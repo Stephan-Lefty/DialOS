@@ -22,7 +22,8 @@ so nothing gets lost from the discussions.
   still open: a normal password (safer, but the voice-guided maintenance
   flow then has to work around it specifically), passwordless sudo
   scoped to specific maintenance commands only, or fully passwordless.
-  Currently only a placeholder password is set in the golden image.
+  Currently a random password is generated per build (not stored in
+  the repo) instead of a fixed placeholder.
 - A self-hosted RustDesk relay server (hbbs/hbbr) is planned for later,
   once the system runs stably — no concrete timing/process yet.
 

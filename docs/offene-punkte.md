@@ -23,7 +23,8 @@ damit nichts aus den Diskussionen verloren geht.
   werden sollen, ist noch offen: normales Passwort (sicherer, aber die
   sprachgesteuerte Wartung muss das dann gezielt umgehen), auf einzelne
   Wartungsbefehle beschränktes passwortloses sudo, oder komplett
-  passwortlos. Aktuell nur ein Platzhalter-Passwort im Golden Image.
+  passwortlos. Aktuell wird pro Build ein zufälliges Passwort erzeugt
+  (nicht im Repo hinterlegt) statt eines festen Platzhalters.
 - Eigener RustDesk-Relay-Server (hbbs/hbbr) ist für später geplant, sobald
   das System stabil läuft – noch kein konkreter Zeitpunkt/Ablauf.
 
