@@ -1,0 +1,11 @@
+PRETTY_NAME="Stephan-OS"
+NAME="Stephan-OS"
+VERSION_ID="0.1"
+VERSION="0.1 (Konzeptphase)"
+VERSION_CODENAME=trixie
+ID=stephan-os
+ID_LIKE=debian
+HOME_URL="https://github.com/Stephan-Lefty/Stephan-OS"
+SUPPORT_URL="https://github.com/Stephan-Lefty/Stephan-OS"
+BUG_REPORT_URL="https://github.com/Stephan-Lefty/Stephan-OS/issues"
+LOGO=distributor-logo

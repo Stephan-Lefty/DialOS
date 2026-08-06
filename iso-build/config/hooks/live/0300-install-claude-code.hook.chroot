@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+echo "[stephan-os] Installing Claude Code CLI..."
+npm install -g @anthropic-ai/claude-code || \
+  echo "[stephan-os] WARNING: Claude Code CLI install failed, continuing." >&2
