@@ -28,7 +28,8 @@ npm
 dconf-cli
 
 zenity
-policykit-1
+polkitd
+pkexec
 parted
 dosfstools
 cryptsetup
