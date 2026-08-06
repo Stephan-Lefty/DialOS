@@ -18,6 +18,11 @@ thunderbird
 shortwave
 rhythmbox
 libreoffice-writer
+aspell
+aspell-de
+aspell-en
+hunspell-de-de
+hunspell-en-us
 
 gnome-terminal
 curl

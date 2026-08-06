@@ -1,0 +1,7 @@
+# firmware-b43(legacy)-installer try to download proprietary Broadcom
+# firmware from the internet during postinst - irrelevant for our
+# Intel-wifi reference hardware (T490) and fragile/network-dependent
+# during automated builds. Excluded on purpose.
+Package: firmware-b43-installer firmware-b43legacy-installer
+Pin: release *
+Pin-Priority: -1
