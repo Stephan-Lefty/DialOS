@@ -40,7 +40,8 @@ alone), `logo-tagline.png` (with tagline), `logo-full.png` (with the
 feature icon row), `logo-horizontal-light.png`/`-dark.png` (horizontal
 version for light/dark backgrounds), `app-icon-light.png`/`-dark.png`
 (square app icon), and `brand-sheet.png` as a complete reference
-overview.
+overview. Plus `wallpaper-light.png`/`wallpaper-dark.png` (desktop
+background) and `splash.png` (boot/login screen).
 
 ## Test environment
 

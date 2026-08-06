@@ -39,7 +39,8 @@ allein), `logo-tagline.png` (mit Slogan), `logo-full.png` (mit
 Feature-Icon-Zeile), `logo-horizontal-light.png`/`-dark.png` (horizontale
 Version für helle/dunkle Hintergründe), `app-icon-light.png`/`-dark.png`
 (quadratisches App-Icon) sowie `brand-sheet.png` als vollständige
-Referenzübersicht.
+Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
+(Desktop-Hintergrund) und `splash.png` (Boot-/Login-Bildschirm).
 
 ## Testumgebung
 

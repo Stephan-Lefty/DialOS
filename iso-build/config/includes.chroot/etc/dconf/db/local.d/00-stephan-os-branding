@@ -1,7 +1,7 @@
 [org/gnome/desktop/background]
-picture-uri='file:///usr/share/backgrounds/stephan-os/wallpaper.png'
-picture-uri-dark='file:///usr/share/backgrounds/stephan-os/wallpaper.png'
-picture-options='centered'
+picture-uri='file:///usr/share/backgrounds/stephan-os/wallpaper-light.png'
+picture-uri-dark='file:///usr/share/backgrounds/stephan-os/wallpaper-dark.png'
+picture-options='zoom'
 primary-color='#0f2a4a'
 secondary-color='#0f2a4a'
 
