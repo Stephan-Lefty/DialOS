@@ -1,5 +1,7 @@
 [Deutsch](README.md) | [English](README.en.md) | [Änderungsprotokoll](#änderungsprotokoll)
 
+<img src="assets/logo.png" alt="Stephan-OS Logo" width="360">
+
 # Stephan-OS
 
 Ein auf Debian 13 + GNOME basierendes, vollständig sprachgesteuertes
@@ -29,6 +31,15 @@ Design-Entscheidungen als Grundlage für die Umsetzung.
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
 - [Offene Punkte](docs/offene-punkte.md) – was noch zu klären/entscheiden ist
+
+## Logo & Branding
+
+Weitere Varianten liegen in [assets/](assets/): `mark.png` (Bildmarke
+allein), `logo-tagline.png` (mit Slogan), `logo-full.png` (mit
+Feature-Icon-Zeile), `logo-horizontal-light.png`/`-dark.png` (horizontale
+Version für helle/dunkle Hintergründe), `app-icon-light.png`/`-dark.png`
+(quadratisches App-Icon) sowie `brand-sheet.png` als vollständige
+Referenzübersicht.
 
 ## Testumgebung
 

@@ -1,5 +1,7 @@
 [Deutsch](README.md) | [English](README.en.md) | [Changelog](#changelog)
 
+<img src="assets/logo.png" alt="Stephan-OS logo" width="360">
+
 # Stephan-OS
 
 A fully voice-controlled system based on Debian 13 + GNOME for people who
@@ -30,6 +32,15 @@ implementation.
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
 - [Open questions](docs/offene-punkte.en.md) – what still needs to be decided
+
+## Logo & branding
+
+More variants are available in [assets/](assets/): `mark.png` (icon
+alone), `logo-tagline.png` (with tagline), `logo-full.png` (with the
+feature icon row), `logo-horizontal-light.png`/`-dark.png` (horizontal
+version for light/dark backgrounds), `app-icon-light.png`/`-dark.png`
+(square app icon), and `brand-sheet.png` as a complete reference
+overview.
 
 ## Test environment
 
