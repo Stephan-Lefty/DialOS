@@ -10,6 +10,7 @@ docker build -t stephan-os-builder .
 
 docker run --rm -it \
   --privileged \
+  --device-cgroup-rule='a *:* rmw' \
   -v "$(pwd)":/build \
   -w /build \
   stephan-os-builder \
