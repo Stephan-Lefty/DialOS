@@ -28,6 +28,14 @@ damit nichts aus den Diskussionen verloren geht.
 - Eigener RustDesk-Relay-Server (hbbs/hbbr) ist für später geplant, sobald
   das System stabil läuft – noch kein konkreter Zeitpunkt/Ablauf.
 
+## ISO-Build
+- Rechtschreibprüfung (hunspell-de-de/hunspell-en-us, aspell) fehlt in
+  der ISO: Das Paket `dictionaries-common`, von dem beide abhängen,
+  scheitert reproduzierbar in der Docker-Chroot-Build-Umgebung
+  (vermutlich fehlender D-Bus während der Paketkonfiguration). Für den
+  ersten lauffähigen Build vorerst ausgelassen, muss nachgerüstet
+  werden (ggf. Installation nach dem ersten Boot statt zur Build-Zeit).
+
 ## Sprachsteuerung
 - Konkrete Intent-Schicht (eigene Middleware vs. bestehendes Framework
   als Ausgangsbasis) noch nicht festgelegt.

@@ -27,6 +27,14 @@ so nothing gets lost from the discussions.
 - A self-hosted RustDesk relay server (hbbs/hbbr) is planned for later,
   once the system runs stably — no concrete timing/process yet.
 
+## ISO build
+- Spell-checking (hunspell-de-de/hunspell-en-us, aspell) is missing
+  from the ISO: the package `dictionaries-common`, which both depend
+  on, reproducibly fails inside the Docker chroot build environment
+  (likely missing D-Bus during package configuration). Left out for
+  the first working build for now, needs to be added back (possibly
+  installed after first boot instead of at build time).
+
 ## Voice control
 - The concrete intent layer (custom middleware vs. an existing framework
   as a starting point) not yet decided.
