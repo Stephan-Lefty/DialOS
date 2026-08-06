@@ -17,6 +17,11 @@ damit nichts aus den Diskussionen verloren geht.
 - Wiederherstellungsweg für den USB-Sicherheits-Stick bei Verlust/Defekt
   noch nicht entschieden (Master-Passphrase bei Vertrauensperson vs.
   Ersatz-Stick vs. kein Recovery).
+- Wie sudo/Admin-Rechte für den Standard-Benutzer ("nutzer") gehandhabt
+  werden sollen, ist noch offen: normales Passwort (sicherer, aber die
+  sprachgesteuerte Wartung muss das dann gezielt umgehen), auf einzelne
+  Wartungsbefehle beschränktes passwortloses sudo, oder komplett
+  passwortlos. Aktuell nur ein Platzhalter-Passwort im Golden Image.
 - Eigener RustDesk-Relay-Server (hbbs/hbbr) ist für später geplant, sobald
   das System stabil läuft – noch kein konkreter Zeitpunkt/Ablauf.
 

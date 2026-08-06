@@ -16,6 +16,11 @@ so nothing gets lost from the discussions.
 - Recovery path for the USB security stick in case of loss/damage not
   yet decided (master passphrase held by a trusted person vs. backup
   stick vs. no recovery).
+- How sudo/admin rights for the default user ("nutzer") should work is
+  still open: a normal password (safer, but the voice-guided maintenance
+  flow then has to work around it specifically), passwordless sudo
+  scoped to specific maintenance commands only, or fully passwordless.
+  Currently only a placeholder password is set in the golden image.
 - A self-hosted RustDesk relay server (hbbs/hbbr) is planned for later,
   once the system runs stably — no concrete timing/process yet.
 
