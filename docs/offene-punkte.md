@@ -14,9 +14,11 @@ damit nichts aus den Diskussionen verloren geht.
   Modem, z. B. Quectel EM7565).
 
 ## Sicherheit
-- Wiederherstellungsweg für den USB-Sicherheits-Stick bei Verlust/Defekt
-  noch nicht entschieden (Master-Passphrase bei Vertrauensperson vs.
-  Ersatz-Stick vs. kein Recovery).
+- Wiederherstellungsweg für den USB-Sicherheits-Stick bei Verlust/Defekt:
+  vorläufig als Master-Passphrase umgesetzt (zweiter LUKS-Schlüsselslot,
+  wird bei jeder Installation vom Installer abgefragt) – ob das die
+  endgültige Lösung sein soll (vs. Ersatz-Stick vs. kein Recovery) ist
+  noch nicht final entschieden.
 - Wie sudo/Admin-Rechte für den Standard-Benutzer ("nutzer") gehandhabt
   werden sollen, ist noch offen: normales Passwort (sicherer, aber die
   sprachgesteuerte Wartung muss das dann gezielt umgehen), auf einzelne

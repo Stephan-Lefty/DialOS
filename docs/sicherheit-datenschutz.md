@@ -37,6 +37,17 @@ Ablauf: Stick rein → Gerät einschalten → System ist sofort einsatzbereit
 und spricht den Nutzer an, ohne dass irgendwo getippt oder etwas
 abgelesen werden muss.
 
+**Installation:** Aus der laufenden Live-Session heraus gibt es dafür ein
+eigenes Installations-Werkzeug (`stephan-os-install`, per Programm-Menü
+aufrufbar) statt eines Standard-Installers wie Calamares – dessen
+LUKS-Modul ist auf ein getipptes Passwort ausgelegt, nicht auf unser
+Stick-Schlüssel-Konzept. Das Werkzeug partitioniert die Zielfestplatte,
+erzeugt einen zufälligen Schlüssel auf dem gewählten Sicherheits-Stick,
+legt zusätzlich ein Wiederherstellungs-Passwort als zweiten LUKS-Slot an
+(siehe unten), kopiert das laufende System auf die Platte und richtet
+den Bootloader ein. Gedacht für dich/Techniker im Büro-Setup, nicht für
+die Vor-Ort-Einrichtung – deshalb bewusst nicht sprachgesteuert.
+
 **Praxishinweise:**
 - Der Stick sollte getrennt vom Laptop aufbewahrt werden (z. B. am
   Schlüsselbund), sonst bringt die Verschlüsselung wenig, falls beides

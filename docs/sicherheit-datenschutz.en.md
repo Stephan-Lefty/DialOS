@@ -35,6 +35,16 @@ Combined with autologin, this gives an ideal flow for the target group:
 plug in the stick → power on the device → the system is immediately ready
 and speaks to the user, without anything needing to be typed or read.
 
+**Installation:** From the running live session there's a dedicated
+installer tool (`stephan-os-install`, launchable from the applications
+menu) instead of a standard installer like Calamares - its LUKS module
+is built around a typed password, not our stick-keyfile concept. The
+tool partitions the target disk, generates a random key onto the chosen
+security stick, additionally sets up a recovery passphrase as a second
+LUKS slot (see below), copies the running system onto the disk, and
+sets up the bootloader. Meant for you/technicians during office setup,
+not the on-site setup - deliberately not voice-controlled.
+
 **Practical notes:**
 - The stick should be kept separately from the laptop (e.g. on a
   keyring), otherwise the encryption provides little benefit if both are

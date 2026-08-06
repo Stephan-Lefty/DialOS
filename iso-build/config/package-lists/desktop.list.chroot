@@ -26,3 +26,13 @@ git
 nodejs
 npm
 dconf-cli
+
+zenity
+policykit-1
+parted
+dosfstools
+cryptsetup
+cryptsetup-initramfs
+rsync
+grub-efi-amd64
+grub-efi-amd64-bin

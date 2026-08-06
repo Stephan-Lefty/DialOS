@@ -1,0 +1,19 @@
+#!/bin/sh
+# Bundles the Stephan-OS LUKS keyscript (and the tools it calls) into
+# the initramfs, so the root partition can be unlocked before the real
+# root filesystem is mounted.
+
+PREREQ=""
+prereqs() { echo "$PREREQ"; }
+case "$1" in
+  prereqs) prereqs; exit 0 ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+copy_exec /usr/local/sbin/stephan-os-keyscript /usr/local/sbin
+copy_exec /bin/mount /bin
+copy_exec /bin/umount /bin
+copy_exec /sbin/udevadm /sbin
+
+exit 0

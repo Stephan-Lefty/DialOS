@@ -13,9 +13,11 @@ so nothing gets lost from the discussions.
   modem, e.g. Quectel EM7565).
 
 ## Security
-- Recovery path for the USB security stick in case of loss/damage not
-  yet decided (master passphrase held by a trusted person vs. backup
-  stick vs. no recovery).
+- Recovery path for the USB security stick in case of loss/damage:
+  provisionally implemented as a master passphrase (second LUKS key
+  slot, asked for by the installer on every install) – whether that
+  should be the final solution (vs. a backup stick vs. no recovery) is
+  not finally decided yet.
 - How sudo/admin rights for the default user ("nutzer") should work is
   still open: a normal password (safer, but the voice-guided maintenance
   flow then has to work around it specifically), passwordless sudo
