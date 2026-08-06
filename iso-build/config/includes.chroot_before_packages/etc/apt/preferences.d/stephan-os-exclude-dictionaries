@@ -1,0 +1,11 @@
+# dictionaries-common's postinst reproducibly fails in this Docker
+# chroot build environment (likely missing D-Bus during package
+# configuration - see docs/offene-punkte.md). libreoffice-writer pulls
+# in hunspell-en-us as a Recommends (not a hard dependency), which in
+# turn drags in dictionaries-common. Recommends are best-effort, so
+# pinning these specific packages to "not installable" just makes apt
+# skip them instead of failing the whole transaction (unlike a hard
+# dependency, where this would break resolution entirely).
+Package: hunspell-en-us hunspell-de-de aspell aspell-en aspell-de dictionaries-common
+Pin: release *
+Pin-Priority: -1
