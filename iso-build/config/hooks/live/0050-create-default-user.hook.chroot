@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+USERNAME=nutzer
+
+echo "[stephan-os] Creating default desktop user '$USERNAME'..."
+adduser --disabled-password --gecos "" "$USERNAME"
+usermod -aG sudo,audio,video,plugdev,netdev,bluetooth,scanner,lpadmin,cdrom "$USERNAME"
+
+# Placeholder password, only relevant for sudo/admin access - the end
+# user never types anything (autologin handles session login). Change
+# this before shipping a device; how sudo should ultimately work for the
+# voice-guided maintenance flow is still an open decision, see
+# docs/sicherheit-datenschutz.md.
+echo "$USERNAME:stephan-os" | chpasswd
