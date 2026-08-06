@@ -12,4 +12,6 @@ lb config noauto \
   --iso-publisher "Stephan-Lefty" \
   --memtest none \
   --win32-loader false \
+  --firmware-chroot false \
+  --firmware-binary false \
   "${@}"
