@@ -1,3 +1,5 @@
+[Deutsch](telefonie.md) | [English](telefonie.en.md)
+
 # Telefonie & Videocall
 
 ## Ziel

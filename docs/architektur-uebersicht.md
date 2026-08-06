@@ -1,3 +1,5 @@
+[Deutsch](architektur-uebersicht.md) | [English](architektur-uebersicht.en.md)
+
 # Architektur-Übersicht
 
 ## Ziel

@@ -1,3 +1,5 @@
+[Deutsch](offene-punkte.md) | [English](offene-punkte.en.md)
+
 # Offene Punkte
 
 Sammlung aller noch nicht abschließend geklärten oder umgesetzten Themen,

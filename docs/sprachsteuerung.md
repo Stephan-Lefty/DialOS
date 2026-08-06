@@ -1,3 +1,5 @@
+[Deutsch](sprachsteuerung.md) | [English](sprachsteuerung.en.md)
+
 # Sprachsteuerung
 
 ## Stack

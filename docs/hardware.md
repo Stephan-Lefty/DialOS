@@ -1,3 +1,5 @@
+[Deutsch](hardware.md) | [English](hardware.en.md)
+
 # Hardware
 
 ## Zielgerät

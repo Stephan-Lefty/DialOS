@@ -1,4 +1,4 @@
-[Änderungsprotokoll](#änderungsprotokoll)
+[Deutsch](README.md) | [English](README.en.md) | [Änderungsprotokoll](#änderungsprotokoll)
 
 # Stephan-OS
 
