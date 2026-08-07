@@ -87,11 +87,22 @@ docker run --rm -it \
     # lb installer/binary/source re-enter the chroot on their own
     # (their own chroot_prep install/remove cycles, e.g. mode-archives-
     # binary) for bootloader/ISO-metadata packages, hitting the same
-    # /dev/null issue again if our device binds aren't still there - so
-    # keep them mounted through the whole rest of the build instead of
-    # tearing down right after the chroot stage.
+    # /dev/null issue again even though our device binds were never
+    # explicitly unmounted - something about lb chroot_prep remove
+    # (mode-archives-chroot) tears them down as a side effect. Re-assert
+    # them defensively right before each stage that re-enters the chroot
+    # instead of trying to fully understand why they disappear.
+    for _DEV in null zero random urandom full; do
+      mount --bind /dev/\$_DEV chroot/dev/\$_DEV 2>/dev/null || true
+    done
     lb installer
+    for _DEV in null zero random urandom full; do
+      mount --bind /dev/\$_DEV chroot/dev/\$_DEV 2>/dev/null || true
+    done
     lb binary
+    for _DEV in null zero random urandom full; do
+      mount --bind /dev/\$_DEV chroot/dev/\$_DEV 2>/dev/null || true
+    done
     lb source
 
     for _DEV in null zero random urandom full; do
