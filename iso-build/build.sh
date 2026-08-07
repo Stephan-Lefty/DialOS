@@ -73,16 +73,21 @@ docker run --rm -it \
     for _PASS in install live; do
       lb chroot_package-lists \$_PASS
       lb chroot_install-packages \$_PASS
+      if [ \"\$_PASS\" = install ]; then
+        chroot chroot dpkg-query -W > chroot.packages.install
+      fi
     done
     lb chroot_includes_after_packages
     lb chroot_hooks
     lb chroot_hacks
     lb chroot_interactive
+    chroot chroot dpkg-query -W > chroot.packages.live
 
     chroot chroot pkill dbus-daemon || true
 
     lb chroot_prep remove all mode-archives-chroot
     lb chroot_cache save
+    chroot chroot ls -lR > chroot.files
 
     # lb installer/binary/source re-enter the chroot on their own
     # (their own chroot_prep install/remove cycles, e.g. mode-archives-
