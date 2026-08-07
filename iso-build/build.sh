@@ -82,12 +82,19 @@ docker run --rm -it \
     chroot chroot pkill dbus-daemon || true
 
     lb chroot_prep remove all mode-archives-chroot
-    for _DEV in null zero random urandom full; do
-      umount chroot/dev/\$_DEV 2>/dev/null || true
-    done
     lb chroot_cache save
 
+    # lb installer/binary/source re-enter the chroot on their own
+    # (their own chroot_prep install/remove cycles, e.g. mode-archives-
+    # binary) for bootloader/ISO-metadata packages, hitting the same
+    # /dev/null issue again if our device binds aren't still there - so
+    # keep them mounted through the whole rest of the build instead of
+    # tearing down right after the chroot stage.
     lb installer
     lb binary
     lb source
+
+    for _DEV in null zero random urandom full; do
+      umount chroot/dev/\$_DEV 2>/dev/null || true
+    done
   "
