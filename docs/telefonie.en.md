@@ -55,11 +55,19 @@ voice control on the laptop.
 Jitsi Meet in the browser as the simplest, account-free solution — open
 source, launchable directly with a voice command via a link.
 
-## Messenger (optional)
+## Messenger (text messages, in addition to real telephony)
 
-There is no official WhatsApp Linux client, only WhatsApp Web in the
-browser or unofficial wrappers. Since this is about reaching existing
-contacts, WhatsApp remains a sensible option despite the project's
-otherwise strict privacy stance; **Signal** (official Linux app,
-voice/video calls) is a more privacy-friendly alternative in parallel.
-Prioritization is still open.
+Only for writing/receiving messages - calls always go through SIM/phone
+as above, never through the messenger.
+
+**Priority: WhatsApp**, despite the project's otherwise strict privacy
+stance - the deciding factor is reach: the user's family/friends are
+far more likely to already have WhatsApp than Signal, and reaching
+existing contacts matters more here than for the project's other
+(purely internal) system decisions. There is no official WhatsApp
+Linux client; implemented via WhatsApp Web in the browser or an
+unofficial wrapper.
+
+**Signal** (official Linux app, voice/video calls, real encryption)
+remains available as a more privacy-friendly option, but not
+prioritized.

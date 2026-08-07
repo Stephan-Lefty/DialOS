@@ -127,6 +127,28 @@ cryptsetup luksFormat --type luks2 --batch-mode "$LUKS_PART" "$KEYFILE"
 printf '%s' "$RECOVERY_PASS" | cryptsetup luksAddKey --batch-mode "$LUKS_PART" "$KEYFILE" --key-file=- 2>/dev/null || \
   { echo "$RECOVERY_PASS" > /tmp/.rp; cryptsetup luksAddKey --batch-mode "$LUKS_PART" "$KEYFILE" --new-keyfile=/tmp/.rp; shred -u /tmp/.rp; }
 
+# --- 7b. Encrypted off-site backup of the keyfile (e.g. for upload to
+#          Stephan's own Nextcloud) - lets a replacement stick be made
+#          later without keeping spare physical sticks in stock. Reuses
+#          the recovery passphrase from step 3 so there is only one
+#          secret to manage, not a second one. Only the small keyfile
+#          is backed up, never the disk contents. ---
+BACKUP_LABEL=$(zenity --entry --title="Schlüssel-Backup" \
+  --text="Kennzeichnung für dieses Backup (z. B. Kundenname/Kürzel):" \
+  --entry-text="dialos-$(date +%Y%m%d)" 2>/dev/null || echo "dialos-$(date +%Y%m%d-%H%M%S)")
+BACKUP_TMP="/tmp/${BACKUP_LABEL}.key.enc"
+openssl enc -aes-256-cbc -pbkdf2 -salt -in "$KEYFILE" -out "$BACKUP_TMP" -pass "pass:$RECOVERY_PASS"
+SAVE_TO=$(zenity --file-selection --save --confirm-overwrite \
+  --title="Verschlüsseltes Schlüssel-Backup speichern (z. B. im Nextcloud-Sync-Ordner)" \
+  --filename="$HOME/${BACKUP_LABEL}.key.enc" 2>/dev/null || true)
+if [ -n "$SAVE_TO" ]; then
+  cp "$BACKUP_TMP" "$SAVE_TO"
+  say "Backup gespeichert unter: $SAVE_TO\nFalls der Ordner nicht automatisch synchronisiert wird, manuell in die Nextcloud hochladen. Mit dem Wiederherstellungs-Passwort entschlüsselbar: openssl enc -d -aes-256-cbc -pbkdf2 -in $BACKUP_LABEL.key.enc -out neuer-stick.key"
+else
+  warn "Kein Speicherort gewählt - Schlüssel-Backup wurde NICHT gesichert."
+fi
+shred -u "$BACKUP_TMP" 2>/dev/null || rm -f "$BACKUP_TMP"
+
 umount /run/dialos-key-write
 
 cryptsetup open --key-file="$KEYFILE" "$LUKS_PART" "$LUKS_NAME"

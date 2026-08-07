@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Sicherheits-Stick ersetzen
+Comment=Richtet einen neuen Sicherheits-Stick für ein bereits installiertes Gerät ein (nur für Fernwartung durch Stephan)
+Exec=/usr/local/sbin/dialos-rekey
+Icon=/usr/share/pixmaps/distributor-logo.png
+Terminal=false
+Categories=System;

@@ -57,11 +57,19 @@ Laptop.
 Jitsi Meet im Browser als einfachste, kontofreie Lösung – Open Source,
 direkt per Sprachbefehl mit einem Link startbar.
 
-## Messenger (optional)
+## Messenger (Textnachrichten, zusätzlich zur echten Telefonie)
 
-Kein offizieller WhatsApp-Linux-Client verfügbar, nur WhatsApp Web im
-Browser oder inoffizielle Wrapper. Da es hier um Erreichbarkeit
-bestehender Kontakte geht, bleibt WhatsApp trotz der sonstigen
-Datenschutz-Linie des Projekts eine sinnvolle Option; als
-datenschutzfreundlichere Alternative kommt **Signal** (offizielle
-Linux-App, Sprach-/Videoanrufe) parallel in Frage. Priorisierung noch offen.
+Dient nur zum Schreiben/Empfangen von Nachrichten – Anrufe laufen immer
+über SIM/Handy wie oben, nicht über den Messenger.
+
+**Priorität: WhatsApp**, trotz der sonstigen Datenschutz-Linie des
+Projekts – ausschlaggebend ist die Verbreitung: Familie/Freunde der
+Nutzer haben mit deutlich höherer Wahrscheinlichkeit schon WhatsApp als
+Signal, und Erreichbarkeit bestehender Kontakte zählt hier mehr als bei
+den übrigen (rein internen) Systementscheidungen. Kein offizieller
+WhatsApp-Linux-Client verfügbar, Umsetzung über WhatsApp Web im Browser
+oder einen inoffiziellen Wrapper.
+
+**Signal** (offizielle Linux-App, Sprach-/Videoanrufe, echte
+Verschlüsselung) bleibt als datenschutzfreundlichere Option zusätzlich
+verfügbar, aber nicht priorisiert.

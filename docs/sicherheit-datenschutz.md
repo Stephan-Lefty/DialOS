@@ -52,10 +52,37 @@ die Vor-Ort-Einrichtung – deshalb bewusst nicht sprachgesteuert.
 - Der Stick sollte getrennt vom Laptop aufbewahrt werden (z. B. am
   Schlüsselbund), sonst bringt die Verschlüsselung wenig, falls beides
   zusammen entwendet wird.
-- **Offen**: Wiederherstellungsweg, falls der Stick verloren geht oder
-  kaputt ist (Optionen: Master-Passphrase bei einer Vertrauensperson
-  hinterlegen, ein baugleicher Ersatz-Stick, oder bewusst kein Recovery –
-  noch nicht entschieden).
+## Wiederherstellung bei Stick-Verlust
+
+Drei Wege, je nach Situation:
+
+1. **Wiederherstellungs-Passwort direkt am Boot-Bildschirm eintippen.**
+   Funktioniert sofort, komplett offline, unabhängig vom Stick und vom
+   Netzwerk – der einzige Weg, ein Gerät überhaupt wieder zum Laufen zu
+   bringen, wenn nichts anderes erreichbar ist. Wird von Stephan
+   telefonisch angeleitet oder von einer Vertrauensperson vor Ort
+   eingetippt, nicht vom Endnutzer selbst gewusst.
+2. **Neuen Stick per Fernwartung einrichten** (`dialos-rekey`, auf dem
+   installierten System). Sobald das Gerät einmal läuft (z. B. nach Weg 1)
+   und der Nutzer "Hilfe rufen" sagt, verbindet sich Stephan per RustDesk
+   und richtet remote einen neuen Stick ein: neuer Schlüssel wird erzeugt,
+   als LUKS-Schlüssel hinzugefügt, der alte (verlorene) Schlüssel-Slot wird
+   entwertet, ein neues Wiederherstellungs-Passwort wird vergeben.
+3. **Ersatz-Stick von Stephan anfertigen und per Post verschicken**, falls
+   das Gerät gar nicht mehr bootet (auch Weg 1 nicht möglich, z. B.
+   Hardware-Defekt oder Passwort nicht griffbereit). Dafür lädt Stephan
+   das verschlüsselte Schlüssel-Backup dieses Nutzers aus der eigenen
+   Nextcloud, entschlüsselt es lokal mit dem zugehörigen
+   Wiederherstellungs-Passwort und schreibt den Schlüssel auf einen neuen
+   Stick.
+
+Für Weg 2 und 3 braucht es das **verschlüsselte Schlüssel-Backup**: Der
+Installer (`dialos-install`) und das Rekey-Werkzeug (`dialos-rekey`)
+verschlüsseln die kleine Schlüsseldatei (nicht die ganze Festplatte) mit
+dem jeweils aktuellen Wiederherstellungs-Passwort (`openssl enc
+-aes-256-cbc -pbkdf2`) und bieten an, die Datei zu speichern – Stephan
+legt sie in seiner eigenen, selbst gehosteten Nextcloud ab (eine Datei
+pro Nutzer/Gerät), statt bei einem fremden Cloud-Anbieter.
 
 ## Versand-Sicherheit
 

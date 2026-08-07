@@ -49,9 +49,35 @@ not the on-site setup - deliberately not voice-controlled.
 - The stick should be kept separately from the laptop (e.g. on a
   keyring), otherwise the encryption provides little benefit if both are
   stolen together.
-- **Open**: recovery path if the stick is lost or damaged (options: a
-  master passphrase held by a trusted person, a duplicate backup stick,
-  or deliberately no recovery — not yet decided).
+## Recovery when a stick is lost
+
+Three paths, depending on the situation:
+
+1. **Type the recovery passphrase directly at the boot screen.** Works
+   immediately, fully offline, independent of the stick and the network
+   — the only way to get a device running again at all when nothing
+   else is reachable. Talked through by Stephan over the phone, or
+   typed by a trusted person on site — never known by the end user
+   themselves.
+2. **Set up a new stick remotely** (`dialos-rekey`, runs on the
+   installed system). Once the device is running once (e.g. via path 1)
+   and the user says "call for help", Stephan connects via RustDesk and
+   remotely sets up a new stick: a new key is generated, added as a
+   LUKS key, the old (lost) key slot is retired, and a new recovery
+   passphrase is set.
+3. **Stephan makes a replacement stick and mails it**, if the device
+   won't boot at all (path 1 not possible either, e.g. hardware failure
+   or the passphrase isn't at hand). For this, Stephan downloads this
+   user's encrypted key backup from his own Nextcloud, decrypts it
+   locally with the matching recovery passphrase, and writes the key
+   onto a new stick.
+
+Paths 2 and 3 need the **encrypted key backup**: the installer
+(`dialos-install`) and the rekey tool (`dialos-rekey`) encrypt the
+small key file (not the whole disk) with the currently valid recovery
+passphrase (`openssl enc -aes-256-cbc -pbkdf2`) and offer to save the
+file — Stephan stores it in his own, self-hosted Nextcloud (one file
+per user/device), not with a third-party cloud provider.
 
 ## Shipping security
 

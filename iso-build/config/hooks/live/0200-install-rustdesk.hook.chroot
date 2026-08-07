@@ -17,5 +17,11 @@ fi
 echo "[dialos] Downloading $DEB_URL"
 curl -fsSL -o rustdesk.deb "$DEB_URL"
 apt-get update
-dpkg -i rustdesk.deb || apt-get install -f -y
+# RustDesk's postinst tries to register a setuid input-simulation
+# helper via PolicyKit, which fails in this build chroot (no real
+# polkit/systemd session running) - harmless here, it self-configures
+# on the actual target machine's first real boot. Don't let it abort
+# the whole image build.
+dpkg -i rustdesk.deb || apt-get install -f -y || true
 rm -f rustdesk.deb
+echo "[dialos] RustDesk install step finished (see above for any non-fatal warnings)."
