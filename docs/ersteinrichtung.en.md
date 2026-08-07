@@ -30,8 +30,13 @@ implemented.
 Only the following is asked for on site, via voice:
 - The user's **name**, with confirmation back ("I understood: Anna
   Schmidt. Is that correct?") and an option to correct it.
-- **Greeting voice**: choosing from 2–3 Piper voices via audio samples
-  ("the second one", "the male voice").
+- **Greeting voice**: choosing from 4 Piper voices (2 male, 2 female,
+  each at the highest available speech quality) via audio samples,
+  addressable by name instead of "voice 1/2". Male: **Michael**,
+  **Daniel** (reserve names for later expansion: Christian, Andreas,
+  Stefan). Female: **Anna**, **Julia** (reserve: Sarah, Katharina,
+  Christina). Changeable again at any time later, not just during
+  initial setup.
 - Possibly confirming pre-prepared accounts (see privacy variants below)
   — a plain yes/no answer, no dictation.
 

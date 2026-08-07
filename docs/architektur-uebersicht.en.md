@@ -19,7 +19,7 @@ operable without keyboard or mouse.
 
 ## Core features
 
-- Listening to radio and music
+- Listening to radio, music, and podcasts
 - Writing letters/texts
 - Browser for search queries
 - Using streaming media libraries (ARD, ZDF Mediatheken)
@@ -48,6 +48,7 @@ Details: see [telefonie.en.md](telefonie.en.md), [sicherheit-datenschutz.en.md](
 | Mail/calendar/contacts | Thunderbird | One app for all three functions, good Orca support |
 | Radio | Shortwave | GNOME internet radio app |
 | Music | Rhythmbox/GNOME Music | — |
+| Podcasts | GNOME Podcasts | — |
 | Word processing | LibreOffice Writer | — |
 | Browser | Firefox ESR | For search queries and ARD/ZDF Mediatheken (no native Linux client) |
 | Remote support | RustDesk | Open source, self-hostable, see [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md) |

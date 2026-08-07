@@ -1,2 +1,6 @@
 [org/gnome/mutter]
 center-new-windows=true
+
+[org/gnome/desktop/interface]
+accent-color='blue'
+color-scheme='default'

@@ -32,8 +32,13 @@ aktuell noch nicht umgesetzt.
 Vor Ort per Sprache erfragt werden nur:
 - **Name** des Nutzers, mit Rückbestätigung ("Ich habe verstanden: Anna
   Schmidt. Stimmt das?") und Korrekturmöglichkeit.
-- **Begrüßungsstimme**: Auswahl aus 2–3 Piper-Stimmen per Hörprobe
-  ("die zweite", "die männliche Stimme").
+- **Begrüßungsstimme**: Auswahl aus 4 Piper-Stimmen (2 männlich, 2
+  weiblich, jeweils höchste verfügbare Sprachqualität) per Hörprobe,
+  mit Namen statt "Stimme 1/2" ansprechbar. Männlich: **Michael**,
+  **Daniel** (Reserve für spätere Erweiterung: Christian, Andreas,
+  Stefan). Weiblich: **Anna**, **Julia** (Reserve: Sarah, Katharina,
+  Christina). Später jederzeit änderbar, nicht nur bei der
+  Ersteinrichtung.
 - Ggf. Bestätigung vorbereiteter Konten (siehe Datenschutz-Varianten
   unten) – reine Ja/Nein-Antwort, kein Diktat.
 

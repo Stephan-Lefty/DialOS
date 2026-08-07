@@ -19,7 +19,7 @@ vollständig ohne Tastatur/Maus bedienbar sein.
 
 ## Kernfunktionen
 
-- Radio hören, Musik hören
+- Radio hören, Musik hören, Podcasts hören
 - Briefe/Texte schreiben
 - Browser für Suchfragen
 - Mediatheken (ARD, ZDF) nutzen
@@ -48,6 +48,7 @@ Details siehe [telefonie.md](telefonie.md), [sicherheit-datenschutz.md](sicherhe
 | Mail/Kalender/Kontakte | Thunderbird | Eine App für alle drei Funktionen, gute Orca-Unterstützung |
 | Radio | Shortwave | GNOME-Internetradio-App |
 | Musik | Rhythmbox/GNOME Music | — |
+| Podcasts | GNOME Podcasts | — |
 | Textverarbeitung | LibreOffice Writer | — |
 | Browser | Firefox ESR | Für Suchfragen und ARD/ZDF-Mediatheken (kein nativer Linux-Client) |
 | Fernwartung | RustDesk | Open Source, selbst hostbar, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md) |
