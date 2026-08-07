@@ -19,6 +19,13 @@
 #    so it can't just be excluded. Fix: start a real dbus-daemon in
 #    this outer container and bind-mount its socket directory into
 #    chroot/run/dbus, so chroot'd processes can reach a working bus.
+#
+#    Both bind mounts (/dev and /run/dbus) must happen AFTER
+#    `lb bootstrap` (debootstrap), not before - debootstrap repopulates
+#    chroot/dev and chroot/run itself while unpacking the base system,
+#    which silently orphans a mount established beforehand. `lb build`
+#    is safe to call again afterwards; it resumes via stage files and
+#    skips the bootstrap step it already did.
 set -e
 
 cd "$(dirname "$0")"
@@ -33,12 +40,14 @@ docker run --rm -it \
   dialos-builder \
   sh -c "
     lb clean --purge || true
+    auto/config
+    lb bootstrap
     mkdir -p /run/dbus
     dbus-daemon --system --fork
     mkdir -p chroot/dev chroot/run/dbus
     mount --bind /dev chroot/dev
     mount --bind /run/dbus chroot/run/dbus
-    auto/config && lb build
+    lb build
     ret=\$?
     umount chroot/run/dbus 2>/dev/null || true
     umount chroot/dev 2>/dev/null || true
