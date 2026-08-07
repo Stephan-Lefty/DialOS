@@ -1,8 +1,8 @@
 [Deutsch](README.md) | [English](README.en.md) | [Changelog](#changelog)
 
-<img src="assets/logo.png" alt="Stephan-OS logo" width="360">
+<img src="assets/logo.png" alt="DialOS logo" width="360">
 
-# Stephan-OS
+# DialOS
 
 A fully voice-controlled system based on Debian 13 + GNOME for people who
 can only use a computer to a limited extent — in particular blind and

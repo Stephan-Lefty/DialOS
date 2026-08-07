@@ -45,7 +45,7 @@ so nothing gets lost from the discussions.
 - Prioritization of WhatsApp vs. Signal as messenger still open.
 
 ## Project/repository
-- GitHub repository for Stephan-OS not yet created — started locally,
+- GitHub repository for DialOS not yet created — started locally,
   decision on public/private and timing of the push still pending.
 - Logo: a first draft exists as a placeholder, Stephan is working on his
   own design in parallel.

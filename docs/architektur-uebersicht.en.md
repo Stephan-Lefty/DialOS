@@ -4,7 +4,7 @@
 
 ## Goal
 
-Stephan-OS is a live ISO based on Debian 13 (Trixie) + GNOME for people
+DialOS is a live ISO based on Debian 13 (Trixie) + GNOME for people
 who can only use a computer to a limited extent — in particular blind and
 motor-impaired individuals. The system must be fully voice-controllable,
 including system maintenance, and work equally well for an 18-year-old as

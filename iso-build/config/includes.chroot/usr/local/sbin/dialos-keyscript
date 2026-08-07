@@ -1,8 +1,8 @@
 #!/bin/sh
-# LUKS keyscript for Stephan-OS: unlocks the root partition using a
+# LUKS keyscript for DialOS: unlocks the root partition using a
 # keyfile stored on a dedicated USB stick, instead of a typed password.
 # Referenced from /etc/crypttab as:
-#   stephanos-root UUID=... none luks,keyscript=/usr/local/sbin/stephan-os-keyscript,keyscript-timeout=60
+#   dialos-root UUID=... none luks,keyscript=/usr/local/sbin/dialos-keyscript,keyscript-timeout=60
 #
 # See docs/sicherheit-datenschutz.md for the reasoning: the target group
 # cannot reliably type a passphrase blind, so unlocking is tied to
@@ -10,9 +10,9 @@
 
 set -e
 
-LABEL="STEPHANOS-KEY"
-KEYFILE_NAME=".stephan-os-key"
-MOUNTPOINT="/run/stephan-os-key-mount"
+LABEL="DIALOS-KEY"
+KEYFILE_NAME=".dialos-key"
+MOUNTPOINT="/run/dialos-key-mount"
 TIMEOUT=60
 
 mkdir -p "$MOUNTPOINT"

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the Stephan-OS ISO inside a Debian trixie Docker container,
+# Builds the DialOS ISO inside a Debian trixie Docker container,
 # since live-build needs a Debian/Ubuntu host and the dev machine runs
 # Manjaro. Run from the iso-build/ directory.
 #
@@ -23,14 +23,14 @@ set -e
 
 cd "$(dirname "$0")"
 
-docker build -t stephan-os-builder .
+docker build -t dialos-builder .
 
 docker run --rm -it \
   --privileged \
   --device-cgroup-rule='a *:* rmw' \
   -v "$(pwd)":/build \
   -w /build \
-  stephan-os-builder \
+  dialos-builder \
   sh -c "
     lb clean --purge || true
     mkdir -p /run/dbus

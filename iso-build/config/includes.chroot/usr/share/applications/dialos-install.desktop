@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS installieren
+Comment=Installiert DialOS dauerhaft auf die interne Festplatte (nur für die Büro-Ersteinrichtung)
+Exec=/usr/local/sbin/dialos-install
+Icon=/usr/share/pixmaps/distributor-logo.png
+Terminal=false
+Categories=System;

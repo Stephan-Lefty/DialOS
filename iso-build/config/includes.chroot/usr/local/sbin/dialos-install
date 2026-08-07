@@ -1,5 +1,5 @@
 #!/bin/bash
-# Stephan-OS installer: writes the running live system to an internal
+# DialOS installer: writes the running live system to an internal
 # disk, encrypted with LUKS and unlocked via a keyfile on a dedicated
 # USB stick instead of a typed passphrase (see
 # docs/sicherheit-datenschutz.md). Meant to be run once per device by
@@ -12,14 +12,14 @@ if [ "$(id -u)" -ne 0 ]; then
   exec pkexec "$0" "$@"
 fi
 
-LABEL="STEPHANOS-KEY"
-KEYFILE_NAME=".stephan-os-key"
-TARGET_MNT="/mnt/stephan-os-install"
-LUKS_NAME="stephanos-root"
+LABEL="DIALOS-KEY"
+KEYFILE_NAME=".dialos-key"
+TARGET_MNT="/mnt/dialos-install"
+LUKS_NAME="dialos-root"
 
-say() { zenity --info --width=400 --title="Stephan-OS Installation" --text="$1" 2>/dev/null || echo "$1"; }
-warn() { zenity --warning --width=400 --title="Stephan-OS Installation" --text="$1" 2>/dev/null || echo "$1" >&2; }
-die() { zenity --error --width=400 --title="Stephan-OS Installation" --text="$1" 2>/dev/null || echo "$1" >&2; exit 1; }
+say() { zenity --info --width=400 --title="DialOS Installation" --text="$1" 2>/dev/null || echo "$1"; }
+warn() { zenity --warning --width=400 --title="DialOS Installation" --text="$1" 2>/dev/null || echo "$1" >&2; }
+die() { zenity --error --width=400 --title="DialOS Installation" --text="$1" 2>/dev/null || echo "$1" >&2; exit 1; }
 ask_password() { zenity --password --title="$1" 2>/dev/null; }
 
 LIVE_ROOT_SRC=$(findmnt -no SOURCE / || true)
@@ -28,7 +28,7 @@ if [ -n "$LIVE_ROOT_SRC" ]; then
   LIVE_ROOT_DISK=$(lsblk -no PKNAME "$LIVE_ROOT_SRC" 2>/dev/null || true)
 fi
 
-echo "== Stephan-OS Installer =="
+echo "== DialOS Installer =="
 
 # --- 1. Select target disk (internal, not the live boot medium) ---
 mapfile -t DISK_ROWS < <(lsblk -dnb -o NAME,SIZE,MODEL,TRAN | awk -v skip="$LIVE_ROOT_DISK" '$1 != skip')
@@ -92,7 +92,7 @@ wipefs -af "$TARGET_DISK"
 parted -s "$TARGET_DISK" mklabel gpt
 parted -s "$TARGET_DISK" mkpart ESP fat32 1MiB 513MiB
 parted -s "$TARGET_DISK" set 1 esp on
-parted -s "$TARGET_DISK" mkpart stephanos-luks 513MiB 100%
+parted -s "$TARGET_DISK" mkpart dialos-luks 513MiB 100%
 partprobe "$TARGET_DISK"
 sleep 2
 
@@ -104,7 +104,7 @@ else
   LUKS_PART="${TARGET_DISK}2"
 fi
 
-mkfs.vfat -F32 -n STEPHANOS-ESP "$ESP_PART"
+mkfs.vfat -F32 -n DIALOS-ESP "$ESP_PART"
 
 # --- 6. Prepare the key stick: format, write keyfile ---
 umount "${KEY_STICK}"* 2>/dev/null || true
@@ -116,9 +116,9 @@ sleep 2
 KEY_STICK_PART="${KEY_STICK}1"
 mkfs.vfat -F32 -n "$LABEL" "$KEY_STICK_PART"
 
-mkdir -p /run/stephan-os-key-write
-mount "$KEY_STICK_PART" /run/stephan-os-key-write
-KEYFILE="/run/stephan-os-key-write/$KEYFILE_NAME"
+mkdir -p /run/dialos-key-write
+mount "$KEY_STICK_PART" /run/dialos-key-write
+KEYFILE="/run/dialos-key-write/$KEYFILE_NAME"
 head -c 512 /dev/urandom > "$KEYFILE"
 sync
 
@@ -127,10 +127,10 @@ cryptsetup luksFormat --type luks2 --batch-mode "$LUKS_PART" "$KEYFILE"
 printf '%s' "$RECOVERY_PASS" | cryptsetup luksAddKey --batch-mode "$LUKS_PART" "$KEYFILE" --key-file=- 2>/dev/null || \
   { echo "$RECOVERY_PASS" > /tmp/.rp; cryptsetup luksAddKey --batch-mode "$LUKS_PART" "$KEYFILE" --new-keyfile=/tmp/.rp; shred -u /tmp/.rp; }
 
-umount /run/stephan-os-key-write
+umount /run/dialos-key-write
 
 cryptsetup open --key-file="$KEYFILE" "$LUKS_PART" "$LUKS_NAME"
-mkfs.ext4 -L stephanos-root "/dev/mapper/$LUKS_NAME"
+mkfs.ext4 -L dialos-root "/dev/mapper/$LUKS_NAME"
 
 # --- 8. Copy the running live system onto the new root ---
 mkdir -p "$TARGET_MNT"
@@ -151,7 +151,7 @@ ESP_UUID=$(blkid -s UUID -o value "$ESP_PART")
 ROOT_UUID=$(blkid -s UUID -o value "/dev/mapper/$LUKS_NAME")
 
 cat > "$TARGET_MNT/etc/crypttab" <<EOF
-$LUKS_NAME UUID=$LUKS_UUID none luks,keyscript=/usr/local/sbin/stephan-os-keyscript,keyscript-timeout=60
+$LUKS_NAME UUID=$LUKS_UUID none luks,keyscript=/usr/local/sbin/dialos-keyscript,keyscript-timeout=60
 EOF
 
 cat > "$TARGET_MNT/etc/fstab" <<EOF
@@ -163,7 +163,7 @@ EOF
 chroot "$TARGET_MNT" apt-get update
 chroot "$TARGET_MNT" apt-get install -y --no-install-recommends grub-efi-amd64 cryptsetup-initramfs
 chroot "$TARGET_MNT" update-initramfs -u -k all
-chroot "$TARGET_MNT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=stephan-os --removable
+chroot "$TARGET_MNT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=dialos --removable
 chroot "$TARGET_MNT" update-grub
 
 for d in dev proc sys run; do umount "$TARGET_MNT/$d"; done

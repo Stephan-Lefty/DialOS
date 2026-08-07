@@ -3,7 +3,7 @@ set -e
 
 USERNAME=nutzer
 
-echo "[stephan-os] Creating default desktop user '$USERNAME'..."
+echo "[dialos] Creating default desktop user '$USERNAME'..."
 adduser --disabled-password --gecos "" "$USERNAME"
 usermod -aG sudo,audio,video,plugdev,netdev,bluetooth,scanner,lpadmin,cdrom "$USERNAME"
 
@@ -15,4 +15,4 @@ usermod -aG sudo,audio,video,plugdev,netdev,bluetooth,scanner,lpadmin,cdrom "$US
 # docs/sicherheit-datenschutz.md.
 GEN_PASSWORD=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16)
 echo "$USERNAME:$GEN_PASSWORD" | chpasswd
-echo "[stephan-os] Generated sudo password for '$USERNAME': $GEN_PASSWORD"
+echo "[dialos] Generated sudo password for '$USERNAME': $GEN_PASSWORD"

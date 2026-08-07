@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=DialOS
+Description=Boot splash for DialOS
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/dialos
+ScriptFile=/usr/share/plymouth/themes/dialos/dialos.script

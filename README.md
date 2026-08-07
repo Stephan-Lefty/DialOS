@@ -1,8 +1,8 @@
 [Deutsch](README.md) | [English](README.en.md) | [Änderungsprotokoll](#änderungsprotokoll)
 
-<img src="assets/logo.png" alt="Stephan-OS Logo" width="360">
+<img src="assets/logo.png" alt="DialOS Logo" width="360">
 
-# Stephan-OS
+# DialOS
 
 Ein auf Debian 13 + GNOME basierendes, vollständig sprachgesteuertes
 System für Menschen, die einen Computer nur eingeschränkt nutzen können –

@@ -7,8 +7,8 @@ lb config noauto \
   --archive-areas "main contrib non-free non-free-firmware" \
   --linux-packages "linux-image" \
   --binary-images iso-hybrid \
-  --iso-application "Stephan-OS" \
-  --iso-volume "Stephan-OS" \
+  --iso-application "DialOS" \
+  --iso-volume "DialOS" \
   --iso-publisher "Stephan-Lefty" \
   --memtest none \
   --win32-loader false \

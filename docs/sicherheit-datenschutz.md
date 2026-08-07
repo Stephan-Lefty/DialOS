@@ -38,7 +38,7 @@ und spricht den Nutzer an, ohne dass irgendwo getippt oder etwas
 abgelesen werden muss.
 
 **Installation:** Aus der laufenden Live-Session heraus gibt es dafür ein
-eigenes Installations-Werkzeug (`stephan-os-install`, per Programm-Menü
+eigenes Installations-Werkzeug (`dialos-install`, per Programm-Menü
 aufrufbar) statt eines Standard-Installers wie Calamares – dessen
 LUKS-Modul ist auf ein getipptes Passwort ausgelegt, nicht auf unser
 Stick-Schlüssel-Konzept. Das Werkzeug partitioniert die Zielfestplatte,

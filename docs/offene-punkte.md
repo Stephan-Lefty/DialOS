@@ -46,7 +46,7 @@ damit nichts aus den Diskussionen verloren geht.
 - Priorisierung WhatsApp vs. Signal als Messenger noch offen.
 
 ## Projekt/Repository
-- GitHub-Repository für Stephan-OS noch nicht angelegt – lokal
+- GitHub-Repository für DialOS noch nicht angelegt – lokal
   begonnen, Entscheidung öffentlich/privat und Zeitpunkt für den Push
   steht noch aus.
 - Logo: Erster Entwurf als Platzhalter vorhanden, Stephan arbeitet

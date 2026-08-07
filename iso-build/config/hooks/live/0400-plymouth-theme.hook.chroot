@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "[stephan-os] Activating Plymouth theme..."
+echo "[dialos] Activating Plymouth theme..."
 if [ -x /usr/sbin/plymouth-set-default-theme ]; then
-  plymouth-set-default-theme -R stephan-os || true
+  plymouth-set-default-theme -R dialos || true
 fi

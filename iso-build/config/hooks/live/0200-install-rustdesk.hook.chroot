@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "[stephan-os] Installing RustDesk..."
+echo "[dialos] Installing RustDesk..."
 cd /tmp
 
 DEB_URL=$(curl -fsSL https://api.github.com/repos/rustdesk/rustdesk/releases/latest \
@@ -10,11 +10,11 @@ DEB_URL=$(curl -fsSL https://api.github.com/repos/rustdesk/rustdesk/releases/lat
   | sed -E 's/"browser_download_url": *"([^"]*)"/\1/')
 
 if [ -z "$DEB_URL" ]; then
-  echo "[stephan-os] WARNING: could not determine RustDesk download URL, skipping." >&2
+  echo "[dialos] WARNING: could not determine RustDesk download URL, skipping." >&2
   exit 0
 fi
 
-echo "[stephan-os] Downloading $DEB_URL"
+echo "[dialos] Downloading $DEB_URL"
 curl -fsSL -o rustdesk.deb "$DEB_URL"
 apt-get update
 dpkg -i rustdesk.deb || apt-get install -f -y

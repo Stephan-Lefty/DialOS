@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Stephan-OS installieren
-Comment=Installiert Stephan-OS dauerhaft auf die interne Festplatte (nur für die Büro-Ersteinrichtung)
-Exec=/usr/local/sbin/stephan-os-install
-Icon=/usr/share/pixmaps/distributor-logo.png
-Terminal=false
-Categories=System;

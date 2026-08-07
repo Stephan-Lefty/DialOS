@@ -36,7 +36,7 @@ plug in the stick → power on the device → the system is immediately ready
 and speaks to the user, without anything needing to be typed or read.
 
 **Installation:** From the running live session there's a dedicated
-installer tool (`stephan-os-install`, launchable from the applications
+installer tool (`dialos-install`, launchable from the applications
 menu) instead of a standard installer like Calamares - its LUKS module
 is built around a typed password, not our stick-keyfile concept. The
 tool partitions the target disk, generates a random key onto the chosen
