@@ -70,9 +70,9 @@ docker run --rm -it \
     lb chroot_interactive
 
     chroot chroot pkill dbus-daemon || true
-    umount chroot/dev 2>/dev/null || true
 
     lb chroot_prep remove all mode-archives-chroot
+    umount chroot/dev 2>/dev/null || true
     lb chroot_cache save
 
     lb installer
