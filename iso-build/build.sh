@@ -10,8 +10,15 @@
 #    /usr/lib/live/build/chroot_devpts), not /dev itself - it relies on
 #    debootstrap's minimal static device nodes for everything else. That
 #    reproducibly broke /dev/null access ("Permission denied") partway
-#    through package postinst scripts. Fix: bind-mount the host's real
-#    /dev over chroot/dev.
+#    through package postinst scripts. Fix: bind-mount just the specific
+#    device files that broke (null, zero, random, urandom, full) from
+#    the host, one by one - NOT the whole /dev directory. Bind-mounting
+#    all of /dev shadows the devpts mount live-build already set up
+#    inside chroot/dev/pts (silently, since the mount still exists in
+#    the kernel's mount table but becomes unreachable at that path), so
+#    its own teardown logic (grep for the mount + `umount
+#    chroot/dev/pts`, no `|| true`) fails with "not mounted" and aborts
+#    the whole build.
 #
 # 2. There is no D-Bus system bus running inside the chroot, which
 #    makes some packages' postinst scripts fail - most notably
@@ -51,8 +58,11 @@ docker run --rm -it \
     lb chroot_cache restore
     lb chroot_prep install all mode-archives-chroot
 
-    mkdir -p chroot/dev chroot/run/dbus
-    mount --bind /dev chroot/dev
+    mkdir -p chroot/run/dbus
+    for _DEV in null zero random urandom full; do
+      touch chroot/dev/\$_DEV
+      mount --bind /dev/\$_DEV chroot/dev/\$_DEV
+    done
     chroot chroot apt-get install -y --no-install-recommends dbus
     chroot chroot dbus-daemon --system --fork
 
@@ -72,7 +82,9 @@ docker run --rm -it \
     chroot chroot pkill dbus-daemon || true
 
     lb chroot_prep remove all mode-archives-chroot
-    umount chroot/dev 2>/dev/null || true
+    for _DEV in null zero random urandom full; do
+      umount chroot/dev/\$_DEV 2>/dev/null || true
+    done
     lb chroot_cache save
 
     lb installer
