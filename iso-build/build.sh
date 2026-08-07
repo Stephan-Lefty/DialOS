@@ -17,9 +17,10 @@
 #    makes some packages' postinst scripts fail - most notably
 #    dictionaries-common, a hard transitive dependency of gnome-core
 #    (via gnome-text-editor -> libspelling -> libenchant), so it can't
-#    just be excluded. Fix: start a dbus-daemon chrooted into chroot/
-#    itself (not bind-mounted from the host), so it creates its socket
-#    natively at chroot/run/dbus.
+#    just be excluded. Fix: install the dbus package early (right after
+#    chroot_prep, once apt sources are set up) and start a dbus-daemon
+#    chrooted into chroot/ itself (not bind-mounted from the host), so
+#    it creates its socket natively at chroot/run/dbus.
 #
 # Both fixes must be applied AFTER `lb bootstrap` and after
 # `lb chroot_prep install` - debootstrap repopulates chroot/dev and
@@ -52,6 +53,7 @@ docker run --rm -it \
 
     mkdir -p chroot/dev
     mount --bind /dev chroot/dev
+    chroot chroot apt-get install -y --no-install-recommends dbus
     chroot chroot dbus-daemon --system --fork
 
     lb chroot_linux-image
