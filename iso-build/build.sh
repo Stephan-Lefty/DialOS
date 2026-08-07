@@ -51,7 +51,7 @@ docker run --rm -it \
     lb chroot_cache restore
     lb chroot_prep install all mode-archives-chroot
 
-    mkdir -p chroot/dev
+    mkdir -p chroot/dev chroot/run/dbus
     mount --bind /dev chroot/dev
     chroot chroot apt-get install -y --no-install-recommends dbus
     chroot chroot dbus-daemon --system --fork
