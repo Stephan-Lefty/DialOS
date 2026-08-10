@@ -23,8 +23,3 @@ abgehakt.
   gewählt) - braucht eine echte Einstellmöglichkeit (z. B. GNOME-
   Barrierefreiheitseinstellungen oder eigener Sprachbefehl), nicht nur
   einen Config-Wert.
-- [ ] Live-Desktop-Icon für die Installation: `.desktop`-Datei mit Icon,
-  die `sudo eggs sysinstall` ausführt, auf dem Live-Boot-Desktop
-  bereitstellen (nicht dem installierten System). Erfordert erst zu
-  klären, welchen Live-User/Desktop-Pfad `eggs`/`coa` beim ISO-Build für
-  das generische (nicht `-clone-`) Image tatsächlich verwendet.
