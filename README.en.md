@@ -2,6 +2,8 @@
 
 <img src="assets/logo.png" alt="DialOS logo" width="360">
 
+Website: [dialos.org](https://dialos.org)
+
 # DialOS
 
 A fully voice-controlled system based on Debian 13 + GNOME for people who

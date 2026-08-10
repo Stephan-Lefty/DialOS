@@ -2,6 +2,8 @@
 
 <img src="assets/logo.png" alt="DialOS Logo" width="360">
 
+Website: [dialos.org](https://dialos.org)
+
 # DialOS
 
 Ein auf Debian 13 + GNOME basierendes, vollständig sprachgesteuertes
