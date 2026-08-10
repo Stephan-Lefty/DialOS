@@ -331,3 +331,223 @@ nicht weiterverfolgt.
   `systemctl`/`journalctl` nicht vergessen, und wo möglich Ausgaben in
   eine Datei umleiten + direkt danach per `cat` anzeigen, statt auf
   manuelles Navigieren zu setzen.
+
+## ✅ Calamares-Installer: Deutsch + DialOS-Branding (2026-08-10)
+
+Ausgangslage: Der von Penguins' Eggs ins Live-System eingebundene
+Installer war Krill (React+Ink-TUI, textbasiert). Für Krill gibt es
+keinen dokumentierten Branding-Mechanismus (Logo/Farben/Schriftfarbe) -
+hätte Patches am TypeScript/React-Ink-Quellcode erfordert, als zu
+fragil verworfen. Auf Stephans Entscheidung hin auf **Calamares**
+(GUI-Installer) umgestiegen, mit der Vorgabe: Branding anpassbar UND
+auf Deutsch funktionsfähig.
+
+**Deutsch:** Erst fälschlich angenommen, Debians `calamares`-Paket
+bringe gar keine Kern-UI-Übersetzung mit (kein loses
+`/usr/share/calamares/lang/`-Verzeichnis per `find`/`dpkg -L`
+auffindbar - nur die branding-eigenen, sehr kleinen `lang/`-Ordner mit
+ar/en/eo/fr/nl, kein Deutsch). Tatsächlich bettet Calamares seine
+Kern-Übersetzungen als kompilierte Qt-Ressourcen direkt ins Programm
+ein (nicht als lose Dateien sichtbar) und wählt die Sprache automatisch
+nach System-Locale. Da der T490 auf Deutsch eingestellt ist, lief
+`sudo calamares` von Anfang an komplett auf Deutsch (Titel,
+Seitenüberschriften, Willkommenstext, Buttons) - **kein
+Zusatzaufwand nötig**. Der Umweg über das manuelle Herunterladen und
+Kompilieren von `calamares_de.ts` → `.qm` (via `lrelease-qt6` aus dem
+Paket `qt6-tools-dev-tools`) war am Ende überflüssig, wurde aber nicht
+schädlich - kann ignoriert/gelöscht werden.
+
+**Branding:** Das bare `calamares`-Paket liefert kein
+`/etc/calamares/`-Config. Das Paket **`calamares-settings-debian`**
+liefert dagegen eine vollständige, einsatzbereite
+`/etc/calamares/settings.conf` (kompletter Modul-Ablauf
+welcome→locale→keyboard→partition→users→summary→exec) plus eine
+"debian"-Branding-Komponente unter
+`/etc/calamares/branding/debian/`. Eigene Komponente `dialos` als
+Kopie davon angelegt (`/etc/calamares/branding/dialos/`):
+
+- `branding.desc`: `componentName: dialos` (**muss exakt dem
+  Ordnernamen entsprechen**, sonst Fatal-Error beim Start - genau das
+  ist uns beim ersten Testlauf passiert), `productName: DialOS`,
+  Bilder `mark.png` (Logo/Icon), `logo-tagline.png` (Willkommensbild),
+  Sidebar-Farben `#0B1E2D` (Hintergrund, dunkles Marken-Navy) /
+  `#0774D5` (aktueller Schritt, Blauton aus dem Logo gesampelt).
+- `show.qml`: Slideshow während der Installation, Bild
+  `logo-full.png`, deutscher Willkommenstext.
+- `stylesheet.qss`: **neu angelegt** (gab es bei "debian" nicht) -
+  einziger Weg, die generelle Schriftfarbe im Hauptbereich zu setzen
+  (der `style:`-Block in `branding.desc` deckt nur die Seitenleiste
+  ab). Wird automatisch erkannt, sobald die Datei im
+  Komponenten-Ordner existiert, gilt app-weit. Aktuell simpel
+  `* { color: #1A1A1A; }` (dunkles Grau für Kontrast/Lesbarkeit).
+- `/etc/calamares/settings.conf`: `branding: debian` →
+  `branding: dialos` geändert (Zeile 105).
+
+Verifiziert per Screenshot (`sudo calamares` direkt auf dem
+installierten System gestartet, nur Willkommensseite angesehen, nicht
+bis zur Partitionierung durchgeklickt): eigenes Logo, dunkles
+Marken-Navy in der Seitenleiste, "DialOS Installationsprogramm" als
+Fenstertitel, "Willkommen bei Calamares, dem Installationsprogramm für
+DialOS 1.0", Sprachauswahl zeigt "Deutsch" als Standard. **Funktioniert.**
+
+Alle sechs Dateien zusätzlich nach
+`iso-build/config/includes.chroot/etc/calamares/` im Git-Repo
+gespiegelt (gleiches Muster wie schon bei `background.png`), damit die
+Anpassung nicht verloren geht, falls der T490 nochmal neu aufgesetzt
+werden muss, bevor der nächste ISO-Build sie einfängt.
+
+`productUrl`/`supportUrl`/etc. in `branding.desc` zeigen vorerst als
+Platzhalter auf das GitHub-Repo - Stephans bewusste Entscheidung, erstmal
+so zu lassen (Repo ist zwar privat, aber in der aktuellen Testphase
+klickt da eh niemand drauf).
+
+### 🐛 Gefundener Bug: Standort-Seite zeigte "New York" statt Deutschland
+
+Beim Kontrollgang durch "Standort" und "Tastatur" zeigte die
+Standort-Karte als Startpunkt New York statt Deutschland. Ursache:
+`calamares-settings-debian` liefert kein
+`/etc/calamares/modules/locale.conf` mit, und Calamares' eigener
+eingebauter Standardwert für Region/Zeitzone ist laut Doku
+buchstäblich `America/New_York` (kein GeoIP-Fehler - GeoIP war schlicht
+nicht konfiguriert, weil die Datei komplett fehlte). Fix: eigene
+`locale.conf` angelegt mit festem `region: Europe` / `zone: Berlin`
+(GeoIP bewusst nicht aktiviert - ein fester Standardwert ist robuster
+als von einem Online-Dienst abzuhängen, der beim Installieren mal
+ausfallen könnte). Nach Fix: Standort zeigt Berlin, Tastatur zeigt
+"Deutsch"/"Standard" - beides korrekt. Datei nach
+`iso-build/config/includes.chroot/etc/calamares/modules/locale.conf`
+im Git-Repo gespiegelt.
+
+(Nebenbei geklärt: Der T490 selbst läuft mit Systemzeitzone
+Europe/Vienna statt Berlin - das ist **kein Bug**, Stephan sitzt
+tatsächlich in Österreich. Betrifft nur die eigene Konfiguration des
+Testrechners, nicht den `region`/`zone`-Standardwert für neue
+Installationen.)
+
+## ✅ Hardware-Livetest auf dem T490 (2026-08-10)
+
+Erster echter Hardware-Test auf dem installierten System (Konto
+`DialOS-Admin`), alle drei Punkte bestanden:
+
+- **WLAN: ✅** Lief ohne jedes Zutun - Gerät automatisch verbunden
+  (`nmcli`), echte IP-Adresse, gutes Signal.
+- **Sound: ✅** Hardware (`aplay -l`: Intel PCH, Analog + 3× HDMI) und
+  Software-Stack (PipeWire/PipeWire-Pulse/WirePlumber) beide sauber
+  erkannt/aktiv. Ein Lücke: `pactl` (aus `pulseaudio-utils`) war nicht
+  vorinstalliert - nachgerüstet. Testton per `speaker-test` gehört.
+- **Orca: ✅** Vorinstalliert (48.1, Wayland/GNOME), Umschalten per
+  **Super+Alt+S** funktioniert, liest vor.
+
+### ✅ Natürlichere deutsche Stimme für Orca: Piper statt espeak-ng (2026-08-10)
+
+Die Standard-Orca-Stimme (`espeak-ng`) klang wie erwartet robotisch.
+`docs/sprachsteuerung.md` hatte dafür schon "Piper oder RHVoice" als
+Zielvorgabe notiert. RHVoice ist in Debian nur im "non-free"-Bereich
+verfügbar (nicht aktiviert) und generell schwächer als Piper. Piper
+selbst ist kein Debian-Paket, sondern wird direkt von GitHub geladen.
+
+**Umsetzung** (bewährtes Community-Skript, vor Ausführung Zeile für
+Zeile geprüft):
+1. `sudo apt-get install -y jq sox` (Abhängigkeiten des Skripts).
+2. Install-Skript geladen und ausgeführt (**nicht mit `sudo`** - sonst
+   landet alles unter `/root` statt im Nutzer-Home und Orca/Sprach-
+   ausgabe, die als Nutzer laufen, finden nichts):
+   `wget -4 -O install-piper-speechd.sh "https://gist.githubusercontent.com/alexkuz/f24f93245ff80458c9b6ec93c644c40b/raw/"`
+   Zeile `apt -qq install jq sox` im Skript selbst hat kein `sudo` -
+   vorher auskommentiert, da Abhängigkeiten schon manuell installiert.
+   Legt an: `~/.local/share/speech-dispatcher-piper/` (Piper-Binary +
+   Stimmdateien, werden bei Bedarf von HuggingFace nachgeladen) und
+   `~/.config/speech-dispatcher/modules/piper-generic.conf`
+   (`sd_generic`-Modul-Config mit `AddVoice`-Zeilen für alle
+   verfügbaren Piper-Stimmen inkl. zehn deutscher, z. B.
+   `de_DE-thorsten-high`, `-medium`, `-low`, `de_DE-kerstin-low` usw.).
+3. **Zwei `sed`-Fallen** (gleiches Muster wie beim Calamares-
+   `settings.conf` weiter oben - Musterbasierte `sed`-Ersetzung mit
+   `^`-Anker schlägt fehl, wenn die Ziel-Zeile mit einem führenden
+   Leerzeichen beginnt, was in mehreren dieser generierten Configs der
+   Fall ist. **Lehre: bei speech-dispatcher/Calamares-Configs immer
+   erst mit `grep -n` die Zeilennummer holen und zeilengenau mit
+   `sed -i 'NNNs/.*/neuer Inhalt/'` ersetzen, nicht musterbasiert.**
+   - `~/.config/speech-dispatcher/speechd.conf`: `AddModule "piper"
+     "sd_generic" "piper-generic.conf"` fehlte und `DefaultModule`
+     zeigte noch auf `espeak-ng`.
+   - `~/.config/speech-dispatcher/modules/piper-generic.conf`:
+     `DefaultVoice` zeigte noch auf die englische Test-Stimme
+     `en_GB-alan-low` statt einer deutschen.
+4. **Weitere Falle:** Nach Config-Änderungen wirkungslos, weil noch
+   ein `speech-dispatcher`-Hintergrundprozess (seit dem ersten
+   Orca-Test) mit der alten, beim Start eingelesenen Config lief -
+   Config wird nicht automatisch neu geladen. Fix: `pkill -f
+   speech-dispatcher`, danach spawnt der nächste `spd-say`/Orca-Aufruf
+   den Prozess frisch mit aktueller Config.
+5. Stimme `de_DE-thorsten-high` (höchste Qualitätsstufe) als
+   `DefaultVoice` gesetzt - deutlich hörbare Verbesserung gegenüber
+   espeak-ng, bestätigt sowohl per direktem `spd-say`-Test als auch
+   über Orca.
+6. Sprechtempo minimal gedrosselt: `GenericRateMultiply` von `1` auf
+   `0.85` - Stephans Eindruck bei Orca war "schon etwas besser, aber
+   noch nicht so gut wie beim direkten Test", mit `0.85` als "besser"
+   bestätigt.
+
+### ✅ Piper systemweit gemacht (2026-08-10, gleicher Tag)
+
+Die anfängliche Einrichtung lag nur unter `~/.config/`/`~/.local/share/`
+von `DialOS-Admin` - für echte Endkunden-Konten hätte das nicht
+automatisch gegriffen. Deshalb noch am selben Tag systemweit verlagert:
+
+1. Piper-Binary + Stimmdateien nach `/usr/local/share/dialos-piper/`
+   verschoben (root, aber `chmod -R a+rX` - für alle Konten lesbar).
+   Größe: Piper-Programm selbst ~52 MB, dazu pro geladener Stimme die
+   `.onnx`-Datei (`de_DE-thorsten-high.onnx` ~114 MB).
+2. `/etc/speech-dispatcher/modules/piper-generic.conf` neu angelegt
+   (systemweite Modul-Config, Pfad zeigt jetzt auf
+   `/usr/local/share/dialos-piper`; `DefaultVoice
+   de_DE-thorsten-high`, `GenericRateMultiply 0.85`). Komplette Datei
+   in einem Rutsch per `tee`-Heredoc geschrieben statt einzelner
+   `sed`-Änderungen - robuster.
+3. In `/etc/speech-dispatcher/speechd.conf` (systemweit, nicht die
+   Kopie im Home-Ordner) `AddModule "piper"` ergänzt und
+   `DefaultModule` auf `piper` gesetzt.
+4. **Verifiziert für den Kundenkonto-Fall:** `DialOS-Admin`s eigene
+   Nutzer-Config testweise beiseitegeschoben, `speech-dispatcher`
+   neu gestartet, `spd-say` ganz ohne Parameter aufgerufen - lief
+   sofort auf Deutsch mit der Thorsten-Stimme. Bestätigt: ein neues
+   Kundenkonto ohne jede Vorkonfiguration bekommt das automatisch.
+5. Aufgeräumt: alte Kopie unter `~/.local/share/speech-dispatcher-piper/`
+   gelöscht, Test-Backup der Nutzer-Config ebenfalls gelöscht.
+6. Config-Dateien (nicht die große Binary/Sprachdatei) nach
+   `iso-build/config/includes.chroot/etc/speech-dispatcher/` im
+   Git-Repo gespiegelt.
+
+**Reproduzierbarkeit** (bei künftigem Neuaufbau):
+```bash
+sudo apt-get install -y jq sox
+sudo mkdir -p /usr/local/share/dialos-piper/voices
+curl -s -L -o /tmp/piper.tar.gz "https://github.com/rhasspy/piper/releases/latest/download/piper_linux_x86_64.tar.gz"
+sudo tar -xzf /tmp/piper.tar.gz -C /usr/local/share/dialos-piper
+curl -s -L -o /tmp/thorsten.onnx "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx?download=true"
+curl -s -L -o /tmp/thorsten.onnx.json "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json?download=true"
+sudo mv /tmp/thorsten.onnx /usr/local/share/dialos-piper/voices/de_DE-thorsten-high.onnx
+sudo mv /tmp/thorsten.onnx.json /usr/local/share/dialos-piper/voices/de_DE-thorsten-high.onnx.json
+sudo chmod -R a+rX /usr/local/share/dialos-piper
+sudo chmod +x /usr/local/share/dialos-piper/piper/piper
+```
+Die Config-Dateien selbst liegen ja schon im Git-Repo.
+
+## Datei-Workflow mit Stephan (wichtig, 2026-08-10)
+
+Die Geräte-Brücke zu diesem Rechner ist getrennt (seit der
+Neuinstallation) - Claude hat keinerlei direkten Zugriff auf den T490.
+Dateien, die Claude als Download im Chat anbietet, kommen bei Stephan
+NICHT automatisch auf dem T490 an. **Alle Änderungen - auch an
+CLAUDE.md/TODO.md/README.md selbst - müssen als Terminal-Befehle
+(cat/heredoc, sed, etc.) gegeben werden, die Stephan direkt einfügt.**
+Das gilt auch rückwirkend: mehrere CLAUDE.md/TODO.md-Updates vom
+10.08.2026 wurden zunächst nur als Chat-Datei geschickt und sind nie im
+echten Repo gelandet - nachträglich per Sammel-Befehl nachgeholt.
+
+`TODO.md` im Repo-Root wurde angelegt, verlinkt in der Kopfzeile von
+`README.md` rechts neben Änderungsprotokoll. Dort kommen kurzfristige,
+konkrete Aufgaben rein - anders als `docs/offene-punkte.md`, das für
+grundsätzliche, noch unentschiedene Architekturfragen gedacht ist.
+Erledigte Einträge werden aus `TODO.md` gelöscht statt nur abgehakt.
