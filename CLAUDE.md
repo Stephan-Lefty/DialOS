@@ -551,3 +551,36 @@ echten Repo gelandet - nachträglich per Sammel-Befehl nachgeholt.
 konkrete Aufgaben rein - anders als `docs/offene-punkte.md`, das für
 grundsätzliche, noch unentschiedene Architekturfragen gedacht ist.
 Erledigte Einträge werden aus `TODO.md` gelöscht statt nur abgehakt.
+
+## 🐛 Gefundener Bug: Praktisch alle Sprachpakete installiert (2026-08-10)
+
+Beim Kontrollgang nach dem ersten konsolidierten ISO-Build fiel auf,
+dass ganz oben rechts im GNOME-Panel eine japanische Eingabemethode
+(Anthy) als aktiv angezeigt wurde statt Deutsch. Untersuchung ergab:
+`iso-build/config/package-lists/desktop.list.chroot` enthielt
+`task-gnome-desktop` (ein Debian-Tasksel-Metapaket) - dessen
+Recommends haben über die komplette `task-*`/`task-*-desktop`-Familie
+praktisch **jede** von Debian unterstützte Sprache installiert (~70
+Sprachen, von Albanisch bis Xhosa), inklusive japanischer
+IBus-Eingabemethoden (`ibus-anthy`, `ibus-mozc`), die dann als erster
+Eintrag in `org.gnome.desktop.input-sources` registriert wurden und
+damit den GNOME-Standard überstimmt haben.
+
+Fix:
+- `task-gnome-desktop` aus `desktop.list.chroot` entfernt (wird eh
+  nicht gebraucht, `gnome-core` steht schon separat in der Liste),
+  ersetzt durch `task-german` + `task-german-desktop` (gezielt nur
+  deutsche Sprachunterstützung: Wörterbücher, Übersetzungen).
+- Auf dem laufenden System aufgeräumt: alle `task-*`-Pakete außer
+  `task-desktop`, `task-gnome-desktop`, `task-laptop`, `task-german`,
+  `task-german-desktop`, `task-english` per `apt-get purge` +
+  `autoremove` entfernt. `ibus-anthy`/`ibus-mozc`/`anthy` hingen danach
+  noch dran (nicht sauber als "automatisch installiert" markiert),
+  explizit nachpurged.
+- `org.gnome.desktop.input-sources` für `DialOS-Admin` per `gsettings`
+  auf `[('xkb', 'de')]` zurückgesetzt.
+
+**Wichtig:** Die zuerst gebaute konsolidierte ISO
+(`egg-of-debian-trixie-laptop-t490-dialos-amd64-2026-08-10_0934.iso`)
+enthält diesen Bug noch - **nicht für den Live-Boot-Test verwenden**,
+muss nach diesem Fix neu gebaut werden.
