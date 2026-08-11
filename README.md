@@ -52,6 +52,34 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 
 ## Änderungsprotokoll
 
+### 0.2.0
+- Erste Live-Boot-Installationstests auf realer Hardware (Lenovo T490)
+  durchgeführt und iterativ ausgewertet; ISO-Build-Workflow mit
+  Penguins' Eggs eingerichtet (Rezept unter `iso-build/config/`, Build-
+  und Testzyklus in CLAUDE.md dokumentiert).
+- Kosmetik-Fixes für den Installer erarbeitet und per Live-Boot-Test
+  bestätigt: NTP-Client (`systemd-timesyncd`) ergänzt, Partitionen-
+  Fenster vergrößert (800×580 → 1000×700), Calamares-Assistent zeigt
+  jetzt durchgängig DialOS-Branding statt der Penguins'-Eggs-
+  Standardoptik (Vendor-Overlay unter
+  `/etc/penguins-eggs.d/brain.d/assets/calamares/`), das Live-
+  Installer-Icon im App-Grid heißt jetzt "DialOS installieren" mit
+  eigenem Icon statt "Install System" mit Ei-Icon, und während der
+  Installation läuft kein Pinguin-Werbematerial mehr.
+- Live-Dash-Favoriten angepasst: statt des generischen "Debian
+  installieren"-Icons erscheint dort jetzt das DialOS-Icon.
+- Zentrale Erkenntnis dabei: `iso-build/config/includes.chroot/...` ist
+  nur eine Vorlage im Git-Repo - Änderungen müssen vor jedem
+  `eggs produce` manuell aufs echte System kopiert werden, sonst landen
+  sie nicht im gebauten Image (Details in CLAUDE.md).
+- Bekannte, bewusst zurückgestellte Einschränkung: Die Standort-Seite im
+  Installer schlägt GeoIP-basiert manchmal einen falschen Ort vor (z. B.
+  Rome statt Berlin) - kein Vendor-Override dafür gefunden, unkritisch
+  bei Zwei-Phasen-Provisionierung.
+- Git-Repository und ISO-Ausgabeordner liegen jetzt auf einer externen
+  Festplatte statt nur lokal auf dem T490, damit sie einen erneuten
+  Reinstall des Testrechners überstehen.
+
 ### 0.1.0
 - Projekt gestartet: Anforderungen, Architektur- und Design-Entscheidungen
   aus der Konzeptphase dokumentiert.
