@@ -637,3 +637,69 @@ direkt einsehen, ohne neu zu booten - `mount -o loop,ro
 den Zustand des Live-Abbilds, das tatsächlich gebaut wurde. Sehr
 nützlich, um "steckt der Fix wirklich im Abbild?" von "verhält sich das
 Programm zur Laufzeit anders?" zu unterscheiden.
+
+## Root Cause des "nichts hat sich verändert"-Tests gefunden (2026-08-11, Nachmittag)
+
+Der zweite Live-Boot-Test zeigte trotz committeter Fixes (NTP, windowSize,
+Calamares-Vendor-Overlay, install-system.desktop) keinerlei Veränderung.
+Ursache: `iso-build/config/includes.chroot/...` ist bei DialOS **nur eine
+Vorlage/Dokumentation im Git-Repo**, kein automatischer Build-Input (siehe
+Abschnitt oben zu "interaktiv auf dem echten System ausführen"). Es gibt
+kein Skript, das diese Dateien automatisch aufs echte Dateisystem kopiert.
+`eggs produce` snapshotet ausschließlich den tatsächlichen, echten Zustand
+des laufenden Systems. Die heutigen Recipe-Änderungen waren nur committet,
+aber nie auf das reale System kopiert worden, bevor die ISO gebaut wurde -
+deshalb war beim ersten Rebuild nichts davon im Image (per Squashfs-Mount-
+Diagnose bestätigt: selbst der simple `windowSize`-Sed-Fix fehlte).
+
+**Wichtige Lehre:** Nach jeder Recipe-Änderung im Git-Repo müssen die
+betroffenen Dateien manuell auf das echte System kopiert werden (z. B.
+`sudo cp ~/DialOS/iso-build/config/includes.chroot/<pfad> /<pfad>`), BEVOR
+`eggs produce` läuft. Reines Committen reicht nicht.
+
+### Zweiter Bug gefunden: `install-system.desktop` wird von eggs selbst neu gerendert
+
+Selbst nachdem der Fix korrekt aufs System kopiert war, überschrieb `eggs
+produce` die Datei erneut - der Task `create-live-launcher` rendert sie bei
+JEDEM Build aus einem eigenen Template neu (Log: "Template rendered and
+written to: .../install-system.desktop"). Das ist ein anderer Mechanismus
+als die Calamares-Vendor-Overlay-Logik.
+
+Quelle gefunden: `/etc/penguins-eggs.d/brain.d/base.yaml.tmpl` (echte Datei
+auf der Platte, Teil der Penguins'-Eggs-Paketinstallation, kein
+verstecktes Go-Template) - enthält den kompletten Inhalt von
+`install-system.desktop` direkt inline als YAML-Textblock (Abschnitt
+"12. DESKTOP LAUNCHER", Task `create-live-launcher`). Direkt angepasst
+(`Name=DialOS installieren`, `Comment=DialOS auf diesem Rechner
+installieren`, `Icon=/etc/calamares/branding/dialos/mark.png`) und nach
+`iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/base.yaml.tmpl`
+im Git-Repo gespiegelt (gleiches Muster wie die Calamares-Vendor-Overlay-
+Dateien), damit der Fix einen künftigen Neuaufbau übersteht.
+
+Nach Anwenden beider Fixes direkt auf dem echten System und Neu-Build:
+per Squashfs-Mount bestätigt, dass jetzt alle vier Punkte (NTP, windowSize,
+Calamares-Vendor-Overlay, install-system.desktop) tatsächlich im Image
+stecken. Ein echter Live-Boot-Test zur endgültigen Bestätigung (v. a. ob
+der Calamares-Assistent zur Laufzeit wirklich das Vendor-Overlay-Branding
+zieht) steht noch aus.
+
+### Neuer Workflow: Repo und ISOs liegen jetzt auf externer Platte
+
+Da Build-System und Test-System dasselbe T490 sind und jeder Live-Boot-
+Installationstest die interne Platte überschreibt, liegt das Git-Repo ab
+sofort physisch auf der externen "SanDisk-Extreme"-Platte unter
+`DialOS/repo/`, mit einem Symlink `~/DialOS` darauf (muss nach jedem
+Reinstall neu gesetzt werden: `ln -s
+/media/dialosadmin/SanDisk-Extreme/DialOS/repo ~/DialOS`). Neu gebaute
+ISOs landen ebenfalls dort unter `DialOS/DialOS-ISOs/` (ersetzt die
+frühere Konvention "immer nach ~/Downloads"). Git-Identität
+(`user.name`/`user.email`/`credential.helper store`) muss nach jedem
+Reinstall ebenfalls neu gesetzt werden - das wurde diesmal vergessen und
+verhinderte kurzzeitig den Commit des `base.yaml.tmpl`-Fixes.
+
+Praktisch zur Diagnose: eine gebaute ISO-Datei lässt sich auch direkt per
+Loop-Mount einsehen, ganz ohne USB-Stick zu bespielen:
+`sudo mount -o loop,ro <pfad>.iso /mnt/x` und dann
+`sudo mount -o loop,ro /mnt/x/live/filesystem.squashfs /mnt/y` - schneller
+als jedes Mal einen Stick neu zu flashen, um nachzusehen, ob ein Fix
+tatsächlich im Image gelandet ist.

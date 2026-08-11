@@ -9,21 +9,24 @@ entschiedene Architekturfragen) sind das hier konkrete, abhakbare
 Aufgaben. Erledigte Punkte werden aus dieser Datei gelöscht, nicht nur
 abgehakt.
 
-- [ ] Neuen Live-Boot-Test mit der ISO vom 11.08. durchführen, um die
-  gesammelten Kosmetik-Fixes zu verifizieren: NTP-Client
+- [ ] Neuen Live-Boot-Test mit der ISO vom 11.08. (11:48 Uhr, "_1048")
+  durchführen. Per Squashfs-Mount bereits bestätigt, dass NTP-Client
   (systemd-timesyncd), größeres Partitionen-Fenster (1000x700),
-  DialOS-Branding im Calamares-Assistenten selbst (über neuen
-  Vendor-Overlay `/etc/penguins-eggs.d/brain.d/assets/calamares/`, da
-  `eggs sysinstall` sein eigenes "eggs"-Branding live regeneriert und
-  `/etc/calamares/branding/dialos/` dabei ignoriert - Details in
-  CLAUDE.md), umbenanntes/gebrandetes Install-Icon
-  (`/usr/share/applications/install-system.desktop`), und ob dadurch
-  auch die Pinguin-Werbebilder während der Installation durch
-  DialOS-Inhalt ersetzt werden.
+  DialOS-Branding im Calamares-Vendor-Overlay UND das rebrandete
+  Install-Icon (`install-system.desktop`, Fix diesmal über die echte
+  Quelle `/etc/penguins-eggs.d/brain.d/base.yaml.tmpl`, Task
+  `create-live-launcher`) tatsächlich im Image stecken - das war beim
+  vorherigen Test noch nicht der Fall, weil die Recipe-Änderungen nur im
+  Git-Repo committet, aber nie manuell aufs echte System kopiert worden
+  waren (Details in CLAUDE.md). Noch nicht per echtem Live-Boot bestätigt:
+  ob der Calamares-Assistent zur Laufzeit auch wirklich das
+  Vendor-Overlay-Branding zieht statt des Standard-eggs-Brandings, und ob
+  die Pinguin-Werbebilder während der Installation durch DialOS-Inhalt
+  ersetzt werden.
 - [ ] Calamares-Standort-Seite schlägt beim Live-Boot GeoIP-basiert oft
   einen falschen Standort vor (z. B. Rome statt Berlin) - kein
-  dokumentierter Vendor-Override für `modules/locale.conf` gefunden
-  (nur Branding ist offiziell überschreibbar). Bleibt vorerst
+  dokumentierter Vendor-Override für `modules/locale.conf` gefunden (nur
+  Branding ist offiziell überschreibbar). Bleibt vorerst
   Werkzeug-Einschränkung; installierende Person muss Standort beim
   Durchklicken manuell prüfen/korrigieren (unkritisch bei
   Zwei-Phasen-Provisionierung, da Endkunden den Installer nie sehen).
