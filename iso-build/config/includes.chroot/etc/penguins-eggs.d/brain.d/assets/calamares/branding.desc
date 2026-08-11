@@ -1,0 +1,32 @@
+componentName:   eggs
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 1000px,700px
+windowPlacement: center
+strings:
+    productName:         DialOS
+    shortProductName:    DialOS
+    version:             1.0
+    shortVersion:        1.0
+    versionedName:       DialOS 1.0
+    shortVersionedName:  DialOS 1.0
+    bootloaderEntryName: DialOS
+    productUrl:          https://github.com/Stephan-Lefty/DialOS
+    supportUrl:          https://github.com/Stephan-Lefty/DialOS
+    knownIssuesUrl:      https://github.com/Stephan-Lefty/DialOS/issues
+    releaseNotesUrl:     https://github.com/Stephan-Lefty/DialOS
+    donateUrl:           https://github.com/Stephan-Lefty/DialOS
+sidebar: widget
+navigation: widget
+images:
+    productLogo:         "mark.png"
+    productIcon:         "mark.png"
+    productWelcome:      "logo-tagline.png"
+slideshow:               "show.qml"
+style:
+   SidebarBackground:    "#0B1E2D"
+   SidebarText:          "#FFFFFF"
+   SidebarTextCurrent:   "#FFFFFF"
+   SidebarBackgroundCurrent: "#0774D5"
+slideshowAPI: 2
