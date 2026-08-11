@@ -1,0 +1,364 @@
+# ==============================================================================
+# FILE: base.yaml.tmpl
+# ROLE: Main orchestration plan (YAML) for penguins-eggs framework
+# ==============================================================================
+
+remaster:
+# ----------------------------------------------------------------------------
+# 1. INITIAL SETUP AND MOUNT
+# ----------------------------------------------------------------------------
+  - name: "mount-logic"
+    description: "Chroot environment and mount point preparation"
+    module: "mount_logic"
+
+# ----------------------------------------------------------------------------
+# 2. BOOTLOADER COPY
+# ----------------------------------------------------------------------------
+  - name: "bootloader-copy"
+    description: "Create a directory and copy the bootloader assets (BIOS/UEFI)"
+    module: "shell"
+    params:
+      command: "/etc/penguins-eggs.d/scripts/bootloader-copy.sh /tmp/coa/bootloaders /home/eggs/isodir"
+
+# ----------------------------------------------------------------------------
+# 3. EFI IMAGE GENERATION
+# ----------------------------------------------------------------------------
+  - name: "generate-efi.img"
+    description: "Generating a FAT image for EFI"
+    module: "shell"
+    params:
+      command: |
+        dd if=/dev/zero of=/home/eggs/isodir/EFI/BOOT/efi.img bs=1M count=12
+        mkfs.vfat /home/eggs/isodir/EFI/BOOT/efi.img
+        mmd -i /home/eggs/isodir/EFI/BOOT/efi.img ::/EFI
+        mmd -i /home/eggs/isodir/EFI/BOOT/efi.img ::/EFI/BOOT
+        if [ -f /home/eggs/isodir/EFI/BOOT/BOOTX64.EFI ]; then
+            mcopy -i /home/eggs/isodir/EFI/BOOT/efi.img /home/eggs/isodir/EFI/BOOT/BOOTX64.EFI ::/EFI/BOOT/BOOTX64.EFI
+        fi
+
+# ----------------------------------------------------------------------------
+# 4. BOOT ASSETS (SPLASH AND FONTS)
+# ----------------------------------------------------------------------------
+  - name: "boot-assets"
+    description: "Copy the splash screen and configure the GRUB/ISOLINUX fonts"
+    module: "shell"
+    params:
+      command: |
+        [ -f "/etc/penguins-eggs.d/brain.d/assets/splash.png" ] && cp -f /etc/penguins-eggs.d/brain.d/assets/splash.png /home/eggs/isodir/boot/grub/splash.png
+        [ -f "/etc/penguins-eggs.d/brain.d/assets/splash.png" ] && cp -f /etc/penguins-eggs.d/brain.d/assets/splash.png /home/eggs/isodir/isolinux/splash.png
+        [ -f "/etc/penguins-eggs.d/brain.d/assets/grub-theme.cfg" ] && cp -f /etc/penguins-eggs.d/brain.d/assets/grub-theme.cfg /home/eggs/isodir/boot/grub/theme.cfg
+        [ -f "/etc/penguins-eggs.d/brain.d/assets/isolinux-theme.cfg" ] && cp -f /etc/penguins-eggs.d/brain.d/assets/isolinux-theme.cfg /home/eggs/isodir/isolinux/isolinux.theme.cfg
+        if [ -f "/usr/share/grub/unicode.pf2" ]; then
+            cp -f /usr/share/grub/unicode.pf2 /home/eggs/isodir/boot/grub/font.pf2
+        elif [ -f "/etc/penguins-eggs.d/brain.d/assets/unicode.pf2" ]; then
+            cp -f /etc/penguins-eggs.d/brain.d/assets/unicode.pf2 /home/eggs/isodir/boot/grub/font.pf2
+        fi
+
+# ----------------------------------------------------------------------------
+# 5. BOOT MENU GENERATION
+# ----------------------------------------------------------------------------
+  - name: "generate-boot-menus"
+    description: "Dynamic generation of GRUB, ISOLINUX and EFI trampoline"
+    module: "script"
+    chroot: false
+    params:
+      src: "/etc/penguins-eggs.d/scripts/generate-menus.sh"
+      args:
+        - "/home/eggs/isodir"
+        - '{{ template "distro_boot_params" . }}'
+        - '{{ if .RamModeEnabled }}1{{ else }}0{{ end }}'
+
+# ----------------------------------------------------------------------------
+# 5.1 EFI IMAGE FINALIZATION
+# ----------------------------------------------------------------------------
+# UEFI boots BOOTX64.EFI from inside efi.img, so the trampoline grub.cfg
+# must live there too, not just on the ISO9660 tree.
+  - name: "inject-efi-grubcfg"
+    description: "Copy the EFI trampoline grub.cfg into efi.img"
+    module: "shell"
+    params:
+      command: |
+        if [ -f /home/eggs/isodir/EFI/BOOT/efi.img ] && [ -f /home/eggs/isodir/EFI/BOOT/grub.cfg ]; then
+            mcopy -i /home/eggs/isodir/EFI/BOOT/efi.img -o /home/eggs/isodir/EFI/BOOT/grub.cfg ::/EFI/BOOT/grub.cfg
+        fi
+
+# ----------------------------------------------------------------------------
+# 6. USER IDENTITY
+# ----------------------------------------------------------------------------
+  - name: "identity"
+    description: "Live user injection and password sanitization"
+    module: "users"
+
+# ----------------------------------------------------------------------------
+# 7. SYSTEM FILE SANITIZATION
+# ----------------------------------------------------------------------------
+  - name: "sanitize-system-files"
+    description: "Sanitize fstab, crypttab and ensure basic system config for the live system"
+    module: "shell"
+    chroot: false
+    params:
+      command: |
+        echo "# UNCONFIGURED FSTAB" > /home/eggs/liveroot/etc/fstab
+        echo "# UNCONFIGURED CRYPTTAB" > /home/eggs/liveroot/etc/crypttab
+        chmod 644 /home/eggs/liveroot/etc/fstab /home/eggs/liveroot/etc/crypttab
+
+        # Prevent systemd-firstboot prompts if the base template has no timezone/localtime configured
+        if [ ! -e /home/eggs/liveroot/etc/localtime ] && [ ! -L /home/eggs/liveroot/etc/localtime ]; then
+            ln -sf /usr/share/zoneinfo/UTC /home/eggs/liveroot/etc/localtime
+        fi
+
+        # Prevent systemd-firstboot locale prompts
+        if [ ! -f /home/eggs/liveroot/etc/locale.conf ]; then
+            echo "LANG=C.UTF-8" > /home/eggs/liveroot/etc/locale.conf
+        fi
+
+        # Prevent systemd-firstboot hostname prompts
+        if [ ! -f /home/eggs/liveroot/etc/hostname ]; then
+            echo "live-system" > /home/eggs/liveroot/etc/hostname
+        fi
+
+
+# ----------------------------------------------------------------------------
+# 8. LIVE INITRAMFS
+# ----------------------------------------------------------------------------
+  - name: "initramfs"
+    description: "Live environment-specific Initramfs generation"
+    module: "shell"
+    chroot: true
+    live_root: "INJECTED_BY_PLANNER"
+    params:
+      command: |
+{{ include "distro_initramfs_cmd" . | indent 8 }}
+
+# ----------------------------------------------------------------------------
+# 9. COPY KERNEL AND INITRAMFS
+# ----------------------------------------------------------------------------
+  - name: "copy-kernel-initrd"
+    description: "Universal copy of kernel and initramfs to live ISO directory"
+    module: "shell"
+    chroot: false
+    params:
+      command: |
+{{ include "distro_copy_kernel_cmd" . | indent 8 }}
+
+# ----------------------------------------------------------------------------
+# 10. LIVE USER PRIVILEGES (sudo)
+# ----------------------------------------------------------------------------
+  - name: "conf-live-sudoers"
+    description: "Configure sudoers for the live user"
+    module: "template"
+    chroot: true
+    params:
+      dest: "/etc/sudoers.d/00-live"
+      permissions: 288 # 0440 octal
+      content: |
+        live ALL=(ALL) NOPASSWD:ALL
+        %wheel ALL=(ALL) NOPASSWD:ALL
+        %sudo ALL=(ALL) NOPASSWD:ALL
+
+# ----------------------------------------------------------------------------
+# 11. LIVE USER PRIVILEGES (polkit)
+# ----------------------------------------------------------------------------
+  - name: "polkit-policy"
+    description: "Polkit policy for the installer launcher (pkexec eggs)"
+    module: "template"
+    chroot: true
+    params:
+      dest: "/usr/share/polkit-1/actions/net.penguins-eggs.pkexec.policy"
+      permissions: 420 # 0644 octal
+      content: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE policyconfig PUBLIC
+        "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+        "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+        <policyconfig>
+          <vendor>penguins-eggs</vendor>
+          <vendor_url>https://penguins-eggs.net</vendor_url>
+          <action id="net.penguins-eggs.pkexec.run">
+            <description>Run System Installer</description>
+            <message>Authentication is required to run the system installer</message>
+            <icon_name>penguins-eggs</icon_name>
+            <defaults>
+              <allow_any>no</allow_any>
+              <allow_inactive>no</allow_inactive>
+              <allow_active>yes</allow_active>
+            </defaults>
+            <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/eggs</annotate>
+            <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+          </action>
+        </policyconfig>
+
+# ----------------------------------------------------------------------------
+# 12. DESKTOP LAUNCHER
+# ----------------------------------------------------------------------------
+  - name: "create-live-launcher"
+    description: "Add universal desktop launcher"
+    module: "template"
+    chroot: true
+    params:
+      dest: "/usr/share/applications/install-system.desktop"
+      permissions: 493 # 0755 octal
+      content: |
+        [Desktop Entry]
+        Type=Application
+        Version=1.0
+        Name=DialOS installieren
+        GenericName=Live Installer
+        Comment=DialOS auf diesem Rechner installieren
+        Exec=pkexec eggs sysinstall
+        Icon=/etc/calamares/branding/dialos/mark.png
+        {{ if .HasCalamares -}}
+        Terminal=false
+        {{ else -}}
+        Terminal=true
+        {{ end -}}
+        Categories=System;
+
+# ----------------------------------------------------------------------------
+# 13. TRUST AGENT
+# ----------------------------------------------------------------------------
+  - name: "trust-agent-script"
+    description: "Copy dynamic trust script for the desktop launcher"
+    module: "shell"
+    chroot: false
+    params:
+      command: |
+        mkdir -p /home/eggs/liveroot/usr/local/bin
+        cp /etc/penguins-eggs.d/scripts/trust-desktop.sh /home/eggs/liveroot/usr/local/bin/trust-desktop
+        chmod 755 /home/eggs/liveroot/usr/local/bin/trust-desktop
+
+  - name: "trust-agent-autostart"
+    description: "Enable XDG Autostart for the trust agent"
+    module: "template"
+    chroot: true
+    params:
+      dest: "/etc/xdg/autostart/trust-installer.desktop"
+      permissions: 420 # 0644 octal
+      content: |
+        [Desktop Entry]
+        Type=Application
+        Name=Trust Installer
+        Exec=/usr/local/bin/trust-desktop
+        Hidden=false
+        NoDisplay=true
+
+# ----------------------------------------------------------------------------
+# 14. AUTOLOGIN
+# ----------------------------------------------------------------------------
+  - name: autologin-gui
+    description: "Set up autologin for the live user"
+    module: "autologin-gui"
+    chroot: true
+    params:
+      user: "{{.LiveUser}}"
+      is_gui: true
+
+# ----------------------------------------------------------------------------
+# 15. EGG ICON
+# ----------------------------------------------------------------------------
+  - name: "eggs-icon"
+    description: "Create Egg Icon"
+    module: "template"
+    params:
+      dest: "/usr/share/icons/hicolor/scalable/apps/penguins-eggs.svg"
+      permissions: 420 # 0644 octal
+      content: |
+        <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="eggGrad" cx="30%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#ffe066" />
+            <stop offset="50%" stop-color="#f0ad4e" />
+            <stop offset="100%" stop-color="#b87311" />
+            </radialGradient>
+        </defs>
+        <ellipse cx="32" cy="59" rx="18" ry="3" fill="rgba(0,0,0,0.2)" />
+        <path d="M 32 4 C 18 4, 8 24, 8 42 C 8 55, 18 60, 32 60 C 46 60, 56 55, 56 42 C 56 24, 46 4, 32 4 Z" fill="url(#eggGrad)" />
+        </svg>
+
+# ----------------------------------------------------------------------------
+# 16. FILESYSTEM.SQUASHFS COMPRESSION
+# ----------------------------------------------------------------------------
+  - name: "mksquashfs"
+    module: "mksquashfs"
+    params:
+      live_root: "/home/eggs/liveroot"
+      dest_file: "/home/eggs/isodir/live/filesystem.squashfs"
+      excludes_file: "/tmp/coa/excludes.list"
+
+# ----------------------------------------------------------------------------
+# 17. DISTRO-SPECIFIC SQUASHFS HOOK
+# ----------------------------------------------------------------------------
+  - name: "distro_hook_squashfs"
+    description: "Hard link to filesystem.squashfs for distros that need it (arch, fedora, manjaro)"
+    module: "shell"
+    chroot: false
+    params:
+      command: |
+{{ include "distro_hook_squashfs" . | indent 8 }}
+
+# ----------------------------------------------------------------------------
+# 18. ISO XORRISO PACKAGING
+# ----------------------------------------------------------------------------
+  - name: "xorriso"
+    module: "xorriso"
+    params:
+      output_file: "INJECTED_BY_PLANNER"
+      source_dir: "INJECTED_BY_PLANNER"
+      isolinux_bin: "isolinux/isolinux.bin"
+      isolinux_cat: "isolinux/boot.cat"
+      efi_img: "EFI/BOOT/efi.img"
+      isohdpfx: "/tmp/coa/bootloaders/ISOLINUX/isohdpfx.bin"
+
+# ==============================================================================
+# 🎯 INSTALLER
+# ==============================================================================
+install:
+  - name: "install-cleanup"
+    description: "remove 00-live"
+    module: "shell"
+    chroot: true
+    params:
+      command: |
+        rm -f /etc/sudoers.d/00-live
+
+  - name: "install-ssh-keys"
+    description: "generate host SSH keys"
+    module: "shell"
+    chroot: true
+    params:
+      command: |
+        if [ -x /usr/bin/ssh-keygen ]; then
+            /usr/bin/ssh-keygen -A
+        fi
+
+  - name: "enable-network-services"
+    description: "Ensure NetworkManager and systemd-resolved are enabled on the target"
+    module: "shell"
+    chroot: true
+    params:
+      command: |
+        if [ -f /usr/lib/systemd/system/NetworkManager.service ] || [ -f /etc/systemd/system/NetworkManager.service ]; then
+            systemctl enable NetworkManager.service 2>/dev/null || true
+        fi
+        if [ -f /usr/lib/systemd/system/systemd-resolved.service ]; then
+            systemctl enable systemd-resolved.service 2>/dev/null || true
+        fi
+
+  - name: "install-initramfs"
+    description: "update initramfs"
+    module: "shell"
+    chroot: true
+    params:
+      command: |
+{{ include "install_distro_initramfs" . | indent 8 }}
+
+  - name: "install-bootloader"
+    description: "install bootloader"
+    module: "shell"
+    chroot: true
+    params:
+      command: |
+{{ include "install_distro_bootloader" . | indent 8 }}
+
+
+
