@@ -214,6 +214,18 @@ remaster:
         {{ end -}}
         Categories=System;
 
+
+# ----------------------------------------------------------------------------
+# 12b. LIVE DASH FAVORITES (DialOS statt Debian-Installer-Icon)
+# ----------------------------------------------------------------------------
+  - name: "dialos-live-favorites"
+    description: "Swap Debian installer icon for DialOS launcher in the live dash"
+    module: "shell"
+    chroot: true
+    params:
+      command: |
+        sed -i 's/calamares-install-debian.desktop/install-system.desktop/' /usr/share/glib-2.0/schemas/96_calamares-settings-debian.gschema.override
+        glib-compile-schemas /usr/share/glib-2.0/schemas/
 # ----------------------------------------------------------------------------
 # 13. TRUST AGENT
 # ----------------------------------------------------------------------------
