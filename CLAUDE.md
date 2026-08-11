@@ -584,3 +584,56 @@ Fix:
 (`egg-of-debian-trixie-laptop-t490-dialos-amd64-2026-08-10_0934.iso`)
 enthält diesen Bug noch - **nicht für den Live-Boot-Test verwenden**,
 muss nach diesem Fix neu gebaut werden.
+
+## Calamares-Branding wird von eggs/coa live überschrieben (2026-08-11)
+
+Erster echter Live-Boot-Test (USB-Stick, komplette Installation inkl.
+Partitionierung) zeigte: Der Calamares-Assistent selbst (Willkommen-
+Bildschirm, Fortschrittsanzeige mit Pinguin-Werbebildern) zeigte
+Standard-"eggs"-Branding statt DialOS, obwohl `/etc/calamares/
+settings.conf` (branding: dialos) und `/etc/calamares/branding/dialos/`
+sowohl im Rezept als auch im gebauten Live-Abbild (per Squashfs-Mount
+verifiziert) korrekt vorhanden waren.
+
+Ursache (per Quellcode-Recherche in github.com/pieroproietti/
+penguins-eggs bestätigt): Der `eggs sysinstall`-Befehl (aufgerufen über
+`/usr/share/applications/install-system.desktop`, `Exec=pkexec eggs
+sysinstall`) generiert bei jedem Start sein eigenes Standard-"eggs"-
+Branding frisch nach `/etc/calamares/branding/eggs/` im beschreibbaren
+Live-Overlay (RAM), unabhängig von unserem `/etc/calamares/`-Rezept.
+Calamares' `unpackfs`-Modul kopiert beim eigentlichen Installieren aber
+direkt aus der (unveränderten) Squashfs, nicht aus dem Live-Overlay -
+deshalb landete am Ende trotzdem unser korrektes Branding auf der
+Zielplatte, aber der Installations-Bildschirm selbst zeigte die
+falschen (generischen) Inhalte.
+
+Fix: `eggs`/`coa` unterstützt einen festen Vendor-Overlay-Pfad
+`/etc/penguins-eggs.d/brain.d/assets/calamares/` (Quelle:
+`coa/pkg/sysinstall/setup/branding-desc.go`). Existiert dieser Ordner,
+kopiert `copyBrandingOverlay()` seinen Inhalt (inkl. `branding.desc`,
+falls vorhanden) über das generierte "eggs"-Branding drüber. Der
+Zielordner heißt bei eggs aber immer `eggs`, nicht `dialos` - deshalb
+muss `componentName` in der Overlay-`branding.desc` auf `eggs` gesetzt
+werden (sonst wieder der bekannte "componentName muss zum
+Verzeichnisnamen passen"-Fehler). Umgesetzt in
+`iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/
+calamares/` (Kopie von `branding/dialos/` mit angepasstem
+componentName).
+
+Für das Ei-Icon selbst (`Install System`, `Icon=penguins-eggs`) wurde
+zusätzlich `/usr/share/applications/install-system.desktop` per
+`includes.chroot` überschrieben (Name auf "DialOS installieren",
+Icon auf `/etc/calamares/branding/dialos/mark.png`).
+
+Kein Vendor-Override-Mechanismus gefunden für `modules/locale.conf` -
+GeoIP-basierte Standort-Vorschläge (z. B. "Rome" statt "Berlin") können
+also weiterhin auftreten und müssen von der installierenden Person
+manuell korrigiert werden. Unkritisch, da Endkunden den Installer im
+Rahmen der Zwei-Phasen-Provisionierung nie selbst sehen.
+
+Wichtige Nebenerkenntnis beim Debuggen: Der Live-USB-Stick lässt sich
+direkt einsehen, ohne neu zu booten - `mount -o loop,ro
+/pfad/zum/stick/live/filesystem.squashfs /mnt/irgendwas` zeigt exakt
+den Zustand des Live-Abbilds, das tatsächlich gebaut wurde. Sehr
+nützlich, um "steckt der Fix wirklich im Abbild?" von "verhält sich das
+Programm zur Laufzeit anders?" zu unterscheiden.
