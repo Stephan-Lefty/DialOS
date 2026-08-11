@@ -1,0 +1,8 @@
+{
+  "policies": {
+    "Homepage": {
+      "URL": "https://dialos.org",
+      "StartPage": "homepage"
+    }
+  }
+}
