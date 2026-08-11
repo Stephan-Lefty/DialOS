@@ -2,7 +2,7 @@ componentName:   dialos
 welcomeStyleCalamares: true
 welcomeExpandingLogo: true
 windowExpanding: normal
-windowSize: 800px,580px
+windowSize: 1000px,700px
 windowPlacement: center
 strings:
     productName:         DialOS
