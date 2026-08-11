@@ -80,6 +80,37 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Festplatte statt nur lokal auf dem T490, damit sie einen erneuten
   Reinstall des Testrechners überstehen.
 
+### 0.3.0
+- Login-Avatar für "DialOS-Admin" gesetzt: das schon vorhandene
+  Buero-Setup-Skript `scripts/dialos-set-avatar.sh` tatsaechlich
+  ausgefuehrt (setzt die DialOS-Bildmarke per AccountsService/D-Bus als
+  Profilbild) - vorher nur geschrieben, aber nie angewendet.
+- Autologin-Kette repariert und verifiziert: Standard-Benutzer "nutzer"
+  angelegt, Autologin laeuft korrekt ueber AccountsService (nicht ueber
+  das dafuer ignorierte `/etc/gdm3/custom.conf`), Admin-Konto behaelt
+  kein Autologin. Dabei einen Timing-Bug in
+  `scripts/dialos-setup-nutzer.sh` gefunden ("user is locked" direkt
+  nach `chpasswd`, weil AccountsService die neue Passwort-Zeile noch
+  nicht bemerkt hatte) und mit Wiederholungslogik behoben (auch in der
+  ISO-Vorlage unter `iso-build/config/includes.chroot/etc/skel/Desktop/`
+  nachgezogen).
+- Neuer fester Sammelordner `~/Dokumente/DialOS/` auf dem Testgeraet für
+  alle Dateien, die nach einer Installation für die Einrichtung
+  gebraucht werden - als erstes Werkzeug liegt dort
+  `nutzer-anlegen.sh` (robustere Kopie des Autologin-Skripts) sowie ein
+  Angaben-Formular für die Thunderbird-Kontoeinrichtung
+  (`thunderbird-angaben-formular.md`).
+- Firefox: Startseite per Enterprise-Policy auf `https://dialos.org`
+  gesetzt (`policies.json` unter
+  `usr/lib/firefox-esr/distribution/` im ISO-Rezept - der alternative
+  `/etc/firefox-esr/`-Pfad wird von diesem Debian-Paket nicht
+  unterstuetzt).
+- Versuch, ein DialOS-Wallpaper als Hintergrund der "Neuer Tab"-Seite zu
+  hinterlegen, zurueckgestellt: Firefox respektiert `browser.newtab.url`
+  in aktuellen Versionen nicht mehr zuverlaessig (fuehrt nur zu einer
+  leeren Seite), eine eigene Erweiterung dafuer waere mit
+  Signatur-Aufwand verbunden und wurde bewusst nicht umgesetzt.
+
 ### 0.1.0
 - Projekt gestartet: Anforderungen, Architektur- und Design-Entscheidungen
   aus der Konzeptphase dokumentiert.
