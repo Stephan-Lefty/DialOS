@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=DialOS installieren
+GenericName=Live Installer
+Comment=DialOS auf diesem Rechner installieren
+Exec=pkexec eggs sysinstall
+Icon=/etc/calamares/branding/dialos/mark.png
+Terminal=false
+Categories=System;
