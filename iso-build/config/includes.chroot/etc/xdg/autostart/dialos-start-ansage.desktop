@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Start-Ansage
+Comment=Sprachansage mit Uhrzeit, Akkustand und Wetter beim Anmelden
+Exec=/usr/local/bin/dialos-start-ansage.py
+X-GNOME-Autostart-Delay=3
+NoDisplay=true
