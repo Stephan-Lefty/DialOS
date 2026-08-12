@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Evolution
+Exec=evolution %U
+Icon=evolution
+NoDisplay=true
