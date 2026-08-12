@@ -41,3 +41,5 @@ grub-efi-amd64
 grub-efi-amd64-bin
 openssl
 systemd-timesyncd
+thunderbird-l10n-de
+gnome-shell-extension-manager
