@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Calendar
+Comment=Access and manage your calendars
+Exec=gnome-calendar %U
+Icon=org.gnome.Calendar
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;Office;Calendar;Core;
+MimeType=text/calendar;
+NoDisplay=true
