@@ -52,6 +52,67 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 
 ## Änderungsprotokoll
 
+### 0.4.0
+- Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur
+  Thunderbird soll für E-Mail und Kalender genutzt werden): `apt purge`
+  ist bei beiden nicht möglich, da `evolution-data-server` bzw.
+  `gnome-calendar` fest an die Metapakete `gnome`/`gnome-core`/
+  `task-gnome-desktop` gekoppelt sind (ein Entfernungsversuch hätte fast
+  den kompletten GNOME-Desktop mitgerissen - vorher per
+  `apt-get -s purge` simuliert und rechtzeitig abgebrochen). Stattdessen
+  Override-Dateien mit `NoDisplay=true` unter
+  `/usr/local/share/applications/org.gnome.Evolution.desktop` bzw.
+  `.../org.gnome.Calendar.desktop` angelegt - `/usr/local` wird von
+  `apt`/`dpkg` nie angefasst, die Änderung übersteht also künftige
+  Debian-Updates.
+- Thunderbird als tatsächlicher Standard für E-Mail-Links (`mailto:`)
+  und Kalendereinträge (`text/calendar`) gesetzt (`xdg-mime`), inklusive
+  deutschem Sprachpaket (`thunderbird-l10n-de`, das - anders als bei
+  Firefox und LibreOffice - nicht automatisch über `task-german-desktop`
+  mitinstalliert wird). Beides über `/etc/skel/.config/mimeapps.list`
+  und die ISO-Paketliste (`desktop.list.chroot`) für jedes künftige
+  Konto (DialOS-Admin wie nutzer) hinterlegt.
+- Calamares entfernt sich künftig automatisch nach der Installation vom
+  fertig installierten Zielsystem (neuer Schritt im
+  `shellprocess`-Nachinstallationsmodul) - wird auf dem Zielsystem nicht
+  mehr gebraucht. Wichtig dabei: Der Schritt läuft ausschließlich im
+  chroot des NEUEN Systems, nicht auf der Live-Vorlage, von der aus
+  künftige ISOs gebaut werden - sonst hätte die nächste ISO gar keinen
+  Installer mehr enthalten. Noch nicht über eine echte Installation
+  verifiziert.
+- Bluetooth-Kopplungsdaten für die drei Standard-Peripheriegeräte dieses
+  Testgeräts (Maus "Pebble M350s", Tastatur "Pebble K380s", externer
+  Lautsprecher/Mikrofon "AIRHUG 01") fest ins Image aufgenommen
+  (`/var/lib/bluetooth/<Adapter-MAC>/...`), damit nach einer
+  Neuinstallation auf diesem Laptop keine erneute Kopplung nötig ist
+  (funktioniert, weil der eingebaute Bluetooth-Adapter des Laptops
+  gleich bleibt). Dabei eine unverankerte `.gitignore`-Regel (`cache/`)
+  gefunden und korrigiert, die versehentlich auch echte Systemordner
+  wie `var/cache/...` in der ISO-Vorlage gefiltert hätte.
+- Akkustand-Anzeige in der oberen Leiste eingerichtet: GNOME-Erweiterung
+  "Bluetooth Battery Monitor" zeigt Laptop- und Bluetooth-Geräte-Akku
+  (liest die Werte über `upower`/UPower aus), Akku-Prozentanzeige
+  aktiviert. Erweiterung und Einstellung systemweit als Standard für
+  alle künftigen Konten hinterlegt
+  (`/etc/skel/.local/share/gnome-shell/extensions/`,
+  `/etc/dconf/db/local.d/01-dialos-defaults`).
+- Neue Sprachansage beim Anmelden ("Michael", der persönliche
+  Assistent, `/usr/local/bin/dialos-start-ansage.py`): begrüßt, nennt
+  Datum und Uhrzeit, liest die Akkustände von Laptop, Maus, Tastatur und
+  Lautsprecher vor, meldet bei Internetverbindung das Tageswetter
+  (Morgens/Mittags/Nachmittags/Abends, inkl. Regenschirm-Hinweis bei
+  Regenwahrscheinlichkeit, Standort wird automatisch per IP erkannt) und
+  verabschiedet sich. Verbindet dabei automatisch alle gekoppelten
+  Bluetooth-Geräte neu (behebt ein Problem, bei dem der
+  Bluetooth-Lautsprecher nach einer Ab-/Anmeldung nicht selbstständig
+  wiederverbunden wurde) und schaltet über ein wiederverwendbares
+  Sprachausgabe-Skript mit Audio-Ducking (`/usr/local/bin/dialos-say.py`)
+  andere Audioquellen für die Dauer der Ansage stumm. Läuft automatisch
+  bei jedem Login für alle Konten
+  (`/etc/xdg/autostart/dialos-start-ansage.desktop`).
+- Änderungsprotokoll in dieser Datei in die richtige (neueste zuerst)
+  Reihenfolge sortiert.
+
 ### 0.3.0
 - Login-Avatar für "DialOS-Admin" gesetzt: das schon vorhandene
   Buero-Setup-Skript `scripts/dialos-set-avatar.sh` tatsaechlich
