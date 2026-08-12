@@ -1,6 +1,8 @@
 [org/gnome/mutter]
 center-new-windows=true
-
 [org/gnome/desktop/interface]
 accent-color='blue'
 color-scheme='default'
+show-battery-percentage=true
+[org/gnome/shell]
+enabled-extensions=['bluetooth-battery-monitor@v8v88v8v88.com']
