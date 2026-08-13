@@ -12,6 +12,16 @@ damit nichts aus den Diskussionen verloren geht.
 - Kein WWAN-Modul für praktische SIM-Tests vorhanden – Test-T490 hat
   keins verbaut. Muss für die SIM-Variante beschafft werden (sprachfähiges
   Modem, z. B. Quectel EM7565).
+- Netzwerk-Priorität WLAN/Kabel vor SIM fuer Internetverbindung: ueber
+  NetworkManager-Routenmetriken umgesetzt (niedrigere Metrik = bevorzugt).
+  Kabel-Profil auf ipv4.route-metric/ipv6.route-metric 100, WLAN-Profil
+  auf 600 gesetzt (auf dem T490 mit `nmcli connection show "<Profil>" |
+  grep route-metric` verifiziert). UNGETESTET: Kabel-Metrik nur gesetzt,
+  nicht mit eingestecktem Kabel funktional geprueft (kein Kabel
+  verfuegbar). SIM-Profil kann mangels WWAN-Hardware noch nicht angelegt
+  werden - sobald vorhanden, dort ipv4.route-metric/ipv6.route-metric auf
+  z. B. 900 setzen, damit SIM nur greift, wenn weder Kabel noch WLAN eine
+  Route liefern.
 
 ## Sicherheit
 - Wiederherstellungsweg für den USB-Sicherheits-Stick bei Verlust/Defekt:
