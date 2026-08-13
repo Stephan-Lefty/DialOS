@@ -93,3 +93,37 @@ damit nichts aus den Diskussionen verloren geht.
   ist der Fallback.
 - Kontakte werden laufend synchronisiert (CardDAV), nicht nur einmalig
   importiert.
+
+## 2026-08-13: Bluetooth-Lautsprecher/Sprachausgabe manchmal nicht hörbar nach Login
+
+**Symptom:** Nach dem Login blieb die Start-Ansage über den Bluetooth-
+Lautsprecher (AIRHUG 01) intermittierend aus - mal funktionierte es, mal
+nicht, ohne erkennbares Muster.
+
+**Vermutete Hauptursache:** GNOME "Benutzer wechseln" (statt richtigem
+Abmelden) ließ alte Sitzungen im Hintergrund aktiv - dabei liefen
+zeitweise `nutzer`- und `dialosadmin`-Sitzung gleichzeitig auf `seat0`,
+jede mit eigener `dialos-start-ansage.py`-Instanz (das Skript endet nie
+von selbst wegen der Netzwerk-Hintergrundüberwachung). Mehrere Instanzen
+konkurrierten vermutlich um `bluetooth_reconnect_alle()` und die
+Audio-Stummschaltung in `dialos-say.py`.
+
+**Fix (dialos-start-ansage.py):**
+- `alte_instanz_beenden()`: Lock-Datei `/tmp/dialos-start-ansage.pid`,
+  beendet beim Start eine evtl. noch laufende alte Instanz desselben
+  Kontos (funktioniert nicht kontoübergreifend, da keine sudo-Rechte im
+  Skript - das ist gewollt).
+- `bluetooth_debug_snapshot()`: schreibt bei jedem Lauf zwei
+  Zeitstempel-Schnappschuesse (`bluetoothctl info` je gekoppeltem Gerät +
+  `pactl list sinks short` + `pactl get-default-sink`) nach
+  `/tmp/dialos-bluetooth-debug.log`, direkt vor und nach dem
+  Reconnect-Versuch.
+
+**Praxis-Regel:** Kontowechsel immer über echtes **Abmelden**, nie über
+"Benutzer wechseln" - sonst bleiben alte Sitzungen aktiv und konkurrieren
+um Bluetooth-/Audio-Hardware.
+
+**Status:** Nach dem Fix bisher kein erneuter Fehlschlag beobachtet,
+u.a. bei einem echten Neustart mit Autologin für `nutzer`. Noch nicht
+über einen längeren Zeitraum endgültig bestätigt - `/tmp/dialos-
+bluetooth-debug.log` bei einem erneuten Auftreten prüfen.
