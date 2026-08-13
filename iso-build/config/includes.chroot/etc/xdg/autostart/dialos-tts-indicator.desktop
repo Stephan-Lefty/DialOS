@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Sprachausgabe-Indikator
+Comment=Zeigt ein Panel-Icon, waehrend DialOS gerade spricht
+Exec=/usr/local/bin/dialos-tts-indicator.py
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
