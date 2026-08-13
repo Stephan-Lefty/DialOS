@@ -2,6 +2,8 @@
 """DialOS: Sprachansage beim Start (Uhrzeit, Akkustaende, Internet, Wetter)."""
 import getpass
 import json
+import os
+import signal
 import socket
 import subprocess
 import time
@@ -30,16 +32,9 @@ KIND_LABEL = {
     "mouse": "Maus",
     "keyboard": "Tastatur",
 }
-# Volle Abfrage/Ansage (Admin-Konto, z.B. DialOS-Admin): Laptop, Lautsprecher,
-# Maus, Tastatur. Kundenkonto ("nutzer") bekommt nur Laptop + Lautsprecher -
-# externe Maus/Tastatur sind fuer die sprachgesteuerte Zielgruppe nicht
-# relevant und haben das Warten auf "erwartet=3" unnoetig verzoegert, wenn
-# gar keine Maus/Tastatur gekoppelt ist.
 KIND_REIHENFOLGE_VOLL = ["battery", "headset", "mouse", "keyboard"]
 KIND_REIHENFOLGE_NUTZER = ["battery", "headset"]
 KUNDENKONTO_BENUTZERNAME = "nutzer"
-# upower-"state:"-Werte, die bedeuten "haengt gerade am Stromnetz" - dann
-# ist der Laptop-Akku-Stand fuer die Ansage nicht relevant.
 LADE_STATUS_AM_NETZ = {"charging", "fully-charged", "pending-charge"}
 WETTER_SLOTS = [
     ("600", "Morgens"),
@@ -47,6 +42,8 @@ WETTER_SLOTS = [
     ("1500", "Nachmittags"),
     ("1800", "Abends"),
 ]
+BLUETOOTH_DEBUG_LOG = "/tmp/dialos-bluetooth-debug.log"
+LOCK_DATEI = "/tmp/dialos-start-ansage.pid"
 EINER = ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"]
 ZEHN_BIS_NEUNZEHN = ["zehn", "elf", "zwölf", "dreizehn", "vierzehn", "fünfzehn",
                      "sechzehn", "siebzehn", "achtzehn", "neunzehn"]
@@ -67,11 +64,6 @@ def zahl_wort_0_99(n):
 
 
 def ist_kundenkonto():
-    """True, wenn dieses Skript unter dem Kundenkonto ("nutzer") laeuft.
-    Bei jedem anderen Konto (z.B. DialOS-Admin/dialosadmin) gilt die volle
-    Abfrage/Ansage. Bei einem Fehler (z.B. Benutzername nicht ermittelbar)
-    wird sicherheitshalber die volle Variante angenommen, nicht die
-    eingeschraenkte."""
     try:
         return getpass.getuser() == KUNDENKONTO_BENUTZERNAME
     except Exception:
@@ -83,15 +75,6 @@ def spd_say(text):
 
 
 def upower_geraete():
-    """Liefert {kind: [(prozent, status), ...]} fuer alle upower-Geraete mit
-    Akku-Stand. status ist der upower-"state:"-Wert (z.B. "charging",
-    "discharging", "fully-charged") oder None, falls das Geraet keinen
-    Ladezustand meldet (z.B. die meisten Bluetooth-Peripheriegeraete).
-
-    upower -i hat KEIN "kind:"-Feld bei Peripheriegeraeten, sondern eine
-    Kopfzeile mit dem reinen Geraetetyp (z.B. "mouse"), darunter eingerueckt
-    "percentage:". Wir suchen daher nach dieser Kopfzeile.
-    """
     ergebnis = {}
     try:
         pfade = subprocess.run(
@@ -141,12 +124,6 @@ def bluetooth_paired_geraete():
 
 
 def bluetooth_reconnect_alle():
-    """Verbindet alle gekoppelten Bluetooth-Geraete neu (v.a. wichtig fuer
-    Audiogeraete, deren Audio-Profil nach einem Sitzungswechsel manchmal
-    nicht automatisch wiederhergestellt wird). Ein bereits verbundenes
-    Geraet erneut zu verbinden ist unschaedlich, daher keine Vorab-Pruefung
-    (die durch mehrere schnelle bluetoothctl-Aufrufe hintereinander zu
-    Wettlaufsituationen fuehren kann)."""
     for mac in bluetooth_paired_geraete():
         try:
             subprocess.run(
@@ -156,8 +133,63 @@ def bluetooth_reconnect_alle():
             pass
 
 
+def alte_instanz_beenden():
+    try:
+        with open(LOCK_DATEI) as f:
+            alte_pid = int(f.read().strip())
+        with open(f"/proc/{alte_pid}/cmdline", "rb") as f:
+            cmdline = f.read().decode(errors="replace")
+        if "dialos-start-ansage" not in cmdline:
+            raise ValueError("PID gehoert nicht mehr zu diesem Skript")
+        os.kill(alte_pid, signal.SIGTERM)
+        time.sleep(0.5)
+        try:
+            os.kill(alte_pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    except (FileNotFoundError, ValueError, ProcessLookupError):
+        pass
+    except Exception:
+        pass
+    try:
+        with open(LOCK_DATEI, "w") as f:
+            f.write(str(os.getpid()))
+    except Exception:
+        pass
+
+
+def bluetooth_debug_snapshot(label):
+    zeilen = [f"=== {datetime.now().isoformat(timespec='seconds')} - {label} ==="]
+    for mac in bluetooth_paired_geraete():
+        try:
+            ausgabe = subprocess.run(
+                ["bluetoothctl", "info", mac], capture_output=True, text=True, timeout=5
+            ).stdout.strip() or "(keine Ausgabe)"
+        except Exception as fehler:
+            ausgabe = f"(Fehler beim Ausfuehren: {fehler})"
+        zeilen.append(f"--- bluetoothctl info {mac} ---")
+        zeilen.append(ausgabe)
+    for beschriftung, befehl in [
+        ("pactl list sinks short", ["pactl", "list", "sinks", "short"]),
+        ("pactl get-default-sink", ["pactl", "get-default-sink"]),
+    ]:
+        try:
+            ausgabe = subprocess.run(
+                befehl, capture_output=True, text=True, timeout=5
+            ).stdout.strip() or "(keine Ausgabe)"
+        except Exception as fehler:
+            ausgabe = f"(Fehler beim Ausfuehren: {fehler})"
+        zeilen.append(f"--- {beschriftung} ---")
+        zeilen.append(ausgabe)
+    zeilen.append("")
+    try:
+        with open(BLUETOOTH_DEBUG_LOG, "a") as f:
+            f.write("\n".join(zeilen) + "\n")
+    except Exception:
+        pass
+
+
 def warte_auf_geraete(erwartet=3, timeout=12):
-    """Wartet kurz, bis Bluetooth-Geraete nach dem Login erkannt wurden."""
     ende = time.time() + timeout
     geraete = upower_geraete()
     while time.time() < ende:
@@ -214,13 +246,6 @@ UEBERWACHUNGS_INTERVALL_SEKUNDEN = 90
 
 
 def netzwerk_ueberwachung(letzter_status):
-    """Laeuft nach der Start-Ansage dauerhaft im Hintergrund weiter (endet
-    erst, wenn der Prozess selbst beendet wird, z.B. beim Abmelden) und
-    prueft alle UEBERWACHUNGS_INTERVALL_SEKUNDEN erneut die Internet-
-    verbindung. Nur bei einer tatsaechlichen Aenderung gegenueber dem
-    zuletzt bekannten Status (verbunden <-> getrennt) gibt es eine kurze,
-    freundliche Sprachansage - bei unveraendertem Status bleibt es still.
-    """
     while True:
         time.sleep(UEBERWACHUNGS_INTERVALL_SEKUNDEN)
         try:
@@ -240,6 +265,8 @@ def netzwerk_ueberwachung(letzter_status):
 
 
 def main():
+    alte_instanz_beenden()
+
     jetzt = datetime.now()
     datum = f"{WOCHENTAGE[jetzt.weekday()]}, der {ORDINAL_TAGE[jetzt.day]} {MONATE[jetzt.month - 1]}"
     uhrzeit = f"{zahl_wort_0_99(jetzt.hour)} {zahl_wort_0_99(jetzt.minute)}"
@@ -247,15 +274,14 @@ def main():
     kind_reihenfolge = KIND_REIHENFOLGE_NUTZER if ist_kundenkonto() else KIND_REIHENFOLGE_VOLL
     erwartete_peripherie = len([k for k in kind_reihenfolge if k != "battery"])
 
+    bluetooth_debug_snapshot("01-Skriptstart (vor bluetooth_reconnect_alle)")
+
     bluetooth_reconnect_alle()
     time.sleep(3)
     geraete = warte_auf_geraete(erwartet=erwartete_peripherie)
 
-    # Nur Geraete ansagen, die gerade tatsaechlich eingerichtet/verbunden
-    # sind - kein "nicht verbunden" mehr fuer Geraete, die der Nutzer gar
-    # nicht besitzt (z.B. keine externe Maus). Beim Laptop-Akku selbst wird
-    # die Ansage zusaetzlich uebersprungen, wenn er gerade am Stromnetz
-    # haengt (laedt/voll) - der Akku-Stand ist dann nicht relevant.
+    bluetooth_debug_snapshot("02-Direkt vor der Ansage (nach Reconnect + Wartezeit)")
+
     akku_saetze = []
     for kind in kind_reihenfolge:
         werte = geraete.get(kind)
@@ -277,14 +303,6 @@ def main():
             "angeschlossenen Geräte mitteile. " + " ".join(akku_saetze)
         )
 
-    # Internetstatus und Wetter werden bewusst NICHT als eigene spd_say()-
-    # Aufrufe gesprochen, sondern in denselben Text eingehaengt wie der Rest:
-    # dialos-say.py mutet waehrend jeder Sprachausgabe die System-Lautstaerke
-    # und hebt die Mute-Sperre danach wieder auf - bei mehreren Aufrufen
-    # hintereinander war dazwischen kurz Hintergrundmusik zu hoeren (Mute
-    # wurde kurz aufgehoben, bevor der naechste Aufruf sie erneut setzte).
-    # Ein einziger zusammenhaengender spd_say()-Aufruf haelt die Ansage in
-    # einem einzigen Mute-Fenster.
     hat_internet = internet_verfuegbar()
     if hat_internet:
         text += " Es besteht eine Internetverbindung."
