@@ -96,6 +96,11 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   (tatsächlich reinsprechen, Erkennungsqualität beurteilen) - bisher nur
   Installation + Modell-Laden technisch verifiziert, noch kein echter
   Spracherkennungs-Test mit einer gesprochenen Aufnahme gelaufen.
+- [ ] Beim nächsten `eggs produce`-Lauf die neue ISO in
+  `docs/iso-builds.md` eintragen (Version, Datum, Commit-Hash, SHA256,
+  Nextcloud-Ablageort) und die Datei in die Nextcloud hochladen - die
+  Tabelle ist aktuell noch leer/nicht rückwirkend befüllbar (siehe
+  Commit-Historie vom 14.08.).
 - [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
   (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
   längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`

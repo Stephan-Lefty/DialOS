@@ -78,6 +78,10 @@ what has already been done.
   speak into it, judge recognition quality) - so far only installation +
   model loading verified technically, no real speech recognition test
   with an actual spoken recording has run yet.
+- [ ] On the next `eggs produce` run, record the new ISO in
+  `docs/iso-builds.en.md` (version, date, commit hash, SHA256, Nextcloud
+  location) and upload the file to Nextcloud - the table is currently
+  empty/can't be backfilled (see commit history from 2026-08-14).
 - [ ] The Bluetooth audio fix in `dialos-start-ansage.py`
   (single-instance lock/`alte_instanz_beenden()`) hasn't been
   conclusively confirmed over a longer period yet - check

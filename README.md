@@ -34,6 +34,7 @@ Design-Entscheidungen als Grundlage für die Umsetzung.
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
 - [Offene Punkte](docs/offene-punkte.md) – was noch zu klären/entscheiden ist
+- [ISO-Builds](docs/iso-builds.md) – Verzeichnis gebauter Images (Version, Commit, Prüfsumme, Nextcloud-Ablageort)
 
 ## Logo & Branding
 

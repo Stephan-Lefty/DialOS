@@ -1,0 +1,16 @@
+# Gebaute Live-/Installations-Images - zu groß für Git (GitHub blockt
+# ohnehin Dateien >100 MB), gehören in die Nextcloud, siehe
+# docs/iso-builds.md.
+*.iso
+
+# live-build/Docker-Pipeline-Artefakte (iso-build/, siehe CLAUDE.md -
+# nur noch Referenz/Fallback, wird aber trotzdem nicht committet, falls
+# lokal mal wieder gebaut wird).
+iso-build/**/chroot/
+iso-build/**/binary/
+iso-build/**/cache/
+iso-build/**/.build/
+
+# Python-Bytecode-Cache (z. B. durch lokale Syntax-Checks entstanden).
+__pycache__/
+*.pyc

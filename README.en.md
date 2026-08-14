@@ -35,6 +35,7 @@ implementation.
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
 - [Open questions](docs/offene-punkte.en.md) – what still needs to be decided
+- [ISO builds](docs/iso-builds.en.md) – ledger of built images (version, commit, checksum, Nextcloud location)
 
 ## Logo & branding
 
