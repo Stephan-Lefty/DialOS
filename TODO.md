@@ -9,6 +9,19 @@ entschiedene Architekturfragen) sind das hier konkrete, abhakbare
 Aufgaben. Erledigte Punkte werden mit einem Häkchen markiert, nicht
 gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 
+- [ ] **Hier weitermachen (Session-Unterbrechung 14.08.):**
+  `scripts/dialos-full-office-setup.sh` ist neu angelegt (führt
+  Schritte 2-12 + 15 aus `Debian-zu-DialOS.md` automatisiert aus, siehe
+  `scripts/README.md`) und syntaktisch geprüft (`bash -n`), aber
+  **noch nicht end-to-end auf einem echten System getestet**. Laut
+  Stephan als Nächstes geplant: T490 komplett neu aufsetzen
+  (Schritt 1 manuell, dann dieses Skript testen), danach darauf
+  aufbauend Spracherkennung/Sprachbefehle Schritt für Schritt auf
+  echter Hardware ausarbeiten und die Installationsroutine
+  entsprechend erweitern. Noch offen aus derselben Session: Verweis auf
+  das neue Skript fehlt noch in `Debian-zu-DialOS.md`/`.en.md` und im
+  README-Änderungsprotokoll (nur `scripts/README.md` ist schon
+  aktualisiert).
 - [ ] **Zurückgestellt, nicht mehr nächster Schritt** (siehe die zwei
   neuen Punkte unten): Echten Live-Boot-Test mit
   `DialOS-Live-0.5.0-clone.iso` erneut durchführen: erster Versuch am
