@@ -38,17 +38,25 @@ damit nichts aus den Diskussionen verloren geht.
 - Eigener RustDesk-Relay-Server (hbbs/hbbr) ist für später geplant, sobald
   das System stabil läuft – noch kein konkreter Zeitpunkt/Ablauf.
 - Boot-Zeit-Tastenkombination für direkten `dialosadmin`-Zugriff (statt
-  GNOME "Benutzer wechseln", siehe sicherheit-datenschutz.md, Abschnitt
+  richtigem Ab-/Anmelden, siehe sicherheit-datenschutz.md, Abschnitt
   "Automatische Anmeldung"): technisch möglich (eigener früher Boot-Dienst,
   der kurz auf einen gehaltenen Tastendruck lauscht, z. B. über rohen
   `/dev/input`-Zugriff, und je nach Ergebnis per `gdbus` das Autologin-Ziel
-  umbiegt), aber bewusst zurückgestellt – "Benutzer wechseln" funktioniert
-  bereits zuverlässig ohne zusätzliche Boot-Software. Nur aufgreifen, falls
-  sich "Benutzer wechseln" in der Praxis als zu umständlich erweist (z. B.
-  Probleme beim Fernwarten per RustDesk mit dem GDM-Wechsel-Bildschirm).
-  Risiko bei Umsetzung: sauberes Zeitfenster nötig, sonst könnte ein
-  zufälliger Tastendruck während des normalen Kundenboots ungewollt den
-  Admin-Pfad statt des normalen `nutzer`-Autologins auslösen.
+  umbiegt), aber bewusst zurückgestellt. **Korrigiert am 2026-08-14:**
+  Ursprünglich stand hier GNOME "Benutzer wechseln" als bereits
+  zuverlässige Alternative - das war falsch. Testbefund vom 2026-08-13
+  zeigt, dass "Benutzer wechseln" `nutzer`s Sitzung aktiv im Hintergrund
+  lässt und dadurch einen Bluetooth-/Audio-Konflikt zwischen zwei
+  gleichzeitig laufenden `dialos-start-ansage.py`-Instanzen auslösen kann.
+  Aktuelle Praxis ist stattdessen: `nutzer` richtig abmelden, dann als
+  `dialosadmin` anmelden - funktioniert, ist aber ein Zwischenschritt mehr
+  als eine Boot-Zeit-Tastenkombination böte. Diese Tastenkombination bleibt
+  also eine echte, noch offene Verbesserungsoption (nicht nur ein
+  "nice-to-have" wie ursprünglich vermerkt), gerade weil der direkte Weg
+  über "Benutzer wechseln" wegfällt. Risiko bei Umsetzung: sauberes
+  Zeitfenster nötig, sonst könnte ein zufälliger Tastendruck während des
+  normalen Kundenboots ungewollt den Admin-Pfad statt des normalen
+  `nutzer`-Autologins auslösen.
 
 ## ISO-Build
 - Rechtschreibprüfung (hunspell-de-de/hunspell-en-us, aspell) fehlt in

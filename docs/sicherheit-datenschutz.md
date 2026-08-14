@@ -23,17 +23,26 @@ Login-Auswahl bedienen). Trade-off: physischer Zugriff auf das Gerät
 bedeutet direkten Zugriff auf das System – das wird durch die
 Festplattenverschlüsselung mit Hardware-Schlüssel abgefedert (siehe unten).
 
-**Admin-Zugriff parallel zu `nutzer`:** Das Autologin-Konto ist immer
-`nutzer` (`AutomaticLogin=true`), das Admin-Konto `dialosadmin` bleibt
-aktiv, aber ohne Autologin (`AutomaticLogin=false`) – siehe
+**Admin-Zugriff:** Das Autologin-Konto ist immer `nutzer`
+(`AutomaticLogin=true`), das Admin-Konto `dialosadmin` bleibt aktiv, aber
+ohne Autologin (`AutomaticLogin=false`) – siehe
 `scripts/dialos-setup-nutzer.sh`. Für Eingriffe vor Ort oder per RustDesk
-(nachdem `nutzer` per Sprachbefehl "Hilfe rufen" gesagt hat) reicht das
-GNOME-Bordmittel **"Benutzer wechseln"**: darüber lässt sich `dialosadmin`
-mit Passwort in einer eigenen, parallelen Sitzung öffnen, ohne `nutzer`s
-laufende Sitzung zu unterbrechen. Setzt voraus, dass
-`org.gnome.desktop.lockdown disable-user-switching` auf `false` steht
-(Standard, auf dem T490 verifiziert) und `dialosadmin` ein gültiges,
-nicht gesperrtes Passwort hat. Kein zusätzlicher Mechanismus nötig.
+(nachdem `nutzer` per Sprachbefehl "Hilfe rufen" gesagt hat): `nutzer`
+**richtig abmelden**, danach am GDM-Bildschirm als `dialosadmin` mit
+Passwort anmelden. Setzt voraus, dass `dialosadmin` ein gültiges, nicht
+gesperrtes Passwort hat.
+
+**Wichtig, korrigiert am 2026-08-14:** GNOME **"Benutzer wechseln"**
+(statt richtigem Abmelden) bewusst **vermeiden** – lässt `nutzer`s
+Sitzung im Hintergrund aktiv. Laut Testbefund vom 2026-08-13 (siehe
+[offene-punkte.md](offene-punkte.md), Eintrag "Bluetooth-Lautsprecher/
+Sprachausgabe manchmal nicht hörbar nach Login") konkurrieren dann zwei
+gleichzeitig laufende `dialos-start-ansage.py`-Instanzen (eine pro
+Konto) um Bluetooth-Reconnect und Audio-Stummschaltung, was die
+Sprachausgabe unzuverlässig macht. Der vorhandene Ein-Instanz-Lock in
+`dialos-start-ansage.py` verhindert nur doppelte Anmeldungen
+*desselben* Kontos, nicht das kontoübergreifende Nebeneinander, das
+"Benutzer wechseln" erzeugt.
 
 ## Festplattenverschlüsselung mit USB-Schlüssel
 
