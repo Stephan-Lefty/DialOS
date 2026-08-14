@@ -411,7 +411,7 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.
 - `dialos-tts-indicator.py`: a panel icon that shows when something is
   currently being spoken (needs the AppIndicator extension from step 9).
 
-## 12. Security tools (stick encryption)
+## 12. Security tools (stick encryption + autologin gate)
 
 ```bash
 sudo mkdir -p /usr/local/sbin
@@ -437,6 +437,27 @@ often end up with `600` permissions - `chmod +x` alone then results in
 `711` (no read permission for other accounts), and the script is then
 "not found" for other accounts. Always use `chmod 755` for scripts,
 `chmod 644` for plain files like `.desktop`/`.deb`.
+
+**Autologin gate (since 2026-08-14, in addition to the encryption
+above):** a purely software-based presence check of the security
+stick, switches `nutzer`'s autologin via AccountsService/`gdbus`
+(concept + rationale: see
+[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md), section
+"Security stick as a presence token").
+
+```bash
+sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
+sudo chmod 755 /usr/local/sbin/dialos-stick-gate.sh
+sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable dialos-stick-gate.service
+```
+
+Only takes effect from the **next** reboot onward (the service only
+runs at boot, not retroactively on the currently running session).
+Test: unplug the stick, reboot - the system must land on the normal
+GDM login screen instead of autologging `nutzer`; plug the stick back
+in, reboot again - autologin must work again.
 
 ## 13. Create the customer account + finish office setup
 

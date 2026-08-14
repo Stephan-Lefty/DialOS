@@ -143,6 +143,23 @@ background) and `splash.png` (boot/login screen).
   brought them into the real repository (the Bluetooth fix and its
   documentation) - the repository now lives entirely on the external
   drive; the stale second copy had kept running unused in the meantime.
+- **New `dialos-stick-gate` mechanism:** the planned live test of
+  `dialos-install` with the security stick failed on 2026-08-14 - the
+  reason wasn't a single bug but that the whole LUKS/initramfs path is
+  structurally error-prone (the key file has to be available at exactly
+  the right moment inside the initramfs, with almost no debugging
+  options on site when something fails there). As a more robust addition
+  (not a replacement - see TODO.md) there is now a purely software-based
+  presence check: `dialos-stick-gate.service` checks on every boot via
+  `blkid` whether the security stick (label `DIALOS-KEY`) is found, and
+  switches `nutzer`'s autologin via AccountsService/`gdbus` accordingly -
+  stick present: autologin on; stick missing: autologin off, GDM shows
+  the normal login screen (practically only `dialosadmin` usable). Runs
+  entirely in the normal system environment instead of the initramfs, so
+  it avoids that path's pitfalls. **Important limitation:** this only
+  protects login access, not the data on the disk itself - that's still
+  the job of the LUKS encryption above. Details:
+  [docs/sicherheit-datenschutz.en.md](docs/sicherheit-datenschutz.en.md#security-stick-as-a-presence-token-autologin-gate).
 
 ### 0.4.0
 - Removed Evolution and GNOME Calendar from the app grid and search

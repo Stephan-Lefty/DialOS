@@ -147,6 +147,23 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   und dessen Dokumentation) - Repository liegt jetzt vollständig auf der
   externen Platte, veraltete Zweitkopie war zwischenzeitlich ungenutzt
   weitergelaufen.
+- **Neuer `dialos-stick-gate`-Mechanismus:** Der geplante Live-Test von
+  `dialos-install` mit dem Sicherheits-Stick ist am 14.08. gescheitert -
+  Grund war kein einzelner Bug, sondern dass der ganze LUKS/initramfs-Weg
+  strukturell fehleranfällig ist (Schlüsseldatei muss exakt im richtigen
+  Moment im initramfs verfügbar sein, kaum Debugging-Möglichkeiten vor
+  Ort bei einem Fehler dort). Als robustere Ergänzung (nicht Ersatz -
+  siehe TODO.md) gibt es jetzt einen rein softwarebasierten
+  Anwesenheits-Check: `dialos-stick-gate.service` prüft bei jedem Boot
+  per `blkid`, ob der Sicherheits-Stick (Label `DIALOS-KEY`) gefunden
+  wird, und schaltet darüber `nutzer`s Autologin per AccountsService/
+  `gdbus` um - Stick da: Autologin an; Stick fehlt: Autologin aus, GDM
+  zeigt den normalen Login-Screen (praktisch nur `dialosadmin` nutzbar).
+  Läuft komplett in der normalen Systemumgebung statt im initramfs,
+  daher ohne dessen Fallstricke. **Wichtige Einschränkung:** schützt nur
+  den Login-Zugriff, nicht die Daten auf der Platte selbst - das bleibt
+  weiterhin Aufgabe der LUKS-Verschlüsselung oben. Details:
+  [docs/sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md#sicherheits-stick-als-anwesenheits-token-autologin-gate).
 
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur

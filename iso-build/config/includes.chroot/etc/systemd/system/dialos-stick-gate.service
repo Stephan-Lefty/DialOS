@@ -1,0 +1,14 @@
+[Unit]
+Description=DialOS: Autologin von "nutzer" je nach Sicherheits-Stick umschalten
+DefaultDependencies=no
+After=accounts-daemon.service systemd-udevd.service local-fs.target
+Requires=accounts-daemon.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/dialos-stick-gate.sh
+RemainAfterExit=no
+
+[Install]
+WantedBy=display-manager.service

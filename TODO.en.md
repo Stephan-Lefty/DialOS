@@ -9,7 +9,8 @@ architecture questions), these are concrete, checkable tasks. Completed
 items are marked with a checkmark, not deleted - so it stays traceable
 what has already been done.
 
-- [ ] Run a real live-boot test with `DialOS-Live-0.5.0-clone.iso`
+- [ ] **Deprioritized, no longer the next step** (see the two new items
+  below): Run a real live-boot test with `DialOS-Live-0.5.0-clone.iso`
   (supersedes the old, now outdated live-boot-test item for the 11.08
   ISO): before running `dialos-install`, check via `gdbus` whether
   `dialosadmin`/`nutzer` came along with the correct autologin status
@@ -18,6 +19,22 @@ what has already been done.
   unplug the external SanDisk-Extreme drive first (otherwise it's
   selectable as the target disk!); verify the new stick partitioning
   (`DIALOS-KEY` 2 GiB + `DIALOS-DATA` ext4).
+- [ ] Test the new `dialos-stick-gate` mechanism (presence check
+  instead of/in addition to LUKS encryption, switches `nutzer`'s
+  autologin via AccountsService - see docs/sicherheit-datenschutz.en.md,
+  section "Security stick as a presence token") on real hardware:
+  unplug the stick + reboot → normal GDM login screen instead of
+  autologin; plug the stick back in + reboot → autologin works again.
+  Supersedes the old first TODO item (real live-boot test of
+  `dialos-install` with LUKS), since the original test failed on
+  2026-08-14.
+- [ ] Open fundamental decision: should LUKS encryption in
+  `dialos-install`/`dialos-rekey` (error-prone initramfs installation,
+  see commit history from 2026-08-14) remain alongside the new
+  `dialos-stick-gate` long-term, or does the gate replace it entirely?
+  Currently both mechanisms run independently side by side - without a
+  decision, the disk stays unprotected against removal/live-USB access
+  by the gate alone (only LUKS closes that gap).
 - [ ] The Calamares location page often suggests a wrong location based
   on GeoIP during live boot (e.g. Rome instead of Berlin) - no
   documented vendor override found for `modules/locale.conf` (only

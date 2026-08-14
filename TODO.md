@@ -9,9 +9,11 @@ entschiedene Architekturfragen) sind das hier konkrete, abhakbare
 Aufgaben. Erledigte Punkte werden mit einem Häkchen markiert, nicht
 gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 
-- [ ] Echten Live-Boot-Test mit `DialOS-Live-0.5.0-clone.iso` erneut
-  durchführen: erster Versuch am 2026-08-14 ist bei `dialos-install`
-  gescheitert, zwei Bugs im Skript gefunden und behoben (siehe
+- [ ] **Zurückgestellt, nicht mehr nächster Schritt** (siehe die zwei
+  neuen Punkte unten): Echten Live-Boot-Test mit
+  `DialOS-Live-0.5.0-clone.iso` erneut durchführen: erster Versuch am
+  2026-08-14 ist bei `dialos-install` gescheitert, zwei Bugs im Skript
+  gefunden und behoben (siehe
   Commit-Historie): 1) Sicherheits-Stick wurde vor der `cryptsetup
   open`-Nutzung der Schlüsseldatei ausgehängt, 2) Datei-Speichern-Dialog
   für das Schlüssel-Backup blieb unter `pkexec` lautlos aus (fehlende
@@ -30,6 +32,23 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   SanDisk-Extreme-Platte vorher abstecken (sonst als Zielfestplatte
   wählbar!); neue Stick-Partitionierung (`DIALOS-KEY` 2 GiB +
   `DIALOS-DATA` ext4) verifizieren.
+- [ ] Neuen `dialos-stick-gate`-Mechanismus (Anwesenheits-Check statt/
+  zusätzlich zur LUKS-Verschlüsselung, schaltet `nutzer`s Autologin per
+  AccountsService um - siehe docs/sicherheit-datenschutz.md, Abschnitt
+  "Sicherheits-Stick als Anwesenheits-Token") auf echter Hardware testen:
+  Stick abziehen + neu starten → normaler GDM-Login-Screen statt
+  Autologin; Stick wieder einstecken + neu starten → Autologin greift
+  wieder. Ersetzt den bisherigen ersten TODO-Punkt (echter Live-Boot-Test
+  von `dialos-install` mit LUKS), da der ursprüngliche Test am
+  14.08. gescheitert ist.
+- [ ] Grundsatzentscheidung noch offen: Soll die LUKS-Verschlüsselung aus
+  `dialos-install`/`dialos-rekey` (fehleranfällige initramfs-
+  Installation, siehe Commit-Historie vom 14.08.) langfristig neben dem
+  neuen `dialos-stick-gate` bestehen bleiben, oder ersetzt das Gate sie
+  komplett? Aktuell laufen beide Mechanismen unabhängig nebeneinander -
+  ohne Entscheidung bleibt die Festplatte durch das Gate allein
+  ungeschützt vor Ausbau/Live-USB-Zugriff (nur LUKS schließt diese
+  Lücke).
 - [ ] Calamares-Standort-Seite schlägt beim Live-Boot GeoIP-basiert oft
   einen falschen Standort vor (z. B. Rome statt Berlin) - kein
   dokumentierter Vendor-Override für `modules/locale.conf` gefunden (nur

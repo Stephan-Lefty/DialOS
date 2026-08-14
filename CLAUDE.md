@@ -63,10 +63,17 @@ mehr, sondern der etablierte Ansatz:
 Test-ISOs bereits gebaut (`DialOS-Live-0.5.0.iso`,
 `DialOS-Live-0.5.0-clone.iso`).
 
-**Aktueller Blocker (14.08.):** Der geplante echte Live-Boot-Test von
-`dialos-install` mit dem Sicherheits-Stick (bisher erster Punkt in
-TODO.md) ist gescheitert - es wird gerade an einer neuen Lösung
-gearbeitet.
+**Blocker vom 14.08. entschärft:** Der geplante echte Live-Boot-Test von
+`dialos-install` mit dem Sicherheits-Stick ist gescheitert - Grund war
+kein Einzelbug, sondern dass der ganze LUKS/initramfs-Weg strukturell
+fehleranfällig ist (siehe
+[docs/sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md),
+Abschnitt "Sicherheits-Stick als Anwesenheits-Token"). Als robustere
+Ergänzung (noch nicht als Ersatz - offene Entscheidung, siehe TODO.md)
+gibt es jetzt zusätzlich `dialos-stick-gate.service`: ein rein
+softwarebasierter Anwesenheits-Check, der `nutzer`s Autologin je nach
+gestecktem Sicherheits-Stick umschaltet, komplett ohne initramfs.
+Nächster Schritt laut TODO.md: auf echter Hardware testen.
 
 Konkrete offene Aufgaben stehen ausschließlich in [TODO.md](TODO.md),
 nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
@@ -111,10 +118,9 @@ GitHub-Integration verbunden - Claude hat dadurch direkten Lese-/
 Schreibzugriff auf dieses Repo unter `repo/` (anders als in der
 früheren Situation mit getrennter Geräte-Brücke) und kann Dateien
 direkt bearbeiten/committen, ohne den Umweg über Copy-Paste-
-Terminalbefehle für Stephan. **Weiterhin offen:** die lokale
-Git-Identität (`user.name`/`user.email`/`credential.helper`) ist in
-dieser Umgebung noch nicht gesetzt - vor einem `git push` muss das
-erst eingerichtet werden.
+Terminalbefehle für Stephan. Lokale Git-Identität
+(`user.name`/`user.email`/`credential.helper=store`) ist seit 2026-08-14
+eingerichtet und verifiziert - `git push` funktioniert direkt.
 
 `TODO.md` im Repo-Root ist für kurzfristige, konkrete Aufgaben gedacht -
 anders als `docs/offene-punkte.md`, das für grundsätzliche, noch

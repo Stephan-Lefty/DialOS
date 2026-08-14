@@ -74,6 +74,58 @@ die Vor-Ort-Einrichtung – deshalb bewusst nicht sprachgesteuert.
 - Der Stick sollte getrennt vom Laptop aufbewahrt werden (z. B. am
   Schlüsselbund), sonst bringt die Verschlüsselung wenig, falls beides
   zusammen entwendet wird.
+
+## Sicherheits-Stick als Anwesenheits-Token (Autologin-Gate)
+
+**Ergänzung seit 2026-08-14**, unabhängig von der Verschlüsselung oben.
+
+**Warum:** Der reale Live-Boot-Test von `dialos-install` mit dem
+Sicherheits-Stick ist am 14.08. gescheitert. Grund war nicht ein
+einzelner Bug, sondern dass der ganze LUKS/initramfs-Weg strukturell
+fehleranfällig ist: die Schlüsseldatei muss exakt im richtigen Moment
+im initramfs verfügbar sein (ein Bug hängte den Stick vor der
+`cryptsetup open`-Nutzung schon aus), und selbst der Installer selbst
+lief nicht rund (ein `pkexec`-Bug ließ den Datei-Speichern-Dialog für
+das Schlüssel-Backup lautlos scheitern, siehe README-Änderungsprotokoll
+0.5.0). Ein initramfs bietet kaum Fehlerausgabe/Debugging-Möglichkeiten
+für die Zielgruppe vor Ort - jeder Fehler dort bedeutet ein
+nicht bootendes Gerät ohne Hilfe von Stephan. Statt den fragilen Weg
+weiter zu flicken, gibt es jetzt zusätzlich einen viel robusteren,
+rein softwarebasierten Anwesenheits-Check, der komplett in einer schon
+laufenden, normalen Systemumgebung läuft (kein initramfs, keine
+`pkexec`/xdg-portal-Fallstricke) - unabhängig vom initramfs/LUKS-Weg
+oben:
+
+- Ein systemd-Dienst (`dialos-stick-gate.service`, läuft als oneshot vor
+  `display-manager.service`) prüft bei **jedem Boot**, ob eine Partition
+  mit Label `DIALOS-KEY` gefunden wird (`blkid -L DIALOS-KEY`, mit
+  kurzer Wiederholschleife für nachhinkende USB-Erkennung).
+- Stick da: Autologin für `nutzer` wird aktiviert
+  (`SetAutomaticLogin true` über AccountsService/`gdbus`, derselbe
+  Mechanismus wie in `scripts/dialos-setup-nutzer.sh` und
+  [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 4).
+- Stick fehlt: Autologin für `nutzer` wird deaktiviert
+  (`SetAutomaticLogin false`). GDM zeigt den normalen Login-Bildschirm -
+  darauf ist praktisch nur `dialosadmin` nutzbar, da `nutzer`s Passwort
+  ein zufälliger, niemandem bekannter String ist.
+- `dialosadmin` bleibt davon komplett unberührt: nie Autologin, immer
+  normales getipptes Passwort am GDM-Screen, wie bisher.
+
+Skript: `usr/local/sbin/dialos-stick-gate.sh`, Unit:
+`etc/systemd/system/dialos-stick-gate.service` (beide im Repo unter
+`iso-build/config/includes.chroot/`, Installation siehe
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 12).
+
+**Wichtige Einschränkung:** Das ist ein reiner **Zugriffs-Filter beim
+Login**, keine Verschlüsselung. Die Festplatte selbst bleibt durch
+dieses Gate ungeschützt - wer sie ausbaut oder das Gerät von einem
+Live-USB bootet, liest alle Daten direkt, unabhängig davon, ob der
+Stick dabei ist. Diese Lücke schließt weiterhin nur die LUKS-
+Verschlüsselung oben. Ob die LUKS-Verschlüsselung (mit ihrer
+fehleranfälligen initramfs-Installation) langfristig neben diesem Gate
+bestehen bleibt oder entfällt, ist eine offene Entscheidung (siehe
+TODO.md) - aktuell laufen beide Mechanismen unabhängig nebeneinander.
+
 ## Wiederherstellung bei Stick-Verlust
 
 Drei Wege, je nach Situation:

@@ -416,7 +416,7 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.
 - `dialos-tts-indicator.py`: Panel-Icon, das anzeigt, wenn gerade
   gesprochen wird (braucht die AppIndicator-Erweiterung aus Schritt 9).
 
-## 12. Sicherheits-Werkzeuge (Stick-Verschlüsselung)
+## 12. Sicherheits-Werkzeuge (Stick-Verschlüsselung + Autologin-Gate)
 
 ```bash
 sudo mkdir -p /usr/local/sbin
@@ -443,6 +443,27 @@ eine Geräte-Brücke/einen Editor neu geschrieben werden, landen oft mit
 andere), das Skript ist dann für andere Konten "nicht gefunden".
 Immer `chmod 755` für Skripte, `chmod 644` für reine Dateien wie
 `.desktop`/`.deb`.
+
+**Autologin-Gate (seit 2026-08-14, zusätzlich zur Verschlüsselung
+oben):** rein softwarebasierter Anwesenheits-Check des Sicherheits-
+Sticks, schaltet den Autologin von `nutzer` per AccountsService/`gdbus`
+um (Konzept + Begründung siehe
+[sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
+"Sicherheits-Stick als Anwesenheits-Token").
+
+```bash
+sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
+sudo chmod 755 /usr/local/sbin/dialos-stick-gate.sh
+sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable dialos-stick-gate.service
+```
+
+Wirkt erst ab dem **nächsten** Neustart (der Dienst läuft nur beim
+Boot, nicht rückwirkend auf die aktuell laufende Sitzung). Test: Stick
+abziehen, neu starten - System muss am normalen GDM-Login-Screen
+landen statt `nutzer` automatisch anzumelden; Stick wieder einstecken,
+erneut neu starten - Autologin muss wieder greifen.
 
 ## 13. Nutzer-Konto anlegen + Büro-Setup abschließen
 

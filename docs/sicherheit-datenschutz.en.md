@@ -70,6 +70,55 @@ deliberately not voice-controlled.
   keyring), otherwise the encryption provides little benefit if both are
   stolen together.
 
+## Security stick as a presence token (autologin gate)
+
+**Addition since 2026-08-14**, independent of the encryption above.
+
+**Why:** the real live-boot test of `dialos-install` with the security
+stick failed on 2026-08-14. The reason wasn't a single bug but that the
+whole LUKS/initramfs path is structurally error-prone: the key file has
+to be available at exactly the right moment inside the initramfs (one
+bug unmounted the stick before `cryptsetup open` even used it), and the
+installer itself didn't run smoothly either (a `pkexec` bug made the
+file-save dialog for the key backup fail silently, see README changelog
+0.5.0). An initramfs offers almost no error output/debugging options for
+the target group on site - any failure there means a device that won't
+boot, with no way to help themselves until Stephan steps in. Instead of
+continuing to patch the fragile path, there is now also a much more
+robust, purely software-based presence check that runs entirely inside
+an already-running, normal system environment (no initramfs, no
+`pkexec`/xdg-portal pitfalls) - independent of the initramfs/LUKS path
+above:
+
+- A systemd service (`dialos-stick-gate.service`, runs as a oneshot
+  before `display-manager.service`) checks on **every boot** whether a
+  partition labeled `DIALOS-KEY` is found (`blkid -L DIALOS-KEY`, with a
+  short retry loop for USB detection that lags behind).
+- Stick present: autologin for `nutzer` is enabled
+  (`SetAutomaticLogin true` via AccountsService/`gdbus`, the same
+  mechanism as in `scripts/dialos-setup-nutzer.sh` and
+  [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 4).
+- Stick missing: autologin for `nutzer` is disabled
+  (`SetAutomaticLogin false`). GDM shows the normal login screen - on it
+  practically only `dialosadmin` is usable, since `nutzer`'s password is
+  a random string nobody knows.
+- `dialosadmin` is completely unaffected: never autologin, always a
+  normal typed password at the GDM screen, as before.
+
+Script: `usr/local/sbin/dialos-stick-gate.sh`, unit:
+`etc/systemd/system/dialos-stick-gate.service` (both in the repo under
+`iso-build/config/includes.chroot/`, installation see
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 12).
+
+**Important limitation:** this is purely an **access filter at login**,
+not encryption. The disk itself remains unprotected by this gate -
+anyone who removes it or boots the device from a live USB reads all the
+data directly, regardless of whether the stick is present. Only the
+LUKS encryption above still closes that gap. Whether the LUKS encryption
+(with its error-prone initramfs installation) remains alongside this
+gate long-term or gets dropped is an open decision (see TODO.md) -
+currently both mechanisms run independently side by side.
+
 ## Recovery when a stick is lost
 
 Three paths, depending on the situation:
