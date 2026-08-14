@@ -46,12 +46,12 @@ what has already been done.
   (single-instance lock/`alte_instanz_beenden()`) hasn't been
   conclusively confirmed over a longer period yet - check
   `/tmp/dialos-bluetooth-debug.log` if the problem recurs.
-- [ ] Clean up the stale local second repo copy under `~/DialOS-repo`
-  (delete it, or replace it with the symlink that was actually intended,
-  `~/DialOS → .../SanDisk-Extreme/DialOS/repo`, which is currently
-  missing). Two independent copies side by side are error-prone - that's
-  exactly how two never-pushed commits from 2026-08-13 were nearly lost
-  today.
+- [ ] Delete the stale local second repo copy under `~/DialOS-repo`, or
+  deliberately keep it as a backup (decision still open) - the
+  `~/DialOS` symlink is now correctly set up (see "Done" below), but
+  the second copy itself is still sitting there. Two independent copies
+  side by side are error-prone - that's exactly how two never-pushed
+  commits from 2026-08-13 were nearly lost on 2026-08-14.
 - [ ] Clean up leftover `/home/eggs/*.iso` files from the last builds
   (owned by `root`; the `eggs produce` NOPASSWD rule only covers
   `eggs produce` itself, not `rm` - needs Stephan's manual `sudo rm`).
@@ -64,3 +64,6 @@ what has already been done.
 - [x] Build a new ISO with all the fixes collected so far (boot screen,
   avatar script, Calamares branding, Piper TTS) - done 2026-08-10/11
   (the 11.08 ISO).
+- [x] Set up the `~/DialOS → .../SanDisk-Extreme/DialOS/repo` symlink
+  again - done 2026-08-14 via `scripts/dialos-claude-setup.sh`, which
+  now also restores the `eggs produce` sudoers rule on every reinstall.

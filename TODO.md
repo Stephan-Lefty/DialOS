@@ -49,12 +49,12 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
   längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`
   bei einem erneuten Auftreten des Problems prüfen.
-- [ ] Veraltete lokale Repo-Zweitkopie unter `~/DialOS-repo` aufräumen
-  (löschen oder durch den eigentlich vorgesehenen Symlink
-  `~/DialOS → .../SanDisk-Extreme/DialOS/repo` ersetzen, der aktuell
-  fehlt). Zwei unabhängige Kopien nebeneinander sind fehleranfällig -
-  genau dadurch sind heute zwei nie gepushte Commits vom 13.08. fast
-  verloren gegangen.
+- [ ] Veraltete lokale Repo-Zweitkopie unter `~/DialOS-repo` löschen oder
+  bewusst als Backup behalten (Entscheidung noch offen) - der Symlink
+  `~/DialOS` ist mittlerweile korrekt gesetzt (siehe "Erledigt" unten),
+  aber die Zweitkopie selbst liegt noch da. Zwei unabhängige Kopien
+  nebeneinander sind fehleranfällig - genau dadurch sind zwei nie
+  gepushte Commits vom 13.08. am 14.08. fast verloren gegangen.
 - [ ] `/home/eggs/*.iso`-Restdateien der letzten Builds aufräumen
   (gehören `root`, die `eggs produce`-NOPASSWD-Regel deckt nur
   `eggs produce` selbst ab, nicht `rm` - braucht Stephans manuelles
@@ -69,3 +69,7 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 - [x] Neuen ISO-Build mit allen gesammelten Fixes (Bootscreen,
   Avatar-Skript, Calamares-Branding, Piper-TTS) erstellen - erledigt
   2026-08-10/11 (ISO vom 11.08.).
+- [x] Symlink `~/DialOS → .../SanDisk-Extreme/DialOS/repo` neu setzen -
+  erledigt 2026-08-14 über `scripts/dialos-claude-setup.sh`, das jetzt
+  bei jedem Reinstall auch die `eggs produce`-Sudoers-Regel mit
+  wiederherstellt.
