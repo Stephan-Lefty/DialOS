@@ -25,6 +25,17 @@ Timing-Bug ("user is locked" direkt nach dem Passwort setzen).
 Aufruf: `sudo ./dialos-setup-nutzer.sh [admin-benutzername]`
 (Standard: `$SUDO_USER`)
 
+## dialos-claude-setup.sh
+
+Stellt nach einem Reinstall des T490 die Arbeitsumgebung für Claude
+Code wieder her: legt die eng begrenzte Sudoers-Regel für
+`eggs produce` (ohne Passwortabfrage) neu an und setzt den Symlink
+`~/DialOS` auf das Repo der externen Platte neu. Deckt bewusst NICHT
+die Claude-Anmeldung selbst ab (Login/Zugangsdaten) - dafür einfach
+`claude` starten und neu einloggen.
+
+Aufruf: `sudo ./dialos-claude-setup.sh`
+
 ## dialos-buero-setup-abschliessen.sh
 
 Sammel-Skript für den letzten Schritt nach einer frischen Installation:
