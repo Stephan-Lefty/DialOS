@@ -492,10 +492,16 @@ Sobald alle vorigen Schritte durchgeführt sind, System einmal neu
 starten und verifizieren (Autologin, Splash, Ton, Orca, Piper,
 Programme). Dann:
 
+**Wichtig: `--path` auf die externe Platte zeigen lassen**, statt das
+Standard-Arbeitsverzeichnis `/home/eggs` (intern) zu nutzen - so landet
+das mehrere GB große Zwischenmaterial gar nicht erst auf der internen
+Platte (und die fertige ISO muss nicht mehr manuell rüberkopiert
+werden):
+
 ```bash
-sudo eggs produce            # generisches Image, Live-Nutzer "live"
+sudo eggs produce --path /media/dialosadmin/SanDisk-Extreme/DialOS/eggs-workdir
 # oder, um dialosadmin/nutzer inkl. Home-Verzeichnissen zu übernehmen:
-sudo eggs produce --clone
+sudo eggs produce --path /media/dialosadmin/SanDisk-Extreme/DialOS/eggs-workdir --clone
 ```
 
 `--clone` ist Pflicht, wenn die gebaute ISO später mit `dialos-install`
@@ -505,9 +511,10 @@ im Live-System tatsächlich läuft - ohne `--clone` gäbe es dort kein
 `--clone` eignet sich die ISO für den klassischen Weg: Live-Boot →
 Calamares-Installation → Konten manuell per Schritt 13 einrichten.
 
-Ausgabe liegt standardmäßig unter `/home/eggs/<generierter-name>.iso` -
-zur besseren Nachvollziehbarkeit passend umbenennen, z. B.
-`DialOS-Live-0.5.0.iso` / `DialOS-Live-0.5.0-clone.iso`.
+Die fertige ISO liegt danach direkt unter
+`.../DialOS/eggs-workdir/<generierter-name>.iso` - zur besseren
+Nachvollziehbarkeit passend umbenennen, z. B. nach
+`DialOS-ISOs/DialOS-Live-0.5.0.iso`.
 
 ## Praxishinweis: externe Platte
 

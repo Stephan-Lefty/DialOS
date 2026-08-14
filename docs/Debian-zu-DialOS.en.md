@@ -487,10 +487,16 @@ microphone as a (not yet implemented) fallback. Details:
 Once all the previous steps are done, reboot the system once and
 verify everything (autologin, splash, sound, Orca, Piper, apps). Then:
 
+**Important: point `--path` at the external drive** instead of using the
+default working directory `/home/eggs` (internal) - this way the
+several-GB intermediate build material never touches the internal disk
+at all (and the finished ISO doesn't need to be manually copied over
+afterward):
+
 ```bash
-sudo eggs produce            # generic image, live user "live"
+sudo eggs produce --path /media/dialosadmin/SanDisk-Extreme/DialOS/eggs-workdir
 # or, to carry over dialosadmin/nutzer including home directories:
-sudo eggs produce --clone
+sudo eggs produce --path /media/dialosadmin/SanDisk-Extreme/DialOS/eggs-workdir --clone
 ```
 
 `--clone` is required if the built ISO is later going to be tested with
@@ -500,9 +506,9 @@ live system when installing - without `--clone` there would be no
 `--clone`, the ISO is suited to the classic path: live boot →
 Calamares installation → set up accounts manually via step 13.
 
-Output lands under `/home/eggs/<generated-name>.iso` by default -
-rename it appropriately for clarity, e.g.
-`DialOS-Live-0.5.0.iso` / `DialOS-Live-0.5.0-clone.iso`.
+The finished ISO then lands directly under
+`.../DialOS/eggs-workdir/<generated-name>.iso` - rename it
+appropriately for clarity, e.g. to `DialOS-ISOs/DialOS-Live-0.5.0.iso`.
 
 ## Practical note: external drive
 
