@@ -316,10 +316,20 @@ Config starten: `pkill -f speech-dispatcher`.
 - **AppIndicator-Support** (für die Sprachausgabe-Aktiv-Anzeige,
   Schritt 11): Paket `gnome-shell-extension-appindicator`
   (UUID `ubuntu-appindicators@ubuntu.com`) sowie
-  `gir1.2-ayatanaappindicator3-0.1` installieren und die Erweiterung in
-  den GNOME-Einstellungen/der Extension-App aktivieren. **Noch nicht in
-  der Paketliste verankert** (siehe TODO.md) - bis dahin manuell
-  nachziehen.
+  `gir1.2-ayatanaappindicator3-0.1` - inzwischen Teil der Paketliste
+  (Schritt 2), Aktivierung steckt in `01-dialos-defaults` (Schritt 3).
+- **Desktop Icons NG (DING)** (`gnome-shell-extension-desktop-icons-ng`,
+  UUID `ding@rastersoft.com`): GNOME zeigt seit Jahren von Haus aus
+  keine Icons mehr auf der Arbeitsfläche - ohne diese Erweiterung wären
+  die Skripte aus Schritt 13 zwar im `~/Desktop/`-Ordner, aber nicht
+  sichtbar. Ebenfalls Teil der Paketliste, Aktivierung + die drei
+  Einstellungen `show-home`/`show-trash`/`show-volumes` auf `false`
+  (nur die tatsächlich abgelegten Dateien sollen sichtbar sein, keine
+  Papierkorb-/Persönlicher-Ordner-/Laufwerks-Icons) stecken in
+  `01-dialos-defaults` (Schritt 3). **Wichtige Falle:** Eine schon
+  laufende GNOME-Shell-Sitzung erkennt neu installierte Erweiterungen
+  unter Wayland erst nach einem echten Ab-/Anmelden (kein Live-Neuladen
+  wie früher unter X11) - nach der Installation einmal neu anmelden.
 
 ## 10. Standardprogramme setzen
 

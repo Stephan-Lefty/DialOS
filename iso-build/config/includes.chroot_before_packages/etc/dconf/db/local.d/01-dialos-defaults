@@ -5,4 +5,8 @@ accent-color='blue'
 color-scheme='default'
 show-battery-percentage=true
 [org/gnome/shell]
-enabled-extensions=['bluetooth-battery-monitor@v8v88v8v88.com']
+enabled-extensions=['bluetooth-battery-monitor@v8v88v8v88.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com']
+[org/gnome/shell/extensions/ding]
+show-home=false
+show-trash=false
+show-volumes=false

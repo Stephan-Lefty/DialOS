@@ -309,11 +309,22 @@ become user-adjustable later). After config changes, kill any running
   via `/etc/skel/` for new accounts); activation is already covered by
   `01-dialos-defaults` (step 3).
 - **AppIndicator support** (for the voice-output-active indicator, step
-  11): install the package `gnome-shell-extension-appindicator` (UUID
+  11): package `gnome-shell-extension-appindicator` (UUID
   `ubuntu-appindicators@ubuntu.com`) plus
-  `gir1.2-ayatanaappindicator3-0.1`, and enable the extension in GNOME
-  Settings/the Extensions app. **Not yet anchored in the package list**
-  (see TODO.md) - add it manually until then.
+  `gir1.2-ayatanaappindicator3-0.1` - now part of the package list
+  (step 2), activation is covered by `01-dialos-defaults` (step 3).
+- **Desktop Icons NG (DING)** (`gnome-shell-extension-desktop-icons-ng`,
+  UUID `ding@rastersoft.com`): GNOME hasn't shown desktop icons out of
+  the box for years - without this extension, the scripts from step 13
+  would sit in the `~/Desktop/` folder but not be visible. Also part of
+  the package list; activation plus the three settings
+  `show-home`/`show-trash`/`show-volumes` set to `false` (only the
+  actually placed files should be visible, no trash/home/volume icons)
+  are covered by `01-dialos-defaults` (step 3). **Important gotcha:** an
+  already-running GNOME Shell session only detects newly installed
+  extensions after a real logout/login under Wayland (no live reload
+  like the old X11 Alt+F2 trick) - log out and back in once after
+  installing.
 
 ## 10. Set default applications
 

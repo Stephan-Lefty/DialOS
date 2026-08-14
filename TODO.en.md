@@ -30,12 +30,6 @@ what has already been done.
   Piper config, `0.85` chosen as Stephan's personal preference) - needs
   a real setting (e.g. GNOME accessibility settings or a dedicated voice
   command), not just a config value.
-- [ ] The AppIndicator packages for `dialos-tts-indicator.py`
-  (`gnome-shell-extension-appindicator`, UUID
-  `ubuntu-appindicators@ubuntu.com`, plus
-  `gir1.2-ayatanaappindicator3-0.1`) are installed/enabled live on the
-  T490 but not yet captured in the package list/project docs - would
-  otherwise have to be re-installed by hand on every new test device.
 - [ ] Vosk (0.3.45) + hassil (3.11.0) + German Vosk models (large/small)
   are so far only installed live on the T490 (pip, manually downloaded
   models under `/usr/local/share/`), not yet captured as a repeatable
@@ -67,3 +61,10 @@ what has already been done.
 - [x] Set up the `~/DialOS → .../SanDisk-Extreme/DialOS/repo` symlink
   again - done 2026-08-14 via `scripts/dialos-claude-setup.sh`, which
   now also restores the `eggs produce` sudoers rule on every reinstall.
+- [x] Anchor the AppIndicator packages for `dialos-tts-indicator.py`
+  (`gnome-shell-extension-appindicator`, `gir1.2-ayatanaappindicator3-0.1`)
+  in the package list - done 2026-08-14, also added
+  `gnome-shell-extension-desktop-icons-ng` (DING) while at it: GNOME
+  hasn't shown desktop icons out of the box for years, without this
+  extension the office-setup scripts on `dialosadmin`'s desktop (see
+  below) would have stayed invisible.

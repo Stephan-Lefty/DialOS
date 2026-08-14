@@ -31,13 +31,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   gewählt) - braucht eine echte Einstellmöglichkeit (z. B. GNOME-
   Barrierefreiheitseinstellungen oder eigener Sprachbefehl), nicht nur
   einen Config-Wert.
-- [ ] AppIndicator-Pakete für `dialos-tts-indicator.py`
-  (`gnome-shell-extension-appindicator`, UUID
-  `ubuntu-appindicators@ubuntu.com`, sowie
-  `gir1.2-ayatanaappindicator3-0.1`) sind live auf dem T490
-  installiert/aktiviert, aber noch nicht in der Paketliste/Projekt-Doku
-  festgehalten - müssen sonst bei jedem neuen Testgerät erneut von Hand
-  nachgezogen werden.
 - [ ] Vosk (0.3.45) + hassil (3.11.0) + deutsche Vosk-Modelle (groß/klein)
   sind bisher nur live auf dem T490 installiert (pip, manuell
   heruntergeladene Modelle unter `/usr/local/share/`), noch nicht als
@@ -73,3 +66,10 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   erledigt 2026-08-14 über `scripts/dialos-claude-setup.sh`, das jetzt
   bei jedem Reinstall auch die `eggs produce`-Sudoers-Regel mit
   wiederherstellt.
+- [x] AppIndicator-Pakete für `dialos-tts-indicator.py`
+  (`gnome-shell-extension-appindicator`, `gir1.2-ayatanaappindicator3-0.1`)
+  in der Paketliste verankert - erledigt 2026-08-14, dabei zusätzlich
+  `gnome-shell-extension-desktop-icons-ng` (DING) ergänzt: GNOME zeigt
+  seit Jahren keine Desktop-Icons mehr von Haus aus, ohne diese
+  Erweiterung wären die Büro-Setup-Skripte auf `dialosadmin`s
+  Arbeitsfläche (siehe unten) unsichtbar geblieben.
