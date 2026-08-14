@@ -73,13 +73,26 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   gewählt) - braucht eine echte Einstellmöglichkeit (z. B. GNOME-
   Barrierefreiheitseinstellungen oder eigener Sprachbefehl), nicht nur
   einen Config-Wert.
-- [ ] Vosk (0.3.45) + hassil (3.11.0) + deutsche Vosk-Modelle (groß/klein)
-  sind bisher nur live auf dem T490 installiert (pip, manuell
-  heruntergeladene Modelle unter `/usr/local/share/`), noch nicht als
-  wiederholbares Rezept/Doku festgehalten - gleiche Falle wie früher bei
-  Piper, bevor es systemweit verankert wurde. `dialos-vosk-test.py` liegt
-  ebenfalls noch nicht im Repo (nur unter `/usr/local/bin/` auf dem
-  Testgerät).
+- [x] Vosk (0.3.45) + hassil (3.11.0) + deutsche Vosk-Modelle (groß/klein)
+  als wiederholbares Rezept dokumentiert - erledigt 2026-08-14 (siehe
+  docs/Debian-zu-DialOS.md, Schritt 15). Dabei bestätigt: Die
+  ursprüngliche Live-Installation war zwischenzeitlich tatsächlich
+  wieder verschwunden (`import vosk` schlug beim Nachprüfen fehl) - ein
+  zwischenzeitlicher Reinstall des T490 hatte sie gelöscht, genau die
+  hier befürchtete Falle. `dialos-vosk-test.py` jetzt im Repo unter
+  `iso-build/config/includes.chroot/usr/local/bin/`. Außerdem gefunden:
+  Die Modell-Ordner auf dem T490 (`/usr/local/share/vosk-model-de-big`
+  und `-small`) enthalten wegen eines Entpack-Fehlers beim ursprünglichen
+  Testlauf doppelt verschachtelte Kopien der Modelldateien (unnötiger
+  Festplattenplatz, gemessen ca. 6,3 GB statt ~3,2 GB beim großen
+  Modell) - die
+  neue Doku vermeidet den Fehler, die vorhandenen doppelten Daten auf
+  dem T490 selbst sind aber noch nicht aufgeräumt.
+- [ ] Nach der `pip3 install --break-system-packages`-Installation auf
+  dem T490 noch echten End-to-End-Test von `dialos-vosk-test.py`
+  durchführen (tatsächlich reinsprechen, Erkennungsqualität beurteilen)
+  - bisher nur die Installation selbst vorbereitet/dokumentiert, noch
+  kein echter Spracherkennungs-Test mit dieser Installation gelaufen.
 - [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
   (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
   längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`

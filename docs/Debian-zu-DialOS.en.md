@@ -549,31 +549,75 @@ sudo cp -r "iso-build/config/includes.chroot/var/lib/bluetooth/." /var/lib/bluet
 Saves re-pairing the mouse/keyboard/speaker after a reinstall. On a
 new/different device, pair normally instead.
 
-## 15. Speech recognition (Vosk + hassil) - status: installed live only
+## 15. Speech recognition (Vosk + hassil)
 
-**Note: not yet anchored as a repeatable recipe in the repo** (see
-TODO.md) - here are the steps as they were carried out live on the
-T490, for reference/reproduction:
+**Anchored as a repeatable recipe since 2026-08-14** (replaces the
+previous TODO.md item "installed live only" - the original test run
+actually got lost again during an interim reinstall of the T490,
+exactly the trap TODO.md had warned about, see README changelog 0.5.0).
+
+**System-wide installation** (not `--user`) - so `nutzer` can access it
+later too, not just whichever account installed the packages. Debian 13
+blocks `pip install` into system Python by default (PEP 668,
+"externally-managed-environment") - `--break-system-packages` is
+Debian's officially intended way around that, not a hack. Versions
+pinned to match the original test run:
 
 ```bash
-pip install --user vosk hassil
-sudo mkdir -p /usr/local/share/vosk-model-de-big /usr/local/share/vosk-model-de-small
-curl -L -o /tmp/vosk-de-big.zip https://alphacephei.com/vosk/models/vosk-model-de-0.21.zip
-curl -L -o /tmp/vosk-de-small.zip https://alphacephei.com/vosk/models/vosk-model-small-de-0.15.zip
-sudo unzip /tmp/vosk-de-big.zip -d /usr/local/share/vosk-model-de-big
-sudo unzip /tmp/vosk-de-small.zip -d /usr/local/share/vosk-model-de-small
+sudo pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0
 ```
+
+German Vosk models (large for accuracy, small for speed - see
+`dialos-vosk-test.py`):
+
+```bash
+cd /tmp
+curl -L -o vosk-de-big.zip https://alphacephei.com/vosk/models/vosk-model-de-0.21.zip
+curl -L -o vosk-de-small.zip https://alphacephei.com/vosk/models/vosk-model-small-de-0.15.zip
+unzip vosk-de-big.zip
+unzip vosk-de-small.zip
+sudo mv vosk-model-de-0.21 /usr/local/share/vosk-model-de-big
+sudo mv vosk-model-small-de-0.15 /usr/local/share/vosk-model-de-small
+```
+
+**Unzip pitfall:** the ZIPs already contain a named folder of their own
+(`vosk-model-de-0.21/` resp. `vosk-model-small-de-0.15/`) - using
+`unzip -d <target>` therefore creates a doubly-nested structure
+(`<target>/vosk-model-de-0.21/...` instead of directly
+`<target>/...`), under which `vosk.Model()` can't find the files.
+Instead, unzip without `-d` into the current directory here and then
+move the already-correctly-named folder to the target location (`mv`)
+- that way `am/`, `conf/`, `graph/`, `ivector/` etc. end up directly in
+`/usr/local/share/vosk-model-de-big` resp. `-small`, as
+`dialos-vosk-test.py`
+(`MODELL_PFAD_STANDARD = "/usr/local/share/vosk-model-de-small"`)
+expects. This exact double-nesting is what happened during the
+original test run on the T490 (done via `unzip ... -d <target>`) - it
+only worked anyway by accident, because `unzip` also copies the files
+flat into the target directory on a name collision; not clean (wastes
+disk space, see TODO.md).
+
+Install the test script:
+
+```bash
+sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-vosk-test.py /usr/local/bin/
+sudo chmod 755 /usr/local/bin/dialos-vosk-test.py
+```
+
+Usage: `dialos-vosk-test.py [model path] [recording seconds]
+[--bluetooth-erlauben]` - interactive (waits for [Enter], then records
+real microphone audio via `parec`, recognizes it with Vosk, prints the
+result in the terminal). Can't be automated - needs an actual person
+speaking into the microphone.
 
 Decision: **hassil instead of Rhasspy** for intent recognition (Rhasspy
 was archived by its creator, no longer maintained) - details and
 reasoning in [sprachsteuerung.en.md](sprachsteuerung.en.md).
 
-The technical test script `dialos-vosk-test.py` so far only lives under
-`/usr/local/bin/` on the test device, not yet in the repo. Core result
-of the microphone comparison test: a Bluetooth headset (e.g. AIRHUG) is
-clearly superior to the built-in laptop microphone - the target design
-is a Bluetooth microphone as the primary path, with the built-in
-microphone as a (not yet implemented) fallback. Details:
+Core result of the microphone comparison test: a Bluetooth headset
+(e.g. AIRHUG) is clearly superior to the built-in laptop microphone -
+the target design is a Bluetooth microphone as the primary path, with
+the built-in microphone as a (not yet implemented) fallback. Details:
 [offene-punkte.en.md](offene-punkte.en.md), section "Voice control".
 
 ## 16. Build the ISO (Penguins' Eggs)

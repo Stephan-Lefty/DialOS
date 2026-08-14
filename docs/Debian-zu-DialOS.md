@@ -555,30 +555,76 @@ sudo cp -r "iso-build/config/includes.chroot/var/lib/bluetooth/." /var/lib/bluet
 Erspart erneutes Koppeln von Maus/Tastatur/Lautsprecher nach einer
 Neuinstallation. Auf einem neuen/anderen Gerät stattdessen normal koppeln.
 
-## 15. Spracherkennung (Vosk + hassil) - Status: nur live installiert
+## 15. Spracherkennung (Vosk + hassil)
 
-**Achtung, noch nicht als wiederholbares Rezept im Repo verankert**
-(siehe TODO.md) - hier die Schritte, wie sie live auf dem T490
-durchgeführt wurden, zum Nachvollziehen/Reproduzieren:
+**Seit 2026-08-14 als wiederholbares Rezept verankert** (löst den
+bisherigen TODO.md-Punkt "nur live installiert" ab - der ursprüngliche
+Testlauf ging bei einem zwischenzeitlichen Reinstall des T490 sogar
+tatsächlich wieder verloren, genau die Falle, vor der TODO.md gewarnt
+hatte, siehe README-Änderungsprotokoll 0.5.0).
+
+**System-weite Installation** (nicht `--user`) - damit später auch
+`nutzer` darauf zugreifen kann, nicht nur das Konto, das die Pakete
+installiert hat. Debian 13 blockiert `pip install` ins System-Python
+ohne Weiteres (PEP 668, "externally-managed-environment") -
+`--break-system-packages` ist Debians offiziell vorgesehener Weg dafür,
+kein Hack. Versionen wie beim ursprünglichen Testlauf gepinnt:
 
 ```bash
-pip install --user vosk hassil
-sudo mkdir -p /usr/local/share/vosk-model-de-big /usr/local/share/vosk-model-de-small
-curl -L -o /tmp/vosk-de-big.zip https://alphacephei.com/vosk/models/vosk-model-de-0.21.zip
-curl -L -o /tmp/vosk-de-small.zip https://alphacephei.com/vosk/models/vosk-model-small-de-0.15.zip
-sudo unzip /tmp/vosk-de-big.zip -d /usr/local/share/vosk-model-de-big
-sudo unzip /tmp/vosk-de-small.zip -d /usr/local/share/vosk-model-de-small
+sudo pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0
 ```
+
+Deutsche Vosk-Modelle (groß für Genauigkeit, klein für Geschwindigkeit -
+siehe `dialos-vosk-test.py`):
+
+```bash
+cd /tmp
+curl -L -o vosk-de-big.zip https://alphacephei.com/vosk/models/vosk-model-de-0.21.zip
+curl -L -o vosk-de-small.zip https://alphacephei.com/vosk/models/vosk-model-small-de-0.15.zip
+unzip vosk-de-big.zip
+unzip vosk-de-small.zip
+sudo mv vosk-model-de-0.21 /usr/local/share/vosk-model-de-big
+sudo mv vosk-model-small-de-0.15 /usr/local/share/vosk-model-de-small
+```
+
+**Entpack-Falle:** Die ZIPs enthalten selbst schon einen benannten
+Ordner (`vosk-model-de-0.21/` bzw. `vosk-model-small-de-0.15/`) - mit
+`unzip -d <Zielordner>` entsteht dadurch eine doppelt verschachtelte
+Struktur (`<Zielordner>/vosk-model-de-0.21/...` statt direkt
+`<Zielordner>/...`), unter der `vosk.Model()` die Dateien nicht findet.
+Deshalb hier stattdessen ohne `-d` ins aktuelle Verzeichnis entpacken
+und danach den bereits richtig benannten Ordner an den Zielort
+verschieben (`mv`) - so landen `am/`, `conf/`, `graph/`, `ivector/` etc.
+direkt in `/usr/local/share/vosk-model-de-big`
+bzw. `-small`, wie es `dialos-vosk-test.py`
+(`MODELL_PFAD_STANDARD = "/usr/local/share/vosk-model-de-small"`)
+erwartet. Genau diese doppelte Verschachtelung ist beim ursprünglichen
+Testlauf auf dem T490 passiert (dort per `unzip ... -d <Zielordner>`) -
+funktioniert nur zufällig trotzdem, weil `unzip` bei einer
+Namenskollision die Dateien zusätzlich auch flach ins Zielverzeichnis
+kopiert; sauber ist das nicht (doppelter Festplattenplatz, siehe
+TODO.md).
+
+Testskript installieren:
+
+```bash
+sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-vosk-test.py /usr/local/bin/
+sudo chmod 755 /usr/local/bin/dialos-vosk-test.py
+```
+
+Aufruf: `dialos-vosk-test.py [Modellpfad] [Aufnahmesekunden]
+[--bluetooth-erlauben]` - interaktiv (wartet auf [Enter], nimmt danach
+per `parec` echtes Mikrofon-Audio auf, erkennt mit Vosk, zeigt das
+Ergebnis im Terminal). Kein automatisierter Test möglich, braucht eine
+Person, die tatsächlich hineinspricht.
 
 Entscheidung **hassil statt Rhasspy** für die Intent-Erkennung
 (Rhasspy vom Ersteller archiviert, nicht mehr gepflegt) - Details und
 Begründung in [sprachsteuerung.md](sprachsteuerung.md).
 
-Technisches Testskript `dialos-vosk-test.py` liegt bisher nur unter
-`/usr/local/bin/` auf dem Testgerät, noch nicht im Repo. Kernergebnis
-des Mikrofon-Vergleichstests: ein Bluetooth-Headset (z. B. AIRHUG) ist
-dem eingebauten Laptop-Mikrofon klar überlegen - Zielbild ist
-Bluetooth-Mikrofon als primärer Weg, eingebautes Mikrofon als (noch
+Kernergebnis des Mikrofon-Vergleichstests: ein Bluetooth-Headset (z. B.
+AIRHUG) ist dem eingebauten Laptop-Mikrofon klar überlegen - Zielbild
+ist Bluetooth-Mikrofon als primärer Weg, eingebautes Mikrofon als (noch
 nicht implementierter) Fallback. Details:
 [offene-punkte.md](offene-punkte.md), Abschnitt "Sprachsteuerung".
 

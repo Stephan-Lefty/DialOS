@@ -56,12 +56,25 @@ what has already been done.
   Piper config, `0.85` chosen as Stephan's personal preference) - needs
   a real setting (e.g. GNOME accessibility settings or a dedicated voice
   command), not just a config value.
-- [ ] Vosk (0.3.45) + hassil (3.11.0) + German Vosk models (large/small)
-  are so far only installed live on the T490 (pip, manually downloaded
-  models under `/usr/local/share/`), not yet captured as a repeatable
-  recipe/doc - the same trap as with Piper before it was anchored
-  system-wide. `dialos-vosk-test.py` is also not yet in the repo (only
-  under `/usr/local/bin/` on the test device).
+- [x] Vosk (0.3.45) + hassil (3.11.0) + German Vosk models (large/small)
+  documented as a repeatable recipe - done 2026-08-14 (see
+  docs/Debian-zu-DialOS.en.md, step 15). Confirmed along the way: the
+  original live installation had actually disappeared again
+  (`import vosk` failed on re-check) - an interim reinstall of the T490
+  had wiped it, exactly the trap this item warned about.
+  `dialos-vosk-test.py` is now in the repo under
+  `iso-build/config/includes.chroot/usr/local/bin/`. Also found: the
+  model folders on the T490 (`/usr/local/share/vosk-model-de-big` and
+  `-small`) contain doubly-nested duplicate copies of the model files
+  due to an unzip mistake during the original test run (wastes disk
+  space, measured ~6.3 GB instead of ~3.2 GB for the large model) - the
+  new docs avoid the mistake, but the existing duplicate data on the
+  T490 itself hasn't been cleaned up yet.
+- [ ] After the `pip3 install --break-system-packages` install on the
+  T490, still run a real end-to-end test of `dialos-vosk-test.py`
+  (actually speak into it, judge recognition quality) - so far only the
+  installation itself has been prepared/documented, no real speech
+  recognition test has run against it yet.
 - [ ] The Bluetooth audio fix in `dialos-start-ansage.py`
   (single-instance lock/`alte_instanz_beenden()`) hasn't been
   conclusively confirmed over a longer period yet - check

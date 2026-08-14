@@ -189,6 +189,25 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   noch aus. Details:
   [docs/sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md),
   Abschnitt "Verschlüsselung von nutzers Daten + Sicherheits-Stick".
+- **Vosk/hassil-Spracherkennung als wiederholbares Rezept dokumentiert:**
+  Bisher nur manuell live auf dem T490 installiert (TODO.md) - beim
+  Nachprüfen bestätigt sich, dass diese Installation zwischenzeitlich
+  tatsächlich verloren gegangen war (`import vosk` schlug fehl), durch
+  einen Reinstall des Geräts. `docs/Debian-zu-DialOS.md` (Schritt 15)
+  enthält jetzt das vollständige Rezept: System-weite Installation via
+  `pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0`
+  (Debian 13 blockiert `pip install` ins System-Python sonst per PEP
+  668), Download + korrektes Entpacken der deutschen Modelle (groß +
+  klein). Dabei einen Entpack-Fehler im ursprünglichen Testlauf gefunden
+  und in der neuen Doku vermieden: Die Modell-ZIPs enthalten selbst
+  schon einen benannten Ordner - `unzip -d <Zielordner>` erzeugt dadurch
+  eine doppelt verschachtelte Struktur, unter der `vosk.Model()` nichts
+  findet (funktionierte auf dem T490 nur zufällig, weil `unzip` bei
+  Namenskollision zusätzlich flach kopiert - kostet aber unnötig
+  Festplattenplatz, gemessen ca. 6,3 GB statt ~3,2 GB beim großen
+  Modell). `dialos-vosk-test.py` (interaktives technisches Testskript)
+  jetzt ebenfalls im Repo. Ein echter Erkennungstest (tatsächlich
+  hineinsprechen) steht laut TODO.md noch aus.
 
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur
