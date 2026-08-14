@@ -32,23 +32,34 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   SanDisk-Extreme-Platte vorher abstecken (sonst als Zielfestplatte
   wählbar!); neue Stick-Partitionierung (`DIALOS-KEY` 2 GiB +
   `DIALOS-DATA` ext4) verifizieren.
-- [ ] Neuen `dialos-stick-gate`-Mechanismus (Anwesenheits-Check statt/
-  zusätzlich zur LUKS-Verschlüsselung, schaltet `nutzer`s Autologin per
-  AccountsService um - siehe docs/sicherheit-datenschutz.md, Abschnitt
-  "Sicherheits-Stick als Anwesenheits-Token") auf echter Hardware testen:
-  Stick abziehen + neu starten → normaler GDM-Login-Screen statt
-  Autologin; Stick wieder einstecken + neu starten → Autologin greift
-  wieder. Ersetzt den bisherigen ersten TODO-Punkt (echter Live-Boot-Test
-  von `dialos-install` mit LUKS), da der ursprüngliche Test am
-  14.08. gescheitert ist.
-- [ ] Grundsatzentscheidung noch offen: Soll die LUKS-Verschlüsselung aus
-  `dialos-install`/`dialos-rekey` (fehleranfällige initramfs-
-  Installation, siehe Commit-Historie vom 14.08.) langfristig neben dem
-  neuen `dialos-stick-gate` bestehen bleiben, oder ersetzt das Gate sie
-  komplett? Aktuell laufen beide Mechanismen unabhängig nebeneinander -
-  ohne Entscheidung bleibt die Festplatte durch das Gate allein
-  ungeschützt vor Ausbau/Live-USB-Zugriff (nur LUKS schließt diese
-  Lücke).
+- [ ] **Neuer nächster Schritt:** komplette `dialos-install`-Installation
+  mit dem neuen Home-Partition-Design auf echter Hardware (T490)
+  durchspielen (siehe docs/sicherheit-datenschutz.md, Abschnitt
+  "Verschlüsselung von nutzers Daten + Sicherheits-Stick", für das
+  vollständige Design). Prüfpunkte: root-Partition ~100 GiB
+  unverschlüsselt bootet normal; `dialos-nutzer-home` (LUKS2) wird beim
+  Büro-Setup korrekt angelegt; `dialos-setup-nutzer.sh` bricht ohne
+  gestecktem Stick kontrolliert ab statt `nutzer`s Home auf root
+  anzulegen; nach Abschluss: Stick abziehen + neu starten → normaler
+  GDM-Login-Screen, `/home/nutzer` leer/nicht gemountet; Stick wieder
+  einstecken + neu starten → `/home/nutzer` gemountet, Autologin greift.
+  Zusätzlich `DIALOS-KEY` (jetzt ext4, nicht mehr FAT32) und
+  `DIALOS-DATA` (jetzt exFAT, nicht mehr ext4) auf einem 64-GB-Stick
+  verifizieren. **Teilweise bereits erledigt (2026-08-14):** Die reine
+  Stick-Partitionierung wurde manuell (nicht über `dialos-install`
+  selbst, sondern per Hand mit denselben Befehlen) gegen einen echten
+  59,8-GB-USB-Stick getestet - `DIALOS-KEY` (ext4, root:root 755, für
+  normale Nutzer weder less- noch schreibbar - stärkerer Schutz als
+  geplant) und `DIALOS-DATA` (exFAT, für den aktuellen Nutzer beschreib-
+  bar) wurden korrekt angelegt. **Noch offen:** `DIALOS-DATA` an einem
+  echten Windows-Rechner einbinden und beschreiben testen (nur
+  Linux-seitig verifiziert bisher).
+- [x] Grundsatzentscheidung getroffen (siehe oben, umgesetzt
+  2026-08-14): Ganze-Platte-LUKS-Verschlüsselung ist komplett entfallen,
+  ersetzt durch eine reine `dialos-nutzer-home`-Partition + das
+  `dialos-stick-gate`-Gate. `dialos-install`/`dialos-rekey`/
+  `dialos-stick-gate.sh` entsprechend umgeschrieben, tote
+  `dialos-keyscript`-initramfs-Dateien entfernt.
 - [ ] Calamares-Standort-Seite schlägt beim Live-Boot GeoIP-basiert oft
   einen falschen Standort vor (z. B. Rome statt Berlin) - kein
   dokumentierter Vendor-Override für `modules/locale.conf` gefunden (nur

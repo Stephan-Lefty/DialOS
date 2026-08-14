@@ -82,7 +82,8 @@ Notable groups within it (in the order they appear in the file):
 - **Terminal/development**: `gnome-terminal`, `curl`, `wget`, `git`,
   `nodejs`/`npm` (for the Claude Code CLI, step 7), `dconf-cli`.
 - **Installer/security tools**: `zenity`, `polkitd`, `pkexec`,
-  `parted`, `dosfstools`, `cryptsetup` + `cryptsetup-initramfs`,
+  `parted`, `dosfstools`, `exfatprogs` (for the Windows-readable
+  `DIALOS-DATA` partition on the security stick), `cryptsetup`,
   `rsync`, `grub-efi-amd64` (+ `-bin`), `openssl`,
   `systemd-timesyncd` (NTP, important for the installer later),
   `thunderbird-l10n-de`, `gnome-shell-extension-manager`.
@@ -411,20 +412,30 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.
 - `dialos-tts-indicator.py`: a panel icon that shows when something is
   currently being spoken (needs the AppIndicator extension from step 9).
 
-## 12. Security tools (stick encryption + autologin gate)
+## 12. Security tools (encrypt nutzer's data + autologin gate)
+
+**Design since 2026-08-14** (replaces the original whole-disk
+encryption, see README changelog 0.5.0 and
+[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md), section
+"Encrypting nutzer's data + security stick", for concept + rationale):
+`dialos-install` now only encrypts a dedicated `dialos-nutzer-home`
+partition (LUKS2, exclusively `/home/nutzer`), root stays unencrypted
+(~100 GiB, ext4). No more `cryptsetup-initramfs`/`dialos-keyscript` -
+the home partition isn't opened in the initramfs but by
+`dialos-stick-gate.service` after boot.
 
 ```bash
 sudo mkdir -p /usr/local/sbin
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
-sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-keyscript /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey /usr/local/sbin/dialos-keyscript
-sudo mkdir -p /etc/initramfs-tools/hooks
-sudo cp iso-build/config/includes.chroot/etc/initramfs-tools/hooks/dialos-keyscript /etc/initramfs-tools/hooks/
-sudo chmod 755 /etc/initramfs-tools/hooks/dialos-keyscript
+sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
+sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey /usr/local/sbin/dialos-stick-gate.sh
 sudo mkdir -p /usr/share/applications
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
+sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable dialos-stick-gate.service
 ```
 
 What these tools do: see
@@ -438,26 +449,19 @@ often end up with `600` permissions - `chmod +x` alone then results in
 "not found" for other accounts. Always use `chmod 755` for scripts,
 `chmod 644` for plain files like `.desktop`/`.deb`.
 
-**Autologin gate (since 2026-08-14, in addition to the encryption
-above):** a purely software-based presence check of the security
-stick, switches `nutzer`'s autologin via AccountsService/`gdbus`
-(concept + rationale: see
-[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md), section
-"Security stick as a presence token").
+`dialos-stick-gate.service` only takes effect from the **next** reboot
+onward (only runs at boot, not retroactively on the currently running
+session). Test after a real `dialos-install` install: unplug the
+stick, reboot - the system must land on the normal GDM login screen
+instead of autologging `nutzer`, and `/home/nutzer` must be
+empty/unmounted; plug the stick back in, reboot again - `/home/nutzer`
+must be mounted and autologin must work again.
 
-```bash
-sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-stick-gate.sh
-sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable dialos-stick-gate.service
-```
-
-Only takes effect from the **next** reboot onward (the service only
-runs at boot, not retroactively on the currently running session).
-Test: unplug the stick, reboot - the system must land on the normal
-GDM login screen instead of autologging `nutzer`; plug the stick back
-in, reboot again - autologin must work again.
+**Important for step 13:** `scripts/dialos-setup-nutzer.sh` only
+creates `nutzer`'s account after checking (and, if needed, triggering
+`dialos-stick-gate.sh` itself) that `/home/nutzer` is already mounted -
+**the security stick must already be plugged in when running step 13**,
+otherwise the script aborts cleanly (see sicherheit-datenschutz.en.md).
 
 ## 13. Create the customer account + finish office setup
 

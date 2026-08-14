@@ -19,22 +19,31 @@ what has already been done.
   unplug the external SanDisk-Extreme drive first (otherwise it's
   selectable as the target disk!); verify the new stick partitioning
   (`DIALOS-KEY` 2 GiB + `DIALOS-DATA` ext4).
-- [ ] Test the new `dialos-stick-gate` mechanism (presence check
-  instead of/in addition to LUKS encryption, switches `nutzer`'s
-  autologin via AccountsService - see docs/sicherheit-datenschutz.en.md,
-  section "Security stick as a presence token") on real hardware:
-  unplug the stick + reboot → normal GDM login screen instead of
-  autologin; plug the stick back in + reboot → autologin works again.
-  Supersedes the old first TODO item (real live-boot test of
-  `dialos-install` with LUKS), since the original test failed on
-  2026-08-14.
-- [ ] Open fundamental decision: should LUKS encryption in
-  `dialos-install`/`dialos-rekey` (error-prone initramfs installation,
-  see commit history from 2026-08-14) remain alongside the new
-  `dialos-stick-gate` long-term, or does the gate replace it entirely?
-  Currently both mechanisms run independently side by side - without a
-  decision, the disk stays unprotected against removal/live-USB access
-  by the gate alone (only LUKS closes that gap).
+- [ ] **New next step:** run a complete `dialos-install` installation
+  with the new home-partition design on real hardware (T490) (see
+  docs/sicherheit-datenschutz.en.md, section "Encrypting nutzer's data +
+  security stick", for the full design). Check: ~100 GiB unencrypted
+  root partition boots normally; `dialos-nutzer-home` (LUKS2) gets set
+  up correctly during office setup; `dialos-setup-nutzer.sh` aborts
+  cleanly without the stick plugged in instead of creating `nutzer`'s
+  home on root; after setup: unplug the stick + reboot → normal GDM
+  login screen, `/home/nutzer` empty/unmounted; plug the stick back in +
+  reboot → `/home/nutzer` mounted, autologin works. Also verify
+  `DIALOS-KEY` (now ext4, no longer FAT32) and `DIALOS-DATA` (now
+  exFAT, no longer ext4) on a 64 GB stick. **Partially done already
+  (2026-08-14):** the plain stick partitioning was manually tested
+  (not via `dialos-install` itself, but by hand with the same commands)
+  against a real 59.8 GB USB stick - `DIALOS-KEY` (ext4, root:root 755,
+  neither readable nor writable for regular users - stronger protection
+  than planned) and `DIALOS-DATA` (exFAT, writable for the current user)
+  were created correctly. **Still open:** mount and write-test
+  `DIALOS-DATA` on a real Windows machine (only verified on Linux so
+  far).
+- [x] Fundamental decision made (see above, implemented 2026-08-14):
+  whole-disk LUKS encryption is gone entirely, replaced by a dedicated
+  `dialos-nutzer-home` partition + the `dialos-stick-gate` gate.
+  `dialos-install`/`dialos-rekey`/`dialos-stick-gate.sh` rewritten
+  accordingly, dead `dialos-keyscript` initramfs files removed.
 - [ ] The Calamares location page often suggests a wrong location based
   on GeoIP during live boot (e.g. Rome instead of Berlin) - no
   documented vendor override found for `modules/locale.conf` (only

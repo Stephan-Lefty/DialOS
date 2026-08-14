@@ -34,6 +34,28 @@ if [ -z "$ADMIN_USER" ]; then
   echo "[dialos] Aufruf: sudo ./dialos-setup-nutzer.sh <admin-benutzername>" >&2
   exit 1
 fi
+
+# --- Sicherstellen, dass nutzers verschluesselte Home-Partition schon
+# gemountet ist, BEVOR das Konto angelegt wird. Sonst wuerde "adduser"
+# /home/nutzer samt Skel-Dateien auf der unverschluesselten root-
+# Partition anlegen - beim naechsten Boot mit Stick wuerde die (dann
+# leere) verschluesselte Partition das wieder verdecken
+# (Konfigurationsverlust), bei einem Boot ohne Stick waeren diese Daten
+# ungeschuetzt sichtbar (Datenleck). Siehe docs/sicherheit-
+# datenschutz.md, Abschnitt "Sicherheits-Stick als Anwesenheits-Token".
+if ! id "$USERNAME" >/dev/null 2>&1; then
+  if [ -x /usr/local/sbin/dialos-stick-gate.sh ]; then
+    /usr/local/sbin/dialos-stick-gate.sh || true
+  fi
+  if ! mountpoint -q "/home/$USERNAME"; then
+    echo "[dialos] Abbruch: /home/$USERNAME ist nicht gemountet." >&2
+    echo "[dialos] Sicherheits-Stick einstecken und erneut versuchen - sonst" >&2
+    echo "[dialos] würde '$USERNAME's Home auf der UNVERSCHLÜSSELTEN Platte" >&2
+    echo "[dialos] angelegt werden." >&2
+    exit 1
+  fi
+fi
+
 if id "$USERNAME" >/dev/null 2>&1; then
   echo "[dialos] Benutzer '$USERNAME' existiert bereits, ueberspringe Anlage."
 else

@@ -44,98 +44,105 @@ Sprachausgabe unzuverlässig macht. Der vorhandene Ein-Instanz-Lock in
 *desselben* Kontos, nicht das kontoübergreifende Nebeneinander, das
 "Benutzer wechseln" erzeugt.
 
-## Festplattenverschlüsselung mit USB-Schlüssel
+## Verschlüsselung von nutzers Daten + Sicherheits-Stick
 
-Der PC soll nur booten/entsperren, wenn ein bestimmter USB-Stick
-eingesteckt ist. Umsetzung: **LUKS-Festplattenverschlüsselung mit einer
-Schlüsseldatei auf dem USB-Stick** – ein Skript im initramfs wartet beim
-Boot auf den Stick und entsperrt die Platte automatisch, sobald er erkannt
-wird, ganz ohne Passworteingabe. Fehlt der Stick, bleibt das System
-verschlüsselt.
+**Design seit 2026-08-14** (ersetzt die ursprüngliche Ganze-Platte-
+Verschlüsselung, siehe README-Änderungsprotokoll 0.5.0).
 
-Kombiniert mit Autologin ergibt das einen für die Zielgruppe idealen
-Ablauf: Stick rein → Gerät einschalten → System ist sofort einsatzbereit
-und spricht den Nutzer an, ohne dass irgendwo getippt oder etwas
-abgelesen werden muss.
+**Warum kein initramfs-Weg mehr:** Der reale Live-Boot-Test von
+`dialos-install` mit LUKS-Ganze-Platte-Verschlüsselung ist am 14.08.
+gescheitert. Grund war nicht ein einzelner Bug, sondern dass der ganze
+LUKS/initramfs-Weg strukturell fehleranfällig ist: die Schlüsseldatei
+musste exakt im richtigen Moment im initramfs verfügbar sein (ein Bug
+hängte den Stick vor der `cryptsetup open`-Nutzung schon aus), und
+selbst der Installer selbst lief nicht rund (ein `pkexec`-Bug ließ den
+Datei-Speichern-Dialog für das Schlüssel-Backup lautlos scheitern). Ein
+initramfs bietet kaum Fehlerausgabe/Debugging-Möglichkeiten für die
+Zielgruppe vor Ort - jeder Fehler dort bedeutet ein nicht bootendes
+Gerät ohne Hilfe von Stephan.
 
-**Installation:** Aus der laufenden Live-Session heraus gibt es dafür ein
-eigenes Installations-Werkzeug (`dialos-install`, per Programm-Menü
-aufrufbar) statt eines Standard-Installers wie Calamares – dessen
-LUKS-Modul ist auf ein getipptes Passwort ausgelegt, nicht auf unser
-Stick-Schlüssel-Konzept. Das Werkzeug partitioniert die Zielfestplatte,
-erzeugt einen zufälligen Schlüssel auf dem gewählten Sicherheits-Stick,
-legt zusätzlich ein Wiederherstellungs-Passwort (mind. 12 Zeichen) als
-zweiten LUKS-Slot an (siehe unten), kopiert das laufende System auf die
-Platte und richtet
-den Bootloader ein. Gedacht für dich/Techniker im Büro-Setup, nicht für
-die Vor-Ort-Einrichtung – deshalb bewusst nicht sprachgesteuert.
+**Aktuelles Design:** Nicht mehr die ganze Platte, sondern nur eine
+eigene Partition wird verschlüsselt, die ausschließlich `nutzer`s Daten
+enthält - und diese Partition wird NICHT im initramfs, sondern nach dem
+Boot in der normalen, schon laufenden Systemumgebung geöffnet:
+
+- **root-Partition** (ext4, ~100 GiB): System + `dialosadmin`s Home,
+  **unverschlüsselt**. Bootet immer ganz normal, keine initramfs-
+  Fallstricke mehr.
+- **`dialos-nutzer-home`-Partition** (LUKS2, Rest der Kapazität):
+  enthält ausschließlich `/home/nutzer`. Wird per `blkid -L
+  dialos-nutzer-home` gefunden (LUKS2-Label, kein `/etc/crypttab`-
+  Eintrag nötig).
+- Der Sicherheits-Stick (Partition `DIALOS-KEY`) trägt weiterhin die
+  Schlüsseldatei, plus einen zweiten Datenbereich `DIALOS-DATA` für
+  allgemeinen Speicher - **unverändert** gegenüber vorher.
+- `dialos-stick-gate.service` (systemd-oneshot, läuft bei **jedem
+  Boot** vor `display-manager.service`) prüft, ob der Stick da ist:
+  wenn ja, öffnet es `dialos-nutzer-home` mit dem Schlüssel vom Stick
+  und mountet sie nach `/home/nutzer`; erst danach wird `nutzer`s
+  Autologin aktiviert (`SetAutomaticLogin true` über AccountsService/
+  `gdbus`, derselbe Mechanismus wie in `scripts/dialos-setup-nutzer.sh`
+  und [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 4). Schlägt
+  irgendein Schritt fehl (kein Stick, falscher/beschädigter Stick,
+  Home-Partition fehlt) bleibt `/home/nutzer` ein leeres Verzeichnis
+  und Autologin wird deaktiviert - GDM zeigt den normalen Login-
+  Bildschirm, auf dem praktisch nur `dialosadmin` nutzbar ist (`nutzer`s
+  Passwort ist ein zufälliger, niemandem bekannter String).
+- `dialosadmin` bleibt davon komplett unberührt: nie Autologin, immer
+  normales getipptes Passwort am GDM-Screen, unabhängig vom Stick.
+
+Damit ist die ursprüngliche Idealvorstellung für die Zielgruppe weiter
+erfüllt (Stick rein → Gerät einschalten → System spricht den Nutzer
+an, ohne Tippen/Ablesen), aber ohne die fragile initramfs-Kette - und
+zusätzlich wird jetzt tatsächlich geschützt, was am Gerät am
+sensibelsten ist: `nutzer`s eigene Daten. System-Dateien,
+`dialosadmin`s Home und Logs bleiben bewusst unverschlüsselt (bewusster
+Kompromiss - siehe README-Änderungsprotokoll 0.5.0 für die Abwägung).
+
+Skripte/Units:
+`usr/local/sbin/dialos-install`, `usr/local/sbin/dialos-rekey`,
+`usr/local/sbin/dialos-stick-gate.sh`,
+`etc/systemd/system/dialos-stick-gate.service` (alle im Repo unter
+`iso-build/config/includes.chroot/`, Installation siehe
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 12).
 
 **Praxishinweise:**
 - Der Stick sollte getrennt vom Laptop aufbewahrt werden (z. B. am
   Schlüsselbund), sonst bringt die Verschlüsselung wenig, falls beides
   zusammen entwendet wird.
-
-## Sicherheits-Stick als Anwesenheits-Token (Autologin-Gate)
-
-**Ergänzung seit 2026-08-14**, unabhängig von der Verschlüsselung oben.
-
-**Warum:** Der reale Live-Boot-Test von `dialos-install` mit dem
-Sicherheits-Stick ist am 14.08. gescheitert. Grund war nicht ein
-einzelner Bug, sondern dass der ganze LUKS/initramfs-Weg strukturell
-fehleranfällig ist: die Schlüsseldatei muss exakt im richtigen Moment
-im initramfs verfügbar sein (ein Bug hängte den Stick vor der
-`cryptsetup open`-Nutzung schon aus), und selbst der Installer selbst
-lief nicht rund (ein `pkexec`-Bug ließ den Datei-Speichern-Dialog für
-das Schlüssel-Backup lautlos scheitern, siehe README-Änderungsprotokoll
-0.5.0). Ein initramfs bietet kaum Fehlerausgabe/Debugging-Möglichkeiten
-für die Zielgruppe vor Ort - jeder Fehler dort bedeutet ein
-nicht bootendes Gerät ohne Hilfe von Stephan. Statt den fragilen Weg
-weiter zu flicken, gibt es jetzt zusätzlich einen viel robusteren,
-rein softwarebasierten Anwesenheits-Check, der komplett in einer schon
-laufenden, normalen Systemumgebung läuft (kein initramfs, keine
-`pkexec`/xdg-portal-Fallstricke) - unabhängig vom initramfs/LUKS-Weg
-oben:
-
-- Ein systemd-Dienst (`dialos-stick-gate.service`, läuft als oneshot vor
-  `display-manager.service`) prüft bei **jedem Boot**, ob eine Partition
-  mit Label `DIALOS-KEY` gefunden wird (`blkid -L DIALOS-KEY`, mit
-  kurzer Wiederholschleife für nachhinkende USB-Erkennung).
-- Stick da: Autologin für `nutzer` wird aktiviert
-  (`SetAutomaticLogin true` über AccountsService/`gdbus`, derselbe
-  Mechanismus wie in `scripts/dialos-setup-nutzer.sh` und
-  [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 4).
-- Stick fehlt: Autologin für `nutzer` wird deaktiviert
-  (`SetAutomaticLogin false`). GDM zeigt den normalen Login-Bildschirm -
-  darauf ist praktisch nur `dialosadmin` nutzbar, da `nutzer`s Passwort
-  ein zufälliger, niemandem bekannter String ist.
-- `dialosadmin` bleibt davon komplett unberührt: nie Autologin, immer
-  normales getipptes Passwort am GDM-Screen, wie bisher.
-
-Skript: `usr/local/sbin/dialos-stick-gate.sh`, Unit:
-`etc/systemd/system/dialos-stick-gate.service` (beide im Repo unter
-`iso-build/config/includes.chroot/`, Installation siehe
-[Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 12).
-
-**Wichtige Einschränkung:** Das ist ein reiner **Zugriffs-Filter beim
-Login**, keine Verschlüsselung. Die Festplatte selbst bleibt durch
-dieses Gate ungeschützt - wer sie ausbaut oder das Gerät von einem
-Live-USB bootet, liest alle Daten direkt, unabhängig davon, ob der
-Stick dabei ist. Diese Lücke schließt weiterhin nur die LUKS-
-Verschlüsselung oben. Ob die LUKS-Verschlüsselung (mit ihrer
-fehleranfälligen initramfs-Installation) langfristig neben diesem Gate
-bestehen bleibt oder entfällt, ist eine offene Entscheidung (siehe
-TODO.md) - aktuell laufen beide Mechanismen unabhängig nebeneinander.
+- **Empfohlene Standardgröße: 64 GB.** `dialos-install`/`dialos-rekey`
+  partitionieren den Stick immer in `DIALOS-KEY` (2 GiB, Schlüssel) +
+  `DIALOS-DATA` (Rest der Kapazität, allgemeiner Speicher) - bei 64 GB
+  bleiben `nutzer` dadurch automatisch ca. 62 GB als mobiler
+  Datenträger (z. B. für Fotos, Dokumente), den er unabhängig vom
+  Gerät mitnehmen kann.
+- `scripts/dialos-setup-nutzer.sh` (legt das `nutzer`-Konto im
+  Büro-Setup an) prüft vor `adduser`, ob `/home/nutzer` schon gemountet
+  ist, und bricht sonst kontrolliert ab - sonst würde `nutzer`s Home mit
+  allen Skel-Standardeinstellungen versehentlich auf der
+  unverschlüsselten root-Partition landen.
 
 ## Wiederherstellung bei Stick-Verlust
 
 Drei Wege, je nach Situation:
 
-1. **Wiederherstellungs-Passwort direkt am Boot-Bildschirm eintippen.**
-   Funktioniert sofort, komplett offline, unabhängig vom Stick und vom
-   Netzwerk – der einzige Weg, ein Gerät überhaupt wieder zum Laufen zu
-   bringen, wenn nichts anderes erreichbar ist. Wird von Stephan
-   telefonisch angeleitet oder von einer Vertrauensperson vor Ort
-   eingetippt, nicht vom Endnutzer selbst gewusst.
+1. **Wiederherstellungs-Passwort manuell eingeben, über `dialosadmin`.**
+   Da `nutzer`s Home-Partition nicht mehr im initramfs geöffnet wird,
+   gibt es keinen automatischen Passwort-Prompt mehr am Boot-Bildschirm
+   - `dialosadmin`s eigener Login ist aber vom Stick völlig unabhängig
+   und funktioniert immer per getipptem Passwort. Ablauf: als
+   `dialosadmin` anmelden, Terminal öffnen,
+   `sudo cryptsetup open --type luks2 $(sudo blkid -L dialos-nutzer-home) dialos-nutzer-home`
+   ausführen (fragt nach dem Wiederherstellungs-Passwort), danach
+   `sudo mount /home/nutzer && sudo /usr/local/sbin/dialos-stick-gate.sh`
+   - schaltet `nutzer`s Autologin für diese Sitzung frei. Komplett
+   offline, unabhängig vom Stick und vom Netzwerk – der einzige Weg,
+   ein Gerät überhaupt wieder nutzbar zu machen, wenn nichts anderes
+   erreichbar ist. Wird von Stephan telefonisch angeleitet oder von
+   einer Vertrauensperson vor Ort eingetippt, nicht vom Endnutzer selbst
+   gewusst. **Wichtig:** Das ist nur eine einmalige Freischaltung für
+   die laufende Sitzung - nach einem Neustart ohne Stick greift wieder
+   die normale Sperre; für eine dauerhafte Lösung Weg 2 nutzen.
 2. **Neuen Stick per Fernwartung einrichten** (`dialos-rekey`, auf dem
    installierten System). Sobald das Gerät einmal läuft (z. B. nach Weg 1)
    und der Nutzer "Hilfe rufen" sagt, verbindet sich Stephan per RustDesk

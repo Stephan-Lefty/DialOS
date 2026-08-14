@@ -156,10 +156,34 @@ background) and `splash.png` (boot/login screen).
   stick present: autologin on; stick missing: autologin off, GDM shows
   the normal login screen (practically only `dialosadmin` usable). Runs
   entirely in the normal system environment instead of the initramfs, so
-  it avoids that path's pitfalls. **Important limitation:** this only
-  protects login access, not the data on the disk itself - that's still
-  the job of the LUKS encryption above. Details:
-  [docs/sicherheit-datenschutz.en.md](docs/sicherheit-datenschutz.en.md#security-stick-as-a-presence-token-autologin-gate).
+  it avoids that path's pitfalls. Originally designed as a pure login
+  filter (didn't yet protect the data itself) - **evolved further the
+  same day, see next entry.**
+- **Home-partition encryption replaces whole-disk LUKS:** instead of
+  encrypting the entire target disk (the original approach that failed
+  in the initramfs), `dialos-install` now only encrypts a dedicated
+  `dialos-nutzer-home` partition (LUKS2, exclusively `/home/nutzer`) -
+  root (~100 GiB, ext4) stays unencrypted and always boots normally.
+  `dialos-stick-gate.service` opens the home partition after boot (no
+  longer in the initramfs) and only then unlocks `nutzer`'s autologin -
+  so it now actually protects `nutzer`'s data, not just login access
+  like the first version above. `dialos-rekey` and
+  `scripts/dialos-setup-nutzer.sh` (mount check before `adduser`)
+  updated accordingly, dead `dialos-keyscript` initramfs code removed.
+  Additionally: the security stick is now deliberately formatted
+  **differently** per partition - `DIALOS-KEY` (the key) as **ext4**
+  instead of FAT32, so the key file isn't even readable under Windows
+  in the first place (and thanks to Unix permissions `root:root 755`,
+  accessible only to root even under Linux); `DIALOS-DATA` (general
+  storage) as **exFAT** instead of ext4, so `nutzer` can use it as an
+  ordinary portable drive under Windows/macOS/Linux - recommended
+  standard size 64 GB (≈62 GB usable `DIALOS-DATA`). The stick
+  partitioning was manually verified against a real 59.8 GB USB stick
+  (labels, filesystems, permission behavior all as expected); the full
+  `dialos-install` installation on real hardware is still pending per
+  TODO.md. Details:
+  [docs/sicherheit-datenschutz.en.md](docs/sicherheit-datenschutz.en.md),
+  section "Encrypting nutzer's data + security stick".
 
 ### 0.4.0
 - Removed Evolution and GNOME Calendar from the app grid and search

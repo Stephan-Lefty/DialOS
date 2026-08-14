@@ -1,11 +1,24 @@
 #!/bin/bash
-# DialOS installer: writes the running live system to an internal
-# disk, encrypted with LUKS and unlocked via a keyfile on a dedicated
-# USB stick instead of a typed passphrase (see
-# docs/sicherheit-datenschutz.md). Meant to be run once per device by
-# Stephan during office setup - NOT part of the voice-guided on-site
-# setup, so it is deliberately a plain graphical/terminal tool, not
-# accessible-by-voice.
+# DialOS installer: writes the running live system to an internal disk.
+#
+# Design (since 2026-08-14, see docs/sicherheit-datenschutz.md, section
+# "Sicherheits-Stick als Anwesenheits-Token"): only nutzer's data is
+# encrypted, not the whole disk. The root partition is a plain,
+# unencrypted ext4 filesystem - this avoids the fragile initramfs-time
+# LUKS unlock (keyfile-on-stick, keyscript-timeout races) that caused
+# the failed live-boot test on 2026-08-14. Instead:
+#   - root: plain ext4, ~100 GiB, holds the OS + dialosadmin's home.
+#   - a separate "dialos-nutzer-home" partition (rest of the disk) is
+#     LUKS2-encrypted and holds ONLY /home/nutzer. It is opened/mounted
+#     after boot, in normal userspace, by dialos-stick-gate.service -
+#     not in the initramfs.
+# The security stick still carries the decryption keyfile (now for the
+# home partition instead of root) plus a recovery passphrase as a
+# second LUKS key slot, same as before.
+#
+# Meant to be run once per device by Stephan during office setup - NOT
+# part of the voice-guided on-site setup, so it is deliberately a plain
+# graphical/terminal tool, not accessible-by-voice.
 set -euo pipefail
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -26,7 +39,9 @@ LABEL="DIALOS-KEY"
 DATA_LABEL="DIALOS-DATA"
 KEYFILE_NAME=".dialos-key"
 TARGET_MNT="/mnt/dialos-install"
-LUKS_NAME="dialos-root"
+HOME_LUKS_NAME="dialos-nutzer-home"
+HOME_LUKS_LABEL="dialos-nutzer-home"
+ROOT_SIZE_MIB=102400   # 100 GiB fuer die root-Partition (Stephans Wahl)
 
 say() { zenity --info --width=400 --title="DialOS Installation" --text="$1" 2>/dev/null || echo "$1"; }
 warn() { zenity --warning --width=400 --title="DialOS Installation" --text="$1" 2>/dev/null || echo "$1" >&2; }
@@ -62,6 +77,14 @@ TARGET_DISK=$(zenity --list --title="Zielfestplatte wählen" \
   "${DISK_ARGS[@]}")
 [ -n "$TARGET_DISK" ] || die "Abgebrochen: keine Festplatte gewählt."
 
+TARGET_DISK_SIZE=$(lsblk -dnb -o SIZE "$TARGET_DISK" 2>/dev/null || echo 0)
+# 100 GiB root + mindestens ~20 GiB fuer die verschluesselte
+# nutzer-home-Partition, grosszuegig gerundet als Sicherheitsabstand.
+MIN_DISK_BYTES=130000000000
+if [ "$TARGET_DISK_SIZE" -lt "$MIN_DISK_BYTES" ]; then
+  die "Die gewählte Festplatte ist zu klein (mind. ~130 GB nötig: 100 GB root + Platz für die verschlüsselte nutzer-Partition)."
+fi
+
 # --- 2. Select the USB stick that will hold the LUKS keyfile ---
 # Excludes the live boot medium (same as the target-disk list above) so
 # the running boot stick can't be accidentally chosen and wiped.
@@ -79,7 +102,7 @@ if [ "${#USB_ARGS[@]}" -eq 0 ]; then
 fi
 
 KEY_STICK=$(zenity --list --title="Sicherheits-Stick wählen" \
-  --text="Auf diesem Stick werden der Entschlüsselungs-Schlüssel (2 GiB) und ein Datenspeicher-Bereich (Rest der Kapazität) angelegt.\nDer Stick wird dabei komplett neu formatiert." \
+  --text="Auf diesem Stick werden der Entschlüsselungs-Schlüssel für nutzers Daten (2 GiB) und ein Datenspeicher-Bereich (Rest der Kapazität) angelegt.\nDer Stick wird dabei komplett neu formatiert." \
   --column="Gerät" --column="Größe" --width=500 --height=250 \
   "${USB_ARGS[@]}")
 [ -n "$KEY_STICK" ] || die "Abgebrochen: kein Sicherheits-Stick gewählt."
@@ -90,7 +113,7 @@ if [ "$KEY_STICK_SIZE" -lt 2684354560 ]; then
 fi
 
 # --- 3. Recovery passphrase (temporary policy until docs/offene-punkte.md is resolved) ---
-say "Zusätzlich zum Stick wird ein Wiederherstellungs-Passwort als zweiter LUKS-Schlüssel angelegt (Notfall, falls der Stick verloren geht). Bitte sicher verwahren, NICHT dem Endnutzer geben. Mindestens 12 Zeichen."
+say "Zusätzlich zum Stick wird ein Wiederherstellungs-Passwort als zweiter LUKS-Schlüssel für nutzers Daten-Partition angelegt (Notfall, falls der Stick verloren geht). Bitte sicher verwahren, NICHT dem Endnutzer geben. Mindestens 12 Zeichen."
 RECOVERY_PASS=""
 while [ -z "$RECOVERY_PASS" ] || [ "${#RECOVERY_PASS}" -lt 12 ]; do
   RECOVERY_PASS=$(ask_password "Wiederherstellungs-Passwort festlegen (mind. 12 Zeichen)")
@@ -109,51 +132,72 @@ CONFIRM=$(zenity --entry --title="Letzte Bestätigung" \
 
 echo "Installiere auf $TARGET_DISK, Schlüssel-Stick $KEY_STICK ..."
 
-# --- 5. Partition target disk: ESP + LUKS ---
+# --- 5. Partition target disk: ESP + root (plain ext4, ~100 GiB) +
+#          dialos-nutzer-home (LUKS2, Rest der Kapazitaet) ---
 umount "${TARGET_DISK}"* 2>/dev/null || true
 wipefs -af "$TARGET_DISK"
 parted -s "$TARGET_DISK" mklabel gpt
 parted -s "$TARGET_DISK" mkpart ESP fat32 1MiB 513MiB
 parted -s "$TARGET_DISK" set 1 esp on
-parted -s "$TARGET_DISK" mkpart dialos-luks 513MiB 100%
+ROOT_END_MIB=$((513 + ROOT_SIZE_MIB))
+parted -s "$TARGET_DISK" mkpart dialos-root ext4 513MiB "${ROOT_END_MIB}MiB"
+parted -s "$TARGET_DISK" mkpart dialos-nutzer-home "${ROOT_END_MIB}MiB" 100%
 partprobe "$TARGET_DISK"
 sleep 2
 
 if [[ "$TARGET_DISK" == *nvme* ]]; then
   ESP_PART="${TARGET_DISK}p1"
-  LUKS_PART="${TARGET_DISK}p2"
+  ROOT_PART="${TARGET_DISK}p2"
+  HOME_PART="${TARGET_DISK}p3"
 else
   ESP_PART="${TARGET_DISK}1"
-  LUKS_PART="${TARGET_DISK}2"
+  ROOT_PART="${TARGET_DISK}2"
+  HOME_PART="${TARGET_DISK}3"
 fi
 
 mkfs.vfat -F32 -n DIALOS-ESP "$ESP_PART"
+mkfs.ext4 -F -L dialos-root "$ROOT_PART"
 
-# --- 6. Prepare the key stick: DIALOS-KEY (2 GiB, FAT32, holds the
-#          keyfile) + DIALOS-DATA (rest of the stick, ext4, general-
-#          purpose storage for the technician/end user) ---
+# --- 6. Prepare the key stick: DIALOS-KEY (2 GiB, ext4, holds the
+#          keyfile - deliberately NOT a Windows-readable filesystem, so
+#          the key file can't just be casually opened by plugging the
+#          stick into any Windows PC) + DIALOS-DATA (rest of the stick,
+#          exFAT, general-purpose storage for the technician/end user -
+#          deliberately Windows/macOS/Linux readable, so nutzer can use
+#          it as an ordinary mobile drive) ---
 umount "${KEY_STICK}"* 2>/dev/null || true
 wipefs -af "$KEY_STICK"
 parted -s "$KEY_STICK" mklabel gpt
-parted -s "$KEY_STICK" mkpart "$LABEL" fat32 1MiB 2049MiB
-parted -s "$KEY_STICK" mkpart "$DATA_LABEL" ext4 2049MiB 100%
+parted -s "$KEY_STICK" mkpart "$LABEL" ext4 1MiB 2049MiB
+# "fat32" ist hier nur der parted-Hint fuer den GPT-Partitionstyp
+# ("Microsoft basic data", noetig damit Windows die Partition ueberhaupt
+# als Laufwerk anbietet) - tatsaechlich formatiert wird sie unten mit
+# exFAT (mkfs.exfat), nicht FAT32 (4-GiB-Dateigroessenlimit waere bei
+# 62 GB Nutzkapazitaet zu einschraenkend).
+parted -s "$KEY_STICK" mkpart "$DATA_LABEL" fat32 2049MiB 100%
 partprobe "$KEY_STICK"
 sleep 2
 KEY_STICK_PART="${KEY_STICK}1"
 DATA_PART="${KEY_STICK}2"
-mkfs.vfat -F32 -n "$LABEL" "$KEY_STICK_PART"
-mkfs.ext4 -F -L "$DATA_LABEL" "$DATA_PART"
+mkfs.ext4 -F -L "$LABEL" "$KEY_STICK_PART"
+mkfs.exfat -L "$DATA_LABEL" "$DATA_PART"
 
 mkdir -p /run/dialos-key-write
 mount "$KEY_STICK_PART" /run/dialos-key-write
 KEYFILE="/run/dialos-key-write/$KEYFILE_NAME"
 head -c 512 /dev/urandom > "$KEYFILE"
+chmod 600 "$KEYFILE"
 sync
 
-# --- 7. LUKS setup: keyfile as primary slot, recovery passphrase as second slot ---
-cryptsetup luksFormat --type luks2 --batch-mode "$LUKS_PART" "$KEYFILE"
+# --- 7. LUKS setup for nutzer's home partition: keyfile as primary
+#          slot, recovery passphrase as second slot. --label macht die
+#          Partition per "blkid -L dialos-nutzer-home" wiederfindbar,
+#          ohne auf eine feste /etc/crypttab-Zeile angewiesen zu sein
+#          (dialos-stick-gate.service oeffnet sie explizit, nicht das
+#          initramfs). ---
+cryptsetup luksFormat --type luks2 --label "$HOME_LUKS_LABEL" --batch-mode "$HOME_PART" "$KEYFILE"
 printf '%s' "$RECOVERY_PASS" > /tmp/.rp
-cryptsetup luksAddKey --batch-mode --key-file="$KEYFILE" "$LUKS_PART" /tmp/.rp
+cryptsetup luksAddKey --batch-mode --key-file="$KEYFILE" "$HOME_PART" /tmp/.rp
 shred -u /tmp/.rp
 
 # --- 7b. Encrypted off-site backup of the keyfile (e.g. for upload to
@@ -195,51 +239,73 @@ else
 fi
 shred -u "$BACKUP_TMP" 2>/dev/null || rm -f "$BACKUP_TMP"
 
-# Unlock LUKS with the keyfile BEFORE unmounting the stick - $KEYFILE
-# lives on the stick's DIALOS-KEY partition, so unmounting first would
-# make it inaccessible and abort the script here (set -e), exactly as
-# happened during Stephan's live-boot test on 2026-08-14.
-cryptsetup open --key-file="$KEYFILE" "$LUKS_PART" "$LUKS_NAME"
+# --- 7c. Home-Partition kurz oeffnen, leer mit ext4 formatieren, wieder
+#          schliessen - damit sie beim ersten echten Boot direkt
+#          nutzbar ist, ohne dass am Zielgeraet noch etwas formatiert
+#          werden muss. Schluessel-Stick bleibt dabei bewusst noch
+#          eingehaengt (siehe Kommentar unten). ---
+cryptsetup open --key-file="$KEYFILE" "$HOME_PART" "$HOME_LUKS_NAME"
+mkfs.ext4 -F -L dialos-nutzer-home "/dev/mapper/$HOME_LUKS_NAME"
+cryptsetup close "$HOME_LUKS_NAME"
+
+# Unhang den Stick erst JETZT, nachdem alle Schritte, die $KEYFILE
+# brauchen, abgeschlossen sind - vorher unmounten wuerde die Datei
+# unzugaenglich machen und das Skript hier abbrechen (set -e), genau
+# wie bei Stephans Live-Boot-Test am 2026-08-14 (damals betraf es die
+# root-Partition, das Prinzip ist identisch).
 umount /run/dialos-key-write
-mkfs.ext4 -L dialos-root "/dev/mapper/$LUKS_NAME"
 
 # --- 8. Copy the running live system onto the new root ---
 mkdir -p "$TARGET_MNT"
-mount "/dev/mapper/$LUKS_NAME" "$TARGET_MNT"
+mount "$ROOT_PART" "$TARGET_MNT"
 mkdir -p "$TARGET_MNT/boot/efi"
 mount "$ESP_PART" "$TARGET_MNT/boot/efi"
 
 say "Kopiere das System auf die Zielfestplatte - das dauert mehrere Minuten."
+# /home/nutzer wird bewusst ausgeschlossen: falls das laufende
+# Live-/Buero-Setup-System zufaellig schon ein nutzer-Konto mit Daten
+# hat (z. B. Quell-ISO mit --clone gebaut), duerfen diese Daten NIE auf
+# der unverschluesselten root-Partition landen - /home/nutzer bleibt
+# hier immer ein leerer Platzhalter fuer den spaeteren verschluesselten
+# Mount (siehe dialos-stick-gate.service + scripts/dialos-setup-nutzer.sh).
 rsync -aAXH --info=progress2 / "$TARGET_MNT" \
   --exclude=/dev --exclude=/proc --exclude=/sys --exclude=/tmp \
   --exclude=/run --exclude=/mnt --exclude=/media --exclude=/lost+found \
+  --exclude=/home/nutzer \
   --exclude="$TARGET_MNT"
+mkdir -p "$TARGET_MNT/home/nutzer"
 
 for d in dev proc sys run; do mount --bind "/$d" "$TARGET_MNT/$d"; done
 
-LUKS_UUID=$(cryptsetup luksUUID "$LUKS_PART")
+ROOT_UUID=$(blkid -s UUID -o value "$ROOT_PART")
 ESP_UUID=$(blkid -s UUID -o value "$ESP_PART")
-ROOT_UUID=$(blkid -s UUID -o value "/dev/mapper/$LUKS_NAME")
 
-cat > "$TARGET_MNT/etc/crypttab" <<EOF
-$LUKS_NAME UUID=$LUKS_UUID none luks,keyscript=/usr/local/sbin/dialos-keyscript,keyscript-timeout=60
-EOF
-
+# Kein /etc/crypttab mehr noetig: root ist unverschluesselt, und die
+# nutzer-home-Partition wird nicht ueber crypttab/systemd-cryptsetup
+# beim Boot geoeffnet, sondern explizit von dialos-stick-gate.service
+# (siehe docs/sicherheit-datenschutz.md). Der fstab-Eintrag mit
+# "noauto,nofail" sorgt dafuer, dass ein simples "mount /home/nutzer"
+# funktioniert, SOBALD das Mapper-Geraet per "cryptsetup open" existiert
+# - und dass ein fehlender/nicht geoeffneter Mount den Boot nicht
+# blockiert.
 cat > "$TARGET_MNT/etc/fstab" <<EOF
 UUID=$ROOT_UUID / ext4 errors=remount-ro 0 1
 UUID=$ESP_UUID /boot/efi vfat umask=0077 0 1
+/dev/mapper/$HOME_LUKS_NAME /home/nutzer ext4 noauto,nofail 0 2
 EOF
 
-# --- 9. Bootloader + initramfs inside the new root ---
+# --- 9. Bootloader inside the new root - kein cryptsetup-initramfs und
+#          kein "update-initramfs -u" mehr noetig, da root nicht mehr
+#          verschluesselt ist (der vom Live-System uebernommene
+#          initramfs passt fuer ein normales ext4-root bereits). ---
+say "Richte Bootloader ein."
 chroot "$TARGET_MNT" apt-get update
-chroot "$TARGET_MNT" apt-get install -y --no-install-recommends grub-efi-amd64 cryptsetup-initramfs
-chroot "$TARGET_MNT" update-initramfs -u -k all
+chroot "$TARGET_MNT" apt-get install -y --no-install-recommends grub-efi-amd64
 chroot "$TARGET_MNT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=dialos --removable
 chroot "$TARGET_MNT" update-grub
 
 for d in dev proc sys run; do umount "$TARGET_MNT/$d"; done
 umount "$TARGET_MNT/boot/efi"
 umount "$TARGET_MNT"
-cryptsetup close "$LUKS_NAME"
 
 say "Installation abgeschlossen. Sicherheits-Stick jetzt abziehen (getrennt vom Gerät versenden), Live-USB entfernen und neu starten."

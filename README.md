@@ -160,10 +160,35 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   `gdbus` um - Stick da: Autologin an; Stick fehlt: Autologin aus, GDM
   zeigt den normalen Login-Screen (praktisch nur `dialosadmin` nutzbar).
   Läuft komplett in der normalen Systemumgebung statt im initramfs,
-  daher ohne dessen Fallstricke. **Wichtige Einschränkung:** schützt nur
-  den Login-Zugriff, nicht die Daten auf der Platte selbst - das bleibt
-  weiterhin Aufgabe der LUKS-Verschlüsselung oben. Details:
-  [docs/sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md#sicherheits-stick-als-anwesenheits-token-autologin-gate).
+  daher ohne dessen Fallstricke. Ursprünglich als reiner Login-Filter
+  gedacht (schützte noch nicht die Daten selbst) - **noch am selben Tag
+  weiterentwickelt, siehe nächster Eintrag.**
+- **Home-Partition-Verschlüsselung ersetzt Ganze-Platte-LUKS:** Statt
+  die ganze Zielfestplatte zu verschlüsseln (der ursprüngliche, am
+  initramfs gescheiterte Ansatz), verschlüsselt `dialos-install` jetzt
+  nur noch eine eigene `dialos-nutzer-home`-Partition (LUKS2,
+  ausschließlich `/home/nutzer`) - root (~100 GiB, ext4) bleibt
+  unverschlüsselt und bootet immer normal. `dialos-stick-gate.service`
+  öffnet die Home-Partition nach dem Boot (nicht mehr im initramfs) und
+  schaltet erst danach `nutzer`s Autologin frei - schützt damit jetzt
+  tatsächlich `nutzer`s Daten, nicht nur den Login-Zugriff wie in der
+  ersten Version oben. `dialos-rekey` und `scripts/dialos-setup-
+  nutzer.sh` (Mount-Prüfung vor `adduser`) entsprechend angepasst,
+  toter `dialos-keyscript`-initramfs-Code entfernt. Zusätzlich: Der
+  Sicherheits-Stick wird jetzt bewusst **unterschiedlich** formatiert -
+  `DIALOS-KEY` (Schlüssel) als **ext4** statt FAT32, damit die
+  Schlüsseldatei unter Windows gar nicht erst lesbar ist (und dank
+  Unix-Rechten `root:root 755` selbst unter Linux nur für root
+  zugreifbar); `DIALOS-DATA` (allgemeiner Speicher) als **exFAT** statt
+  ext4, damit `nutzer` sie als normalen mobilen Datenträger unter
+  Windows/macOS/Linux nutzen kann - empfohlene Standardgröße 64 GB
+  (≈62 GB `DIALOS-DATA` nutzbar). Die Stick-Partitionierung wurde
+  manuell gegen einen echten 59,8-GB-USB-Stick verifiziert (Labels,
+  Dateisysteme, Rechte-Verhalten wie erwartet); die vollständige
+  `dialos-install`-Installation auf echter Hardware steht laut TODO.md
+  noch aus. Details:
+  [docs/sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md),
+  Abschnitt "Verschlüsselung von nutzers Daten + Sicherheits-Stick".
 
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur

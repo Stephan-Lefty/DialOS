@@ -2,11 +2,16 @@
 # DialOS re-key tool: issues a replacement security stick for an
 # already-installed system, without needing to ship a new device.
 #
+# Seit 2026-08-14 (siehe docs/sicherheit-datenschutz.md, Abschnitt
+# "Sicherheits-Stick als Anwesenheits-Token") verschlüsselt nur noch
+# eine eigene "dialos-nutzer-home"-Partition (nicht mehr die ganze
+# Platte) - dieses Werkzeug richtet einen neuen Schlüssel für GENAU
+# diese Partition ein.
+#
 # Intended flow when a stick is lost (see docs/sicherheit-datenschutz.md):
 #   1. The user (or a family member/caregiver, guided by phone) types
-#      the recovery passphrase once at the LUKS boot prompt, so the
-#      system can boot at all.
-#   2. Once booted, the user says "Hilfe rufen" to start RustDesk.
+#      the recovery passphrase once, so this tool can authorize itself.
+#   2. The user says "Hilfe rufen" to start RustDesk.
 #   3. Stephan connects remotely and runs this tool: it writes a fresh
 #      keyfile onto a new USB stick the user has plugged in, adds it as
 #      a LUKS key, retires the old (lost) keyfile slot, and offers a
@@ -23,18 +28,18 @@ fi
 LABEL="DIALOS-KEY"
 DATA_LABEL="DIALOS-DATA"
 KEYFILE_NAME=".dialos-key"
+HOME_LUKS_LABEL="dialos-nutzer-home"
 
 say() { zenity --info --width=400 --title="DialOS Stick-Ersatz" --text="$1" 2>/dev/null || echo "$1"; }
 warn() { zenity --warning --width=400 --title="DialOS Stick-Ersatz" --text="$1" 2>/dev/null || echo "$1" >&2; }
 die() { zenity --error --width=400 --title="DialOS Stick-Ersatz" --text="$1" 2>/dev/null || echo "$1" >&2; exit 1; }
 ask_password() { zenity --password --title="$1" 2>/dev/null; }
 
-# --- 1. Find the LUKS partition backing the running system ---
-LUKS_NAME=$(awk '$1 !~ /^#/ {print $1; exit}' /etc/crypttab)
-LUKS_UUID=$(awk '$1 !~ /^#/ {print $2; exit}' /etc/crypttab | sed 's/UUID=//')
-[ -n "$LUKS_UUID" ] || die "Kein LUKS-Eintrag in /etc/crypttab gefunden - dieses Werkzeug ist nur für ein installiertes DialOS-System gedacht."
-LUKS_PART="/dev/disk/by-uuid/$LUKS_UUID"
-[ -e "$LUKS_PART" ] || die "LUKS-Partition $LUKS_UUID nicht gefunden."
+# --- 1. Find nutzer's encrypted home partition (per LUKS2-Label, nicht
+#          mehr per /etc/crypttab - die Partition wird nicht mehr beim
+#          Boot ueber crypttab geoeffnet, siehe dialos-stick-gate.sh) ---
+LUKS_PART=$(blkid -L "$HOME_LUKS_LABEL" 2>/dev/null || true)
+[ -n "$LUKS_PART" ] || die "Keine Partition mit Label '$HOME_LUKS_LABEL' gefunden - dieses Werkzeug ist nur für ein installiertes DialOS-System gedacht."
 
 echo "== DialOS Stick-Ersatz =="
 
@@ -72,24 +77,29 @@ CONFIRM=$(zenity --entry --title="Bestätigung" \
   --text="Stick $NEW_STICK wird GELÖSCHT und als neuer Sicherheits-Stick eingerichtet.\nZum Bestätigen \"LOESCHEN\" eingeben:" 2>/dev/null || true)
 [ "$CONFIRM" = "LOESCHEN" ] || die "Abgebrochen: Bestätigung nicht erhalten."
 
-# --- 4. Format the stick (DIALOS-KEY 2 GiB + DIALOS-DATA rest) and
-#          write a fresh keyfile ---
+# --- 4. Format the stick (DIALOS-KEY 2 GiB ext4 - deliberately NOT
+#          Windows-readable, siehe dialos-install - + DIALOS-DATA rest,
+#          exFAT fuer Windows/macOS/Linux-Kompatibilitaet) and write a
+#          fresh keyfile ---
 umount "${NEW_STICK}"* 2>/dev/null || true
 wipefs -af "$NEW_STICK"
 parted -s "$NEW_STICK" mklabel gpt
-parted -s "$NEW_STICK" mkpart "$LABEL" fat32 1MiB 2049MiB
-parted -s "$NEW_STICK" mkpart "$DATA_LABEL" ext4 2049MiB 100%
+parted -s "$NEW_STICK" mkpart "$LABEL" ext4 1MiB 2049MiB
+# "fat32"-Hint nur fuer den GPT-Partitionstyp (Windows-Kompatibilitaet),
+# tatsaechlich mit exFAT formatiert - siehe dialos-install.
+parted -s "$NEW_STICK" mkpart "$DATA_LABEL" fat32 2049MiB 100%
 partprobe "$NEW_STICK"
 sleep 2
 NEW_STICK_PART="${NEW_STICK}1"
 NEW_DATA_PART="${NEW_STICK}2"
-mkfs.vfat -F32 -n "$LABEL" "$NEW_STICK_PART"
-mkfs.ext4 -F -L "$DATA_LABEL" "$NEW_DATA_PART"
+mkfs.ext4 -F -L "$LABEL" "$NEW_STICK_PART"
+mkfs.exfat -L "$DATA_LABEL" "$NEW_DATA_PART"
 
 mkdir -p /run/dialos-rekey
 mount "$NEW_STICK_PART" /run/dialos-rekey
 NEW_KEYFILE="/run/dialos-rekey/$KEYFILE_NAME"
 head -c 512 /dev/urandom > "$NEW_KEYFILE"
+chmod 600 "$NEW_KEYFILE"
 sync
 
 # --- 5. Add the new keyfile as a LUKS key, retire the old one ---

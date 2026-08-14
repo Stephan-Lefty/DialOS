@@ -42,93 +42,103 @@ voice output unreliable. The existing single-instance lock in
 `dialos-start-ansage.py` only prevents duplicate logins of the *same*
 account, not the cross-account overlap that "switch user" creates.
 
-## Disk encryption with a USB key
+## Encrypting nutzer's data + security stick
 
-The PC should only boot/unlock when a specific USB stick is plugged in.
-Implementation: **LUKS disk encryption with a key file on the USB stick**
-— a script in the initramfs waits for the stick at boot and automatically
-unlocks the disk once it is detected, with no password entry needed. If
-the stick is missing, the system stays encrypted.
+**Design since 2026-08-14** (replaces the original whole-disk
+encryption, see README changelog 0.5.0).
 
-Combined with autologin, this gives an ideal flow for the target group:
-plug in the stick → power on the device → the system is immediately ready
-and speaks to the user, without anything needing to be typed or read.
+**Why not the initramfs path anymore:** the real live-boot test of
+`dialos-install` with whole-disk LUKS encryption failed on 2026-08-14.
+The reason wasn't a single bug but that the whole LUKS/initramfs path is
+structurally error-prone: the key file had to be available at exactly
+the right moment inside the initramfs (one bug unmounted the stick
+before `cryptsetup open` even used it), and the installer itself didn't
+run smoothly either (a `pkexec` bug made the file-save dialog for the
+key backup fail silently). An initramfs offers almost no error
+output/debugging options for the target group on site - any failure
+there means a device that won't boot, with no way to help themselves
+until Stephan steps in.
 
-**Installation:** From the running live session there's a dedicated
-installer tool (`dialos-install`, launchable from the applications
-menu) instead of a standard installer like Calamares - its LUKS module
-is built around a typed password, not our stick-keyfile concept. The
-tool partitions the target disk, generates a random key onto the chosen
-security stick, additionally sets up a recovery passphrase (min. 12
-characters) as a second LUKS slot (see below), copies the running
-system onto the disk, and sets up the bootloader. Meant for
-you/technicians during office setup, not the on-site setup -
-deliberately not voice-controlled.
+**Current design:** instead of the whole disk, only a dedicated
+partition holding exclusively `nutzer`'s data is encrypted - and that
+partition is opened NOT in the initramfs, but after boot, inside the
+already-running normal system environment:
+
+- **root partition** (ext4, ~100 GiB): the OS + `dialosadmin`'s home,
+  **unencrypted**. Always boots completely normally, no more initramfs
+  pitfalls.
+- **`dialos-nutzer-home` partition** (LUKS2, remaining capacity):
+  holds exclusively `/home/nutzer`. Found via `blkid -L
+  dialos-nutzer-home` (LUKS2 label, no `/etc/crypttab` entry needed).
+- The security stick (`DIALOS-KEY` partition) still carries the key
+  file, plus a second data area `DIALOS-DATA` for general storage -
+  **unchanged** from before.
+- `dialos-stick-gate.service` (systemd oneshot, runs on **every boot**
+  before `display-manager.service`) checks whether the stick is
+  present: if so, it opens `dialos-nutzer-home` with the key from the
+  stick and mounts it at `/home/nutzer`; only then is `nutzer`'s
+  autologin enabled (`SetAutomaticLogin true` via AccountsService/
+  `gdbus`, the same mechanism as in `scripts/dialos-setup-nutzer.sh`
+  and [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 4). If any
+  step fails (no stick, wrong/damaged stick, home partition missing),
+  `/home/nutzer` stays an empty directory and autologin is disabled -
+  GDM shows the normal login screen, on which practically only
+  `dialosadmin` is usable (`nutzer`'s password is a random string
+  nobody knows).
+- `dialosadmin` is completely unaffected: never autologin, always a
+  normal typed password at the GDM screen, independent of the stick.
+
+This still delivers the original ideal flow for the target group (plug
+in the stick → power on the device → the system speaks to the user,
+without typing or reading anything), but without the fragile initramfs
+chain - and it now actually protects what's most sensitive on the
+device: `nutzer`'s own data. System files, `dialosadmin`'s home, and
+logs stay deliberately unencrypted (a deliberate trade-off - see README
+changelog 0.5.0 for the reasoning).
+
+Scripts/units: `usr/local/sbin/dialos-install`,
+`usr/local/sbin/dialos-rekey`, `usr/local/sbin/dialos-stick-gate.sh`,
+`etc/systemd/system/dialos-stick-gate.service` (all in the repo under
+`iso-build/config/includes.chroot/`, installation see
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 12).
 
 **Practical notes:**
 - The stick should be kept separately from the laptop (e.g. on a
   keyring), otherwise the encryption provides little benefit if both are
   stolen together.
-
-## Security stick as a presence token (autologin gate)
-
-**Addition since 2026-08-14**, independent of the encryption above.
-
-**Why:** the real live-boot test of `dialos-install` with the security
-stick failed on 2026-08-14. The reason wasn't a single bug but that the
-whole LUKS/initramfs path is structurally error-prone: the key file has
-to be available at exactly the right moment inside the initramfs (one
-bug unmounted the stick before `cryptsetup open` even used it), and the
-installer itself didn't run smoothly either (a `pkexec` bug made the
-file-save dialog for the key backup fail silently, see README changelog
-0.5.0). An initramfs offers almost no error output/debugging options for
-the target group on site - any failure there means a device that won't
-boot, with no way to help themselves until Stephan steps in. Instead of
-continuing to patch the fragile path, there is now also a much more
-robust, purely software-based presence check that runs entirely inside
-an already-running, normal system environment (no initramfs, no
-`pkexec`/xdg-portal pitfalls) - independent of the initramfs/LUKS path
-above:
-
-- A systemd service (`dialos-stick-gate.service`, runs as a oneshot
-  before `display-manager.service`) checks on **every boot** whether a
-  partition labeled `DIALOS-KEY` is found (`blkid -L DIALOS-KEY`, with a
-  short retry loop for USB detection that lags behind).
-- Stick present: autologin for `nutzer` is enabled
-  (`SetAutomaticLogin true` via AccountsService/`gdbus`, the same
-  mechanism as in `scripts/dialos-setup-nutzer.sh` and
-  [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 4).
-- Stick missing: autologin for `nutzer` is disabled
-  (`SetAutomaticLogin false`). GDM shows the normal login screen - on it
-  practically only `dialosadmin` is usable, since `nutzer`'s password is
-  a random string nobody knows.
-- `dialosadmin` is completely unaffected: never autologin, always a
-  normal typed password at the GDM screen, as before.
-
-Script: `usr/local/sbin/dialos-stick-gate.sh`, unit:
-`etc/systemd/system/dialos-stick-gate.service` (both in the repo under
-`iso-build/config/includes.chroot/`, installation see
-[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 12).
-
-**Important limitation:** this is purely an **access filter at login**,
-not encryption. The disk itself remains unprotected by this gate -
-anyone who removes it or boots the device from a live USB reads all the
-data directly, regardless of whether the stick is present. Only the
-LUKS encryption above still closes that gap. Whether the LUKS encryption
-(with its error-prone initramfs installation) remains alongside this
-gate long-term or gets dropped is an open decision (see TODO.md) -
-currently both mechanisms run independently side by side.
+- **Recommended standard size: 64 GB.** `dialos-install`/`dialos-rekey`
+  always partition the stick into `DIALOS-KEY` (2 GiB, key) +
+  `DIALOS-DATA` (remaining capacity, general storage) - at 64 GB this
+  gives `nutzer` about 62 GB of it automatically as portable storage
+  (e.g. for photos, documents) they can take along independently of the
+  device.
+- `scripts/dialos-setup-nutzer.sh` (creates the `nutzer` account during
+  office setup) checks before `adduser` whether `/home/nutzer` is
+  already mounted, and aborts cleanly if not - otherwise `nutzer`'s home
+  with all its skel default settings would accidentally end up on the
+  unencrypted root partition.
 
 ## Recovery when a stick is lost
 
 Three paths, depending on the situation:
 
-1. **Type the recovery passphrase directly at the boot screen.** Works
-   immediately, fully offline, independent of the stick and the network
-   — the only way to get a device running again at all when nothing
-   else is reachable. Talked through by Stephan over the phone, or
-   typed by a trusted person on site — never known by the end user
-   themselves.
+1. **Manually enter the recovery passphrase, via `dialosadmin`.** Since
+   `nutzer`'s home partition is no longer opened in the initramfs,
+   there's no more automatic password prompt at the boot screen -
+   `dialosadmin`'s own login, however, is completely independent of the
+   stick and always works with a typed password. Flow: log in as
+   `dialosadmin`, open a terminal, run
+   `sudo cryptsetup open --type luks2 $(sudo blkid -L dialos-nutzer-home) dialos-nutzer-home`
+   (prompts for the recovery passphrase), then
+   `sudo mount /home/nutzer && sudo /usr/local/sbin/dialos-stick-gate.sh`
+   - unlocks `nutzer`'s autologin for this session. Fully offline,
+   independent of the stick and the network — the only way to get a
+   device running again at all when nothing else is reachable. Talked
+   through by Stephan over the phone, or typed by a trusted person on
+   site — never known by the end user themselves. **Important:** this is
+   only a one-time unlock for the current session - after a reboot
+   without the stick, the normal lock applies again; use path 2 for a
+   permanent fix.
 2. **Set up a new stick remotely** (`dialos-rekey`, runs on the
    installed system). Once the device is running once (e.g. via path 1)
    and the user says "call for help", Stephan connects via RustDesk and

@@ -86,7 +86,8 @@ Wichtige Gruppen darin (Reihenfolge wie in der Datei):
 - **Terminal/Entwicklung**: `gnome-terminal`, `curl`, `wget`, `git`,
   `nodejs`/`npm` (für Claude Code CLI, Schritt 7), `dconf-cli`.
 - **Installer-/Sicherheits-Werkzeuge**: `zenity`, `polkitd`, `pkexec`,
-  `parted`, `dosfstools`, `cryptsetup` + `cryptsetup-initramfs`,
+  `parted`, `dosfstools`, `exfatprogs` (für die Windows-lesbare
+  `DIALOS-DATA`-Partition auf dem Sicherheits-Stick), `cryptsetup`,
   `rsync`, `grub-efi-amd64` (+ `-bin`), `openssl`,
   `systemd-timesyncd` (NTP, wichtig für den späteren Installer),
   `thunderbird-l10n-de`, `gnome-shell-extension-manager`.
@@ -416,20 +417,31 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.
 - `dialos-tts-indicator.py`: Panel-Icon, das anzeigt, wenn gerade
   gesprochen wird (braucht die AppIndicator-Erweiterung aus Schritt 9).
 
-## 12. Sicherheits-Werkzeuge (Stick-Verschlüsselung + Autologin-Gate)
+## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
+
+**Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-
+Verschlüsselung ab, siehe README-Änderungsprotokoll 0.5.0 und
+[sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
+"Verschlüsselung von nutzers Daten + Sicherheits-Stick", für Konzept +
+Begründung): `dialos-install` verschlüsselt nur noch eine eigene
+`dialos-nutzer-home`-Partition (LUKS2, ausschließlich `/home/nutzer`),
+root bleibt unverschlüsselt (~100 GiB, ext4). Kein
+`cryptsetup-initramfs`/`dialos-keyscript` mehr nötig - die
+Home-Partition wird nicht im initramfs geöffnet, sondern von
+`dialos-stick-gate.service` nach dem Boot.
 
 ```bash
 sudo mkdir -p /usr/local/sbin
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
-sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-keyscript /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey /usr/local/sbin/dialos-keyscript
-sudo mkdir -p /etc/initramfs-tools/hooks
-sudo cp iso-build/config/includes.chroot/etc/initramfs-tools/hooks/dialos-keyscript /etc/initramfs-tools/hooks/
-sudo chmod 755 /etc/initramfs-tools/hooks/dialos-keyscript
+sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
+sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey /usr/local/sbin/dialos-stick-gate.sh
 sudo mkdir -p /usr/share/applications
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
+sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable dialos-stick-gate.service
 ```
 
 Was diese Werkzeuge tun: siehe
@@ -444,26 +456,20 @@ andere), das Skript ist dann für andere Konten "nicht gefunden".
 Immer `chmod 755` für Skripte, `chmod 644` für reine Dateien wie
 `.desktop`/`.deb`.
 
-**Autologin-Gate (seit 2026-08-14, zusätzlich zur Verschlüsselung
-oben):** rein softwarebasierter Anwesenheits-Check des Sicherheits-
-Sticks, schaltet den Autologin von `nutzer` per AccountsService/`gdbus`
-um (Konzept + Begründung siehe
-[sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
-"Sicherheits-Stick als Anwesenheits-Token").
-
-```bash
-sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-stick-gate.sh
-sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable dialos-stick-gate.service
-```
-
-Wirkt erst ab dem **nächsten** Neustart (der Dienst läuft nur beim
-Boot, nicht rückwirkend auf die aktuell laufende Sitzung). Test: Stick
+`dialos-stick-gate.service` wirkt erst ab dem **nächsten** Neustart
+(läuft nur beim Boot, nicht rückwirkend auf die aktuell laufende
+Sitzung). Test nach einer echten `dialos-install`-Installation: Stick
 abziehen, neu starten - System muss am normalen GDM-Login-Screen
-landen statt `nutzer` automatisch anzumelden; Stick wieder einstecken,
-erneut neu starten - Autologin muss wieder greifen.
+landen statt `nutzer` automatisch anzumelden und `/home/nutzer` muss
+leer/nicht gemountet sein; Stick wieder einstecken, erneut neu starten
+- `/home/nutzer` muss gemountet sein und Autologin muss wieder greifen.
+
+**Wichtig für Schritt 13:** `scripts/dialos-setup-nutzer.sh` legt
+`nutzer`s Konto erst an, nachdem es geprüft (und notfalls per
+`dialos-stick-gate.sh` selbst ausgelöst) hat, dass `/home/nutzer`
+bereits gemountet ist - **der Sicherheits-Stick muss beim Ausführen von
+Schritt 13 also schon eingesteckt sein**, sonst bricht das Skript
+kontrolliert ab (siehe sicherheit-datenschutz.md).
 
 ## 13. Nutzer-Konto anlegen + Büro-Setup abschließen
 
