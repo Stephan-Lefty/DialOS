@@ -23,6 +23,25 @@ blind, operating a login chooser). Trade-off: physical access to the
 device means direct access to the system — mitigated by disk encryption
 with a hardware key (see below).
 
+**Admin access:** The autologin account is always `nutzer`
+(`AutomaticLogin=true`), the admin account `dialosadmin` stays active but
+without autologin (`AutomaticLogin=false`) – see
+`scripts/dialos-setup-nutzer.sh`. For interventions on site or via
+RustDesk (after `nutzer` has said "call for help" by voice): **properly
+log `nutzer` off**, then log in as `dialosadmin` with a password at the
+GDM screen. Requires `dialosadmin` to have a valid, non-locked password.
+
+**Important, corrected 2026-08-14:** Deliberately **avoid** GNOME
+**"switch user"** (instead of a proper logout) – it leaves `nutzer`'s
+session active in the background. Per a test finding from 2026-08-13
+(see [offene-punkte.en.md](offene-punkte.en.md), entry "Bluetooth
+speaker/voice output sometimes inaudible after login"), two
+concurrently running `dialos-start-ansage.py` instances (one per
+account) then compete over Bluetooth reconnect and audio muting, making
+voice output unreliable. The existing single-instance lock in
+`dialos-start-ansage.py` only prevents duplicate logins of the *same*
+account, not the cross-account overlap that "switch user" creates.
+
 ## Disk encryption with a USB key
 
 The PC should only boot/unlock when a specific USB stick is plugged in.
@@ -40,15 +59,17 @@ installer tool (`dialos-install`, launchable from the applications
 menu) instead of a standard installer like Calamares - its LUKS module
 is built around a typed password, not our stick-keyfile concept. The
 tool partitions the target disk, generates a random key onto the chosen
-security stick, additionally sets up a recovery passphrase as a second
-LUKS slot (see below), copies the running system onto the disk, and
-sets up the bootloader. Meant for you/technicians during office setup,
-not the on-site setup - deliberately not voice-controlled.
+security stick, additionally sets up a recovery passphrase (min. 12
+characters) as a second LUKS slot (see below), copies the running
+system onto the disk, and sets up the bootloader. Meant for
+you/technicians during office setup, not the on-site setup -
+deliberately not voice-controlled.
 
 **Practical notes:**
 - The stick should be kept separately from the laptop (e.g. on a
   keyring), otherwise the encryption provides little benefit if both are
   stolen together.
+
 ## Recovery when a stick is lost
 
 Three paths, depending on the situation:
@@ -74,10 +95,20 @@ Three paths, depending on the situation:
 
 Paths 2 and 3 need the **encrypted key backup**: the installer
 (`dialos-install`) and the rekey tool (`dialos-rekey`) encrypt the
-small key file (not the whole disk) with the currently valid recovery
-passphrase (`openssl enc -aes-256-cbc -pbkdf2`) and offer to save the
-file — Stephan stores it in his own, self-hosted Nextcloud (one file
-per user/device), not with a third-party cloud provider.
+small key file (not the whole disk) with a dedicated, randomly
+generated backup password (`openssl rand -base64 32`, encrypted via
+`openssl enc -aes-256-cbc -pbkdf2`) and offer to save the file —
+Stephan stores it in his own, self-hosted Nextcloud (one file per
+user/device), not with a third-party cloud provider.
+
+**Important: the backup password is deliberately NOT the same as the
+recovery passphrase** from paths 1/2 above. If the same passphrase were
+used for both, anyone who knew the recovery passphrase and had access
+to the Nextcloud could decrypt the key — entirely without the physical
+stick, which would defeat the whole point of tying unlock to the stick.
+The tool shows the generated backup password once after saving; Stephan
+must store it separately from the Nextcloud (e.g. in his own password
+manager), never together with the backup file itself.
 
 ## Shipping security
 

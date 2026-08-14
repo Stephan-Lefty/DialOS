@@ -52,6 +52,94 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 
 ## Änderungsprotokoll
 
+### 0.5.0
+- **Sicherheitsfix Schlüssel-Backup:** `dialos-install` und `dialos-rekey`
+  verschlüsselten das Nextcloud-Backup der LUKS-Schlüsseldatei bisher mit
+  demselben Wiederherstellungs-Passwort, das auch als zweiter
+  LUKS-Schlüssel-Slot dient - wer beides kannte, hätte den Schlüssel ganz
+  ohne den physischen Stick entschlüsseln können. Jetzt: eigenes,
+  zufällig erzeugtes Backup-Passwort (`openssl rand -base64 32`),
+  Passwortübergabe an `openssl` über eine geshredete Temp-Datei statt
+  Kommandozeilen-Argument (verhindert Sichtbarkeit in `ps aux`),
+  Wiederherstellungs-Passwort braucht jetzt mindestens 12 Zeichen.
+- **Sicherheits-Stick partitioniert jetzt in zwei Bereiche:** `DIALOS-KEY`
+  (2 GiB, FAT32, wie bisher für die Schlüsseldatei) + `DIALOS-DATA`
+  (Rest der Kapazität, ext4, allgemeiner Datenspeicher) - vorher wurde
+  die gesamte Stick-Kapazität für die winzige Schlüsseldatei
+  "verschwendet". Neue Mindestgrößen-Prüfung (~2,5 GB) verhindert eine
+  kaputte/leere Datenpartition bei zu kleinen Sticks. Dabei außerdem
+  einen Bug behoben: Die Sicherheits-Stick-Auswahl in `dialos-install`
+  blendete (anders als die Zielfestplatten-Auswahl) das aktuelle
+  Live-Boot-Medium nicht aus - bei drei angeschlossenen Medien
+  (Boot-Stick, Sicherheits-Stick, interne Platte) hätte der Boot-Stick
+  fälschlich als Sicherheits-Stick wählbar sein können.
+- **Admin-Zugriff dokumentiert und korrigiert:** Erst wurde GNOME
+  "Benutzer wechseln" als Weg für parallelen `dialosadmin`-Zugriff neben
+  der laufenden `nutzer`-Sitzung dokumentiert. Beim Rekonstruieren der
+  Vortags-Session kam aber ein bereits gefundener Bug ans Licht (siehe
+  unten): "Benutzer wechseln" lässt `nutzer`s Sitzung im Hintergrund
+  aktiv, zwei gleichzeitig laufende `dialos-start-ansage.py`-Instanzen
+  konkurrieren dann um Bluetooth/Audio. Korrigierte Praxis: `nutzer`
+  richtig abmelden, danach als `dialosadmin` anmelden. Eine
+  Boot-Zeit-Tastenkombination für direkten Admin-Zugriff bleibt als
+  offene Verbesserungsoption vorgemerkt (`docs/offene-punkte.md`).
+- **Bluetooth-Audio-Bug behoben** (`dialos-start-ansage.py`): Nach dem
+  Login blieb die Sprachansage über den Bluetooth-Lautsprecher
+  intermittierend aus. Ursache: mehrere gleichzeitig laufende
+  Skript-Instanzen (durch Kontowechsel ohne echtes Abmelden)
+  konkurrierten um Bluetooth-Reconnect und Audio-Stummschaltung. Fix:
+  Ein-Instanz-Lock pro Konto (`alte_instanz_beenden()`) sowie ein
+  Bluetooth-Debug-Log (`bluetooth_debug_snapshot()`) für künftige
+  Fehlersuche ohne manuelles Nachstellen.
+- **Spracherkennung (Vosk) technisch zum Laufen gebracht:** Vosk 0.3.45 +
+  deutsche Modelle (groß `vosk-model-de-0.21`, 6,3 GB; klein
+  `vosk-model-small-de-0.15`, 183 MB) installiert, reines
+  Technik-Testskript `dialos-vosk-test.py` (Mikrofon wählen, aufnehmen,
+  transkribieren, im Terminal anzeigen - noch ohne Anbindung an
+  Intent-Erkennung/TTS). Aufnahme-Modus bewusst "erst vollständig
+  aufnehmen, dann erkennen" statt Echtzeit-Streaming, da das große
+  Modell laut offizieller Beschreibung für Telefonie/Server gedacht ist,
+  nicht Echtzeit auf Laptop-Hardware. Mikrofon-Vergleichstest AIRHUG
+  Bluetooth vs. eingebautes Laptop-Mikrofon: Bluetooth klar überlegen (6
+  von 8 Testsätzen exakt korrekt bei normaler Sprechlautstärke, gegenüber
+  deutlich schwächeren Ergebnissen beim eingebauten Mikrofon) -
+  Zielbild: DialOS wird künftig immer mit einem mobilen
+  Bluetooth-Lautsprecher/Mikrofon installiert, eingebautes Mikrofon nur
+  als (noch nicht implementierter) Fallback.
+- **Intent-Erkennung auf [hassil](https://github.com/OHF-Voice/hassil)
+  festgelegt** statt des ursprünglich angedachten Rhasspy, das 2026 vom
+  Ersteller archiviert wurde und nicht mehr weiterentwickelt wird -
+  hassil bietet denselben Beispielsatz-Ansatz, aber als schlanke
+  Python-Bibliothek ohne Docker/eigenen Dienst (siehe
+  [docs/sprachsteuerung.md](docs/sprachsteuerung.md)).
+- Neue Sprachausgabe-Aktiv-Anzeige im GNOME-Panel
+  (`dialos-tts-indicator.py`): Icon erscheint während jeder
+  Sprachausgabe und verschwindet danach zuverlässig - nützlich, falls
+  die Lautstärke zu leise eingestellt ist und eine sehende Person
+  trotzdem sehen soll, dass gerade gesprochen wird.
+- `dialos-start-ansage.py` weiter verbessert: Zahlwort-Bug behoben
+  ("einsundzwanzig" → "einundzwanzig"), Internetstatus/Wetter/Abschluss
+  in einem einzigen Sprachausgabe-Aufruf statt mehrerer (verhinderte
+  kurze Hintergrundmusik-Einblendungen zwischen den Aufrufen),
+  Akku-Ansage nur noch für tatsächlich verbundene Geräte, neue
+  Hintergrund-Überwachung meldet Internet-Statuswechsel auch nach der
+  Anmeldung, kontobasierter Filter (Kundenkonto `nutzer` bekommt nur
+  Laptop + Lautsprecher abgefragt, jedes andere Konto die volle
+  Variante mit Maus/Tastatur).
+- Netzwerk-Priorität WLAN/Kabel vor SIM umgesetzt und auf dem T490
+  verifiziert (NetworkManager-Routenmetriken).
+- Zwei ISO-Testbuilds erstellt: `DialOS-Live-0.5.0.iso` (ohne Klonen,
+  generischer Live-Nutzer als Sicherheitsnetz) und
+  `DialOS-Live-0.5.0-clone.iso` (mit `--clone`, übernimmt `dialosadmin`
+  und `nutzer` inkl. Home-Verzeichnissen aus dem echten System - für
+  den geplanten Live-Test von `dialos-install` mit dem Sicherheits-Stick
+  gedacht).
+- Zwei nie gepushte Commits aus einer veralteten lokalen Repo-Kopie
+  wiederhergestellt und ins echte Repository nachgezogen (Bluetooth-Fix
+  und dessen Dokumentation) - Repository liegt jetzt vollständig auf der
+  externen Platte, veraltete Zweitkopie war zwischenzeitlich ungenutzt
+  weitergelaufen.
+
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur
   Thunderbird soll für E-Mail und Kalender genutzt werden): `apt purge`
