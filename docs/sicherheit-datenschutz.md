@@ -23,6 +23,18 @@ Login-Auswahl bedienen). Trade-off: physischer Zugriff auf das Gerät
 bedeutet direkten Zugriff auf das System – das wird durch die
 Festplattenverschlüsselung mit Hardware-Schlüssel abgefedert (siehe unten).
 
+**Admin-Zugriff parallel zu `nutzer`:** Das Autologin-Konto ist immer
+`nutzer` (`AutomaticLogin=true`), das Admin-Konto `dialosadmin` bleibt
+aktiv, aber ohne Autologin (`AutomaticLogin=false`) – siehe
+`scripts/dialos-setup-nutzer.sh`. Für Eingriffe vor Ort oder per RustDesk
+(nachdem `nutzer` per Sprachbefehl "Hilfe rufen" gesagt hat) reicht das
+GNOME-Bordmittel **"Benutzer wechseln"**: darüber lässt sich `dialosadmin`
+mit Passwort in einer eigenen, parallelen Sitzung öffnen, ohne `nutzer`s
+laufende Sitzung zu unterbrechen. Setzt voraus, dass
+`org.gnome.desktop.lockdown disable-user-switching` auf `false` steht
+(Standard, auf dem T490 verifiziert) und `dialosadmin` ein gültiges,
+nicht gesperrtes Passwort hat. Kein zusätzlicher Mechanismus nötig.
+
 ## Festplattenverschlüsselung mit USB-Schlüssel
 
 Der PC soll nur booten/entsperren, wenn ein bestimmter USB-Stick

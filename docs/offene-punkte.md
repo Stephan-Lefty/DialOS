@@ -37,6 +37,18 @@ damit nichts aus den Diskussionen verloren geht.
   (nicht im Repo hinterlegt) statt eines festen Platzhalters.
 - Eigener RustDesk-Relay-Server (hbbs/hbbr) ist für später geplant, sobald
   das System stabil läuft – noch kein konkreter Zeitpunkt/Ablauf.
+- Boot-Zeit-Tastenkombination für direkten `dialosadmin`-Zugriff (statt
+  GNOME "Benutzer wechseln", siehe sicherheit-datenschutz.md, Abschnitt
+  "Automatische Anmeldung"): technisch möglich (eigener früher Boot-Dienst,
+  der kurz auf einen gehaltenen Tastendruck lauscht, z. B. über rohen
+  `/dev/input`-Zugriff, und je nach Ergebnis per `gdbus` das Autologin-Ziel
+  umbiegt), aber bewusst zurückgestellt – "Benutzer wechseln" funktioniert
+  bereits zuverlässig ohne zusätzliche Boot-Software. Nur aufgreifen, falls
+  sich "Benutzer wechseln" in der Praxis als zu umständlich erweist (z. B.
+  Probleme beim Fernwarten per RustDesk mit dem GDM-Wechsel-Bildschirm).
+  Risiko bei Umsetzung: sauberes Zeitfenster nötig, sonst könnte ein
+  zufälliger Tastendruck während des normalen Kundenboots ungewollt den
+  Admin-Pfad statt des normalen `nutzer`-Autologins auslösen.
 
 ## ISO-Build
 - Rechtschreibprüfung (hunspell-de-de/hunspell-en-us, aspell) fehlt in
