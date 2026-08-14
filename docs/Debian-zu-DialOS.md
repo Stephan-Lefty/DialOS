@@ -148,6 +148,27 @@ sudo update-grub
 Verifikation erst nach einem echten Neustart möglich (Splash zwischen
 Firmware-Logo und Anmeldung/Desktop).
 
+**Boot-Hintergrund von `eggs produce` selbst (GRUB/isolinux, Live-ISO):**
+Getrennt vom Plymouth-Theme oben kopiert `eggs produce` beim Bauen
+zusätzlich `/etc/penguins-eggs.d/brain.d/assets/splash.png` als
+Hintergrundbild in den GRUB- und isolinux-Bootbereich der fertigen
+Live-ISO - das ist die Grafik, die ganz am Anfang beim Booten von der
+ISO erscheint, noch vor Plymouth. Ohne eigene Datei zeigt das Paket
+`eggs` dort standardmäßig ein Pinguin-Foto:
+
+```bash
+sudo mkdir -p /etc/penguins-eggs.d/brain.d/assets
+sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/splash.png /etc/penguins-eggs.d/brain.d/assets/splash.png
+```
+
+Nutzt dieselbe schon komprimierte Datei wie das Plymouth-Theme oben
+(~2 MB statt der 14,7-MB-Rohversion aus `assets/`). **Noch nicht per
+echtem Live-Boot verifiziert**, ob die Auflösung (2559×1440) im
+isolinux-Kontext (traditionell 640×480-VESA-Erwartung) sauber
+skaliert/zentriert wird oder verzerrt/beschnitten erscheint - beim
+nächsten Live-Boot-Test mit prüfen, ggf. auf 640×480 zuschneiden falls
+nötig.
+
 ## 4. Autologin einrichten
 
 **Zentrale Falle:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`,

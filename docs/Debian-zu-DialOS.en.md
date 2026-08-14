@@ -143,6 +143,27 @@ sudo update-grub
 Can only be verified after a real reboot (splash between the firmware
 logo and the login/desktop).
 
+**Boot background from `eggs produce` itself (GRUB/isolinux, live
+ISO):** separately from the Plymouth theme above, `eggs produce` also
+copies `/etc/penguins-eggs.d/brain.d/assets/splash.png` as the
+background image into the GRUB and isolinux boot area of the finished
+live ISO while building - that's the graphic that appears right at the
+very start when booting from the ISO, before Plymouth even runs.
+Without a custom file, the `eggs` package shows a default penguin photo
+there:
+
+```bash
+sudo mkdir -p /etc/penguins-eggs.d/brain.d/assets
+sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/splash.png /etc/penguins-eggs.d/brain.d/assets/splash.png
+```
+
+Reuses the same already-compressed file as the Plymouth theme above
+(~2 MB instead of the 14.7 MB raw version in `assets/`). **Not yet
+verified via a real live boot** whether the resolution (2559×1440)
+scales/centers cleanly in the isolinux context (traditionally a
+640×480 VESA expectation) or appears stretched/cropped - check during
+the next live-boot test, crop to 640×480 if needed.
+
 ## 4. Set up autologin
 
 **Key gotcha:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`, see
