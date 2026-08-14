@@ -179,9 +179,12 @@ else
 fi
 shred -u "$BACKUP_TMP" 2>/dev/null || rm -f "$BACKUP_TMP"
 
-umount /run/dialos-key-write
-
+# Unlock LUKS with the keyfile BEFORE unmounting the stick - $KEYFILE
+# lives on the stick's DIALOS-KEY partition, so unmounting first would
+# make it inaccessible and abort the script here (set -e), exactly as
+# happened during Stephan's live-boot test on 2026-08-14.
 cryptsetup open --key-file="$KEYFILE" "$LUKS_PART" "$LUKS_NAME"
+umount /run/dialos-key-write
 mkfs.ext4 -L dialos-root "/dev/mapper/$LUKS_NAME"
 
 # --- 8. Copy the running live system onto the new root ---
