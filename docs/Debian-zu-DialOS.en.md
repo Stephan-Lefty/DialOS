@@ -429,18 +429,37 @@ That calls, in order:
 3. Checks that the Firefox homepage policy from step 10 is set
    correctly.
 
-Provide the Claude desktop app for the new account (freshly downloaded
-during every office setup, not committed to the repo):
+**Important correction (2026-08-14):** All scripts in `scripts/` are
+**for `dialosadmin` only** - `nutzer` should never see them. So do
+**not** distribute them via `/etc/skel/Desktop/` - instead copy them
+directly onto the already-existing `dialosadmin` account
+(`/etc/skel/` only affects accounts created *after* it's populated -
+in this recipe that's exclusively `nutzer`, not a second admin
+account; an earlier attempt to solve this via `/etc/skel/Desktop/`
+therefore ended up on `nutzer`'s desktop unintentionally):
+
+```bash
+mkdir -p /home/dialosadmin/Desktop
+cp scripts/*.sh /home/dialosadmin/Desktop/
+chmod 755 /home/dialosadmin/Desktop/*.sh
+chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/*.sh
+```
+
+Provide the Claude desktop app for the admin account (freshly
+downloaded during every office setup, not committed to the repo) - for
+the same reason, also directly onto `dialosadmin`'s desktop, not via
+`/etc/skel/`:
 
 ```bash
 cd /tmp && apt-get download claude-desktop
-sudo cp /tmp/claude-desktop*.deb /etc/skel/Desktop/
-sudo chmod 644 /etc/skel/Desktop/claude-desktop*.deb
-sudo chown root:root /etc/skel/Desktop/claude-desktop*.deb
+sudo cp /tmp/claude-desktop*.deb /home/dialosadmin/Desktop/
+sudo chmod 644 /home/dialosadmin/Desktop/claude-desktop*.deb
+sudo chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/claude-desktop*.deb
 ```
 
-After this step: reboot and verify that `nutzer` starts automatically
-with no login screen.
+After this step: reboot, verify that `nutzer` starts automatically with
+no login screen - and that `nutzer`'s own desktop is **empty** of admin
+tools.
 
 ## 14. Bake in Bluetooth pairing data (optional, device-specific)
 

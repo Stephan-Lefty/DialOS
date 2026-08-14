@@ -283,6 +283,19 @@ nicht weiterverfolgt.
      `/etc/skel/Desktop/claude-desktop_1.26832.0_amd64.deb`,
      `-rw-r--r-- root root`. Landet damit automatisch auf dem Desktop
      jedes künftig angelegten `DialOS-Admin`-Kontos.
+   - 🐛 **Bug gefunden und korrigiert (2026-08-14):** Die Annahme "landet
+     auf dem Desktop jedes künftig angelegten `DialOS-Admin`-Kontos" war
+     falsch — `/etc/skel/` wirkt auf JEDES Konto, das danach per
+     `adduser` angelegt wird, und in diesem Rezept ist das ausschließlich
+     `nutzer` (es gibt nie ein zweites Admin-Konto). Die `.deb` landete
+     also ungewollt auf `nutzer`s Desktop statt auf einem (nicht
+     existierenden) künftigen Admin-Konto — dasselbe Problem betraf auch
+     `dialos-setup-nutzer.sh` unter `iso-build/config/includes.chroot/
+     etc/skel/Desktop/`. Fix: beides jetzt per explizitem `cp` direkt auf
+     `dialosadmin`s bereits existierendes Desktop kopiert, nicht mehr
+     über `/etc/skel/`. Siehe
+     [Debian-zu-DialOS.md](docs/Debian-zu-DialOS.md), Schritt 13, und
+     [scripts/README.md](scripts/README.md).
 
    ### ⚠️ Wichtige Rechte-Falle: `chmod +x` reicht bei `/etc/skel/`-Dateien NICHT
 

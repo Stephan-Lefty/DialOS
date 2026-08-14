@@ -433,18 +433,37 @@ Das ruft nacheinander auf:
    AccountsService die neue Passwort-Zeile noch nicht bemerkt hatte).
 3. Prüft, ob die Firefox-Startseiten-Policy aus Schritt 10 korrekt sitzt.
 
-Claude-Desktop-App fürs neue Konto bereitstellen (wird bei jedem
-Büro-Setup frisch heruntergeladen, nicht ins Repo committet):
+**Wichtige Korrektur (2026-08-14):** Alle Skripte in `scripts/` sind
+**nur für `dialosadmin`** gedacht - `nutzer` soll sie nie zu Gesicht
+bekommen. Sie deshalb **nicht** über `/etc/skel/Desktop/` verteilen,
+sondern gezielt auf das bereits existierende `dialosadmin`-Konto
+kopieren (`/etc/skel/` wirkt nur bei Konten, die *danach* angelegt
+werden - bei diesem Rezept ist das ausschließlich `nutzer`, nicht ein
+weiteres Admin-Konto; ein früherer Versuch, das über `/etc/skel/Desktop/`
+zu lösen, landete deshalb ungewollt auf `nutzer`s Desktop):
+
+```bash
+mkdir -p /home/dialosadmin/Desktop
+cp scripts/*.sh /home/dialosadmin/Desktop/
+chmod 755 /home/dialosadmin/Desktop/*.sh
+chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/*.sh
+```
+
+Claude-Desktop-App fürs Admin-Konto bereitstellen (wird bei jedem
+Büro-Setup frisch heruntergeladen, nicht ins Repo committet) - aus
+demselben Grund ebenfalls direkt auf `dialosadmin`s Desktop, nicht über
+`/etc/skel/`:
 
 ```bash
 cd /tmp && apt-get download claude-desktop
-sudo cp /tmp/claude-desktop*.deb /etc/skel/Desktop/
-sudo chmod 644 /etc/skel/Desktop/claude-desktop*.deb
-sudo chown root:root /etc/skel/Desktop/claude-desktop*.deb
+sudo cp /tmp/claude-desktop*.deb /home/dialosadmin/Desktop/
+sudo chmod 644 /home/dialosadmin/Desktop/claude-desktop*.deb
+sudo chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/claude-desktop*.deb
 ```
 
 Nach diesem Schritt: neu starten, verifizieren dass `nutzer` automatisch
-ohne Anmeldebildschirm startet.
+ohne Anmeldebildschirm startet - und dass `nutzer`s eigener Desktop
+**leer** von Admin-Werkzeugen ist.
 
 ## 14. Bluetooth-Kopplungsdaten fest einbauen (optional, geräte­spezifisch)
 

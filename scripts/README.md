@@ -3,6 +3,16 @@
 Diese Datei wird von Claude bei jeder Änderung an einem Skript in
 diesem Ordner (neu angelegt, geändert, gelöscht) mit aktualisiert.
 
+**Wichtig:** Alle Skripte hier sind ausschließlich für `dialosadmin`
+gedacht - `nutzer` soll sie nie sehen. Deshalb werden sie explizit auf
+`dialosadmin`s Desktop kopiert (siehe
+[Debian-zu-DialOS.md](../docs/Debian-zu-DialOS.md), Schritt 13), **nicht**
+über `/etc/skel/Desktop/` verteilt - das würde ungewollt auch bei
+`nutzer` landen, da `/etc/skel/` in diesem Rezept nur `nutzer` als
+"künftig angelegtes Konto" betrifft, kein zweites Admin-Konto
+(Korrektur vom 2026-08-14, betraf vorher auch `dialos-setup-nutzer.sh`
+und die `claude-desktop.deb`).
+
 ## dialos-set-avatar.sh
 
 Setzt die DialOS-Bildmarke als Profilbild (Avatar) für ein
