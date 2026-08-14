@@ -39,10 +39,19 @@ Aufruf: `sudo ./dialos-setup-nutzer.sh [admin-benutzername]`
 
 Stellt nach einem Reinstall des T490 die Arbeitsumgebung für Claude
 Code wieder her: legt die eng begrenzte Sudoers-Regel für
-`eggs produce` (ohne Passwortabfrage) neu an und setzt den Symlink
-`~/DialOS` auf das Repo der externen Platte neu. Deckt bewusst NICHT
-die Claude-Anmeldung selbst ab (Login/Zugangsdaten) - dafür einfach
-`claude` starten und neu einloggen.
+`eggs produce` (ohne Passwortabfrage) neu an, setzt den Symlink
+`~/DialOS` auf das Repo der externen Platte neu, und setzt Git-Identität
+(`user.name`/`user.email`) + `credential.helper=store` für
+`dialosadmin`, damit `git push` nach einem Reinstall nicht mehr an
+fehlender Identität scheitert.
+
+Deckt bewusst NICHT ab (Sicherheitsgrenze, kein Bug): die
+Claude-Chat-Anmeldung selbst (Login/Zugangsdaten - einfach `claude`
+starten und neu einloggen), den Connector für die externe Platte sowie
+die GitHub-Integration in der Claude-App (App-seitige Verbindungen,
+müssen dort neu erteilt werden), und das GitHub-Token selbst (`git
+push` fragt beim ersten Mal einmalig danach - manuell einzutippen,
+kein Skript nimmt Tokens/Passwörter entgegen).
 
 Aufruf: `sudo ./dialos-claude-setup.sh`
 

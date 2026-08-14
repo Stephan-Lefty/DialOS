@@ -56,9 +56,9 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bei einem erneuten Auftreten des Problems prüfen.
 - [ ] Veraltete lokale Repo-Zweitkopie unter `~/DialOS-repo` löschen oder
   bewusst als Backup behalten (Entscheidung noch offen) - der Symlink
-  `~/DialOS` ist mittlerweile korrekt gesetzt (siehe "Erledigt" unten),
-  aber die Zweitkopie selbst liegt noch da. Zwei unabhängige Kopien
-  nebeneinander sind fehleranfällig - genau dadurch sind zwei nie
+  `~/DialOS` ist jetzt tatsächlich korrekt gesetzt (siehe "Erledigt"
+  unten), aber die Zweitkopie selbst liegt noch da. Zwei unabhängige
+  Kopien nebeneinander sind fehleranfällig - genau dadurch sind zwei nie
   gepushte Commits vom 13.08. am 14.08. fast verloren gegangen.
 - [ ] `/home/eggs/*.iso`-Restdateien der letzten Builds aufräumen
   (gehören `root`, die `eggs produce`-NOPASSWD-Regel deckt nur
@@ -74,10 +74,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 - [x] Neuen ISO-Build mit allen gesammelten Fixes (Bootscreen,
   Avatar-Skript, Calamares-Branding, Piper-TTS) erstellen - erledigt
   2026-08-10/11 (ISO vom 11.08.).
-- [x] Symlink `~/DialOS → .../SanDisk-Extreme/DialOS/repo` neu setzen -
-  erledigt 2026-08-14 über `scripts/dialos-claude-setup.sh`, das jetzt
-  bei jedem Reinstall auch die `eggs produce`-Sudoers-Regel mit
-  wiederherstellt.
+- [x] `scripts/dialos-claude-setup.sh` erweitert (Git-Identität +
+  `credential.helper=store` für `dialosadmin`) und tatsächlich
+  ausgeführt/verifiziert - erledigt 2026-08-14. `~/DialOS`-Symlink jetzt
+  bestätigt vorhanden (per `readlink -f`, zeigt korrekt auf
+  `.../SanDisk-Extreme/DialOS/repo`), Sudoers-Regel war schon vorhanden,
+  Git-Identität + `credential.helper` per `git config --global`
+  bestätigt. (Der vorherige "erledigt"-Eintrag hierzu war falsch - das
+  Skript war nie erfolgreich mit `sudo` durchgelaufen, siehe
+  Commit-Historie.)
 - [x] AppIndicator-Pakete für `dialos-tts-indicator.py`
   (`gnome-shell-extension-appindicator`, `gir1.2-ayatanaappindicator3-0.1`)
   in der Paketliste verankert - erledigt 2026-08-14, dabei zusätzlich
