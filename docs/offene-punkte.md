@@ -59,10 +59,21 @@ damit nichts aus den Diskussionen verloren geht.
   werden (ggf. Installation nach dem ersten Boot statt zur Build-Zeit).
 
 ## Sprachsteuerung
-- Konkrete Intent-Schicht (eigene Middleware vs. bestehendes Framework
-  als Ausgangsbasis) noch nicht festgelegt.
 - Wake-Word-Engine für Akku-sparendes Dauerlauschen noch nicht final
   entschieden (Vorschlag: openWakeWord).
+- Bluetooth-Mikrofon-Fallback-Logik fehlt noch: Laut Vergleichstest
+  (2026-08-13, AIRHUG-Bluetooth-Gerät vs. eingebautes Laptop-Mikrofon –
+  6 von 8 Testsätzen exakt korrekt über Bluetooth bei normaler
+  Sprechlautstärke/-abstand, gegenüber deutlich schwächeren Ergebnissen
+  beim eingebauten Mikrofon) ist das Zielbild: DialOS wird künftig immer
+  mit einem mobilen Bluetooth-Lautsprecher/Mikrofon (wie AIRHUG) als
+  primärem Ein-/Ausgabeweg installiert, das eingebaute Mikrofon/die
+  Lautsprecher sind nur Fallback (leerer Akku am Bluetooth-Gerät oder
+  keine Bluetooth-Verbindung). Diese Umschaltung (erkennen, dass kein
+  Bluetooth-Gerät verbunden ist, und automatisch aufs eingebaute
+  Mikrofon/die Lautsprecher wechseln) ist noch nicht implementiert –
+  bisher deckt `dialos-vosk-test.py` nur den technischen
+  Bluetooth-Anteil ab (per `--bluetooth-erlauben`).
 
 ## Telefonie
 - Priorisierung WhatsApp vs. Signal als Messenger noch offen.
