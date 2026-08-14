@@ -9,15 +9,27 @@ entschiedene Architekturfragen) sind das hier konkrete, abhakbare
 Aufgaben. Erledigte Punkte werden mit einem Häkchen markiert, nicht
 gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 
-- [ ] Echten Live-Boot-Test mit `DialOS-Live-0.5.0-clone.iso`
-  durchführen (löst den alten, jetzt überholten Live-Boot-Test-Punkt für
-  die ISO vom 11.08. ab): vor `dialos-install` per `gdbus` prüfen, ob
-  `dialosadmin`/`nutzer` mit korrektem Autologin-Status mitgekommen sind
-  (siehe docs/sicherheit-datenschutz.md, Abschnitt "Automatische
-  Anmeldung"); danach `dialos-install` mit dem Sicherheits-Stick komplett
-  durchspielen - externe SanDisk-Extreme-Platte vorher abstecken (sonst
-  als Zielfestplatte wählbar!); neue Stick-Partitionierung (`DIALOS-KEY`
-  2 GiB + `DIALOS-DATA` ext4) verifizieren.
+- [ ] Echten Live-Boot-Test mit `DialOS-Live-0.5.0-clone.iso` erneut
+  durchführen: erster Versuch am 2026-08-14 ist bei `dialos-install`
+  gescheitert, zwei Bugs im Skript gefunden und behoben (siehe
+  Commit-Historie): 1) Sicherheits-Stick wurde vor der `cryptsetup
+  open`-Nutzung der Schlüsseldatei ausgehängt, 2) Datei-Speichern-Dialog
+  für das Schlüssel-Backup blieb unter `pkexec` lautlos aus (fehlende
+  `DBUS_SESSION_BUS_ADDRESS`/`XDG_RUNTIME_DIR` für den
+  xdg-desktop-portal-Zugriff). **Wichtig vor dem nächsten Versuch:** Die
+  gepatchte `dialos-install` liegt bisher nur im Git-Repo - sie muss
+  zusätzlich auf das aktuell laufende System kopiert werden UND eine neue
+  ISO mit `eggs produce` gebaut werden, sonst testet der nächste
+  Live-Boot wieder die alte, fehlerhafte Version (siehe "Root Cause
+  des 'nichts hat sich verändert'-Tests", 2026-08-11, in der
+  Commit-Historie). Danach wie ursprünglich geplant: vor `dialos-install`
+  per `gdbus` prüfen, ob `dialosadmin`/`nutzer` mit korrektem
+  Autologin-Status mitgekommen sind (siehe docs/sicherheit-
+  datenschutz.md, Abschnitt "Automatische Anmeldung"); `dialos-install`
+  mit dem Sicherheits-Stick komplett durchspielen - externe
+  SanDisk-Extreme-Platte vorher abstecken (sonst als Zielfestplatte
+  wählbar!); neue Stick-Partitionierung (`DIALOS-KEY` 2 GiB +
+  `DIALOS-DATA` ext4) verifizieren.
 - [ ] Calamares-Standort-Seite schlägt beim Live-Boot GeoIP-basiert oft
   einen falschen Standort vor (z. B. Rome statt Berlin) - kein
   dokumentierter Vendor-Override für `modules/locale.conf` gefunden (nur

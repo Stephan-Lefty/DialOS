@@ -9,7 +9,17 @@
 set -euo pipefail
 
 if [ "$(id -u)" -ne 0 ]; then
-  exec pkexec "$0" "$@"
+  # pkexec strips most environment variables for security, including
+  # DBUS_SESSION_BUS_ADDRESS/XDG_RUNTIME_DIR - without them, zenity's
+  # native file-save dialog (used below for the key backup) tries to
+  # reach xdg-desktop-portal over D-Bus, can't, and fails silently
+  # (found 2026-08-14: Stephan got straight to "kein Speicherort
+  # gewählt" with no visible file dialog and no error anywhere).
+  # Simple zenity dialogs (list/entry/password) don't need the portal,
+  # which is why those worked fine before this point.
+  exec pkexec env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTHORITY" \
+    DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
+    XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" "$0" "$@"
 fi
 
 LABEL="DIALOS-KEY"
@@ -168,14 +178,20 @@ BACKUP_PASS_FILE=$(mktemp)
 printf '%s' "$BACKUP_PASS" > "$BACKUP_PASS_FILE"
 openssl enc -aes-256-cbc -pbkdf2 -salt -in "$KEYFILE" -out "$BACKUP_TMP" -pass "file:$BACKUP_PASS_FILE"
 shred -u "$BACKUP_PASS_FILE"
+# Real stderr is captured instead of discarded (2>/dev/null hid the
+# actual failure reason on 2026-08-14, leaving only the generic "kein
+# Speicherort gewählt" message with no way to diagnose it further).
+SAVE_TO_ERR=$(mktemp)
 SAVE_TO=$(zenity --file-selection --save --confirm-overwrite \
   --title="Verschlüsseltes Schlüssel-Backup speichern (z. B. im Nextcloud-Sync-Ordner)" \
-  --filename="$HOME/${BACKUP_LABEL}.key.enc" 2>/dev/null || true)
+  --filename="$HOME/${BACKUP_LABEL}.key.enc" 2>"$SAVE_TO_ERR" || true)
+ZENITY_ERR=$(cat "$SAVE_TO_ERR" 2>/dev/null || true)
+rm -f "$SAVE_TO_ERR"
 if [ -n "$SAVE_TO" ]; then
   cp "$BACKUP_TMP" "$SAVE_TO"
   say "Backup gespeichert unter: $SAVE_TO\nFalls der Ordner nicht automatisch synchronisiert wird, manuell in die Nextcloud hochladen.\n\nBACKUP-PASSWORT (getrennt von der Nextcloud aufbewahren, z. B. im eigenen Passwort-Manager - NIEMALS zusammen mit der Backup-Datei!):\n$BACKUP_PASS\n\nEntschlüsselung später: openssl enc -d -aes-256-cbc -pbkdf2 -in $BACKUP_LABEL.key.enc -out neuer-stick.key"
 else
-  warn "Kein Speicherort gewählt - Schlüssel-Backup wurde NICHT gesichert."
+  warn "Kein Speicherort gewählt - Schlüssel-Backup wurde NICHT gesichert.${ZENITY_ERR:+ Fehlermeldung: $ZENITY_ERR}"
 fi
 shred -u "$BACKUP_TMP" 2>/dev/null || rm -f "$BACKUP_TMP"
 
