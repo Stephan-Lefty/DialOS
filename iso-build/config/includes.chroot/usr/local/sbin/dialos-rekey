@@ -21,6 +21,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 LABEL="DIALOS-KEY"
+DATA_LABEL="DIALOS-DATA"
 KEYFILE_NAME=".dialos-key"
 
 say() { zenity --info --width=400 --title="DialOS Stick-Ersatz" --text="$1" 2>/dev/null || echo "$1"; }
@@ -57,24 +58,33 @@ if [ "${#USB_ARGS[@]}" -eq 0 ]; then
   die "Kein USB-Stick gefunden. Neuen Stick anschließen und erneut versuchen."
 fi
 NEW_STICK=$(zenity --list --title="Neuen Sicherheits-Stick wählen" \
-  --text="Dieser Stick wird komplett neu formatiert." \
+  --text="Auf diesem Stick werden der Entschlüsselungs-Schlüssel (2 GiB) und ein Datenspeicher-Bereich (Rest der Kapazität) angelegt.\nDer Stick wird dabei komplett neu formatiert." \
   --column="Gerät" --column="Größe" --width=500 --height=250 \
   "${USB_ARGS[@]}")
 [ -n "$NEW_STICK" ] || die "Abgebrochen: kein Stick gewählt."
+
+NEW_STICK_SIZE=$(lsblk -dnb -o SIZE "$NEW_STICK" 2>/dev/null || echo 0)
+if [ "$NEW_STICK_SIZE" -lt 2684354560 ]; then
+  die "Der gewählte Stick ist zu klein (mind. ~2,5 GB nötig für Schlüssel- + Datenpartition)."
+fi
 
 CONFIRM=$(zenity --entry --title="Bestätigung" \
   --text="Stick $NEW_STICK wird GELÖSCHT und als neuer Sicherheits-Stick eingerichtet.\nZum Bestätigen \"LOESCHEN\" eingeben:" 2>/dev/null || true)
 [ "$CONFIRM" = "LOESCHEN" ] || die "Abgebrochen: Bestätigung nicht erhalten."
 
-# --- 4. Format the stick and write a fresh keyfile ---
+# --- 4. Format the stick (DIALOS-KEY 2 GiB + DIALOS-DATA rest) and
+#          write a fresh keyfile ---
 umount "${NEW_STICK}"* 2>/dev/null || true
 wipefs -af "$NEW_STICK"
 parted -s "$NEW_STICK" mklabel gpt
-parted -s "$NEW_STICK" mkpart "$LABEL" fat32 1MiB 100%
+parted -s "$NEW_STICK" mkpart "$LABEL" fat32 1MiB 2049MiB
+parted -s "$NEW_STICK" mkpart "$DATA_LABEL" ext4 2049MiB 100%
 partprobe "$NEW_STICK"
 sleep 2
 NEW_STICK_PART="${NEW_STICK}1"
+NEW_DATA_PART="${NEW_STICK}2"
 mkfs.vfat -F32 -n "$LABEL" "$NEW_STICK_PART"
+mkfs.ext4 -F -L "$DATA_LABEL" "$NEW_DATA_PART"
 
 mkdir -p /run/dialos-rekey
 mount "$NEW_STICK_PART" /run/dialos-rekey

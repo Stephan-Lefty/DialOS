@@ -13,6 +13,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 LABEL="DIALOS-KEY"
+DATA_LABEL="DIALOS-DATA"
 KEYFILE_NAME=".dialos-key"
 TARGET_MNT="/mnt/dialos-install"
 LUKS_NAME="dialos-root"
@@ -52,7 +53,9 @@ TARGET_DISK=$(zenity --list --title="Zielfestplatte wählen" \
 [ -n "$TARGET_DISK" ] || die "Abgebrochen: keine Festplatte gewählt."
 
 # --- 2. Select the USB stick that will hold the LUKS keyfile ---
-mapfile -t USB_ROWS < <(lsblk -dnb -o NAME,SIZE,TRAN | awk '$3=="usb"')
+# Excludes the live boot medium (same as the target-disk list above) so
+# the running boot stick can't be accidentally chosen and wiped.
+mapfile -t USB_ROWS < <(lsblk -dnb -o NAME,SIZE,TRAN | awk -v skip="$LIVE_ROOT_DISK" '$1 != skip && $3=="usb"')
 USB_ARGS=()
 for row in "${USB_ROWS[@]}"; do
   name=$(echo "$row" | awk '{print $1}')
@@ -62,14 +65,19 @@ for row in "${USB_ROWS[@]}"; do
 done
 
 if [ "${#USB_ARGS[@]}" -eq 0 ]; then
-  die "Kein USB-Stick gefunden. Sicherheits-Stick anschließen und erneut versuchen."
+  die "Kein USB-Stick gefunden. Sicherheits-Stick anschließen und erneut versuchen (das aktuelle Boot-Medium wird nicht als Sicherheits-Stick angeboten)."
 fi
 
 KEY_STICK=$(zenity --list --title="Sicherheits-Stick wählen" \
-  --text="Auf diesem Stick wird der Entschlüsselungs-Schlüssel gespeichert.\nDer Stick wird dabei neu formatiert." \
+  --text="Auf diesem Stick werden der Entschlüsselungs-Schlüssel (2 GiB) und ein Datenspeicher-Bereich (Rest der Kapazität) angelegt.\nDer Stick wird dabei komplett neu formatiert." \
   --column="Gerät" --column="Größe" --width=500 --height=250 \
   "${USB_ARGS[@]}")
 [ -n "$KEY_STICK" ] || die "Abgebrochen: kein Sicherheits-Stick gewählt."
+
+KEY_STICK_SIZE=$(lsblk -dnb -o SIZE "$KEY_STICK" 2>/dev/null || echo 0)
+if [ "$KEY_STICK_SIZE" -lt 2684354560 ]; then
+  die "Der gewählte Stick ist zu klein (mind. ~2,5 GB nötig für Schlüssel- + Datenpartition)."
+fi
 
 # --- 3. Recovery passphrase (temporary policy until docs/offene-punkte.md is resolved) ---
 say "Zusätzlich zum Stick wird ein Wiederherstellungs-Passwort als zweiter LUKS-Schlüssel angelegt (Notfall, falls der Stick verloren geht). Bitte sicher verwahren, NICHT dem Endnutzer geben. Mindestens 12 Zeichen."
@@ -111,15 +119,20 @@ fi
 
 mkfs.vfat -F32 -n DIALOS-ESP "$ESP_PART"
 
-# --- 6. Prepare the key stick: format, write keyfile ---
+# --- 6. Prepare the key stick: DIALOS-KEY (2 GiB, FAT32, holds the
+#          keyfile) + DIALOS-DATA (rest of the stick, ext4, general-
+#          purpose storage for the technician/end user) ---
 umount "${KEY_STICK}"* 2>/dev/null || true
 wipefs -af "$KEY_STICK"
 parted -s "$KEY_STICK" mklabel gpt
-parted -s "$KEY_STICK" mkpart "$LABEL" fat32 1MiB 100%
+parted -s "$KEY_STICK" mkpart "$LABEL" fat32 1MiB 2049MiB
+parted -s "$KEY_STICK" mkpart "$DATA_LABEL" ext4 2049MiB 100%
 partprobe "$KEY_STICK"
 sleep 2
 KEY_STICK_PART="${KEY_STICK}1"
+DATA_PART="${KEY_STICK}2"
 mkfs.vfat -F32 -n "$LABEL" "$KEY_STICK_PART"
+mkfs.ext4 -F -L "$DATA_LABEL" "$DATA_PART"
 
 mkdir -p /run/dialos-key-write
 mount "$KEY_STICK_PART" /run/dialos-key-write
