@@ -91,26 +91,38 @@ if [ -n "${OLD_SLOT:-}" ]; then
 fi
 
 # --- 6. New recovery passphrase + new encrypted Nextcloud backup ---
-say "Jetzt wird ein neues Wiederherstellungs-Passwort festgelegt (ersetzt das alte)."
+say "Jetzt wird ein neues Wiederherstellungs-Passwort festgelegt (ersetzt das alte). Mindestens 12 Zeichen."
 NEW_PASS=""
-while [ -z "$NEW_PASS" ]; do
-  NEW_PASS=$(ask_password "Neues Wiederherstellungs-Passwort festlegen")
-  [ -n "$NEW_PASS" ] || warn "Passwort darf nicht leer sein."
+while [ -z "$NEW_PASS" ] || [ "${#NEW_PASS}" -lt 12 ]; do
+  NEW_PASS=$(ask_password "Neues Wiederherstellungs-Passwort festlegen (mind. 12 Zeichen)")
+  if [ -z "$NEW_PASS" ]; then
+    warn "Passwort darf nicht leer sein."
+  elif [ "${#NEW_PASS}" -lt 12 ]; then
+    warn "Passwort ist zu kurz (mind. 12 Zeichen)."
+    NEW_PASS=""
+  fi
 done
 printf '%s' "$OLD_PASS" | cryptsetup luksChangeKey --batch-mode --key-file=- "$LUKS_PART" <<< "$NEW_PASS" 2>/dev/null || \
   warn "Altes Wiederherstellungs-Passwort konnte nicht automatisch ersetzt werden - beide Passwörter könnten jetzt gültig sein, bitte manuell prüfen."
 
+# Backup password is a SEPARATE, randomly generated secret - NOT
+# NEW_PASS. See the equivalent comment in dialos-install step 7b for
+# why reusing the recovery passphrase here would be a security hole.
 BACKUP_LABEL=$(zenity --entry --title="Schlüssel-Backup" \
   --text="Kennzeichnung für dieses Backup (z. B. Kundenname/Kürzel):" \
   --entry-text="dialos-rekey-$(date +%Y%m%d)" 2>/dev/null || echo "dialos-rekey-$(date +%Y%m%d-%H%M%S)")
+BACKUP_PASS=$(openssl rand -base64 32)
 BACKUP_TMP="/tmp/${BACKUP_LABEL}.key.enc"
-openssl enc -aes-256-cbc -pbkdf2 -salt -in "$NEW_KEYFILE" -out "$BACKUP_TMP" -pass "pass:$NEW_PASS"
+BACKUP_PASS_FILE=$(mktemp)
+printf '%s' "$BACKUP_PASS" > "$BACKUP_PASS_FILE"
+openssl enc -aes-256-cbc -pbkdf2 -salt -in "$NEW_KEYFILE" -out "$BACKUP_TMP" -pass "file:$BACKUP_PASS_FILE"
+shred -u "$BACKUP_PASS_FILE"
 SAVE_TO=$(zenity --file-selection --save --confirm-overwrite \
   --title="Neues verschlüsseltes Schlüssel-Backup speichern (z. B. im Nextcloud-Sync-Ordner)" \
   --filename="$HOME/${BACKUP_LABEL}.key.enc" 2>/dev/null || true)
 if [ -n "$SAVE_TO" ]; then
   cp "$BACKUP_TMP" "$SAVE_TO"
-  say "Backup gespeichert unter: $SAVE_TO - bitte das alte Backup dieses Nutzers in der Nextcloud löschen/ersetzen."
+  say "Backup gespeichert unter: $SAVE_TO - bitte das alte Backup dieses Nutzers in der Nextcloud löschen/ersetzen.\n\nBACKUP-PASSWORT (getrennt von der Nextcloud aufbewahren, z. B. im eigenen Passwort-Manager - NIEMALS zusammen mit der Backup-Datei!):\n$BACKUP_PASS"
 else
   warn "Kein Speicherort gewählt - neues Schlüssel-Backup wurde NICHT gesichert."
 fi

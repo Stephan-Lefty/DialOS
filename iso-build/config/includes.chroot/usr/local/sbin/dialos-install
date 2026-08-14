@@ -72,11 +72,16 @@ KEY_STICK=$(zenity --list --title="Sicherheits-Stick wählen" \
 [ -n "$KEY_STICK" ] || die "Abgebrochen: kein Sicherheits-Stick gewählt."
 
 # --- 3. Recovery passphrase (temporary policy until docs/offene-punkte.md is resolved) ---
-say "Zusätzlich zum Stick wird ein Wiederherstellungs-Passwort als zweiter LUKS-Schlüssel angelegt (Notfall, falls der Stick verloren geht). Bitte sicher verwahren, NICHT dem Endnutzer geben."
+say "Zusätzlich zum Stick wird ein Wiederherstellungs-Passwort als zweiter LUKS-Schlüssel angelegt (Notfall, falls der Stick verloren geht). Bitte sicher verwahren, NICHT dem Endnutzer geben. Mindestens 12 Zeichen."
 RECOVERY_PASS=""
-while [ -z "$RECOVERY_PASS" ]; do
-  RECOVERY_PASS=$(ask_password "Wiederherstellungs-Passwort festlegen")
-  [ -n "$RECOVERY_PASS" ] || warn "Passwort darf nicht leer sein."
+while [ -z "$RECOVERY_PASS" ] || [ "${#RECOVERY_PASS}" -lt 12 ]; do
+  RECOVERY_PASS=$(ask_password "Wiederherstellungs-Passwort festlegen (mind. 12 Zeichen)")
+  if [ -z "$RECOVERY_PASS" ]; then
+    warn "Passwort darf nicht leer sein."
+  elif [ "${#RECOVERY_PASS}" -lt 12 ]; then
+    warn "Passwort ist zu kurz (mind. 12 Zeichen)."
+    RECOVERY_PASS=""
+  fi
 done
 
 # --- 4. Final confirmation ---
@@ -124,26 +129,38 @@ sync
 
 # --- 7. LUKS setup: keyfile as primary slot, recovery passphrase as second slot ---
 cryptsetup luksFormat --type luks2 --batch-mode "$LUKS_PART" "$KEYFILE"
-printf '%s' "$RECOVERY_PASS" | cryptsetup luksAddKey --batch-mode "$LUKS_PART" "$KEYFILE" --key-file=- 2>/dev/null || \
-  { echo "$RECOVERY_PASS" > /tmp/.rp; cryptsetup luksAddKey --batch-mode "$LUKS_PART" "$KEYFILE" --new-keyfile=/tmp/.rp; shred -u /tmp/.rp; }
+printf '%s' "$RECOVERY_PASS" > /tmp/.rp
+cryptsetup luksAddKey --batch-mode --key-file="$KEYFILE" "$LUKS_PART" /tmp/.rp
+shred -u /tmp/.rp
 
 # --- 7b. Encrypted off-site backup of the keyfile (e.g. for upload to
 #          Stephan's own Nextcloud) - lets a replacement stick be made
-#          later without keeping spare physical sticks in stock. Reuses
-#          the recovery passphrase from step 3 so there is only one
-#          secret to manage, not a second one. Only the small keyfile
-#          is backed up, never the disk contents. ---
+#          later without keeping spare physical sticks in stock. Only
+#          the small keyfile is backed up, never the disk contents.
+#
+#          Uses a SEPARATE, randomly generated backup password - NOT the
+#          recovery passphrase from step 3. Reusing the recovery password
+#          would mean anyone with both that password and access to the
+#          Nextcloud backup could decrypt the keyfile without ever
+#          needing the physical stick, defeating the whole point of
+#          stick-based unlock. Store the backup password somewhere
+#          separate from the Nextcloud backup itself (e.g. Stephan's own
+#          password manager) - never alongside the backup file. ---
 BACKUP_LABEL=$(zenity --entry --title="Schlüssel-Backup" \
   --text="Kennzeichnung für dieses Backup (z. B. Kundenname/Kürzel):" \
   --entry-text="dialos-$(date +%Y%m%d)" 2>/dev/null || echo "dialos-$(date +%Y%m%d-%H%M%S)")
+BACKUP_PASS=$(openssl rand -base64 32)
 BACKUP_TMP="/tmp/${BACKUP_LABEL}.key.enc"
-openssl enc -aes-256-cbc -pbkdf2 -salt -in "$KEYFILE" -out "$BACKUP_TMP" -pass "pass:$RECOVERY_PASS"
+BACKUP_PASS_FILE=$(mktemp)
+printf '%s' "$BACKUP_PASS" > "$BACKUP_PASS_FILE"
+openssl enc -aes-256-cbc -pbkdf2 -salt -in "$KEYFILE" -out "$BACKUP_TMP" -pass "file:$BACKUP_PASS_FILE"
+shred -u "$BACKUP_PASS_FILE"
 SAVE_TO=$(zenity --file-selection --save --confirm-overwrite \
   --title="Verschlüsseltes Schlüssel-Backup speichern (z. B. im Nextcloud-Sync-Ordner)" \
   --filename="$HOME/${BACKUP_LABEL}.key.enc" 2>/dev/null || true)
 if [ -n "$SAVE_TO" ]; then
   cp "$BACKUP_TMP" "$SAVE_TO"
-  say "Backup gespeichert unter: $SAVE_TO\nFalls der Ordner nicht automatisch synchronisiert wird, manuell in die Nextcloud hochladen. Mit dem Wiederherstellungs-Passwort entschlüsselbar: openssl enc -d -aes-256-cbc -pbkdf2 -in $BACKUP_LABEL.key.enc -out neuer-stick.key"
+  say "Backup gespeichert unter: $SAVE_TO\nFalls der Ordner nicht automatisch synchronisiert wird, manuell in die Nextcloud hochladen.\n\nBACKUP-PASSWORT (getrennt von der Nextcloud aufbewahren, z. B. im eigenen Passwort-Manager - NIEMALS zusammen mit der Backup-Datei!):\n$BACKUP_PASS\n\nEntschlüsselung später: openssl enc -d -aes-256-cbc -pbkdf2 -in $BACKUP_LABEL.key.enc -out neuer-stick.key"
 else
   warn "Kein Speicherort gewählt - Schlüssel-Backup wurde NICHT gesichert."
 fi

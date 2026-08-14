@@ -43,8 +43,9 @@ aufrufbar) statt eines Standard-Installers wie Calamares – dessen
 LUKS-Modul ist auf ein getipptes Passwort ausgelegt, nicht auf unser
 Stick-Schlüssel-Konzept. Das Werkzeug partitioniert die Zielfestplatte,
 erzeugt einen zufälligen Schlüssel auf dem gewählten Sicherheits-Stick,
-legt zusätzlich ein Wiederherstellungs-Passwort als zweiten LUKS-Slot an
-(siehe unten), kopiert das laufende System auf die Platte und richtet
+legt zusätzlich ein Wiederherstellungs-Passwort (mind. 12 Zeichen) als
+zweiten LUKS-Slot an (siehe unten), kopiert das laufende System auf die
+Platte und richtet
 den Bootloader ein. Gedacht für dich/Techniker im Büro-Setup, nicht für
 die Vor-Ort-Einrichtung – deshalb bewusst nicht sprachgesteuert.
 
@@ -79,10 +80,22 @@ Drei Wege, je nach Situation:
 Für Weg 2 und 3 braucht es das **verschlüsselte Schlüssel-Backup**: Der
 Installer (`dialos-install`) und das Rekey-Werkzeug (`dialos-rekey`)
 verschlüsseln die kleine Schlüsseldatei (nicht die ganze Festplatte) mit
-dem jeweils aktuellen Wiederherstellungs-Passwort (`openssl enc
--aes-256-cbc -pbkdf2`) und bieten an, die Datei zu speichern – Stephan
-legt sie in seiner eigenen, selbst gehosteten Nextcloud ab (eine Datei
-pro Nutzer/Gerät), statt bei einem fremden Cloud-Anbieter.
+einem eigenen, zufällig erzeugten Backup-Passwort (`openssl rand
+-base64 32`, verschlüsselt via `openssl enc -aes-256-cbc -pbkdf2`) und
+bieten an, die Datei zu speichern – Stephan legt sie in seiner eigenen,
+selbst gehosteten Nextcloud ab (eine Datei pro Nutzer/Gerät), statt bei
+einem fremden Cloud-Anbieter.
+
+**Wichtig: Das Backup-Passwort ist bewusst NICHT dasselbe wie das
+Wiederherstellungs-Passwort** aus Weg 1/2 oben. Würde dieselbe
+Passphrase für beides verwendet, könnte jeder mit Kenntnis des
+Wiederherstellungs-Passworts und Zugriff auf die Nextcloud den
+Schlüssel entschlüsseln – ganz ohne den physischen Stick, was den
+eigentlichen Zweck der Stick-Bindung aushebeln würde. Das
+Skript zeigt das generierte Backup-Passwort einmalig nach dem
+Speichern an; Stephan muss es getrennt von der Nextcloud aufbewahren
+(z. B. im eigenen Passwort-Manager), niemals zusammen mit der
+Backup-Datei selbst.
 
 ## Versand-Sicherheit
 
