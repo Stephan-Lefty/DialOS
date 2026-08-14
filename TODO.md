@@ -88,11 +88,14 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Modell) - die
   neue Doku vermeidet den Fehler, die vorhandenen doppelten Daten auf
   dem T490 selbst sind aber noch nicht aufgeräumt.
-- [ ] Nach der `pip3 install --break-system-packages`-Installation auf
-  dem T490 noch echten End-to-End-Test von `dialos-vosk-test.py`
-  durchführen (tatsächlich reinsprechen, Erkennungsqualität beurteilen)
-  - bisher nur die Installation selbst vorbereitet/dokumentiert, noch
-  kein echter Spracherkennungs-Test mit dieser Installation gelaufen.
+- [x] `pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0`
+  auf dem T490 ausgeführt und verifiziert (2026-08-14) - `import vosk`/
+  `hassil` funktioniert, `vosk.Model()` lädt das kleine deutsche Modell
+  erfolgreich.
+- [ ] Echten End-to-End-Test von `dialos-vosk-test.py` durchführen
+  (tatsächlich reinsprechen, Erkennungsqualität beurteilen) - bisher nur
+  Installation + Modell-Laden technisch verifiziert, noch kein echter
+  Spracherkennungs-Test mit einer gesprochenen Aufnahme gelaufen.
 - [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
   (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
   längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`

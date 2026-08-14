@@ -70,11 +70,14 @@ what has already been done.
   space, measured ~6.3 GB instead of ~3.2 GB for the large model) - the
   new docs avoid the mistake, but the existing duplicate data on the
   T490 itself hasn't been cleaned up yet.
-- [ ] After the `pip3 install --break-system-packages` install on the
-  T490, still run a real end-to-end test of `dialos-vosk-test.py`
-  (actually speak into it, judge recognition quality) - so far only the
-  installation itself has been prepared/documented, no real speech
-  recognition test has run against it yet.
+- [x] Ran and verified
+  `pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0` on
+  the T490 (2026-08-14) - `import vosk`/`hassil` works, `vosk.Model()`
+  successfully loads the small German model.
+- [ ] Run a real end-to-end test of `dialos-vosk-test.py` (actually
+  speak into it, judge recognition quality) - so far only installation +
+  model loading verified technically, no real speech recognition test
+  with an actual spoken recording has run yet.
 - [ ] The Bluetooth audio fix in `dialos-start-ansage.py`
   (single-instance lock/`alte_instanz_beenden()`) hasn't been
   conclusively confirmed over a longer period yet - check
