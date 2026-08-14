@@ -6,7 +6,7 @@ Website: [dialos.org](https://dialos.org)
 
 # DialOS
 
-A fully voice-controlled system based on Debian 13 + GNOME for people who
+A fully voice-controlled system based on Debian 13 + GNOME 48 for people who
 can only use a computer to a limited extent — in particular blind and
 motor-impaired individuals. The goal is a ready-to-use laptop that the
 user can operate entirely by speaking: listening to radio and music,

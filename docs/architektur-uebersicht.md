@@ -4,7 +4,7 @@
 
 ## Ziel
 
-DialOS ist eine auf Debian 13 (Trixie) + GNOME basierende Live-ISO für
+DialOS ist eine auf Debian 13 (Trixie) + GNOME 48 basierende Live-ISO für
 Menschen, die einen Computer nur eingeschränkt nutzen können – insbesondere
 blinde und motorisch eingeschränkte Personen. Das System soll vollständig
 per Sprache bedienbar sein, inklusive der Systemwartung, und dabei gleich
@@ -39,7 +39,7 @@ Details siehe [telefonie.md](telefonie.md), [sicherheit-datenschutz.md](sicherhe
 
 | Bereich | Wahl | Begründung |
 |---|---|---|
-| Distribution | Debian 13 + GNOME, live-build | Beste Orca/AT-SPI-Integration, ausgereiftes ISO-Tooling, Hardware-Support |
+| Distribution | Debian 13 + GNOME 48, live-build | Beste Orca/AT-SPI-Integration, ausgereiftes ISO-Tooling, Hardware-Support |
 | Spracherkennung (STT) | Vosk (deutsches Modell), offline | Datenschutz bei vulnerabler Zielgruppe, funktioniert auch unterwegs ohne Internet |
 | Sprachausgabe (TTS) | Piper oder RHVoice | Natürlicher als espeak-ng, als Orca-Backend nutzbar |
 | Intent-Erkennung | flexible/LLM-gestützte Zuordnung statt starrer Grammatik | Muss unterschiedliche Formulierungen derselben Absicht verstehen (18- bis 80-Jährige) |

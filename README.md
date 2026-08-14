@@ -6,7 +6,7 @@ Website: [dialos.org](https://dialos.org)
 
 # DialOS
 
-Ein auf Debian 13 + GNOME basierendes, vollständig sprachgesteuertes
+Ein auf Debian 13 + GNOME 48 basierendes, vollständig sprachgesteuertes
 System für Menschen, die einen Computer nur eingeschränkt nutzen können –
 insbesondere blinde und motorisch eingeschränkte Personen. Ziel ist ein
 fertig eingerichteter Laptop, den der Nutzer allein durch Sprechen

@@ -1,6 +1,6 @@
 [Deutsch](Debian-zu-DialOS.md) | [English](Debian-zu-DialOS.en.md)
 
-# Build guide: From Debian 13 + GNOME to DialOS 0.5.0
+# Build guide: From Debian 13 + GNOME 48 to DialOS 0.5.0
 
 > **Maintenance note:** This document is the gap-free "rebuild from
 > scratch" recipe, not just a historical retrospective. Any future
@@ -39,7 +39,10 @@ T490 (see [hardware.en.md](hardware.en.md)).
 
 - A Debian 13 ("Trixie") installation medium with the GNOME desktop
   (the standard Debian installer is enough - Calamares only comes into
-  play later, as the installer for the *next* installation).
+  play later, as the installer for the *next* installation). Debian 13
+  ships GNOME 48 (tested version: GNOME Shell 48.7, package version
+  `48.7-0+deb13u2`, checked via `gnome-shell --version`) - no separate
+  step needed, that's simply the version that comes with Trixie.
 - Root/sudo access on the target system.
 - An internet connection (for `apt`, `npm`, model downloads).
 - This repository available locally (ideally on an external drive, see

@@ -1,6 +1,6 @@
 # Hinweise für Claude
 
-Dieses Repository ist DialOS – eine barrierefreie Debian-13/GNOME-
+Dieses Repository ist DialOS – eine barrierefreie Debian-13/GNOME-48-
 Live-ISO mit voller Sprachsteuerung für blinde und motorisch
 eingeschränkte Nutzer. Stephan arbeitet allein an diesem Projekt (kein
 Team) – bitte durchgehend "du" statt "ihr/euch" verwenden, und Stephan
