@@ -538,16 +538,10 @@ microphone as a (not yet implemented) fallback. Details:
 Once all the previous steps are done, reboot the system once and
 verify everything (autologin, splash, sound, Orca, Piper, apps). Then:
 
-**Important: point `--path` at the external drive** instead of using the
-default working directory `/home/eggs` (internal) - this way the
-several-GB intermediate build material never touches the internal disk
-at all (and the finished ISO doesn't need to be manually copied over
-afterward):
-
 ```bash
-sudo eggs produce --path /media/dialosadmin/SanDisk-Extreme/DialOS/eggs-workdir
+sudo eggs produce
 # or, to carry over dialosadmin/nutzer including home directories:
-sudo eggs produce --path /media/dialosadmin/SanDisk-Extreme/DialOS/eggs-workdir --clone
+sudo eggs produce --clone
 ```
 
 `--clone` is required if the built ISO is later going to be tested with
@@ -557,9 +551,21 @@ live system when installing - without `--clone` there would be no
 `--clone`, the ISO is suited to the classic path: live boot →
 Calamares installation → set up accounts manually via step 13.
 
-The finished ISO then lands directly under
-`.../DialOS/eggs-workdir/<generated-name>.iso` - rename it
-appropriately for clarity, e.g. to `DialOS-ISOs/DialOS-Live-0.5.0.iso`.
+Output lands under `/home/eggs/<generated-name>.iso` by default -
+rename it appropriately for clarity and move it to the external drive,
+e.g. to `DialOS-ISOs/DialOS-Live-0.5.0.iso`.
+
+**Attempted and abandoned (2026-08-14): pointing `--path` at the
+external drive**, to keep the several-GB intermediate build material
+off the internal disk entirely. Fails: `eggs`/`coa`'s
+`bootloader-copy` step writes its files (including `isolinux.bin`)
+hardcoded to `/home/eggs/isodir` regardless of `--path` - the rest of
+the build correctly uses the `--path` target folder, so the finished
+image ends up without a working bootloader (`xorriso` error: "Cannot
+find in ISO image ... bin_path='/isolinux/isolinux.bin'"). A bug in
+`eggs`/`coa` (version 48.x), not our configuration. Until this is
+fixed upstream: don't use `--path`, always use the internal default
+path `/home/eggs` and move the result manually afterward.
 
 ## Practical note: external drive
 
