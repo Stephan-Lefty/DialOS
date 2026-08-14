@@ -27,6 +27,7 @@ implementation.
 
 ## Documentation
 
+- [Debian to DialOS](docs/Debian-zu-DialOS.en.md) – step-by-step recipe: from a bare Debian 13/GNOME install to the current version
 - [Architecture overview](docs/architektur-uebersicht.en.md) – goal, target audience, core features, software stack
 - [Hardware](docs/hardware.en.md) – reference device, test hardware, WWAN requirements
 - [Security & privacy](docs/sicherheit-datenschutz.en.md) – autologin, encryption, remote support, shipping

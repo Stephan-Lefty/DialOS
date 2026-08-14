@@ -14,6 +14,17 @@ Doppelung der eigentlichen Doku.
 
 **GitHub-Repo:** https://github.com/Stephan-Lefty/DialOS (privat).
 
+**Wichtige, dauerhafte Regel (seit 2026-08-14):**
+[docs/Debian-zu-DialOS.md](docs/Debian-zu-DialOS.md) (+ `.en.md`) ist
+das lückenlose "von einer nackten Debian-13/GNOME-Installation bis zur
+aktuellen DialOS-Version nachbauen"-Rezept. Bei **jeder** Änderung, die
+den Aufbau eines Geräts betrifft (neues Paket, neue Branding-/Config-
+Datei, geänderter Befehl, Bugfix an einem referenzierten Skript), muss
+dieses Dokument **zusätzlich zum Änderungsprotokoll** in README.md
+aktualisiert werden - in beiden Sprachen. Ziel: Das System soll sich
+bei der finalen Version lückenlos aus dieser einen Datei heraus
+reproduzieren lassen.
+
 ## Aktueller Stand (Stand: 2026-08-10)
 
 Wir stecken mitten in der ersten funktionierenden ISO. Zwei parallele

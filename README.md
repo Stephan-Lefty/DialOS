@@ -26,6 +26,7 @@ Design-Entscheidungen als Grundlage für die Umsetzung.
 
 ## Dokumentation
 
+- [Debian-zu-DialOS](docs/Debian-zu-DialOS.md) – Schritt-für-Schritt-Rezept: von einer nackten Debian-13/GNOME-Installation bis zur aktuellen Version
 - [Architektur-Übersicht](docs/architektur-uebersicht.md) – Ziel, Zielgruppe, Kernfunktionen, Software-Stack
 - [Hardware](docs/hardware.md) – Referenzgerät, Test-Hardware, WWAN-Anforderungen
 - [Sicherheit & Datenschutz](docs/sicherheit-datenschutz.md) – Autologin, Verschlüsselung, Fernwartung, Versand
