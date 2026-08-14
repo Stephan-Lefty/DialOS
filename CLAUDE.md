@@ -14,6 +14,17 @@ Doppelung der eigentlichen Doku.
 
 **GitHub-Repo:** https://github.com/Stephan-Lefty/DialOS (privat).
 
+**Wichtig für Claude selbst:** Dein eigenes Memory-System
+(`~/.claude/...`) liegt auf der internen Platte des T490 und wird bei
+jedem Reinstall gelöscht - genau wie der bisherige Chat und alle
+Connector-/GitHub-Integration-Verbindungen der Claude-App (dafür gibt
+es keine Wiederherstellung, weder automatisiert noch manuell in der
+App). **Diese Datei hier (im Git-Repo auf der externen Platte, nach
+GitHub gepusht) ist die einzige Erinnerung, die einen Reinstall
+übersteht.** Alles, was über eine einzelne Session hinaus wichtig ist,
+gehört deshalb hierher oder in `docs/`/`TODO.md` - nicht ins eigene
+Memory-System verlassen.
+
 **Wichtige, dauerhafte Regel (seit 2026-08-14):**
 [docs/Debian-zu-DialOS.md](docs/Debian-zu-DialOS.md) (+ `.en.md`) ist
 das lückenlose "von einer nackten Debian-13/GNOME-Installation bis zur

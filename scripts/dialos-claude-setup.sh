@@ -14,9 +14,11 @@
 #     einfach "claude" starten und dich normal neu einloggen, dauert nur
 #     wenige Sekunden.
 #   - Den Connector fuer die externe Platte bzw. die GitHub-Integration
-#     in der Claude-App - das sind App-seitige Verbindungen, die in der
-#     Claude-Oberflaeche selbst (nicht per Shell-Skript auf dem T490)
-#     neu erteilt werden muessen.
+#     in der Claude-App: keine Wiederherstellung moeglich, weder per
+#     Skript noch in der App selbst - nach einem Reinstall muessen
+#     diese Verbindungen (und der bisherige Chat) komplett neu
+#     eingerichtet werden, es gibt dafuer keinen Speicher-/Restore-
+#     Mechanismus (bestaetigt von Stephan, 2026-08-14).
 #   - Das GitHub-Token selbst: "git push" fragt beim allerersten Mal
 #     nach diesem Reinstall einmalig nach Benutzername + Token - das
 #     muss von Hand eingetippt werden, kein Skript/keine KI nimmt
@@ -91,7 +93,8 @@ echo "  Benutzername (Stephan-Lefty) + GitHub-Token - danach gemerkt."
 echo ""
 echo "=== Nicht automatisiert (siehe Kommentar oben) ==="
 echo "  - Claude-Chat-Anmeldung: 'claude' starten, normal einloggen."
-echo "  - Connector fuer externe Platte + GitHub-Integration: in der"
-echo "    Claude-App selbst neu verbinden."
+echo "  - Connector fuer externe Platte + GitHub-Integration sowie der"
+echo "    bisherige Chat: keine Wiederherstellung moeglich, muessen in"
+echo "    der Claude-App komplett neu eingerichtet werden."
 echo ""
 echo "=== Fertig ==="

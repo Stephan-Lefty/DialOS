@@ -47,11 +47,13 @@ fehlender Identität scheitert.
 
 Deckt bewusst NICHT ab (Sicherheitsgrenze, kein Bug): die
 Claude-Chat-Anmeldung selbst (Login/Zugangsdaten - einfach `claude`
-starten und neu einloggen), den Connector für die externe Platte sowie
-die GitHub-Integration in der Claude-App (App-seitige Verbindungen,
-müssen dort neu erteilt werden), und das GitHub-Token selbst (`git
-push` fragt beim ersten Mal einmalig danach - manuell einzutippen,
-kein Skript nimmt Tokens/Passwörter entgegen).
+starten und neu einloggen), und das GitHub-Token selbst (`git push`
+fragt beim ersten Mal einmalig danach - manuell einzutippen, kein
+Skript nimmt Tokens/Passwörter entgegen). Der Connector für die externe
+Platte, die GitHub-Integration und der bisherige Chat lassen sich nach
+einem Reinstall **gar nicht** wiederherstellen (weder per Skript noch
+in der App selbst) - komplette Neueinrichtung, bestätigt von Stephan
+am 2026-08-14.
 
 Aufruf: `sudo ./dialos-claude-setup.sh`
 
