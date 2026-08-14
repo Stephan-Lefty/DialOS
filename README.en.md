@@ -55,6 +55,12 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **`dialos-install` bugfix:** the file-save dialog for the key backup
+  silently failed under `pkexec` (missing `DBUS_SESSION_BUS_ADDRESS`/
+  `XDG_RUNTIME_DIR` for reaching `xdg-desktop-portal`) - `pkexec` now
+  passes through the needed environment variables, and real `zenity`
+  errors are no longer swallowed. Also added: a clickable desktop icon
+  for `dialos-install` on `dialosadmin`'s desktop.
 - **Key-backup security fix:** `dialos-install` and `dialos-rekey` used
   to encrypt the Nextcloud backup of the LUKS key file with the same
   recovery passphrase that also serves as the second LUKS key slot -

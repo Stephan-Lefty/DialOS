@@ -489,6 +489,24 @@ sudo chmod 644 /home/dialosadmin/Desktop/claude-desktop*.deb
 sudo chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/claude-desktop*.deb
 ```
 
+**Clickable icon for `dialos-install` on `dialosadmin`'s desktop**
+(2026-08-14): also copy the app-menu template
+(`iso-build/config/includes.chroot/usr/share/applications/
+dialos-install.desktop`) directly onto the desktop - no `sudo` needed,
+`dialosadmin` owns their own desktop folder:
+
+```bash
+cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /home/dialosadmin/Desktop/
+chmod 755 /home/dialosadmin/Desktop/dialos-install.desktop
+gio set /home/dialosadmin/Desktop/dialos-install.desktop metadata::trusted true
+```
+
+The last command (`gio set ... metadata::trusted true`) is mandatory -
+without it, Nautilus shows an "untrusted" warning on the first
+double-click instead of launching the program (unlike the `.sh` scripts
+on the same desktop, which run via the executable-text-file setting,
+not the launcher trust mechanism).
+
 After this step: reboot, verify that `nutzer` starts automatically with
 no login screen - and that `nutzer`'s own desktop is **empty** of admin
 tools.

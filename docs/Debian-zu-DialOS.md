@@ -492,6 +492,25 @@ sudo chmod 644 /home/dialosadmin/Desktop/claude-desktop*.deb
 sudo chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/claude-desktop*.deb
 ```
 
+**Klickbares Icon für `dialos-install` auf `dialosadmin`s Desktop**
+(2026-08-14): Die App-Menü-Vorlage
+(`iso-build/config/includes.chroot/usr/share/applications/
+dialos-install.desktop`) zusätzlich direkt auf den Desktop kopieren -
+kein `sudo` nötig, `dialosadmin` besitzt sein eigenes Desktop-Verzeichnis:
+
+```bash
+cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /home/dialosadmin/Desktop/
+chmod 755 /home/dialosadmin/Desktop/dialos-install.desktop
+gio set /home/dialosadmin/Desktop/dialos-install.desktop metadata::trusted true
+```
+
+Der letzte Befehl (`gio set ... metadata::trusted true`) ist Pflicht -
+ohne ihn zeigt Nautilus beim ersten Doppelklick eine
+"nicht vertrauenswürdig"-Warnung statt das Programm zu starten (anders
+als bei den `.sh`-Skripten auf demselben Desktop, die über die
+Textdatei-Ausführen-Einstellung laufen, nicht über den
+Launcher-Vertrauensmechanismus).
+
 Nach diesem Schritt: neu starten, verifizieren dass `nutzer` automatisch
 ohne Anmeldebildschirm startet - und dass `nutzer`s eigener Desktop
 **leer** von Admin-Werkzeugen ist.

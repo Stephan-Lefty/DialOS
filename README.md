@@ -54,6 +54,13 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **`dialos-install`-Bugfix:** Der Datei-Speichern-Dialog für das
+  Schlüssel-Backup blieb unter `pkexec` lautlos aus (fehlende
+  `DBUS_SESSION_BUS_ADDRESS`/`XDG_RUNTIME_DIR` für den Zugriff auf
+  `xdg-desktop-portal`) - `pkexec` reicht die nötigen Umgebungsvariablen
+  jetzt durch, echte `zenity`-Fehler werden zusätzlich nicht mehr
+  verschluckt. Außerdem: klickbares Desktop-Icon für `dialos-install`
+  auf `dialosadmin`s Schreibtisch.
 - **Sicherheitsfix Schlüssel-Backup:** `dialos-install` und `dialos-rekey`
   verschlüsselten das Nextcloud-Backup der LUKS-Schlüsseldatei bisher mit
   demselben Wiederherstellungs-Passwort, das auch als zweiter
