@@ -235,14 +235,30 @@ what has already been done.
   `DialOS-Live-0.5.1-clone.iso` as a backup snapshot before the planned
   end-to-end test (see next item) - version/date/commit/SHA256 filled
   in.
-- [ ] `DialOS-Live-0.5.1-clone.iso` currently only exists locally
+- [ ] **Premise outdated, needs a fresh decision (checked 2026-08-16):**
+  `DialOS-Live-0.5.1-clone.iso` is **no longer** local - the reinstall
+  took it too. It still exists on the external drive under `DialOS-ISOs/`,
+  together with four older images; **28 GB** in total.
+
+  The real question is now a different one: all five come from the
+  Penguins' Eggs era, dropped on 2026-08-16, and represent a system state
+  that today's rebuild has substantially superseded. Is a Nextcloud upload
+  still worth it, or are they deleted with `docs/iso-builds.en.md` keeping
+  them only as a ledger?
+
+  Only Stephan can decide - it is his backup strategy. Original entry:
+  `DialOS-Live-0.5.1-clone.iso` currently only exists locally
   (`~/DialOS-Live-0.5.1-clone.iso`) - still needs to be uploaded to
   Nextcloud (only Stephan can do this, no Claude access to it).
 - [ ] The Bluetooth audio fix in `dialos-start-ansage.py`
   (single-instance lock/`alte_instanz_beenden()`) hasn't been
   conclusively confirmed over a longer period yet - check
   `/tmp/dialos-bluetooth-debug.log` if the problem recurs.
-- [ ] Delete the stale local second repo copy under `~/DialOS-repo`, or
+- [x] **Resolved by the rebuild (checked 2026-08-16):** `~/DialOS-repo`
+  no longer exists - the T490 reinstall removed the second copy. The
+  danger that prompted this entry is therefore gone; the `~/DialOS`
+  symlink now points at the repo on the external drive, so only one copy
+  is left. Originally: Delete the stale local second repo copy under `~/DialOS-repo`, or
   deliberately keep it as a backup (decision still open) - the
   `~/DialOS` symlink is now correctly set up (see "Done" below), but
   the second copy itself is still sitting there. Two independent copies
