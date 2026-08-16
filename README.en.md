@@ -56,6 +56,20 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Rule established: the fallback to the built-in devices must always be
+  guaranteed (Stephan, 2026-08-16).** A switched-off, empty or
+  disconnected headset must never leave DialOS mute or deaf - for a blind
+  user that would be the total failure, because they would not notice the
+  headset is off. Checking this revealed a **contradiction between docs
+  and code**: `docs/offene-punkte.en.md` listed the fallback switchover as
+  "not implemented", whereas `waehle_mikrofon_fuer_lautstaerke()` has long
+  picked the first non-monitor source when no `bluez_input` is present -
+  i.e. the built-in microphone. On the output side PipeWire moves the
+  default sink by itself. The open item is therefore not missing logic but
+  that **neither has ever been tested without Bluetooth**; the docs are
+  corrected accordingly. Named as the harder, still-open case: a device
+  that is *connected* but transmits nothing - no fallback triggers there,
+  because from the outside everything looks fine.
 - **Reference audio device settled: AIRHUG 01 (Stephan, 2026-08-16).**
   This decides the hardware question that was blocking voice control -
   tuning recognition thresholds and recording durations against a

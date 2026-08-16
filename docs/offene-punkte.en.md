@@ -68,21 +68,36 @@ so nothing gets lost from the discussions.
 ## Voice control
 - Wake-word engine for battery-saving continuous listening not yet
   finally decided (proposal: openWakeWord).
-- Bluetooth microphone fallback logic still missing: per a comparison
-  test (2026-08-13, AIRHUG Bluetooth device vs. built-in laptop
-  microphone – 6 out of 8 test sentences exactly correct over
-  Bluetooth at normal speaking volume/distance, vs. noticeably weaker
-  results with the built-in microphone), the target design is: DialOS
-  will always be installed with a mobile Bluetooth speaker/microphone
-  (like AIRHUG) as the primary input/output path, with the built-in
-  microphone/speakers only as a fallback (dead battery on the
-  Bluetooth device, or no Bluetooth connection). This switchover
-  (detecting that no Bluetooth device is connected and automatically
-  switching to the built-in microphone/speakers) is not implemented
-  yet – so far `dialos-vosk-test.py` only covers the technical
-  Bluetooth side (via `--bluetooth-erlauben`).
+- **Fallback to the built-in devices - Stephan's ruling of 2026-08-16:
+  must ALWAYS be guaranteed.** The reference device is the AIRHUG headset
+  (see [hardware.en.md](hardware.en.md)), but a switched-off, empty or
+  disconnected Bluetooth device must never leave DialOS mute or deaf. For
+  a blind user that would be the total failure: they do not notice the
+  headset is off and simply get no feedback at all.
 
-## Telephony
+  The basis for this is the comparison test of 2026-08-13 (AIRHUG vs. the
+  built-in laptop microphone: 6 of 8 test sentences exactly correct over
+  Bluetooth at normal speaking volume, noticeably weaker with the
+  built-in microphone). Bluetooth is therefore the primary path, the
+  built-in devices are the fallback.
+
+  **Implementation status (corrected 2026-08-16 - this previously said
+  "not implemented", which was wrong):**
+  - **Microphone: implemented.** `waehle_mikrofon_fuer_lautstaerke()` in
+    `dialos-start-ansage.py` takes a `bluez_input.` source if one exists,
+    otherwise the first non-monitor source - i.e. the built-in mic.
+  - **Speaker: implicitly implemented.** `spd-say` speaks through
+    speech-dispatcher's default sink; when the Bluetooth device
+    disappears, PipeWire moves the default sink to the built-in one by
+    itself.
+  - **Neither has ever been tested without Bluetooth.** That is the
+    remaining open item - not a missing implementation.
+
+  **Not covered and harder:** a device that is *connected* but transmits
+  nothing (nearly dead battery, radio interference). No fallback triggers
+  there, because from the system's point of view everything looks fine.
+  That would need real feedback about playback, not just about the
+  connection.
 - Prioritization of WhatsApp vs. Signal as messenger still open.
 
 ## Project/repository

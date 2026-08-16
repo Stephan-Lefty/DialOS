@@ -44,6 +44,13 @@ test was unambiguous (see [offene-punkte.en.md](offene-punkte.en.md),
 section "Voice control"). The built-in microphone remains intended as a
 not-yet-implemented fallback.
 
+**Mandatory rule (Stephan, 2026-08-16): the fallback to the built-in
+speakers and microphone must always be guaranteed.** A switched-off,
+empty or disconnected headset must never leave DialOS mute or deaf - for
+a blind user that would be the total failure, because they would not even
+notice the headset is off. Implementation status and what remains open:
+see [offene-punkte.en.md](offene-punkte.en.md).
+
 **Still to clarify:** whether the device announces its own firmware
 prompts ("connected", low battery) in German. Standard Bluetooth profiles
 offer no remote control over this, it is purely device-dependent – but
@@ -78,6 +85,8 @@ Sierra Wireless modules).
 
 ## Open questions
 
+- ~~Reference audio device~~ – **decided 2026-08-16: AIRHUG 01** (see
+  above).
 - Reference laptop model not yet finalized.
 - Reference security stick (brand/model, USB-A vs. USB-C) not yet
   finalized - the recommended size (64 GB) and filesystem split

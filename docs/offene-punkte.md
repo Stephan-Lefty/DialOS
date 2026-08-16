@@ -69,21 +69,38 @@ damit nichts aus den Diskussionen verloren geht.
 ## Sprachsteuerung
 - Wake-Word-Engine für Akku-sparendes Dauerlauschen noch nicht final
   entschieden (Vorschlag: openWakeWord).
-- Bluetooth-Mikrofon-Fallback-Logik fehlt noch: Laut Vergleichstest
-  (2026-08-13, AIRHUG-Bluetooth-Gerät vs. eingebautes Laptop-Mikrofon –
-  6 von 8 Testsätzen exakt korrekt über Bluetooth bei normaler
-  Sprechlautstärke/-abstand, gegenüber deutlich schwächeren Ergebnissen
-  beim eingebauten Mikrofon) ist das Zielbild: DialOS wird künftig immer
-  mit einem mobilen Bluetooth-Lautsprecher/Mikrofon (wie AIRHUG) als
-  primärem Ein-/Ausgabeweg installiert, das eingebaute Mikrofon/die
-  Lautsprecher sind nur Fallback (leerer Akku am Bluetooth-Gerät oder
-  keine Bluetooth-Verbindung). Diese Umschaltung (erkennen, dass kein
-  Bluetooth-Gerät verbunden ist, und automatisch aufs eingebaute
-  Mikrofon/die Lautsprecher wechseln) ist noch nicht implementiert –
-  bisher deckt `dialos-vosk-test.py` nur den technischen
-  Bluetooth-Anteil ab (per `--bluetooth-erlauben`).
+- **Fallback auf die eingebauten Geräte - Stephans Festlegung vom
+  2026-08-16: muss IMMER gewährleistet sein.** Referenzgerät ist das
+  AIRHUG-Headset (siehe [hardware.md](hardware.md)), aber ein
+  ausgeschaltetes, leeres oder nicht verbundenes Bluetooth-Gerät darf
+  DialOS nie stumm oder taub machen. Für einen blinden Nutzer wäre genau
+  das der Totalausfall: Er merkt nicht, dass das Headset aus ist, und
+  bekommt keinerlei Rückmeldung mehr.
 
-## Telefonie
+  Grundlage der Entscheidung ist der Vergleichstest vom 2026-08-13
+  (AIRHUG gegen eingebautes Laptop-Mikrofon: 6 von 8 Testsätzen exakt
+  korrekt über Bluetooth bei normaler Sprechlautstärke, deutlich
+  schwächer beim eingebauten Mikrofon). Bluetooth ist also der primäre
+  Weg, die eingebauten Geräte sind die Rückfallebene.
+
+  **Stand der Umsetzung (korrigiert am 2026-08-16 - hier stand vorher
+  fälschlich "nicht implementiert"):**
+  - **Mikrofon: umgesetzt.** `waehle_mikrofon_fuer_lautstaerke()` in
+    `dialos-start-ansage.py` nimmt eine `bluez_input.`-Quelle, wenn eine
+    da ist, sonst die erste Nicht-Monitor-Quelle - also das eingebaute
+    Mikrofon.
+  - **Lautsprecher: implizit umgesetzt.** `spd-say` spricht über
+    Speech-Dispatchers Standard-Senke; verschwindet das
+    Bluetooth-Gerät, zieht PipeWire die Standard-Senke selbst auf die
+    eingebaute um.
+  - **Beides noch nie ohne Bluetooth getestet.** Genau das ist der
+    verbleibende offene Punkt - nicht das Fehlen der Logik.
+
+  **Nicht abgedeckt und schwieriger:** ein Gerät, das *verbunden* ist,
+  aber nichts überträgt (fast leerer Akku, Funkstörung). Dann greift kein
+  Fallback, weil aus Systemsicht alles in Ordnung aussieht. Dafür bräuchte
+  es eine echte Rückmeldung über die Wiedergabe, nicht nur über die
+  Verbindung.
 - Priorisierung WhatsApp vs. Signal als Messenger noch offen.
 
 ## Projekt/Repository

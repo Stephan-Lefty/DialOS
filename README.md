@@ -55,6 +55,22 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Regel festgelegt: Der Rückfall auf die eingebauten Geräte muss immer
+  gewährleistet sein (Stephan, 2026-08-16).** Ein ausgeschaltetes, leeres
+  oder nicht verbundenes Headset darf DialOS nie stumm oder taub machen -
+  für einen blinden Nutzer wäre genau das der Totalausfall, weil er nicht
+  bemerkt, dass das Headset aus ist. Beim Nachprüfen zeigte sich ein
+  **Widerspruch zwischen Doku und Code**: `docs/offene-punkte.md` führte
+  die Fallback-Umschaltung als "noch nicht implementiert", tatsächlich
+  wählt `waehle_mikrofon_fuer_lautstaerke()` längst die erste
+  Nicht-Monitor-Quelle, wenn kein `bluez_input` da ist - also das
+  eingebaute Mikrofon. Auf der Ausgabeseite zieht PipeWire die
+  Standard-Senke selbst um. Der offene Punkt ist damit nicht das Fehlen
+  der Logik, sondern dass **beides noch nie ohne Bluetooth getestet
+  wurde**; die Doku ist entsprechend korrigiert. Als schwierigerer,
+  weiterhin offener Fall benannt: ein Gerät, das *verbunden* ist, aber
+  nichts überträgt - dann greift kein Fallback, weil von außen alles in
+  Ordnung aussieht.
 - **Referenz-Audiogerät festgelegt: AIRHUG 01 (Stephan, 2026-08-16).**
   Damit ist der Hardware-Punkt entschieden, der die Sprachsteuerung
   blockierte - Erkennungsschwellen und Aufnahmedauer gegen ein Mikrofon

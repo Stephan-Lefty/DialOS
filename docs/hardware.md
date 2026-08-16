@@ -45,6 +45,14 @@ Vergleichstest fiel eindeutig aus (siehe
 [offene-punkte.md](offene-punkte.md), Abschnitt "Sprachsteuerung"). Das
 eingebaute Mikrofon bleibt als noch nicht umgesetzter Rückfall gedacht.
 
+**Zwingende Regel (Stephan, 2026-08-16): Der Rückfall auf die
+eingebauten Lautsprecher und das eingebaute Mikrofon muss immer
+gewährleistet sein.** Ein ausgeschaltetes, leeres oder nicht verbundenes
+Headset darf DialOS nie stumm oder taub machen - für einen blinden Nutzer
+wäre genau das der Totalausfall, weil er gar nicht bemerkt, dass das
+Headset aus ist. Stand der Umsetzung und was daran noch offen ist: siehe
+[offene-punkte.md](offene-punkte.md).
+
 **Noch zu klären:** ob das Gerät seine eigenen Firmware-Ansagen
 ("verbunden", Akku-Warnung) auf Deutsch ausgibt. Über die
 Bluetooth-Standardprofile lässt sich das nicht fernsteuern, es ist rein
