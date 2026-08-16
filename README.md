@@ -85,6 +85,35 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **README-Status und Änderungsprotokoll auf den tatsächlichen Stand
+  gebracht (2026-08-16).** Der Status-Abschnitt stand noch auf
+  "Konzeptphase - es existiert noch keine lauffähige Software"; seit dem
+  Neuaufbau desselben Tages war das schlicht falsch. Er nennt jetzt die
+  drei Aufbau-Befehle, was nachweislich funktioniert (Sprachausgabe,
+  Sicherheitskonzept, Autologin, Standardprogramme) und was fehlt - die
+  Sprachsteuerung selbst. Im selben Durchgang das Protokoll geprüft:
+  Innerhalb von 0.5.0 hatten spätere Entscheidungen frühere Einträge
+  **derselben** Version überholt, ohne dass man das den Einträgen ansah -
+  die Stick-Formatierung (FAT32/ext4 → ext4/exFAT), `dialos-install`
+  (inzwischen ersatzlos entfallen) und mehrere "steht noch aus"-Vermerke,
+  die längst erledigt sind. Diese Einträge sind entfernt bzw. berichtigt
+  statt als scheinbar gültige Aussagen stehenzubleiben: Das Protokoll ist
+  in diesem Projekt kein Archiv, sondern die Erinnerung, die einen
+  Reinstall übersteht - eine überholte Aussage darin richtet mehr Schaden
+  an als eine fehlende. In 0.2.0 und 0.4.0 bleiben die Einträge dagegen
+  stehen, tragen aber jetzt einen Hinweis, dass der dort beschriebene
+  Installationsweg seit 0.5.0 nicht mehr existiert.
+- **Acht alte ISOs gelöscht, Abbild-Verzeichnis auf Rescuezilla
+  umgestellt (2026-08-16).** Rund 59 GB auf der externen Platte frei
+  geworden (danach 486 GB frei). Alle acht stammten aus der
+  Penguins-Eggs-Zeit, die am selben Tag entfallen ist, und bildeten
+  Systemstände ab, die der Neuaufbau vom 2026-08-16 deutlich überholt
+  hat; Prüfsummen lagen für keine davon vor. Stehen geblieben ist einzig
+  `DialOS-Live-0.5.1-clone.iso` - sie bleibt bewusst, bis Stephans erstes
+  Rescuezilla-Abbild existiert, damit nie der Zustand "gar keine
+  Sicherung" eintritt. `docs/iso-builds.md` heißt deshalb jetzt
+  "Abbild-Verzeichnis" statt "ISO-Verzeichnis", beschreibt Rescuezilla
+  statt `eggs produce` und hält die Löschaktion mit fest.
 - **Regel festgelegt: Der Rückfall auf die eingebauten Geräte muss immer
   gewährleistet sein (Stephan, 2026-08-16).** Ein ausgeschaltetes, leeres
   oder nicht verbundenes Headset darf DialOS nie stumm oder taub machen -
@@ -361,8 +390,9 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Wartungswerkzeug, kein Installer; sein Startsymbol tritt an die Stelle
   des bisherigen `dialos-install`-Symbols. `dialos-install`s LUKS-/
   Stick-Logik lebt unverändert in `dialos-setup-home-partition.sh`
-  weiter, das daraus abgeleitet wurde. Die ISO (`eggs produce`) dient nur
-  noch als Sicherungs-Schnappschuss. Erledigt sich damit auch: der offene
+  weiter, das daraus abgeleitet wurde. Die ISO dient nur noch als
+  Sicherungs-Schnappschuss (seit Schritt 16 als Rescuezilla-Abbild
+  statt `eggs produce`). Erledigt sich damit auch: der offene
   Punkt zum falschen GeoIP-Standortvorschlag von Calamares.
 - **`nutzer` hätte ein Home bekommen, das ihm nicht gehört - gefunden
   beim ersten echten Lauf von Skript 3 (2026-08-16).** `adduser` meldete
@@ -445,10 +475,11 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
     Rückmeldung. Die 8 GiB sind das Notpolster dagegen.
 - **Zeitzone/Locale entschieden:** Bau- und Referenzgerät bleiben auf
   `Europe/Vienna` + `de_AT.UTF-8` statt des bis dahin dokumentierten
-  `Europe/Berlin`. Folge, jetzt in Schritt 1 festgehalten: die beiden
-  Kundenwege liefern unterschiedliche Zeitzonen - Calamares setzt
-  weiterhin fest Berlin aus `locale.conf`, während `dialos-install` als
-  Klon-Werkzeug das laufende System kopiert und damit Wien vererbt.
+  `Europe/Berlin`. Der damit verbundene Widerspruch - Calamares setzte
+  fest Berlin aus `locale.conf`, während `dialos-install` als
+  Klon-Werkzeug das laufende System kopierte und damit Wien vererbte -
+  hat sich mit Weg A erledigt: Es gibt nur noch einen Aufbauweg, Wien
+  gilt überall.
 - **Von Debian 13 zu DialOS in drei Befehlen - Skript-Durchsicht vor dem
   ersten echten Durchlauf (2026-08-16).** `dialos-full-office-setup.sh`
   und `dialos-setup-home-partition.sh` waren bis dahin nur syntaktisch
@@ -509,14 +540,16 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
     Anleitung komplett - inklusive der Warnung, dass sie unverschlüsselt
     ist und damit `nutzer`s ausgelagerte Speicherseiten am
     LUKS-Schutz vorbei im Klartext auf der Platte liegen können.
-- **`dialos-install`-Bugfix:** Der Datei-Speichern-Dialog für das
+- **`zenity` unter `pkexec`:** Der Datei-Speichern-Dialog für das
   Schlüssel-Backup blieb unter `pkexec` lautlos aus (fehlende
   `DBUS_SESSION_BUS_ADDRESS`/`XDG_RUNTIME_DIR` für den Zugriff auf
   `xdg-desktop-portal`) - `pkexec` reicht die nötigen Umgebungsvariablen
   jetzt durch, echte `zenity`-Fehler werden zusätzlich nicht mehr
-  verschluckt. Außerdem: klickbares Desktop-Icon für `dialos-install`
-  auf `dialosadmin`s Schreibtisch.
-- **Sicherheitsfix Schlüssel-Backup:** `dialos-install` und `dialos-rekey`
+  verschluckt. Gefunden an `dialos-install`; das Werkzeug ist seither
+  entfallen, der Fix lebt unverändert in
+  `dialos-setup-home-partition.sh` weiter, das dessen Logik geerbt hat.
+- **Sicherheitsfix Schlüssel-Backup:** `dialos-rekey` und der daraus
+  abgeleitete `dialos-setup-home-partition.sh`
   verschlüsselten das Nextcloud-Backup der LUKS-Schlüsseldatei bisher mit
   demselben Wiederherstellungs-Passwort, das auch als zweiter
   LUKS-Schlüssel-Slot dient - wer beides kannte, hätte den Schlüssel ganz
@@ -525,17 +558,6 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Passwortübergabe an `openssl` über eine geshredete Temp-Datei statt
   Kommandozeilen-Argument (verhindert Sichtbarkeit in `ps aux`),
   Wiederherstellungs-Passwort braucht jetzt mindestens 12 Zeichen.
-- **Sicherheits-Stick partitioniert jetzt in zwei Bereiche:** `DIALOS-KEY`
-  (2 GiB, FAT32, wie bisher für die Schlüsseldatei) + `DIALOS-DATA`
-  (Rest der Kapazität, ext4, allgemeiner Datenspeicher) - vorher wurde
-  die gesamte Stick-Kapazität für die winzige Schlüsseldatei
-  "verschwendet". Neue Mindestgrößen-Prüfung (~2,5 GB) verhindert eine
-  kaputte/leere Datenpartition bei zu kleinen Sticks. Dabei außerdem
-  einen Bug behoben: Die Sicherheits-Stick-Auswahl in `dialos-install`
-  blendete (anders als die Zielfestplatten-Auswahl) das aktuelle
-  Live-Boot-Medium nicht aus - bei drei angeschlossenen Medien
-  (Boot-Stick, Sicherheits-Stick, interne Platte) hätte der Boot-Stick
-  fälschlich als Sicherheits-Stick wählbar sein können.
 - **Admin-Zugriff dokumentiert und korrigiert:** Erst wurde GNOME
   "Benutzer wechseln" als Weg für parallelen `dialosadmin`-Zugriff neben
   der laufenden `nutzer`-Sitzung dokumentiert. Beim Rekonstruieren der
@@ -567,8 +589,10 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   von 8 Testsätzen exakt korrekt bei normaler Sprechlautstärke, gegenüber
   deutlich schwächeren Ergebnissen beim eingebauten Mikrofon) -
   Zielbild: DialOS wird künftig immer mit einem mobilen
-  Bluetooth-Lautsprecher/Mikrofon installiert, eingebautes Mikrofon nur
-  als (noch nicht implementierter) Fallback.
+  Bluetooth-Lautsprecher/Mikrofon installiert, eingebautes Mikrofon als Fallback.
+  **Berichtigung:** Der Fallback war entgegen dieser Formulierung längst
+  implementiert, nur nie ohne Bluetooth getestet - siehe den Eintrag zur
+  Fallback-Regel ganz oben.
 - **Intent-Erkennung auf [hassil](https://github.com/OHF-Voice/hassil)
   festgelegt** statt des ursprünglich angedachten Rhasspy, das 2026 vom
   Ersteller archiviert wurde und nicht mehr weiterentwickelt wird -
@@ -591,12 +615,6 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Variante mit Maus/Tastatur).
 - Netzwerk-Priorität WLAN/Kabel vor SIM umgesetzt und auf dem T490
   verifiziert (NetworkManager-Routenmetriken).
-- Zwei ISO-Testbuilds erstellt: `DialOS-Live-0.5.0.iso` (ohne Klonen,
-  generischer Live-Nutzer als Sicherheitsnetz) und
-  `DialOS-Live-0.5.0-clone.iso` (mit `--clone`, übernimmt `dialosadmin`
-  und `nutzer` inkl. Home-Verzeichnissen aus dem echten System - für
-  den geplanten Live-Test von `dialos-install` mit dem Sicherheits-Stick
-  gedacht).
 - Zwei nie gepushte Commits aus einer veralteten lokalen Repo-Kopie
   wiederhergestellt und ins echte Repository nachgezogen (Bluetooth-Fix
   und dessen Dokumentation) - Repository liegt jetzt vollständig auf der
@@ -613,7 +631,10 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   per `blkid`, ob der Sicherheits-Stick (Label `DIALOS-KEY`) gefunden
   wird, und schaltet darüber `nutzer`s Autologin per AccountsService/
   `gdbus` um - Stick da: Autologin an; Stick fehlt: Autologin aus, GDM
-  zeigt den normalen Login-Screen (praktisch nur `dialosadmin` nutzbar).
+  zeigt den normalen Login-Screen. Der Zusatz "praktisch nur
+  `dialosadmin` nutzbar" stand hier ursprünglich und war falsch - wer
+  `nutzer`s Passwort kannte, kam trotzdem hinein. Geschlossen hat das
+  erst die Konto-Sperre weiter oben.
   Läuft komplett in der normalen Systemumgebung statt im initramfs,
   daher ohne dessen Fallstricke. Ursprünglich als reiner Login-Filter
   gedacht (schützte noch nicht die Daten selbst) - **noch am selben Tag
@@ -637,11 +658,13 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   zugreifbar); `DIALOS-DATA` (allgemeiner Speicher) als **exFAT** statt
   ext4, damit `nutzer` sie als normalen mobilen Datenträger unter
   Windows/macOS/Linux nutzen kann - empfohlene Standardgröße 64 GB
-  (≈62 GB `DIALOS-DATA` nutzbar). Die Stick-Partitionierung wurde
+  (≈62 GB `DIALOS-DATA` nutzbar). Eine Mindestgrößen-Prüfung (~2,5 GB)
+  verhindert eine kaputte oder leere Datenpartition bei zu kleinen
+  Sticks. Die Stick-Partitionierung wurde
   manuell gegen einen echten 59,8-GB-USB-Stick verifiziert (Labels,
-  Dateisysteme, Rechte-Verhalten wie erwartet); die vollständige
-  `dialos-install`-Installation auf echter Hardware steht laut TODO.md
-  noch aus. Details:
+  Dateisysteme, Rechte-Verhalten wie erwartet); der vollständige Aufbau auf echter Hardware ist
+  inzwischen durchgelaufen (2026-08-16), allerdings über die drei
+  Büro-Skripte - `dialos-install` selbst ist seither entfallen. Details:
   [docs/sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md),
   Abschnitt "Verschlüsselung von nutzers Daten + Sicherheits-Stick".
 - **Vosk/hassil-Spracherkennung als wiederholbares Rezept dokumentiert:**
@@ -662,7 +685,8 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Festplattenplatz, gemessen ca. 6,3 GB statt ~3,2 GB beim großen
   Modell). `dialos-vosk-test.py` (interaktives technisches Testskript)
   jetzt ebenfalls im Repo. Ein echter Erkennungstest (tatsächlich
-  hineinsprechen) steht laut TODO.md noch aus.
+  hineinsprechen) folgte am 15./16.08. mit Stephans Stimme - siehe den
+  Eintrag zur Lautstärke-Abfrage.
 - **Konsolidierungs-Skript + eigenständige Home-Partitionierung:**
   Stephan wollte eine durchgehende Schritt-für-Schritt-Anleitung von
   Debian-Installer-Download bis fertigem DialOS - dabei fiel eine echte
@@ -680,9 +704,9 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   den Festplatten-Wipe - nutzt stattdessen freien Platz am Ende der
   System-Platte. Dafür muss bei der Basis-Installation (Schritt 1)
   bewusst Platz nach der 100-GB-root-Partition frei gelassen werden -
-  jetzt in `Debian-zu-DialOS.md` dokumentiert. Beide neuen Skripte sind
-  bisher nur syntaktisch geprüft, noch nicht real getestet - geplant für
-  den nächsten kompletten T490-Neuaufbau (siehe TODO.md).
+  jetzt in `Debian-zu-DialOS.md` dokumentiert. Beide neuen Skripte waren zu diesem
+  Zeitpunkt nur syntaktisch geprüft; der erste echte Lauf folgte am
+  2026-08-16 auf dem neu aufgebauten T490 (siehe weiter oben).
 - **Wetter-Standort auf GeoClue2 umgestellt:** Auslöser war ein
   konkreter Live-Fund - `dialos-start-ansage.py` fragte bisher `wttr.in`
   ohne Ortsangabe ab, das rät den Standort selbst per IP; auf Stephans
@@ -762,7 +786,9 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   chroot des NEUEN Systems, nicht auf der Live-Vorlage, von der aus
   künftige ISOs gebaut werden - sonst hätte die nächste ISO gar keinen
   Installer mehr enthalten. Noch nicht über eine echte Installation
-  verifiziert.
+  verifiziert - **und seit 0.5.0 gegenstandslos:** Mit Weg A ist
+  Calamares ersatzlos entfallen, dieser Schritt wird nie verifiziert
+  werden.
 - Bluetooth-Kopplungsdaten für die drei Standard-Peripheriegeräte dieses
   Testgeräts (Maus "Pebble M350s", Tastatur "Pebble K380s", externer
   Lautsprecher/Mikrofon "AIRHUG 01") fest ins Image aufgenommen
@@ -828,6 +854,12 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Signatur-Aufwand verbunden und wurde bewusst nicht umgesetzt.
 
 ### 0.2.0
+
+*Hinweis, nachgetragen am 2026-08-16: Die Einträge dieser Version
+beschreiben den Live-Boot-Installationsweg über Calamares und Penguins'
+Eggs. Beides ist seit 0.5.0 ersatzlos entfallen - die Einträge bleiben
+als Verlauf stehen, taugen aber nicht mehr als Bauanleitung.*
+
 - Erste Live-Boot-Installationstests auf realer Hardware (Lenovo T490)
   durchgeführt und iterativ ausgewertet; ISO-Build-Workflow mit
   Penguins' Eggs eingerichtet (Rezept unter `iso-build/config/`, Build-

@@ -84,6 +84,33 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **README status and changelog brought in line with reality
+  (2026-08-16).** The status section still read "concept phase - no
+  working software exists yet"; that had been plainly wrong since the
+  rebuild earlier the same day. It now names the three build commands,
+  what demonstrably works (speech output, the security concept,
+  autologin, default applications) and what is missing - voice control
+  itself. The same pass audited the changelog: within 0.5.0, later
+  decisions had superseded earlier entries of the **same** version
+  without that being visible in the entries - the stick formatting
+  (FAT32/ext4 → ext4/exFAT), `dialos-install` (since removed entirely)
+  and several "still pending" notes that have long been done. Those
+  entries were removed or corrected rather than left standing as
+  seemingly valid statements: in this project the changelog is not an
+  archive but the memory that survives a reinstall - an outdated
+  statement in it does more damage than a missing one. In 0.2.0 and
+  0.4.0 the entries do remain, but now carry a note that the
+  installation path described there no longer exists as of 0.5.0.
+- **Eight old ISOs deleted, image directory switched to Rescuezilla
+  (2026-08-16).** Freed about 59 GB on the external drive (486 GB free
+  afterwards). All eight dated from the Penguins' Eggs era that ended
+  the same day, and captured system states that the 2026-08-16 rebuild
+  has clearly superseded; no checksums existed for any of them. The only
+  one kept is `DialOS-Live-0.5.1-clone.iso` - deliberately, until
+  Stephan's first Rescuezilla image exists, so that "no backup at all"
+  never becomes the state. `docs/iso-builds.en.md` is therefore now
+  called "Image directory" instead of "ISO directory", describes
+  Rescuezilla instead of `eggs produce` and records the deletion.
 - **Rule established: the fallback to the built-in devices must always be
   guaranteed (Stephan, 2026-08-16).** A switched-off, empty or
   disconnected headset must never leave DialOS mute or deaf - for a blind
@@ -344,7 +371,8 @@ background) and `splash.png` (boot/login screen).
   its launcher takes the place of the former `dialos-install` one.
   `dialos-install`'s LUKS/stick logic lives on unchanged in
   `dialos-setup-home-partition.sh`, which was derived from it. The ISO
-  (`eggs produce`) now serves only as a backup snapshot. This also
+  now serves only as a backup snapshot (since step 16 as a Rescuezilla
+  image instead of `eggs produce`). This also
   disposes of the open item about Calamares' wrong GeoIP location
   suggestion.
 - **`nutzer` would have got a home they don't own - found during the
@@ -426,10 +454,11 @@ background) and `splash.png` (boot/login screen).
     user loses all feedback. The 8 GiB are the cushion against that.
 - **Timezone/locale decided:** the build and reference device stays on
   `Europe/Vienna` + `de_AT.UTF-8` instead of the `Europe/Berlin`
-  documented until then. Consequence, now recorded in step 1: the two
-  customer paths yield different timezones - Calamares still hard-sets
-  Berlin from `locale.conf`, while `dialos-install` as a cloning tool
-  copies the running system and thus passes Vienna on.
+  documented until then. The contradiction this created - Calamares
+  hard-setting Berlin from `locale.conf` while `dialos-install` as a
+  cloning tool copied the running system and thus passed Vienna on - is
+  moot since path A: there is only one build path left, and Vienna
+  applies everywhere.
 - **From Debian 13 to DialOS in three commands - script review before the
   first real run (2026-08-16).** `dialos-full-office-setup.sh` and
   `dialos-setup-home-partition.sh` had only been syntax-checked until
@@ -488,13 +517,15 @@ background) and `splash.png` (boot/login screen).
     the guide entirely - including the warning that it is unencrypted, so
     `nutzer`'s paged-out memory can end up in the clear on disk, bypassing
     the LUKS protection.
-- **`dialos-install` bugfix:** the file-save dialog for the key backup
+- **`zenity` under `pkexec`:** the file-save dialog for the key backup
   silently failed under `pkexec` (missing `DBUS_SESSION_BUS_ADDRESS`/
   `XDG_RUNTIME_DIR` for reaching `xdg-desktop-portal`) - `pkexec` now
   passes through the needed environment variables, and real `zenity`
-  errors are no longer swallowed. Also added: a clickable desktop icon
-  for `dialos-install` on `dialosadmin`'s desktop.
-- **Key-backup security fix:** `dialos-install` and `dialos-rekey` used
+  errors are no longer swallowed. Found in `dialos-install`; that tool
+  has since been removed, but the fix lives on unchanged in
+  `dialos-setup-home-partition.sh`, which inherited its logic.
+- **Key-backup security fix:** `dialos-rekey` and the derived
+  `dialos-setup-home-partition.sh` used
   to encrypt the Nextcloud backup of the LUKS key file with the same
   recovery passphrase that also serves as the second LUKS key slot -
   anyone who knew both could have decrypted the key entirely without the
@@ -503,16 +534,6 @@ background) and `splash.png` (boot/login screen).
   shredded temp file instead of a command-line argument (prevents
   visibility in `ps aux`), and the recovery passphrase now requires at
   least 12 characters.
-- **Security stick now partitioned into two areas:** `DIALOS-KEY` (2
-  GiB, FAT32, as before for the key file) + `DIALOS-DATA` (remaining
-  capacity, ext4, general-purpose storage) - previously the stick's
-  entire capacity was "wasted" on the tiny key file. A new minimum-size
-  check (~2.5 GB) prevents a broken/empty data partition on sticks that
-  are too small. Also fixed a bug: the security-stick picker in
-  `dialos-install` (unlike the target-disk picker) didn't exclude the
-  current live boot medium - with three media plugged in (boot stick,
-  security stick, internal disk), the boot stick could have been
-  mistakenly selectable as the security stick.
 - **Admin access documented, then corrected:** GNOME "switch user" was
   first documented as a way to get parallel `dialosadmin` access
   alongside the running `nutzer` session. While reconstructing the
@@ -544,8 +565,10 @@ background) and `splash.png` (boot/login screen).
   test sentences exactly correct at normal speaking volume, vs.
   noticeably weaker results with the built-in microphone) - target
   design: DialOS will always be installed with a mobile Bluetooth
-  speaker/microphone, with the built-in microphone only as a (not yet
-  implemented) fallback.
+  speaker/microphone, with the built-in microphone as a fallback.
+  **Correction:** contrary to this wording the fallback had long been
+  implemented, just never tested without Bluetooth - see the entry on
+  the fallback rule at the top.
 - **Intent recognition set to [hassil](https://github.com/OHF-Voice/hassil)**
   instead of the originally planned Rhasspy, which was archived by its
   creator in 2026 and is no longer maintained - hassil offers the same
@@ -567,11 +590,6 @@ background) and `splash.png` (boot/login screen).
   every other account gets the full variant including mouse/keyboard).
 - Network priority WLAN/wired over SIM implemented and verified on the
   T490 (NetworkManager route metrics).
-- Built two test ISOs: `DialOS-Live-0.5.0.iso` (without cloning, a
-  generic live user as a safety net) and `DialOS-Live-0.5.0-clone.iso`
-  (with `--clone`, carries over `dialosadmin` and `nutzer` including
-  home directories from the real system - intended for the planned live
-  test of `dialos-install` with the security stick).
 - Recovered two never-pushed commits from a stale local repo copy and
   brought them into the real repository (the Bluetooth fix and its
   documentation) - the repository now lives entirely on the external
@@ -587,7 +605,10 @@ background) and `splash.png` (boot/login screen).
   `blkid` whether the security stick (label `DIALOS-KEY`) is found, and
   switches `nutzer`'s autologin via AccountsService/`gdbus` accordingly -
   stick present: autologin on; stick missing: autologin off, GDM shows
-  the normal login screen (practically only `dialosadmin` usable). Runs
+  the normal login screen. The qualifier "practically only
+  `dialosadmin` usable" stood here originally and was wrong - anyone
+  who knew `nutzer`'s password still got in. Only the account lock
+  described above closed that. Runs
   entirely in the normal system environment instead of the initramfs, so
   it avoids that path's pitfalls. Originally designed as a pure login
   filter (didn't yet protect the data itself) - **evolved further the
@@ -610,11 +631,13 @@ background) and `splash.png` (boot/login screen).
   accessible only to root even under Linux); `DIALOS-DATA` (general
   storage) as **exFAT** instead of ext4, so `nutzer` can use it as an
   ordinary portable drive under Windows/macOS/Linux - recommended
-  standard size 64 GB (≈62 GB usable `DIALOS-DATA`). The stick
+  standard size 64 GB (≈62 GB usable `DIALOS-DATA`). A minimum-size
+  check (~2.5 GB) prevents a broken or empty data partition on sticks
+  that are too small. The stick
   partitioning was manually verified against a real 59.8 GB USB stick
-  (labels, filesystems, permission behavior all as expected); the full
-  `dialos-install` installation on real hardware is still pending per
-  TODO.md. Details:
+  (labels, filesystems, permission behavior all as expected); the full build on real hardware has since
+  completed (2026-08-16), via the three office scripts - `dialos-install`
+  itself has been removed in the meantime. Details:
   [docs/sicherheit-datenschutz.en.md](docs/sicherheit-datenschutz.en.md),
   section "Encrypting nutzer's data + security stick".
 - **Vosk/hassil speech recognition documented as a repeatable recipe:**
@@ -634,7 +657,8 @@ background) and `splash.png` (boot/login screen).
   - but wastes disk space, measured ~6.3 GB instead of ~3.2 GB for the
   large model). `dialos-vosk-test.py` (interactive technical test
   script) is now in the repo too. A real recognition test (actually
-  speaking into it) is still pending per TODO.md.
+  speaking into it) followed on 2026-08-15/16 with Stephan's voice - see
+  the entry on the volume prompt.
 - **Consolidation script + standalone home-partition setup:** Stephan
   wanted a continuous step-by-step guide from downloading the Debian
   installer to a finished DialOS - that surfaced a real gap: the
@@ -650,9 +674,9 @@ background) and `splash.png` (boot/login screen).
   logic unchanged, but without the disk wipe - instead using free space
   at the end of the system disk. This requires deliberately leaving
   space free after the 100 GB root partition during the base install
-  (step 1) - now documented in `Debian-zu-DialOS.md`. Both new scripts
-  are only syntax-checked so far, not yet tested for real - planned for
-  the next full T490 rebuild (see TODO.md).
+  (step 1) - now documented in `Debian-zu-DialOS.md`. Both new scripts were only
+  syntax-checked at that point; the first real run followed on
+  2026-08-16 on the rebuilt T490 (see above).
 - **Switched the weather location to GeoClue2:** triggered by a concrete
   live finding - `dialos-start-ansage.py` previously queried `wttr.in`
   without a location, which guesses the location itself via IP; on
@@ -732,7 +756,9 @@ background) and `splash.png` (boot/login screen).
   system. Important detail: the step runs exclusively inside the chroot
   of the NEW system, not on the live template that future ISOs are
   built from - otherwise the next ISO would ship without an installer
-  at all. Not yet verified via a real installation.
+  at all. Not yet verified via a real installation - **and moot since
+  0.5.0:** path A removed Calamares entirely, so this step will never be
+  verified.
 - Baked the Bluetooth pairing data for this test device's three
   standard peripherals (mouse "Pebble M350s", keyboard "Pebble K380s",
   external speaker/microphone "AIRHUG 01") directly into the image
@@ -795,6 +821,12 @@ background) and `splash.png` (boot/login screen).
   was deliberately not implemented.
 
 ### 0.2.0
+
+*Note added on 2026-08-16: the entries in this version describe the
+live-boot installation path via Calamares and Penguins' Eggs. Both were
+removed entirely as of 0.5.0 - the entries remain as history, but are no
+longer usable as build instructions.*
+
 - Ran and iteratively evaluated the first live-boot install tests on
   real hardware (Lenovo T490); set up the ISO build workflow with
   Penguins' Eggs (recipe under `iso-build/config/`, build and test cycle
