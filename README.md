@@ -37,11 +37,24 @@ Anwesenheits-Token – in beiden Richtungen nachgewiesen: ohne Stick ist
 das Konto gesperrt und die Daten sind verschlossen, mit Stick meldet sich
 `nutzer` automatisch an), Autologin, Branding, Standardprogramme.
 
-**Was noch fehlt – der eigentliche Kern:** die Sprachsteuerung selbst.
-Vosk und hassil sind installiert und haben mit der Lautstärke-Abfrage bei
-der Start-Ansage ihre erste echte Bewährungsprobe bestanden, aber
-dauerhaftes Zuhören mit Aufweckwort und eine Befehlsgrammatik gibt es
-noch nicht. Ebenso offen: Telefonie und die WWAN-Variante.
+**Seit dem Abend des 2026-08-16 gehört dazu der erste echte
+Sprachbefehl.** Ein dauerhaft lauschender Dienst schaltet auf Zuruf die
+Optik des Schreibtischs um:
+
+> "auf Windows umschalten" &nbsp;·&nbsp; "auf Linux umschalten"
+
+Dahinter steht die optionale Windows-11-Optik – für Menschen, die DialOS
+wegen der Sprachsteuerung wollen, aber aus der Windows-Welt kommen. GNOME
+bleibt dabei vollständig erhalten (Orca, AT-SPI), es kommen nur drei
+Erweiterungen obendrauf, und es lässt sich jederzeit in beide Richtungen
+zurückschalten. Die gewählte Optik bleibt über Neustarts hinweg
+bestehen.
+
+**Was noch fehlt – der eigentliche Kern:** die Sprachsteuerung in der
+Breite. Was es gibt, ist eine auf drei feste Sätze beschränkte
+Erkennung; was fehlt, ist ein Aufweckwort und eine Befehlsgrammatik für
+alles andere (Radio, Briefe, Termine). Ebenso offen: Telefonie und die
+WWAN-Variante.
 
 Details zum jeweiligen Stand stehen im
 [Änderungsprotokoll](#änderungsprotokoll), konkrete nächste Schritte in
@@ -76,6 +89,8 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Referenzgerät für die Sprachsteuerung (siehe
   [hardware.md](docs/hardware.md)). Rückfall auf die eingebauten
   Lautsprecher/Mikrofone ist Pflicht und für die Ausgabe nachgewiesen.
+  Das eingebaute Mikrofon war bis zum 2026-08-16 um 60 dB übersteuert –
+  seither korrigiert und per Dienst bei jedem Start abgesichert.
 - **Eingabegeräte:** Logitech Pebble M350s (Maus), Pebble K380s (Tastatur)
 - **Sicherheits-Stick:** 64 GB, aufgeteilt in `DIALOS-KEY` (Schlüssel,
   ext4) und `DIALOS-DATA` (exFAT, auch an Windows/macOS lesbar)

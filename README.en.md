@@ -38,11 +38,24 @@ without the stick the account is locked and the data sealed, with it
 `nutzer` logs in automatically), autologin, branding, default
 applications.
 
-**What is still missing – the actual core:** voice control itself. Vosk
-and hassil are installed and passed their first real test with the volume
-prompt during the startup announcement, but continuous listening with a
-wake word and a command grammar do not exist yet. Also open: telephony
-and the WWAN variant.
+**Since the evening of 2026-08-16 that includes the first real voice
+command.** A continuously listening service switches the desktop's look
+on command:
+
+> "auf Windows umschalten" &nbsp;·&nbsp; "auf Linux umschalten"
+> (German for "switch to Windows/Linux")
+
+Behind it sits the optional Windows 11 look – for people who want DialOS
+for the voice control but come from the Windows world. GNOME is preserved
+in full (Orca, AT-SPI); only three extensions are added on top, and it
+can be switched back at any time in either direction. The chosen look
+persists across restarts.
+
+**What is still missing – the actual core:** voice control across the
+board. What exists is recognition limited to three fixed sentences; what
+is missing is a wake word and a command grammar for everything else
+(radio, letters, appointments). Also open: telephony and the WWAN
+variant.
 
 Details on the respective state are in the [changelog](#changelog),
 concrete next steps in [TODO.en.md](TODO.en.md).
@@ -75,7 +88,9 @@ background) and `splash.png` (boot/login screen).
 - **Audio:** AIRHUG 01 – Bluetooth headset, the reference device for
   voice control since 2026-08-16 (see [hardware.en.md](docs/hardware.en.md)).
   Falling back to the built-in speakers/microphone is mandatory and has
-  been proven for the output side.
+  been proven for the output side. The built-in microphone was
+  over-amplified by 60 dB until 2026-08-16 – corrected since, and
+  secured by a service at every boot.
 - **Input devices:** Logitech Pebble M350s (mouse), Pebble K380s (keyboard)
 - **Security stick:** 64 GB, split into `DIALOS-KEY` (key file, ext4) and
   `DIALOS-DATA` (exFAT, also readable on Windows/macOS)
