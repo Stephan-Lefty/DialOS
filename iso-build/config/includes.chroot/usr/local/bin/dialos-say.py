@@ -6,15 +6,53 @@ stumm und stellt sie danach wieder her. Speech-Dispatcher-eigene Streams
 werden dabei bewusst ausgenommen.
 
 Legt zusaetzlich waehrend der Sprachausgabe eine Markierungsdatei an (und
-entfernt sie garantiert wieder, auch bei Fehlern) - darauf reagiert
-dialos-tts-indicator.py mit einem Icon im GNOME-Panel, nuetzlich falls die
-Lautstaerke zu leise eingestellt ist.
+entfernt sie wieder, auch bei Fehlern und bei Zeitueberschreitung) - darauf
+reagiert dialos-tts-indicator.py mit einem Icon im GNOME-Panel, nuetzlich
+falls die Lautstaerke zu leise eingestellt ist.
 """
 import json
+import os
 import subprocess
 import sys
 
-MARKIERUNGSDATEI = "/tmp/dialos-sprachausgabe-aktiv"
+
+def markierungsdatei():
+    """Pro Konto eigener Pfad - bewusst NICHT ein fester Name in /tmp.
+
+    Bis 2026-08-16 stand hier "/tmp/dialos-sprachausgabe-aktiv", also ein
+    fester Pfad, den sich ALLE Konten teilen. Live beobachtet: nutzers
+    Ansage legte die Datei an, danach zeigte auch dialosadmins Panel
+    dauerhaft das Sprechen-Icon - obwohl dort nichts lief. Schlimmer:
+    /tmp hat das Sticky-Bit, dialosadmin konnte nutzers Datei also gar
+    nicht entfernen, und markierung_setzen() scheiterte still am
+    fehlenden Schreibrecht.
+
+    XDG_RUNTIME_DIR (/run/user/<uid>) ist pro Konto privat und wird beim
+    Abmelden automatisch geleert - genau richtig fuer eine Markierung,
+    die nur waehrend einer Sitzung gilt.
+    """
+    basis = os.environ.get("XDG_RUNTIME_DIR")
+    if basis and os.path.isdir(basis):
+        return os.path.join(basis, "dialos-sprachausgabe-aktiv")
+    # Rueckfall: eigener Name je Konto, damit sich auch hier nichts
+    # zwischen zwei Konten in die Quere kommt.
+    return f"/tmp/dialos-sprachausgabe-aktiv-{os.getuid()}"
+
+
+MARKIERUNGSDATEI = markierungsdatei()
+
+# Zeitgrenzen fuer spd-say. Ohne sie kann ein haengendes "spd-say --wait"
+# das ganze Skript blockieren - und dann laeuft der finally-Block NIE, die
+# stummgeschalteten Audioquellen bleiben also dauerhaft stumm und das
+# Panel-Icon dauerhaft an. Genau das ist am 2026-08-16 passiert: Waehrend
+# die Sprachausgabe defekt war (fehlendes check_piper_voice.sh), wartete
+# spd-say auf ein Ende-Signal, das nie kam - der Prozess stand nach 75
+# Minuten immer noch.
+AUFWAERM_TIMEOUT_S = 20
+# Grundzeit plus Zuschlag nach Textlaenge: die Start-Ansage ist rund 450
+# Zeichen lang und braucht bei Sprechtempo 0.85 etwa 40 Sekunden.
+TEXT_TIMEOUT_GRUND_S = 60
+TEXT_TIMEOUT_MAX_S = 300
 
 
 def sink_inputs():
@@ -49,12 +87,35 @@ def markierung_setzen():
 
 def markierung_entfernen():
     try:
-        import os
         os.remove(MARKIERUNGSDATEI)
     except FileNotFoundError:
         pass
     except Exception:
         pass
+
+
+def sprich(cmd, grenze_s):
+    """spd-say mit Zeitgrenze aufrufen.
+
+    Laeuft die Grenze ab, beendet subprocess.run den Prozess und wirft
+    TimeoutExpired - das faengt diese Funktion ab, damit der Aufrufer
+    normal weiterlaeuft und vor allem sein finally erreicht. Eine
+    hakelnde Sprachausgabe darf niemals dazu fuehren, dass die Audio-
+    Stummschaltung nicht wieder aufgehoben wird.
+    """
+    try:
+        subprocess.run(cmd, timeout=grenze_s)
+        return True
+    except subprocess.TimeoutExpired:
+        print(
+            f"[dialos-say] spd-say nach {grenze_s}s abgebrochen - "
+            "Sprachausgabe antwortet nicht.",
+            file=sys.stderr,
+        )
+        return False
+    except Exception as fehler:
+        print(f"[dialos-say] spd-say fehlgeschlagen: {fehler}", file=sys.stderr)
+        return False
 
 
 def main():
@@ -88,8 +149,15 @@ def main():
         spd_cmd = ["spd-say", "--wait"]
         if intensitaet is not None:
             spd_cmd += ["-i", str(intensitaet)]
-        subprocess.run(spd_cmd + ["."])
-        subprocess.run(spd_cmd + [text])
+        text_timeout = min(
+            TEXT_TIMEOUT_MAX_S, TEXT_TIMEOUT_GRUND_S + len(text) // 10
+        )
+        # Auch wenn die Aufwaerm-Ansage in eine Zeitgrenze laeuft, wird der
+        # eigentliche Text noch versucht: vielleicht hakte nur der erste
+        # Aufruf, und eine ausbleibende Ansage waere fuer einen blinden
+        # Nutzer schlimmer als eine verspaetete.
+        sprich(spd_cmd + ["."], AUFWAERM_TIMEOUT_S)
+        sprich(spd_cmd + [text], text_timeout)
     finally:
         for index in stummgeschaltet:
             set_mute(index, False)

@@ -30,7 +30,22 @@ except ValueError:
     from gi.repository import AppIndicator3
 from gi.repository import GLib, Gtk
 
-MARKIERUNGSDATEI = "/tmp/dialos-sprachausgabe-aktiv"
+def markierungsdatei():
+    """Muss exakt denselben Pfad liefern wie dialos-say.py.
+
+    Pro Konto eigener Pfad - bis 2026-08-16 stand hier ein fester Name in
+    /tmp, den sich alle Konten teilten. Folge (live beobachtet): nutzers
+    Ansage legte die Datei an, und danach zeigte dialosadmins Panel
+    dauerhaft das Sprechen-Icon, obwohl dort nichts sprach. Begruendung
+    ausfuehrlich in dialos-say.py.
+    """
+    basis = os.environ.get("XDG_RUNTIME_DIR")
+    if basis and os.path.isdir(basis):
+        return os.path.join(basis, "dialos-sprachausgabe-aktiv")
+    return f"/tmp/dialos-sprachausgabe-aktiv-{os.getuid()}"
+
+
+MARKIERUNGSDATEI = markierungsdatei()
 PRUEF_INTERVALL_MS = 200
 
 
