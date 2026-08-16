@@ -127,35 +127,72 @@ single number anywhere.
 > system if the shrink is interrupted. Hence the correct layout is
 > created during installation instead.
 
-### 1a. Put the preseed file on dialos.org (one-off)
+### 1a. Make the preseed file available
 
 The file lives in the repo at
-[`website/d-i/trixie/preseed.cfg`](../website/d-i/trixie/preseed.cfg) -
-i.e. alongside the other `dialos.org` website files. **The repo path
-mirrors the web server path exactly**, and the filename already matches:
-the next time the website is uploaded it lands in the right place by
-itself, at
+[`website/d-i/trixie/preseed.cfg`](../website/d-i/trixie/preseed.cfg).
+The installer must be able to reach it over **plain HTTP**.
+
+> **Why HTTP and not HTTPS:** the Debian docs list only `http://` and
+> `tftp://` for `preseed/url`. HTTPS is nowhere guaranteed, nor is the
+> behaviour on a 301 redirect. A server that forcibly redirects to HTTPS
+> is therefore unsuitable - verified on 2026-08-16 against dialos.org,
+> which does exactly that.
+
+#### Route 1 (recommended): the office machine itself
+
+Since every device is set up in the office anyway, the machine holding
+the repo is right there. A one-liner turns it into a web server for the
+duration of the install - **no internet, no hosting, no HTTPS**:
+
+```bash
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo/website && python3 -m http.server 8080
+```
+
+Find your own IP address with:
+
+```bash
+hostname -I | awk '{print $1}'
+```
+
+In the installer (step 1b) you then enter:
+
+```
+preseed/url=http://<office-machine-IP>:8080/d-i/trixie/preseed.cfg
+```
+
+Advantages: the file comes straight from the repo and cannot go stale,
+nothing depends on a hosting provider, and the target device only needs
+the local network. Stop the web server with `Ctrl`+`C` afterwards.
+
+#### Route 2 (optional): dialos.org
+
+Only worthwhile if your web server delivers `/d-i/` **without**
+redirecting to HTTPS. Upload the file there via FTP:
 
 ```
 http://dialos.org/d-i/trixie/preseed.cfg
 ```
 
-The path is freely choosable - it is spelled out in full in step 1b
-below. This structure still makes sense: it matches Debian convention and
-leaves room for future Debian releases alongside `trixie`.
+Two pitfalls, both encountered for real on 2026-08-16:
 
-This is done **once**, not per device. For a future Debian release simply
-add a folder next to `trixie` (the new release's codename); the old one
-can stay.
+- **The FTP landing folder is usually not the web root.** With many
+  hosts you end up one level above it. The `d-i` folder has to sit at the
+  same level as `wp-content`, `wp-admin`, `wp-includes` and `index.php` -
+  otherwise the server returns 404 even though the file is there.
+- **dialos.org runs WordPress and forces HTTPS.** WordPress itself is
+  harmless (nginx serves existing files before falling through to
+  WordPress), but the forced HTTPS is not: it would have to be excluded
+  for `/d-i/` in the server configuration.
 
-> Deliberately **not** served from GitHub: the DialOS repo is private,
-> and `raw.githubusercontent.com` requires a token in the request for
-> that - the Debian installer cannot authenticate. Besides, GitHub serves
-> exclusively over HTTPS, and whether the installer supports HTTPS for
-> `preseed/url` is version-dependent.
+**To check it is in place** - use `http://` explicitly, not a browser
+(which silently substitutes `https://`):
 
-**To check it is in place:** open the address in a browser - the file's
-text content must appear, not a download dialog and not a 404 page.
+```bash
+curl -s -o /dev/null -w "%{http_code} %{url_effective}\n" -L http://dialos.org/d-i/trixie/preseed.cfg
+```
+
+Expected: `200` **without** a switch to `https://` in the output.
 
 ### 1b. Start the installer with it (for every device)
 
@@ -182,7 +219,14 @@ Procedure:
      `linux` and press **End** to jump to its end.
    - **Older BIOS (isolinux menu):** press **`Tab`** instead. The boot
      line then appears directly for editing.
-4. Append at the end - with a space before it:
+4. Append the address from step 1a at the end, with a space before it.
+   For route 1 (office machine):
+
+   ```
+   preseed/url=http://192.168.1.50:8080/d-i/trixie/preseed.cfg
+   ```
+
+   (replace `192.168.1.50` with your own IP). For route 2:
 
    ```
    preseed/url=http://dialos.org/d-i/trixie/preseed.cfg

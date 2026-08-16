@@ -134,37 +134,73 @@ irgendwo eine Zahl angepasst werden muss.
 > mitten im Schrumpfen das System zerstört. Deshalb entsteht das
 > richtige Layout gleich beim Installieren.
 
-### 1a. Die Preseed-Datei auf dialos.org ablegen (einmalig)
+### 1a. Die Preseed-Datei bereitstellen
 
 Die Datei liegt im Repo unter
-[`website/d-i/trixie/preseed.cfg`](../website/d-i/trixie/preseed.cfg) -
-also bei den übrigen Website-Dateien von `dialos.org`. **Der Pfad im Repo
-entspricht exakt dem Pfad auf dem Webserver**, und der Dateiname stimmt
-schon: Beim nächsten Hochladen der Website landet sie von selbst richtig
-unter
+[`website/d-i/trixie/preseed.cfg`](../website/d-i/trixie/preseed.cfg).
+Der Installer muss sie über **einfaches HTTP** erreichen können.
+
+> **Warum HTTP und nicht HTTPS:** Die Debian-Doku nennt für `preseed/url`
+> ausschließlich `http://` und `tftp://`. HTTPS wird nirgends zugesichert,
+> das Verhalten bei einer 301-Umleitung ebenso wenig. Ein Server, der
+> zwingend auf HTTPS umleitet, ist deshalb ungeeignet - geprüft am
+> 2026-08-16 an dialos.org, das genau das tut.
+
+#### Weg 1 (empfohlen): der Rechner im Büro selbst
+
+Da ohnehin jedes Gerät im Büro aufgesetzt wird, steht der Rechner mit dem
+Repo direkt daneben. Ein Einzeiler macht ihn für die Dauer der
+Installation zum Webserver - **kein Internet, kein Hosting, kein HTTPS**:
+
+```bash
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo/website && python3 -m http.server 8080
+```
+
+Die eigene IP-Adresse findest du mit:
+
+```bash
+hostname -I | awk '{print $1}'
+```
+
+Im Installer (Schritt 1b) gibst du dann an:
+
+```
+preseed/url=http://<IP-des-Buero-Rechners>:8080/d-i/trixie/preseed.cfg
+```
+
+Vorteile: Die Datei kommt unmittelbar aus dem Repo und kann gar nicht
+veralten, es hängt nichts an einem Hoster, und das Zielgerät braucht nur
+das lokale Netz. Nach der Installation den Webserver mit `Strg`+`C`
+beenden.
+
+#### Weg 2 (optional): dialos.org
+
+Nur sinnvoll, wenn dein Webserver `/d-i/` **ohne** Umleitung auf HTTPS
+ausliefert. Datei per FTP dorthin legen:
 
 ```
 http://dialos.org/d-i/trixie/preseed.cfg
 ```
 
-Der Pfad ist frei wählbar - er wird unten in Schritt 1b vollständig
-ausgeschrieben. Diese Struktur ist trotzdem sinnvoll: Sie entspricht der
-Debian-Konvention und lässt Platz für künftige Debian-Versionen neben
-`trixie`.
+Zwei Fallstricke, beide am 2026-08-16 real aufgetreten:
 
-Das muss **einmal** gemacht werden, nicht pro Gerät. Bei einer künftigen
-Debian-Version kommt einfach ein Ordner neben `trixie` dazu (Codename
-der neuen Version), der alte kann stehen bleiben.
+- **Der FTP-Startordner ist meist nicht das Web-Wurzelverzeichnis.** Bei
+  vielen Hostern landest du eine Ebene darüber. Der Ordner `d-i` muss auf
+  derselben Ebene liegen wie `wp-content`, `wp-admin`, `wp-includes` und
+  `index.php` - sonst liefert der Server 404, obwohl die Datei da ist.
+- **dialos.org läuft auf WordPress und erzwingt HTTPS.** WordPress selbst
+  ist unkritisch (nginx liefert vorhandene Dateien vor der
+  WordPress-Weiterleitung aus), die HTTPS-Erzwingung dagegen schon: Sie
+  müsste für `/d-i/` in der Server-Konfiguration ausgenommen werden.
 
-> Bewusst **nicht** über GitHub ausgeliefert: Das DialOS-Repo ist privat,
-> und `raw.githubusercontent.com` verlangt dafür ein Token im Request -
-> der Debian-Installer kann sich nicht authentifizieren. Davon abgesehen
-> liefert GitHub ausschließlich über HTTPS, und ob der Installer HTTPS
-> für `preseed/url` beherrscht, ist versionsabhängig.
+**Prüfen, ob es liegt** - unbedingt mit `http://`, nicht im Browser
+(der ersetzt es stillschweigend durch `https://`):
 
-**Prüfen, ob es liegt:** Die Adresse im Browser aufrufen - es muss der
-Textinhalt der Datei erscheinen, kein Download-Dialog und keine
-404-Seite.
+```bash
+curl -s -o /dev/null -w "%{http_code} %{url_effective}\n" -L http://dialos.org/d-i/trixie/preseed.cfg
+```
+
+Erwartet wird `200` **ohne** Wechsel auf `https://` in der Ausgabe.
 
 ### 1b. Den Installer damit starten (bei jedem Gerät)
 
@@ -192,7 +228,14 @@ Ablauf:
      springen.
    - **Älteres BIOS (isolinux-Menü):** stattdessen **`Tab`** drücken. Die
      Startzeile erscheint dann direkt zum Bearbeiten.
-4. Dort ans Ende - mit einem Leerzeichen davor - anhängen:
+4. Dort ans Ende - mit einem Leerzeichen davor - die Adresse aus
+   Schritt 1a anhängen. Bei Weg 1 (Rechner im Büro):
+
+   ```
+   preseed/url=http://192.168.1.50:8080/d-i/trixie/preseed.cfg
+   ```
+
+   (die `192.168.1.50` durch die eigene IP ersetzen). Bei Weg 2:
 
    ```
    preseed/url=http://dialos.org/d-i/trixie/preseed.cfg
