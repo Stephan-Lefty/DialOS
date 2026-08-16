@@ -50,6 +50,28 @@ Fehlermeldung im falschen Home. Alles, was Root-Rechte braucht, ruft
 **Noch nicht auf einem frischen System end-to-end getestet** - geplant
 für den nächsten kompletten Neuaufbau des T490.
 
+## dialos-preseed-server.sh
+
+Stellt die Preseed-Datei (`website/d-i/trixie/preseed.cfg`) für die Dauer
+einer Installation im lokalen Netz bereit und gibt die Zeile aus, die im
+Debian-Installer einzutippen ist - inklusive der eigenen IP-Adresse, damit
+nichts nachgeschlagen werden muss.
+
+Hintergrund (2026-08-16): Der Debian-Installer holt die Preseed-Datei über
+**einfaches HTTP**; die Debian-Doku nennt für `preseed/url` nur `http://`
+und `tftp://`. Genau daran scheitern die naheliegenden Ablageorte -
+dialos.org (WordPress) leitet zwingend auf HTTPS um, Nextcloud erst recht
+und erzeugt zusätzlich lange Token-Adressen. Der eigene Rechner umgeht
+alles davon und passt zum Ablauf, weil ohnehin jedes Gerät im Büro neben
+ihm aufgesetzt wird. Die Datei kommt dabei unmittelbar aus dem Repo und
+kann nicht veralten.
+
+Prüft vorab, ob die Datei existiert und ob der Port frei ist, und weist
+bei mehreren Netzwerkkarten auf die Alternativadressen hin.
+
+Aufruf: `./dialos-preseed-server.sh [Port]` (Standard 8080),
+beenden mit `Strg`+`C`.
+
 ## dialos-set-avatar.sh
 
 Setzt die DialOS-Bildmarke als Profilbild (Avatar) für ein
