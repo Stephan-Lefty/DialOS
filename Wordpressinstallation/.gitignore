@@ -1,0 +1,9 @@
+# Zugangsdaten NIEMALS committen – dieses Repo ist öffentlich auf GitHub.
+.env
+.env.*
+!.env.example
+
+# Lokale Arbeitsdateien der Analyse
+*.html
+*.har
+tmp/
