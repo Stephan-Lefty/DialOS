@@ -2,8 +2,13 @@
 # DialOS: Kompletter Buero-Setup-Abschluss nach einer frischen
 # Installation - fasst mehrere Einzelschritte in einem Klick zusammen:
 # 1. Avatar fuer das Admin-Konto setzen
-# 2. "nutzer"-Konto anlegen + Autologin umschalten
-# 3. Firefox-Startseite pruefen (sollte automatisch aus der ISO kommen)
+# 2. Admin-Werkzeuge auf dialosadmins Arbeitsflaeche bereitstellen
+# 3. "nutzer"-Konto anlegen + Autologin umschalten
+# 4. Firefox-Startseite pruefen (sollte automatisch aus der ISO kommen)
+#
+# Schritt 2 war bis 2026-08-16 reine Handarbeit aus der Doku (Schritt 13 in
+# docs/Debian-zu-DialOS.md) und damit die einzige Luecke, die den Aufbau
+# davon abhielt, komplett aus Skripten zu bestehen - jetzt hier mit drin.
 #
 # Aufruf: sudo ./dialos-buero-setup-abschliessen.sh [admin-benutzername]
 #   admin-benutzername Standard: $SUDO_USER (also "dialosadmin")
@@ -15,16 +20,79 @@ if [ -z "$ADMIN_USER" ]; then
   echo "[dialos] Aufruf: sudo ./dialos-buero-setup-abschliessen.sh <admin-benutzername>" >&2
   exit 1
 fi
+ADMIN_HOME=$(getent passwd "$ADMIN_USER" | cut -d: -f6)
+if [ -z "$ADMIN_HOME" ] || [ ! -d "$ADMIN_HOME" ]; then
+  echo "[dialos] Home-Verzeichnis von '$ADMIN_USER' nicht gefunden." >&2
+  exit 1
+fi
 
-echo "=== [dialos] Schritt 1/3: Avatar setzen ==="
+echo "=== [dialos] Schritt 1/4: Avatar setzen ==="
 "$SCRIPT_DIR/dialos-set-avatar.sh" "$ADMIN_USER"
 
 echo ""
-echo "=== [dialos] Schritt 2/3: Nutzer-Konto + Autologin ==="
+echo "=== [dialos] Schritt 2/4: Admin-Werkzeuge auf die Arbeitsflaeche ==="
+# WICHTIG: bewusst direkt auf das schon existierende Admin-Konto, NICHT
+# ueber /etc/skel/Desktop/ - /etc/skel wirkt nur auf kuenftig angelegte
+# Konten, und das ist in diesem Rezept ausschliesslich "nutzer". Ueber skel
+# landeten die Admin-Werkzeuge also ausgerechnet auf dem Konto, das sie nie
+# sehen soll (Korrektur vom 2026-08-14, siehe scripts/README.md).
+DESKTOP_DIR="$ADMIN_HOME/Desktop"
+mkdir -p "$DESKTOP_DIR"
+
+# Nur kopieren, wenn das Skript NICHT schon von der Arbeitsflaeche selbst
+# laeuft - sonst kopierten die Dateien auf sich selbst.
+if [ "$SCRIPT_DIR" != "$DESKTOP_DIR" ]; then
+  cp "$SCRIPT_DIR"/*.sh "$DESKTOP_DIR/"
+  echo "[dialos] Setup-Skripte nach $DESKTOP_DIR kopiert."
+else
+  echo "[dialos] Skripte liegen bereits auf der Arbeitsflaeche - nichts zu kopieren."
+fi
+chmod 755 "$DESKTOP_DIR"/*.sh
+
+# Startsymbol fuer dialos-install. Quelle ist bewusst die INSTALLIERTE
+# Datei aus /usr/share/applications (Schritt 12) und nicht das Repo: so
+# funktioniert dieser Schritt auch, wenn das Skript von der Arbeitsflaeche
+# aus gestartet wird, wo es kein Repo-Verzeichnis gibt.
+INSTALL_DESKTOP="/usr/share/applications/dialos-install.desktop"
+if [ -f "$INSTALL_DESKTOP" ]; then
+  cp "$INSTALL_DESKTOP" "$DESKTOP_DIR/"
+  chmod 755 "$DESKTOP_DIR/dialos-install.desktop"
+  echo "[dialos] Startsymbol fuer dialos-install abgelegt."
+else
+  echo "[dialos] WARNUNG: $INSTALL_DESKTOP fehlt - lief Schritt 12 (Sicherheits-Werkzeuge) durch?" >&2
+fi
+
+# Claude-Desktop-App: wird bei jedem Buero-Setup frisch geladen, bewusst
+# nicht ins Repo committet. Darf den Lauf nicht abbrechen, falls das Paket
+# gerade nicht verfuegbar ist - deshalb Fehler abgefangen.
+if (cd /tmp && apt-get download claude-desktop >/dev/null 2>&1); then
+  cp /tmp/claude-desktop*.deb "$DESKTOP_DIR/" 2>/dev/null || true
+  chmod 644 "$DESKTOP_DIR"/claude-desktop*.deb 2>/dev/null || true
+  rm -f /tmp/claude-desktop*.deb
+  echo "[dialos] Claude-Desktop-App auf der Arbeitsflaeche abgelegt."
+else
+  echo "[dialos] Hinweis: 'claude-desktop' konnte nicht geladen werden (nicht in den Paketquellen?) - uebersprungen."
+fi
+
+# Alles auf der Arbeitsflaeche muss dem Admin-Konto gehoeren, sonst kann es
+# die Dateien als normaler Benutzer nicht starten.
+chown -R "$ADMIN_USER":"$ADMIN_USER" "$DESKTOP_DIR"
+
+# Ohne "metadata::trusted" zeigt Nautilus beim ersten Doppelklick eine
+# "nicht vertrauenswuerdig"-Warnung, statt das Programm zu starten. Das
+# Merkmal liegt in der Metadaten-Ablage des BENUTZERS - deshalb als
+# ADMIN_USER ausfuehren, nicht als root.
+if [ -f "$DESKTOP_DIR/dialos-install.desktop" ] && command -v runuser >/dev/null 2>&1; then
+  runuser -u "$ADMIN_USER" -- gio set "$DESKTOP_DIR/dialos-install.desktop" metadata::trusted true 2>/dev/null \
+    || echo "[dialos] Hinweis: 'gio set metadata::trusted' ging nicht (keine laufende Sitzung von '$ADMIN_USER'?) - beim ersten Doppelklick ggf. einmal 'Vertrauen und starten' bestaetigen."
+fi
+
+echo ""
+echo "=== [dialos] Schritt 3/4: Nutzer-Konto + Autologin ==="
 "$SCRIPT_DIR/dialos-setup-nutzer.sh" "$ADMIN_USER"
 
 echo ""
-echo "=== [dialos] Schritt 3/3: Firefox-Startseite pruefen ==="
+echo "=== [dialos] Schritt 4/4: Firefox-Startseite pruefen ==="
 POLICY_FILE="/usr/lib/firefox-esr/distribution/policies.json"
 if [ -f "$POLICY_FILE" ] && grep -q "dialos.org" "$POLICY_FILE"; then
   echo "[dialos] Firefox-Startseite ist korrekt gesetzt (automatisch aus der ISO)."

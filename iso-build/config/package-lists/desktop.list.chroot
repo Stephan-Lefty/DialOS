@@ -30,6 +30,8 @@ git
 nodejs
 npm
 dconf-cli
+unzip
+python3-pip
 
 zenity
 polkitd

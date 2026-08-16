@@ -56,6 +56,49 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Danach wie von Stephan geplant: darauf aufbauend Spracherkennung/
   Sprachbefehle Schritt für Schritt auf echter Hardware ausarbeiten und
   die Installationsroutine weiter erweitern.
+  **Vorarbeit erledigt 2026-08-16:** Beide Skripte wurden vor dem ersten
+  Lauf gegen `docs/Debian-zu-DialOS.md` durchgesehen, auf dem frisch
+  installierten T490 live gegengeprüft und die gefundenen Fehler behoben
+  (Details im README-Änderungsprotokoll 0.5.0). Der Ablauf besteht jetzt
+  aus genau drei Befehlen; die Handarbeit aus Doku-Schritt 13 steckt in
+  `dialos-buero-setup-abschliessen.sh`.
+- [ ] **Swap ist unverschlüsselt - Grundsatzentscheidung nötig.** Auf dem
+  T490 liegt eine 37,3-GiB-Swap-Partition (`nvme0n1p3`, Klartext, per
+  UUID in `/etc/fstab`). `nutzer`s Speicherseiten - offene Dokumente,
+  Mails, Browserinhalte - können dorthin ausgelagert werden und sind dann
+  ohne Sicherheits-Stick lesbar, ebenso nach Ausbau der SSD. Das
+  untergräbt genau das, was `dialos-nutzer-home` schützen soll (siehe
+  docs/sicherheit-datenschutz.md). Optionen: (a) Swap per `/etc/crypttab`
+  mit bei jedem Start neu gewürfeltem Schlüssel verschlüsseln, (b) Swap
+  ganz weglassen (46 GiB RAM im Gerät), (c) bewusst akzeptieren und
+  dokumentieren. Für den Ruhezustand taugt der Swap ohnehin nicht (37 GiB
+  < 46 GiB RAM). Gefunden 2026-08-16 beim Abgleich der realen
+  Partitionierung gegen Schritt 1 der Doku; die Doku beschreibt die Lage
+  jetzt inklusive Warnung, die Entscheidung selbst steht noch aus.
+- [ ] **`dialos-install` und `dialos-rekey` haben dieselben Fehler wie
+  das durchgesehene `dialos-setup-home-partition.sh`** - bewusst nicht
+  mitkorrigiert, weil über den Klon-Pfad noch nicht entschieden ist (Punkt
+  weiter unten). Betroffen: gleiches zu langes ext4-Label
+  `dialos-nutzer-home` (`dialos-install` Zeile 248), gleiche
+  Klartext-Passphrase unter festem Namen `/tmp/.rp` (Zeile 199), gleicher
+  `$HOME`-Startordner im Backup-Dialog (Zeile 231, `dialos-rekey` Zeile
+  142), gleiche fehlende Fallbacks in `ask_password`/`zenity --list`.
+  Entweder mitziehen oder zusammen mit dem Klon-Pfad entfallen lassen -
+  aber nicht auseinanderlaufen lassen.
+- [ ] **Zeitzone/Locale festlegen:** Das T490 läuft auf `Europe/Vienna` +
+  `de_AT.UTF-8`, die Doku (Schritt 1) und Calamares' `locale.conf`
+  schreiben `Europe/Berlin` vor. Für den Betrieb in Tirol ist Wien
+  richtig, aber `eggs produce --clone` klont Zeitzone und Locale mit in
+  die ISO - eine so gebaute ISO käme mit österreichischen Einstellungen
+  beim Kunden an. Vor dem finalen ISO-Bau entscheiden (gefunden
+  2026-08-16).
+- [ ] **`dialos-claude-setup.sh` auf dem frisch installierten T490
+  ausführen.** Geprüft am 2026-08-16: `credential.helper` ist nicht
+  gesetzt, `~/.git-credentials` fehlt, `/etc/sudoers.d/` enthält nur die
+  README, und `~/DialOS` zeigt nicht auf das Repo der externen Platte.
+  Das Skript lief auf diesem System also noch nie - `git push` würde
+  nach Zugangsdaten fragen und die `eggs produce`-NOPASSWD-Regel fehlt.
+  Muss Stephan selbst machen (das GitHub-Token tippt kein Skript ein).
 - [x] Konsolidierungs-Skript `scripts/dialos-full-office-setup.sh` +
   neues `dialos-setup-home-partition.sh` (führt `dialos-install`s LUKS/
   Stick-Logik auf einem bereits installierten System aus, ohne dessen

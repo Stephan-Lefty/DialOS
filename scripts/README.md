@@ -31,13 +31,21 @@ vorhanden, läuft aber NICHT im Standardlauf mit - nur sinnvoll, wenn
 dasselbe Testgerät wie vorher wiederverwendet wird (Kopplungsdaten
 hängen an der MAC-Adresse des eingebauten Bluetooth-Adapters).
 
-Aufruf:
+Aufruf (**ohne `sudo`**, siehe unten):
 - `./dialos-full-office-setup.sh` - Standardlauf ohne Schritt 14.
 - `./dialos-full-office-setup.sh --bluetooth-kopplung` - Standardlauf
   inkl. Schritt 14.
 - `./dialos-full-office-setup.sh 08` - nur ein einzelner Schritt, zum
   gezielten Nachholen/Debuggen (funktioniert für jeden Schritt,
   einschließlich 14).
+
+**Nicht mit `sudo` starten** (Riegel eingebaut 2026-08-16): Die Schritte
+9 und 10 richten das Benutzerkonto ein (GNOME-Erweiterung,
+Standardprogramme, Nautilus-Lesezeichen) und schreiben dafür nach `~` -
+unter `sudo` wäre das `/root`, und die Dateien landeten ohne jede
+Fehlermeldung im falschen Home. Alles, was Root-Rechte braucht, ruft
+`sudo` selbst auf; das Passwort wird zu Beginn einmal abgefragt
+(`sudo -v`), damit der Lauf nicht mitten in den Downloads stehen bleibt.
 
 **Noch nicht auf einem frischen System end-to-end getestet** - geplant
 für den nächsten kompletten Neuaufbau des T490.
@@ -88,10 +96,24 @@ Aufruf: `sudo ./dialos-claude-setup.sh`
 
 ## dialos-buero-setup-abschliessen.sh
 
-Sammel-Skript für den letzten Schritt nach einer frischen Installation:
-ruft `dialos-set-avatar.sh` und `dialos-setup-nutzer.sh` nacheinander
-auf und prüft zusätzlich, ob die Firefox-Startseite korrekt gesetzt ist
-(sollte automatisch aus der ISO kommen, wird hier nur kontrolliert).
+Sammel-Skript für den letzten Schritt nach einer frischen Installation,
+seit 2026-08-16 vier Teilschritte:
+
+1. `dialos-set-avatar.sh` - Profilbild fürs Admin-Konto.
+2. **Admin-Werkzeuge auf `dialosadmin`s Arbeitsfläche** (neu 2026-08-16):
+   die Skripte aus diesem Ordner, die frisch geladene
+   Claude-Desktop-`.deb` und ein klickbares Startsymbol für
+   `dialos-install` inklusive `gio set … metadata::trusted true`. Das war
+   vorher reine Handarbeit aus der Doku (Schritt 13) und damit die letzte
+   Lücke, die den Geräteaufbau davon abhielt, komplett aus Skripten zu
+   bestehen. `gio set` läuft per `runuser` als das Admin-Konto, nicht als
+   root - das Vertrauens-Merkmal liegt in dessen eigener
+   Metadaten-Ablage.
+3. `dialos-setup-nutzer.sh` - `nutzer`-Konto + Autologin-Umschaltung.
+   Braucht den **noch eingesteckten** Sicherheits-Stick, sonst bricht es
+   kontrolliert ab.
+4. Prüft, ob die Firefox-Startseite korrekt gesetzt ist (sollte
+   automatisch aus der ISO kommen, wird hier nur kontrolliert).
 
 Aufruf: `sudo ./dialos-buero-setup-abschliessen.sh [admin-benutzername]`
 (Standard: `$SUDO_USER`)

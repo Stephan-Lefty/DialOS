@@ -35,19 +35,41 @@ points back to the file/commit/doc it comes from.
 This guide describes path 2. Reference test device: Lenovo ThinkPad
 T490 (see [hardware.en.md](hardware.en.md)).
 
-> **Fast path since 2026-08-14:** steps 2-12 + 15 (and optionally 14)
-> can now be run automatically via
-> [`scripts/dialos-full-office-setup.sh`](../scripts/dialos-full-office-setup.sh)
-> instead of typing them out one by one (see
-> [`scripts/README.md`](../scripts/README.md)). The individual steps
-> below remain the actual detailed reference, though - the script is
-> built directly from them, and if a single step causes trouble the
-> script can also be run for just that one step
-> (`./scripts/dialos-full-office-setup.sh 08`). Step 14 (Bluetooth
-> pairing data) only runs along with `--bluetooth-kopplung`, since it's
-> device-specific. Steps 1 (base install), 13 (create the `nutzer`
-> account) and 16 (build the ISO) deliberately remain their own manual
-> steps - see there.
+> **Fast path (as of 2026-08-16): three commands from Debian to DialOS.**
+> After the base install (step 1), everything except the ISO build is
+> covered by scripts - there is no manual command left to type out of
+> this document:
+>
+> ```bash
+> # 1) Steps 2-12 + 15 - as dialosadmin, WITHOUT sudo:
+> ./scripts/dialos-full-office-setup.sh
+>
+> # 2) Step 12b - plug in the security stick, again WITHOUT sudo
+> #    (the script raises its own privileges via pkexec):
+> /usr/local/sbin/dialos-setup-home-partition.sh
+>
+> # 3) Step 13 - leave the stick plugged in:
+> sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
+> ```
+>
+> Then reboot, then step 16 (build the ISO). The individual steps below
+> remain the actual detailed reference - the scripts are built directly
+> from them, and if a single step causes trouble, script 1 can be run for
+> just that one step (`./scripts/dialos-full-office-setup.sh 08`). Step
+> 14 (Bluetooth pairing data) only runs along with
+> `--bluetooth-kopplung`, since it's device-specific. Steps 1 (base
+> install) and 16 (build the ISO) deliberately remain manual - see there.
+>
+> **Two pitfalls when invoking these** (both found on 2026-08-16, before
+> the first real run started):
+> - Do **not** start script 1 with `sudo`. Steps 9 and 10 set up the user
+>   account (GNOME extension, default applications); under `sudo`, `~`
+>   would be `/root` and everything would silently land in the wrong
+>   home. The script therefore refuses to start as root.
+> - Do **not** start script 2 with `sudo` either. `sudo` strips
+>   `DISPLAY`/`XAUTHORITY` (`env_reset`), so the script's Zenity dialogs
+>   might not be able to open. Started without `sudo`, it elevates itself
+>   via `pkexec` and keeps the graphical environment.
 
 ## 0. Prerequisites
 
@@ -74,19 +96,59 @@ adjustment.
 Timezone: `Europe`/`Berlin` as the default (see step 5 - Calamares
 later picks this up automatically for customer installs).
 
+> **Note the deviation on the reference device (2026-08-16):** the T490
+> actually runs `Europe/Vienna` and `de_AT.UTF-8` (Stephan's location in
+> Tyrol). That's correct for day-to-day use, but it has a consequence for
+> step 16: `eggs produce --clone` clones the running system **including**
+> `/etc/localtime` and the locale - an ISO built that way would ship with
+> Austrian settings, while Calamares' `locale.conf` hard-sets
+> `Europe/Berlin` for customer installs (step 5). Decide which one should
+> win before the final ISO build; see [TODO.en.md](../TODO.en.md).
+
 **Partitioning - important, choose manual instead of "guided - use
 entire disk"** (since 2026-08-14, see
 [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md), section
 "Encrypting nutzer's data + security stick"):
 
 - GPT partition table.
-- EFI system partition (~512 MB), `/boot/efi`.
+- EFI system partition, `/boot/efi` (~512 MB is enough; the Debian
+  installer likes to create around 1 GB on its own - either is fine).
 - Root partition, **exactly 100 GB**, ext4, `/`.
+- Swap partition: **optional, see the warning below.** The Debian
+  installer suggests one on its own during manual partitioning.
 - **Leave the entire rest of the disk unpartitioned/free** - don't let
   the installer use it, otherwise
   [`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
   (step 12) won't have any room left for the encrypted
-  `dialos-nutzer-home` partition.
+  `dialos-nutzer-home` partition. The script requires at least 20 GiB of
+  free space; considerably more makes sense - this is the end user's
+  entire data area.
+
+**What this looks like concretely on the reference device** (T490,
+476.9 GiB NVMe) - measured on 2026-08-16, as a template to compare
+against when rebuilding:
+
+| Partition | Size | Used for |
+|---|---|---|
+| `nvme0n1p1` | 100.00 GB (93.13 GiB) | `/`, ext4 |
+| `nvme0n1p2` | 954 MB | `/boot/efi`, vfat |
+| `nvme0n1p3` | 37.3 GiB | swap |
+| *(unpartitioned)* | **345.6 GiB** | reserved for `dialos-nutzer-home` |
+
+> **Warning: an ordinary swap partition is unencrypted and therefore
+> undermines part of the security design.** `/home/nutzer` does sit
+> inside LUKS2, but memory pages belonging to that account - open
+> documents, mail, browser content - can be paged out to swap by the
+> kernel, where they are **readable in the clear without the security
+> stick**, and likewise after removing the SSD. That contradicts
+> [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md). Options:
+> leave swap out entirely (usually unproblematic with ≥16 GB RAM), or
+> encrypt it with a key re-randomized on every boot (`/etc/crypttab`). On
+> the reference device swap is currently **unencrypted** - open item, see
+> [TODO.en.md](../TODO.en.md). Note: a swap area smaller than RAM (37 GiB
+> against 46 GiB here) is unsuitable for hibernation anyway - which
+> removes the one argument that might have spoken for an unencrypted swap
+> partition.
 
 ## 2. Install the package list
 
@@ -108,7 +170,11 @@ Notable groups within it (in the order they appear in the file):
 - **Applications**: Firefox, Thunderbird, Shortwave (radio), Rhythmbox,
   GNOME Podcasts, LibreOffice Writer.
 - **Terminal/development**: `gnome-terminal`, `curl`, `wget`, `git`,
-  `nodejs`/`npm` (for the Claude Code CLI, step 7), `dconf-cli`.
+  `nodejs`/`npm` (for the Claude Code CLI, step 7), `dconf-cli`,
+  `unzip` + `python3-pip` (both needed for step 15 - added on 2026-08-16
+  because they were missing before: `pip3` is not present on a fresh
+  Debian 13 install, so step 15 would have failed at the very end of the
+  run).
 - **Installer/security tools**: `zenity`, `polkitd`, `pkexec`,
   `parted`, `dosfstools`, `exfatprogs` (for the Windows-readable
   `DIALOS-DATA` partition on the security stick), `cryptsetup`,
@@ -214,9 +280,9 @@ sudo gdbus call --system --dest org.freedesktop.Accounts \
   --method org.freedesktop.Accounts.User.SetAutomaticLogin true
 ```
 
-At the very start (before `nutzer` even exists, see step 12), the admin
-account (`dialosadmin`) gets autologin for testing purposes, so you can
-work on the system. Details and reasoning:
+At the very start (before `nutzer` even exists - that account is only
+created in step 13), the admin account (`dialosadmin`) gets autologin for
+testing purposes, so you can work on the system. Details and reasoning:
 [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md), section
 "Automatic login".
 
@@ -310,8 +376,13 @@ sudo systemctl disable --now rustdesk
 ## 7. Install the Claude Code CLI
 
 ```bash
-npm install -g @anthropic-ai/claude-code
+sudo npm install -g @anthropic-ai/claude-code
 ```
+
+`sudo` is mandatory here (corrected 2026-08-16 - the command was
+previously listed without it, which would not have worked on a fresh
+system): Debian's npm prefix is `/usr/local`, which `dialosadmin` cannot
+write to, so the command otherwise fails with `EACCES`.
 
 (The `EBADENGINE` warning about the Node version can be ignored, it
 works anyway.) For the desktop app: no fixed install step - the `.deb`
@@ -543,14 +614,28 @@ uses the space deliberately left free at the end of the system disk in
 step 1:
 
 ```bash
-sudo /usr/local/sbin/dialos-setup-home-partition.sh
+/usr/local/sbin/dialos-setup-home-partition.sh
 ```
+
+**Deliberately without `sudo`** (corrected 2026-08-16): the script raises
+itself to root via `pkexec` and keeps the graphical environment while
+doing so. Started with `sudo`, that branch never runs (you are already
+root), and `sudo` simultaneously strips `DISPLAY`/`XAUTHORITY` via
+`env_reset` - the Zenity dialogs might then fail to open. If it does have
+to run from a non-graphical terminal, the script has asked for passwords
+on the terminal instead since 2026-08-16, rather than (as before)
+terminating silently at that point.
 
 Asks for the security stick, a recovery passphrase (≥12 characters),
 and confirmation (type "LOESCHEN"), then offers the same encrypted
 Nextcloud key backup as `dialos-install`. At the end it mounts
 `/home/nutzer` right away (no reboot needed), provided
 `dialos-stick-gate.sh` is already installed (see above).
+
+**Take care when picking the stick:** since 2026-08-16 the list shows a
+"Bisheriger Inhalt" (current content) column with label + filesystem. The
+selected stick is wiped completely - without that column, a plugged-in
+Debian installation stick was indistinguishable from an empty one.
 
 **Important for step 13:** `scripts/dialos-setup-nutzer.sh` only
 creates `nutzer`'s account after checking (and, if needed, triggering
@@ -561,72 +646,64 @@ otherwise the script aborts cleanly (see sicherheit-datenschutz.en.md).
 
 ## 13. Create the customer account + finish office setup
 
-A collector script that handles three individual steps in one go (see
-[`scripts/README.md`](../scripts/README.md)):
+A collector script that since 2026-08-16 handles **all four** sub-steps
+in one go (see [`scripts/README.md`](../scripts/README.md)) - before
+that, sub-steps 2a-2c below were manual work copied out of this document,
+and thus the last gap keeping the build from consisting purely of
+scripts:
 
 ```bash
 sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
 ```
 
-That calls, in order:
+The security stick must **still be plugged in** at this point (see step
+12). The script performs, in order:
+
 1. `dialos-set-avatar.sh` - sets `distributor-logo.png` as the profile
    picture for the admin account (via `gdbus`/AccountsService
    `SetIconFile`).
-2. `dialos-setup-nutzer.sh` - creates `nutzer` (`adduser
+2. **Admin tools onto `dialosadmin`'s desktop** (new in the script since
+   2026-08-16):
+   - a) the scripts from `scripts/` (`chmod 755`),
+   - b) the Claude desktop app (`apt-get download claude-desktop`,
+     `chmod 644`) - freshly downloaded during every office setup and
+     deliberately not committed to the repo; if the package isn't in the
+     sources, this sub-step is skipped rather than aborting the run,
+   - c) a clickable launcher for `dialos-install`, including
+     `gio set … metadata::trusted true`.
+3. `dialos-setup-nutzer.sh` - creates `nutzer` (`adduser
    --disabled-password`, groups
    `sudo,audio,video,plugdev,netdev,bluetooth,scanner,lpadmin,cdrom`,
    random sudo password), switches autologin from `dialosadmin` to
    `nutzer` (with retry logic against a timing bug: "user is locked"
    right after `chpasswd`, because AccountsService hadn't yet noticed
    the new password entry).
-3. Checks that the Firefox homepage policy from step 10 is set
+4. Checks that the Firefox homepage policy from step 10 is set
    correctly.
 
-**Important correction (2026-08-14):** All scripts in `scripts/` are
-**for `dialosadmin` only** - `nutzer` should never see them. So do
-**not** distribute them via `/etc/skel/Desktop/` - instead copy them
-directly onto the already-existing `dialosadmin` account
-(`/etc/skel/` only affects accounts created *after* it's populated -
-in this recipe that's exclusively `nutzer`, not a second admin
-account; an earlier attempt to solve this via `/etc/skel/Desktop/`
-therefore ended up on `nutzer`'s desktop unintentionally):
+**Why sub-step 2 looks the way it does** (important correction from
+2026-08-14, still applies): all scripts in `scripts/` are **for
+`dialosadmin` only** - `nutzer` should never see them. They are therefore
+**not** distributed via `/etc/skel/Desktop/` but copied directly onto the
+already-existing `dialosadmin` account: `/etc/skel/` only affects
+accounts created *after* it's populated - in this recipe that's
+exclusively `nutzer`, not a second admin account. An earlier attempt via
+`/etc/skel/Desktop/` therefore ended up on `nutzer`'s desktop
+unintentionally. The same reasoning applies to the Claude desktop `.deb`.
 
-```bash
-mkdir -p /home/dialosadmin/Desktop
-cp scripts/*.sh /home/dialosadmin/Desktop/
-chmod 755 /home/dialosadmin/Desktop/*.sh
-chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/*.sh
-```
+`gio set … metadata::trusted true` is mandatory - without it, Nautilus
+shows an "untrusted" warning on the first double-click instead of
+launching the program (unlike the `.sh` scripts on the same desktop,
+which run via the executable-text-file setting, not the launcher trust
+mechanism). The attribute lives in the respective **user's** metadata
+store, so the script runs the command as `dialosadmin` via `runuser`,
+not as root. If no session of that account is running, it says so and you
+confirm "trust and launch" once on the first double-click.
 
-Provide the Claude desktop app for the admin account (freshly
-downloaded during every office setup, not committed to the repo) - for
-the same reason, also directly onto `dialosadmin`'s desktop, not via
-`/etc/skel/`:
-
-```bash
-cd /tmp && apt-get download claude-desktop
-sudo cp /tmp/claude-desktop*.deb /home/dialosadmin/Desktop/
-sudo chmod 644 /home/dialosadmin/Desktop/claude-desktop*.deb
-sudo chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/claude-desktop*.deb
-```
-
-**Clickable icon for `dialos-install` on `dialosadmin`'s desktop**
-(2026-08-14): also copy the app-menu template
-(`iso-build/config/includes.chroot/usr/share/applications/
-dialos-install.desktop`) directly onto the desktop - no `sudo` needed,
-`dialosadmin` owns their own desktop folder:
-
-```bash
-cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /home/dialosadmin/Desktop/
-chmod 755 /home/dialosadmin/Desktop/dialos-install.desktop
-gio set /home/dialosadmin/Desktop/dialos-install.desktop metadata::trusted true
-```
-
-The last command (`gio set ... metadata::trusted true`) is mandatory -
-without it, Nautilus shows an "untrusted" warning on the first
-double-click instead of launching the program (unlike the `.sh` scripts
-on the same desktop, which run via the executable-text-file setting,
-not the launcher trust mechanism).
+The script deliberately takes the launcher template from
+`/usr/share/applications/dialos-install.desktop` (placed there in step
+12) rather than from the repo - that way it also works when started from
+the desktop later, where no repo directory exists.
 
 After this step: reboot, verify that `nutzer` starts automatically with
 no login screen - and that `nutzer`'s own desktop is **empty** of admin
@@ -662,6 +739,10 @@ pinned to match the original test run:
 ```bash
 sudo pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0
 ```
+
+`pip3` itself (`python3-pip`) and `unzip` for the models below come from
+the package list in step 2 - neither is necessarily present on a fresh
+Debian 13 install, and both were added there on 2026-08-16.
 
 German Vosk models (large for accuracy, small for speed - see
 `dialos-vosk-test.py`):

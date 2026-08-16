@@ -35,6 +35,24 @@
 # docs/Debian-zu-DialOS.md, Abschnitt "Praxishinweis: externe Platte").
 set -euo pipefail
 
+# NICHT mit "sudo" starten! Die Schritte 9 und 10 schreiben bewusst in "~"
+# (GNOME-Erweiterung, Standardprogramme, Nautilus-Lesezeichen) - das muss
+# dialosadmins Home sein. Unter sudo waere "~" = /root, die Dateien landeten
+# dann lautlos im falschen Home: kein Fehler, keine Meldung, aber die
+# Erweiterung und die Standardprogramme fehlen auf dem Konto, das sie
+# braucht. Die Schritte, die Root-Rechte brauchen, rufen sudo selbst auf.
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Dieses Skript NICHT als root/mit sudo starten, sondern direkt als" >&2
+  echo "dialosadmin:" >&2
+  echo "    ./scripts/dialos-full-office-setup.sh" >&2
+  echo >&2
+  echo "Grund: die Schritte 9 und 10 richten das BENUTZERKONTO ein (GNOME-" >&2
+  echo "Erweiterung, Standardprogramme). Als root wuerden sie in /root statt" >&2
+  echo "in /home/dialosadmin landen. Alles, was Root-Rechte braucht, ruft" >&2
+  echo "sudo von selbst auf." >&2
+  exit 1
+fi
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
@@ -46,6 +64,18 @@ pruefe_netzwerk() {
     echo "Kein Internetzugang (deb.debian.org nicht erreichbar) - breche" >&2
     echo "lieber jetzt ab, statt mitten in einem apt-get/Download-Schritt" >&2
     echo "zu scheitern." >&2
+    exit 1
+  fi
+}
+
+pruefe_sudo() {
+  log "Sudo-Check"
+  # Passwort einmal vorab abfragen, statt den Nutzer mitten im Lauf (evtl.
+  # nach Minuten von Downloads) zu ueberraschen - und sofort abbrechen,
+  # falls dieses Konto gar keine sudo-Rechte hat.
+  if ! sudo -v; then
+    echo "Keine sudo-Rechte fuer '$(id -un)' - dieses Skript braucht sie fuer" >&2
+    echo "fast jeden Schritt. Gehoert das Konto zur Gruppe 'sudo'?" >&2
     exit 1
   fi
 }
@@ -125,12 +155,19 @@ schritt_06_rustdesk() {
   # Das .deb-Postinst aktiviert automatisch einen systemd-Autostart -
   # widerspricht der Sicherheitslinie (RustDesk darf nicht dauerhaft
   # laufen, siehe sicherheit-datenschutz.md, Abschnitt "Fernwartung").
-  sudo systemctl disable --now rustdesk
+  # "|| true": heisst die Unit in einer kuenftigen RustDesk-Version anders
+  # oder fehlt sie, soll das nicht per "set -e" den kompletten Lauf (und
+  # damit die Schritte 7-15) abbrechen - dann lieber weiterlaufen und den
+  # Autostart im Nachgang pruefen.
+  sudo systemctl disable --now rustdesk || true
 }
 
 schritt_07_claude_cli() {
   log "Schritt 7: Claude Code CLI installieren"
-  npm install -g @anthropic-ai/claude-code
+  # sudo ist Pflicht: Debians npm-Prefix ist /usr/local, dort darf
+  # dialosadmin nicht schreiben. Ohne sudo bricht "npm install -g" mit
+  # EACCES ab und reisst per "set -e" die Schritte 8-15 mit.
+  sudo npm install -g @anthropic-ai/claude-code
 }
 
 schritt_08_piper() {
@@ -274,6 +311,7 @@ main() {
   done
 
   pruefe_netzwerk
+  pruefe_sudo
 
   if [ -n "$einzelschritt" ]; then
     local treffer=""
@@ -298,7 +336,24 @@ main() {
     fi
     "schritt_${schritt}"
   done
-  log "Fertig. Naechster Schritt: sudo /usr/local/sbin/dialos-setup-home-partition.sh (Sicherheits-Stick einstecken), danach sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin."
+  log "Fertig (Schritte 2-12 + 15)."
+  cat <<'HINWEIS'
+
+Noch zwei Befehle bis zum fertigen DialOS:
+
+  2) Sicherheits-Stick einstecken, dann OHNE sudo starten (das Skript holt
+     sich die Rechte selbst per pkexec - unter "sudo" fehlt ihm die
+     Grafik-Umgebung fuer seine Dialoge):
+
+       /usr/local/sbin/dialos-setup-home-partition.sh
+
+  3) Stick STECKEN LASSEN, dann:
+
+       sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
+
+Danach einmal neu starten. Hinweis: neu installierte GNOME-Erweiterungen
+werden unter Wayland erst nach einem echten Ab-/Anmelden aktiv.
+HINWEIS
 }
 
 main "$@"

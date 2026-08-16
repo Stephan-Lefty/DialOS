@@ -56,6 +56,64 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **From Debian 13 to DialOS in three commands - script review before the
+  first real run (2026-08-16).** `dialos-full-office-setup.sh` and
+  `dialos-setup-home-partition.sh` had only been syntax-checked until
+  then and never actually run. Reviewing them against
+  `docs/Debian-zu-DialOS.en.md` on a freshly installed T490 turned up
+  several faults that would have aborted the first run:
+  - `python3-pip` was missing from the package list (`pip3` is not
+    present on a fresh Debian 13) - step 15 would have failed at the very
+    end of the run. Added together with `unzip`, which was also missing
+    and only happened to be pre-installed.
+  - Step 7 called `npm install -g` without `sudo` - Debian's npm prefix
+    is `/usr/local`, so it fails with `EACCES` and would have taken steps
+    8-15 down with it via `set -e`. Also corrected in the docs, where the
+    command was likewise listed without `sudo`.
+  - No guard against starting with `sudo`: steps 9 and 10 set up the user
+    account and write to `~`, which under `sudo` would have been `/root` -
+    silently, with no error. Starting as root is now refused; `sudo -v`
+    asks for the password once up front instead of mid-download.
+  - `systemctl disable --now rustdesk` without `|| true` would have
+    aborted the rest of the run on a renamed/missing unit.
+  - In `dialos-setup-home-partition.sh`, of the four dialog helpers it
+    was precisely the password prompt that had **no** fallback: without a
+    graphical environment (e.g. via `sudo` from a text console - `sudo`
+    strips `DISPLAY` via `env_reset`) the script terminated silently at
+    that point, because `VAR=$(zenity …)` aborts under `set -e`. Now
+    falls back to terminal input, limited to three attempts. For the same
+    reason the explanatory abort messages in the stick picker were dead
+    code (`|| true` added).
+  - The new partition was determined as "highest existing number". But
+    parted assigns the lowest **free** number - with a gap in the
+    numbering, an existing partition would have been overwritten by
+    `luksFormat`. Now compares the numbers before/after and aborts if the
+    result is ambiguous.
+  - The key-backup save dialog started in `$HOME`, i.e. `/root` under
+    `pkexec`/`sudo` instead of the admin account's Nextcloud folder, and
+    the saved file was owned by `root`. The calling account's home is now
+    resolved (`PKEXEC_UID`/`SUDO_UID`) and the file handed over to it.
+  - The recovery passphrase was written to a fixed `/tmp/.rp` with the
+    default umask, so it was briefly world-readable (now `mktemp`, 600).
+  - The ext4 label `dialos-nutzer-home` is 18 characters, ext4 allows 16
+    - `mkfs.ext4` silently truncated it to `dialos-nutzer-ho`. Harmless,
+    since the LUKS2 label is what matters for finding the partition, but
+    misleading in the log; now `dialos-nutzer`.
+  - The stick picker now shows a "current content" column - a plugged-in
+    installation stick was previously indistinguishable from an empty
+    one, despite being wiped completely.
+  - **Last manual work eliminated:** the desktop provisioning from doc
+    step 13 (scripts, Claude desktop `.deb`, launcher for
+    `dialos-install` including `gio set metadata::trusted`) wasn't in any
+    script. It is now part of `dialos-buero-setup-abschliessen.sh`, which
+    means the device build after the base install consists entirely of
+    three script invocations.
+  - **Doc reconciliation for step 1:** the T490's real partitioning
+    (100.00 GB root, 954 MB ESP, 37.3 GiB swap, 345.6 GiB free) is now
+    documented as a reference table. The swap partition was missing from
+    the guide entirely - including the warning that it is unencrypted, so
+    `nutzer`'s paged-out memory can end up in the clear on disk, bypassing
+    the LUKS protection.
 - **`dialos-install` bugfix:** the file-save dialog for the key backup
   silently failed under `pkexec` (missing `DBUS_SESSION_BUS_ADDRESS`/
   `XDG_RUNTIME_DIR` for reaching `xdg-desktop-portal`) - `pkexec` now

@@ -87,10 +87,26 @@ lassen) → [`scripts/dialos-full-office-setup.sh`](scripts/dialos-full-office-s
 `dialos-setup-home-partition.sh` (richtet `dialos-nutzer-home` +
 Sicherheits-Stick im freigelassenen Platz ein, gleiche Logik wie
 `dialos-install` ohne dessen Platten-Wipe) →
-`scripts/dialos-buero-setup-abschliessen.sh` (`nutzer` anlegen). Beide
-neuen Skripte sind nur syntaktisch geprüft, **noch nie end-to-end auf
-einem frischen System durchgelaufen** - das ist der nächste geplante
-Schritt (kompletter T490-Neuaufbau, siehe TODO.md "Nächster Schritt").
+`scripts/dialos-buero-setup-abschliessen.sh` (`nutzer` anlegen +
+Admin-Werkzeuge auf die Arbeitsfläche). **Seit 2026-08-16 besteht der
+Aufbau nach der Basis-Installation aus genau drei Befehlen** - die letzte
+Handarbeit aus Doku-Schritt 13 steckt jetzt im dritten Skript. Achtung
+bei den Aufrufen: Skript 1 und 2 werden **ohne** `sudo` gestartet (Skript
+1 richtet Benutzer-Dateien in `~` ein, Skript 2 hebt sich selbst per
+`pkexec` an und braucht dafür die Grafik-Umgebung, die `sudo` streicht),
+nur Skript 3 mit `sudo`.
+
+Die Skripte wurden am 2026-08-16 vor dem ersten Lauf gegen
+`docs/Debian-zu-DialOS.md` durchgesehen und auf dem frisch installierten
+T490 live gegengeprüft; dabei kamen mehrere Fehler heraus, die den ersten
+Durchlauf abgebrochen hätten (fehlendes `python3-pip`, `npm install -g`
+ohne `sudo`, stummer Abbruch bei der Passwortabfrage ohne Grafik,
+Partitionsnummer-Bestimmung, die bei Nummerierungslücken die falsche
+Partition getroffen hätte) - alle behoben, Details im
+README-Änderungsprotokoll 0.5.0. **Trotzdem weiterhin noch nie
+end-to-end auf einem frischen System durchgelaufen** - das bleibt der
+nächste geplante Schritt (kompletter T490-Neuaufbau, siehe TODO.md
+"Nächster Schritt").
 Offene Grundsatzfrage: ob `dialos-install`/`dialos-rekey` (Clone-Pfad)
 langfristig neben diesem zweiten Pfad bestehen bleiben oder entfallen.
 

@@ -55,6 +55,66 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Von Debian 13 zu DialOS in drei Befehlen - Skript-Durchsicht vor dem
+  ersten echten Durchlauf (2026-08-16).** `dialos-full-office-setup.sh`
+  und `dialos-setup-home-partition.sh` waren bis dahin nur syntaktisch
+  geprüft und nie gelaufen. Beim Abgleich gegen
+  `docs/Debian-zu-DialOS.md` auf einem frisch installierten T490 kamen
+  mehrere Fehler heraus, die den ersten Lauf abgebrochen hätten:
+  - `python3-pip` fehlte in der Paketliste (`pip3` ist auf einem frischen
+    Debian 13 nicht vorhanden) - Schritt 15 wäre ganz am Ende des Laufs
+    gescheitert. Zusammen mit `unzip` nachgetragen, das dort ebenfalls
+    fehlte und nur zufällig vorinstalliert war.
+  - Schritt 7 rief `npm install -g` ohne `sudo` auf - Debians npm-Prefix
+    ist `/usr/local`, das scheitert mit `EACCES` und hätte per `set -e`
+    die Schritte 8-15 mitgerissen. Auch in der Doku korrigiert, wo der
+    Befehl ebenfalls ohne `sudo` stand.
+  - Kein Riegel gegen einen Start mit `sudo`: die Schritte 9 und 10
+    richten das Benutzerkonto ein und schreiben nach `~`, unter `sudo`
+    wäre das `/root` gewesen - lautlos, ohne Fehlermeldung. Start als
+    root wird jetzt abgewiesen; `sudo -v` fragt das Passwort einmal zu
+    Beginn ab, statt mitten in den Downloads.
+  - `systemctl disable --now rustdesk` ohne `|| true` hätte bei einer
+    umbenannten/fehlenden Unit den Rest des Laufs abgebrochen.
+  - In `dialos-setup-home-partition.sh` hatte als einzige der vier
+    Dialog-Hilfsfunktionen ausgerechnet die Passwortabfrage **keinen**
+    Fallback: ohne Grafik (z. B. per `sudo` von einer Textkonsole -
+    `sudo` entfernt `DISPLAY` per `env_reset`) beendete sich das Skript
+    an dieser Stelle wortlos, weil `VAR=$(zenity …)` unter `set -e`
+    abbricht. Jetzt Terminal-Eingabe als Rückfall, begrenzt auf drei
+    Versuche. Aus demselben Grund waren die erklärenden Abbruch-Meldungen
+    bei der Stick-Auswahl toter Code (`|| true` ergänzt).
+  - Die neue Partition wurde als "höchste vorhandene Nummer" bestimmt.
+    parted vergibt aber die niedrigste **freie** Nummer - bei einer Lücke
+    in der Nummerierung wäre eine bestehende Partition per `luksFormat`
+    überschrieben worden. Jetzt Vergleich der Nummern vorher/nachher mit
+    Abbruch bei Uneindeutigkeit.
+  - Der Speichern-Dialog des Schlüssel-Backups startete in `$HOME`, unter
+    `pkexec`/`sudo` also in `/root` statt im Nextcloud-Ordner des
+    Admin-Kontos, und die gespeicherte Datei gehörte `root`. Jetzt wird
+    das Home des aufrufenden Kontos aufgelöst (`PKEXEC_UID`/`SUDO_UID`)
+    und die Datei diesem übereignet.
+  - Die Notfall-Passphrase landete unter festem Namen `/tmp/.rp` mit der
+    Standard-umask, war also kurz weltlesbar (jetzt `mktemp`, 600).
+  - Das ext4-Label `dialos-nutzer-home` ist 18 Zeichen lang, ext4 erlaubt
+    16 - `mkfs.ext4` kürzte es stumm auf `dialos-nutzer-ho`. Folgenlos,
+    weil zum Auffinden das LUKS2-Label zählt, aber irreführend im
+    Protokoll; jetzt `dialos-nutzer`.
+  - Die Stick-Auswahl zeigt jetzt eine Spalte "Bisheriger Inhalt" - ein
+    eingesteckter Installationsstick war vorher nicht von einem leeren zu
+    unterscheiden, obwohl er komplett gelöscht wird.
+  - **Letzte Handarbeit beseitigt:** Die Desktop-Bereitstellung aus
+    Doku-Schritt 13 (Skripte, Claude-Desktop-`.deb`, Startsymbol für
+    `dialos-install` samt `gio set metadata::trusted`) steckte in keinem
+    Skript. Sie ist jetzt Teil von `dialos-buero-setup-abschliessen.sh`,
+    womit der Geräteaufbau nach der Basis-Installation vollständig aus
+    drei Skript-Aufrufen besteht.
+  - **Doku-Abgleich Schritt 1:** Die reale Partitionierung des T490
+    (100,00-GB-root, 954-MB-ESP, 37,3-GiB-Swap, 345,6 GiB frei) ist jetzt
+    als Referenztabelle dokumentiert. Die Swap-Partition fehlte in der
+    Anleitung komplett - inklusive der Warnung, dass sie unverschlüsselt
+    ist und damit `nutzer`s ausgelagerte Speicherseiten am
+    LUKS-Schutz vorbei im Klartext auf der Platte liegen können.
 - **`dialos-install`-Bugfix:** Der Datei-Speichern-Dialog für das
   Schlüssel-Backup blieb unter `pkexec` lautlos aus (fehlende
   `DBUS_SESSION_BUS_ADDRESS`/`XDG_RUNTIME_DIR` für den Zugriff auf

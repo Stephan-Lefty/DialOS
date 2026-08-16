@@ -39,19 +39,42 @@ Datei/den Commit/die Doku, aus der es stammt.
 Diese Anleitung beschreibt Weg 2. Referenz-Testgerät: Lenovo ThinkPad
 T490 (siehe [hardware.md](hardware.md)).
 
-> **Schnellweg seit 2026-08-14:** Die Schritte 2-12 + 15 (sowie
-> optional 14) lassen sich jetzt automatisiert per
-> [`scripts/dialos-full-office-setup.sh`](../scripts/dialos-full-office-setup.sh)
-> ausführen, statt sie einzeln abzutippen (siehe
-> [`scripts/README.md`](../scripts/README.md)). Die Einzelschritte unten
-> bleiben trotzdem die eigentliche, ausführliche Referenz - genau daraus
-> ist das Skript gebaut, und bei Problemen mit einem einzelnen Schritt
-> lässt sich das Skript auch gezielt nur für diesen einen Schritt
-> aufrufen (`./scripts/dialos-full-office-setup.sh 08`). Schritt 14
-> (Bluetooth-Kopplungsdaten) läuft dabei nur mit `--bluetooth-kopplung`
-> mit, da er gerätespezifisch ist. Schritt 1 (Basis-Installation), 13
-> (`nutzer`-Konto anlegen) und 16 (ISO bauen) bleiben bewusst eigene,
-> manuelle Schritte - siehe dort.
+> **Schnellweg (Stand 2026-08-16): drei Befehle von Debian zu DialOS.**
+> Nach der Basis-Installation (Schritt 1) ist der gesamte Rest bis auf den
+> ISO-Bau in Skripten abgebildet - es bleibt keine Handarbeit mehr aus
+> dieser Doku abzutippen:
+>
+> ```bash
+> # 1) Schritte 2-12 + 15 - als dialosadmin, OHNE sudo:
+> ./scripts/dialos-full-office-setup.sh
+>
+> # 2) Schritt 12b - Sicherheits-Stick einstecken, ebenfalls OHNE sudo
+> #    (das Skript holt sich die Rechte selbst per pkexec):
+> /usr/local/sbin/dialos-setup-home-partition.sh
+>
+> # 3) Schritt 13 - Stick stecken lassen:
+> sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
+> ```
+>
+> Danach neu starten, dann Schritt 16 (ISO bauen). Die Einzelschritte
+> unten bleiben die eigentliche, ausführliche Referenz - genau daraus sind
+> die Skripte gebaut, und bei Problemen mit einem einzelnen Schritt lässt
+> sich Skript 1 gezielt nur für diesen einen Schritt aufrufen
+> (`./scripts/dialos-full-office-setup.sh 08`). Schritt 14
+> (Bluetooth-Kopplungsdaten) läuft nur mit `--bluetooth-kopplung` mit, da
+> er gerätespezifisch ist. Schritt 1 (Basis-Installation) und 16 (ISO
+> bauen) bleiben bewusst manuell - siehe dort.
+>
+> **Zwei Fallen bei den Aufrufen** (beide 2026-08-16 gefunden, bevor der
+> erste echte Durchlauf startete):
+> - Skript 1 **nicht** mit `sudo` starten. Die Schritte 9 und 10 richten
+>   das Benutzerkonto ein (GNOME-Erweiterung, Standardprogramme); unter
+>   `sudo` wäre `~` gleich `/root` und alles landete lautlos im falschen
+>   Home. Das Skript weist einen Start als root deshalb ab.
+> - Skript 2 ebenfalls **nicht** mit `sudo` starten. `sudo` entfernt
+>   `DISPLAY`/`XAUTHORITY` (`env_reset`), womit die Zenity-Dialoge des
+>   Skripts nicht mehr aufgehen könnten. Ohne `sudo` gestartet, hebt es
+>   sich selbst per `pkexec` an und behält die Grafik-Umgebung.
 
 ## 0. Voraussetzungen
 
@@ -78,19 +101,60 @@ Namen, damit Skripte und Doku nicht pro Gerät angepasst werden müssen.
 Zeitzone: `Europe`/`Berlin` als Standard (siehe Schritt 5, Calamares
 übernimmt das später automatisch für Kundeninstallationen).
 
+> **Abweichung auf dem Referenzgerät beachten (2026-08-16):** Das T490
+> läuft tatsächlich mit `Europe/Vienna` und `de_AT.UTF-8` (Stephans
+> Standort in Tirol). Für den laufenden Betrieb ist das richtig, hat aber
+> eine Folge für Schritt 16: `eggs produce --clone` klont das laufende
+> System **inklusive** `/etc/localtime` und Locale - eine so gebaute ISO
+> würde also mit österreichischen Einstellungen ausgeliefert, während
+> Calamares' `locale.conf` für Kundeninstallationen fest `Europe/Berlin`
+> setzt (Schritt 5). Vor dem finalen ISO-Bau entscheiden, was gelten
+> soll; siehe [TODO.md](../TODO.md).
+
 **Partitionierung - wichtig, manuell statt "geführt - gesamte Platte
 verwenden" wählen** (seit 2026-08-14, siehe
 [sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
 "Verschlüsselung von nutzers Daten + Sicherheits-Stick"):
 
 - GPT-Partitionstabelle.
-- EFI-Systempartition (~512 MB), `/boot/efi`.
+- EFI-Systempartition, `/boot/efi` (~512 MB genügen; der Debian-Installer
+  legt von sich aus gern rund 1 GB an - beides ist in Ordnung).
 - Root-Partition, **genau 100 GB**, ext4, `/`.
+- Swap-Partition: **optional, siehe Warnung unten.** Der Debian-Installer
+  schlägt sie bei manueller Partitionierung von sich aus vor.
 - **Den kompletten Rest der Platte unpartitioniert/frei lassen** - nicht
   dem Installer überlassen, sonst hat
   [`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
   später (Schritt 12) keinen Platz mehr für die verschlüsselte
-  `dialos-nutzer-home`-Partition.
+  `dialos-nutzer-home`-Partition. Als Untergrenze verlangt das Skript
+  20 GiB freien Platz; sinnvoll ist deutlich mehr, das ist der gesamte
+  Datenbereich des Endnutzers.
+
+**So sieht das auf dem Referenzgerät (T490, 476,9-GiB-NVMe) konkret aus** -
+nachgemessen am 2026-08-16, als Vorlage zum Vergleich beim Nachbauen:
+
+| Partition | Größe | Verwendung |
+|---|---|---|
+| `nvme0n1p1` | 100,00 GB (93,13 GiB) | `/`, ext4 |
+| `nvme0n1p2` | 954 MB | `/boot/efi`, vfat |
+| `nvme0n1p3` | 37,3 GiB | Swap |
+| *(unpartitioniert)* | **345,6 GiB** | bleibt für `dialos-nutzer-home` |
+
+> **Warnung: eine gewöhnliche Swap-Partition ist unverschlüsselt und
+> untergräbt damit einen Teil des Sicherheitskonzepts.** `/home/nutzer`
+> liegt zwar in LUKS2, aber Speicherseiten des Kontos - geöffnete
+> Dokumente, Mails, Browserinhalte - können vom Kernel in den Swap
+> ausgelagert werden und sind dort **ohne Sicherheits-Stick im Klartext
+> lesbar**, ebenso nach Ausbau der SSD. Das widerspricht
+> [sicherheit-datenschutz.md](sicherheit-datenschutz.md). Möglichkeiten:
+> Swap ganz weglassen (bei ≥16 GB RAM meist unproblematisch), oder ihn
+> mit einem bei jedem Start neu gewürfelten Schlüssel verschlüsseln
+> (`/etc/crypttab`). Auf dem Referenzgerät ist der Swap derzeit
+> **unverschlüsselt** - offener Punkt, siehe [TODO.md](../TODO.md).
+> Hinweis: Ein Swap, der kleiner ist als der Arbeitsspeicher (hier 37 GiB
+> gegen 46 GiB RAM), taugt ohnehin nicht für den Ruhezustand
+> (Hibernate) - der einzige Grund, der für eine unverschlüsselte
+> Swap-Partition sprechen könnte, entfällt damit.
 
 ## 2. Paketliste installieren
 
@@ -112,7 +176,11 @@ Wichtige Gruppen darin (Reihenfolge wie in der Datei):
 - **Programme**: Firefox, Thunderbird, Shortwave (Radio), Rhythmbox,
   GNOME Podcasts, LibreOffice Writer.
 - **Terminal/Entwicklung**: `gnome-terminal`, `curl`, `wget`, `git`,
-  `nodejs`/`npm` (für Claude Code CLI, Schritt 7), `dconf-cli`.
+  `nodejs`/`npm` (für Claude Code CLI, Schritt 7), `dconf-cli`,
+  `unzip` + `python3-pip` (beide für Schritt 15 nötig - ergänzt am
+  2026-08-16, weil sie vorher fehlten: `pip3` ist auf einer frischen
+  Debian-13-Installation nicht vorhanden, und Schritt 15 wäre damit ganz
+  am Ende des Laufs gescheitert).
 - **Installer-/Sicherheits-Werkzeuge**: `zenity`, `polkitd`, `pkexec`,
   `parted`, `dosfstools`, `exfatprogs` (für die Windows-lesbare
   `DIALOS-DATA`-Partition auf dem Sicherheits-Stick), `cryptsetup`,
@@ -219,9 +287,9 @@ sudo gdbus call --system --dest org.freedesktop.Accounts \
   --method org.freedesktop.Accounts.User.SetAutomaticLogin true
 ```
 
-Ganz am Anfang (bevor `nutzer` überhaupt existiert, siehe Schritt 12)
-bekommt das Admin-Konto (`dialosadmin`) testweise Autologin, damit man
-am System arbeiten kann. Details und Begründung:
+Ganz am Anfang (bevor `nutzer` überhaupt existiert - der wird erst in
+Schritt 13 angelegt) bekommt das Admin-Konto (`dialosadmin`) testweise
+Autologin, damit man am System arbeiten kann. Details und Begründung:
 [sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
 "Automatische Anmeldung".
 
@@ -315,8 +383,13 @@ sudo systemctl disable --now rustdesk
 ## 7. Claude Code CLI installieren
 
 ```bash
-npm install -g @anthropic-ai/claude-code
+sudo npm install -g @anthropic-ai/claude-code
 ```
+
+`sudo` ist hier Pflicht (korrigiert 2026-08-16 - vorher stand der Befehl
+ohne, was auf einem frischen System nicht funktioniert hätte): Debians
+npm-Prefix ist `/usr/local`, dort darf `dialosadmin` nicht schreiben, der
+Befehl scheitert sonst mit `EACCES`.
 
 (`EBADENGINE`-Warnung wegen Node-Version ist ignorierbar, funktioniert
 trotzdem.) Für die Desktop-App: kein fester Installationsschritt, das
@@ -549,14 +622,29 @@ nutzt stattdessen den in Schritt 1 bewusst frei gelassenen Platz am
 Ende der System-Platte:
 
 ```bash
-sudo /usr/local/sbin/dialos-setup-home-partition.sh
+/usr/local/sbin/dialos-setup-home-partition.sh
 ```
+
+**Bewusst ohne `sudo`** (korrigiert 2026-08-16): Das Skript hebt sich
+selbst per `pkexec` auf Root-Rechte an und behält dabei die
+Grafik-Umgebung. Mit `sudo` gestartet greift dieser Zweig nicht (man ist
+ja schon root), und `sudo` entfernt gleichzeitig `DISPLAY`/`XAUTHORITY`
+per `env_reset` - die Zenity-Dialoge könnten dann nicht aufgehen. Muss es
+doch einmal über ein Terminal ohne Grafik laufen, fragt das Skript
+Passwörter seit 2026-08-16 ersatzweise im Terminal ab, statt sich (wie
+vorher) an dieser Stelle wortlos zu beenden.
 
 Fragt nach Sicherheits-Stick, Wiederherstellungs-Passwort (≥12 Zeichen)
 und Bestätigung ("LOESCHEN" eingeben), bietet danach das gleiche
 verschlüsselte Nextcloud-Schlüssel-Backup wie `dialos-install` an. Am
 Ende wird `/home/nutzer` gleich gemountet (kein Neustart nötig), sofern
 `dialos-stick-gate.sh` schon installiert ist (siehe oben).
+
+**Bei der Stick-Auswahl aufpassen:** Die Liste zeigt seit 2026-08-16 eine
+Spalte "Bisheriger Inhalt" (Label + Dateisystem). Der gewählte Stick wird
+komplett gelöscht - ohne diese Spalte war z. B. ein eingesteckter
+Debian-Installationsstick in der Liste nicht von einem leeren Stick zu
+unterscheiden.
 
 **Wichtig für Schritt 13:** `scripts/dialos-setup-nutzer.sh` legt
 `nutzer`s Konto erst an, nachdem es geprüft (und notfalls per
@@ -568,70 +656,65 @@ kontrolliert ab (siehe sicherheit-datenschutz.md).
 
 ## 13. Nutzer-Konto anlegen + Büro-Setup abschließen
 
-Sammel-Skript, das drei Einzelschritte in einem Rutsch erledigt (siehe
-[`scripts/README.md`](../scripts/README.md)):
+Sammel-Skript, das seit 2026-08-16 **alle vier** Teilschritte in einem
+Rutsch erledigt (siehe [`scripts/README.md`](../scripts/README.md)) -
+vorher waren die Teilschritte 2a-2c unten reine Handarbeit aus dieser
+Doku und damit die letzte Lücke, die den Aufbau davon abhielt, komplett
+aus Skripten zu bestehen:
 
 ```bash
 sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
 ```
 
-Das ruft nacheinander auf:
+Der Sicherheits-Stick muss dabei **noch stecken** (siehe Schritt 12).
+Das Skript erledigt nacheinander:
+
 1. `dialos-set-avatar.sh` - setzt `distributor-logo.png` als Profilbild
    für das Admin-Konto (per `gdbus`/AccountsService `SetIconFile`).
-2. `dialos-setup-nutzer.sh` - legt `nutzer` an (`adduser
+2. **Admin-Werkzeuge auf `dialosadmin`s Arbeitsfläche** (neu im Skript
+   seit 2026-08-16):
+   - a) die Skripte aus `scripts/` (`chmod 755`),
+   - b) die Claude-Desktop-App (`apt-get download claude-desktop`,
+     `chmod 644`) - wird bei jedem Büro-Setup frisch geladen und bewusst
+     nicht ins Repo committet; fehlt das Paket in den Quellen, wird der
+     Teilschritt übersprungen statt den Lauf abzubrechen,
+   - c) ein klickbares Startsymbol für `dialos-install`, inklusive
+     `gio set … metadata::trusted true`.
+3. `dialos-setup-nutzer.sh` - legt `nutzer` an (`adduser
    --disabled-password`, Gruppen `sudo,audio,video,plugdev,netdev,
    bluetooth,scanner,lpadmin,cdrom`, zufälliges Sudo-Passwort), schaltet
    Autologin von `dialosadmin` auf `nutzer` um (Wiederholungslogik gegen
    einen Timing-Bug: "user is locked" direkt nach `chpasswd`, weil
    AccountsService die neue Passwort-Zeile noch nicht bemerkt hatte).
-3. Prüft, ob die Firefox-Startseiten-Policy aus Schritt 10 korrekt sitzt.
+4. Prüft, ob die Firefox-Startseiten-Policy aus Schritt 10 korrekt sitzt.
 
-**Wichtige Korrektur (2026-08-14):** Alle Skripte in `scripts/` sind
-**nur für `dialosadmin`** gedacht - `nutzer` soll sie nie zu Gesicht
-bekommen. Sie deshalb **nicht** über `/etc/skel/Desktop/` verteilen,
-sondern gezielt auf das bereits existierende `dialosadmin`-Konto
-kopieren (`/etc/skel/` wirkt nur bei Konten, die *danach* angelegt
-werden - bei diesem Rezept ist das ausschließlich `nutzer`, nicht ein
-weiteres Admin-Konto; ein früherer Versuch, das über `/etc/skel/Desktop/`
-zu lösen, landete deshalb ungewollt auf `nutzer`s Desktop):
+**Warum Teilschritt 2 so aussieht, wie er aussieht** (wichtige Korrektur
+vom 2026-08-14, gilt weiterhin): Alle Skripte in `scripts/` sind **nur
+für `dialosadmin`** gedacht - `nutzer` soll sie nie zu Gesicht bekommen.
+Sie werden deshalb **nicht** über `/etc/skel/Desktop/` verteilt, sondern
+gezielt auf das bereits existierende `dialosadmin`-Konto kopiert:
+`/etc/skel/` wirkt nur bei Konten, die *danach* angelegt werden - bei
+diesem Rezept ist das ausschließlich `nutzer`, nicht ein weiteres
+Admin-Konto. Ein früherer Versuch über `/etc/skel/Desktop/` landete
+genau deshalb ungewollt auf `nutzer`s Desktop. Aus demselben Grund gilt
+das auch für die Claude-Desktop-`.deb`.
 
-```bash
-mkdir -p /home/dialosadmin/Desktop
-cp scripts/*.sh /home/dialosadmin/Desktop/
-chmod 755 /home/dialosadmin/Desktop/*.sh
-chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/*.sh
-```
-
-Claude-Desktop-App fürs Admin-Konto bereitstellen (wird bei jedem
-Büro-Setup frisch heruntergeladen, nicht ins Repo committet) - aus
-demselben Grund ebenfalls direkt auf `dialosadmin`s Desktop, nicht über
-`/etc/skel/`:
-
-```bash
-cd /tmp && apt-get download claude-desktop
-sudo cp /tmp/claude-desktop*.deb /home/dialosadmin/Desktop/
-sudo chmod 644 /home/dialosadmin/Desktop/claude-desktop*.deb
-sudo chown dialosadmin:dialosadmin /home/dialosadmin/Desktop/claude-desktop*.deb
-```
-
-**Klickbares Icon für `dialos-install` auf `dialosadmin`s Desktop**
-(2026-08-14): Die App-Menü-Vorlage
-(`iso-build/config/includes.chroot/usr/share/applications/
-dialos-install.desktop`) zusätzlich direkt auf den Desktop kopieren -
-kein `sudo` nötig, `dialosadmin` besitzt sein eigenes Desktop-Verzeichnis:
-
-```bash
-cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /home/dialosadmin/Desktop/
-chmod 755 /home/dialosadmin/Desktop/dialos-install.desktop
-gio set /home/dialosadmin/Desktop/dialos-install.desktop metadata::trusted true
-```
-
-Der letzte Befehl (`gio set ... metadata::trusted true`) ist Pflicht -
-ohne ihn zeigt Nautilus beim ersten Doppelklick eine
-"nicht vertrauenswürdig"-Warnung statt das Programm zu starten (anders
-als bei den `.sh`-Skripten auf demselben Desktop, die über die
+`gio set … metadata::trusted true` ist Pflicht - ohne diesen Schritt
+zeigt Nautilus beim ersten Doppelklick eine "nicht vertrauenswürdig"-
+Warnung, statt das Programm zu starten (anders als bei den
+`.sh`-Skripten auf demselben Desktop, die über die
 Textdatei-Ausführen-Einstellung laufen, nicht über den
-Launcher-Vertrauensmechanismus).
+Launcher-Vertrauensmechanismus). Das Merkmal liegt in der
+Metadaten-Ablage des jeweiligen **Benutzers**, das Skript führt den
+Befehl deshalb per `runuser` als `dialosadmin` aus, nicht als root. Läuft
+gerade keine Sitzung dieses Kontos, meldet es das und man bestätigt beim
+ersten Doppelklick einmalig "Vertrauen und starten".
+
+Das Skript nimmt die Vorlage für das Startsymbol bewusst aus
+`/usr/share/applications/dialos-install.desktop` (dort abgelegt in
+Schritt 12) statt aus dem Repo - so funktioniert es auch, wenn es später
+von der Arbeitsfläche aus gestartet wird, wo es kein Repo-Verzeichnis
+gibt.
 
 Nach diesem Schritt: neu starten, verifizieren dass `nutzer` automatisch
 ohne Anmeldebildschirm startet - und dass `nutzer`s eigener Desktop
@@ -668,6 +751,11 @@ kein Hack. Versionen wie beim ursprünglichen Testlauf gepinnt:
 ```bash
 sudo pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0
 ```
+
+`pip3` selbst (`python3-pip`) und `unzip` für die Modelle weiter unten
+kommen aus der Paketliste in Schritt 2 - beide sind auf einer frischen
+Debian-13-Installation nicht zwingend vorhanden und wurden am 2026-08-16
+dort nachgetragen.
 
 Deutsche Vosk-Modelle (groß für Genauigkeit, klein für Geschwindigkeit -
 siehe `dialos-vosk-test.py`):
