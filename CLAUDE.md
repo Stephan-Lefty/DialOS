@@ -41,6 +41,46 @@ vermeiden.
 
 ## Aktueller Stand (Stand: 2026-08-16)
 
+**Neu am Abend des 2026-08-16: DialOS hat seinen ersten echten
+Sprachbefehl.** `dialos-sprachbefehl-desktop.py` laeuft dauerhaft mit
+(erster stets lauschender Dienst des Projekts) und schaltet auf
+"auf Linux umschalten" / "auf Windows umschalten" die Desktop-Optik
+zwischen GNOME-Standard und einem Windows-11-Nachbau um
+(`dialos-desktop-stil.sh`, drei Debian-Erweiterungen: dash-to-panel,
+arc-menu, tiling-assistant). Live mit Stephans Stimme bestaetigt.
+Hintergrund: Es gibt Interessenten, die DialOS wegen der Sprachsteuerung
+wollen, aber aus der Windows-Welt kommen - GNOME bleibt dabei
+unangetastet, es kommt nur etwas obendrauf.
+
+**Drei Erkenntnisse daraus, die ueber diese eine Funktion hinausgehen:**
+
+1. **Eingeschraenkte Vosk-Grammatik ist Pflicht, nicht Kuer.** Frei
+   erkannt macht das deutsche Modell aus "gnome" zuverlaessig "genug".
+   Mit einer auf die Befehlssaetze beschraenkten Grammatik lag alles
+   woertlich richtig. Bewaehrte Pruefmethode dafuer: Piper spricht den
+   Satz, Vosk hoert zu - ohne dass jemand ins Mikrofon sprechen muss.
+2. **Befehle sind ganze Saetze, keine Einzelwoerter** (Stephans
+   Vorgabe). Ein beilaeufiges "windows" im Gespraech wuerde sonst den
+   Schreibtisch umstellen. Der Stoersatz "ich habe frueher windows
+   benutzt" wurde als "auf auf windows" erkannt - mit dem Zielwort, aber
+   ohne "umschalten", und loeste damit nichts aus.
+3. **Mikrofon-Pegel sind ein Sicherheitsthema, kein Feinschliff.** Das
+   eingebaute Mikrofon des T490 war ab Werk um 60 dB uebersteuert
+   (Capture +30 dB UND Internal Mic Boost +30 dB). Vosk erkennt Sprache
+   an den Pausen zwischen Woertern; in einem Dauervollausschlag gibt es
+   keine, also kam nie ein Ergebnis - ohne Fehlermeldung. Behoben und
+   per `dialos-mikrofon-pegel.service` bei jedem Start abgesichert.
+   **Folge:** Der Mikrofon-Vergleich vom 2026-08-13 ("eingebaut deutlich
+   schlechter als AIRHUG") hat womoeglich nur die Uebersteuerung
+   gemessen und gehoert wiederholt (TODO.md).
+
+Dazu zwei Paketfehler in Debians `gnome-shell-extension-arc-menu` (65-2),
+beide live gefunden und im Rezept umgangen: Das GSettings-Schema liegt
+unter `/usr/share/glib-2/schemas/` statt `/usr/share/glib-2.0/schemas/`
+(landet nie im systemweiten Cache), und die fertige deutsche `de.mo`
+liegt in `po/` statt in einem `locale`-Ordner (Menue bleibt sonst
+englisch).
+
 Der ursprüngliche Zwei-Wege-Versuch ist entschieden, kein "neuer Plan"
 mehr, sondern der etablierte Ansatz:
 
@@ -152,6 +192,9 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
   Ausgabe-Fallback dagegen belegt.
 - Rechtschreibprüfung (hunspell/aspell) fehlt noch, siehe
   `docs/offene-punkte.md`.
+- Mikrofon-Vergleich eingebaut gegen AIRHUG wiederholen, nachdem die
+  60-dB-Übersteuerung behoben ist - davon hängt ab, ob die
+  Bluetooth-Priorität überhaupt begründet ist.
 
 ## Arbeitsweise mit Stephan
 
