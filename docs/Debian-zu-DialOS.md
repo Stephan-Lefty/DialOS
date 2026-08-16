@@ -109,50 +109,129 @@ außerhalb Österreichs eingesetzt wird, dort einfach die passende Zeitzone
 angeben - es gibt keinen zweiten Weg mehr, der eine andere Einstellung
 vererben könnte.
 
-**Partitionierung - wichtig, manuell statt "geführt - gesamte Platte
-verwenden" wählen** (seit 2026-08-14, siehe
-[sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
-"Verschlüsselung von nutzers Daten + Sicherheits-Stick"):
+**Partitionierung - seit 2026-08-16 automatisiert (Weg A).** Damit du
+weder von Hand partitionieren noch über die Plattengröße nachdenken
+musst, gibt eine Preseed-Datei dem Debian-Installer das Layout vor:
 
-- GPT-Partitionstabelle.
-- EFI-Systempartition, `/boot/efi` (~512 MB genügen; der Debian-Installer
-  legt von sich aus gern rund 1 GB an - beides ist in Ordnung).
-- Root-Partition, **genau 100 GB**, ext4, `/`.
-- Swap-Partition: **egal, was der Installer hier anlegt** - Schritt 12
-  räumt das ohnehin auf (siehe unten). Am einfachsten den Vorschlag des
-  Debian-Installers annehmen.
-- **Den kompletten Rest der Platte unpartitioniert/frei lassen** - nicht
-  dem Installer überlassen, sonst hat
-  [`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
-  später (Schritt 12) keinen Platz mehr für die verschlüsselte
-  `dialos-nutzer-home`-Partition. Als Untergrenze verlangt das Skript
-  20 GiB freien Platz; sinnvoll ist deutlich mehr, das ist der gesamte
-  Datenbereich des Endnutzers.
+| Partition | Größe | |
+|---|---|---|
+| EFI | 538 MB | `/boot/efi` |
+| root | **100 GiB**, ext4 | `/` |
+| *Rest* | **unpartitioniert** | bleibt für Schritt 12 |
 
-**So sieht das auf dem Referenzgerät (T490, 476,9-GiB-NVMe) konkret aus** -
-nachgemessen am 2026-08-16, als Vorlage zum Vergleich beim Nachbauen:
+Der freie Rest ist der Zweck der Übung: Dort legt
+[`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
+später den verschlüsselten Swap (8 GiB) und `dialos-nutzer-home` an - je
+größer die Platte, desto mehr Platz bekommt `nutzer`, ohne dass
+irgendwo eine Zahl angepasst werden muss.
+
+> **Warum nicht einfach die ganze Platte nehmen und danach verkleinern?**
+> Weil das nicht geht: Ein **eingehängtes** ext4-Dateisystem lässt sich
+> nicht schrumpfen, Online-Resize kann ausschließlich wachsen. Ein Skript
+> auf dem laufenden System könnte die root-Partition also gar nicht
+> verkleinern - das ginge nur aus einer Live-Sitzung heraus, mit einem
+> zusätzlichen Neustart pro Gerät und dem Risiko, dass ein Abbruch
+> mitten im Schrumpfen das System zerstört. Deshalb entsteht das
+> richtige Layout gleich beim Installieren.
+
+### 1a. Die Preseed-Datei auf dialos.org ablegen (einmalig)
+
+Die Datei liegt im Repo unter
+[`iso-build/preseed/dialos-partitionierung.cfg`](../iso-build/preseed/dialos-partitionierung.cfg).
+Lade sie auf den Webserver von `dialos.org` - **genau an diesen Ort**:
+
+```
+http://dialos.org/d-i/trixie/preseed.cfg
+```
+
+Also: ein Ordner `d-i`, darin ein Ordner `trixie`, darin die Datei unter
+dem Namen `preseed.cfg`. Dieser Pfad ist nicht frei gewählt - der
+Debian-Installer setzt ihn bei der Kurzschreibweise unten genau so
+zusammen (`d-i` / Codename der Debian-Version / `preseed.cfg`).
+
+Das muss **einmal** gemacht werden, nicht pro Gerät. Bei einer künftigen
+Debian-Version ändert sich nur der Ordnername (`trixie` → Codename der
+neuen Version).
+
+**Prüfen, ob es liegt:** Die Adresse im Browser aufrufen - es muss der
+Textinhalt der Datei erscheinen, kein Download-Dialog und keine
+404-Seite.
+
+### 1b. Den Installer damit starten (bei jedem Gerät)
+
+**Voraussetzung: Netzwerkkabel einstecken.** Der Installer holt die
+Preseed-Datei, *bevor* er nach WLAN fragen kann - über WLAN allein
+funktioniert das also nicht. Ein per DHCP versorgtes LAN-Kabel genügt.
+
+1. Vom Debian-13-USB-Stick booten.
+2. Im Bootmenü **nicht** Enter drücken, sondern den Eintrag
+   `Graphical install` (oder `Install`) nur **auswählen**.
+3. Jetzt die Startzeile bearbeiten:
+   - **UEFI (der Normalfall, GRUB-Menü):** Taste **`e`** drücken. Es
+     erscheint ein Textblock. Mit den Pfeiltasten in die Zeile gehen, die
+     mit `linux` beginnt, und mit der **Ende**-Taste an deren Ende
+     springen.
+   - **Älteres BIOS (isolinux-Menü):** stattdessen **`Tab`** drücken. Die
+     Startzeile erscheint dann direkt zum Bearbeiten.
+4. Dort ans Ende - mit einem Leerzeichen davor - anhängen:
+
+   ```
+   auto url=dialos.org
+   ```
+
+5. Starten:
+   - **UEFI:** **`Strg`+`X`** (oder `F10`).
+   - **BIOS:** **`Enter`**.
+
+Falls die Kurzform einmal nicht greift, tut es die ausgeschriebene
+Adresse genauso - sie funktioniert unabhängig vom Ablageort:
+
+```
+auto url=http://dialos.org/d-i/trixie/preseed.cfg
+```
+
+### 1c. Was dann passiert
+
+Die Installation läuft wie gewohnt weiter - Sprache, Tastatur, Netzwerk,
+Zeitzone und das Konto **`dialosadmin`** fragt der Installer weiterhin
+ganz normal ab. Die Preseed-Datei gibt ausschließlich die
+Partitionierung vor.
+
+Ein Punkt bleibt bewusst deine Entscheidung: **Der Installer fragt
+weiterhin, welche Platte er partitionieren soll.** Das ist Absicht - so
+kann die Vorgabe niemals die falsche Platte treffen, etwa den
+Installations-Stick selbst oder eine angesteckte externe Platte.
+
+> **Danach kommt keine Rückfrage mehr.** Sobald die Platte gewählt ist,
+> wird sie gelöscht und neu aufgeteilt. Vorher also prüfen, dass wirklich
+> die interne Platte markiert ist (bei ThinkPads meist `nvme0n1`, nicht
+> `sda` - `sda` ist typischerweise der USB-Stick).
+
+Konto: Das erste angelegte Konto (der Installer verlangt eines) muss
+**`dialosadmin`** heißen - Konvention, damit Skripte und Doku nicht pro
+Gerät angepasst werden müssen.
+
+### 1d. Rückfallebene: von Hand partitionieren
+
+Ohne Preseed - etwa wenn kein Netzwerkkabel zur Hand ist - im Installer
+**"Manuell"** wählen statt "Geführt - gesamte Platte verwenden" und
+dasselbe Layout von Hand anlegen: GPT-Partitionstabelle, EFI-Partition
+(~512 MB genügen; der Debian-Installer legt von sich aus gern rund 1 GB
+an - beides ist in Ordnung), root mit **100 GiB** als ext4 auf `/`, und
+**den kompletten Rest der Platte unpartitioniert lassen**. Einen Swap
+kann der Installer anlegen oder auch nicht - Schritt 12 ersetzt ihn
+ohnehin durch einen verschlüsselten (siehe dort). Als Untergrenze
+verlangt das Skript in Schritt 12 20 GiB freien Platz.
+
+**So sah das auf dem Referenzgerät (T490, 476,9-GiB-NVMe) beim ersten
+Aufbau aus** - noch von Hand partitioniert, am 2026-08-16 nachgemessen:
 
 | Partition | Größe | Verwendung |
 |---|---|---|
 | `nvme0n1p1` | 100,00 GB (93,13 GiB) | `/`, ext4 |
 | `nvme0n1p2` | 954 MB | `/boot/efi`, vfat |
-| `nvme0n1p3` | 37,3 GiB | Swap |
-| *(unpartitioniert)* | **345,6 GiB** | bleibt für `dialos-nutzer-home` |
-
-> **Zur Swap-Partition (entschieden 2026-08-16):** Eine gewöhnliche
-> Swap-Partition ist unverschlüsselt und untergräbt damit einen Teil des
-> Sicherheitskonzepts. `/home/nutzer` liegt zwar in LUKS2, aber
-> Speicherseiten des Kontos - geöffnete Dokumente, Mails,
-> Browserinhalte - können vom Kernel in den Swap ausgelagert werden und
-> sind dort **ohne Sicherheits-Stick im Klartext lesbar**, ebenso nach
-> Ausbau der SSD. Das widerspricht
-> [sicherheit-datenschutz.md](sicherheit-datenschutz.md).
->
-> **Deshalb muss die Größe hier niemanden kümmern:**
-> `dialos-setup-home-partition.sh` (Schritt 12) ersetzt einen vorgefundenen
-> Klartext-Swap durch **8 GiB verschlüsselten Swap** und schlägt den
-> freigewordenen Platz gleich der Home-Partition zu. Die Tabelle oben
-> zeigt den Zustand *vor* diesem Schritt.
+| `nvme0n1p3` | 37,3 GiB | Swap (wurde in Schritt 12 durch 8 GiB verschlüsselt ersetzt) |
+| *(unpartitioniert)* | **345,6 GiB** | wurde `dialos-nutzer-home` |
 
 ## 2. Paketliste installieren
 

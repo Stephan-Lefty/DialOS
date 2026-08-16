@@ -55,6 +55,28 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Partitionierung wird nicht mehr von Hand gemacht: Preseed für den
+  Debian-Installer (2026-08-16).** Stephans Wunsch war, bei der
+  Erstinstallation nicht über die Plattengröße nachdenken zu müssen.
+  Sein erster Gedanke - die ganze Platte nehmen und hinterher per Skript
+  auf 100 GiB verkleinern - geht technisch nicht: Ein **eingehängtes**
+  ext4-Dateisystem lässt sich nicht schrumpfen, Online-Resize kann
+  ausschließlich wachsen. Auf dem laufenden System kann kein Skript die
+  root-Partition verkleinern; das ginge nur aus einer Live-Sitzung, mit
+  Zusatz-Neustart pro Gerät und dem Risiko, dass ein Abbruch mitten im
+  Schrumpfen das System zerstört. Deshalb der umgekehrte Weg: das richtige
+  Layout entsteht gleich beim Installieren. Neu:
+  `iso-build/preseed/dialos-partitionierung.cfg` gibt dem Debian-Installer
+  EFI + genau 100 GiB root vor und lässt den **kompletten Rest
+  unpartitioniert** - unabhängig von der Plattengröße, ohne dass
+  irgendwo eine Zahl angepasst werden muss. Die Zielplatte bleibt bewusst
+  eine interaktive Frage: das ist die einzige Sicherung dagegen, dass die
+  Vorgabe den Installations-Stick oder eine externe Platte trifft. Kein
+  Swap im Rezept - den legt Schritt 12 verschlüsselt an. Doku-Schritt 1
+  ist dafür in 1a bis 1d gegliedert: Ablageort auf dialos.org, die genaue
+  Tastenfolge im Bootmenü (UEFI `e`, BIOS `Tab`), was danach passiert,
+  und die Rückfallebene von Hand. Voraussetzung ist ein Netzwerkkabel -
+  der Installer holt das Preseed, bevor er nach WLAN fragen kann.
 - **Weg A entschieden (Stephan, 2026-08-16): Calamares und
   `dialos-install` ersatzlos entfernt.** Jedes Kundengerät wird im Büro
   aufgesetzt - leere Platte, jeweils aktuelle Debian-13/GNOME-ISO von

@@ -56,6 +56,27 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Partitioning is no longer done by hand: a preseed for the Debian
+  installer (2026-08-16).** Stephan wanted to stop thinking about disk
+  size during the initial install. His first idea - use the whole disk
+  and shrink it to 100 GiB afterwards with a script - is technically
+  impossible: a **mounted** ext4 filesystem cannot be shrunk, online
+  resize can only grow. No script on the running system can shrink the
+  root partition; that would only work from a live session, at the cost
+  of an extra reboot per device and the risk of destroying the system if
+  the shrink is interrupted. Hence the reverse approach: the correct
+  layout is created during installation. New:
+  `iso-build/preseed/dialos-partitionierung.cfg` gives the Debian
+  installer EFI + exactly 100 GiB root and leaves the **entire rest
+  unpartitioned** - independent of disk size, with no number to adjust
+  anywhere. The target disk deliberately stays an interactive question:
+  that is the only safeguard against the preset hitting the installation
+  stick or an external drive. No swap in the recipe - step 12 creates an
+  encrypted one. Doc step 1 is structured into 1a-1d for this: where to
+  put the file on dialos.org, the exact key sequence in the boot menu
+  (UEFI `e`, BIOS `Tab`), what happens afterwards, and the manual
+  fallback. A network cable is required - the installer fetches the
+  preseed before it can ask about WiFi.
 - **Path A decided (Stephan, 2026-08-16): Calamares and `dialos-install`
   removed entirely.** Every customer device is set up in the office -
   empty disk, the current Debian 13/GNOME ISO off debian.org, creating
