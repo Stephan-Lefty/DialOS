@@ -55,14 +55,15 @@ mehr, sondern der etablierte Ansatz:
    konfiguriert - die `iso-build/`-Dateien dienen dabei nur noch als
    Vorlage/Rezept (siehe [docs/Debian-zu-DialOS.md](docs/Debian-zu-DialOS.md)
    für das vollständige, aktuell gehaltene Schritt-für-Schritt-Rezept).
-   Anschließend zieht **[Penguins' Eggs](https://penguins-eggs.net/)**
-   eine startfähige ISO aus dem fertig eingerichteten System.
+   Vom fertig eingerichteten System zieht Stephan anschließend ein
+   Sicherungs-Abbild mit **[Rescuezilla](https://rescuezilla.com/)**
+   (seit 2026-08-16; Penguins' Eggs ist entfallen, siehe Schritt 16).
 
 **Aktuelle Version: 0.5.0** (in Arbeit) - alle Details im
-[README.md-Änderungsprotokoll](README.md#änderungsprotokoll). Zwei
-Test-ISOs bereits gebaut (`DialOS-Live-0.5.0.iso`,
-`DialOS-Live-0.5.0-clone.iso`, beide nicht mehr lokal vorhanden - siehe
-`docs/iso-builds.md`).
+[README.md-Änderungsprotokoll](README.md#änderungsprotokoll). Von den
+alten ISOs sind am 2026-08-16 acht gelöscht worden (~59 GB); übrig ist
+nur `DialOS-Live-0.5.1-clone.iso`, bis Stephans erstes
+Rescuezilla-Abbild existiert - siehe `docs/iso-builds.md`.
 
 **Grundlegende Sicherheits-Architektur seit 14./15.08. neu** (löst den
 früheren Ganze-Platte-LUKS-Ansatz komplett ab, siehe
@@ -104,10 +105,11 @@ Durchlauf abgebrochen hätten (fehlendes `python3-pip`, `npm install -g`
 ohne `sudo`, stummer Abbruch bei der Passwortabfrage ohne Grafik,
 Partitionsnummer-Bestimmung, die bei Nummerierungslücken die falsche
 Partition getroffen hätte) - alle behoben, Details im
-README-Änderungsprotokoll 0.5.0. **Trotzdem weiterhin noch nie
-end-to-end auf einem frischen System durchgelaufen** - das bleibt der
-nächste geplante Schritt (kompletter T490-Neuaufbau, siehe TODO.md
-"Nächster Schritt").
+README-Änderungsprotokoll 0.5.0. **Am 2026-08-16 dann erstmals
+end-to-end auf dem frisch aufgebauten T490 durchgelaufen** - alle drei
+Skripte, anschließend Neustart mit und ohne Sicherheits-Stick, beide
+Richtungen per Journal belegt. Offen bleibt die Sprachsteuerung selbst
+(siehe TODO.md).
 **Entfallen am 2026-08-16 (Weg A):** `dialos-install` (Zielplatte
 löschen, System per rsync klonen, GRUB setzen) und der komplette
 Calamares-Unterbau - Branding, `locale.conf`, `shellprocess.conf`, das
@@ -116,8 +118,8 @@ Live-Boot-Installationsweg, den es nicht mehr gibt. `dialos-install`s
 LUKS-/Stick-Logik lebt unverändert in `dialos-setup-home-partition.sh`
 weiter, das daraus abgeleitet wurde. **`dialos-rekey` bleibt** - es
 ersetzt einen verlorenen oder defekten Sicherheits-Stick und ist damit
-ein Wartungswerkzeug, kein Installer. Die ISO (`eggs produce`) dient nur
-noch als Sicherungs-Schnappschuss.
+ein Wartungswerkzeug, kein Installer. Die ISO dient nur noch als
+Sicherungs-Schnappschuss (seit 2026-08-16 als Rescuezilla-Abbild).
 
 **Vosk/hassil ist jetzt produktiv im Einsatz** (nicht mehr nur das
 Testskript `dialos-vosk-test.py`): `dialos-start-ansage.py` fragt
@@ -138,13 +140,13 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
 - Sudo-Rechte für den Standard-Benutzer "nutzer" (Platzhalter-Passwort
   aktuell zufällig generiert, echte Policy für die spätere
   sprachgesteuerte Wartung noch offen).
-- Referenz-Hardware final festlegen (Laptop UND Sicherheits-Stick UND
-  Bluetooth-Lautsprecher/-Mikrofon - alle drei noch offen, siehe
-  `docs/hardware.md`).
+- Referenz-Hardware final festlegen: Bluetooth-Lautsprecher/-Mikrofon
+  ist seit 2026-08-16 entschieden (AIRHUG 01), Laptop und
+  Sicherheits-Stick noch offen (siehe `docs/hardware.md`). Der
+  Mikrofon-Fallback auf das eingebaute Gerät ist noch ungetestet, der
+  Ausgabe-Fallback dagegen belegt.
 - Rechtschreibprüfung (hunspell/aspell) fehlt noch, siehe
   `docs/offene-punkte.md`.
-- Kompletter neuer Installations-Pfad (siehe oben) noch nicht
-  end-to-end auf einem frischen System getestet.
 
 ## Arbeitsweise mit Stephan
 
