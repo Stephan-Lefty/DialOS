@@ -148,6 +148,18 @@ background) and `splash.png` (boot/login screen).
       directory (`GSETTINGS_SCHEMA_DIR`), searched across all three
       extensions: if Debian fixes the typo, the system-wide path applies
       again automatically.
+    - **Our own start-button icon** (`dialos-fenster-symbolic.svg`,
+      Stephan's request): Debian stripped every ArcMenu icon from the
+      package, so the button fell back to the GNOME distro icon - the
+      GNOME logo, of all things, in the Windows look. It now carries a
+      generic window symbol (a frame with a cross bar, four panes).
+      **Deliberately not Microsoft's Windows logo:** DialOS is sold, and
+      someone else's trademark on the start button of a sold device would
+      be a trademark problem - ArcMenu itself notes in its source that
+      its distribution icons are trademarks of their owners. Monochrome
+      and ending in `-symbolic.svg` so GNOME recolors it and it stays
+      legible in both light and dark appearance; a fixed-color icon would
+      be invisible in one of the two.
     - Then switched back and forth three times, comparing every touched
       key: `gnome` really does restore the shipped state
       (`appmenu:close`, hot corner on, dash-to-panel and ArcMenu back to

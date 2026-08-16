@@ -344,6 +344,11 @@ schritt_11_sprachausgabe() {
   # "nutzer", der spaeter per Sprachbefehl umschalten koennen soll.
   sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-desktop-stil.sh /usr/local/bin/
   sudo chmod 755 /usr/local/bin/dialos-desktop-stil.sh
+  # Eigenes Startknopf-Symbol fuer die Windows-Optik (generisches Fenster,
+  # bewusst nicht Microsofts Markenzeichen - Begruendung in der Datei).
+  sudo mkdir -p /usr/local/share/dialos
+  sudo cp iso-build/config/includes.chroot/usr/local/share/dialos/dialos-fenster-symbolic.svg /usr/local/share/dialos/
+  sudo chmod 644 /usr/local/share/dialos/dialos-fenster-symbolic.svg
   sudo mkdir -p /etc/xdg/autostart
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-start-ansage.desktop /etc/xdg/autostart/
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.desktop /etc/xdg/autostart/

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DialOS: Startknopf-Symbol fuer die Windows-Optik.
+
+  Bewusst ein GENERISCHES Fenster-Sinnbild (Rahmen mit Kreuzsprosse, vier
+  Scheiben) und NICHT das Windows-Logo von Microsoft. Das ist keine
+  Kosmetik, sondern Absicht: DialOS wird verkauft, und ein fremdes
+  Markenzeichen auf dem Startknopf eines verkauften Geraets waere ein
+  Markenrechtsproblem. Microsofts Zeichen ist eine perspektivisch
+  gekippte Vierergruppe ohne Rahmen in einem bestimmten Blau - dieses
+  hier ist das seit Jahrzehnten uebliche, allgemeine Sinnbild fuer "ein
+  Fenster" und wird von Windows-Gewohnten trotzdem sofort als
+  Startknopf gelesen.
+
+  Einfarbig und auf "-symbolic.svg" endend, damit GNOME Shell es wie ein
+  Symbol-Icon einfaerbt: Es nimmt automatisch die Vordergrundfarbe der
+  Leiste an und bleibt damit im hellen wie im dunklen Erscheinungsbild
+  lesbar. Ein fest eingefaerbtes Icon waere in einem der beiden Faelle
+  unsichtbar - fuer sehbehinderte Nutzer der Unterschied zwischen
+  bedienbar und nicht bedienbar.
+
+  Nur gefuellte Pfade, keine Striche: Strichbreiten werden beim
+  Einfaerben und Skalieren nicht von allen Fassungen gleich behandelt,
+  gefuellte Flaechen schon.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <g fill="#222222">
+    <!-- Rahmen: aussen abgerundet, innen ausgespart (evenodd) -->
+    <path fill-rule="evenodd" d="M3 2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 1.4a.6.6 0 0 0-.6.6v8a.6.6 0 0 0 .6.6h10a.6.6 0 0 0 .6-.6V4a.6.6 0 0 0-.6-.6z"/>
+    <!-- Senkrechte Sprosse -->
+    <path d="M7.3 2.7h1.4v10.6H7.3z"/>
+    <!-- Waagrechte Sprosse -->
+    <path d="M1.4 7.3h13.2v1.4H1.4z"/>
+  </g>
+</svg>

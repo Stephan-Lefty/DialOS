@@ -778,6 +778,25 @@ Switching back resets every touched key to its **shipped default** via
 `gsettings reset`, not to hand-picked "GNOME-ish" values - otherwise
 switching back and forth repeatedly would not be lossless.
 
+**The icon on the start button** is our own bundled window symbol
+(`/usr/local/share/dialos/dialos-fenster-symbolic.svg`, a frame with a
+cross bar, four panes) - **deliberately not Microsoft's Windows logo.**
+DialOS is sold; someone else's trademark on the start button of a sold
+device would be a trademark problem. Microsoft's mark is a tilted group
+of four without a frame in a specific blue; this is the general symbol
+for "a window" and is still read immediately as a start button by people
+used to Windows. ArcMenu itself ships no Windows symbol and notes
+explicitly in its source that its distribution icons are trademarks of
+their respective owners.
+
+The file ends in `-symbolic.svg` and is monochrome so GNOME Shell
+recolors it like a symbolic icon: it takes on the panel's foreground
+color and stays legible in both the light and the dark appearance. A
+fixed-color icon would be invisible in one of the two - for visually
+impaired users the difference between usable and unusable. If the file is
+missing, the button keeps its previous symbol; a start button with no
+image would be worse than one with the wrong image.
+
 **Two stumbling blocks, both of which only surfaced during the real
 test run on 2026-08-16:**
 

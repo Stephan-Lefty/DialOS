@@ -29,6 +29,14 @@ PAKETE="gnome-shell-extension-dash-to-panel gnome-shell-extension-arc-menu gnome
 STIL_DATEI="${XDG_CONFIG_HOME:-$HOME/.config}/dialos/desktop-stil"
 SAY="/usr/local/bin/dialos-say.py"
 
+# Symbol fuer den Startknopf. Bewusst ein eigenes, generisches
+# Fenster-Sinnbild statt des Windows-Logos von Microsoft - Begruendung
+# steht in der SVG-Datei selbst. ArcMenu bringt kein Windows-Symbol mit,
+# und Debian hat ausserdem saemtliche ArcMenu-Icons aus dem Paket
+# entfernt (65-2), weshalb der Knopf ohne diese Datei auf das
+# GNOME-Distro-Icon zurueckfaellt.
+STARTKNOPF_ICON="/usr/local/share/dialos/dialos-fenster-symbolic.svg"
+
 # ---------------------------------------------------------------- Ausgabe
 
 # Sagt den Text und schreibt ihn zusaetzlich ins Terminal. Die Zielgruppe
@@ -248,6 +256,15 @@ auf_windows() {
   setze "$a" position-in-panel "'Left'"
   setze "$a" dash-to-panel-standalone false
 
+  # Startknopf-Symbol. Fehlt die Datei, bleibt es beim bisherigen Symbol -
+  # ein Startknopf ohne Bild waere schlimmer als einer mit dem falschen.
+  if [ -f "$STARTKNOPF_ICON" ]; then
+    setze "$a" menu-button-icon "'Custom_Icon'"
+    setze "$a" custom-menu-button-icon "'$STARTKNOPF_ICON'"
+  else
+    echo "  Hinweis: $STARTKNOPF_ICON fehlt - der Startknopf behaelt sein bisheriges Symbol." >&2
+  fi
+
   # 4. Fensterknoepfe nach rechts, in der Reihenfolge von Windows. Das ist
   #    die Umstellung, die im Alltag am meisten ausmacht - unter GNOME sitzt
   #    dort standardmaessig nur ein Schliessen-Knopf.
@@ -297,7 +314,8 @@ auf_gnome() {
   done
 
   local a="org.gnome.shell.extensions.arcmenu"
-  for k in menu-layout position-in-panel dash-to-panel-standalone; do
+  for k in menu-layout position-in-panel dash-to-panel-standalone \
+           menu-button-icon custom-menu-button-icon; do
     zuruecksetzen "$a" "$k"
   done
 

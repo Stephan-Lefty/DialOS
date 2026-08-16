@@ -155,6 +155,19 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
       `schemas`-Ordner der Erweiterung (`GSETTINGS_SCHEMA_DIR`), und
       zwar über alle drei Erweiterungen hinweg gesucht: Behebt Debian
       den Tippfehler, greift automatisch wieder der systemweite Weg.
+    - **Eigenes Startknopf-Symbol** (`dialos-fenster-symbolic.svg`,
+      Stephans Wunsch): Debian hat sämtliche ArcMenu-Icons aus dem Paket
+      entfernt, weshalb der Knopf auf das GNOME-Distro-Icon zurückfiel -
+      ausgerechnet das GNOME-Logo in der Windows-Optik. Jetzt liegt dort
+      ein generisches Fenster-Sinnbild (Rahmen mit Kreuzsprosse, vier
+      Scheiben). **Bewusst nicht Microsofts Windows-Logo:** DialOS wird
+      verkauft, und ein fremdes Markenzeichen auf dem Startknopf eines
+      verkauften Geräts wäre ein Markenrechtsproblem - ArcMenu selbst
+      weist im Quelltext darauf hin, dass seine Distributions-Icons
+      Marken ihrer Inhaber sind. Einfarbig und auf `-symbolic.svg`
+      endend, damit GNOME es einfärbt und es im hellen wie im dunklen
+      Erscheinungsbild lesbar bleibt; ein fest eingefärbtes Icon wäre in
+      einem der beiden Fälle unsichtbar.
     - Danach dreimal hin- und hergeschaltet und jeden berührten
       Schlüssel verglichen: `gnome` stellt tatsächlich den
       Auslieferungszustand wieder her (`appmenu:close`, heiße Ecke an,

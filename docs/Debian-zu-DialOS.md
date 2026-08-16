@@ -797,6 +797,26 @@ den **Auslieferungszustand** zurück, nicht auf selbst gewählte
 "GNOME-artige" Werte - sonst wäre mehrfaches Hin- und Herschalten nicht
 verlustfrei.
 
+**Das Symbol auf dem Startknopf** ist ein eigenes, mitgeliefertes
+Fenster-Sinnbild (`/usr/local/share/dialos/dialos-fenster-symbolic.svg`,
+Rahmen mit Kreuzsprosse, vier Scheiben) - **bewusst nicht das
+Windows-Logo von Microsoft.** DialOS wird verkauft; ein fremdes
+Markenzeichen auf dem Startknopf eines verkauften Geräts wäre ein
+Markenrechtsproblem. Microsofts Zeichen ist eine perspektivisch gekippte
+Vierergruppe ohne Rahmen in einem bestimmten Blau; das hier ist das
+allgemeine Sinnbild für "ein Fenster" und wird von Windows-Gewohnten
+trotzdem sofort als Startknopf gelesen. ArcMenu selbst bringt kein
+Windows-Symbol mit und weist im Quelltext ausdrücklich darauf hin, dass
+seine Distributions-Icons Marken ihrer Inhaber sind.
+
+Die Datei endet auf `-symbolic.svg` und ist einfarbig, damit GNOME Shell
+sie wie ein Symbol-Icon einfärbt: Sie nimmt die Vordergrundfarbe der
+Leiste an und bleibt im hellen wie im dunklen Erscheinungsbild lesbar.
+Ein fest eingefärbtes Icon wäre in einem der beiden Fälle unsichtbar -
+für sehbehinderte Nutzer der Unterschied zwischen bedienbar und nicht
+bedienbar. Fehlt die Datei, behält der Knopf sein bisheriges Symbol; ein
+Startknopf ohne Bild wäre schlimmer als einer mit dem falschen.
+
 **Zwei Stolpersteine, beide erst beim echten Testlauf am 2026-08-16
 sichtbar geworden:**
 
