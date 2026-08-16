@@ -36,6 +36,30 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
+- [ ] **Mikrofon-Fallback ohne Bluetooth testen** (offen seit
+  2026-08-16). Die Ausgabeseite ist bewiesen - Headset aus, Ton kam aus
+  dem eingebauten Lautsprecher. Die Eingabeseite fehlt noch: versteht das
+  eingebaute Laptop-Mikrofon die Lautstärke-Frage?
+
+  **Wichtig, sonst schlägt der Test scheinbar fehl:** Die Frage kommt seit
+  2026-08-16 nur noch einmalig. Vorher den gemerkten Wert löschen, sonst
+  wird gar nicht gefragt:
+
+  ```bash
+  sudo rm /home/nutzer/.config/dialos/lautstaerke
+  ```
+
+  Dann AIRHUG **ausschalten**, als `nutzer` ab- und wieder anmelden, und
+  ins Laptop-Mikrofon antworten.
+
+  **Erwartung:** deutlich schlechter als über das Headset - der
+  Vergleichstest vom 2026-08-13 war eindeutig (6 von 8 Testsätzen über
+  Bluetooth korrekt, spürbar weniger beim eingebauten Mikrofon). Für den
+  Fallback reicht es, wenn es *überhaupt* trägt: Er soll nur verhindern,
+  dass ein Nutzer ohne Headset gar nichts mehr ausrichten kann. Wird gar
+  nichts verstanden, greift der 100-%-Rückfall - die Ansage bleibt also
+  hörbar, aber der Nutzer könnte die Lautstärke nicht mehr selbst ändern.
+
 - [ ] **Referenzgerät steht seit 2026-08-16: AIRHUG 01** (Bluetooth-
   Headset, A2DP + HFP, in `docs/hardware.md` dokumentiert). Offen bleibt
   davon nur noch die ursprüngliche Teilfrage: ob es Deutsch als

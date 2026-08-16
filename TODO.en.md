@@ -37,6 +37,30 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
+- [ ] **Test the microphone fallback without Bluetooth** (open since
+  2026-08-16). The output side is proven - headset off, sound came from
+  the built-in speaker. The input side is still missing: does the
+  built-in laptop microphone understand the volume question?
+
+  **Important, or the test appears to fail:** since 2026-08-16 the
+  question is only asked once. Delete the remembered value first,
+  otherwise nothing is asked at all:
+
+  ```bash
+  sudo rm /home/nutzer/.config/dialos/lautstaerke
+  ```
+
+  Then switch the AIRHUG **off**, log out and back in as `nutzer`, and
+  answer into the laptop microphone.
+
+  **Expectation:** noticeably worse than over the headset - the
+  comparison test of 2026-08-13 was unambiguous (6 of 8 test sentences
+  correct over Bluetooth, clearly fewer with the built-in mic). For a
+  fallback it is enough that it works *at all*: it only has to prevent a
+  user without a headset from being unable to do anything. If nothing is
+  understood, the 100% fallback applies - the announcement stays audible,
+  but the user could no longer change the volume themselves.
+
 - [ ] **Reference device settled 2026-08-16: AIRHUG 01** (Bluetooth
   headset, A2DP + HFP, documented in `docs/hardware.en.md`). Only the
   original sub-question remains: whether it supports German as its own
