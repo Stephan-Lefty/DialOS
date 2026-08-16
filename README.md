@@ -167,22 +167,31 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
       Marken ihrer Inhaber sind. Einfarbig und auf `-symbolic.svg`
       endend, damit GNOME es einfärbt und es im hellen wie im dunklen
       Erscheinungsbild lesbar bleibt; ein fest eingefärbtes Icon wäre in
-      einem der beiden Fälle unsichtbar.
-    - **Der erste Anlauf dafür war falsch gebaut** und erschien in der
-      Leiste als **weißes Rechteck**: Die Datei zeichnete den Rahmen als
-      ausgesparte Fläche (`fill-rule="evenodd"`) und setzte die Farbe auf
-      einer `<g>`-Gruppe. Als Vorschaubild gerendert sah das richtig aus -
-      beim Einfärben durch GNOME gehen die Aussparungen aber verloren,
-      die Fläche läuft voll. Lehre, die jetzt als Merksatz in der Datei
-      steht: **Ein Symbol-Icon muss aus lauter Vollflächen bestehen; was
-      als Loch gedacht ist, muss durch einen Zwischenraum entstehen,
-      nicht durch eine Aussparung.** Die zweite Fassung ist exakt wie ein
-      Adwaita-Symbol-Icon aufgebaut (ein `<path>`, Farbe direkt am
-      Element, keine `fill-rule`): Rahmen aus vier vollen Balken,
-      Sprossen aus zwei weiteren. Überlappende Vollflächen überstehen das
-      Einfärben unverändert. Nebenbei gelernt: Ein selbst gerendertes
-      Vorschaubild beweist bei Symbol-Icons **nichts** - librsvg zeichnet
-      die Datei so, wie sie dasteht, GNOME zeichnet sie umgefärbt.
+      einem der beiden Fälle unsichtbar. Die Form sind vier Kacheln im
+      Quadrat ohne Rahmen (Stephans Wahl) - dieselbe allgemeine Form, die
+      GNOME selbst als `view-grid-symbolic` verwendet.
+    - **Zwei Anläufe erschienen als volle weiße Fläche auf dem Knopf** -
+      ohne Fehlermeldung, ohne Eintrag im Journal. Meine erste Diagnose
+      (ausgesparte Flächen per `fill-rule="evenodd"` überstünden das
+      Einfärben nicht) war **falsch**: Die zweite Fassung kam ganz ohne
+      Aussparungen aus und sah trotzdem genauso aus. Gefunden wurde die
+      Ursache erst durch einen Gegentest mit einem Icon, das GNOME
+      sicher richtig darstellt (`view-grid-symbolic` aus Adwaita) - das
+      erschien korrekt, womit die Datei überführt war und nicht ArcMenu.
+      Der einzige strukturelle Unterschied zu Adwaitas Datei: **Bei mir
+      stand ein Erklärungs-Kommentar vor dem `<svg>`-Tag.** GNOME baut
+      Symbol-Icons beim Einfärben um und stolpert über alles, was davor
+      steht. Die Erklärung ist deshalb in eine `README.md` neben die
+      Datei gewandert, und die Datei ist jetzt bis auf die Pfaddaten
+      Zeile für Zeile identisch mit Adwaitas Aufbau (per `diff`
+      gegengeprüft, nicht vermutet).
+    - **Zwei Lehren, festgehalten neben der Datei**, damit sie beim
+      nächsten Symbol nicht wiederholt werden: Vorlage ist immer eine
+      Adwaita-Datei - und **ein selbst gerendertes Vorschaubild beweist
+      bei Symbol-Icons nichts.** librsvg zeichnet die Datei so, wie sie
+      dasteht, und zeigte sie beide Male korrekt an; GNOME zeichnet sie
+      umgefärbt. Ich hatte die Vorschau als Beleg genommen - der Fehler,
+      der die zweite Runde überhaupt nötig gemacht hat.
     - Danach dreimal hin- und hergeschaltet und jeden berührten
       Schlüssel verglichen: `gnome` stellt tatsächlich den
       Auslieferungszustand wieder her (`appmenu:close`, heiße Ecke an,

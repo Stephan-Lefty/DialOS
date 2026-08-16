@@ -159,21 +159,29 @@ background) and `splash.png` (boot/login screen).
       its distribution icons are trademarks of their owners. Monochrome
       and ending in `-symbolic.svg` so GNOME recolors it and it stays
       legible in both light and dark appearance; a fixed-color icon would
-      be invisible in one of the two.
-    - **The first attempt at it was built wrong** and appeared in the
-      panel as a **white rectangle**: the file drew the frame as a cut-out
-      area (`fill-rule="evenodd"`) and set the color on a `<g>` group.
-      Rendered as a preview image it looked right - but GNOME's recoloring
-      loses the cut-outs and the area fills in solid. The lesson, now a
-      note in the file itself: **a symbolic icon must consist entirely of
-      solid areas; anything meant as a hole has to come from a gap, not
-      from a cut-out.** The second version is built exactly like an
-      Adwaita symbolic icon (one `<path>`, color on the element itself, no
-      `fill-rule`): the frame from four solid bars, the cross bars from
-      two more. Overlapping solid areas survive recoloring unchanged.
-      Learned along the way: a self-rendered preview proves **nothing**
-      for symbolic icons - librsvg draws the file as written, GNOME draws
-      it recolored.
+      be invisible in one of the two. The shape is four tiles in a square
+      without a frame (Stephan's choice) - the same general form GNOME
+      itself uses as `view-grid-symbolic`.
+    - **Two attempts appeared as a solid white area on the button** -
+      no error message, nothing in the journal. My first diagnosis
+      (cut-out areas via `fill-rule="evenodd"` not surviving recoloring)
+      was **wrong**: the second version had no cut-outs at all and looked
+      exactly the same. The cause was found only through a control test
+      with an icon GNOME certainly renders correctly (`view-grid-symbolic`
+      from Adwaita) - that appeared correctly, which convicted the file
+      rather than ArcMenu. The only structural difference from Adwaita's
+      file: **mine had an explanatory comment before the `<svg>` tag.**
+      GNOME rewrites symbolic icons while recoloring them and trips over
+      anything preceding it. The explanation therefore moved into a
+      `README.md` beside the file, and the file is now line-for-line
+      identical to Adwaita's structure apart from the path data (verified
+      by `diff`, not assumed).
+    - **Two lessons, recorded next to the file** so they aren't repeated
+      with the next symbol: always model on an Adwaita file - and **a
+      self-rendered preview proves nothing for symbolic icons.** librsvg
+      draws the file as written and showed it correctly both times; GNOME
+      draws it recolored. I had taken the preview as evidence - the
+      mistake that made the second round necessary at all.
     - Then switched back and forth three times, comparing every touched
       key: `gnome` really does restore the shipped state
       (`appmenu:close`, hot corner on, dash-to-panel and ArcMenu back to

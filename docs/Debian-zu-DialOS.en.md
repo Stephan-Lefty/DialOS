@@ -779,8 +779,8 @@ Switching back resets every touched key to its **shipped default** via
 switching back and forth repeatedly would not be lossless.
 
 **The icon on the start button** is our own bundled window symbol
-(`/usr/local/share/dialos/dialos-fenster-symbolic.svg`, a frame with a
-cross bar, four panes) - **deliberately not Microsoft's Windows logo.**
+(`/usr/local/share/dialos/dialos-fenster-symbolic.svg`, four tiles in a
+square, no frame) - **deliberately not Microsoft's Windows logo.**
 DialOS is sold; someone else's trademark on the start button of a sold
 device would be a trademark problem. Microsoft's mark is a tilted group
 of four without a frame in a specific blue; this is the general symbol
@@ -788,6 +788,16 @@ for "a window" and is still read immediately as a start button by people
 used to Windows. ArcMenu itself ships no Windows symbol and notes
 explicitly in its source that its distribution icons are trademarks of
 their respective owners.
+
+**Careful when editing:** the file must start with `<svg` **immediately**
+after the XML declaration, with no comment before it - otherwise the
+button shows a solid white area, with no error message whatsoever. GNOME
+rewrites symbolic icons while recoloring them and trips over anything
+preceding the `<svg>` tag. That is why the explanation for the file lives
+in `iso-build/config/includes.chroot/usr/local/share/dialos/README.md`
+and not inside the file. Always model new symbols on an Adwaita file; a
+self-rendered preview proves nothing, because librsvg draws the file
+exactly as written.
 
 The file ends in `-symbolic.svg` and is monochrome so GNOME Shell
 recolors it like a symbolic icon: it takes on the panel's foreground
