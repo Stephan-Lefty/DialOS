@@ -132,10 +132,14 @@ what has already been done.
   speak into it, judge recognition quality) - so far only installation +
   model loading verified technically, no real speech recognition test
   with an actual spoken recording has run yet.
-- [ ] On the next `eggs produce` run, record the new ISO in
-  `docs/iso-builds.en.md` (version, date, commit hash, SHA256, Nextcloud
-  location) and upload the file to Nextcloud - the table is currently
-  empty/can't be backfilled (see commit history from 2026-08-14).
+- [x] First entry in `docs/iso-builds.en.md` recorded: `eggs produce
+  --clone` ran on 2026-08-16 (21/21 steps without errors, 6.50 GiB),
+  `DialOS-Live-0.5.1-clone.iso` as a backup snapshot before the planned
+  end-to-end test (see next item) - version/date/commit/SHA256 filled
+  in.
+- [ ] `DialOS-Live-0.5.1-clone.iso` currently only exists locally
+  (`~/DialOS-Live-0.5.1-clone.iso`) - still needs to be uploaded to
+  Nextcloud (only Stephan can do this, no Claude access to it).
 - [ ] The Bluetooth audio fix in `dialos-start-ansage.py`
   (single-instance lock/`alte_instanz_beenden()`) hasn't been
   conclusively confirmed over a longer period yet - check

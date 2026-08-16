@@ -23,12 +23,20 @@ git log -1 --format=%H
 | Version | Dateiname | Datum | Commit | SHA256 | Ablageort |
 |---|---|---|---|---|---|
 | _(Vorlage)_ | `DialOS-Live-X.Y.Z.iso` | JJJJ-MM-TT | `abcdef1` | `…` | Nextcloud-Pfad |
+| 0.5.1 | `DialOS-Live-0.5.1-clone.iso` | 2026-08-16 | `ac89f26` | `73378ae3da384e28ef1123c0efad9e98122c8c12ae4edbd26dc8496ce587ed32` | Nextcloud (Upload durch Stephan noch ausstehend) |
 
 ## Bisherige Builds
 
-Noch nicht nachgetragen - die beiden bisher gebauten 0.5.0-Test-ISOs
+Die beiden ursprünglich gebauten 0.5.0-Test-ISOs
 (`DialOS-Live-0.5.0.iso`, `DialOS-Live-0.5.0-clone.iso`, siehe
 [README-Änderungsprotokoll](../README.md#änderungsprotokoll)) liegen
 nicht mehr lokal vor, Prüfsumme/Commit-Zuordnung lassen sich im
-Nachhinein nicht mehr zuverlässig ermitteln. Ab dem nächsten Build oben
-in die Tabelle eintragen.
+Nachhinein nicht mehr zuverlässig ermitteln.
+
+`DialOS-Live-0.5.1-clone.iso` (siehe Tabelle oben) ist ein
+Backup-Snapshot des kompletten Systemstands vor dem geplanten
+End-to-end-Test des neuen Installations-Pfads (`dialos-full-office-
+setup.sh` + `dialos-setup-home-partition.sh`, siehe TODO.md) - falls
+der Test schiefgeht, lässt sich das Gerät darüber wieder in den
+bekannten Arbeitszustand zurückversetzen (`--clone` gebaut, enthält
+`dialosadmin`/`nutzer` inkl. Home-Verzeichnissen).

@@ -151,11 +151,14 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   (tatsächlich reinsprechen, Erkennungsqualität beurteilen) - bisher nur
   Installation + Modell-Laden technisch verifiziert, noch kein echter
   Spracherkennungs-Test mit einer gesprochenen Aufnahme gelaufen.
-- [ ] Beim nächsten `eggs produce`-Lauf die neue ISO in
-  `docs/iso-builds.md` eintragen (Version, Datum, Commit-Hash, SHA256,
-  Nextcloud-Ablageort) und die Datei in die Nextcloud hochladen - die
-  Tabelle ist aktuell noch leer/nicht rückwirkend befüllbar (siehe
-  Commit-Historie vom 14.08.).
+- [x] Erster Eintrag in `docs/iso-builds.md` erfolgt: `eggs produce
+  --clone` am 16.08. gelaufen (21/21 Schritte fehlerfrei, 6,50 GiB),
+  `DialOS-Live-0.5.1-clone.iso` als Backup-Snapshot vor dem geplanten
+  End-to-end-Test (siehe nächster Punkt) - Version/Datum/Commit/SHA256
+  eingetragen.
+- [ ] `DialOS-Live-0.5.1-clone.iso` liegt bisher nur lokal
+  (`~/DialOS-Live-0.5.1-clone.iso`) - noch in die Nextcloud hochladen
+  (kann nur Stephan selbst machen, kein Claude-Zugriff darauf).
 - [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
   (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
   längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`
