@@ -55,6 +55,37 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Die Start-Ansage konnte dauerhaft hängen bleiben - und dabei Audio für
+  immer stumm schalten (gefunden 2026-08-16 durch Stephans Frage, warum
+  das Sprechen-Icon dauerhaft leuchtet).** Von den vier
+  `subprocess.run`-Aufrufen in `dialos-say.py` hatten ausgerechnet die
+  beiden `spd-say`-Aufrufe **kein Timeout**; alle anderen nutzen
+  `timeout=5`. Solange die Sprachausgabe defekt war (fehlendes
+  `check_piper_voice.sh`), wartete `spd-say --wait` auf ein Ende-Signal,
+  das nie kam - der Prozess stand beim Nachsehen seit **75 Minuten**.
+  Der eigentliche Schaden liegt dabei nicht beim Icon: Weil das Skript
+  hängt, wird der `finally`-Block **nie** erreicht - und der hebt die fürs
+  Audio-Ducking gesetzte Stummschaltung wieder auf. Hätte `nutzer` beim
+  Anmelden Radio gehört, wäre es dauerhaft stumm geblieben, ohne
+  erkennbaren Grund und ohne dass ein blinder Nutzer sich hätte selbst
+  helfen können. Diesmal traf es nur speech-dispatchers eigene Streams,
+  die vom Ducking ohnehin ausgenommen sind - Glück, kein Verdienst.
+  Behoben: beide Aufrufe laufen über eine Hilfsfunktion mit Zeitgrenze
+  (20 s für die Aufwärm-Ansage, 60 s plus Zuschlag nach Textlänge für den
+  Text, gedeckelt bei 300 s - für die reale Start-Ansage 102 s bei rund
+  40 s Sprechdauer). Der Docstring behauptete bis dahin, die Markierung
+  werde "garantiert wieder entfernt, auch bei Fehlern" - das galt für
+  Ausnahmen, nicht fürs Hängen.
+- **Die Sprechen-Markierung war ein fester Pfad im geteilten `/tmp`.**
+  `/tmp/dialos-sprachausgabe-aktiv` teilten sich alle Konten. Live
+  beobachtet: `nutzer`s Ansage legte die Datei an, woraufhin auch
+  `dialosadmin`s Panel dauerhaft das Sprechen-Icon zeigte, obwohl dort
+  nichts sprach. Verschärfend das Sticky-Bit von `/tmp` - `dialosadmin`
+  konnte die fremde Datei weder überschreiben noch löschen, und
+  `markierung_setzen()` scheiterte still am fehlenden Schreibrecht. Die
+  Markierung liegt jetzt unter `$XDG_RUNTIME_DIR` (`/run/user/<uid>`):
+  pro Konto privat und beim Abmelden automatisch weg. `dialos-say.py` und
+  `dialos-tts-indicator.py` bilden den Pfad mit identischer Logik.
 - **Der erste Neustart legte drei Lücken offen - alle nur auf echter
   Hardware sichtbar (2026-08-16).**
   - **Die Sprachausgabe war vollständig stumm, aus zwei unabhängigen

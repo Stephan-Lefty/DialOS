@@ -56,6 +56,35 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **The startup announcement could hang indefinitely - muting audio
+  forever in the process (found 2026-08-16 via Stephan's question about
+  why the speech icon was permanently lit).** Of the four
+  `subprocess.run` calls in `dialos-say.py`, the two `spd-say` calls of
+  all things had **no timeout**; every other one uses `timeout=5`. While
+  speech output was broken (missing `check_piper_voice.sh`), `spd-say
+  --wait` waited for an end signal that never came - the process had been
+  standing for **75 minutes** when inspected. The real damage is not the
+  icon: because the script hangs, the `finally` block is **never**
+  reached - and that block restores the sources muted for audio ducking.
+  Had `nutzer` been listening to radio at login, it would have stayed
+  permanently silent, for no visible reason and with no way for a blind
+  user to recover. This time it only affected speech-dispatcher's own
+  streams, which ducking excludes anyway - luck, not design. Fixed: both
+  calls now go through a helper with a time limit (20 s for the warm-up,
+  60 s plus a length-based allowance for the text, capped at 300 s -
+  102 s for the real announcement against ~40 s of speech). Until then
+  the docstring claimed the marker was "removed reliably, even on
+  errors" - that held for exceptions, not for hangs.
+- **The speaking marker was a fixed path in shared `/tmp`.** All accounts
+  shared `/tmp/dialos-sprachausgabe-aktiv`. Observed live: `nutzer`'s
+  announcement created the file, whereupon `dialosadmin`'s panel also
+  showed the speech icon permanently although nothing was speaking there.
+  Made worse by `/tmp`'s sticky bit - `dialosadmin` could neither
+  overwrite nor delete the foreign file, and `markierung_setzen()` failed
+  silently for lack of write permission. The marker now lives under
+  `$XDG_RUNTIME_DIR` (`/run/user/<uid>`): private per account and gone
+  automatically at logout. `dialos-say.py` and `dialos-tts-indicator.py`
+  derive the path with identical logic.
 - **The first reboot exposed three gaps - all of them visible only on
   real hardware (2026-08-16).**
   - **Speech output was completely silent, for two independent reasons.**
