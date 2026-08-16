@@ -71,6 +71,13 @@ background) and `splash.png` (boot/login screen).
   AccountsService rejects `SetAutomaticLogin` for a locked account with
   "user is locked" (the same fault that already cost time on
   2026-08-11). `dialosadmin` is never locked.
+  **Proven on real hardware the same day** - after a boot without the
+  stick, five layers hold at once: stick physically absent, LUKS
+  container closed (`nvme0n1p4` is `crypto_LUKS` with no mapper),
+  `/home/nutzer` not a mountpoint, account at `L`, no `nutzer` session.
+  The encrypted swap keeps running throughout - it uses a key
+  re-randomized per boot and does not depend on the stick. Exactly the
+  intended separation.
   **For clarity, since the question is natural:** the recovery passphrase
   is *not* a login password. It is the second LUKS key slot and only
   unlocks the partition manually (`cryptsetup open`) - for the "stick

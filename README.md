@@ -71,6 +71,13 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   AccountsService `SetAutomaticLogin` für ein gesperrtes Konto mit "user
   is locked" ablehnt (derselbe Fehler, der am 2026-08-11 schon einmal
   Zeit gekostet hat). `dialosadmin` wird nie gesperrt.
+  **Noch am selben Tag auf echter Hardware bewiesen** - nach einem Boot
+  ohne Stick greifen fünf Ebenen gleichzeitig: Stick physisch weg,
+  LUKS-Container zu (`nvme0n1p4` ist `crypto_LUKS` ohne Mapper),
+  `/home/nutzer` kein Einhängepunkt, Konto auf `L`, keine `nutzer`-Sitzung.
+  Der verschlüsselte Swap läuft dabei weiter - er nutzt einen pro Start
+  neu gewürfelten Schlüssel und hängt nicht am Stick. Genau die
+  beabsichtigte Trennung.
   **Zur Klarstellung, weil die Frage naheliegt:** Das
   Wiederherstellungs-Passwort ist *kein* Anmelde-Passwort. Es ist der
   zweite LUKS-Schlüsselslot und entsperrt nur die Partition von Hand
