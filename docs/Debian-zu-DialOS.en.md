@@ -139,31 +139,48 @@ The installer must be able to reach it over **plain HTTP**.
 > is therefore unsuitable - verified on 2026-08-16 against dialos.org,
 > which does exactly that.
 
-#### Route 1 (recommended): the office machine itself
+#### Route 1 (recommended): a second computer with the external drive
 
-Since every device is set up in the office anyway, the machine holding
-the repo is right there. A one-liner turns it into a web server for the
-duration of the install - **no internet, no hosting, no HTTPS**:
+**Important to understand:** the target device is being wiped right now -
+so it cannot serve the file itself. The web server runs on a **second
+computer**. That is exactly why this repository lives on an external
+drive: during the installation you simply plug it into any second
+machine. That machine needs nothing but `python3` (present on every Linux
+and macOS) and must be on the same network as the target device.
+
+On that second machine, from the external drive:
 
 ```bash
-cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo/website && python3 -m http.server 8080
+./scripts/dialos-preseed-server.sh
 ```
 
-Find your own IP address with:
+That is all. The script
 
-```bash
-hostname -I | awk '{print $1}'
+- checks that the preseed file exists and the port is free,
+- determines its own IP address (listing alternatives if there are
+  several network interfaces),
+- prints the **ready-made line** to type in step 1b,
+- and starts the web server.
+
+The output looks like this:
+
+```
+  Im Debian-Installer diese Zeile an die Startzeile anhaengen
+  (UEFI: Taste "e", ans Ende der Zeile mit "linux", dann Strg+X):
+
+      preseed/url=http://192.168.178.45:8080/d-i/trixie/preseed.cfg
 ```
 
-In the installer (step 1b) you then enter:
+Stop the server with `Ctrl`+`C` once partitioning is done. If the port is
+taken, the script says so and you pass another one
+(`./scripts/dialos-preseed-server.sh 8081`).
 
-```
-preseed/url=http://<office-machine-IP>:8080/d-i/trixie/preseed.cfg
-```
+This works regardless of where the external drive is mounted - the script
+derives the repo path from its own location.
 
-Advantages: the file comes straight from the repo and cannot go stale,
-nothing depends on a hosting provider, and the target device only needs
-the local network. Stop the web server with `Ctrl`+`C` afterwards.
+Advantages over every other hosting option: plain HTTP with no redirect,
+no hosting provider, no internet needed - and the file comes straight
+from the repo, so it cannot go stale.
 
 #### Route 2 (optional): dialos.org
 
@@ -1058,10 +1075,19 @@ path `/home/eggs` and move the result manually afterward.
 
 ## Practical note: external drive
 
-Since the build and test system are often the same machine, and a
-live-boot install test overwrites the internal disk, it's a good idea
-to keep this repository (and the built ISOs) on an external drive, so
-a reinstall of the test device doesn't take them down with it. After
+Since the build and test system are often the same machine, and an
+installation overwrites the internal disk, it's a good idea to keep this
+repository (and the built ISOs) on an external drive, so a reinstall of
+the test device doesn't take them down with it.
+
+**Second purpose since 2026-08-16:** the drive doubles as the preseed
+source for every installation. The target device is being wiped and
+cannot serve the file itself - so you plug the drive into any second
+computer and run
+[`scripts/dialos-preseed-server.sh`](../scripts/dialos-preseed-server.sh)
+there (see step 1a). That second machine needs nothing but `python3` and
+the same network. The script derives the repo path from its own location,
+so it does not matter where the drive is mounted. After
 every reinstall: reset the git identity
 (`git config user.name`/`user.email`) and, if applicable, a symlink
 like `~/DialOS` pointing at the external repo path.

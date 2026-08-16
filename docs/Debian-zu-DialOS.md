@@ -146,32 +146,49 @@ Der Installer muss sie über **einfaches HTTP** erreichen können.
 > zwingend auf HTTPS umleitet, ist deshalb ungeeignet - geprüft am
 > 2026-08-16 an dialos.org, das genau das tut.
 
-#### Weg 1 (empfohlen): der Rechner im Büro selbst
+#### Weg 1 (empfohlen): ein zweiter Rechner mit der externen Platte
 
-Da ohnehin jedes Gerät im Büro aufgesetzt wird, steht der Rechner mit dem
-Repo direkt daneben. Ein Einzeiler macht ihn für die Dauer der
-Installation zum Webserver - **kein Internet, kein Hosting, kein HTTPS**:
+**Wichtig zum Verständnis:** Das Zielgerät wird gerade plattgemacht - es
+kann die Datei also nicht selbst ausliefern. Der Webserver läuft auf einem
+**zweiten Rechner**. Genau dafür liegt dieses Repository auf einer
+externen Platte: Die steckst du während der Installation einfach an einen
+beliebigen zweiten Rechner an. Der muss nichts können außer `python3`
+(auf jedem Linux und macOS vorhanden) und im selben Netz hängen wie das
+Zielgerät.
+
+Auf diesem zweiten Rechner - von der externen Platte aus:
 
 ```bash
-cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo/website && python3 -m http.server 8080
+./scripts/dialos-preseed-server.sh
 ```
 
-Die eigene IP-Adresse findest du mit:
+Mehr ist nicht zu tun. Das Skript
 
-```bash
-hostname -I | awk '{print $1}'
+- prüft, ob die Preseed-Datei da und der Port frei ist,
+- ermittelt die eigene IP-Adresse (bei mehreren Netzwerkkarten nennt es
+  die Alternativen),
+- gibt die **fertige Zeile** aus, die in Schritt 1b einzutippen ist,
+- und startet den Webserver.
+
+Die Ausgabe sieht so aus:
+
+```
+  Im Debian-Installer diese Zeile an die Startzeile anhaengen
+  (UEFI: Taste "e", ans Ende der Zeile mit "linux", dann Strg+X):
+
+      preseed/url=http://192.168.178.45:8080/d-i/trixie/preseed.cfg
 ```
 
-Im Installer (Schritt 1b) gibst du dann an:
+Nach der Partitionierung den Server mit `Strg`+`C` beenden. Ist der Port
+belegt, sagt das Skript das und man gibt einen anderen an
+(`./scripts/dialos-preseed-server.sh 8081`).
 
-```
-preseed/url=http://<IP-des-Buero-Rechners>:8080/d-i/trixie/preseed.cfg
-```
+Der Weg funktioniert unabhängig davon, wo die externe Platte eingehängt
+ist - das Skript leitet den Repo-Pfad aus seinem eigenen Ort ab.
 
-Vorteile: Die Datei kommt unmittelbar aus dem Repo und kann gar nicht
-veralten, es hängt nichts an einem Hoster, und das Zielgerät braucht nur
-das lokale Netz. Nach der Installation den Webserver mit `Strg`+`C`
-beenden.
+Vorteile gegenüber allen anderen Ablageorten: einfaches HTTP ohne
+Umleitung, kein Hoster, kein Internet nötig - und die Datei kommt
+unmittelbar aus dem Repo, kann also gar nicht veralten.
 
 #### Weg 2 (optional): dialos.org
 
@@ -1091,10 +1108,19 @@ Standardpfad `/home/eggs` nutzen und danach manuell verschieben.
 
 ## Praxishinweis: externe Platte
 
-Da Build- und Test-System oft dasselbe Gerät sind und ein Live-Boot-
-Installationstest die interne Platte überschreibt, empfiehlt es sich,
-dieses Repository (und die gebauten ISOs) auf einer externen Platte zu
-halten, damit ein Reinstall des Testgeräts sie nicht mitreißt. Nach
+Da Build- und Test-System oft dasselbe Gerät sind und eine Installation
+die interne Platte überschreibt, empfiehlt es sich, dieses Repository
+(und die gebauten ISOs) auf einer externen Platte zu halten, damit ein
+Reinstall des Testgeräts sie nicht mitreißt.
+
+**Zweiter Zweck seit 2026-08-16:** Die Platte ist gleichzeitig die
+Preseed-Quelle bei jeder Installation. Das Zielgerät wird ja gerade
+plattgemacht und kann die Datei nicht selbst ausliefern - also steckt man
+die Platte an einen beliebigen zweiten Rechner und startet dort
+[`scripts/dialos-preseed-server.sh`](../scripts/dialos-preseed-server.sh)
+(siehe Schritt 1a). Der zweite Rechner braucht dafür nichts außer
+`python3` und dasselbe Netz. Das Skript leitet den Repo-Pfad aus seinem
+eigenen Ort ab, es ist also egal, wo die Platte eingehängt wird. Nach
 jedem Reinstall: Git-Identität (`git config user.name`/`user.email`)
 und ggf. ein Symlink wie `~/DialOS` auf den externen Repo-Pfad neu
 setzen.

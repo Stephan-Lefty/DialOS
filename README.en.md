@@ -56,7 +56,23 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
-- **The startup announcement could hang indefinitely - muting audio
+- **Preseed provisioning reduced to a single command (2026-08-16).** The
+  Debian installer fetches the file over **plain HTTP** - the Debian docs
+  list only `http://` and `tftp://` for `preseed/url`. Both obvious
+  hosting options failed on that in turn: dialos.org runs WordPress and
+  forcibly redirects to HTTPS (the file is now correctly in place there,
+  but only reachable via that redirect), and Nextcloud enforces HTTPS
+  even more strictly while adding long token URLs that would have to be
+  typed at the boot prompt. New script
+  `scripts/dialos-preseed-server.sh`: checks file and port, determines
+  the IP address, prints the ready-made `preseed/url` line and starts the
+  server. Verified live - 200, zero redirects, byte-identical to the
+  repo. **The decisive point came from Stephan:** the target device is
+  being wiped and cannot serve the file itself - the external drive
+  holding the repo gets plugged into any second computer during the
+  installation. That gives the drive a second purpose beyond "survives
+  the reinstall", now also recorded in the practical note. No nginx
+  changes needed, WordPress stays untouched. - muting audio
   forever in the process (found 2026-08-16 via Stephan's question about
   why the speech icon was permanently lit).** Of the four
   `subprocess.run` calls in `dialos-say.py`, the two `spd-say` calls of

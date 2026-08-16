@@ -55,6 +55,23 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Preseed-Bereitstellung auf einen Befehl reduziert (2026-08-16).**
+  Der Debian-Installer holt die Datei über **einfaches HTTP** - die
+  Debian-Doku nennt für `preseed/url` nur `http://` und `tftp://`. Daran
+  scheiterten der Reihe nach beide naheliegenden Ablageorte: dialos.org
+  läuft auf WordPress und leitet zwingend auf HTTPS um (die Datei liegt
+  dort inzwischen korrekt, aber nur über die Umleitung erreichbar), und
+  Nextcloud erzwingt HTTPS noch strikter und erzeugt zusätzlich lange
+  Token-Adressen, die am Boot-Prompt abzutippen wären. Neues Skript
+  `scripts/dialos-preseed-server.sh`: prüft Datei und Port, ermittelt die
+  IP-Adresse, gibt die fertige `preseed/url`-Zeile aus und startet den
+  Server. Live geprüft - 200, null Umleitungen, byte-identisch mit dem
+  Repo. **Der entscheidende Punkt kam von Stephan:** Das Zielgerät wird
+  gerade plattgemacht und kann die Datei nicht selbst ausliefern - die
+  externe Platte mit dem Repo steckt man während der Installation an
+  einen beliebigen zweiten Rechner. Damit hat die Platte einen zweiten
+  Zweck neben "übersteht den Reinstall", was jetzt auch im Praxishinweis
+  steht. Kein Eingriff in nginx nötig, WordPress bleibt unangetastet.
 - **Die Start-Ansage konnte dauerhaft hängen bleiben - und dabei Audio für
   immer stumm schalten (gefunden 2026-08-16 durch Stephans Frage, warum
   das Sprechen-Icon dauerhaft leuchtet).** Von den vier
