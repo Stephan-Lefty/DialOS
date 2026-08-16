@@ -56,6 +56,24 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Path A decided (Stephan, 2026-08-16): Calamares and `dialos-install`
+  removed entirely.** Every customer device is set up in the office -
+  empty disk, the current Debian 13/GNOME ISO off debian.org, creating
+  `dialosadmin` along the way, then the three DialOS scripts. Nobody but
+  Stephan ever sees an installer, so both tools lose their purpose.
+  Removed: the entire Calamares branding (`branding/dialos`,
+  `locale.conf`, `shellprocess.conf`), the Penguins' Eggs vendor overlay,
+  `base.yaml.tmpl`, `install-system.desktop` and `dialos-install` with its
+  launcher. Doc step 5 is now "Remove Calamares" and cleans up devices
+  that still have it - the step number stays so all cross-references
+  remain valid. **`dialos-rekey` stays**: it replaces a lost or broken
+  security stick and is therefore a maintenance tool, not an installer;
+  its launcher takes the place of the former `dialos-install` one.
+  `dialos-install`'s LUKS/stick logic lives on unchanged in
+  `dialos-setup-home-partition.sh`, which was derived from it. The ISO
+  (`eggs produce`) now serves only as a backup snapshot. This also
+  disposes of the open item about Calamares' wrong GeoIP location
+  suggestion.
 - **`nutzer` would have got a home they don't own - found during the
   first real run of script 3 (2026-08-16).** `adduser` reported "The home
   directory `/home/nutzer' already exists. Not touching this directory"

@@ -49,18 +49,12 @@ else
 fi
 chmod 755 "$DESKTOP_DIR"/*.sh
 
-# Startsymbol fuer dialos-install. Quelle ist bewusst die INSTALLIERTE
-# Datei aus /usr/share/applications (Schritt 12) und nicht das Repo: so
-# funktioniert dieser Schritt auch, wenn das Skript von der Arbeitsflaeche
-# aus gestartet wird, wo es kein Repo-Verzeichnis gibt.
-INSTALL_DESKTOP="/usr/share/applications/dialos-install.desktop"
-if [ -f "$INSTALL_DESKTOP" ]; then
-  cp "$INSTALL_DESKTOP" "$DESKTOP_DIR/"
-  chmod 755 "$DESKTOP_DIR/dialos-install.desktop"
-  echo "[dialos] Startsymbol fuer dialos-install abgelegt."
-else
-  echo "[dialos] WARNUNG: $INSTALL_DESKTOP fehlt - lief Schritt 12 (Sicherheits-Werkzeuge) durch?" >&2
-fi
+# Frueher lag hier ein Startsymbol fuer dialos-install. Das Werkzeug ist
+# am 2026-08-16 entfallen (Weg A: jedes Geraet entsteht im Buero aus der
+# Debian-ISO plus den drei Skripten, es gibt keinen Live-Boot-Installer
+# mehr). Ein evtl. noch vorhandenes Symbol einer aelteren Version wird
+# hier entfernt, damit es nicht ins Leere zeigt.
+rm -f "$DESKTOP_DIR/dialos-install.desktop"
 
 # Claude-Desktop-App: wird bei jedem Buero-Setup frisch geladen, bewusst
 # nicht ins Repo committet. Darf den Lauf nicht abbrechen, falls das Paket
@@ -81,10 +75,21 @@ chown -R "$ADMIN_USER":"$ADMIN_USER" "$DESKTOP_DIR"
 # Ohne "metadata::trusted" zeigt Nautilus beim ersten Doppelklick eine
 # "nicht vertrauenswuerdig"-Warnung, statt das Programm zu starten. Das
 # Merkmal liegt in der Metadaten-Ablage des BENUTZERS - deshalb als
-# ADMIN_USER ausfuehren, nicht als root.
-if [ -f "$DESKTOP_DIR/dialos-install.desktop" ] && command -v runuser >/dev/null 2>&1; then
-  runuser -u "$ADMIN_USER" -- gio set "$DESKTOP_DIR/dialos-install.desktop" metadata::trusted true 2>/dev/null \
-    || echo "[dialos] Hinweis: 'gio set metadata::trusted' ging nicht (keine laufende Sitzung von '$ADMIN_USER'?) - beim ersten Doppelklick ggf. einmal 'Vertrauen und starten' bestaetigen."
+# ADMIN_USER ausfuehren, nicht als root. Betrifft seit dem Wegfall von
+# dialos-install nur noch dialos-rekey (Ersatz fuer einen verlorenen
+# Sicherheits-Stick).
+REKEY_DESKTOP="/usr/share/applications/dialos-rekey.desktop"
+if [ -f "$REKEY_DESKTOP" ]; then
+  cp "$REKEY_DESKTOP" "$DESKTOP_DIR/"
+  chmod 755 "$DESKTOP_DIR/dialos-rekey.desktop"
+  chown "$ADMIN_USER":"$ADMIN_USER" "$DESKTOP_DIR/dialos-rekey.desktop"
+  echo "[dialos] Startsymbol fuer dialos-rekey abgelegt."
+  if command -v runuser >/dev/null 2>&1; then
+    runuser -u "$ADMIN_USER" -- gio set "$DESKTOP_DIR/dialos-rekey.desktop" metadata::trusted true 2>/dev/null \
+      || echo "[dialos] Hinweis: 'gio set metadata::trusted' ging nicht (keine laufende Sitzung von '$ADMIN_USER'?) - beim ersten Doppelklick ggf. einmal 'Vertrauen und starten' bestaetigen."
+  fi
+else
+  echo "[dialos] WARNUNG: $REKEY_DESKTOP fehlt - lief Schritt 12 (Sicherheits-Werkzeuge) durch?" >&2
 fi
 
 echo ""

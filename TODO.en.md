@@ -80,11 +80,16 @@ what has already been done.
   memory pressure, and a killed screen reader means a blind user loses all
   feedback. Suspend-to-RAM is unaffected. **Not yet run for real** -
   happens during the first end-to-end run on the actual device.
-- [ ] **Deferred (Stephan, 2026-08-16):** **`dialos-install` and
-  `dialos-rekey` carry the same faults as the
+- [x] **Done (2026-08-16): `dialos-install` has been dropped entirely**
+  (path A - every device is built in the office from the Debian ISO plus
+  the three scripts, there is no live-boot installer any more), which
+  disposes of its faults too. **`dialos-rekey` stays** and still has
+  them - carry them over next time it is touched: same `$HOME` starting
+  folder in the backup dialog (line 142) and missing fallbacks in
+  `ask_password`. Original entry: **`dialos-install` and
+  `dialos-rekey` carried the same faults as the
   reviewed `dialos-setup-home-partition.sh`** - deliberately not fixed
-  along with it, because the fate of the clone path is still undecided
-  (item further down). Affected: same over-long ext4 label
+  along with it, because the fate of the clone path was still undecided. Affected: same over-long ext4 label
   `dialos-nutzer-home` (`dialos-install` line 248), same plaintext
   passphrase under a fixed `/tmp/.rp` name (line 199), same `$HOME`
   starting folder in the backup dialog (line 231, `dialos-rekey` line
@@ -96,10 +101,9 @@ what has already been done.
   prescribed until then. Consequence, now documented in
   Debian-zu-DialOS.en.md step 1: the build device and every ISO taken
   from it carry the Austrian settings (`eggs produce --clone` clones
-  `/etc/localtime` + locale along); customer installs via Calamares still
-  get Berlin from `locale.conf`, while customer installs via the
-  `dialos-install` clone path get Vienna - set the timezone afterwards
-  there for a rollout outside Austria.
+  `/etc/localtime` + locale along). Simplified further on the same day by
+  the decision for path A: every device is set up in the office via the
+  Debian installer, so the timezone is chosen per device in step 1.
 - [ ] **Deferred (Stephan, 2026-08-16):** **Run `dialos-claude-setup.sh`
   on the freshly installed T490.**
   Checked 2026-08-16: `credential.helper` is unset, `~/.git-credentials`
@@ -151,7 +155,8 @@ what has already been done.
   `dialos-nutzer-home` partition + the `dialos-stick-gate` gate.
   `dialos-install`/`dialos-rekey`/`dialos-stick-gate.sh` rewritten
   accordingly, dead `dialos-keyscript` initramfs files removed.
-- [ ] The Calamares location page often suggests a wrong location based
+- [x] **Resolved by removal (2026-08-16):** the Calamares location page
+  often suggested a wrong location based
   on GeoIP during live boot (e.g. Rome instead of Berlin) - no
   documented vendor override found for `modules/locale.conf` (only
   branding is officially overridable). Remains a tool limitation for

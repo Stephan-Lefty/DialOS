@@ -18,7 +18,7 @@ und die `claude-desktop.deb`).
 Konsolidierungs-Skript (neu 2026-08-14): führt die Schritte 2-12, 14
 (optional) und 15 aus [Debian-zu-DialOS.md](../docs/Debian-zu-DialOS.md)
 automatisiert und der Reihe nach aus (Paketliste, Branding,
-Autologin-Bootstrap, Calamares, RustDesk, Claude-CLI, Piper,
+Autologin-Bootstrap, Calamares-Entfernung, RustDesk, Claude-CLI, Piper,
 GNOME-Erweiterungen, Standardprogramme, Sprachausgabe-Skripte,
 Sicherheits-Werkzeuge, Bluetooth-Kopplungsdaten, Vosk/hassil) - eine
 Funktion pro Doku-Schritt, gleiche Nummerierung, damit Skript und Doku
@@ -103,7 +103,7 @@ seit 2026-08-16 vier Teilschritte:
 2. **Admin-Werkzeuge auf `dialosadmin`s Arbeitsfläche** (neu 2026-08-16):
    die Skripte aus diesem Ordner, die frisch geladene
    Claude-Desktop-`.deb` und ein klickbares Startsymbol für
-   `dialos-install` inklusive `gio set … metadata::trusted true`. Das war
+   `dialos-rekey` inklusive `gio set … metadata::trusted true`. Das war
    vorher reine Handarbeit aus der Doku (Schritt 13) und damit die letzte
    Lücke, die den Geräteaufbau davon abhielt, komplett aus Skripten zu
    bestehen. `gio set` läuft per `runuser` als das Admin-Konto, nicht als

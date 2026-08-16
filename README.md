@@ -55,6 +55,25 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Weg A entschieden (Stephan, 2026-08-16): Calamares und
+  `dialos-install` ersatzlos entfernt.** Jedes Kundengerät wird im Büro
+  aufgesetzt - leere Platte, jeweils aktuelle Debian-13/GNOME-ISO von
+  debian.org, dabei `dialosadmin` anlegen, danach die drei DialOS-Skripte.
+  Damit bekommt nie jemand außer Stephan einen Installer zu sehen, und
+  beide Werkzeuge verlieren ihre Aufgabe. Entfernt: das gesamte
+  Calamares-Branding (`branding/dialos`, `locale.conf`,
+  `shellprocess.conf`), das Penguins-Eggs-Vendor-Overlay,
+  `base.yaml.tmpl`, `install-system.desktop` sowie `dialos-install` samt
+  Startsymbol. Doku-Schritt 5 heißt jetzt "Calamares entfernen" und
+  räumt Geräte auf, die es noch haben - die Schrittnummer bleibt, damit
+  alle Querverweise gültig bleiben. **`dialos-rekey` bleibt**: es ersetzt
+  einen verlorenen oder defekten Sicherheits-Stick und ist damit ein
+  Wartungswerkzeug, kein Installer; sein Startsymbol tritt an die Stelle
+  des bisherigen `dialos-install`-Symbols. `dialos-install`s LUKS-/
+  Stick-Logik lebt unverändert in `dialos-setup-home-partition.sh`
+  weiter, das daraus abgeleitet wurde. Die ISO (`eggs produce`) dient nur
+  noch als Sicherungs-Schnappschuss. Erledigt sich damit auch: der offene
+  Punkt zum falschen GeoIP-Standortvorschlag von Calamares.
 - **`nutzer` hätte ein Home bekommen, das ihm nicht gehört - gefunden
   beim ersten echten Lauf von Skript 3 (2026-08-16).** `adduser` meldete
   "The home directory `/home/nutzer' already exists. Not touching this

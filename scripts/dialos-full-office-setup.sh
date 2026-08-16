@@ -4,8 +4,9 @@
 # der Reihe nach aus, statt sie manuell aus der Doku abzutippen.
 #
 # Deckt BEWUSST NICHT ab (siehe docs/Debian-zu-DialOS.md fuer den Grund):
-#   Schritt 1  (Debian+GNOME-Basisinstallation) - manuell/Calamares,
-#              legt dabei das Konto "dialosadmin" an.
+#   Schritt 1  (Debian+GNOME-Basisinstallation) - manuell mit der
+#              Debian-13-ISO von debian.org, legt dabei das Konto
+#              "dialosadmin" an.
 #   Schritt 13 (nutzer-Konto anlegen) - bleibt eigener, bewusster
 #              letzter Schritt (scripts/dialos-buero-setup-
 #              abschliessen.sh): braucht den eingesteckten Sicherheits-
@@ -177,40 +178,44 @@ schritt_04_autologin() {
     --method org.freedesktop.Accounts.User.SetAutomaticLogin true
 }
 
-schritt_05_calamares() {
-  log "Schritt 5: Calamares-Installer einrichten"
-  sudo apt-get install -y calamares calamares-settings-debian
-
-  sudo cp -r iso-build/config/includes.chroot/etc/calamares/branding/dialos /etc/calamares/branding/
-  sudo cp iso-build/config/includes.chroot/etc/calamares/modules/locale.conf /etc/calamares/modules/
-  sudo cp iso-build/config/includes.chroot/etc/calamares/modules/shellprocess.conf /etc/calamares/modules/
-  sudo sed -i 's/^branding: debian/branding: dialos/' /etc/calamares/settings.conf
-
-  sudo mkdir -p /etc/penguins-eggs.d/brain.d/assets/calamares
-  sudo cp -r iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/calamares/. /etc/penguins-eggs.d/brain.d/assets/calamares/
-
-  sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/base.yaml.tmpl /etc/penguins-eggs.d/brain.d/base.yaml.tmpl
-
-  # Debians eigenen Installer-Eintrag ausblenden. Calamares selbst bleibt
-  # installiert (die Live-ISO braucht es), sichtbar sein soll aber nur der
-  # gebrandete Starter "DialOS installieren".
-  # 1) Dash-Eintrag: Ueberschreibung in /usr/local/share/applications,
-  #    die apt/dpkg nie anfasst (gleiches Muster wie Schritt 10).
-  sudo mkdir -p /usr/local/share/applications
-  sudo cp iso-build/config/includes.chroot/usr/local/share/applications/calamares-install-debian.desktop \
-    /usr/local/share/applications/
-  sudo update-desktop-database /usr/local/share/applications 2>/dev/null || true
-
-  # 2) Arbeitsflaechen-Icon: calamares-settings-debian legt per
-  #    /etc/xdg/autostart/calamares-desktop-icon.desktop bei JEDEM Login
-  #    ein Installer-Icon auf die Arbeitsflaeche - auch bei "nutzer".
-  #    Gefunden 2026-08-16, als es nach dem ersten Neustart in nutzers
-  #    Sitzung auftauchte. "Hidden=true" ist der vorgesehene Weg, einen
-  #    Autostart abzuschalten.
-  if [ -f /etc/xdg/autostart/calamares-desktop-icon.desktop ] \
-     && ! grep -q "^Hidden=true" /etc/xdg/autostart/calamares-desktop-icon.desktop; then
-    echo "Hidden=true" | sudo tee -a /etc/xdg/autostart/calamares-desktop-icon.desktop > /dev/null
+schritt_05_calamares_entfernen() {
+  log "Schritt 5: Calamares entfernen"
+  # ENTSCHEIDUNG VOM 2026-08-16 (Stephan): Jedes Kundengeraet wird im
+  # Buero aufgesetzt - ueber die Debian-13-ISO von debian.org plus die
+  # drei DialOS-Skripte. Damit sieht nie jemand ausser Stephan einen
+  # Installer, und Calamares hat keine Aufgabe mehr.
+  #
+  # Bis dahin war Calamares der Installer fuer den Live-Boot-Weg: die
+  # DialOS-ISO wurde auf dem Kundengeraet gestartet, Calamares
+  # installierte das System und entfernte sich danach per
+  # shellprocess.conf selbst wieder. Der ganze Pflegeaufwand dafuer
+  # (Branding-Ordner, locale.conf, shellprocess.conf, das
+  # Penguins-Eggs-Vendor-Overlay und base.yaml.tmpl) entfaellt.
+  #
+  # Dieser Schritt heisst weiter "05", damit alle Querverweise auf die
+  # spaeteren Schritte in Doku und Commit-Historie gueltig bleiben. Auf
+  # einer frischen Debian-Installation findet er nichts vor und tut
+  # nichts - er raeumt nur Geraete auf, die Calamares noch haben.
+  if dpkg-query -W -f='${Status}' calamares 2>/dev/null | grep -q "ok installed"; then
+    sudo apt-get purge -y calamares calamares-settings-debian
+  else
+    echo "Calamares ist nicht installiert - nichts zu entfernen."
   fi
+
+  # Reste, die beim Purge stehen bleiben koennen bzw. von frueheren
+  # DialOS-Versionen stammen.
+  sudo rm -rf /etc/calamares /etc/penguins-eggs.d/brain.d/assets/calamares
+  sudo rm -f /etc/penguins-eggs.d/brain.d/base.yaml.tmpl
+  sudo rm -f /usr/local/share/applications/calamares-install-debian.desktop
+  # Das Icon, das der frueher mitgelieferte Autostart auf jede
+  # Arbeitsflaeche gelegt hat - auch auf die von "nutzer", dessen Home
+  # 700 ist und dessen Glob sich deshalb nur als root aufloest.
+  sudo sh -c 'rm -f /home/*/Desktop/calamares-install-debian.desktop'
+
+  # Wie in Schritt 2b: nach autoremove die Paketliste erneut durchsetzen,
+  # damit nichts Gewolltes mitgerissen wird.
+  sudo apt-get autoremove --purge -y
+  sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
 }
 
 schritt_06_rustdesk() {
@@ -346,16 +351,26 @@ schritt_11_sprachausgabe() {
 
 schritt_12_sicherheit() {
   log "Schritt 12: Sicherheits-Werkzeuge (nutzers Daten verschluesseln + Autologin-Gate)"
+  # dialos-install ist am 2026-08-16 entfallen (siehe Schritt 5): es war
+  # der Installer fuer den Live-Boot-Weg - Zielplatte loeschen, neu
+  # partitionieren, das laufende System per rsync klonen, GRUB setzen.
+  # Bei Weg A erledigen das der Debian-Installer und diese drei Skripte.
+  # Seine LUKS-/Stick-Logik lebt unveraendert in
+  # dialos-setup-home-partition.sh weiter, das daraus abgeleitet wurde.
+  #
+  # dialos-rekey BLEIBT: es ersetzt einen verlorenen oder defekten
+  # Sicherheits-Stick und ist damit ein Wartungswerkzeug, kein Installer.
   sudo mkdir -p /usr/local/sbin
-  sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
   sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
   sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
   sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh /usr/local/sbin/
-  sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey \
+  sudo chmod 755 /usr/local/sbin/dialos-rekey \
     /usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/dialos-setup-home-partition.sh
+  # Reste einer frueheren DialOS-Version wegraeumen.
+  sudo rm -f /usr/local/sbin/dialos-install /usr/share/applications/dialos-install.desktop
+  sudo sh -c 'rm -f /home/*/Desktop/dialos-install.desktop'
 
   sudo mkdir -p /usr/share/applications
-  sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
   sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
 
   sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
@@ -397,7 +412,7 @@ schritt_15_vosk() {
 # NICHT Teil des normalen Laufs (device-spezifisch, siehe Funktion
 # oben), nur per --bluetooth-kopplung zuschaltbar oder einzeln per
 # "./dialos-full-office-setup.sh 14" aufrufbar.
-ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 04_autologin 05_calamares 06_rustdesk
+ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 04_autologin 05_calamares_entfernen 06_rustdesk
   07_claude_cli 08_piper 09_gnome_erweiterungen 10_standardprogramme
   11_sprachausgabe 12_sicherheit 14_bluetooth 15_vosk)
 

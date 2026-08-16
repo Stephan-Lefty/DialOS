@@ -82,8 +82,14 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bedeutet für einen blinden Nutzer den völligen Verlust der Rückmeldung.
   Suspend-to-RAM bleibt unberührt. **Noch nicht real gelaufen** - passiert
   beim ersten Durchlauf mit auf dem echten Gerät.
-- [ ] **Zurückgestellt (Stephan, 2026-08-16):** **`dialos-install` und
-  `dialos-rekey` haben dieselben Fehler wie
+- [x] **Erledigt (2026-08-16): `dialos-install` ist ersatzlos entfallen**
+  (Weg A - jedes Gerät entsteht im Büro aus der Debian-ISO plus den drei
+  Skripten, es gibt keinen Live-Boot-Installer mehr). Damit erledigen
+  sich auch dessen Fehler. **`dialos-rekey` bleibt** und hat sie noch -
+  dort nachziehen, wenn es das nächste Mal angefasst wird: gleicher
+  `$HOME`-Startordner im Backup-Dialog (Zeile 142) und fehlende Fallbacks
+  in `ask_password`. Ursprünglicher Eintrag: **`dialos-install` und
+  `dialos-rekey` hatten dieselben Fehler wie
   das durchgesehene `dialos-setup-home-partition.sh`** - bewusst nicht
   mitkorrigiert, weil über den Klon-Pfad noch nicht entschieden ist (Punkt
   weiter unten). Betroffen: gleiches zu langes ext4-Label
@@ -98,10 +104,10 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bis dahin vorschrieb. Folge, jetzt in Debian-zu-DialOS.md Schritt 1
   dokumentiert: Baugerät und jede daraus gezogene ISO tragen die
   österreichischen Einstellungen (`eggs produce --clone` klont
-  `/etc/localtime` + Locale mit); Kundeninstallationen über Calamares
-  bekommen weiterhin Berlin aus `locale.conf`, Kundeninstallationen über
-  den `dialos-install`-Klon-Pfad dagegen Wien - dort bei einem Rollout
-  außerhalb Österreichs die Zeitzone nachträglich setzen.
+  `/etc/localtime` + Locale mit). Am selben Tag durch die Entscheidung
+  für Weg A weiter vereinfacht: Jedes Gerät wird im Büro über den
+  Debian-Installer aufgesetzt, die Zeitzone wird also pro Gerät in
+  Schritt 1 gewählt.
 - [ ] **Zurückgestellt (Stephan, 2026-08-16):** **`dialos-claude-setup.sh`
   auf dem frisch installierten T490
   ausführen.** Geprüft am 2026-08-16: `credential.helper` ist nicht
@@ -169,7 +175,8 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   `dialos-stick-gate`-Gate. `dialos-install`/`dialos-rekey`/
   `dialos-stick-gate.sh` entsprechend umgeschrieben, tote
   `dialos-keyscript`-initramfs-Dateien entfernt.
-- [ ] Calamares-Standort-Seite schlägt beim Live-Boot GeoIP-basiert oft
+- [x] **Erledigt durch Wegfall (2026-08-16):** Calamares-Standort-Seite
+  schlug beim Live-Boot GeoIP-basiert oft
   einen falschen Standort vor (z. B. Rome statt Berlin) - kein
   dokumentierter Vendor-Override für `modules/locale.conf` gefunden (nur
   Branding ist offiziell überschreibbar). Bleibt vorerst

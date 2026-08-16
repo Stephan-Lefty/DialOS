@@ -35,7 +35,7 @@ dieses Dokument **zusätzlich zum Änderungsprotokoll** in README.md
 aktualisiert werden - in beiden Sprachen. Ziel: Das System soll sich
 bei der finalen Version lückenlos aus dieser einen Datei heraus
 reproduzieren lassen. Alle technischen Rezepte/Bugfixes (GDM-Autologin,
-Plymouth-Splash, Calamares-Branding, Piper-TTS, Vosk/hassil, Rechte-
+Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
@@ -77,16 +77,17 @@ Sicherheits-Stick: `DIALOS-KEY` (Schlüssel) als ext4 - bewusst NICHT
 Windows-lesbar; `DIALOS-DATA` als exFAT - bewusst Windows/macOS/Linux-
 lesbar als Zusatzspeicher für `nutzer` (empfohlene Standardgröße 64 GB).
 
-**Zweiter Installations-Pfad seit 15./16.08.:** Neben `dialos-install`
-(Live-ISO klont das ganze System per rsync auf die Zielplatte) gibt es
-jetzt einen zweiten, leichteren Pfad für den direkten Aufbau auf echter
-Hardware: Basis-Installation (Schritt 1, Debian-Installer/Calamares,
+**Einziger Installations-Pfad seit 2026-08-16 ("Weg A", Stephans
+Entscheidung):** Jedes Gerät wird im Büro aufgesetzt - leere Platte,
+jeweils aktuelle Debian-13/GNOME-ISO von debian.org, dabei `dialosadmin`
+anlegen. Kein Kunde bekommt je einen Installer zu sehen. Damit sind
+**Calamares und `dialos-install` ersatzlos entfallen** (siehe unten).
+Ablauf: Basis-Installation (Schritt 1, Debian-Installer,
 **muss** dabei bewusst Platz nach der 100-GB-root-Partition frei
 lassen) → [`scripts/dialos-full-office-setup.sh`](scripts/dialos-full-office-setup.sh)
 (automatisiert Schritte 2-12+15 aus Debian-zu-DialOS.md) →
 `dialos-setup-home-partition.sh` (richtet `dialos-nutzer-home` +
-Sicherheits-Stick im freigelassenen Platz ein, gleiche Logik wie
-`dialos-install` ohne dessen Platten-Wipe) →
+Sicherheits-Stick im freigelassenen Platz ein) →
 `scripts/dialos-buero-setup-abschliessen.sh` (`nutzer` anlegen +
 Admin-Werkzeuge auf die Arbeitsfläche). **Seit 2026-08-16 besteht der
 Aufbau nach der Basis-Installation aus genau drei Befehlen** - die letzte
@@ -107,8 +108,16 @@ README-Änderungsprotokoll 0.5.0. **Trotzdem weiterhin noch nie
 end-to-end auf einem frischen System durchgelaufen** - das bleibt der
 nächste geplante Schritt (kompletter T490-Neuaufbau, siehe TODO.md
 "Nächster Schritt").
-Offene Grundsatzfrage: ob `dialos-install`/`dialos-rekey` (Clone-Pfad)
-langfristig neben diesem zweiten Pfad bestehen bleiben oder entfallen.
+**Entfallen am 2026-08-16 (Weg A):** `dialos-install` (Zielplatte
+löschen, System per rsync klonen, GRUB setzen) und der komplette
+Calamares-Unterbau - Branding, `locale.conf`, `shellprocess.conf`, das
+Penguins-Eggs-Overlay und `base.yaml.tmpl`. Beide existierten nur für den
+Live-Boot-Installationsweg, den es nicht mehr gibt. `dialos-install`s
+LUKS-/Stick-Logik lebt unverändert in `dialos-setup-home-partition.sh`
+weiter, das daraus abgeleitet wurde. **`dialos-rekey` bleibt** - es
+ersetzt einen verlorenen oder defekten Sicherheits-Stick und ist damit
+ein Wartungswerkzeug, kein Installer. Die ISO (`eggs produce`) dient nur
+noch als Sicherungs-Schnappschuss.
 
 **Vosk/hassil ist jetzt produktiv im Einsatz** (nicht mehr nur das
 Testskript `dialos-vosk-test.py`): `dialos-start-ansage.py` fragt
@@ -134,9 +143,6 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
   `docs/hardware.md`).
 - Rechtschreibprüfung (hunspell/aspell) fehlt noch, siehe
   `docs/offene-punkte.md`.
-- Ob `dialos-install`/`dialos-rekey` (Ganze-System-Klon-Pfad) langfristig
-  neben dem neuen `dialos-full-office-setup.sh`+`dialos-setup-home-
-  partition.sh`-Pfad bestehen bleiben oder entfallen - siehe TODO.md.
 - Kompletter neuer Installations-Pfad (siehe oben) noch nicht
   end-to-end auf einem frischen System getestet.
 

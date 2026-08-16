@@ -78,9 +78,9 @@ T490 (siehe [hardware.md](hardware.md)).
 
 ## 0. Voraussetzungen
 
-- Debian-13-("Trixie")-Installationsmedium mit GNOME-Desktop
-  (Standard-Debian-Installer reicht, Calamares kommt erst später als
-  eigener Installer für die *nächste* Installation ins Spiel). Debian
+- Debian-13-("Trixie")-Installationsmedium mit GNOME-Desktop von
+  debian.org - der Standard-Debian-Installer ist der einzige Installer,
+  den DialOS noch verwendet (siehe Schritt 5). Debian
   13 bringt GNOME 48 mit (getesteter Stand: GNOME Shell 48.7,
   Paketversion `48.7-0+deb13u2`, per `gnome-shell --version` geprüft) -
   kein separater Schritt nötig, das ist einfach die Version, die mit
@@ -102,23 +102,12 @@ Namen, damit Skripte und Doku nicht pro Gerät angepasst werden müssen.
 Baugerät läuft auf **`Europe/Vienna` + `de_AT.UTF-8`** (Stephans Standort
 in Tirol), nicht auf `Europe/Berlin`. Das ist bewusst so und bleibt so.
 
-Was daraus folgt, damit beim nächsten Nachbau nichts überrascht:
-
-- **Das Baugerät selbst und jede daraus gezogene Live-ISO** tragen
-  `Europe/Vienna` + `de_AT.UTF-8`, weil `eggs produce --clone` (Schritt
-  16) das laufende System inklusive `/etc/localtime` und Locale klont.
-- **Kundeninstallationen über Calamares** bekommen dagegen weiterhin
-  `Europe/Berlin`: das steht fest in `locale.conf` (Schritt 5) und wird
-  vom Installer auf das Zielsystem angewendet.
-- **Kundeninstallationen über `dialos-install`** (der Klon-Pfad) erben
-  dagegen die österreichischen Einstellungen des Baugeräts, weil dieses
-  Werkzeug das laufende System kopiert statt es neu zu konfigurieren.
-
-Beide Kundenwege liefern also unterschiedliche Zeitzonen. Das ist
-hinnehmbar, solange die installierende Person die Standortseite beim
-Durchklicken ohnehin prüft (siehe TODO.md, Calamares-GeoIP-Punkt) - beim
-Klon-Pfad muss die Zeitzone bei einem Rollout außerhalb Österreichs
-nachträglich gesetzt werden (`timedatectl set-timezone …`).
+Seit der Entscheidung für Weg A (siehe Schritt 5) ist das unkompliziert:
+Jedes Gerät wird im Büro über den Debian-Installer aufgesetzt, die
+Zeitzone wird also **pro Gerät in Schritt 1 gewählt**. Für ein Gerät, das
+außerhalb Österreichs eingesetzt wird, dort einfach die passende Zeitzone
+angeben - es gibt keinen zweiten Weg mehr, der eine andere Einstellung
+vererben könnte.
 
 **Partitionierung - wichtig, manuell statt "geführt - gesamte Platte
 verwenden" wählen** (seit 2026-08-14, siehe
@@ -307,69 +296,51 @@ Autologin, damit man am System arbeiten kann. Details und Begründung:
 [sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
 "Automatische Anmeldung".
 
-## 5. Calamares-Installer einrichten
+## 5. Calamares entfernen (entfällt seit 2026-08-16)
 
-Zweck: eigener grafischer Installer für **künftige** Installationen
-(nicht für dieses laufende System) mit DialOS-Branding und
-Selbstentfernung nach der Installation.
+**Dieser Schritt richtet nichts mehr ein - er räumt nur auf.**
 
-```bash
-sudo apt-get install -y calamares calamares-settings-debian
-```
+Bis zum 2026-08-16 stand hier die Einrichtung des Calamares-Installers:
+eigenes DialOS-Branding, feste Zeitzone, Selbstentfernung nach der
+Installation, dazu ein Vendor-Overlay für Penguins' Eggs und ein
+`base.yaml.tmpl`, damit `eggs produce` das Branding nicht wieder
+überschreibt. Calamares war der Installer für den **Live-Boot-Weg**: Die
+DialOS-ISO wurde auf dem Kundengerät gestartet, Calamares installierte
+das System und entfernte sich anschließend selbst wieder.
 
-Deutsch läuft automatisch mit (Calamares bettet seine
-Kern-Übersetzungen als Qt-Ressourcen ein und folgt der System-Locale -
-kein Zusatzaufwand nötig, sofern das System auf Deutsch läuft).
+**Entscheidung von Stephan (2026-08-16): Dieser Weg entfällt.** Jedes
+Kundengerät wird im Büro aufgesetzt - über die Debian-13-ISO von
+debian.org plus die drei DialOS-Skripte (siehe Schnellweg oben). Damit
+bekommt nie jemand außer Stephan einen Installer zu Gesicht, und
+Calamares hat keine Aufgabe mehr.
 
-Branding übernehmen (`calamares-settings-debian` liefert
-`/etc/calamares/branding/debian/` als Vorlage; die fertige
-`dialos`-Variante liegt schon im Repo):
+Was dadurch entfällt:
 
-```bash
-sudo cp -r iso-build/config/includes.chroot/etc/calamares/branding/dialos /etc/calamares/branding/
-sudo cp iso-build/config/includes.chroot/etc/calamares/modules/locale.conf /etc/calamares/modules/
-sudo cp iso-build/config/includes.chroot/etc/calamares/modules/shellprocess.conf /etc/calamares/modules/
-sudo sed -i 's/^branding: debian/branding: dialos/' /etc/calamares/settings.conf
-```
+- `/etc/calamares/branding/dialos/`, `locale.conf`, `shellprocess.conf`
+- das Penguins-Eggs-Vendor-Overlay unter
+  `/etc/penguins-eggs.d/brain.d/assets/calamares/`
+- `base.yaml.tmpl` (existierte nur, um das Live-Installer-Icon
+  umzubenennen)
+- der offene Punkt „Calamares schlägt einen falschen Standort vor" -
+  erledigt sich mit dem Werkzeug selbst
 
-**Wichtige Fallen dabei:**
-- `componentName` in `branding.desc` muss exakt dem Ordnernamen
-  entsprechen (`dialos`) - sonst Fatal-Error beim Start.
-- `locale.conf` fehlt im Debian-Paket komplett; ohne diese Datei
-  schlägt Calamares' eingebauter Standardwert `America/New_York` als
-  Standort vor (kein GeoIP-Fehler, GeoIP ist schlicht nicht
-  konfiguriert). Mit der Datei: `region: Europe` / `zone: Berlin` fest.
-- `shellprocess.conf` macht zwei Dinge **nur im chroot des NEU
-  installierten Zielsystems** (`dontChroot: false`): Linkshänder-Maus
-  für das Admin-Konto setzen, und Calamares von der fertigen Installation
-  wieder entfernen (`apt-get purge calamares calamares-settings-debian`)
-  - dieser Schritt darf niemals auf der Live-Vorlage selbst laufen,
-    sonst hätte die nächste ISO gar keinen Installer mehr.
-- `stylesheet.qss` (Schriftfarbe im Hauptbereich) gab es im
-  `debian`-Branding nicht - ist neu, wird automatisch erkannt, sobald
-  sie im Komponenten-Ordner liegt.
+Auslöser der Entscheidung waren zwei Defekte, die beim ersten echten
+Aufbau am 2026-08-16 auftraten: `calamares-settings-debian` legt per
+`/etc/xdg/autostart/calamares-desktop-icon.desktop` bei **jedem** Login
+ein Installer-Icon auf die Arbeitsfläche - auch bei `nutzer`, der einen
+Installer nie sehen soll - und trug zusätzlich „Install Debian" in die
+Anwendungsübersicht ein.
 
-**Penguins'-Eggs-Vendor-Overlay** (wichtig, sonst überschreibt
-`eggs sysinstall` das Branding beim Live-Boot wieder mit generischem
-"eggs"-Look):
+Das Aufbau-Skript behält die Nummer 5 bei, damit alle Querverweise auf
+spätere Schritte gültig bleiben. Es entfernt Calamares samt Resten,
+sofern vorhanden:
 
 ```bash
-sudo mkdir -p /etc/penguins-eggs.d/brain.d/assets/calamares
-sudo cp -r iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/calamares/. /etc/penguins-eggs.d/brain.d/assets/calamares/
+./scripts/dialos-full-office-setup.sh 05
 ```
 
-Hier heißt `componentName` in der Kopie bewusst `eggs` statt `dialos`
-(der Zielordner, den `eggs sysinstall` erwartet, heißt immer `eggs`).
-
-**Live-Installer-Icon umbenennen** ("DialOS installieren" statt
-"Install System"/Ei-Icon) - `eggs produce` rendert
-`/usr/share/applications/install-system.desktop` bei **jedem Build**
-neu aus einem eigenen Template, ein einfaches Überschreiben der Datei
-reicht also nicht:
-
-```bash
-sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/base.yaml.tmpl /etc/penguins-eggs.d/brain.d/base.yaml.tmpl
-```
+Auf einer frischen Debian-Installation findet der Schritt nichts vor und
+tut nichts - Calamares wird bei Weg A gar nicht erst installiert.
 
 ## 6. RustDesk installieren (und deaktivieren)
 
@@ -593,14 +564,12 @@ Home-Partition wird nicht im initramfs geöffnet, sondern von
 
 ```bash
 sudo mkdir -p /usr/local/sbin
-sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey \
+sudo chmod 755 /usr/local/sbin/dialos-rekey \
   /usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/dialos-setup-home-partition.sh
 sudo mkdir -p /usr/share/applications
-sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
 sudo systemctl daemon-reload
@@ -757,7 +726,8 @@ Das Skript erledigt nacheinander:
      `chmod 644`) - wird bei jedem Büro-Setup frisch geladen und bewusst
      nicht ins Repo committet; fehlt das Paket in den Quellen, wird der
      Teilschritt übersprungen statt den Lauf abzubrechen,
-   - c) ein klickbares Startsymbol für `dialos-install`, inklusive
+   - c) ein klickbares Startsymbol für `dialos-rekey` (Ersatz für einen
+     verlorenen Sicherheits-Stick), inklusive
      `gio set … metadata::trusted true`.
 3. `dialos-setup-nutzer.sh` - legt `nutzer` an (`adduser
    --disabled-password`, Gruppen `sudo,audio,video,plugdev,netdev,
@@ -931,12 +901,16 @@ sudo eggs produce
 sudo eggs produce --clone
 ```
 
-`--clone` ist Pflicht, wenn die gebaute ISO später mit `dialos-install`
-getestet werden soll (das Werkzeug kopiert beim Installieren nur, was
-im Live-System tatsächlich läuft - ohne `--clone` gäbe es dort kein
-`dialosadmin`/`nutzer`, nur einen generischen `live`-Nutzer). Ohne
-`--clone` eignet sich die ISO für den klassischen Weg: Live-Boot →
-Calamares-Installation → Konten manuell per Schritt 13 einrichten.
+**Wofür die ISO seit dem 2026-08-16 noch da ist:** Mit der Entscheidung
+für Weg A (siehe Schritt 5) wird kein Gerät mehr von einer DialOS-ISO
+installiert - jedes entsteht aus der Debian-ISO plus den drei Skripten.
+Die ISO ist damit ein **Sicherungs-Schnappschuss** des fertig
+eingerichteten Baugeräts (siehe [iso-builds.md](iso-builds.md)).
+
+`--clone` übernimmt dabei `dialosadmin` und `nutzer` samt
+Home-Verzeichnissen; ohne `--clone` enthält die ISO nur einen generischen
+`live`-Nutzer. Für einen Schnappschuss ist `--clone` daher die sinnvolle
+Wahl.
 
 Ausgabe liegt standardmäßig unter `/home/eggs/<generierter-name>.iso` -
 zur besseren Nachvollziehbarkeit passend umbenennen und auf die externe

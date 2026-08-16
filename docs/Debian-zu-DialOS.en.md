@@ -73,9 +73,9 @@ T490 (see [hardware.en.md](hardware.en.md)).
 
 ## 0. Prerequisites
 
-- A Debian 13 ("Trixie") installation medium with the GNOME desktop
-  (the standard Debian installer is enough - Calamares only comes into
-  play later, as the installer for the *next* installation). Debian 13
+- A Debian 13 ("Trixie") installation medium with the GNOME desktop from
+  debian.org - the standard Debian installer is the only installer DialOS
+  still uses (see step 5). Debian 13
   ships GNOME 48 (tested version: GNOME Shell 48.7, package version
   `48.7-0+deb13u2`, checked via `gnome-shell --version`) - no separate
   step needed, that's simply the version that comes with Trixie.
@@ -97,24 +97,11 @@ adjustment.
 device runs **`Europe/Vienna` + `de_AT.UTF-8`** (Stephan's location in
 Tyrol), not `Europe/Berlin`. That is deliberate and stays that way.
 
-What follows from it, so nothing is surprising on the next rebuild:
-
-- **The build device itself and every live ISO taken from it** carry
-  `Europe/Vienna` + `de_AT.UTF-8`, because `eggs produce --clone` (step
-  16) clones the running system including `/etc/localtime` and the
-  locale.
-- **Customer installs via Calamares** still get `Europe/Berlin`: that is
-  hard-set in `locale.conf` (step 5) and applied by the installer to the
-  target system.
-- **Customer installs via `dialos-install`** (the clone path) inherit the
-  build device's Austrian settings instead, because that tool copies the
-  running system rather than reconfiguring it.
-
-So the two customer paths yield different timezones. That's acceptable as
-long as the installing person checks the location page while clicking
-through anyway (see TODO.en.md, the Calamares GeoIP item) - on the clone
-path the timezone has to be set afterwards for a rollout outside Austria
-(`timedatectl set-timezone …`).
+Since the decision for path A (see step 5) this is straightforward:
+every device is set up in the office via the Debian installer, so the
+timezone is **chosen per device in step 1**. For a device destined for use
+outside Austria, simply pick the appropriate timezone there - there is no
+second path left that could inherit a different setting.
 
 **Partitioning - important, choose manual instead of "guided - use
 entire disk"** (since 2026-08-14, see
@@ -302,70 +289,49 @@ testing purposes, so you can work on the system. Details and reasoning:
 [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md), section
 "Automatic login".
 
-## 5. Set up the Calamares installer
+## 5. Remove Calamares (dropped as of 2026-08-16)
 
-Purpose: a dedicated graphical installer for **future** installations
-(not for this running system) with DialOS branding and self-removal
-after installation.
+**This step no longer sets anything up - it only cleans up.**
 
-```bash
-sudo apt-get install -y calamares calamares-settings-debian
-```
+Until 2026-08-16 this step configured the Calamares installer: custom
+DialOS branding, a fixed timezone, self-removal after installation, plus
+a vendor overlay for Penguins' Eggs and a `base.yaml.tmpl` so that
+`eggs produce` wouldn't overwrite the branding again. Calamares was the
+installer for the **live-boot path**: the DialOS ISO was booted on the
+customer's device, Calamares installed the system and then removed
+itself.
 
-German comes along automatically (Calamares embeds its core
-translations as Qt resources and follows the system locale - no extra
-work needed as long as the system runs in German).
+**Stephan's decision (2026-08-16): that path is dropped.** Every customer
+device is set up in the office - from the Debian 13 ISO off debian.org
+plus the three DialOS scripts (see the fast path above). That means
+nobody but Stephan ever sees an installer, and Calamares has no job left.
 
-Bring in the branding (`calamares-settings-debian` ships
-`/etc/calamares/branding/debian/` as a template; the finished `dialos`
-variant is already in the repo):
+What this removes:
 
-```bash
-sudo cp -r iso-build/config/includes.chroot/etc/calamares/branding/dialos /etc/calamares/branding/
-sudo cp iso-build/config/includes.chroot/etc/calamares/modules/locale.conf /etc/calamares/modules/
-sudo cp iso-build/config/includes.chroot/etc/calamares/modules/shellprocess.conf /etc/calamares/modules/
-sudo sed -i 's/^branding: debian/branding: dialos/' /etc/calamares/settings.conf
-```
+- `/etc/calamares/branding/dialos/`, `locale.conf`, `shellprocess.conf`
+- the Penguins' Eggs vendor overlay under
+  `/etc/penguins-eggs.d/brain.d/assets/calamares/`
+- `base.yaml.tmpl` (existed only to rename the live installer icon)
+- the open item "Calamares suggests the wrong location" - moot along
+  with the tool itself
 
-**Important gotchas along the way:**
-- `componentName` in `branding.desc` must exactly match the folder name
-  (`dialos`) - otherwise a fatal error at startup.
-- `locale.conf` is missing entirely from the Debian package; without
-  this file, Calamares' built-in default of `America/New_York` gets
-  suggested as the location (not a GeoIP failure - GeoIP simply isn't
-  configured at all). With the file: `region: Europe` / `zone: Berlin`
-  fixed.
-- `shellprocess.conf` does two things **only inside the chroot of the
-  NEWLY installed target system** (`dontChroot: false`): sets
-  left-handed mouse for the admin account, and removes Calamares again
-  from the finished installation (`apt-get purge calamares
-  calamares-settings-debian`) - this step must never run on the live
-  template itself, or the next ISO would ship with no installer at all.
-- `stylesheet.qss` (font color in the main area) didn't exist in the
-  `debian` branding - it's new, and is picked up automatically as soon
-  as it's present in the component folder.
+The decision was triggered by two defects that showed up during the
+first real build on 2026-08-16: `calamares-settings-debian` ships
+`/etc/xdg/autostart/calamares-desktop-icon.desktop`, which drops an
+installer icon onto **every** user's desktop at login - including
+`nutzer`, who must never see an installer - and it also added "Install
+Debian" to the application overview.
 
-**Penguins' Eggs vendor overlay** (important, otherwise
-`eggs sysinstall` overwrites the branding again with a generic "eggs"
-look during live boot):
+The build script keeps the number 5 so that all cross-references to
+later steps stay valid. It removes Calamares and its leftovers if
+present:
 
 ```bash
-sudo mkdir -p /etc/penguins-eggs.d/brain.d/assets/calamares
-sudo cp -r iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/calamares/. /etc/penguins-eggs.d/brain.d/assets/calamares/
+./scripts/dialos-full-office-setup.sh 05
 ```
 
-Here `componentName` in the copy is deliberately `eggs` instead of
-`dialos` (the target folder that `eggs sysinstall` expects is always
-called `eggs`).
-
-**Rename the live installer icon** ("Install DialOS" instead of
-"Install System"/egg icon) - `eggs produce` re-renders
-`/usr/share/applications/install-system.desktop` from its own template
-on **every** build, so simply overwriting the file isn't enough:
-
-```bash
-sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/base.yaml.tmpl /etc/penguins-eggs.d/brain.d/base.yaml.tmpl
-```
+On a fresh Debian install the step finds nothing and does nothing -
+Calamares is never installed in the first place on path A.
 
 ## 6. Install RustDesk (and disable it)
 
@@ -588,14 +554,12 @@ the home partition isn't opened in the initramfs but by
 
 ```bash
 sudo mkdir -p /usr/local/sbin
-sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey \
+sudo chmod 755 /usr/local/sbin/dialos-rekey \
   /usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/dialos-setup-home-partition.sh
 sudo mkdir -p /usr/share/applications
-sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
 sudo systemctl daemon-reload
@@ -747,8 +711,8 @@ The security stick must **still be plugged in** at this point (see step
      `chmod 644`) - freshly downloaded during every office setup and
      deliberately not committed to the repo; if the package isn't in the
      sources, this sub-step is skipped rather than aborting the run,
-   - c) a clickable launcher for `dialos-install`, including
-     `gio set … metadata::trusted true`.
+   - c) a clickable launcher for `dialos-rekey` (replacement for a lost
+     security stick), including `gio set … metadata::trusted true`.
 3. `dialos-setup-nutzer.sh` - creates `nutzer` (`adduser
    --disabled-password`, groups
    `sudo,audio,video,plugdev,netdev,bluetooth,scanner,lpadmin,cdrom`,
@@ -913,12 +877,15 @@ sudo eggs produce
 sudo eggs produce --clone
 ```
 
-`--clone` is required if the built ISO is later going to be tested with
-`dialos-install` (that tool only copies what's actually running in the
-live system when installing - without `--clone` there would be no
-`dialosadmin`/`nutzer` there, only a generic `live` user). Without
-`--clone`, the ISO is suited to the classic path: live boot →
-Calamares installation → set up accounts manually via step 13.
+**What the ISO is still for, as of 2026-08-16:** with the decision for
+path A (see step 5), no device is installed from a DialOS ISO any more -
+every one is built from the Debian ISO plus the three scripts. The ISO is
+therefore a **backup snapshot** of the fully configured build device (see
+[iso-builds.en.md](iso-builds.en.md)).
+
+`--clone` carries over `dialosadmin` and `nutzer` including their home
+directories; without it the ISO contains only a generic `live` user. For
+a snapshot, `--clone` is therefore the sensible choice.
 
 Output lands under `/home/eggs/<generated-name>.iso` by default -
 rename it appropriately for clarity and move it to the external drive,
