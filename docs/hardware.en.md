@@ -17,8 +17,9 @@ a concrete model choice (e.g. ThinkPad X1 class) is still open.
 ## Current test hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – no WWAN/LTE module installed.
-- **USB stick**: for disk encryption (see
-  [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)).
+- **USB stick**: as the security stick (recommended size 64 GB, see
+  [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)) - so
+  far whatever stick was on hand, no concrete reference product.
 - **Android phone**: for testing the phone-tethering path (USB tethering
   + GSConnect).
 
@@ -37,5 +38,10 @@ Sierra Wireless modules).
 ## Open questions
 
 - Reference laptop model not yet finalized.
+- Reference security stick (brand/model, USB-A vs. USB-C) not yet
+  finalized - the recommended size (64 GB) and filesystem split
+  (`DIALOS-KEY`/`DIALOS-DATA`) are already decided (see
+  [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)), but no
+  concrete product has been chosen.
 - No WWAN module available for practical SIM testing — needs to be
   procured.

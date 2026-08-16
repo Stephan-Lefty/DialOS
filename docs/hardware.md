@@ -18,8 +18,9 @@ steht noch aus.
 ## Aktuelle Test-Hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – kein WWAN-/LTE-Modul verbaut.
-- **USB-Stick**: für die Festplattenverschlüsselung (siehe
-  [sicherheit-datenschutz.md](sicherheit-datenschutz.md)).
+- **USB-Stick**: als Sicherheits-Stick (empfohlene Größe 64 GB, siehe
+  [sicherheit-datenschutz.md](sicherheit-datenschutz.md)) - bisher
+  irgendein vorhandener Stick, kein konkretes Referenzprodukt.
 - **Android-Handy**: für Tests der Handy-Anbindung (USB-Tethering +
   GSConnect).
 
@@ -37,4 +38,9 @@ gewählt werden (z. B. Quectel EM7565, Sierra-Wireless-Module).
 ## Offene Punkte
 
 - Referenz-Laptop-Modell noch nicht final festgelegt.
+- Referenz-Sicherheits-Stick (Marke/Modell, USB-A vs. USB-C) noch nicht
+  final festgelegt - empfohlene Größe (64 GB) und Dateisystem-Aufteilung
+  (`DIALOS-KEY`/`DIALOS-DATA`) stehen bereits (siehe
+  [sicherheit-datenschutz.md](sicherheit-datenschutz.md)), aber kein
+  konkretes Produkt ausgewählt.
 - Kein WWAN-Modul für praktische SIM-Tests vorhanden – muss beschafft werden.
