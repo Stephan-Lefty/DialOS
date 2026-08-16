@@ -96,8 +96,34 @@ fehlende_erweiterungen() {
 # "gnome-extensions" aber noch unsichtbar ("Erweiterung existiert nicht") -
 # unter Wayland hilft dagegen nur ab- und wieder anmelden, weil sich die
 # Shell dort nicht neu starten laesst. Live gefunden am 2026-08-16.
+#
+# Die Liste wird EINMAL gelesen und gemerkt. Das ist kein Geschwindigkeits-
+# trick, sondern eine Fehlerkorrektur vom 2026-08-16: "gnome-extensions
+# list" fragt die laufende Shell ueber D-Bus. Waehrend des Umschaltens auf
+# Windows baut die Shell ihre komplette obere Leiste neu auf (dash-to-panel
+# ersetzt sie), und in diesem Moment kann die Abfrage leer oder
+# unvollstaendig zurueckkommen. Wurde sie - wie vorher - fuer jede
+# Erweiterung einzeln MITTEN im Umschalten gestellt, hielt das Skript eine
+# laengst bekannte Erweiterung faelschlich fuer unbekannt und sagte an, man
+# muesse sich ab- und wieder anmelden. Das war schlicht falsch und
+# verunsichert genau die Nutzer, die sich am wenigsten selbst behelfen
+# koennen. Jetzt wird die Liste vor der ersten Aenderung aufgenommen, wenn
+# die Shell noch ruhig ist.
+SHELL_LISTE=""
+shell_liste_lesen() {
+  SHELL_LISTE="$(gnome-extensions list 2>/dev/null)"
+  # Leere Antwort heisst nicht "keine Erweiterungen", sondern meistens
+  # "Shell gerade beschaeftigt" - einmal nachfassen, statt daraus die
+  # falsche Schlussfolgerung zu ziehen.
+  if [ -z "$SHELL_LISTE" ]; then
+    sleep 1
+    SHELL_LISTE="$(gnome-extensions list 2>/dev/null)"
+  fi
+}
+
 kennt_shell() {
-  gnome-extensions list 2>/dev/null | grep -qx "$1"
+  [ -n "$SHELL_LISTE" ] || shell_liste_lesen
+  printf '%s\n' "$SHELL_LISTE" | grep -qx "$1"
 }
 
 # Traegt eine UUID in org.gnome.shell enabled-extensions ein bzw. aus.
@@ -221,6 +247,11 @@ auf_windows() {
 
   echo "Schalte auf Windows-11-Optik um ..."
 
+  # Zustand der Shell aufnehmen, SOLANGE SIE RUHIG IST - siehe die
+  # Begruendung bei shell_liste_lesen(). Danach faengt sie an, die Leiste
+  # umzubauen, und antwortet zeitweise nicht verlaesslich.
+  shell_liste_lesen
+
   # 1. Erweiterungen einschalten. Ohne das hier greift keine der
   #    Einstellungen darunter.
   gsettings set org.gnome.shell disable-user-extensions false 2>/dev/null || true
@@ -293,6 +324,8 @@ auf_windows() {
 
 auf_gnome() {
   echo "Schalte zurueck auf den GNOME-Standard ..."
+
+  shell_liste_lesen
 
   local u
   for u in "${ALLE_UUIDS[@]}"; do

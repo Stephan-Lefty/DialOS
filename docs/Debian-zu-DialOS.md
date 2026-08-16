@@ -934,6 +934,48 @@ nach dem Einschalten anders aussieht als zuletzt, kein Schönheitsfehler,
 sondern Orientierungsverlust. Gibt es noch keine Merkdatei, tut der
 Aufruf bewusst nichts.
 
+### 11e. Mikrofon-Aufnahmepegel (neu 2026-08-16)
+
+**Das ist kein Feinschliff, sondern die Voraussetzung dafür, dass
+Spracherkennung überhaupt funktioniert.** Auf dem T490 standen ab Werk
+zwei Verstärkungsstufen auf Anschlag: `Capture` auf +30 dB *und*
+zusätzlich `Internal Mic Boost` auf +30 dB, zusammen 60 dB. Gemessen:
+
+| Zustand | RMS-Pegel | gesättigte Abtastwerte |
+|---|---|---|
+| ab Werk (`Internal Mic Boost` +30 dB) | 76 % | **50 %** |
+| nach der Korrektur (Boost 0 dB) | 2,8 % | 0 % |
+
+Die Folge war kein Rauschen, sondern **Stille auf der Bedienseite**:
+Vosk erkennt Sprache anhand der Pausen zwischen den Wörtern. In einem
+Dauervollausschlag gibt es keine Pausen, also liefert der Erkenner nie
+ein Ergebnis. Der Sprachbefehl-Dienst lief, hörte zu und konnte
+prinzipiell nichts verstehen - ohne jede Fehlermeldung. Für ein System,
+das ausschließlich per Sprache bedient wird, ist das der Totalausfall.
+
+Behoben durch `/usr/local/sbin/dialos-mikrofon-pegel.sh` samt
+`dialos-mikrofon-pegel.service`, das bei jedem Start läuft. Zwei
+Entscheidungen dabei:
+
+- **Boost auf Null, nicht auf einen Mittelwert.** Ein zu leises Signal
+  lässt sich in Software nachverstärken; ein übersteuertes ist
+  unwiederbringlich zerstört, die Spitzen sind abgeschnitten. Im Zweifel
+  lieber zu leise.
+- **Ein Dienst statt `alsactl store`.** `alsactl store` schreibt den
+  kompletten Mixer-Zustand *dieser* Karte nach
+  `/var/lib/alsa/asound.state` - gerätespezifisch, und damit nichts, was
+  sich in die ISO-Vorlage legen ließe. Das Skript sucht die Regler
+  stattdessen über ihren Namen (`*Mic Boost*`, `Capture`) und läuft auf
+  jedem Gerät, auch wenn die Karte anders heißt oder nummeriert ist.
+  `alsactl store` wird zusätzlich aufgerufen, als zweite Sicherung.
+
+**Dieser Fund stellt eine ältere Schlussfolgerung in Frage:** Der
+Mikrofon-Vergleich vom 2026-08-13 kam zu dem Ergebnis, das eingebaute
+Mikrofon sei dem AIRHUG deutlich unterlegen. Wenn schon damals 60 dB
+anlagen, hat der Test nicht das Mikrofon gemessen, sondern die
+Übersteuerung. Der Vergleich gehört wiederholt, bevor die
+Bluetooth-Priorität als bewiesen gilt (siehe TODO.md).
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

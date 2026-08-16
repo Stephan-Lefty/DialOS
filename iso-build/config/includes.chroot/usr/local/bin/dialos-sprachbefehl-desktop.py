@@ -104,6 +104,13 @@ ZIELE = {"linux": "gnome", "gnome": "gnome", "windows": "windows"}
 SPERRFRIST_S = 5.0          # nach einem Umschalten so lange nicht zuhoeren
 WARTEN_BEIM_SPRECHEN_S = 0.3
 
+# Mit "--debug" gestartet zeigt der Dienst jeden erkannten Satz und den
+# Aussteuerungspegel an. Das ist kein Entwickler-Spielzeug, sondern die
+# Lehre aus dem 2026-08-16: Der Dienst schwieg, und ohne Pegelanzeige war
+# nicht zu unterscheiden, ob er nicht zuhoert, nichts versteht oder das
+# Mikrofon uebersteuert ist (es war Letzteres).
+DEBUG = "--debug" in sys.argv
+
 
 def markierungsdatei():
     """Gleiche Logik wie in dialos-say.py - pro Konto privat."""
@@ -227,9 +234,19 @@ def main():
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK)
                 continue
 
+            if DEBUG:
+                pegel = max(abs(int.from_bytes(block[i:i + 2], "little", signed=True))
+                            for i in range(0, len(block) - 1, 2))
+                gesaettigt = pegel >= 32000
+                print(f"\rPegel {100 * pegel / 32768:5.1f} %"
+                      f"{'  UEBERSTEUERT' if gesaettigt else '            '}",
+                      end="", flush=True)
+
             if not erkenner.AcceptWaveform(block):
                 continue
             text = json.loads(erkenner.Result()).get("text", "")
+            if DEBUG and text:
+                print(f"\n  erkannt: {text!r}")
             if not text:
                 continue
             worte = text.split()

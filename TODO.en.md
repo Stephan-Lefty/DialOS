@@ -67,15 +67,17 @@ what has already been done.
   way (GNOME Shell doesn't know freshly installed extensions; the ArcMenu
   schema is in the wrong directory in Debian) - details in the changelog.
 
-- [ ] **Test the voice command live** (open since 2026-08-16). So far
-  only verified with synthetically spoken sentences (Piper speaks, Vosk
-  listens): all three commands recognized verbatim, and the distractor
-  "ich habe früher windows benutzt" triggered nothing. The test with a
-  real voice over the built-in microphone is still pending - exactly the
-  combination that scored worst in the microphone comparison on
-  2026-08-13. Procedure: start
-  `/usr/local/bin/dialos-sprachbefehl-desktop.py` and say "auf Windows
-  umschalten" or "auf Linux umschalten".
+- [x] **Voice command tested live and working (2026-08-16, confirmed by
+  Stephan).** It surfaced that the built-in microphone was over-amplified
+  by 60 dB - the service could not possibly recognize anything. Fixed and
+  permanently secured (`dialos-mikrofon-pegel.service`).
+
+- [ ] **Repeat the microphone comparison of 2026-08-13.** Back then the
+  built-in microphone was judged clearly inferior to the AIRHUG. On
+  2026-08-16 it turned out that 60 dB of gain were applied out of the box
+  and the signal was permanently clipped - so the test probably did not
+  measure the microphone but the clipping. Until this is repeated, the
+  rationale for the Bluetooth priority rests on shaky ground.
 
 - [ ] **Visual sign-off of the Windows look after logging in** (open
   since 2026-08-16). The settings are demonstrably correct, but nobody

@@ -85,6 +85,52 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Das eingebaute Mikrofon war um 60 dB übersteuert - und genau das
+  machte den Sprachbefehl wirkungslos (gefunden 2026-08-16).** Stephan
+  meldete "Umschalten funktioniert nicht". Der Dienst lief einwandfrei;
+  der Fehler saß im Mixer: `Capture` stand auf +30 dB **und**
+  zusätzlich `Internal Mic Boost` auf +30 dB. Gemessen 76 % RMS, jeder
+  zweite Abtastwert am Anschlag. Die Folge war kein Rauschen, sondern
+  **Stille auf der Bedienseite**: Vosk erkennt Sprache an den Pausen
+  zwischen den Wörtern, und in einem Dauervollausschlag gibt es keine -
+  der Erkenner liefert deshalb nie ein Ergebnis. Nach dem Zurücknehmen
+  des Boosts: 2,8 % RMS, null gesättigte Werte, Erkennung läuft (von
+  Stephan bestätigt). Dauerhaft gelöst über
+  `/usr/local/sbin/dialos-mikrofon-pegel.sh` +
+  `dialos-mikrofon-pegel.service`, das die Regler bei jedem Start über
+  ihren **Namen** sucht statt über eine gerätespezifische
+  Zustandsdatei - so wirkt es auf jedem Gerät, nicht nur auf dem T490.
+  Boost bewusst auf Null: Ein zu leises Signal lässt sich nachverstärken,
+  ein übersteuertes ist zerstört.
+  - **Dieser Fund stellt eine ältere Schlussfolgerung in Frage.** Der
+    Mikrofon-Vergleich vom 2026-08-13 ergab, das eingebaute Mikrofon sei
+    dem AIRHUG deutlich unterlegen (6 von 8 Sätzen über Bluetooth
+    korrekt, eingebaut merklich schwächer). Lagen schon damals 60 dB an,
+    hat der Test nicht das Mikrofon gemessen, sondern die Übersteuerung.
+    Der Vergleich gehört wiederholt, bevor die Bluetooth-Priorität als
+    bewiesen gilt - steht in TODO.md.
+  - **Eigener Fehler, der die Suche verzögert hat:** Im Sprachdienst ging
+    `stderr` von `parec` nach `/dev/null`, und es gab keine
+    Pegelanzeige. Von außen war dadurch nicht zu unterscheiden, ob der
+    Dienst nicht zuhört, nichts versteht oder das Mikrofon übersteuert
+    ist. Der Dienst hat jetzt einen festen `--debug`-Modus, der Pegel und
+    jeden erkannten Satz zeigt - nicht als Wegwerf-Diagnose, sondern
+    eingebaut.
+- **Falsche Ansage "du musst dich ab- und wieder anmelden" beim
+  Umschalten auf Windows (gemeldet und behoben 2026-08-16).** Die
+  Prüfung, ob GNOME Shell eine Erweiterung schon kennt, lief über
+  `gnome-extensions list` - eine D-Bus-Abfrage an die laufende Shell, und
+  sie wurde **für jede Erweiterung einzeln mitten im Umschalten**
+  gestellt. Genau dann baut die Shell aber ihre komplette obere Leiste
+  neu auf (dash-to-panel ersetzt sie), und die Abfrage kommt zeitweise
+  leer zurück. Das Skript hielt eine längst bekannte Erweiterung dann für
+  unbekannt und sagte eine Abmeldung an, die gar nicht nötig war. Dass es
+  nur in Richtung Windows auftrat, passt dazu: Beim Zurückschalten wird
+  nichts geladen, die Shell bleibt ruhig. Jetzt wird die Liste **einmal
+  vor der ersten Änderung** aufgenommen, und eine leere Antwort führt zu
+  einem zweiten Versuch statt zu einer Schlussfolgerung. Für einen
+  blinden Nutzer ist eine falsche Handlungsanweisung schlimmer als gar
+  keine.
 - **Sprachbefehl für die Desktop-Umschaltung - der erste dauerhaft
   lauschende Dienst in DialOS (Stephans Vorgabe, 2026-08-16).** Bis
   dahin wurde Vosk nur punktuell aufgerufen. `auf Linux umschalten` /

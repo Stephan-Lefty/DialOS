@@ -350,6 +350,17 @@ schritt_11_sprachausgabe() {
   sudo cp iso-build/config/includes.chroot/usr/local/share/dialos/dialos-fenster-symbolic.svg /usr/local/share/dialos/
   sudo chmod 644 /usr/local/share/dialos/dialos-fenster-symbolic.svg
 
+  # Mikrofon-Aufnahmepegel. MUSS vor dem Sprachbefehl kommen: Ab Werk
+  # lagen auf dem T490 60 dB Verstaerkung an (Capture +30 dB UND Internal
+  # Mic Boost +30 dB), das Signal klebte am Anschlag, und Vosk konnte
+  # deshalb prinzipiell nichts erkennen - ohne Fehlermeldung. Details im
+  # Skript.
+  sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-mikrofon-pegel.sh /usr/local/sbin/
+  sudo chmod 755 /usr/local/sbin/dialos-mikrofon-pegel.sh
+  sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-mikrofon-pegel.service /etc/systemd/system/
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now dialos-mikrofon-pegel.service
+
   # Sprachbefehl "auf Linux/Windows umschalten" - der erste dauerhaft
   # lauschende Dienst in DialOS. Braucht Vosk aus Schritt 15; fehlt es,
   # beendet sich der Dienst mit einer Meldung, statt die Anmeldung

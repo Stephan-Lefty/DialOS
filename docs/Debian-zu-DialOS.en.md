@@ -912,6 +912,47 @@ For a blind user a desktop that looks different after switching on than
 it did last time is not a cosmetic flaw but a loss of orientation. If
 there is no memo file yet, the call deliberately does nothing.
 
+### 11e. Microphone recording level (new 2026-08-16)
+
+**This is not polish, it is the precondition for speech recognition
+working at all.** On the T490 two gain stages were at maximum out of the
+box: `Capture` at +30 dB *and* `Internal Mic Boost` at another +30 dB,
+60 dB combined. Measured:
+
+| State | RMS level | saturated samples |
+|---|---|---|
+| out of the box (`Internal Mic Boost` +30 dB) | 76 % | **50 %** |
+| after the correction (boost 0 dB) | 2.8 % | 0 % |
+
+The result was not noise but **silence on the control side**: Vosk
+detects speech from the pauses between words. A permanently railed
+signal has no pauses, so the recognizer never returns a result. The
+voice-command service was running, listening, and could not possibly
+understand anything - with no error message at all. On a system operated
+solely by voice, that is total failure.
+
+Fixed by `/usr/local/sbin/dialos-mikrofon-pegel.sh` together with
+`dialos-mikrofon-pegel.service`, which runs at every boot. Two decisions
+along the way:
+
+- **Boost to zero, not to some middle value.** A too-quiet signal can be
+  amplified in software; a clipped one is destroyed irrecoverably, its
+  peaks cut off. When in doubt, too quiet.
+- **A service instead of `alsactl store`.** `alsactl store` writes the
+  complete mixer state of *this* card to `/var/lib/alsa/asound.state` -
+  device-specific, and therefore nothing that could go into the ISO
+  template. The script instead finds the controls by name (`*Mic
+  Boost*`, `Capture`) and works on any device, even if the card is named
+  or numbered differently. `alsactl store` is called additionally, as a
+  second safeguard.
+
+**This finding calls an earlier conclusion into question:** the
+microphone comparison of 2026-08-13 concluded that the built-in
+microphone was clearly inferior to the AIRHUG. If 60 dB were already
+applied back then, the test did not measure the microphone but the
+clipping. The comparison should be repeated before the Bluetooth
+priority counts as proven (see TODO.en.md).
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

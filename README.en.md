@@ -84,6 +84,48 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **The built-in microphone was over-amplified by 60 dB - and that alone
+  made the voice command useless (found 2026-08-16).** Stephan reported
+  "switching doesn't work". The service was running fine; the fault was
+  in the mixer: `Capture` at +30 dB **and** `Internal Mic Boost` at
+  another +30 dB. Measured: 76 % RMS, every second sample railed. The
+  result was not noise but **silence on the control side**: Vosk detects
+  speech from the pauses between words, and a permanently railed signal
+  has none - so the recognizer never returns a result. After taking the
+  boost back: 2.8 % RMS, zero saturated samples, recognition works
+  (confirmed by Stephan). Fixed permanently via
+  `/usr/local/sbin/dialos-mikrofon-pegel.sh` +
+  `dialos-mikrofon-pegel.service`, which finds the controls by **name**
+  at every boot rather than via a device-specific state file - so it
+  works on any device, not just the T490. Boost deliberately to zero: a
+  too-quiet signal can be amplified, a clipped one is destroyed.
+  - **This finding calls an earlier conclusion into question.** The
+    microphone comparison of 2026-08-13 found the built-in microphone
+    clearly inferior to the AIRHUG (6 of 8 sentences correct over
+    Bluetooth, noticeably weaker built-in). If 60 dB were already applied
+    then, the test did not measure the microphone but the clipping. The
+    comparison should be repeated before the Bluetooth priority counts as
+    proven - tracked in TODO.en.md.
+  - **My own mistake, which delayed the search:** in the voice service,
+    `parec`'s `stderr` went to `/dev/null` and there was no level
+    display. From the outside it was therefore impossible to tell whether
+    the service wasn't listening, didn't understand, or the microphone
+    was clipping. The service now has a permanent `--debug` mode showing
+    the level and every recognized sentence - built in, not a throwaway
+    diagnostic.
+- **A false announcement "you have to log out and back in" when
+  switching to Windows (reported and fixed 2026-08-16).** The check
+  whether GNOME Shell already knows an extension used `gnome-extensions
+  list` - a D-Bus query to the running shell - and it was issued **for
+  each extension separately, in the middle of the switch**. But that is
+  exactly when the shell rebuilds its entire top panel (dash-to-panel
+  replaces it), and the query intermittently comes back empty. The script
+  then took a long-known extension for unknown and announced a logout
+  that wasn't needed at all. That it only occurred in the Windows
+  direction fits: switching back loads nothing, so the shell stays calm.
+  The list is now taken **once, before the first change**, and an empty
+  answer leads to a second attempt rather than to a conclusion. For a
+  blind user a wrong instruction is worse than none.
 - **Voice command for the desktop switch - the first continuously
   listening service in DialOS (Stephan's requirement, 2026-08-16).**
   Until then Vosk was only invoked at specific moments. `auf Linux

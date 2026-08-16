@@ -67,14 +67,18 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   ArcMenu-Schema liegt in Debian im falschen Ordner) - Details im
   Änderungsprotokoll.
 
-- [ ] **Sprachbefehl live testen** (offen seit 2026-08-16). Bisher nur
-  mit synthetisch gesprochenen Sätzen geprüft (Piper spricht, Vosk hört):
-  alle drei Befehle wörtlich erkannt, der Störsatz "ich habe früher
-  windows benutzt" löste nichts aus. Mit echter Stimme über das
-  eingebaute Mikrofon steht der Test noch aus - genau die Kombination,
-  die beim Mikrofon-Vergleich am 2026-08-13 am schwächsten abgeschnitten
-  hat. Ablauf: `/usr/local/bin/dialos-sprachbefehl-desktop.py` starten
-  und "auf Windows umschalten" bzw. "auf Linux umschalten" sagen.
+- [x] **Sprachbefehl live getestet und läuft (2026-08-16, von Stephan
+  bestätigt).** Dabei kam heraus, dass das eingebaute Mikrofon um 60 dB
+  übersteuert war - der Dienst konnte prinzipiell nichts erkennen.
+  Behoben und dauerhaft abgesichert (`dialos-mikrofon-pegel.service`).
+
+- [ ] **Mikrofon-Vergleich vom 2026-08-13 wiederholen.** Damals galt das
+  eingebaute Mikrofon als dem AIRHUG deutlich unterlegen. Am 2026-08-16
+  stellte sich heraus, dass ab Werk 60 dB Verstärkung anlagen und das
+  Signal dauerhaft übersteuert war - vermutlich hat der Test also nicht
+  das Mikrofon gemessen, sondern die Übersteuerung. Solange das nicht
+  wiederholt ist, steht die Begründung für die Bluetooth-Priorität auf
+  wackligem Grund.
 
 - [ ] **Optische Abnahme der Windows-Optik nach dem Anmelden** (offen seit
   2026-08-16). Die Einstellungen stimmen nachweislich, gesehen hat sie

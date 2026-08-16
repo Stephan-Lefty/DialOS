@@ -1,0 +1,22 @@
+[Unit]
+# Setzt die Aufnahme-Verstaerkung der eingebauten Mikrofone bei jedem
+# Start auf einen Pegel, bei dem nichts uebersteuert. Begruendung
+# ausfuehrlich im Skript - kurz: Ab Werk lagen auf dem T490 60 dB
+# Verstaerkung an, das Signal klebte am Anschlag, und Vosk konnte
+# deshalb prinzipiell nichts erkennen. Auf einem rein sprachgesteuerten
+# Geraet ist das der Totalausfall.
+Description=DialOS: Mikrofon-Aufnahmepegel setzen
+Documentation=file:///usr/local/sbin/dialos-mikrofon-pegel.sh
+After=sound.target
+Wants=sound.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/dialos-mikrofon-pegel.sh
+RemainAfterExit=yes
+# Ein fehlender Mixer-Regler ist kein Grund, den Start zu bemaengeln -
+# ein Geraet ohne eingebautes Mikrofon ist zulaessig.
+SuccessExitStatus=0
+
+[Install]
+WantedBy=multi-user.target
