@@ -168,6 +168,21 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
       endend, damit GNOME es einfärbt und es im hellen wie im dunklen
       Erscheinungsbild lesbar bleibt; ein fest eingefärbtes Icon wäre in
       einem der beiden Fälle unsichtbar.
+    - **Der erste Anlauf dafür war falsch gebaut** und erschien in der
+      Leiste als **weißes Rechteck**: Die Datei zeichnete den Rahmen als
+      ausgesparte Fläche (`fill-rule="evenodd"`) und setzte die Farbe auf
+      einer `<g>`-Gruppe. Als Vorschaubild gerendert sah das richtig aus -
+      beim Einfärben durch GNOME gehen die Aussparungen aber verloren,
+      die Fläche läuft voll. Lehre, die jetzt als Merksatz in der Datei
+      steht: **Ein Symbol-Icon muss aus lauter Vollflächen bestehen; was
+      als Loch gedacht ist, muss durch einen Zwischenraum entstehen,
+      nicht durch eine Aussparung.** Die zweite Fassung ist exakt wie ein
+      Adwaita-Symbol-Icon aufgebaut (ein `<path>`, Farbe direkt am
+      Element, keine `fill-rule`): Rahmen aus vier vollen Balken,
+      Sprossen aus zwei weiteren. Überlappende Vollflächen überstehen das
+      Einfärben unverändert. Nebenbei gelernt: Ein selbst gerendertes
+      Vorschaubild beweist bei Symbol-Icons **nichts** - librsvg zeichnet
+      die Datei so, wie sie dasteht, GNOME zeichnet sie umgefärbt.
     - Danach dreimal hin- und hergeschaltet und jeden berührten
       Schlüssel verglichen: `gnome` stellt tatsächlich den
       Auslieferungszustand wieder her (`appmenu:close`, heiße Ecke an,

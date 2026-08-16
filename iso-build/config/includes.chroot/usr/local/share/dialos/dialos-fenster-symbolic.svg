@@ -12,24 +12,29 @@
   Fenster" und wird von Windows-Gewohnten trotzdem sofort als
   Startknopf gelesen.
 
-  Einfarbig und auf "-symbolic.svg" endend, damit GNOME Shell es wie ein
-  Symbol-Icon einfaerbt: Es nimmt automatisch die Vordergrundfarbe der
-  Leiste an und bleibt damit im hellen wie im dunklen Erscheinungsbild
-  lesbar. Ein fest eingefaerbtes Icon waere in einem der beiden Faelle
-  unsichtbar - fuer sehbehinderte Nutzer der Unterschied zwischen
-  bedienbar und nicht bedienbar.
+  AUFBAU GENAU WIE EIN ADWAITA-SYMBOL-ICON, und zwar aus einem konkreten
+  Grund (2026-08-16, zweiter Anlauf): Die erste Fassung zeichnete den
+  Rahmen als ausgesparte Flaeche (fill-rule="evenodd") und setzte die
+  Farbe auf einer <g>-Gruppe. Als Vorschaubild gerendert sah das richtig
+  aus - in der Leiste erschien aber nur ein weisses Rechteck: Beim
+  Einfaerben durch GNOME gehen die Aussparungen verloren, die Flaeche
+  laeuft voll. Deshalb jetzt:
+    - EIN <path>, die Farbe direkt am Element (nicht auf einer Gruppe),
+      exakt wie /usr/share/icons/Adwaita/symbolic/actions/*.svg;
+    - KEINE Aussparungen und keine fill-rule - der Rahmen besteht aus
+      vier vollen Balken, die Sprossen aus zwei weiteren. Ueberlappende
+      Vollflaechen bleiben beim Einfaerben unveraendert, ausgesparte
+      nicht.
+  Merksatz fuer kuenftige Icons: Ein Symbol-Icon muss aus lauter
+  Vollflaechen bestehen. Was als Loch gedacht ist, muss durch einen
+  Zwischenraum entstehen, nicht durch eine Aussparung.
 
-  Nur gefuellte Pfade, keine Striche: Strichbreiten werden beim
-  Einfaerben und Skalieren nicht von allen Fassungen gleich behandelt,
-  gefuellte Flaechen schon.
+  Einfarbig und auf "-symbolic.svg" endend, damit GNOME Shell es
+  einfaerbt: Es nimmt die Vordergrundfarbe der Leiste an und bleibt im
+  hellen wie im dunklen Erscheinungsbild lesbar. Ein fest eingefaerbtes
+  Icon waere in einem der beiden Faelle unsichtbar - fuer sehbehinderte
+  Nutzer der Unterschied zwischen bedienbar und nicht bedienbar.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <g fill="#222222">
-    <!-- Rahmen: aussen abgerundet, innen ausgespart (evenodd) -->
-    <path fill-rule="evenodd" d="M3 2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 1.4a.6.6 0 0 0-.6.6v8a.6.6 0 0 0 .6.6h10a.6.6 0 0 0 .6-.6V4a.6.6 0 0 0-.6-.6z"/>
-    <!-- Senkrechte Sprosse -->
-    <path d="M7.3 2.7h1.4v10.6H7.3z"/>
-    <!-- Waagrechte Sprosse -->
-    <path d="M1.4 7.3h13.2v1.4H1.4z"/>
-  </g>
+<svg height="16px" viewBox="0 0 16 16" width="16px" xmlns="http://www.w3.org/2000/svg">
+    <path d="m 1.6 2 h 12.8 v 1.5 h -12.8 z m 0 10.5 h 12.8 v 1.5 h -12.8 z m 0 -10.5 h 1.5 v 12 h -1.5 z m 11.3 0 h 1.5 v 12 h -1.5 z m -5.65 0 h 1.5 v 12 h -1.5 z m -5.65 5.25 h 12.8 v 1.5 h -12.8 z m 0 0" fill="#2e3436"/>
 </svg>
