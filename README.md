@@ -77,7 +77,12 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   `/home/nutzer` kein Einhängepunkt, Konto auf `L`, keine `nutzer`-Sitzung.
   Der verschlüsselte Swap läuft dabei weiter - er nutzt einen pro Start
   neu gewürfelten Schlüssel und hängt nicht am Stick. Genau die
-  beabsichtigte Trennung.
+  beabsichtigte Trennung. **Auch die Rückrichtung bestätigt:** Stick
+  wieder eingesteckt und neu gestartet - Autologin greift, Konto zurück
+  auf `P`, und die Ansage kommt auf den gemerkten 25 % **ohne erneute
+  Lautstärke-Frage**. Damit ist auch die zweite Hälfte der neuen
+  Lautstärke-Logik belegt: nicht nur "wird gefragt und gemerkt", sondern
+  "wird beim nächsten Mal nicht mehr gefragt".
   **Zur Klarstellung, weil die Frage naheliegt:** Das
   Wiederherstellungs-Passwort ist *kein* Anmelde-Passwort. Es ist der
   zweite LUKS-Schlüsselslot und entsperrt nur die Partition von Hand

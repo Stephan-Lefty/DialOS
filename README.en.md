@@ -77,7 +77,12 @@ background) and `splash.png` (boot/login screen).
   `/home/nutzer` not a mountpoint, account at `L`, no `nutzer` session.
   The encrypted swap keeps running throughout - it uses a key
   re-randomized per boot and does not depend on the stick. Exactly the
-  intended separation.
+  intended separation. **The return direction confirmed too:** stick
+  plugged back in and rebooted - autologin works, the account is back at
+  `P`, and the announcement comes at the remembered 25% **without asking
+  about volume again**. That also proves the second half of the new volume
+  logic: not just "asked and remembered", but "not asked again next
+  time".
   **For clarity, since the question is natural:** the recovery passphrase
   is *not* a login password. It is the second LUKS key slot and only
   unlocks the partition manually (`cryptsetup open`) - for the "stick
