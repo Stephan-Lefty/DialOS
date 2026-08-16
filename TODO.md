@@ -259,14 +259,31 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   `DialOS-Live-0.5.1-clone.iso` als Backup-Snapshot vor dem geplanten
   End-to-end-Test (siehe nächster Punkt) - Version/Datum/Commit/SHA256
   eingetragen.
-- [ ] `DialOS-Live-0.5.1-clone.iso` liegt bisher nur lokal
-  (`~/DialOS-Live-0.5.1-clone.iso`) - noch in die Nextcloud hochladen
-  (kann nur Stephan selbst machen, kein Claude-Zugriff darauf).
+- [ ] **Prämisse überholt, neu zu entscheiden (geprüft 2026-08-16):**
+  `DialOS-Live-0.5.1-clone.iso` liegt **nicht** mehr lokal - der Reinstall
+  hat sie mitgenommen. Sie existiert weiterhin auf der externen Platte
+  unter `DialOS-ISOs/`, zusammen mit vier älteren Abbildern; zusammen
+  **28 GB**.
+
+  Die eigentliche Frage ist jetzt eine andere: Alle fünf stammen aus der
+  Penguins-Eggs-Zeit, die am 2026-08-16 entfallen ist, und bilden einen
+  Systemstand ab, den der heutige Neuaufbau deutlich überholt hat. Lohnt
+  sich dafür noch ein Nextcloud-Upload, oder werden sie gelöscht und
+  `docs/iso-builds.md` behält sie nur als Verzeichnis?
+
+  Das kann nur Stephan entscheiden - es ist seine Sicherungsstrategie.
+  Ursprünglicher Eintrag: liegt bisher nur lokal, noch in die Nextcloud
+  hochladen (kein Claude-Zugriff darauf).
 - [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
   (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
   längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`
   bei einem erneuten Auftreten des Problems prüfen.
-- [ ] Veraltete lokale Repo-Zweitkopie unter `~/DialOS-repo` löschen oder
+- [x] **Erledigt durch den Neuaufbau (geprüft 2026-08-16):** `~/DialOS-repo`
+  existiert nicht mehr - der Reinstall des T490 hat die Zweitkopie
+  beseitigt. Damit ist die Gefahr weg, die den Eintrag ausgelöst hatte.
+  Der Symlink `~/DialOS` zeigt jetzt auf das Repo der externen Platte,
+  es gibt also nur noch eine Kopie. Ursprünglich: Veraltete lokale
+  Repo-Zweitkopie unter `~/DialOS-repo` löschen oder
   bewusst als Backup behalten (Entscheidung noch offen) - der Symlink
   `~/DialOS` ist jetzt tatsächlich korrekt gesetzt (siehe "Erledigt"
   unten), aber die Zweitkopie selbst liegt noch da. Zwei unabhängige
