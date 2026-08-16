@@ -53,3 +53,11 @@ gnome-shell-extension-manager
 gnome-shell-extension-appindicator
 gir1.2-ayatanaappindicator3-0.1
 gnome-shell-extension-desktop-icons-ng
+# Optionale Windows-11-Optik (siehe /usr/local/bin/dialos-desktop-stil.sh).
+# Sie werden mitinstalliert, aber NICHT eingeschaltet - erst das
+# Umschalt-Skript aktiviert sie. Grund: Wer die Umschaltung erst bei Bedarf
+# nachinstallieren muesste, braeuchte dafuer Internet und ein Admin-Passwort;
+# beim Kunden ist beides nicht vorausgesetzt.
+gnome-shell-extension-dash-to-panel
+gnome-shell-extension-arc-menu
+gnome-shell-extension-tiling-assistant

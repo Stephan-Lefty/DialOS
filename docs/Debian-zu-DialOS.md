@@ -748,6 +748,73 @@ enabled=true` steht schon als dconf-Standardwert in
   Bluetooth-Mikrofon inkl. `headset-head-unit`-Profilwechsel).
 - `dialos-tts-indicator.py`: Panel-Icon, das anzeigt, wenn gerade
   gesprochen wird (braucht die AppIndicator-Erweiterung aus Schritt 9).
+- `dialos-desktop-stil.sh`: schaltet die Optik des Desktops zwischen
+  GNOME-Standard und Windows-11-Nachbau um (siehe unten).
+
+### 11b. Optionale Windows-11-Optik (neu 2026-08-16)
+
+**Warum das drin ist:** Es gibt Interessenten, die DialOS wegen der
+Sprachsteuerung wollen, aber ihr Leben lang Windows benutzt haben. Für
+die soll der Schreibtisch aussehen wie gewohnt - ohne dass DialOS deshalb
+den barrierefreien GNOME-Unterbau (Orca, AT-SPI) aufgibt. Es wird deshalb
+nichts ersetzt: GNOME bleibt, bekommt drei Erweiterungen obendrauf und
+kann jederzeit in beide Richtungen zurückgeschaltet werden.
+
+Die drei Erweiterungen kommen aus Debians eigenen Paketquellen (kein
+Fremd-Repository, damit sie bei Systemaktualisierungen mitgepflegt
+werden) und stehen seit 2026-08-16 in der Paketliste aus Schritt 2:
+
+| Paket | UUID | Aufgabe |
+|---|---|---|
+| `gnome-shell-extension-dash-to-panel` | `dash-to-panel@jderose9.github.com` | Taskleiste unten |
+| `gnome-shell-extension-arc-menu` | `arcmenu@arcmenu.com` | Startmenü (Layout `Eleven` = Windows-11-Nachbau) |
+| `gnome-shell-extension-tiling-assistant` | `tiling-assistant@leleat-on-github` | Fenster-Andocken wie Windows-Snap |
+
+Sie werden **mitinstalliert, aber nicht eingeschaltet**. Erst das Skript
+aktiviert sie. Grund: Wer die Umschaltung erst bei Bedarf nachinstallieren
+müsste, bräuchte dafür Internet und ein Admin-Passwort - beim Kunden ist
+beides nicht vorausgesetzt.
+
+Aufruf, **bewusst ohne `sudo`** (alle Einstellungen sind benutzereigen -
+unter `sudo` landeten sie in `/root` und bewirkten beim Nutzer nichts):
+
+```bash
+/usr/local/bin/dialos-desktop-stil.sh windows   # Windows-11-Optik
+/usr/local/bin/dialos-desktop-stil.sh gnome     # zurück zum Standard
+/usr/local/bin/dialos-desktop-stil.sh status    # was ist gerade aktiv
+```
+
+Umgestellt wird: Taskleiste unten mit mittigen Symbolen (48 px),
+ArcMenu-Layout `Eleven` links in der Leiste, **Fensterknöpfe rechts in der
+Reihenfolge Minimieren/Maximieren/Schließen** (unter GNOME sitzt dort ab
+Werk nur ein Schließen-Knopf - im Alltag die auffälligste Umstellung),
+heiße Ecke oben links aus (wer Windows gewohnt ist, löst sie ständig
+versehentlich aus) und Datum neben der Uhr. `tiling-assistant` braucht
+keine Einstellung, es verhält sich ab Werk wie Windows-Snap.
+
+Zurückschalten setzt alle berührten Schlüssel per `gsettings reset` auf
+den **Auslieferungszustand** zurück, nicht auf selbst gewählte
+"GNOME-artige" Werte - sonst wäre mehrfaches Hin- und Herschalten nicht
+verlustfrei.
+
+Drei Details, die beim Bauen wichtig waren:
+
+- **Kein `gsettings set` ins Blaue.** Das Skript prüft für jeden Schlüssel
+  erst, ob das Schema ihn kennt. Ein Fehlschlag mitten in der Umschaltung
+  würde sonst einen halb umgestellten Desktop hinterlassen - für einen
+  blinden Nutzer nicht selbst zu reparieren.
+- **Die mittige Taskleiste gilt nur für den Hauptbildschirm.**
+  dash-to-panel legt diese Einstellung pro Monitor ab und benutzt dafür
+  seit Version 56 die Seriennummer, fällt aber ausdrücklich auf den
+  Bildschirm-Index zurück (`panelSettings.js`, `getMonitorSetting`) -
+  deshalb schreibt das Skript auf `"0"`. Ein zweiter Monitor behält die
+  Standardanordnung; das ist bewusst so, statt für eine Kosmetik die
+  Monitor-Erkennung nachzubauen.
+- **Die Rückmeldung wird gesprochen**, nicht nur geschrieben
+  (`dialos-say.py`). Die Zielgruppe sieht den Bildschirm nicht - eine rein
+  geschriebene Meldung wäre für sie dasselbe wie gar keine. Genau deshalb
+  ist dieses Skript auch der vorgesehene **erste echte Sprachbefehl**,
+  sobald die Befehlsgrammatik steht (siehe TODO.md).
 
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 

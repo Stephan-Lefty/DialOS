@@ -39,22 +39,27 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 - [ ] **Fahrplan bis zur echten Sprachsteuerung** (festgelegt mit Stephan
   am 2026-08-16, in dieser Reihenfolge):
   1. Referenz-Mikrofon festlegen - **erledigt**, AIRHUG 01.
-  2. **Windows-11-Umschaltung für den Desktop** (siehe nächster Punkt).
+  2. **Windows-11-Umschaltung für den Desktop** - **gebaut am 2026-08-16**,
+     Live-Test steht noch aus (siehe nächster Punkt).
   3. Aufweckwort + dauerhafte Zuhör-Schleife.
   4. hassil-Befehlsgrammatik, mit der Desktop-Umschaltung als erstem
      echten Sprachbefehl.
 
-- [ ] **Optionale Windows-11-Optik für GNOME** (Stephans Wunsch vom
-  2026-08-16). Hintergrund: Es gibt Interessenten, die DialOS wegen der
-  Sprachsteuerung wollen, aber aus der Windows-Welt kommen - für die soll
-  sich der Desktop auf Wunsch umschalten lassen, ohne die
-  Barrierefreiheit von GNOME aufzugeben. Alle drei nötigen Erweiterungen
-  liegen in Debian, es braucht also kein Fremd-Repository:
-  `gnome-shell-extension-dash-to-panel` (Taskleiste unten),
-  `gnome-shell-extension-arc-menu` (Startmenü),
-  `gnome-shell-extension-tiling-assistant` (Fenster-Andocken wie
-  Windows-Snap). Gedacht als Umschalt-Skript in beide Richtungen, nicht
-  als fester Umbau - und später per Sprachbefehl auslösbar.
+- [x] **Optionale Windows-11-Optik für GNOME gebaut** (Stephans Wunsch
+  vom 2026-08-16, umgesetzt am selben Tag).
+  `/usr/local/bin/dialos-desktop-stil.sh` schaltet in beide Richtungen um
+  (`windows` / `gnome` / `status`), die drei Debian-Erweiterungen
+  (`dash-to-panel`, `arc-menu`, `tiling-assistant`) stehen in der
+  Paketliste und werden mitinstalliert, aber nicht eingeschaltet.
+  Beschrieben in `docs/Debian-zu-DialOS.md`, Schritt 11b.
+
+- [ ] **Windows-Umschaltung live testen** (offen seit 2026-08-16). Bisher
+  nur die Fehlerwege geprüft (fehlende Erweiterungen, falsches Argument,
+  Start als root) - die eigentliche Umschaltung noch nicht, weil die drei
+  Pakete auf dem T490 noch nicht installiert sind. Ablauf: installieren,
+  dann als `dialosadmin` `dialos-desktop-stil.sh windows`, Optik prüfen,
+  `... gnome`, und kontrollieren dass wirklich alles wieder wie vorher
+  aussieht (besonders die Fensterknöpfe). Danach dasselbe als `nutzer`.
 
 - [ ] **Rechtschreibprüfung nachrüsten** (`hunspell-de-de`,
   `hunspell-en-us`, `aspell`). Steht in keiner Paketliste. Die frühere

@@ -338,6 +338,12 @@ schritt_11_sprachausgabe() {
   sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-start-ansage.py /usr/local/bin/
   sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-tts-indicator.py /usr/local/bin/
   sudo chmod 755 /usr/local/bin/dialos-say.py /usr/local/bin/dialos-start-ansage.py /usr/local/bin/dialos-tts-indicator.py
+
+  # Umschaltung der Desktop-Optik (GNOME <-> Windows 11). Liegt hier, weil
+  # sie wie die Ansagen jedem Konto zur Verfuegung stehen muss - auch
+  # "nutzer", der spaeter per Sprachbefehl umschalten koennen soll.
+  sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-desktop-stil.sh /usr/local/bin/
+  sudo chmod 755 /usr/local/bin/dialos-desktop-stil.sh
   sudo mkdir -p /etc/xdg/autostart
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-start-ansage.desktop /etc/xdg/autostart/
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.desktop /etc/xdg/autostart/

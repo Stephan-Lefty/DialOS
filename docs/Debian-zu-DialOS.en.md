@@ -729,6 +729,73 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
   including the `headset-head-unit` profile switch).
 - `dialos-tts-indicator.py`: a panel icon that shows when something is
   currently being spoken (needs the AppIndicator extension from step 9).
+- `dialos-desktop-stil.sh`: switches the desktop's look between the GNOME
+  standard and a Windows 11 imitation (see below).
+
+### 11b. Optional Windows 11 look (new 2026-08-16)
+
+**Why this exists:** there are people who want DialOS for the voice
+control but have used Windows all their lives. For them the desktop
+should look familiar - without DialOS giving up the accessible GNOME
+foundation (Orca, AT-SPI). So nothing is replaced: GNOME stays, gets
+three extensions on top, and can be switched back at any time in either
+direction.
+
+The three extensions come from Debian's own repositories (no third-party
+repository, so they keep being maintained through system updates) and
+have been in the step 2 package list since 2026-08-16:
+
+| Package | UUID | Job |
+|---|---|---|
+| `gnome-shell-extension-dash-to-panel` | `dash-to-panel@jderose9.github.com` | taskbar at the bottom |
+| `gnome-shell-extension-arc-menu` | `arcmenu@arcmenu.com` | start menu (layout `Eleven` = the Windows 11 imitation) |
+| `gnome-shell-extension-tiling-assistant` | `tiling-assistant@leleat-on-github` | window snapping like Windows Snap |
+
+They are **installed but not enabled**. Only the script activates them.
+Reason: anyone who had to install the switch on demand would need
+internet access and an admin password - neither can be assumed at the
+customer's home.
+
+Invocation, **deliberately without `sudo`** (all settings belong to the
+user account - under `sudo` they would land in `/root` and have no effect
+for the user):
+
+```bash
+/usr/local/bin/dialos-desktop-stil.sh windows   # Windows 11 look
+/usr/local/bin/dialos-desktop-stil.sh gnome     # back to the standard
+/usr/local/bin/dialos-desktop-stil.sh status    # what is currently active
+```
+
+What changes: taskbar at the bottom with centered icons (48 px), ArcMenu
+layout `Eleven` on the left of the bar, **window buttons on the right in
+the order minimize/maximize/close** (GNOME ships with only a close button
+there - the most noticeable change day to day), the top-left hot corner
+off (people used to Windows trigger it constantly by accident) and the
+date next to the clock. `tiling-assistant` needs no settings; out of the
+box it behaves like Windows Snap.
+
+Switching back resets every touched key to its **shipped default** via
+`gsettings reset`, not to hand-picked "GNOME-ish" values - otherwise
+switching back and forth repeatedly would not be lossless.
+
+Three details that mattered while building this:
+
+- **No blind `gsettings set`.** For every key the script first checks
+  whether the schema knows it. A failure mid-switch would otherwise leave
+  a half-converted desktop behind - not something a blind user can repair
+  themselves.
+- **The centered taskbar applies to the primary monitor only.**
+  dash-to-panel stores this setting per monitor and has used the monitor
+  serial as the key since version 56, but explicitly falls back to the
+  monitor index (`panelSettings.js`, `getMonitorSetting`) - so the script
+  writes to `"0"`. A second monitor keeps the default arrangement; that is
+  deliberate, rather than reimplementing monitor detection for a cosmetic
+  detail.
+- **The feedback is spoken**, not just printed (`dialos-say.py`). The
+  target group cannot see the screen - a printed-only message would be the
+  same as none for them. That is also exactly why this script is the
+  intended **first real voice command** once the command grammar exists
+  (see TODO.en.md).
 
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 

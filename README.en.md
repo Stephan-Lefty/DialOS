@@ -84,6 +84,49 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Built the Windows 11 look as a switchable option (Stephan's request
+  of 2026-08-16, implemented the same day).** The reason: there are
+  people who want DialOS for the voice control but have used Windows all
+  their lives. For them the desktop should look familiar - without DialOS
+  giving up the accessible GNOME foundation (Orca, AT-SPI). So **nothing
+  is replaced**: GNOME stays and gets three extensions on top, which
+  `/usr/local/bin/dialos-desktop-stil.sh` turns on and off in both
+  directions (`windows` / `gnome` / `status`). All three are in Debian's
+  own repositories - `dash-to-panel` (taskbar at the bottom), `arc-menu`
+  (start menu, layout `Eleven` is the Windows 11 imitation) and
+  `tiling-assistant` (window snapping like Windows Snap) - so no
+  third-party repository is needed that would become a liability at
+  system-update time.
+  - **Installed but not enabled.** Anyone who had to install the switch
+    on demand would need internet access and an admin password - neither
+    can be assumed at the customer's home.
+  - **The single most noticeable change is the window buttons**
+    (`appmenu:minimize,maximize,close`). GNOME ships with only a close
+    button there; day to day that stands out more than the taskbar. Plus:
+    the top-left hot corner off, because people used to Windows trigger
+    it by accident constantly.
+  - **No blind `gsettings set`.** For every key the script first checks
+    whether the schema knows it, and carries on instead of aborting. A
+    failure mid-switch would leave a half-converted desktop behind - not
+    something a blind user can repair themselves. For the same reason the
+    way back resets every touched key to its **shipped default** via
+    `gsettings reset` rather than to hand-picked "GNOME-ish" values:
+    otherwise switching back and forth repeatedly would not be lossless.
+  - **The centered taskbar applies to the primary monitor only.**
+    dash-to-panel stores it per monitor and has used the serial as the
+    key since version 56, but explicitly falls back to the monitor index
+    (`panelSettings.js`, `getMonitorSetting`) - so the script writes to
+    `"0"`. Deliberately did not reimplement monitor detection for a
+    cosmetic detail.
+  - **Feedback is spoken, not just printed.** The target group cannot see
+    the screen; a printed-only message would be the same as none for
+    them. That is also why this script is the intended first real voice
+    command once the hassil grammar exists.
+  - **Status: failure paths tested, the switch itself not yet.** Tested:
+    missing extensions (aborts with the `apt install` line, exit code 1),
+    a wrong argument, and the guard against `sudo`. The actual switching
+    test is pending because the three packages aren't installed on the
+    T490 yet - tracked in TODO.en.md.
 - **Audited every Markdown file in the repo against reality
   (2026-08-16).** Prompted by Stephan asking whether the "concept"
   status shouldn't be revised too - he had a point: several `docs/`

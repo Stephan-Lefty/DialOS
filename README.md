@@ -85,6 +85,53 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Windows-11-Optik als umschaltbare Option gebaut (Stephans Wunsch vom
+  2026-08-16, umgesetzt am selben Tag).** Anlass: Es gibt Interessenten,
+  die DialOS wegen der Sprachsteuerung wollen, aber ihr Leben lang
+  Windows benutzt haben. Für die soll der Schreibtisch aussehen wie
+  gewohnt - ohne dass DialOS deshalb den barrierefreien GNOME-Unterbau
+  (Orca, AT-SPI) aufgibt. Deshalb wird **nichts ersetzt**: GNOME bleibt
+  und bekommt drei Erweiterungen obendrauf, die
+  `/usr/local/bin/dialos-desktop-stil.sh` in beide Richtungen
+  ein- und ausschaltet (`windows` / `gnome` / `status`). Alle drei liegen
+  in Debians eigenen Paketquellen - `dash-to-panel` (Taskleiste unten),
+  `arc-menu` (Startmenü, Layout `Eleven` ist der Windows-11-Nachbau) und
+  `tiling-assistant` (Fenster-Andocken wie Windows-Snap) -, es braucht
+  also kein Fremd-Repository, das bei Systemaktualisierungen zur
+  Altlast würde.
+  - **Mitinstalliert, aber nicht eingeschaltet.** Wer die Umschaltung
+    erst bei Bedarf nachinstallieren müsste, bräuchte dafür Internet und
+    ein Admin-Passwort - beim Kunden ist beides nicht vorausgesetzt.
+  - **Die auffälligste Einzeländerung sind die Fensterknöpfe**
+    (`appmenu:minimize,maximize,close`). GNOME zeigt dort ab Werk nur
+    einen Schließen-Knopf; das fällt im Alltag mehr auf als die
+    Taskleiste. Dazu: heiße Ecke oben links aus, weil sie von
+    Windows-Gewohnten ständig versehentlich ausgelöst wird.
+  - **Kein `gsettings set` ins Blaue.** Das Skript prüft für jeden
+    Schlüssel erst, ob das Schema ihn kennt, und macht sonst weiter
+    statt abzubrechen. Ein Fehlschlag mitten in der Umschaltung würde
+    einen halb umgestellten Desktop hinterlassen - für einen blinden
+    Nutzer nicht selbst zu reparieren. Aus demselben Grund setzt der
+    Rückweg alle berührten Schlüssel per `gsettings reset` auf den
+    **Auslieferungszustand**, nicht auf selbst gewählte "GNOME-artige"
+    Werte: Sonst wäre mehrfaches Hin- und Herschalten nicht verlustfrei.
+  - **Die mittige Taskleiste gilt nur für den Hauptbildschirm.**
+    dash-to-panel legt sie pro Monitor ab und benutzt seit Version 56 die
+    Seriennummer als Schlüssel, fällt aber ausdrücklich auf den
+    Bildschirm-Index zurück (`panelSettings.js`, `getMonitorSetting`) -
+    deshalb schreibt das Skript auf `"0"`. Bewusst nicht die
+    Monitor-Erkennung nachgebaut, nur für eine Kosmetik.
+  - **Rückmeldung wird gesprochen, nicht nur geschrieben.** Die
+    Zielgruppe sieht den Bildschirm nicht; eine rein geschriebene Meldung
+    wäre für sie dasselbe wie gar keine. Genau deshalb ist dieses Skript
+    auch der vorgesehene erste echte Sprachbefehl, sobald die
+    hassil-Grammatik steht.
+  - **Stand: Fehlerwege geprüft, die Umschaltung selbst noch nicht.**
+    Getestet sind fehlende Erweiterungen (bricht mit der
+    `apt install`-Zeile ab, Exit-Code 1), falsches Argument und der
+    Riegel gegen `sudo`. Der eigentliche Umschalt-Test steht aus, weil
+    die drei Pakete auf dem T490 noch nicht installiert sind - steht in
+    TODO.md.
 - **Alle Markdown-Dateien des Repos gegen den Ist-Zustand geprüft
   (2026-08-16).** Auslöser war Stephans Frage, ob der "Konzept"-Stand
   nicht auch überarbeitet gehört - er traf einen wunden Punkt: Mehrere

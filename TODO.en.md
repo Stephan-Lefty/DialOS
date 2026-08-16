@@ -40,21 +40,27 @@ what has already been done.
 - [ ] **Roadmap to real voice control** (agreed with Stephan on
   2026-08-16, in this order):
   1. Decide on a reference microphone - **done**, AIRHUG 01.
-  2. **Windows 11 desktop switch** (see next item).
+  2. **Windows 11 desktop switch** - **built on 2026-08-16**, live test
+     still pending (see next item).
   3. Wake word + continuous listening loop.
   4. hassil command grammar, with the desktop switch as the first real
      voice command.
 
-- [ ] **Optional Windows 11 look for GNOME** (Stephan's request,
-  2026-08-16). Background: there are people who want DialOS for the voice
-  control but come from the Windows world - for them the desktop should
-  be switchable on request, without giving up GNOME's accessibility. All
-  three required extensions are in Debian, so no third-party repository
-  is needed: `gnome-shell-extension-dash-to-panel` (taskbar at the
-  bottom), `gnome-shell-extension-arc-menu` (start menu),
-  `gnome-shell-extension-tiling-assistant` (window snapping like
-  Windows). Intended as a switch script in both directions, not a
-  permanent conversion - and later triggerable by voice.
+- [x] **Optional Windows 11 look for GNOME built** (Stephan's request of
+  2026-08-16, implemented the same day).
+  `/usr/local/bin/dialos-desktop-stil.sh` switches in both directions
+  (`windows` / `gnome` / `status`); the three Debian extensions
+  (`dash-to-panel`, `arc-menu`, `tiling-assistant`) are in the package
+  list and get installed but not enabled. Documented in
+  `docs/Debian-zu-DialOS.en.md`, step 11b.
+
+- [ ] **Test the Windows switch live** (open since 2026-08-16). So far
+  only the failure paths were checked (missing extensions, wrong
+  argument, starting as root) - not the actual switch, because the three
+  packages aren't installed on the T490 yet. Procedure: install them,
+  then as `dialosadmin` run `dialos-desktop-stil.sh windows`, check the
+  look, run `... gnome`, and verify everything really looks like before
+  (especially the window buttons). Then the same as `nutzer`.
 
 - [ ] **Add spell-checking** (`hunspell-de-de`, `hunspell-en-us`,
   `aspell`). It is in no package list. The earlier rationale in
