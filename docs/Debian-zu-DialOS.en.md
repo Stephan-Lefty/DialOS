@@ -194,6 +194,20 @@ curl -s -o /dev/null -w "%{http_code} %{url_effective}\n" -L http://dialos.org/d
 
 Expected: `200` **without** a switch to `https://` in the output.
 
+> **State of dialos.org on 2026-08-16:** the file is in place and
+> reachable (200, byte-identical to the repo), **but only via the
+> redirect**: `http://` answers with `301` to `https://`. Whether the
+> Debian installer follows that and supports TLS is open - it will only
+> show at the next build. If the installer stalls while loading the
+> preconfiguration file, that is the reason; fall back to route 1 (office
+> machine) or partition by hand (1d). A permanent fix would require the
+> host to exempt `/d-i/` from the forced HTTPS - the redirect comes from
+> nginx itself, not from WordPress.
+>
+> Getting there was instructive: the FTP account does **not** land in the
+> web root but one level above it. The right directory is recognisable by
+> containing `license.txt`, `wp-login.php` and `wp-admin/`.
+
 ### 1b. Start the installer with it (for every device)
 
 **An internet connection is required - cable OR WiFi.** The installer

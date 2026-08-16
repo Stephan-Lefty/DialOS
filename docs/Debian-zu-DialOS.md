@@ -202,6 +202,22 @@ curl -s -o /dev/null -w "%{http_code} %{url_effective}\n" -L http://dialos.org/d
 
 Erwartet wird `200` **ohne** Wechsel auf `https://` in der Ausgabe.
 
+> **Stand auf dialos.org am 2026-08-16:** Die Datei liegt korrekt und ist
+> erreichbar (200, byte-identisch mit dem Repo), **aber nur über die
+> Umleitung**: `http://` antwortet mit `301` auf `https://`. Ob der
+> Debian-Installer dem folgt und TLS beherrscht, ist offen - es zeigt
+> sich erst beim nächsten Aufbau. Bleibt der Installer beim Laden der
+> Vorkonfiguration hängen, ist das der Grund; dann auf Weg 1 (Rechner im
+> Büro) ausweichen oder von Hand partitionieren (1d). Dauerhaft lösen
+> ließe sich das nur, indem der Hoster `/d-i/` von der
+> HTTPS-Erzwingung ausnimmt - die Umleitung kommt von nginx selbst, nicht
+> von WordPress.
+>
+> Der Weg dorthin war lehrreich: Der FTP-Zugang landet **nicht** im
+> Web-Wurzelverzeichnis, sondern eine Ebene darüber. Das richtige
+> Verzeichnis erkennt man daran, dass `license.txt`, `wp-login.php` und
+> `wp-admin/` darin liegen.
+
 ### 1b. Den Installer damit starten (bei jedem Gerät)
 
 **Es braucht eine Internetverbindung - Kabel ODER WLAN.** Der Installer
