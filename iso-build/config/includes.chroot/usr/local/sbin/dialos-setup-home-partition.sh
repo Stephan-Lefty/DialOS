@@ -42,6 +42,11 @@ HOME_LUKS_LABEL="dialos-nutzer-home"
 # sichtbar. Deshalb bewusst kurz und ohne Kuerzungswarnung.
 HOME_FS_LABEL="dialos-nutzer"
 MIN_FREE_MIB=20000   # ~20 GiB Mindestgroesse fuer die Home-Partition
+# 8 GiB Swap: bewusst NICHT "so gross wie das RAM" - diese Faustregel gilt
+# nur fuer den Ruhezustand, der hier ausgeschlossen ist (Begruendung bei
+# swap_verschluesseln unten). Ohne Hibernate reicht ein Notpolster.
+SWAP_SIZE_MIB=8192
+SWAP_MAPPER="cryptswap"
 
 # Das Skript laeuft ab hier immer als root (per pkexec oben oder per sudo).
 # "$HOME" waere dann /root - fuer den Speichern-Dialog des Schluessel-Backups
@@ -81,18 +86,184 @@ ask_password() {
 
 echo "== DialOS: Home-Partition + Sicherheits-Stick einrichten =="
 
-# --- 1. Finde die System-Platte (die, auf der / liegt) und den freien
-#          Platz danach ---
+# --- Kleine Helfer rund um die Partitionstabelle ---
+# parted liefert seine Ausgabe unabhaengig von der Systemsprache auf
+# Englisch (Debians parted-Paket bringt keine Uebersetzungen mit, geprueft
+# 2026-08-16) - "Free Space" ist als Suchbegriff also sicher.
+letzte_freie_region() {
+  parted -s "$1" unit MiB print free 2>/dev/null \
+    | grep "Free Space" | tail -1 | awk '{gsub(/MiB/,""); print $1, $2}'
+}
+partitionsnummern() { parted -s "$1" print 2>/dev/null | awk '/^ [0-9]/{print $1}'; }
+# Geraetenamen, die auf eine Ziffer enden (nvme0n1, mmcblk0), haengen ihre
+# Partitionsnummer mit "p" an - klassische (sda) direkt.
+partitionsgeraet() {
+  case "$1" in
+    *[0-9]) echo "${1}p${2}" ;;
+    *)      echo "${1}${2}" ;;
+  esac
+}
+
+# --- 1. Finde die System-Platte (die, auf der / liegt) ---
 ROOT_SRC=$(findmnt -no SOURCE / || true)
 [ -n "$ROOT_SRC" ] || die "Konnte die Root-Partition nicht ermitteln."
 ROOT_DISK_NAME=$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null || true)
 [ -n "$ROOT_DISK_NAME" ] || die "Konnte die System-Platte nicht ermitteln."
 SYS_DISK="/dev/$ROOT_DISK_NAME"
 
-FREE_START_MIB=$(parted -s "$SYS_DISK" unit MiB print free 2>/dev/null \
-  | grep "Free Space" | tail -1 | awk '{print $1}' | sed 's/MiB$//')
-FREE_END_MIB=$(parted -s "$SYS_DISK" unit MiB print free 2>/dev/null \
-  | grep "Free Space" | tail -1 | awk '{print $2}' | sed 's/MiB$//')
+# --- 1b. Unverschluesselten Swap durch verschluesselten ersetzen ---
+# Warum ueberhaupt: /home/nutzer liegt zwar in LUKS2, aber Speicherseiten
+# dieses Kontos - offene Dokumente, Mails, Browserinhalte - koennen vom
+# Kernel in einen Klartext-Swap ausgelagert werden. Die waeren dann ohne
+# Sicherheits-Stick lesbar und ebenso nach Ausbau der SSD, also genau an
+# dem Schutz vorbei, den die Home-Partition herstellen soll (siehe
+# docs/sicherheit-datenschutz.md).
+#
+# Warum ein bei jedem Start neu gewuerfelter Schluessel (/dev/urandom) und
+# nicht ein dauerhafter: ein dauerhafter Schluessel muesste irgendwo
+# liegen, wo er beim Booten lesbar ist - das waere wieder der verworfene
+# cryptsetup-initramfs-Ansatz. Ein Zufallsschluessel pro Start braucht
+# nichts davon. Er schliesst den Ruhezustand (Hibernate) endgueltig aus:
+# das Abbild liesse sich nach einem Neustart nicht mehr entschluesseln.
+# Das ist kein Verlust - Hibernate war beim Stick-Gate-Design ohnehin
+# unmoeglich, und ein Swap kleiner als der Arbeitsspeicher taugt dafuer
+# ohnehin nicht.
+#
+# Warum 8 GiB statt "so gross wie das RAM": die alte Faustregel
+# "Swap >= RAM" existiert nur wegen Hibernate. Ohne Hibernate ist der Swap
+# reines Notpolster gegen den OOM-Killer - wichtig auf einem Geraet fuer
+# blinde Nutzer, weil ein abgeschossener Screenreader/TTS-Prozess bedeutet,
+# dass der Nutzer keinerlei Rueckmeldung mehr bekommt.
+swap_verschluesseln() {
+  local plain_swaps swap_part partuuid nummern_vorher nummern_nachher neue_nr
+  local frei start_mib end_mib frage antwort name nr
+
+  plain_swaps=$(lsblk -nlo NAME,FSTYPE "$SYS_DISK" 2>/dev/null | awk '$2=="swap"{print $1}')
+
+  if [ -z "$plain_swaps" ] && grep -q "^${SWAP_MAPPER}[[:space:]]" /etc/crypttab 2>/dev/null; then
+    echo "Verschluesselter Swap ist bereits eingerichtet - uebersprungen."
+    return 0
+  fi
+
+  if [ -n "$plain_swaps" ]; then
+    frage="Auf $SYS_DISK liegt unverschlüsselter Swap ($(echo "$plain_swaps" | tr '\n' ' ')).\n\nDaten von 'nutzer' können dorthin ausgelagert werden und wären ohne Sicherheits-Stick im Klartext lesbar.\n\nJetzt durch ${SWAP_SIZE_MIB} MiB verschlüsselten Swap ersetzen (Schlüssel wird bei jedem Start neu gewürfelt)?\n\nDer Ruhezustand ist danach nicht mehr möglich - er ist bei diesem Sicherheitsdesign ohnehin ausgeschlossen."
+  else
+    frage="Auf $SYS_DISK gibt es keinen Swap.\n\nJetzt ${SWAP_SIZE_MIB} MiB verschlüsselten Swap anlegen (Schlüssel wird bei jedem Start neu gewürfelt)?\n\nEmpfohlen: dient als Notpolster, damit bei Speichermangel nicht der Screenreader abgeschossen wird."
+  fi
+
+  # Wichtig: erst pruefen, OB zenity ueberhaupt laufen kann, und nur dann
+  # dessen Antwort auswerten. Sonst waere ein "Nein" im Dialog nicht von
+  # "zenity gar nicht startbar" zu unterscheiden - die Frage wuerde dann
+  # trotz Ablehnung nochmal im Terminal gestellt.
+  if [ -n "${DISPLAY:-}" ] && command -v zenity >/dev/null 2>&1; then
+    if ! zenity --question --width=460 --title="DialOS: Swap verschlüsseln" --text="$frage" 2>/dev/null; then
+      warn "Swap unveraendert gelassen - er bleibt unverschluesselt."
+      return 0
+    fi
+  elif [ -r /dev/tty ]; then
+    printf '%b\n' "$frage" >&2
+    printf 'Swap jetzt verschluesseln? [J/n]: ' >&2
+    read -r antwort </dev/tty || antwort="n"
+    case "$antwort" in
+      [NnQq]*) warn "Swap unveraendert gelassen - er bleibt unverschluesselt."; return 0 ;;
+    esac
+  else
+    warn "Swap-Umstellung uebersprungen (keine Rueckfrage moeglich) - der Swap bleibt unverschluesselt."
+    return 0
+  fi
+
+  # Alte Swap-Partitionen abschalten und entfernen. swapoff zuerst, sonst
+  # laesst sich die Partition nicht loeschen.
+  for name in $plain_swaps; do
+    swapoff "/dev/$name" 2>/dev/null || true
+  done
+  cp /etc/fstab /etc/fstab.dialos-vor-swap-umstellung
+  # Alle bisherigen Swap-Zeilen raus (Feld 3 = "swap"); die neue Zeile auf
+  # /dev/mapper/... kommt weiter unten neu dazu. Betrifft bewusst ALLE
+  # Swap-Zeilen - ein zweiter Swap auf einer anderen Platte waere in
+  # diesem Geraetekonzept nicht vorgesehen. Sicherungskopie steht daneben.
+  sed -i '/[[:space:]]swap[[:space:]]/d' /etc/fstab
+
+  # Fehler hier NICHT verschlucken: bliebe die alte Partition stehen,
+  # waere ihr fstab-Eintrag schon entfernt (Platz dauerhaft verschenkt)
+  # und die Freiplatz-Rechnung unten falsch.
+  for name in $plain_swaps; do
+    nr=$(cat "/sys/class/block/$name/partition" 2>/dev/null || true)
+    if [ -n "$nr" ]; then
+      parted -s "$SYS_DISK" rm "$nr" \
+        || die "Konnte die alte Swap-Partition $name (Nr. $nr) nicht entfernen - Abbruch. /etc/fstab wurde bereits angepasst, Sicherungskopie: /etc/fstab.dialos-vor-swap-umstellung"
+    fi
+  done
+  partprobe "$SYS_DISK" 2>/dev/null || true
+  udevadm settle --timeout=10 >/dev/null 2>&1 || sleep 2
+
+  # Neuen Swap an den ANFANG der letzten freien Region legen - so bleibt
+  # der Rest der Platte eine zusammenhaengende freie Region fuer
+  # dialos-nutzer-home direkt dahinter.
+  frei=$(letzte_freie_region "$SYS_DISK")
+  start_mib=$(echo "$frei" | awk '{printf "%d", $1}')
+  end_mib=$(echo "$frei" | awk '{printf "%d", $2}')
+  if [ -z "$start_mib" ] || [ "$((end_mib - start_mib))" -lt "$((SWAP_SIZE_MIB + MIN_FREE_MIB))" ]; then
+    die "Zu wenig Platz, um Swap ($SWAP_SIZE_MIB MiB) UND die Home-Partition (mind. $MIN_FREE_MIB MiB) anzulegen. Die alten Swap-Zeilen wurden aus /etc/fstab entfernt (Sicherungskopie: /etc/fstab.dialos-vor-swap-umstellung)."
+  fi
+
+  nummern_vorher=$(partitionsnummern "$SYS_DISK")
+  parted -s "$SYS_DISK" mkpart dialos-swap "${start_mib}MiB" "$((start_mib + SWAP_SIZE_MIB))MiB"
+  partprobe "$SYS_DISK" 2>/dev/null || true
+  udevadm settle --timeout=10 >/dev/null 2>&1 || sleep 2
+  nummern_nachher=$(partitionsnummern "$SYS_DISK")
+  neue_nr=$(printf '%s\n' "$nummern_nachher" | grep -vxF -f <(printf '%s\n' "$nummern_vorher") || true)
+  if [ "$(printf '%s\n' "$neue_nr" | grep -c .)" -ne 1 ]; then
+    die "Konnte die neue Swap-Partition nicht eindeutig bestimmen - Abbruch."
+  fi
+  swap_part=$(partitionsgeraet "$SYS_DISK" "$neue_nr")
+  [ -b "$swap_part" ] || die "Neue Swap-Partition $swap_part nicht gefunden - Abbruch."
+
+  # Referenz per PARTUUID, NICHT per UUID: die crypttab-Option "swap" legt
+  # bei jedem Start ein frisches Dateisystem an, die Dateisystem-UUID
+  # aendert sich also staendig. Die PARTUUID steht dagegen fest in der
+  # Partitionstabelle.
+  partuuid=$(blkid -s PARTUUID -o value "$swap_part" 2>/dev/null || true)
+  [ -n "$partuuid" ] || die "Konnte die PARTUUID von $swap_part nicht ermitteln - Abbruch."
+
+  touch /etc/crypttab
+  sed -i "/^${SWAP_MAPPER}[[:space:]]/d" /etc/crypttab
+  # Fuehrender Zeilenumbruch, falls die vorhandene Datei nicht mit einem
+  # endet - sonst klebte der neue Eintrag an die letzte Zeile. Eine
+  # zusaetzliche Leerzeile stoert in beiden Dateien nicht.
+  printf '\n%s /dev/disk/by-partuuid/%s /dev/urandom swap,cipher=aes-xts-plain64,size=256\n' \
+    "$SWAP_MAPPER" "$partuuid" >> /etc/crypttab
+  printf '\n/dev/mapper/%s none swap sw 0 0\n' "$SWAP_MAPPER" >> /etc/fstab
+
+  # Hibernate-Rest aufraeumen: ohne das versucht das initramfs weiter, von
+  # einer Swap-Partition zu erwachen, die es so nicht mehr gibt.
+  mkdir -p /etc/initramfs-tools/conf.d
+  echo "RESUME=none" > /etc/initramfs-tools/conf.d/resume
+  update-initramfs -u >/dev/null 2>&1 || warn "update-initramfs meldete einen Fehler - vor dem naechsten Neustart pruefen."
+
+  # Swap als Notpolster, nicht fuer Routine-Auslagerung: je weniger
+  # ausgelagert wird, desto weniger von nutzers Daten verlaesst ueberhaupt
+  # den Arbeitsspeicher.
+  printf '# DialOS: Swap ist Notpolster, kein Routine-Ziel (viel RAM vorhanden).\nvm.swappiness=10\n' \
+    > /etc/sysctl.d/99-dialos-swappiness.conf
+  sysctl -q vm.swappiness=10 2>/dev/null || true
+
+  # Sofort aktivieren, damit kein Neustart noetig ist. Klappt das nicht,
+  # greift es spaetestens beim naechsten Boot ueber crypttab/fstab.
+  systemctl daemon-reload 2>/dev/null || true
+  systemctl start "systemd-cryptsetup@${SWAP_MAPPER}.service" 2>/dev/null || true
+  swapon -a 2>/dev/null || true
+
+  say "Verschlüsselter Swap eingerichtet: $swap_part → /dev/mapper/$SWAP_MAPPER (${SWAP_SIZE_MIB} MiB, Schlüssel bei jedem Start neu).\n\nvm.swappiness steht jetzt auf 10, der Ruhezustand ist deaktiviert.\nSicherungskopie der alten fstab: /etc/fstab.dialos-vor-swap-umstellung"
+}
+
+swap_verschluesseln
+
+# --- 1c. Freien Platz fuer die Home-Partition ermitteln (erst JETZT, nach
+#          der Swap-Umstellung - die veraendert die Aufteilung) ---
+FREI=$(letzte_freie_region "$SYS_DISK")
+FREE_START_MIB=$(echo "$FREI" | awk '{printf "%d", $1}')
+FREE_END_MIB=$(echo "$FREI" | awk '{printf "%d", $2}')
 
 if [ -z "${FREE_START_MIB:-}" ] || [ -z "${FREE_END_MIB:-}" ]; then
   die "Kein freier Platz auf $SYS_DISK gefunden. Wurde bei der Basis-Installation (Schritt 1) genug Platz nach der root-Partition frei/unpartitioniert gelassen?"
@@ -174,25 +345,20 @@ echo "Lege dialos-nutzer-home auf $SYS_DISK an, Schlüssel-Stick $KEY_STICK ..."
 # 1, 2 und 4 vorhanden -> die neue wird 3) waere "hoechste Nummer" die
 # falsche Partition - und der naechste Schritt wuerde sie per luksFormat
 # unwiederbringlich ueberschreiben.
-NUMMERN_VORHER=$(parted -s "$SYS_DISK" print | awk '/^ [0-9]/{print $1}')
+NUMMERN_VORHER=$(partitionsnummern "$SYS_DISK")
 
 parted -s "$SYS_DISK" mkpart dialos-nutzer-home "${FREE_START_MIB}MiB" "${FREE_END_MIB}MiB"
 partprobe "$SYS_DISK"
 udevadm settle --timeout=10 >/dev/null 2>&1 || sleep 2
 
-NUMMERN_NACHHER=$(parted -s "$SYS_DISK" print | awk '/^ [0-9]/{print $1}')
+NUMMERN_NACHHER=$(partitionsnummern "$SYS_DISK")
 NEW_PART_NUM=$(printf '%s\n' "$NUMMERN_NACHHER" \
   | grep -vxF -f <(printf '%s\n' "$NUMMERN_VORHER") || true)
 if [ "$(printf '%s\n' "$NEW_PART_NUM" | grep -c .)" -ne 1 ]; then
   die "Konnte die neu angelegte Partition nicht eindeutig bestimmen (gefunden: '$(printf '%s' "$NEW_PART_NUM" | tr '\n' ' ')'). Abbruch vor jeder Formatierung - es wurde nichts verschlüsselt."
 fi
 
-# Geraetenamen, die auf eine Ziffer enden (nvme0n1, mmcblk0), haengen ihre
-# Partitionsnummer mit "p" an - klassische (sda) direkt.
-case "$SYS_DISK" in
-  *[0-9]) HOME_PART="${SYS_DISK}p${NEW_PART_NUM}" ;;
-  *)      HOME_PART="${SYS_DISK}${NEW_PART_NUM}" ;;
-esac
+HOME_PART=$(partitionsgeraet "$SYS_DISK" "$NEW_PART_NUM")
 [ -b "$HOME_PART" ] || die "Neue Partition $HOME_PART wurde nicht gefunden - Abbruch vor jeder Formatierung."
 
 # --- 6. Stick vorbereiten: DIALOS-KEY (2 GiB, ext4, bewusst NICHT

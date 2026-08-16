@@ -129,8 +129,9 @@ verwenden" wählen** (seit 2026-08-14, siehe
 - EFI-Systempartition, `/boot/efi` (~512 MB genügen; der Debian-Installer
   legt von sich aus gern rund 1 GB an - beides ist in Ordnung).
 - Root-Partition, **genau 100 GB**, ext4, `/`.
-- Swap-Partition: **optional, siehe Warnung unten.** Der Debian-Installer
-  schlägt sie bei manueller Partitionierung von sich aus vor.
+- Swap-Partition: **egal, was der Installer hier anlegt** - Schritt 12
+  räumt das ohnehin auf (siehe unten). Am einfachsten den Vorschlag des
+  Debian-Installers annehmen.
 - **Den kompletten Rest der Platte unpartitioniert/frei lassen** - nicht
   dem Installer überlassen, sonst hat
   [`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
@@ -149,21 +150,20 @@ nachgemessen am 2026-08-16, als Vorlage zum Vergleich beim Nachbauen:
 | `nvme0n1p3` | 37,3 GiB | Swap |
 | *(unpartitioniert)* | **345,6 GiB** | bleibt für `dialos-nutzer-home` |
 
-> **Warnung: eine gewöhnliche Swap-Partition ist unverschlüsselt und
-> untergräbt damit einen Teil des Sicherheitskonzepts.** `/home/nutzer`
-> liegt zwar in LUKS2, aber Speicherseiten des Kontos - geöffnete
-> Dokumente, Mails, Browserinhalte - können vom Kernel in den Swap
-> ausgelagert werden und sind dort **ohne Sicherheits-Stick im Klartext
-> lesbar**, ebenso nach Ausbau der SSD. Das widerspricht
-> [sicherheit-datenschutz.md](sicherheit-datenschutz.md). Möglichkeiten:
-> Swap ganz weglassen (bei ≥16 GB RAM meist unproblematisch), oder ihn
-> mit einem bei jedem Start neu gewürfelten Schlüssel verschlüsseln
-> (`/etc/crypttab`). Auf dem Referenzgerät ist der Swap derzeit
-> **unverschlüsselt** - offener Punkt, siehe [TODO.md](../TODO.md).
-> Hinweis: Ein Swap, der kleiner ist als der Arbeitsspeicher (hier 37 GiB
-> gegen 46 GiB RAM), taugt ohnehin nicht für den Ruhezustand
-> (Hibernate) - der einzige Grund, der für eine unverschlüsselte
-> Swap-Partition sprechen könnte, entfällt damit.
+> **Zur Swap-Partition (entschieden 2026-08-16):** Eine gewöhnliche
+> Swap-Partition ist unverschlüsselt und untergräbt damit einen Teil des
+> Sicherheitskonzepts. `/home/nutzer` liegt zwar in LUKS2, aber
+> Speicherseiten des Kontos - geöffnete Dokumente, Mails,
+> Browserinhalte - können vom Kernel in den Swap ausgelagert werden und
+> sind dort **ohne Sicherheits-Stick im Klartext lesbar**, ebenso nach
+> Ausbau der SSD. Das widerspricht
+> [sicherheit-datenschutz.md](sicherheit-datenschutz.md).
+>
+> **Deshalb muss die Größe hier niemanden kümmern:**
+> `dialos-setup-home-partition.sh` (Schritt 12) ersetzt einen vorgefundenen
+> Klartext-Swap durch **8 GiB verschlüsselten Swap** und schlägt den
+> freigewordenen Platz gleich der Home-Partition zu. Die Tabelle oben
+> zeigt den Zustand *vor* diesem Schritt.
 
 ## 2. Paketliste installieren
 
@@ -654,6 +654,47 @@ Spalte "Bisheriger Inhalt" (Label + Dateisystem). Der gewählte Stick wird
 komplett gelöscht - ohne diese Spalte war z. B. ein eingesteckter
 Debian-Installationsstick in der Liste nicht von einem leeren Stick zu
 unterscheiden.
+
+### Swap verschlüsseln (Teil desselben Skripts, seit 2026-08-16)
+
+Noch vor der Home-Partition fragt das Skript, ob ein vorgefundener
+Klartext-Swap durch **8 GiB verschlüsselten Swap** ersetzt werden soll -
+Entscheidung vom 2026-08-16, Begründung siehe Schritt 1. Es erledigt dabei:
+
+- alten Swap abschalten (`swapoff`), Partition löschen, Swap-Zeilen aus
+  `/etc/fstab` entfernen (Sicherungskopie:
+  `/etc/fstab.dialos-vor-swap-umstellung`),
+- 8 GiB neu am **Anfang** des freien Bereichs anlegen, damit der Rest der
+  Platte eine zusammenhängende Region für `dialos-nutzer-home` bleibt,
+- `/etc/crypttab`-Eintrag mit **`/dev/urandom` als Schlüsselquelle** -
+  der Schlüssel wird bei jedem Start neu gewürfelt, es gibt also nichts
+  aufzubewahren und nichts, was jemand finden könnte,
+- `vm.swappiness=10` (`/etc/sysctl.d/99-dialos-swappiness.conf`): Swap ist
+  Notpolster, kein Routine-Ziel - je weniger ausgelagert wird, desto
+  weniger von `nutzer`s Daten verlässt überhaupt den Arbeitsspeicher,
+- `RESUME=none` + `update-initramfs -u`, damit kein halb konfigurierter
+  Ruhezustand zurückbleibt.
+
+**Wichtige Details zur Begründung:**
+- Der crypttab-Eintrag zeigt bewusst auf `/dev/disk/by-partuuid/…`, nicht
+  auf eine Dateisystem-UUID: die Option `swap` legt bei jedem Start ein
+  frisches Dateisystem an, die Dateisystem-UUID ändert sich also ständig.
+- **Der Ruhezustand (Hibernate) ist damit endgültig ausgeschlossen** - das
+  Abbild ließe sich nach einem Neustart nicht mehr entschlüsseln. Kein
+  Verlust: Bei diesem Sicherheitsdesign war Hibernate ohnehin unmöglich,
+  weil das Abbild `nutzer`s entschlüsselte Daten enthielte und beim Booten
+  vor allem anderen lesbar sein müsste - genau der verworfene
+  `cryptsetup-initramfs`-Ansatz. Der Standby (Suspend-to-RAM) ist davon
+  **nicht** betroffen und funktioniert weiter.
+- **Warum überhaupt Swap, statt ihn wegzulassen:** Ohne Swap beendet der
+  Kernel bei Speichermangel Prozesse hart (OOM-Killer). Auf einem Gerät
+  für blinde Nutzer kann das den Screenreader oder die Sprachausgabe
+  treffen - der Nutzer bekäme dann ohne Vorwarnung keinerlei Rückmeldung
+  mehr und könnte das Gerät nicht mehr bedienen. 8 GiB sind das Notpolster
+  dagegen.
+- **Warum 8 GiB und nicht so viel wie RAM:** Die Faustregel "Swap ≥ RAM"
+  existiert nur wegen Hibernate. Ohne Hibernate ist alles darüber
+  verschenkter Platz, der besser `nutzer`s Daten zur Verfügung steht.
 
 **Wichtig für Schritt 13:** `scripts/dialos-setup-nutzer.sh` legt
 `nutzer`s Konto erst an, nachdem es geprüft (und notfalls per

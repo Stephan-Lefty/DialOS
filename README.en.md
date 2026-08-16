@@ -56,6 +56,37 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Swap is now encrypted (8 GiB, key re-randomized every boot) - decided
+  and implemented 2026-08-16.** Until then the T490 carried a 37.3 GiB
+  plaintext swap partition. That allowed `nutzer`'s memory pages - open
+  documents, mail, browser content - to land on disk in the clear,
+  bypassing the LUKS protection of `dialos-nutzer-home`: readable without
+  the security stick, and likewise after removing the SSD.
+  `dialos-setup-home-partition.sh` now replaces any plaintext swap it
+  finds with 8 GiB via `/etc/crypttab` using `/dev/urandom` as the key
+  source, sets `vm.swappiness=10` and `RESUME=none`, and hands the freed
+  space straight to the home partition (on the T490: 345.6 → about
+  375 GiB).
+  - The crypttab entry deliberately references the **PARTUUID**, not the
+    filesystem UUID: the `swap` option creates a fresh filesystem on every
+    boot, so that UUID keeps changing.
+  - **8 GiB instead of "as much as RAM":** the `swap ≥ RAM` rule of thumb
+    exists only for hibernation - which was already impossible under this
+    stick-gate design, because the image would contain `nutzer`'s
+    decrypted data and would have to be readable at boot before anything
+    else (exactly the discarded `cryptsetup-initramfs` approach). The
+    random key now rules hibernation out for good; suspend-to-RAM is
+    unaffected.
+  - **Dropping swap entirely** was not an option despite 46 GiB of RAM:
+    without swap the OOM killer terminates processes outright under memory
+    pressure, and a killed screen reader or speech output means a blind
+    user loses all feedback. The 8 GiB are the cushion against that.
+- **Timezone/locale decided:** the build and reference device stays on
+  `Europe/Vienna` + `de_AT.UTF-8` instead of the `Europe/Berlin`
+  documented until then. Consequence, now recorded in step 1: the two
+  customer paths yield different timezones - Calamares still hard-sets
+  Berlin from `locale.conf`, while `dialos-install` as a cloning tool
+  copies the running system and thus passes Vienna on.
 - **From Debian 13 to DialOS in three commands - script review before the
   first real run (2026-08-16).** `dialos-full-office-setup.sh` and
   `dialos-setup-home-partition.sh` had only been syntax-checked until

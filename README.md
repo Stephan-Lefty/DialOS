@@ -55,6 +55,38 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Swap wird jetzt verschlüsselt (8 GiB, Schlüssel pro Start neu) -
+  entschieden und umgesetzt 2026-08-16.** Bis dahin lag auf dem T490
+  eine 37,3-GiB-Klartext-Swap-Partition. Damit konnten `nutzer`s
+  Speicherseiten - offene Dokumente, Mails, Browserinhalte - am
+  LUKS-Schutz von `dialos-nutzer-home` vorbei im Klartext auf der Platte
+  landen: ohne Sicherheits-Stick lesbar, ebenso nach Ausbau der SSD.
+  `dialos-setup-home-partition.sh` ersetzt einen vorgefundenen
+  Klartext-Swap jetzt durch 8 GiB über `/etc/crypttab` mit
+  `/dev/urandom` als Schlüsselquelle, setzt `vm.swappiness=10` und
+  `RESUME=none`, und schlägt den freigewordenen Platz gleich der
+  Home-Partition zu (auf dem T490: 345,6 → rund 375 GiB).
+  - Der crypttab-Eintrag referenziert bewusst die **PARTUUID**, nicht die
+    Dateisystem-UUID: die Option `swap` legt bei jedem Start ein frisches
+    Dateisystem an, dessen UUID sich damit ständig ändert.
+  - **8 GiB statt "so groß wie das RAM":** Die Faustregel `Swap ≥ RAM`
+    existiert nur für den Ruhezustand - und der war bei diesem
+    Stick-Gate-Design ohnehin unmöglich, weil das Abbild `nutzer`s
+    entschlüsselte Daten enthielte und beim Booten vor allem anderen
+    lesbar sein müsste (genau der verworfene
+    `cryptsetup-initramfs`-Ansatz). Der Zufallsschlüssel schließt
+    Hibernate jetzt endgültig aus; Suspend-to-RAM bleibt unberührt.
+  - **Swap ganz weglassen** kam trotz 46 GiB RAM nicht in Frage: ohne
+    Swap beendet der OOM-Killer bei Speichermangel Prozesse hart, und ein
+    abgeschossener Screenreader bzw. eine abgeschossene Sprachausgabe
+    bedeutet für einen blinden Nutzer den völligen Verlust jeder
+    Rückmeldung. Die 8 GiB sind das Notpolster dagegen.
+- **Zeitzone/Locale entschieden:** Bau- und Referenzgerät bleiben auf
+  `Europe/Vienna` + `de_AT.UTF-8` statt des bis dahin dokumentierten
+  `Europe/Berlin`. Folge, jetzt in Schritt 1 festgehalten: die beiden
+  Kundenwege liefern unterschiedliche Zeitzonen - Calamares setzt
+  weiterhin fest Berlin aus `locale.conf`, während `dialos-install` als
+  Klon-Werkzeug das laufende System kopiert und damit Wien vererbt.
 - **Von Debian 13 zu DialOS in drei Befehlen - Skript-Durchsicht vor dem
   ersten echten Durchlauf (2026-08-16).** `dialos-full-office-setup.sh`
   und `dialos-setup-home-partition.sh` waren bis dahin nur syntaktisch

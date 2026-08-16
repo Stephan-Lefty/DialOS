@@ -62,19 +62,26 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   (Details im README-Änderungsprotokoll 0.5.0). Der Ablauf besteht jetzt
   aus genau drei Befehlen; die Handarbeit aus Doku-Schritt 13 steckt in
   `dialos-buero-setup-abschliessen.sh`.
-- [ ] **Swap ist unverschlüsselt - Grundsatzentscheidung nötig.** Auf dem
-  T490 liegt eine 37,3-GiB-Swap-Partition (`nvme0n1p3`, Klartext, per
-  UUID in `/etc/fstab`). `nutzer`s Speicherseiten - offene Dokumente,
-  Mails, Browserinhalte - können dorthin ausgelagert werden und sind dann
-  ohne Sicherheits-Stick lesbar, ebenso nach Ausbau der SSD. Das
-  untergräbt genau das, was `dialos-nutzer-home` schützen soll (siehe
-  docs/sicherheit-datenschutz.md). Optionen: (a) Swap per `/etc/crypttab`
-  mit bei jedem Start neu gewürfeltem Schlüssel verschlüsseln, (b) Swap
-  ganz weglassen (46 GiB RAM im Gerät), (c) bewusst akzeptieren und
-  dokumentieren. Für den Ruhezustand taugt der Swap ohnehin nicht (37 GiB
-  < 46 GiB RAM). Gefunden 2026-08-16 beim Abgleich der realen
-  Partitionierung gegen Schritt 1 der Doku; die Doku beschreibt die Lage
-  jetzt inklusive Warnung, die Entscheidung selbst steht noch aus.
+- [x] **Swap entschieden (Stephan, 2026-08-16): 8 GiB, verschlüsselt,
+  automatisch in `dialos-setup-home-partition.sh`.** Ausgangslage: eine
+  37,3-GiB-Klartext-Swap-Partition (`nvme0n1p3`), in die `nutzer`s
+  Speicherseiten - offene Dokumente, Mails, Browserinhalte - ausgelagert
+  werden konnten; ohne Sicherheits-Stick lesbar, ebenso nach Ausbau der
+  SSD, also genau am Schutz von `dialos-nutzer-home` vorbei. Umgesetzt:
+  Das Skript ersetzt einen vorgefundenen Klartext-Swap durch 8 GiB mit
+  einem bei jedem Start neu gewürfelten Schlüssel (`/etc/crypttab`,
+  `/dev/urandom`, Referenz per PARTUUID statt Dateisystem-UUID),
+  setzt `vm.swappiness=10` und `RESUME=none`, und schlägt den
+  freigewordenen Platz der Home-Partition zu (auf dem T490: 345,6 →
+  rund 375 GiB). Begründung der Größe: die Regel "Swap ≥ RAM" existiert
+  nur wegen des Ruhezustands, und der ist bei diesem Sicherheitsdesign
+  ohnehin ausgeschlossen (das Abbild bräuchte einen dauerhaften Schlüssel
+  im initramfs - der verworfene `cryptsetup-initramfs`-Ansatz). Ganz
+  weglassen kam nicht in Frage: ohne Swap beendet der OOM-Killer bei
+  Speichermangel Prozesse hart, und ein abgeschossener Screenreader
+  bedeutet für einen blinden Nutzer den völligen Verlust der Rückmeldung.
+  Suspend-to-RAM bleibt unberührt. **Noch nicht real gelaufen** - passiert
+  beim ersten Durchlauf mit auf dem echten Gerät.
 - [ ] **Zurückgestellt (Stephan, 2026-08-16):** **`dialos-install` und
   `dialos-rekey` haben dieselben Fehler wie
   das durchgesehene `dialos-setup-home-partition.sh`** - bewusst nicht

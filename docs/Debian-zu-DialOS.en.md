@@ -125,8 +125,9 @@ entire disk"** (since 2026-08-14, see
 - EFI system partition, `/boot/efi` (~512 MB is enough; the Debian
   installer likes to create around 1 GB on its own - either is fine).
 - Root partition, **exactly 100 GB**, ext4, `/`.
-- Swap partition: **optional, see the warning below.** The Debian
-  installer suggests one on its own during manual partitioning.
+- Swap partition: **whatever the installer creates here is fine** - step
+  12 cleans it up anyway (see below). Simplest is to accept the Debian
+  installer's suggestion.
 - **Leave the entire rest of the disk unpartitioned/free** - don't let
   the installer use it, otherwise
   [`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
@@ -146,20 +147,20 @@ against when rebuilding:
 | `nvme0n1p3` | 37.3 GiB | swap |
 | *(unpartitioned)* | **345.6 GiB** | reserved for `dialos-nutzer-home` |
 
-> **Warning: an ordinary swap partition is unencrypted and therefore
-> undermines part of the security design.** `/home/nutzer` does sit
-> inside LUKS2, but memory pages belonging to that account - open
-> documents, mail, browser content - can be paged out to swap by the
-> kernel, where they are **readable in the clear without the security
-> stick**, and likewise after removing the SSD. That contradicts
-> [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md). Options:
-> leave swap out entirely (usually unproblematic with ≥16 GB RAM), or
-> encrypt it with a key re-randomized on every boot (`/etc/crypttab`). On
-> the reference device swap is currently **unencrypted** - open item, see
-> [TODO.en.md](../TODO.en.md). Note: a swap area smaller than RAM (37 GiB
-> against 46 GiB here) is unsuitable for hibernation anyway - which
-> removes the one argument that might have spoken for an unencrypted swap
-> partition.
+> **About the swap partition (decided 2026-08-16):** an ordinary swap
+> partition is unencrypted and therefore undermines part of the security
+> design. `/home/nutzer` does sit inside LUKS2, but memory pages
+> belonging to that account - open documents, mail, browser content - can
+> be paged out to swap by the kernel, where they are **readable in the
+> clear without the security stick**, and likewise after removing the
+> SSD. That contradicts
+> [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md).
+>
+> **That's why the size doesn't matter here:**
+> `dialos-setup-home-partition.sh` (step 12) replaces any plaintext swap
+> it finds with **8 GiB of encrypted swap** and hands the freed space
+> straight to the home partition. The table above shows the state
+> *before* that step.
 
 ## 2. Install the package list
 
@@ -647,6 +648,46 @@ Nextcloud key backup as `dialos-install`. At the end it mounts
 "Bisheriger Inhalt" (current content) column with label + filesystem. The
 selected stick is wiped completely - without that column, a plugged-in
 Debian installation stick was indistinguishable from an empty one.
+
+### Encrypting swap (part of the same script, since 2026-08-16)
+
+Before touching the home partition, the script asks whether a plaintext
+swap it found should be replaced with **8 GiB of encrypted swap** -
+decision from 2026-08-16, rationale in step 1. It does the following:
+
+- switches the old swap off (`swapoff`), deletes the partition, removes
+  swap lines from `/etc/fstab` (backup:
+  `/etc/fstab.dialos-vor-swap-umstellung`),
+- creates 8 GiB at the **start** of the free area, so the rest of the disk
+  stays one contiguous region for `dialos-nutzer-home`,
+- writes an `/etc/crypttab` entry with **`/dev/urandom` as the key
+  source** - the key is re-randomized on every boot, so there is nothing
+  to keep safe and nothing for anyone to find,
+- sets `vm.swappiness=10` (`/etc/sysctl.d/99-dialos-swappiness.conf`):
+  swap is an emergency cushion, not a routine target - the less gets
+  paged out, the less of `nutzer`'s data ever leaves RAM,
+- sets `RESUME=none` + `update-initramfs -u`, so no half-configured
+  hibernation setup is left behind.
+
+**Important details behind the reasoning:**
+- The crypttab entry deliberately points at `/dev/disk/by-partuuid/…`,
+  not at a filesystem UUID: the `swap` option creates a fresh filesystem
+  on every boot, so the filesystem UUID keeps changing.
+- **Hibernation is thereby ruled out for good** - the image could no
+  longer be decrypted after a reboot. No loss: hibernation was already
+  impossible under this security design, because the image would contain
+  `nutzer`'s decrypted data and would have to be readable at boot before
+  anything else - exactly the discarded `cryptsetup-initramfs` approach.
+  Suspend-to-RAM is **not** affected and keeps working.
+- **Why have swap at all rather than dropping it:** without swap, the
+  kernel kills processes outright when memory runs short (OOM killer). On
+  a device for blind users that can hit the screen reader or the speech
+  output - the user would then get no feedback at all, without warning,
+  and could no longer operate the device. The 8 GiB are the cushion
+  against that.
+- **Why 8 GiB and not as much as RAM:** the "swap ≥ RAM" rule of thumb
+  exists only because of hibernation. Without hibernation, anything above
+  this is wasted space that `nutzer`'s data could use instead.
 
 **Important for step 13:** `scripts/dialos-setup-nutzer.sh` only
 creates `nutzer`'s account after checking (and, if needed, triggering

@@ -61,19 +61,25 @@ what has already been done.
   in README changelog 0.5.0). The flow now consists of exactly three
   commands; the manual work from doc step 13 lives in
   `dialos-buero-setup-abschliessen.sh`.
-- [ ] **Swap is unencrypted - needs a decision.** The T490 has a 37.3 GiB
-  swap partition (`nvme0n1p3`, plaintext, referenced by UUID in
-  `/etc/fstab`). `nutzer`'s memory pages - open documents, mail, browser
-  content - can be paged out there and are then readable without the
-  security stick, and likewise after removing the SSD. That undermines
-  exactly what `dialos-nutzer-home` is meant to protect (see
-  docs/sicherheit-datenschutz.en.md). Options: (a) encrypt swap via
-  `/etc/crypttab` with a key re-randomized on every boot, (b) drop swap
-  entirely (the device has 46 GiB RAM), (c) deliberately accept and
-  document it. The swap is unsuitable for hibernation anyway (37 GiB <
-  46 GiB RAM). Found 2026-08-16 while reconciling the real partitioning
-  against step 1 of the guide; the guide now describes the situation
-  including a warning, but the decision itself is still open.
+- [x] **Swap decided (Stephan, 2026-08-16): 8 GiB, encrypted,
+  automated in `dialos-setup-home-partition.sh`.** Starting point: a
+  37.3 GiB plaintext swap partition (`nvme0n1p3`) that `nutzer`'s memory
+  pages - open documents, mail, browser content - could be paged out to;
+  readable without the security stick, and likewise after removing the
+  SSD, i.e. bypassing exactly the protection `dialos-nutzer-home`
+  provides. Implemented: the script replaces any plaintext swap it finds
+  with 8 GiB using a key re-randomized on every boot (`/etc/crypttab`,
+  `/dev/urandom`, referenced by PARTUUID rather than filesystem UUID),
+  sets `vm.swappiness=10` and `RESUME=none`, and hands the freed space to
+  the home partition (on the T490: 345.6 → about 375 GiB). Rationale for
+  the size: the "swap ≥ RAM" rule exists only because of hibernation, and
+  hibernation is ruled out under this security design anyway (the image
+  would need a persistent key in the initramfs - the discarded
+  `cryptsetup-initramfs` approach). Dropping swap entirely was not an
+  option: without swap the OOM killer terminates processes outright under
+  memory pressure, and a killed screen reader means a blind user loses all
+  feedback. Suspend-to-RAM is unaffected. **Not yet run for real** -
+  happens during the first end-to-end run on the actual device.
 - [ ] **Deferred (Stephan, 2026-08-16):** **`dialos-install` and
   `dialos-rekey` carry the same faults as the
   reviewed `dialos-setup-home-partition.sh`** - deliberately not fixed
