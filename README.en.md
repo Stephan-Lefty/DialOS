@@ -56,6 +56,25 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Without the stick, `nutzer` is now locked, not merely without
+  autologin (2026-08-16, prompted by Stephan's question whether one can
+  log in at all without the stick).** Autologin alone was incomplete as
+  protection: without the stick GDM still lists both accounts, and anyone
+  knowing `nutzer`'s random password - printed once when
+  `dialos-setup-nutzer.sh` generates it - could still have logged in.
+  `/home/nutzer` would **not** have been mounted, so the session would
+  have run against a directory on the **unencrypted** root partition: at
+  best failing on permissions, at worst creating a profile in the clear.
+  `dialos-stick-gate.sh` now additionally locks the account
+  (`usermod -L`) and unlocks it again as soon as the stick is present.
+  The order is not arbitrary - unlock first, then set autologin, because
+  AccountsService rejects `SetAutomaticLogin` for a locked account with
+  "user is locked" (the same fault that already cost time on
+  2026-08-11). `dialosadmin` is never locked.
+  **For clarity, since the question is natural:** the recovery passphrase
+  is *not* a login password. It is the second LUKS key slot and only
+  unlocks the partition manually (`cryptsetup open`) - for the "stick
+  lost" emergency, together with `dialos-rekey`.
 - **Volume prompt: ask once instead of at every login - and afterwards
   rather than before (Stephan's requirement, 2026-08-16).** Until now the
   question came at every login and **before** the announcement. Both were

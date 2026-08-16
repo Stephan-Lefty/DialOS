@@ -796,11 +796,34 @@ Immer `chmod 755` für Skripte, `chmod 644` für reine Dateien wie
 
 `dialos-stick-gate.service` wirkt erst ab dem **nächsten** Neustart
 (läuft nur beim Boot, nicht rückwirkend auf die aktuell laufende
-Sitzung). Test nach einer echten `dialos-install`-Installation: Stick
-abziehen, neu starten - System muss am normalen GDM-Login-Screen
-landen statt `nutzer` automatisch anzumelden und `/home/nutzer` muss
-leer/nicht gemountet sein; Stick wieder einstecken, erneut neu starten
-- `/home/nutzer` muss gemountet sein und Autologin muss wieder greifen.
+Sitzung).
+
+**Was der Dienst beim Booten tut - zwei Ebenen seit 2026-08-16:**
+
+1. **Autologin** für `nutzer` ein- bzw. ausschalten, je nachdem ob die
+   Home-Partition entsperrt werden konnte.
+2. **Das Konto `nutzer` sperren bzw. entsperren** (`usermod -L`/`-U`).
+   Der Autologin allein reicht als Schutz nämlich nicht: Ohne Stick zeigt
+   GDM weiterhin beide Konten an, und wer `nutzer`s Passwort kennt (es
+   steht einmalig im Terminal, wenn `dialos-setup-nutzer.sh` es würfelt),
+   könnte sich trotzdem anmelden. Dann wäre `/home/nutzer` **nicht**
+   gemountet und die Sitzung liefe gegen ein Verzeichnis auf der
+   **unverschlüsselten** root-Partition - im besten Fall scheitert sie an
+   den Rechten, im schlechtesten legt sie dort ein Profil im Klartext an.
+   Mit der Sperre ist die Frage gegenstandslos.
+
+   **Reihenfolge ist dabei nicht beliebig:** erst entsperren, dann
+   Autologin setzen - AccountsService lehnt `SetAutomaticLogin` für ein
+   gesperrtes Konto mit "user is locked" ab. Beim Abschalten umgekehrt.
+   `dialosadmin` wird nie gesperrt, du kannst dich also nicht aussperren.
+
+**Test (am 2026-08-16 bestanden):** Stick abziehen, neu starten - das
+System muss am normalen GDM-Anmeldebildschirm landen statt `nutzer`
+automatisch anzumelden, und `/home/nutzer` darf nicht gemountet sein.
+Danach Stick wieder einstecken und erneut neu starten - `/home/nutzer`
+muss gemountet sein und der Autologin wieder greifen. Prüfen lässt sich
+der Sperrzustand mit `sudo passwd -S nutzer` (`P` = nutzbar,
+`L` = gesperrt).
 
 **Home-Partition auf einem frisch installierten System anlegen**
 (neu seit 2026-08-14, für den Weg über die Basis-Installation in

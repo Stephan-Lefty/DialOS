@@ -71,6 +71,34 @@ set_automatic_login() {
   return 1
 }
 
+# --- Kontosperre (seit 2026-08-16) ---
+# Der Autologin allein reicht als Schutz nicht: Ohne Stick zeigt GDM
+# weiterhin beide Konten an, und wer nutzers Passwort kennt, koennte sich
+# trotzdem anmelden. Dann waere /home/nutzer NICHT gemountet, und die
+# Sitzung liefe gegen ein Verzeichnis auf der UNVERSCHLUESSELTEN
+# root-Partition - im besten Fall scheitert sie an den Rechten, im
+# schlechtesten legt sie dort ein Profil im Klartext an.
+#
+# Deshalb wird das Konto ohne Stick zusaetzlich gesperrt. "usermod -L"
+# setzt der Passwort-Zeile ein "!" voran, womit keine Passwort-Anmeldung
+# mehr moeglich ist; "-U" nimmt das zurueck. Eine laufende Sitzung wird
+# davon nicht beendet - der Dienst laeuft ohnehin nur beim Booten.
+konto_entsperren() {
+  if usermod -U "$USERNAME" 2>/dev/null; then
+    log "Konto '$USERNAME' entsperrt."
+  else
+    log "Konnte '$USERNAME' nicht entsperren - Autologin koennte scheitern."
+  fi
+}
+
+konto_sperren() {
+  if usermod -L "$USERNAME" 2>/dev/null; then
+    log "Konto '$USERNAME' gesperrt - ohne Stick ist keine Anmeldung moeglich."
+  else
+    log "Konnte '$USERNAME' nicht sperren."
+  fi
+}
+
 stick_present() {
   udevadm settle --timeout=2 >/dev/null 2>&1 || true
   blkid -L "$STICK_LABEL" >/dev/null 2>&1
@@ -154,9 +182,16 @@ if [ -z "$NUTZER_PATH" ]; then
 fi
 
 if [ "$HOME_OK" -eq 1 ]; then
+  # Reihenfolge ist wichtig: ERST entsperren, DANN Autologin setzen.
+  # AccountsService lehnt SetAutomaticLogin fuer ein gesperrtes Konto mit
+  # "user is locked" ab - genau der Fehler, der am 2026-08-11 schon
+  # einmal Zeit gekostet hat (siehe scripts/dialos-setup-nutzer.sh).
+  konto_entsperren
   log "Aktiviere Autologin für '$USERNAME'."
   set_automatic_login "$NUTZER_PATH" true
 else
+  # Umgekehrte Reihenfolge: erst den Autologin abschalten, dann sperren.
   log "Deaktiviere Autologin für '$USERNAME'."
   set_automatic_login "$NUTZER_PATH" false
+  konto_sperren
 fi

@@ -55,6 +55,27 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Ohne Stick ist `nutzer` jetzt gesperrt, nicht nur ohne Autologin
+  (2026-08-16, ausgelöst durch Stephans Frage, ob man sich ohne Stick
+  überhaupt anmelden kann).** Der Autologin allein war als Schutz
+  unvollständig: Ohne Stick zeigt GDM weiterhin beide Konten, und wer
+  `nutzer`s Zufallspasswort kennt - es steht einmalig im Terminal, wenn
+  `dialos-setup-nutzer.sh` es würfelt - hätte sich trotzdem anmelden
+  können. `/home/nutzer` wäre dabei **nicht** gemountet gewesen, die
+  Sitzung wäre also gegen ein Verzeichnis auf der **unverschlüsselten**
+  root-Partition gelaufen: im besten Fall an den Rechten gescheitert, im
+  schlechtesten mit einem Profil im Klartext. `dialos-stick-gate.sh`
+  sperrt das Konto jetzt zusätzlich (`usermod -L`) und entsperrt es
+  wieder, sobald der Stick da ist. Die Reihenfolge ist dabei nicht
+  beliebig - erst entsperren, dann Autologin setzen, weil
+  AccountsService `SetAutomaticLogin` für ein gesperrtes Konto mit "user
+  is locked" ablehnt (derselbe Fehler, der am 2026-08-11 schon einmal
+  Zeit gekostet hat). `dialosadmin` wird nie gesperrt.
+  **Zur Klarstellung, weil die Frage naheliegt:** Das
+  Wiederherstellungs-Passwort ist *kein* Anmelde-Passwort. Es ist der
+  zweite LUKS-Schlüsselslot und entsperrt nur die Partition von Hand
+  (`cryptsetup open`) - für den Notfall "Stick verloren", zusammen mit
+  `dialos-rekey`.
 - **Lautstärke-Abfrage: einmal fragen statt bei jedem Anmelden - und
   danach statt davor (Stephans Vorgabe, 2026-08-16).** Bisher kam die
   Frage bei jedem Login und noch **vor** der Ansage. Beides war

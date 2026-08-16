@@ -775,11 +775,32 @@ often end up with `600` permissions - `chmod +x` alone then results in
 
 `dialos-stick-gate.service` only takes effect from the **next** reboot
 onward (only runs at boot, not retroactively on the currently running
-session). Test after a real `dialos-install` install: unplug the
-stick, reboot - the system must land on the normal GDM login screen
-instead of autologging `nutzer`, and `/home/nutzer` must be
-empty/unmounted; plug the stick back in, reboot again - `/home/nutzer`
-must be mounted and autologin must work again.
+session).
+
+**What the service does at boot - two layers since 2026-08-16:**
+
+1. **Autologin** for `nutzer` on or off, depending on whether the home
+   partition could be unlocked.
+2. **Locking or unlocking the `nutzer` account** (`usermod -L`/`-U`).
+   Autologin alone is not enough protection: without the stick, GDM still
+   lists both accounts, and anyone who knows `nutzer`'s password (printed
+   once when `dialos-setup-nutzer.sh` generates it) could still log in.
+   `/home/nutzer` would then **not** be mounted and the session would run
+   against a directory on the **unencrypted** root partition - at best it
+   fails on permissions, at worst it creates a profile there in the
+   clear. With the lock, the question is moot.
+
+   **The order matters:** unlock first, then set autologin -
+   AccountsService rejects `SetAutomaticLogin` for a locked account with
+   "user is locked". Reversed when switching off. `dialosadmin` is never
+   locked, so you cannot lock yourself out.
+
+**Test (passed on 2026-08-16):** unplug the stick, reboot - the system
+must land on the normal GDM login screen instead of autologging `nutzer`,
+and `/home/nutzer` must not be mounted. Then plug the stick back in and
+reboot again - `/home/nutzer` must be mounted and autologin must work
+again. The lock state can be checked with `sudo passwd -S nutzer`
+(`P` = usable, `L` = locked).
 
 **Setting up the home partition on a freshly installed system** (new
 since 2026-08-14, for the path via the base install in step 1 instead
