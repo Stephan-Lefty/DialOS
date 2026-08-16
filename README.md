@@ -20,9 +20,32 @@ Dieses Projekt ist in Zusammenarbeit mit [Claude](https://claude.com) entstanden
 
 ## Status
 
-Konzeptphase – es existiert noch keine lauffähige Software. Dieses
-Repository sammelt die bisher getroffenen Architektur- und
-Design-Entscheidungen als Grundlage für die Umsetzung.
+**Seit dem 2026-08-16 läuft DialOS auf echter Hardware.** Aus einer
+nackten Debian-13/GNOME-Installation entsteht das fertige System in drei
+Befehlen – am Referenzgerät (ThinkPad T490) end-to-end durchgeprüft:
+
+```bash
+./scripts/dialos-full-office-setup.sh                    # Pakete, Branding, Sprachausgabe, Vosk
+/usr/local/sbin/dialos-setup-home-partition.sh           # verschlüsselter Swap + nutzer-Partition
+sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # Konto + Autologin
+```
+
+**Was funktioniert:** Sprachausgabe über Piper, Spracherkennung über
+Vosk, das vollständige Sicherheitskonzept (verschlüsselte
+`nutzer`-Partition und verschlüsselter Swap, Sicherheits-Stick als
+Anwesenheits-Token – in beiden Richtungen nachgewiesen: ohne Stick ist
+das Konto gesperrt und die Daten sind verschlossen, mit Stick meldet sich
+`nutzer` automatisch an), Autologin, Branding, Standardprogramme.
+
+**Was noch fehlt – der eigentliche Kern:** die Sprachsteuerung selbst.
+Vosk und hassil sind installiert und haben mit der Lautstärke-Abfrage bei
+der Start-Ansage ihre erste echte Bewährungsprobe bestanden, aber
+dauerhaftes Zuhören mit Aufweckwort und eine Befehlsgrammatik gibt es
+noch nicht. Ebenso offen: Telefonie und die WWAN-Variante.
+
+Details zum jeweiligen Stand stehen im
+[Änderungsprotokoll](#änderungsprotokoll), konkrete nächste Schritte in
+[TODO.md](TODO.md).
 
 ## Dokumentation
 
@@ -34,7 +57,7 @@ Design-Entscheidungen als Grundlage für die Umsetzung.
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
 - [Offene Punkte](docs/offene-punkte.md) – was noch zu klären/entscheiden ist
-- [ISO-Builds](docs/iso-builds.md) – Verzeichnis gebauter Images (Version, Commit, Prüfsumme, Nextcloud-Ablageort)
+- [Abbild-Verzeichnis](docs/iso-builds.md) – welches Sicherungs-Abbild zu welchem Code-Stand gehört (Rescuezilla/Clonezilla)
 
 ## Logo & Branding
 
@@ -48,9 +71,16 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 
 ## Testumgebung
 
-- Lenovo ThinkPad T490 (ohne WWAN-Modul)
-- USB-Sicherheits-Stick
-- Android-Testgerät für Handy-Anbindung (USB-Tethering + GSConnect)
+- **Laptop:** Lenovo ThinkPad T490 (ohne WWAN-Modul)
+- **Audio:** AIRHUG 01 – Bluetooth-Headset, seit 2026-08-16 das
+  Referenzgerät für die Sprachsteuerung (siehe
+  [hardware.md](docs/hardware.md)). Rückfall auf die eingebauten
+  Lautsprecher/Mikrofone ist Pflicht und für die Ausgabe nachgewiesen.
+- **Eingabegeräte:** Logitech Pebble M350s (Maus), Pebble K380s (Tastatur)
+- **Sicherheits-Stick:** 64 GB, aufgeteilt in `DIALOS-KEY` (Schlüssel,
+  ext4) und `DIALOS-DATA` (exFAT, auch an Windows/macOS lesbar)
+- **Android-Testgerät** für die Handy-Anbindung (USB-Tethering +
+  GSConnect)
 
 ## Änderungsprotokoll
 

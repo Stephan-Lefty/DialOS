@@ -21,9 +21,31 @@ This project was created in collaboration with [Claude](https://claude.com).
 
 ## Status
 
-Concept phase — no working software exists yet. This repository collects
-the architecture and design decisions made so far as a foundation for
-implementation.
+**Since 2026-08-16, DialOS runs on real hardware.** Three commands turn a
+bare Debian 13/GNOME install into the finished system – verified
+end-to-end on the reference device (ThinkPad T490):
+
+```bash
+./scripts/dialos-full-office-setup.sh                    # packages, branding, speech output, Vosk
+/usr/local/sbin/dialos-setup-home-partition.sh           # encrypted swap + nutzer partition
+sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # account + autologin
+```
+
+**What works:** speech output via Piper, speech recognition via Vosk, the
+complete security design (encrypted `nutzer` partition and encrypted
+swap, the security stick as a presence token – proven in both directions:
+without the stick the account is locked and the data sealed, with it
+`nutzer` logs in automatically), autologin, branding, default
+applications.
+
+**What is still missing – the actual core:** voice control itself. Vosk
+and hassil are installed and passed their first real test with the volume
+prompt during the startup announcement, but continuous listening with a
+wake word and a command grammar do not exist yet. Also open: telephony
+and the WWAN variant.
+
+Details on the respective state are in the [changelog](#changelog),
+concrete next steps in [TODO.en.md](TODO.en.md).
 
 ## Documentation
 
@@ -35,7 +57,7 @@ implementation.
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
 - [Open questions](docs/offene-punkte.en.md) – what still needs to be decided
-- [ISO builds](docs/iso-builds.en.md) – ledger of built images (version, commit, checksum, Nextcloud location)
+- [Image ledger](docs/iso-builds.en.md) – which backup image belongs to which code state (Rescuezilla/Clonezilla)
 
 ## Logo & branding
 
@@ -49,9 +71,15 @@ background) and `splash.png` (boot/login screen).
 
 ## Test environment
 
-- Lenovo ThinkPad T490 (no WWAN module)
-- USB security stick
-- Android test device for phone tethering (USB tethering + GSConnect)
+- **Laptop:** Lenovo ThinkPad T490 (no WWAN module)
+- **Audio:** AIRHUG 01 – Bluetooth headset, the reference device for
+  voice control since 2026-08-16 (see [hardware.en.md](docs/hardware.en.md)).
+  Falling back to the built-in speakers/microphone is mandatory and has
+  been proven for the output side.
+- **Input devices:** Logitech Pebble M350s (mouse), Pebble K380s (keyboard)
+- **Security stick:** 64 GB, split into `DIALOS-KEY` (key file, ext4) and
+  `DIALOS-DATA` (exFAT, also readable on Windows/macOS)
+- **Android test device** for phone tethering (USB tethering + GSConnect)
 
 ## Changelog
 
