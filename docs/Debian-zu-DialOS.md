@@ -159,9 +159,15 @@ Textinhalt der Datei erscheinen, kein Download-Dialog und keine
 
 ### 1b. Den Installer damit starten (bei jedem Gerät)
 
-**Voraussetzung: Netzwerkkabel einstecken.** Der Installer holt die
-Preseed-Datei, *bevor* er nach WLAN fragen kann - über WLAN allein
-funktioniert das also nicht. Ein per DHCP versorgtes LAN-Kabel genügt.
+> ### ⚠ Netzwerkkabel ist Pflicht - WLAN geht nicht
+>
+> Der Installer holt die Preseed-Datei über das Netzwerk, **bevor** er
+> überhaupt nach WLAN fragen kann. Es gibt also keinen Weg, das per WLAN
+> zu erledigen - auch nicht durch früheres Eingreifen. Ein per DHCP
+> versorgtes LAN-Kabel muss stecken, **bevor** du bootest.
+>
+> Ohne Kabel bricht der Installer beim Laden des Preseeds ab. Dann bleibt
+> nur die Rückfallebene 1d: von Hand partitionieren.
 
 1. Vom Debian-13-USB-Stick booten.
 2. Im Bootmenü **nicht** Enter drücken, sondern den Eintrag

@@ -150,9 +150,15 @@ text content must appear, not a download dialog and not a 404 page.
 
 ### 1b. Start the installer with it (for every device)
 
-**Prerequisite: plug in a network cable.** The installer fetches the
-preseed file *before* it can ask about WiFi, so WiFi alone will not work.
-A DHCP-served Ethernet cable is enough.
+> ### ⚠ A network cable is mandatory - WiFi does not work
+>
+> The installer fetches the preseed file over the network **before** it
+> can even ask about WiFi. There is therefore no way to do this over
+> WiFi - not by intervening earlier either. A DHCP-served Ethernet cable
+> must be plugged in **before** you boot.
+>
+> Without a cable the installer aborts while loading the preseed. The
+> only remaining option is fallback 1d: partition by hand.
 
 1. Boot from the Debian 13 USB stick.
 2. In the boot menu, do **not** press Enter - only **highlight** the

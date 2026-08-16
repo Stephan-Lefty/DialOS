@@ -56,6 +56,48 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **The first reboot exposed three gaps - all of them visible only on
+  real hardware (2026-08-16).**
+  - **Speech output was completely silent, for two independent reasons.**
+    `piper-generic.conf` starts its synthesis chain with
+    `./check_piper_voice.sh $VOICE && …` - that file existed nowhere: not
+    on the system, not in the repo, not in the docs. The `&&` chain broke
+    immediately and **not a single audio sample was ever produced**. And
+    with no error message at all: the panel icon still appeared, because
+    `dialos-tts-indicator.py` runs independently of synthesis - so the
+    fault looked like "running, but quiet". On the old test device the
+    file must have existed as a hand-made leftover and was lost in the
+    reinstall - exactly the gap `docs/Debian-zu-DialOS.en.md` is meant to
+    close. Second, `pulseaudio-utils` was missing from the package list:
+    no `paplay` (playback at the end of the piper chain), no `parec`
+    (recording for the volume prompt), no `pactl` (audio ducking and the
+    Bluetooth profile switch in `dialos-start-ansage.py`). On the old
+    system the package happened to be present, which is why it never
+    surfaced. **Both fixed and confirmed acoustically the same day** -
+    measured link by link first (129,652 bytes of raw audio from piper, a
+    41,140-byte WAV after sox at 22,050 Hz), then heard by Stephan via
+    `spd-say`.
+  - **The keyboard was set to Japanese (Mozc).** The cause is a
+    contradiction within the guide itself: step 1 says "choose GNOME in
+    the Debian installer" - and that very choice installs
+    `task-gnome-desktop`, the package step 2 explicitly warns against.
+    Its Recommends pulled in **138** foreign-language `task-*` packages
+    along with `ibus-mozc`/`ibus-anthy`; both accounts had
+    `[('ibus','mozc-jp'), ('xkb','de')]`, i.e. Mozc first. Two levels of
+    fix: a new step 2b clears out the language packages
+    (`task-gnome-desktop` itself stays, it holds the desktop together),
+    and `01-dialos-defaults` now sets the German keyboard as the **only**
+    input source - as a dconf default for every account, including
+    future ones.
+  - **The cleanup took `gnome-accessibility-themes` with it.**
+    `apt-get autoremove --purge` removes everything nobody requests after
+    the purge, and does not know the difference between a Thai font and a
+    contrast theme - on a system for people with impaired vision of all
+    things. Fixed on two levels: the package is now explicitly in the
+    package list, and step 2b re-asserts the entire list after the
+    `autoremove`. Everything in it is thereby marked "manually installed"
+    again and protected against future `autoremove` - not just this one
+    package.
 - **Partitioning is no longer done by hand: a preseed for the Debian
   installer (2026-08-16).** Stephan wanted to stop thinking about disk
   size during the initial install. His first idea - use the whole disk

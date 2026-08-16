@@ -55,6 +55,50 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Der erste Neustart legte drei Lücken offen - alle nur auf echter
+  Hardware sichtbar (2026-08-16).**
+  - **Die Sprachausgabe war vollständig stumm, aus zwei unabhängigen
+    Gründen.** `piper-generic.conf` beginnt ihre Synthese-Kette mit
+    `./check_piper_voice.sh $VOICE && …` - diese Datei existierte
+    nirgends: nicht im System, nicht im Repo, nicht in der Doku. Die
+    `&&`-Kette brach sofort ab, es wurde **nie ein einziges Audio-Sample
+    erzeugt**. Und das ohne jede Fehlermeldung: Das Panel-Icon erschien
+    weiterhin, weil `dialos-tts-indicator.py` unabhängig von der Synthese
+    läuft - der Fehler sah also nach "läuft, aber leise" aus. Auf dem
+    alten Testgerät muss die Datei als manuell angelegter Rest existiert
+    haben und ist beim Reinstall verlorengegangen - genau die Lücke, die
+    `docs/Debian-zu-DialOS.md` schließen soll. Zweitens fehlte
+    `pulseaudio-utils` in der Paketliste: kein `paplay` (Wiedergabe am
+    Ende der piper-Kette), kein `parec` (Aufnahme für die
+    Lautstärke-Abfrage), kein `pactl` (Audio-Ducking sowie
+    Bluetooth-Profilwechsel in `dialos-start-ansage.py`). Auf dem alten
+    System war das Paket zufällig vorhanden, deshalb ist es nie
+    aufgefallen. **Beides behoben und am selben Tag akustisch bestätigt** -
+    vorher Glied für Glied nachgemessen (129.652 Bytes Rohaudio aus
+    piper, 41.140-Byte-WAV nach sox bei 22.050 Hz), danach von Stephan
+    per `spd-say` gehört.
+  - **Die Tastatur stand auf Japanisch (Mozc).** Ursache ist ein
+    Widerspruch in der Doku selbst: Schritt 1 sagt "GNOME im
+    Debian-Installer wählen" - und genau diese Auswahl installiert
+    `task-gnome-desktop`, also das Paket, vor dem Schritt 2 ausdrücklich
+    warnt. Über dessen Recommends kamen **138** fremdsprachige
+    `task-*`-Pakete samt `ibus-mozc`/`ibus-anthy` herein; beide Konten
+    hatten `[('ibus','mozc-jp'), ('xkb','de')]`, Mozc also an erster
+    Stelle. Zwei Ebenen der Lösung: neuer Schritt 2b räumt die
+    Sprachpakete weg (`task-gnome-desktop` selbst bleibt, es hält den
+    Desktop zusammen), und `01-dialos-defaults` setzt die deutsche
+    Tastatur jetzt als **einzige** Eingabequelle - als dconf-Standard für
+    jedes Konto, auch für künftig angelegte.
+  - **Das Aufräumen riss `gnome-accessibility-themes` mit.**
+    `apt-get autoremove --purge` entfernt alles, was nach dem Purge
+    niemand mehr anfordert, und kennt den Unterschied zwischen einer
+    thailändischen Schriftart und einem Kontrastthema nicht -
+    ausgerechnet auf einem System für Menschen mit Seheinschränkung.
+    Behoben auf zwei Ebenen: Das Paket steht jetzt ausdrücklich in der
+    Paketliste, und Schritt 2b setzt die komplette Liste nach dem
+    `autoremove` erneut durch. Damit ist alles darin wieder als "manuell
+    installiert" markiert und gegen künftiges `autoremove` geschützt -
+    nicht nur dieses eine Paket.
 - **Partitionierung wird nicht mehr von Hand gemacht: Preseed für den
   Debian-Installer (2026-08-16).** Stephans Wunsch war, bei der
   Erstinstallation nicht über die Plattengröße nachdenken zu müssen.
