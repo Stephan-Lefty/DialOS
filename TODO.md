@@ -259,7 +259,12 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   `DialOS-Live-0.5.1-clone.iso` als Backup-Snapshot vor dem geplanten
   End-to-end-Test (siehe nächster Punkt) - Version/Datum/Commit/SHA256
   eingetragen.
-- [ ] **Prämisse überholt, neu zu entscheiden (geprüft 2026-08-16):**
+- [x] **Erledigt am 2026-08-16: acht alte ISOs gelöscht (~59 GB).** Alle
+  stammten aus der entfallenen Penguins-Eggs-Zeit. `DialOS-Live-0.5.1-
+  clone.iso` bleibt bewusst liegen, bis Stephans erstes
+  Rescuezilla-Abbild da ist - sie existiert nirgendwo sonst und ließe
+  sich nicht neu erzeugen. Dokumentiert in `docs/iso-builds.md`.
+  Ursprünglich: **Prämisse überholt, neu zu entscheiden (geprüft 2026-08-16):**
   `DialOS-Live-0.5.1-clone.iso` liegt **nicht** mehr lokal - der Reinstall
   hat sie mitgenommen. Sie existiert weiterhin auf der externen Platte
   unter `DialOS-ISOs/`, zusammen mit vier älteren Abbildern; zusammen

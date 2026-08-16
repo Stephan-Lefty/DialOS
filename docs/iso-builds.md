@@ -1,42 +1,53 @@
 [Deutsch](iso-builds.md) | [English](iso-builds.en.md)
 
-# ISO-Builds
+# Abbild-Verzeichnis
 
-Gebaute Sicherungs-Abbilder (Rescuezilla/Clonezilla, siehe
+Sicherungs-Abbilder (Rescuezilla/Clonezilla, siehe
 [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 16) werden **nicht**
-in Git versioniert - mehrere GB pro Datei, GitHub blockt einzelne
-Dateien über 100 MB ohnehin. Stattdessen: Datei liegt in Stephans
-selbst gehosteter Nextcloud (gleicher Gedanke wie bei den
-verschlüsselten Schlüssel-Backups, siehe
-[sicherheit-datenschutz.md](sicherheit-datenschutz.md)), hier im Repo
-steht nur dieses schlanke Verzeichnis - damit bleibt nachvollziehbar,
-welche ISO zu welchem Code-Stand gehört, ohne die Datei selbst zu
-versionieren.
+in Git versioniert - mehrere GB pro Datei, GitHub blockt einzelne Dateien
+über 100 MB ohnehin. Hier steht nur dieses schlanke Verzeichnis, damit
+nachvollziehbar bleibt, welches Abbild zu welchem Code-Stand gehört, ohne
+die Datei selbst zu versionieren.
 
-## Beim Bauen einer neuen ISO eintragen
+## Aufräumaktion vom 2026-08-16
 
-```bash
-sha256sum DialOS-Live-X.Y.Z.iso
-git log -1 --format=%H
-```
+**Acht alte ISOs wurden bewusst gelöscht** (rund 59 GB) - das ist keine
+Datenpanne, sondern eine Entscheidung. Alle stammten aus der
+Penguins-Eggs-Zeit, die am selben Tag entfallen ist (siehe Schritt 16),
+und bildeten Systemstände ab, die der Neuaufbau vom 2026-08-16 deutlich
+überholt hat. Prüfsummen lagen für keine davon vor, nur für die unten
+verbliebene.
+
+Gelöscht: `DialOS-Clone-mit-home.iso`, `DialOS-live.iso`,
+`DialOS-Live-0.1.iso`, `DialOS-Live-0.2.0.iso`, `DialOS-Live-0.3.0.iso`,
+`DialOS-Live-0.4.0.iso`, `DialOS-Live-0.5.0.iso`,
+`DialOS-Live-0.5.0-clone.iso`.
+
+## Aktueller Bestand
 
 | Version | Dateiname | Datum | Commit | SHA256 | Ablageort |
 |---|---|---|---|---|---|
-| _(Vorlage)_ | `DialOS-Live-X.Y.Z.iso` | JJJJ-MM-TT | `abcdef1` | `…` | Nextcloud-Pfad |
-| 0.5.1 | `DialOS-Live-0.5.1-clone.iso` | 2026-08-16 | `ac89f26` | `73378ae3da384e28ef1123c0efad9e98122c8c12ae4edbd26dc8496ce587ed32` | Nextcloud (Upload durch Stephan noch ausstehend) |
+| 0.5.1 | `DialOS-Live-0.5.1-clone.iso` | 2026-08-16 | `ac89f26` | `73378ae3da384e28ef1123c0efad9e98122c8c12ae4edbd26dc8496ce587ed32` | nur externe Platte, `DialOS-ISOs/` |
 
-## Bisherige Builds
+**Diese Datei bleibt bewusst liegen, bis das erste Rescuezilla-Abbild da
+ist** (Stephans Entscheidung, 2026-08-16). Sie war das Sicherheitsnetz
+für den End-to-end-Test des neuen Aufbauwegs - der ist bestanden, ihr
+Zweck also erfüllt. Sie existiert aber nirgendwo sonst und ließe sich
+nicht neu erzeugen, weil der Bauweg dahinter entfallen ist. Deshalb erst
+löschen, wenn der Ersatz vorhanden ist: So steht nie ein Moment ganz ohne
+Rückfallebene.
 
-Die beiden ursprünglich gebauten 0.5.0-Test-ISOs
-(`DialOS-Live-0.5.0.iso`, `DialOS-Live-0.5.0-clone.iso`, siehe
-[README-Änderungsprotokoll](../README.md#änderungsprotokoll)) liegen
-nicht mehr lokal vor, Prüfsumme/Commit-Zuordnung lassen sich im
-Nachhinein nicht mehr zuverlässig ermitteln.
+## Beim Erstellen eines neuen Abbilds eintragen
 
-`DialOS-Live-0.5.1-clone.iso` (siehe Tabelle oben) ist ein
-Backup-Snapshot des kompletten Systemstands vor dem geplanten
-End-to-end-Test des neuen Installations-Pfads (`dialos-full-office-
-setup.sh` + `dialos-setup-home-partition.sh`, siehe TODO.md) - falls
-der Test schiefgeht, lässt sich das Gerät darüber wieder in den
-bekannten Arbeitszustand zurückversetzen (`--clone` gebaut, enthält
-`dialosadmin`/`nutzer` inkl. Home-Verzeichnissen).
+Rescuezilla erzeugt Verzeichnisse, keine einzelne Datei - die Prüfsumme
+bezieht sich daher sinnvollerweise auf das Archiv oder entfällt.
+Festhalten lohnt sich in jedem Fall der Commit-Stand, zu dem das Abbild
+gehört:
+
+```bash
+git log -1 --format=%H
+```
+
+Und **was im Abbild fehlt**: Die LUKS-Partition `dialos-nutzer-home` wird
+bewusst nicht mitgesichert (Begründung in Schritt 16). Ein Abbild stellt
+also root und EFI wieder her, nicht `nutzer`s Daten.

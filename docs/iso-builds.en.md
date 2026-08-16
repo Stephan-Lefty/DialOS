@@ -1,40 +1,50 @@
 [Deutsch](iso-builds.md) | [English](iso-builds.en.md)
 
-# ISO builds
+# Image ledger
 
-Built backup images (Rescuezilla/Clonezilla, see
+Backup images (Rescuezilla/Clonezilla, see
 [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 16) are **not**
 versioned in Git - several GB per file, and GitHub blocks individual
-files over 100 MB anyway. Instead: the file lives in Stephan's
-self-hosted Nextcloud (same idea as the encrypted key backups, see
-[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)), and this
-repo only holds this lightweight ledger - so it stays traceable which
-ISO belongs to which code state, without versioning the file itself.
+files over 100 MB anyway. Only this slim ledger lives here, so it stays
+traceable which image belongs to which code state without versioning the
+file itself.
 
-## Fill in when building a new ISO
+## Cleanup on 2026-08-16
 
-```bash
-sha256sum DialOS-Live-X.Y.Z.iso
-git log -1 --format=%H
-```
+**Eight old ISOs were deliberately deleted** (about 59 GB) - not a data
+mishap but a decision. All came from the Penguins' Eggs era, dropped the
+same day (see step 16), and represented system states that the
+2026-08-16 rebuild has substantially superseded. No checksums existed for
+any of them, only for the one remaining below.
+
+Deleted: `DialOS-Clone-mit-home.iso`, `DialOS-live.iso`,
+`DialOS-Live-0.1.iso`, `DialOS-Live-0.2.0.iso`, `DialOS-Live-0.3.0.iso`,
+`DialOS-Live-0.4.0.iso`, `DialOS-Live-0.5.0.iso`,
+`DialOS-Live-0.5.0-clone.iso`.
+
+## Current holdings
 
 | Version | Filename | Date | Commit | SHA256 | Location |
 |---|---|---|---|---|---|
-| _(template)_ | `DialOS-Live-X.Y.Z.iso` | YYYY-MM-DD | `abcdef1` | `…` | Nextcloud path |
-| 0.5.1 | `DialOS-Live-0.5.1-clone.iso` | 2026-08-16 | `ac89f26` | `73378ae3da384e28ef1123c0efad9e98122c8c12ae4edbd26dc8496ce587ed32` | Nextcloud (upload by Stephan still pending) |
+| 0.5.1 | `DialOS-Live-0.5.1-clone.iso` | 2026-08-16 | `ac89f26` | `73378ae3da384e28ef1123c0efad9e98122c8c12ae4edbd26dc8496ce587ed32` | external drive only, `DialOS-ISOs/` |
 
-## Builds so far
+**This file deliberately stays until the first Rescuezilla image exists**
+(Stephan's decision, 2026-08-16). It was the safety net for the
+end-to-end test of the new build path - that test passed, so its purpose
+is served. But it exists nowhere else and could not be recreated, because
+the build path behind it is gone. Hence: delete only once the replacement
+is there, so there is never a moment without any fallback.
 
-The two originally built 0.5.0 test ISOs
-(`DialOS-Live-0.5.0.iso`, `DialOS-Live-0.5.0-clone.iso`, see the
-[README changelog](../README.en.md#changelog)) no longer exist locally,
-so checksum/commit mapping can't be reliably reconstructed after the
-fact.
+## To record when creating a new image
 
-`DialOS-Live-0.5.1-clone.iso` (see table above) is a backup snapshot of
-the complete system state before the planned end-to-end test of the new
-install path (`dialos-full-office-setup.sh` +
-`dialos-setup-home-partition.sh`, see TODO.md) - if that test goes
-wrong, the device can be restored to this known-working state from it
-(built with `--clone`, includes `dialosadmin`/`nutzer` with their home
-directories).
+Rescuezilla produces directories rather than a single file, so a checksum
+sensibly refers to the archive or is omitted. Worth recording in any case
+is the commit state the image belongs to:
+
+```bash
+git log -1 --format=%H
+```
+
+And **what the image does not contain**: the LUKS partition
+`dialos-nutzer-home` is deliberately excluded (rationale in step 16). An
+image therefore restores root and EFI, not `nutzer`'s data.

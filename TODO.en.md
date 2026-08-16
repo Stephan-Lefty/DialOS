@@ -235,7 +235,11 @@ what has already been done.
   `DialOS-Live-0.5.1-clone.iso` as a backup snapshot before the planned
   end-to-end test (see next item) - version/date/commit/SHA256 filled
   in.
-- [ ] **Premise outdated, needs a fresh decision (checked 2026-08-16):**
+- [x] **Done 2026-08-16: eight old ISOs deleted (~59 GB).** All came from
+  the dropped Penguins' Eggs era. `DialOS-Live-0.5.1-clone.iso`
+  deliberately stays until Stephan's first Rescuezilla image exists - it
+  exists nowhere else and could not be recreated. Documented in
+  `docs/iso-builds.en.md`. Originally: **Premise outdated, needs a fresh decision (checked 2026-08-16):**
   `DialOS-Live-0.5.1-clone.iso` is **no longer** local - the reinstall
   took it too. It still exists on the external drive under `DialOS-ISOs/`,
   together with four older images; **28 GB** in total.
