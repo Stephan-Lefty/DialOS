@@ -93,17 +93,28 @@ account created (the installer requires one) should be named
 name on every rollout, so scripts and docs don't need per-device
 adjustment.
 
-Timezone: `Europe`/`Berlin` as the default (see step 5 - Calamares
-later picks this up automatically for customer installs).
+**Timezone/language - decided on 2026-08-16:** the reference and build
+device runs **`Europe/Vienna` + `de_AT.UTF-8`** (Stephan's location in
+Tyrol), not `Europe/Berlin`. That is deliberate and stays that way.
 
-> **Note the deviation on the reference device (2026-08-16):** the T490
-> actually runs `Europe/Vienna` and `de_AT.UTF-8` (Stephan's location in
-> Tyrol). That's correct for day-to-day use, but it has a consequence for
-> step 16: `eggs produce --clone` clones the running system **including**
-> `/etc/localtime` and the locale - an ISO built that way would ship with
-> Austrian settings, while Calamares' `locale.conf` hard-sets
-> `Europe/Berlin` for customer installs (step 5). Decide which one should
-> win before the final ISO build; see [TODO.en.md](../TODO.en.md).
+What follows from it, so nothing is surprising on the next rebuild:
+
+- **The build device itself and every live ISO taken from it** carry
+  `Europe/Vienna` + `de_AT.UTF-8`, because `eggs produce --clone` (step
+  16) clones the running system including `/etc/localtime` and the
+  locale.
+- **Customer installs via Calamares** still get `Europe/Berlin`: that is
+  hard-set in `locale.conf` (step 5) and applied by the installer to the
+  target system.
+- **Customer installs via `dialos-install`** (the clone path) inherit the
+  build device's Austrian settings instead, because that tool copies the
+  running system rather than reconfiguring it.
+
+So the two customer paths yield different timezones. That's acceptable as
+long as the installing person checks the location page while clicking
+through anyway (see TODO.en.md, the Calamares GeoIP item) - on the clone
+path the timezone has to be set afterwards for a rollout outside Austria
+(`timedatectl set-timezone …`).
 
 **Partitioning - important, choose manual instead of "guided - use
 entire disk"** (since 2026-08-14, see

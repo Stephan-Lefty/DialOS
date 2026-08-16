@@ -98,18 +98,27 @@ bzw. auf diesem Testgerät praktisch **`dialosadmin`** heißen -
 Konvention: Das Admin-/Setup-Konto trägt bei jedem Rollout denselben
 Namen, damit Skripte und Doku nicht pro Gerät angepasst werden müssen.
 
-Zeitzone: `Europe`/`Berlin` als Standard (siehe Schritt 5, Calamares
-übernimmt das später automatisch für Kundeninstallationen).
+**Zeitzone/Sprache - entschieden am 2026-08-16:** Das Referenz- und
+Baugerät läuft auf **`Europe/Vienna` + `de_AT.UTF-8`** (Stephans Standort
+in Tirol), nicht auf `Europe/Berlin`. Das ist bewusst so und bleibt so.
 
-> **Abweichung auf dem Referenzgerät beachten (2026-08-16):** Das T490
-> läuft tatsächlich mit `Europe/Vienna` und `de_AT.UTF-8` (Stephans
-> Standort in Tirol). Für den laufenden Betrieb ist das richtig, hat aber
-> eine Folge für Schritt 16: `eggs produce --clone` klont das laufende
-> System **inklusive** `/etc/localtime` und Locale - eine so gebaute ISO
-> würde also mit österreichischen Einstellungen ausgeliefert, während
-> Calamares' `locale.conf` für Kundeninstallationen fest `Europe/Berlin`
-> setzt (Schritt 5). Vor dem finalen ISO-Bau entscheiden, was gelten
-> soll; siehe [TODO.md](../TODO.md).
+Was daraus folgt, damit beim nächsten Nachbau nichts überrascht:
+
+- **Das Baugerät selbst und jede daraus gezogene Live-ISO** tragen
+  `Europe/Vienna` + `de_AT.UTF-8`, weil `eggs produce --clone` (Schritt
+  16) das laufende System inklusive `/etc/localtime` und Locale klont.
+- **Kundeninstallationen über Calamares** bekommen dagegen weiterhin
+  `Europe/Berlin`: das steht fest in `locale.conf` (Schritt 5) und wird
+  vom Installer auf das Zielsystem angewendet.
+- **Kundeninstallationen über `dialos-install`** (der Klon-Pfad) erben
+  dagegen die österreichischen Einstellungen des Baugeräts, weil dieses
+  Werkzeug das laufende System kopiert statt es neu zu konfigurieren.
+
+Beide Kundenwege liefern also unterschiedliche Zeitzonen. Das ist
+hinnehmbar, solange die installierende Person die Standortseite beim
+Durchklicken ohnehin prüft (siehe TODO.md, Calamares-GeoIP-Punkt) - beim
+Klon-Pfad muss die Zeitzone bei einem Rollout außerhalb Österreichs
+nachträglich gesetzt werden (`timedatectl set-timezone …`).
 
 **Partitionierung - wichtig, manuell statt "geführt - gesamte Platte
 verwenden" wählen** (seit 2026-08-14, siehe

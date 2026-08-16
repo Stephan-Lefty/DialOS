@@ -74,7 +74,8 @@ what has already been done.
   46 GiB RAM). Found 2026-08-16 while reconciling the real partitioning
   against step 1 of the guide; the guide now describes the situation
   including a warning, but the decision itself is still open.
-- [ ] **`dialos-install` and `dialos-rekey` carry the same faults as the
+- [ ] **Deferred (Stephan, 2026-08-16):** **`dialos-install` and
+  `dialos-rekey` carry the same faults as the
   reviewed `dialos-setup-home-partition.sh`** - deliberately not fixed
   along with it, because the fate of the clone path is still undecided
   (item further down). Affected: same over-long ext4 label
@@ -84,13 +85,17 @@ what has already been done.
   142), same missing fallbacks in `ask_password`/`zenity --list`. Either
   carry the fixes over or retire them together with the clone path - but
   don't let them drift apart.
-- [ ] **Settle timezone/locale:** the T490 runs `Europe/Vienna` +
-  `de_AT.UTF-8`, while the guide (step 1) and Calamares' `locale.conf`
-  prescribe `Europe/Berlin`. Vienna is correct for day-to-day use in
-  Tyrol, but `eggs produce --clone` clones timezone and locale into the
-  ISO - an ISO built that way would reach customers with Austrian
-  settings. Decide before the final ISO build (found 2026-08-16).
-- [ ] **Run `dialos-claude-setup.sh` on the freshly installed T490.**
+- [x] **Timezone/locale decided (Stephan, 2026-08-16): stays
+  `Europe/Vienna` + `de_AT.UTF-8`.** Not `Europe/Berlin`, which the guide
+  prescribed until then. Consequence, now documented in
+  Debian-zu-DialOS.en.md step 1: the build device and every ISO taken
+  from it carry the Austrian settings (`eggs produce --clone` clones
+  `/etc/localtime` + locale along); customer installs via Calamares still
+  get Berlin from `locale.conf`, while customer installs via the
+  `dialos-install` clone path get Vienna - set the timezone afterwards
+  there for a rollout outside Austria.
+- [ ] **Deferred (Stephan, 2026-08-16):** **Run `dialos-claude-setup.sh`
+  on the freshly installed T490.**
   Checked 2026-08-16: `credential.helper` is unset, `~/.git-credentials`
   is missing, `/etc/sudoers.d/` contains only the README, and `~/DialOS`
   does not point at the repo on the external drive. So the script has

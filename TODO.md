@@ -75,7 +75,8 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   < 46 GiB RAM). Gefunden 2026-08-16 beim Abgleich der realen
   Partitionierung gegen Schritt 1 der Doku; die Doku beschreibt die Lage
   jetzt inklusive Warnung, die Entscheidung selbst steht noch aus.
-- [ ] **`dialos-install` und `dialos-rekey` haben dieselben Fehler wie
+- [ ] **Zurückgestellt (Stephan, 2026-08-16):** **`dialos-install` und
+  `dialos-rekey` haben dieselben Fehler wie
   das durchgesehene `dialos-setup-home-partition.sh`** - bewusst nicht
   mitkorrigiert, weil über den Klon-Pfad noch nicht entschieden ist (Punkt
   weiter unten). Betroffen: gleiches zu langes ext4-Label
@@ -85,14 +86,17 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   142), gleiche fehlende Fallbacks in `ask_password`/`zenity --list`.
   Entweder mitziehen oder zusammen mit dem Klon-Pfad entfallen lassen -
   aber nicht auseinanderlaufen lassen.
-- [ ] **Zeitzone/Locale festlegen:** Das T490 läuft auf `Europe/Vienna` +
-  `de_AT.UTF-8`, die Doku (Schritt 1) und Calamares' `locale.conf`
-  schreiben `Europe/Berlin` vor. Für den Betrieb in Tirol ist Wien
-  richtig, aber `eggs produce --clone` klont Zeitzone und Locale mit in
-  die ISO - eine so gebaute ISO käme mit österreichischen Einstellungen
-  beim Kunden an. Vor dem finalen ISO-Bau entscheiden (gefunden
-  2026-08-16).
-- [ ] **`dialos-claude-setup.sh` auf dem frisch installierten T490
+- [x] **Zeitzone/Locale entschieden (Stephan, 2026-08-16): bleibt
+  `Europe/Vienna` + `de_AT.UTF-8`.** Nicht `Europe/Berlin`, wie die Doku
+  bis dahin vorschrieb. Folge, jetzt in Debian-zu-DialOS.md Schritt 1
+  dokumentiert: Baugerät und jede daraus gezogene ISO tragen die
+  österreichischen Einstellungen (`eggs produce --clone` klont
+  `/etc/localtime` + Locale mit); Kundeninstallationen über Calamares
+  bekommen weiterhin Berlin aus `locale.conf`, Kundeninstallationen über
+  den `dialos-install`-Klon-Pfad dagegen Wien - dort bei einem Rollout
+  außerhalb Österreichs die Zeitzone nachträglich setzen.
+- [ ] **Zurückgestellt (Stephan, 2026-08-16):** **`dialos-claude-setup.sh`
+  auf dem frisch installierten T490
   ausführen.** Geprüft am 2026-08-16: `credential.helper` ist nicht
   gesetzt, `~/.git-credentials` fehlt, `/etc/sudoers.d/` enthält nur die
   README, und `~/DialOS` zeigt nicht auf das Repo der externen Platte.
