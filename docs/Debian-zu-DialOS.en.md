@@ -778,7 +778,34 @@ Switching back resets every touched key to its **shipped default** via
 `gsettings reset`, not to hand-picked "GNOME-ish" values - otherwise
 switching back and forth repeatedly would not be lossless.
 
-Three details that mattered while building this:
+**Two stumbling blocks, both of which only surfaced during the real
+test run on 2026-08-16:**
+
+- **The running GNOME Shell does not know freshly installed
+  extensions.** It scans `/usr/share/gnome-shell/extensions` only at
+  startup. Right after `apt install` the files are on disk, but
+  `gnome-extensions enable` answers "extension does not exist" - and
+  under Wayland the shell cannot be restarted while running. The script
+  therefore **always additionally writes the UUIDs straight into
+  `org.gnome.shell enabled-extensions`** (via Gio, not by string-editing
+  the `gsettings` output); the shell then enables them at its next
+  start. When it detects this case it says so explicitly: "It will only
+  appear once you log out and back in." Without that sentence a blind
+  user would face a command that apparently does nothing.
+- **Debian's `gnome-shell-extension-arc-menu` (65-2) installs its schema
+  into the wrong directory:** `/usr/share/glib-2/schemas/` instead of
+  `/usr/share/glib-2.0/schemas/`. As a result it never reaches the
+  system-wide schema cache and `gsettings` answers "No such schema" -
+  all three ArcMenu settings were silently skipped on the first test run
+  (the start menu would have appeared in the GNOME default layout
+  instead of the Windows 11 one). The extension itself still works,
+  because GNOME Shell reads the bundled `gschemas.compiled` from the
+  extension's own directory. That is where the script now looks too
+  (`GSETTINGS_SCHEMA_DIR`), deliberately searching all three extension
+  directories: if Debian fixes the typo, the system-wide path applies
+  again automatically.
+
+Three further details that mattered while building this:
 
 - **No blind `gsettings set`.** For every key the script first checks
   whether the schema knows it. A failure mid-switch would otherwise leave

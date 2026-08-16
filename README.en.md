@@ -122,11 +122,39 @@ background) and `splash.png` (boot/login screen).
     the screen; a printed-only message would be the same as none for
     them. That is also why this script is the intended first real voice
     command once the hassil grammar exists.
-  - **Status: failure paths tested, the switch itself not yet.** Tested:
-    missing extensions (aborts with the `apt install` line, exit code 1),
-    a wrong argument, and the guard against `sudo`. The actual switching
-    test is pending because the three packages aren't installed on the
-    T490 yet - tracked in TODO.en.md.
+  - **Tested the same day with the packages installed - and the test run
+    found two faults that were invisible on paper.**
+    - **The running GNOME Shell does not know freshly installed
+      extensions.** It scans `/usr/share/gnome-shell/extensions` only at
+      startup; right after `apt install`, `gnome-extensions enable`
+      answers "extension does not exist", and under Wayland the shell
+      cannot be restarted while running. So the script did write every
+      setting but enabled not a single extension - it looked as if the
+      command did nothing. The UUIDs are now always written straight into
+      `org.gnome.shell enabled-extensions` as well (via Gio), and the
+      case is detected and spoken aloud: "It will only appear once you
+      log out and back in." For a blind user that one sentence is the
+      difference between "broken" and "almost there".
+    - **A packaging fault in Debian:**
+      `gnome-shell-extension-arc-menu` (65-2) installs its schema into
+      `/usr/share/glib-2/schemas/` instead of
+      `/usr/share/glib-2.0/schemas/`. It therefore never reaches the
+      system-wide schema cache, `gsettings` reports "No such schema", and
+      all three ArcMenu settings were silently skipped - the start menu
+      would have appeared in the GNOME default layout instead of the
+      Windows 11 one. It was noticed only because the script reports
+      unknown keys instead of skipping them without comment. The script
+      now reads those settings from the extension's own `schemas`
+      directory (`GSETTINGS_SCHEMA_DIR`), searched across all three
+      extensions: if Debian fixes the typo, the system-wide path applies
+      again automatically.
+    - Then switched back and forth three times, comparing every touched
+      key: `gnome` really does restore the shipped state
+      (`appmenu:close`, hot corner on, dash-to-panel and ArcMenu back to
+      `{}` and `Default`), `windows` then reproduces exactly the same
+      state again, and running it repeatedly creates no duplicate entries
+      in the extension list. What remains is the visual sign-off after
+      the next login.
 - **Audited every Markdown file in the repo against reality
   (2026-08-16).** Prompted by Stephan asking whether the "concept"
   status shouldn't be revised too - he had a point: several `docs/`

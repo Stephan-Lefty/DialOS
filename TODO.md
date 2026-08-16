@@ -53,13 +53,22 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Paketliste und werden mitinstalliert, aber nicht eingeschaltet.
   Beschrieben in `docs/Debian-zu-DialOS.md`, Schritt 11b.
 
-- [ ] **Windows-Umschaltung live testen** (offen seit 2026-08-16). Bisher
-  nur die Fehlerwege geprüft (fehlende Erweiterungen, falsches Argument,
-  Start als root) - die eigentliche Umschaltung noch nicht, weil die drei
-  Pakete auf dem T490 noch nicht installiert sind. Ablauf: installieren,
-  dann als `dialosadmin` `dialos-desktop-stil.sh windows`, Optik prüfen,
-  `... gnome`, und kontrollieren dass wirklich alles wieder wie vorher
-  aussieht (besonders die Fensterknöpfe). Danach dasselbe als `nutzer`.
+- [x] **Windows-Umschaltung technisch getestet (2026-08-16).** Pakete
+  installiert, dreimal hin- und hergeschaltet, jeden berührten Schlüssel
+  verglichen: Rückweg stellt den Auslieferungszustand her, mehrfaches
+  Ausführen erzeugt keine Doppeleinträge. Dabei zwei Fehler gefunden und
+  behoben (GNOME Shell kennt frisch installierte Erweiterungen nicht;
+  ArcMenu-Schema liegt in Debian im falschen Ordner) - Details im
+  Änderungsprotokoll.
+
+- [ ] **Optische Abnahme der Windows-Optik nach dem Anmelden** (offen seit
+  2026-08-16). Die Einstellungen stimmen nachweislich, gesehen hat sie
+  aber noch niemand: Die Erweiterungen greifen erst nach einmaligem
+  Ab- und Anmelden. Zu prüfen: Taskleiste unten mit mittigen Symbolen,
+  ArcMenu-Startmenü links im Windows-11-Layout, Fensterknöpfe rechts,
+  Fenster-Andocken am Bildschirmrand. Danach `dialos-desktop-stil.sh
+  gnome` und kontrollieren, dass wirklich alles wieder wie vorher
+  aussieht. Anschließend dasselbe als `nutzer`.
 
 - [ ] **Rechtschreibprüfung nachrüsten** (`hunspell-de-de`,
   `hunspell-en-us`, `aspell`). Steht in keiner Paketliste. Die frühere

@@ -126,12 +126,42 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
     wäre für sie dasselbe wie gar keine. Genau deshalb ist dieses Skript
     auch der vorgesehene erste echte Sprachbefehl, sobald die
     hassil-Grammatik steht.
-  - **Stand: Fehlerwege geprüft, die Umschaltung selbst noch nicht.**
-    Getestet sind fehlende Erweiterungen (bricht mit der
-    `apt install`-Zeile ab, Exit-Code 1), falsches Argument und der
-    Riegel gegen `sudo`. Der eigentliche Umschalt-Test steht aus, weil
-    die drei Pakete auf dem T490 noch nicht installiert sind - steht in
-    TODO.md.
+  - **Am selben Tag mit installierten Paketen durchgetestet - und der
+    Testlauf hat zwei Fehler gefunden, die auf dem Papier nicht sichtbar
+    waren.**
+    - **Die laufende GNOME Shell kennt frisch installierte Erweiterungen
+      nicht.** Sie durchsucht `/usr/share/gnome-shell/extensions` nur
+      beim Start; direkt nach `apt install` antwortet
+      `gnome-extensions enable` mit "Erweiterung existiert nicht", und
+      unter Wayland lässt sich die Shell nicht im Betrieb neu starten.
+      Das Skript trug damit zwar alle Einstellungen ein, schaltete aber
+      keine einzige Erweiterung ein - es sah aus, als täte der Befehl
+      nichts. Jetzt werden die UUIDs immer zusätzlich direkt in
+      `org.gnome.shell enabled-extensions` geschrieben (über Gio), und
+      der Fall wird erkannt und ausgesprochen: "Sie erscheint erst, wenn
+      du dich einmal abmeldest und wieder anmeldest." Für einen blinden
+      Nutzer ist genau dieser Satz der Unterschied zwischen "funktioniert
+      nicht" und "gleich fertig".
+    - **Ein Paketfehler in Debian:**
+      `gnome-shell-extension-arc-menu` (65-2) legt sein Schema nach
+      `/usr/share/glib-2/schemas/` statt `/usr/share/glib-2.0/schemas/`.
+      Es landet dadurch nie im systemweiten Schema-Cache, `gsettings`
+      meldet "Kein derartiges Schema", und alle drei
+      ArcMenu-Einstellungen wurden still übersprungen - das Startmenü
+      wäre im GNOME-Standardlayout erschienen statt im
+      Windows-11-Layout. Aufgefallen ist es nur, weil das Skript
+      unbekannte Schlüssel meldet, statt sie kommentarlos zu
+      überspringen. Das Skript liest die Einstellungen jetzt aus dem
+      `schemas`-Ordner der Erweiterung (`GSETTINGS_SCHEMA_DIR`), und
+      zwar über alle drei Erweiterungen hinweg gesucht: Behebt Debian
+      den Tippfehler, greift automatisch wieder der systemweite Weg.
+    - Danach dreimal hin- und hergeschaltet und jeden berührten
+      Schlüssel verglichen: `gnome` stellt tatsächlich den
+      Auslieferungszustand wieder her (`appmenu:close`, heiße Ecke an,
+      dash-to-panel und ArcMenu auf `{}` bzw. `Default`), `windows`
+      stellt danach wieder exakt dasselbe her, und mehrfaches Ausführen
+      erzeugt keine Doppeleinträge in der Erweiterungsliste. Was noch
+      aussteht, ist die optische Abnahme nach dem nächsten Anmelden.
 - **Alle Markdown-Dateien des Repos gegen den Ist-Zustand geprüft
   (2026-08-16).** Auslöser war Stephans Frage, ob der "Konzept"-Stand
   nicht auch überarbeitet gehört - er traf einen wunden Punkt: Mehrere

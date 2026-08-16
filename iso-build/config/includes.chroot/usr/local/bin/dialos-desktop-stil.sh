@@ -78,16 +78,91 @@ fehlende_erweiterungen() {
   printf '%s\n' "${fehlt[@]}"
 }
 
+# Kennt die LAUFENDE GNOME Shell die Erweiterung schon? Das ist etwas
+# anderes als "installiert": Die Shell durchsucht
+# /usr/share/gnome-shell/extensions nur beim Start. Frisch per apt
+# installierte Erweiterungen liegen also auf der Platte, sind fuer
+# "gnome-extensions" aber noch unsichtbar ("Erweiterung existiert nicht") -
+# unter Wayland hilft dagegen nur ab- und wieder anmelden, weil sich die
+# Shell dort nicht neu starten laesst. Live gefunden am 2026-08-16.
+kennt_shell() {
+  gnome-extensions list 2>/dev/null | grep -qx "$1"
+}
+
+# Traegt eine UUID in org.gnome.shell enabled-extensions ein bzw. aus.
+# Dieser Weg funktioniert auch dann, wenn die Shell die Erweiterung noch
+# nicht kennt - sie schaltet sie dann beim naechsten Start ein. Ueber
+# Gio statt per Textbastelei an der gsettings-Ausgabe, damit die Liste
+# nicht durch ein falsch gesetztes Anfuehrungszeichen zerstoert wird.
+liste_setzen() {
+  python3 - "$1" "$2" <<'PY'
+import sys
+import gi
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio
+
+aktion, uuid = sys.argv[1], sys.argv[2]
+s = Gio.Settings.new("org.gnome.shell")
+liste = s.get_strv("enabled-extensions")
+if aktion == "ein" and uuid not in liste:
+    liste.append(uuid)
+elif aktion == "aus" and uuid in liste:
+    liste = [x for x in liste if x != uuid]
+else:
+    sys.exit(0)
+s.set_strv("enabled-extensions", liste)
+Gio.Settings.sync()
+PY
+}
+
 # ------------------------------------------------------------ Hilfsmittel
+
+# Findet heraus, aus welchem Verzeichnis ein Schema zu lesen ist.
+#
+# Normalfall: leer, das Schema steckt im systemweiten Cache
+# (/usr/share/glib-2.0/schemas/gschemas.compiled).
+#
+# Ausnahme, live gefunden am 2026-08-16: Debians Paket
+# gnome-shell-extension-arc-menu (65-2) legt sein Schema nach
+# /usr/share/glib-2/schemas/ statt /usr/share/glib-2.0/schemas/ - ein
+# Tippfehler im Paket. Dadurch landet es nie im systemweiten Cache, und
+# "gsettings" antwortet mit "Kein derartiges Schema". Die Erweiterung
+# selbst funktioniert trotzdem, weil GNOME Shell das mitgelieferte
+# gschemas.compiled im Ordner der Erweiterung liest. Genau dort suchen
+# wir deshalb auch - statt den Fehler zu umgehen, indem wir die
+# ArcMenu-Einstellungen einfach weglassen.
+#
+# Bewusst allgemein gehalten (Suche ueber alle Erweiterungs-Ordner):
+# Sollte Debian den Tippfehler beheben, greift automatisch wieder der
+# systemweite Weg, ohne dass hier etwas anzupassen waere.
+schema_verzeichnis() {
+  local schema="$1" u d
+  if gsettings list-schemas 2>/dev/null | grep -qx "$schema"; then
+    echo ""
+    return 0
+  fi
+  for u in "${ALLE_UUIDS[@]}"; do
+    for d in "/usr/share/gnome-shell/extensions/$u/schemas" \
+             "$HOME/.local/share/gnome-shell/extensions/$u/schemas"; do
+      [ -f "$d/gschemas.compiled" ] || continue
+      if GSETTINGS_SCHEMA_DIR="$d" gsettings list-schemas 2>/dev/null | grep -qx "$schema"; then
+        echo "$d"
+        return 0
+      fi
+    done
+  done
+  echo ""
+}
 
 # Setzt einen Wert nur, wenn es den Schluessel im Schema wirklich gibt.
 # Ein blindes "gsettings set" auf einen unbekannten Schluessel bricht mit
 # einem Fehler ab und wuerde den Rest der Umschaltung mitreissen - was den
 # Desktop halb umgestellt zuruecklassen wuerde.
 setze() {
-  local schema="$1" schluessel="$2" wert="$3"
-  if gsettings list-keys "$schema" 2>/dev/null | grep -qx "$schluessel"; then
-    gsettings set "$schema" "$schluessel" "$wert" 2>/dev/null \
+  local schema="$1" schluessel="$2" wert="$3" d
+  d="$(schema_verzeichnis "$schema")"
+  if GSETTINGS_SCHEMA_DIR="$d" gsettings list-keys "$schema" 2>/dev/null | grep -qx "$schluessel"; then
+    GSETTINGS_SCHEMA_DIR="$d" gsettings set "$schema" "$schluessel" "$wert" 2>/dev/null \
       || echo "  Hinweis: $schema $schluessel liess sich nicht setzen." >&2
   else
     echo "  Hinweis: $schema kennt den Schluessel $schluessel nicht (andere Version?) - uebersprungen." >&2
@@ -95,9 +170,10 @@ setze() {
 }
 
 zuruecksetzen() {
-  local schema="$1" schluessel="$2"
-  if gsettings list-keys "$schema" 2>/dev/null | grep -qx "$schluessel"; then
-    gsettings reset "$schema" "$schluessel" 2>/dev/null || true
+  local schema="$1" schluessel="$2" d
+  d="$(schema_verzeichnis "$schema")"
+  if GSETTINGS_SCHEMA_DIR="$d" gsettings list-keys "$schema" 2>/dev/null | grep -qx "$schluessel"; then
+    GSETTINGS_SCHEMA_DIR="$d" gsettings reset "$schema" "$schluessel" 2>/dev/null || true
   fi
 }
 
@@ -138,8 +214,16 @@ auf_windows() {
   #    Einstellungen darunter.
   gsettings set org.gnome.shell disable-user-extensions false 2>/dev/null || true
   local u
+  neustart_noetig=0
   for u in "${ALLE_UUIDS[@]}"; do
-    gnome-extensions enable "$u" 2>/dev/null || echo "  Hinweis: $u liess sich nicht einschalten." >&2
+    # Immer in die Liste eintragen - das ist der Weg, der auch dann
+    # wirkt, wenn die Shell die Erweiterung noch gar nicht kennt.
+    liste_setzen ein "$u" || echo "  Hinweis: $u liess sich nicht eintragen." >&2
+    if kennt_shell "$u"; then
+      gnome-extensions enable "$u" 2>/dev/null || true
+    else
+      neustart_noetig=1
+    fi
   done
 
   # 2. Taskleiste unten, Symbole mittig, Windows-typische Groesse.
@@ -178,7 +262,11 @@ auf_windows() {
   # Windows-Snap (an den Rand ziehen, Kachel-Vorschlag danach).
 
   stil_merken windows
-  melde "Der Schreibtisch sieht jetzt aus wie unter Windows. Die Taskleiste ist unten, das Startmenue links. Sage Bescheid, wenn du zurueck willst."
+  if [ "$neustart_noetig" -eq 1 ]; then
+    melde "Die Windows-Optik ist eingestellt. Sie erscheint aber erst, wenn du dich einmal abmeldest und wieder anmeldest."
+  else
+    melde "Der Schreibtisch sieht jetzt aus wie unter Windows. Die Taskleiste ist unten, das Startmenue links. Sage Bescheid, wenn du zurueck willst."
+  fi
 }
 
 # -------------------------------------------------------------- GNOME-Stil
@@ -188,7 +276,12 @@ auf_gnome() {
 
   local u
   for u in "${ALLE_UUIDS[@]}"; do
-    ist_installiert "$u" && { gnome-extensions disable "$u" 2>/dev/null || true; }
+    kennt_shell "$u" && { gnome-extensions disable "$u" 2>/dev/null || true; }
+    # Zusaetzlich aus der Liste austragen: Sonst schaltet die Shell sie
+    # beim naechsten Start wieder ein, obwohl gerade "gnome" gewaehlt
+    # wurde - der Nutzer haette nach dem Abmelden ungefragt wieder
+    # Windows-Optik.
+    liste_setzen aus "$u" || true
   done
 
   # Alles wieder auf Auslieferungszustand - nicht auf selbst gewaehlte
@@ -219,23 +312,32 @@ auf_gnome() {
 # ----------------------------------------------------------------- Status
 
 zeige_status() {
-  local stil fehlt aktiv u
+  local stil fehlt u eingetragen unbekannt=0
   stil="$(gemerkter_stil)"
+  eingetragen="$(gsettings get org.gnome.shell enabled-extensions 2>/dev/null)"
   echo "Gemerkter Stil: $stil"
   echo
   echo "Erweiterungen:"
   for u in "${ALLE_UUIDS[@]}"; do
     if ! ist_installiert "$u"; then
       printf "  %-40s nicht installiert\n" "$u"
+    elif ! kennt_shell "$u"; then
+      unbekannt=1
+      printf "  %-40s installiert, aber der laufenden Shell noch unbekannt\n" "$u"
+    elif [[ "$eingetragen" == *"'$u'"* ]]; then
+      printf "  %-40s aktiv\n" "$u"
     else
-      aktiv=$(gnome-extensions info "$u" 2>/dev/null | awk -F': ' '/^ *Enabled:/ {print $2}')
-      printf "  %-40s installiert, aktiv: %s\n" "$u" "${aktiv:-unbekannt}"
+      printf "  %-40s installiert, ausgeschaltet\n" "$u"
     fi
   done
   echo
   mapfile -t fehlt < <(fehlende_erweiterungen)
   if [ "${#fehlt[@]}" -gt 0 ] && [ -n "${fehlt[0]}" ]; then
     echo "Zum Nachinstallieren: sudo apt install $PAKETE"
+  elif [ "$unbekannt" -eq 1 ]; then
+    echo "Einmal abmelden und wieder anmelden - dann liest GNOME die neuen"
+    echo "Erweiterungen ein. (Unter Wayland laesst sich die Shell nicht im"
+    echo "laufenden Betrieb neu starten.)"
   fi
 
   if [ "$stil" = "windows" ]; then

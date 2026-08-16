@@ -797,7 +797,35 @@ den **Auslieferungszustand** zurück, nicht auf selbst gewählte
 "GNOME-artige" Werte - sonst wäre mehrfaches Hin- und Herschalten nicht
 verlustfrei.
 
-Drei Details, die beim Bauen wichtig waren:
+**Zwei Stolpersteine, beide erst beim echten Testlauf am 2026-08-16
+sichtbar geworden:**
+
+- **Frisch installierte Erweiterungen kennt die laufende GNOME Shell
+  nicht.** Sie durchsucht `/usr/share/gnome-shell/extensions` nur beim
+  Start. Direkt nach `apt install` liegen die Dateien also auf der
+  Platte, `gnome-extensions enable` antwortet aber mit "Erweiterung
+  existiert nicht" - und unter Wayland lässt sich die Shell nicht im
+  laufenden Betrieb neu starten. Das Skript trägt die UUIDs deshalb
+  **immer zusätzlich direkt in `org.gnome.shell enabled-extensions`**
+  ein (über Gio, nicht per Textbastelei an der `gsettings`-Ausgabe); die
+  Shell schaltet sie dann beim nächsten Start ein. Erkennt es diesen
+  Fall, sagt es ausdrücklich: "Sie erscheint erst, wenn du dich einmal
+  abmeldest und wieder anmeldest." Ohne diesen Satz stünde ein blinder
+  Nutzer vor einem Befehl, der scheinbar nichts tut.
+- **Debians `gnome-shell-extension-arc-menu` (65-2) legt sein Schema in
+  den falschen Ordner:** `/usr/share/glib-2/schemas/` statt
+  `/usr/share/glib-2.0/schemas/`. Dadurch landet es nie im systemweiten
+  Schema-Cache, und `gsettings` antwortet mit "Kein derartiges Schema" -
+  alle drei ArcMenu-Einstellungen wurden beim ersten Testlauf still
+  übersprungen (das Startmenü wäre im GNOME-Standardlayout erschienen
+  statt im Windows-11-Layout). Die Erweiterung selbst läuft trotzdem,
+  weil GNOME Shell das mitgelieferte `gschemas.compiled` im Ordner der
+  Erweiterung liest. Genau dort sucht das Skript jetzt auch
+  (`GSETTINGS_SCHEMA_DIR`), und zwar bewusst allgemein über alle drei
+  Erweiterungs-Ordner: Behebt Debian den Tippfehler, greift automatisch
+  wieder der systemweite Weg.
+
+Drei weitere Details, die beim Bauen wichtig waren:
 
 - **Kein `gsettings set` ins Blaue.** Das Skript prüft für jeden Schlüssel
   erst, ob das Schema ihn kennt. Ein Fehlschlag mitten in der Umschaltung

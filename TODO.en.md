@@ -54,13 +54,21 @@ what has already been done.
   list and get installed but not enabled. Documented in
   `docs/Debian-zu-DialOS.en.md`, step 11b.
 
-- [ ] **Test the Windows switch live** (open since 2026-08-16). So far
-  only the failure paths were checked (missing extensions, wrong
-  argument, starting as root) - not the actual switch, because the three
-  packages aren't installed on the T490 yet. Procedure: install them,
-  then as `dialosadmin` run `dialos-desktop-stil.sh windows`, check the
-  look, run `... gnome`, and verify everything really looks like before
-  (especially the window buttons). Then the same as `nutzer`.
+- [x] **Windows switch tested technically (2026-08-16).** Packages
+  installed, switched back and forth three times, every touched key
+  compared: the way back restores the shipped state, and repeated runs
+  create no duplicate entries. Two faults were found and fixed along the
+  way (GNOME Shell doesn't know freshly installed extensions; the ArcMenu
+  schema is in the wrong directory in Debian) - details in the changelog.
+
+- [ ] **Visual sign-off of the Windows look after logging in** (open
+  since 2026-08-16). The settings are demonstrably correct, but nobody
+  has actually seen them: the extensions only take effect after logging
+  out and back in once. To check: taskbar at the bottom with centered
+  icons, ArcMenu start menu on the left in the Windows 11 layout, window
+  buttons on the right, window snapping at the screen edge. Then run
+  `dialos-desktop-stil.sh gnome` and verify everything really looks like
+  before. Afterwards the same as `nutzer`.
 
 - [ ] **Add spell-checking** (`hunspell-de-de`, `hunspell-en-us`,
   `aspell`). It is in no package list. The earlier rationale in
