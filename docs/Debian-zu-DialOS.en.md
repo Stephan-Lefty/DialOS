@@ -660,6 +660,14 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
 
 - `dialos-say.py`: a reusable voice-output script with audio ducking
   (mutes other audio sources for the duration of the announcement).
+  **Pronunciation rule since 2026-08-16:** every text passes through
+  `fuer_sprachausgabe()` before being spoken, which splits "DialOS" into
+  "Dial OS" - otherwise Piper reads it as one word. Deliberately central
+  in this one place rather than in each announcement text: no future
+  announcement can forget the split, and the texts stay correctly spelled
+  in the source. Further pronunciation rules belong there too. Not
+  matched: `dialosadmin` (no word end after "dialos") and `dialos.org`
+  (the dot is excluded).
 - `dialos-start-ansage.py` ("Michael"): runs at every login, greets the
   user, states date/time, battery levels (filtered by account -
   `nutzer` only gets laptop+speaker, every other account also gets

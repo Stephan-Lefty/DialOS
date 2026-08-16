@@ -55,6 +55,18 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Aussprache: "DialOS" wird jetzt als "Dial OS" gesprochen (Stephans
+  Wunsch, 2026-08-16).** Umgesetzt **zentral** in `dialos-say.py`: Jeder
+  Text läuft vor dem Sprechen durch `fuer_sprachausgabe()`. Damit kann
+  keine künftige Ansage die Trennung vergessen, und die Texte bleiben im
+  Quelltext korrekt geschrieben - der Ansagetext sagt wieder schlicht
+  "DialOS". Beim Suchen zeigte sich übrigens, dass es in gesprochenen
+  Texten nur **eine** Fundstelle gab; alle anderen Treffer waren Pfade,
+  Kommentare und Variablennamen, die nie gesprochen werden. Die Regel
+  lässt `dialosadmin` und `dialos.org` unangetastet - beides per Test
+  abgesichert. Dabei fiel auf, dass mein Kommentar zur Regel falsch war
+  (ein Bindestrich *ist* eine Wortgrenze, `DialOS-System` wird also
+  getrennt - richtig so); korrigiert wurde der Kommentar, nicht der Code.
 - **Ohne Stick ist `nutzer` jetzt gesperrt, nicht nur ohne Autologin
   (2026-08-16, ausgelöst durch Stephans Frage, ob man sich ohne Stick
   überhaupt anmelden kann).** Der Autologin allein war als Schutz

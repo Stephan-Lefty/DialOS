@@ -56,6 +56,18 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Pronunciation: "DialOS" is now spoken as "Dial OS" (Stephan's
+  request, 2026-08-16).** Implemented **centrally** in `dialos-say.py`:
+  every text passes through `fuer_sprachausgabe()` before being spoken.
+  No future announcement can forget the split, and the texts stay
+  correctly spelled in the source - the announcement text simply says
+  "DialOS" again. The search incidentally showed there was only **one**
+  occurrence in spoken text; all other hits were paths, comments and
+  variable names that are never spoken. The rule leaves `dialosadmin` and
+  `dialos.org` untouched - both covered by tests. It also turned out my
+  comment about the rule was wrong (a hyphen *is* a word boundary, so
+  `DialOS-System` does get split - correctly); the comment was fixed, not
+  the code.
 - **Without the stick, `nutzer` is now locked, not merely without
   autologin (2026-08-16, prompted by Stephan's question whether one can
   log in at all without the stick).** Autologin alone was incomplete as

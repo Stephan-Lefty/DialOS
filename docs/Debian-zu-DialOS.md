@@ -678,6 +678,14 @@ enabled=true` steht schon als dconf-Standardwert in
 
 - `dialos-say.py`: wiederverwendbares Sprachausgabe-Skript mit
   Audio-Ducking (mutet andere Audioquellen für die Dauer der Ansage).
+  **Aussprache-Regel seit 2026-08-16:** Jeder Text läuft vor dem Sprechen
+  durch `fuer_sprachausgabe()`, das "DialOS" zu "Dial OS" trennt - sonst
+  liest Piper es als ein Wort. Bewusst zentral an dieser einen Stelle
+  statt in jedem Ansagetext: So kann keine künftige Ansage die Trennung
+  vergessen, und die Texte bleiben im Quelltext korrekt geschrieben.
+  Weitere Aussprache-Regeln gehören ebenfalls dorthin. Nicht getroffen
+  werden `dialosadmin` (kein Wortende nach "dialos") und `dialos.org`
+  (Punkt ist ausgenommen).
 - `dialos-start-ansage.py` ("Michael"): läuft bei jedem Login, begrüßt,
   nennt Datum/Uhrzeit, Akkustände (kontobasiert gefiltert - `nutzer`
   bekommt nur Laptop+Lautsprecher, jedes andere Konto zusätzlich

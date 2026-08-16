@@ -574,7 +574,7 @@ def main():
     )
     if akku_saetze:
         text += (
-            " Dial OS ist so eingerichtet, dass ich Dir jetzt den Akku-Stand aller "
+            " DialOS ist so eingerichtet, dass ich Dir jetzt den Akku-Stand aller "
             "angeschlossenen Geräte mitteile. " + " ".join(akku_saetze)
         )
 

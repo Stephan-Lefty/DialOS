@@ -12,8 +12,32 @@ falls die Lautstaerke zu leise eingestellt ist.
 """
 import json
 import os
+import re
 import subprocess
 import sys
+
+
+def fuer_sprachausgabe(text):
+    """Schreibweisen anpassen, die Piper sonst falsch ausspricht.
+
+    "DialOS" wuerde als ein Wort gelesen. Getrennt geschrieben spricht die
+    Stimme es als "Dial OS", was gemeint ist.
+
+    Bewusst ZENTRAL hier statt in den einzelnen Texten: So kann keine
+    kuenftige Ansage die Trennung vergessen, und die Texte selbst bleiben
+    im Quelltext korrekt geschrieben. Wer eine weitere Aussprache-Regel
+    braucht, ergaenzt sie an dieser einen Stelle.
+
+    Wortgrenze und die Ausnahme fuer den Punkt sind wichtig:
+      "dialosadmin"     bleibt - kein Wortende nach "dialos"
+      "dialos.org"      bleibt - der Lookahead schliesst den Punkt aus
+      "DialOS-System"   wird getrennt - richtig so, es ist gesprochener Text
+    Ein Bindestrich IST eine Wortgrenze, "dialos-say.py" wuerde also
+    ebenfalls getrennt. Das ist folgenlos: Skript- und Dateinamen kommen
+    in gesprochenen Texten nicht vor, nur in Kommentaren und Pfaden - und
+    die laufen nie durch diese Funktion.
+    """
+    return re.sub(r"\bDialOS\b(?!\.)", "Dial OS", text, flags=re.IGNORECASE)
 
 
 def markierungsdatei():
@@ -129,7 +153,7 @@ def main():
         except (IndexError, ValueError):
             intensitaet = None
         argv = argv[2:]
-    text = " ".join(argv)
+    text = fuer_sprachausgabe(" ".join(argv))
     if not text:
         return
     streams = sink_inputs()
