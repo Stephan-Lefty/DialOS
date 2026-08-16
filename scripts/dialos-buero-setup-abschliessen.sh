@@ -3,8 +3,9 @@
 # Installation - fasst mehrere Einzelschritte in einem Klick zusammen:
 # 1. Avatar fuer das Admin-Konto setzen
 # 2. Admin-Werkzeuge auf dialosadmins Arbeitsflaeche bereitstellen
-# 3. "nutzer"-Konto anlegen + Autologin umschalten
-# 4. Firefox-Startseite pruefen (sollte automatisch aus der ISO kommen)
+# 3. Admin-Konto in die Gruppe "adm" aufnehmen (Systemprotokolle lesen)
+# 4. "nutzer"-Konto anlegen + Autologin umschalten
+# 5. Firefox-Startseite pruefen (sollte automatisch aus der ISO kommen)
 #
 # Schritt 2 war bis 2026-08-16 reine Handarbeit aus der Doku (Schritt 13 in
 # docs/Debian-zu-DialOS.md) und damit die einzige Luecke, die den Aufbau
@@ -26,11 +27,11 @@ if [ -z "$ADMIN_HOME" ] || [ ! -d "$ADMIN_HOME" ]; then
   exit 1
 fi
 
-echo "=== [dialos] Schritt 1/4: Avatar setzen ==="
+echo "=== [dialos] Schritt 1/5: Avatar setzen ==="
 "$SCRIPT_DIR/dialos-set-avatar.sh" "$ADMIN_USER"
 
 echo ""
-echo "=== [dialos] Schritt 2/4: Admin-Werkzeuge auf die Arbeitsflaeche ==="
+echo "=== [dialos] Schritt 2/5: Admin-Werkzeuge auf die Arbeitsflaeche ==="
 # WICHTIG: bewusst direkt auf das schon existierende Admin-Konto, NICHT
 # ueber /etc/skel/Desktop/ - /etc/skel wirkt nur auf kuenftig angelegte
 # Konten, und das ist in diesem Rezept ausschliesslich "nutzer". Ueber skel
@@ -109,11 +110,35 @@ else
 fi
 
 echo ""
-echo "=== [dialos] Schritt 3/4: Nutzer-Konto + Autologin ==="
+echo ""
+echo "=== [dialos] Schritt 3/5: Admin-Konto in die Gruppe adm ==="
+# Ohne "adm" liest das Admin-Konto keine Systemprotokolle: "journalctl -u
+# <dienst>" antwortet mit "-- No entries --", obwohl der Dienst sehr wohl
+# protokolliert hat. Live gestolpert am 2026-08-16 bei der Suche nach dem
+# uebersteuerten Mikrofon - die Meldungen des Pegel-Dienstes waren
+# unsichtbar, und der Irrtum "der Dienst tut nichts" lag nahe.
+#
+# "adm" ist Debians Standardgruppe genau dafuer und gibt LESENDEN Zugriff
+# auf Protokolle, sonst nichts - keine zusaetzlichen Rechte am System.
+# Bewusst nicht zusaetzlich "systemd-journal": adm genuegt, weil systemd
+# dieser Gruppe die Journal-ACL ohnehin einraeumt.
+#
+# Gilt nur fuer das ADMIN-Konto. "nutzer" bekommt das nicht - dort waeren
+# Systemprotokolle nutzlos und nur eine zusaetzliche Angriffsflaeche.
+if id -nG "$ADMIN_USER" | tr ' ' '\n' | grep -qx adm; then
+  echo "[dialos] '$ADMIN_USER' ist bereits in der Gruppe adm."
+else
+  usermod -aG adm "$ADMIN_USER"
+  echo "[dialos] '$ADMIN_USER' zur Gruppe adm hinzugefuegt."
+  echo "[dialos] Wirkt erst nach dem naechsten Anmelden."
+fi
+
+echo ""
+echo "=== [dialos] Schritt 4/5: Nutzer-Konto + Autologin ==="
 "$SCRIPT_DIR/dialos-setup-nutzer.sh" "$ADMIN_USER"
 
 echo ""
-echo "=== [dialos] Schritt 4/4: Firefox-Startseite pruefen ==="
+echo "=== [dialos] Schritt 5/5: Firefox-Startseite pruefen ==="
 POLICY_FILE="/usr/lib/firefox-esr/distribution/policies.json"
 if [ -f "$POLICY_FILE" ] && grep -q "dialos.org" "$POLICY_FILE"; then
   echo "[dialos] Firefox-Startseite ist korrekt gesetzt (automatisch aus der ISO)."

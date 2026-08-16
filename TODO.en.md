@@ -72,6 +72,19 @@ what has already been done.
   by 60 dB - the service could not possibly recognize anything. Fixed and
   permanently secured (`dialos-mikrofon-pegel.service`).
 
+- [ ] **Record a demo video with voice input and output** (Stephan's
+  idea of 2026-08-16, for the next working day). It should show what
+  DialOS can actually do today: the login announcement with the volume
+  question, then "auf Windows umschalten" / "auf Linux umschalten" by
+  voice. The open question is the audio capture - the screen alone is not
+  enough, both the system's speech output and the spoken input have to be
+  audible. `wf-recorder` or OBS with two audio tracks (system sound +
+  microphone) would work; neither is installed yet. **Careful with the
+  microphone choice:** the voice-command service listens on the built-in
+  microphone so the AIRHUG stays in A2DP - recording via the headset
+  microphone would drag playback down to phone quality and make the video
+  sound worse than the system actually is.
+
 - [ ] **Repeat the microphone comparison of 2026-08-13.** Back then the
   built-in microphone was judged clearly inferior to the AIRHUG. On
   2026-08-16 it turned out that 60 dB of gain were applied out of the box

@@ -72,6 +72,19 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   übersteuert war - der Dienst konnte prinzipiell nichts erkennen.
   Behoben und dauerhaft abgesichert (`dialos-mikrofon-pegel.service`).
 
+- [ ] **Vorführvideo mit Sprachein- und -ausgabe aufnehmen** (Stephans
+  Idee vom 2026-08-16, für den nächsten Arbeitstag). Zeigen soll es, was
+  DialOS heute wirklich kann: Start-Ansage mit Lautstärke-Frage, dann
+  "auf Windows umschalten" / "auf Linux umschalten" per Zuruf. Zu klären
+  ist dabei die Tonaufnahme - der Bildschirminhalt allein genügt nicht,
+  es müssen sowohl die Sprachausgabe des Systems als auch die gesprochene
+  Eingabe hörbar sein. Denkbar wäre `wf-recorder` oder OBS mit zwei
+  Tonspuren (Systemklang + Mikrofon); beides ist noch nicht installiert.
+  **Achtung bei der Mikrofonwahl:** Der Sprachbefehl-Dienst hört über das
+  eingebaute Mikrofon, damit das AIRHUG in A2DP bleibt - eine Aufnahme
+  über das Headset-Mikrofon würde die Wiedergabe auf Telefonqualität
+  ziehen und das Video schlechter klingen lassen, als das System ist.
+
 - [ ] **Mikrofon-Vergleich vom 2026-08-13 wiederholen.** Damals galt das
   eingebaute Mikrofon als dem AIRHUG deutlich unterlegen. Am 2026-08-16
   stellte sich heraus, dass ab Werk 60 dB Verstärkung anlagen und das

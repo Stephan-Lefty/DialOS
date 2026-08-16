@@ -1179,13 +1179,25 @@ Das Skript erledigt nacheinander:
    - c) ein klickbares Startsymbol für `dialos-rekey` (Ersatz für einen
      verlorenen Sicherheits-Stick), inklusive
      `gio set … metadata::trusted true`.
-3. `dialos-setup-nutzer.sh` - legt `nutzer` an (`adduser
+3. **Admin-Konto in die Gruppe `adm`** (neu 2026-08-16, Stephans
+   Entscheidung). Ohne sie liest `dialosadmin` keine Systemprotokolle:
+   `journalctl -u <dienst>` antwortet mit "-- No entries --", obwohl der
+   Dienst protokolliert hat. Aufgefallen bei der Suche nach dem
+   übersteuerten Mikrofon (Schritt 11e) - der naheliegende Fehlschluss
+   "der Dienst tut nichts" wäre dort teuer geworden. `adm` ist Debians
+   Standardgruppe dafür und gibt ausschließlich **lesenden** Zugriff auf
+   Protokolle, keine weiteren Rechte; `systemd-journal` ist nicht nötig,
+   weil systemd dieser Gruppe die Journal-Rechte ohnehin einräumt.
+   Bewusst nur fürs Admin-Konto - für `nutzer` wären Systemprotokolle
+   nutzlos und nur zusätzliche Angriffsfläche. Wirkt erst nach dem
+   nächsten Anmelden.
+4. `dialos-setup-nutzer.sh` - legt `nutzer` an (`adduser
    --disabled-password`, Gruppen `sudo,audio,video,plugdev,netdev,
    bluetooth,scanner,lpadmin,cdrom`, zufälliges Sudo-Passwort), schaltet
    Autologin von `dialosadmin` auf `nutzer` um (Wiederholungslogik gegen
    einen Timing-Bug: "user is locked" direkt nach `chpasswd`, weil
    AccountsService die neue Passwort-Zeile noch nicht bemerkt hatte).
-4. Prüft, ob die Firefox-Startseiten-Policy aus Schritt 10 korrekt sitzt.
+5. Prüft, ob die Firefox-Startseiten-Policy aus Schritt 10 korrekt sitzt.
 
 > **Zwei Fallen beim `nutzer`-Konto, gefunden beim ersten echten Lauf
 > (2026-08-16), beide behoben:**

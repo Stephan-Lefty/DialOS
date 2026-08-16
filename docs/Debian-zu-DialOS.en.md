@@ -1147,14 +1147,25 @@ The security stick must **still be plugged in** at this point (see step
      sources, this sub-step is skipped rather than aborting the run,
    - c) a clickable launcher for `dialos-rekey` (replacement for a lost
      security stick), including `gio set … metadata::trusted true`.
-3. `dialos-setup-nutzer.sh` - creates `nutzer` (`adduser
+3. **Admin account into the `adm` group** (new 2026-08-16, Stephan's
+   decision). Without it `dialosadmin` reads no system logs:
+   `journalctl -u <service>` answers "-- No entries --" even though the
+   service did log. Noticed while hunting the over-amplified microphone
+   (step 11e) - the obvious wrong conclusion "the service does nothing"
+   would have been expensive there. `adm` is Debian's standard group for
+   this and grants **read** access to logs only, no further rights;
+   `systemd-journal` isn't needed because systemd grants that group the
+   journal rights anyway. Deliberately for the admin account only - for
+   `nutzer` system logs would be useless and merely extra attack
+   surface. Takes effect at the next login.
+4. `dialos-setup-nutzer.sh` - creates `nutzer` (`adduser
    --disabled-password`, groups
    `sudo,audio,video,plugdev,netdev,bluetooth,scanner,lpadmin,cdrom`,
    random sudo password), switches autologin from `dialosadmin` to
    `nutzer` (with retry logic against a timing bug: "user is locked"
    right after `chpasswd`, because AccountsService hadn't yet noticed
    the new password entry).
-4. Checks that the Firefox homepage policy from step 10 is set
+5. Checks that the Firefox homepage policy from step 10 is set
    correctly.
 
 > **Two pitfalls around the `nutzer` account, found during the first real

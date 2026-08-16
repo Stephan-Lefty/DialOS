@@ -123,7 +123,7 @@ Aufruf: `sudo ./dialos-claude-setup.sh`
 ## dialos-buero-setup-abschliessen.sh
 
 Sammel-Skript für den letzten Schritt nach einer frischen Installation,
-seit 2026-08-16 vier Teilschritte:
+seit 2026-08-16 fünf Teilschritte:
 
 1. `dialos-set-avatar.sh` - Profilbild fürs Admin-Konto.
 2. **Admin-Werkzeuge auf `dialosadmin`s Arbeitsfläche** (neu 2026-08-16):
@@ -135,10 +135,18 @@ seit 2026-08-16 vier Teilschritte:
    bestehen. `gio set` läuft per `runuser` als das Admin-Konto, nicht als
    root - das Vertrauens-Merkmal liegt in dessen eigener
    Metadaten-Ablage.
-3. `dialos-setup-nutzer.sh` - `nutzer`-Konto + Autologin-Umschaltung.
+3. **Admin-Konto in die Gruppe `adm`** (neu 2026-08-16): Ohne sie liest
+   `dialosadmin` keine Systemprotokolle - `journalctl -u <dienst>`
+   antwortet mit "-- No entries --", obwohl der Dienst protokolliert hat.
+   Genau darüber bin ich bei der Suche nach dem übersteuerten Mikrofon
+   gestolpert und hätte den Pegel-Dienst beinahe für wirkungslos
+   gehalten. `adm` gibt ausschließlich **lesenden** Zugriff auf
+   Protokolle, keine weiteren Rechte, und gilt nur fürs Admin-Konto -
+   `nutzer` bekommt sie nicht. Wirkt erst nach dem nächsten Anmelden.
+4. `dialos-setup-nutzer.sh` - `nutzer`-Konto + Autologin-Umschaltung.
    Braucht den **noch eingesteckten** Sicherheits-Stick, sonst bricht es
    kontrolliert ab.
-4. Prüft, ob die Firefox-Startseite korrekt gesetzt ist (sollte
+5. Prüft, ob die Firefox-Startseite korrekt gesetzt ist (sollte
    automatisch aus der ISO kommen, wird hier nur kontrolliert).
 
 Aufruf: `sudo ./dialos-buero-setup-abschliessen.sh [admin-benutzername]`

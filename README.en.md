@@ -99,6 +99,19 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **`dialosadmin` now belongs to the `adm` group (Stephan's decision,
+  2026-08-16).** The gap surfaced while hunting the over-amplified
+  microphone: `journalctl -u dialos-mikrofon-pegel.service` answered
+  "-- No entries --" even though the service had certainly logged.
+  Without `adm` the admin account reads no system logs - and the obvious
+  wrong conclusion, "the service does nothing", would have been
+  expensive for a service doing exactly the opposite. `adm` is Debian's
+  standard group for this and grants **read** access to logs only, no
+  further rights on the system; `systemd-journal` isn't needed because
+  systemd grants that group the journal rights anyway. Deliberately for
+  the admin account only - for `nutzer` system logs would be useless and
+  merely extra attack surface. Built in as step 3 of 5 in
+  `dialos-buero-setup-abschliessen.sh`; takes effect at the next login.
 - **The built-in microphone was over-amplified by 60 dB - and that alone
   made the voice command useless (found 2026-08-16).** Stephan reported
   "switching doesn't work". The service was running fine; the fault was

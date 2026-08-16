@@ -100,6 +100,21 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **`dialosadmin` gehört jetzt zur Gruppe `adm` (Stephans Entscheidung,
+  2026-08-16).** Aufgefallen ist die Lücke bei der Fehlersuche am
+  übersteuerten Mikrofon: `journalctl -u dialos-mikrofon-pegel.service`
+  antwortete mit "-- No entries --", obwohl der Dienst sehr wohl
+  protokolliert hatte. Ohne `adm` liest das Admin-Konto keine
+  Systemprotokolle - und der naheliegende Fehlschluss "der Dienst tut
+  nichts" wäre bei einem Dienst, der genau das Gegenteil tut, teuer
+  geworden. `adm` ist Debians Standardgruppe dafür und gibt
+  ausschließlich **lesenden** Zugriff auf Protokolle, keine weiteren
+  Rechte am System; `systemd-journal` ist nicht nötig, weil systemd
+  dieser Gruppe die Journal-Rechte ohnehin einräumt. Gilt bewusst nur
+  fürs Admin-Konto - für `nutzer` wären Systemprotokolle nutzlos und nur
+  eine zusätzliche Angriffsfläche. Eingebaut als Schritt 3 von 5 in
+  `dialos-buero-setup-abschliessen.sh`, wirkt nach dem nächsten
+  Anmelden.
 - **Das eingebaute Mikrofon war um 60 dB übersteuert - und genau das
   machte den Sprachbefehl wirkungslos (gefunden 2026-08-16).** Stephan
   meldete "Umschalten funktioniert nicht". Der Dienst lief einwandfrei;
