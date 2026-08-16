@@ -84,9 +84,25 @@ if [ -f "$REKEY_DESKTOP" ]; then
   chmod 755 "$DESKTOP_DIR/dialos-rekey.desktop"
   chown "$ADMIN_USER":"$ADMIN_USER" "$DESKTOP_DIR/dialos-rekey.desktop"
   echo "[dialos] Startsymbol fuer dialos-rekey abgelegt."
+  # DBUS_SESSION_BUS_ADDRESS muss mitgegeben werden: "runuser" reicht die
+  # Umgebung des aufrufenden Kontos NICHT durch, und ohne Sitzungsbus
+  # findet "gio" die Metadaten-Ablage des Benutzers nicht. Am 2026-08-16
+  # scheiterte der Aufruf genau daran - die damalige Fehlermeldung
+  # ("keine laufende Sitzung?") war eine Fehldiagnose, das Konto war
+  # sehr wohl angemeldet.
   if command -v runuser >/dev/null 2>&1; then
-    runuser -u "$ADMIN_USER" -- gio set "$DESKTOP_DIR/dialos-rekey.desktop" metadata::trusted true 2>/dev/null \
-      || echo "[dialos] Hinweis: 'gio set metadata::trusted' ging nicht (keine laufende Sitzung von '$ADMIN_USER'?) - beim ersten Doppelklick ggf. einmal 'Vertrauen und starten' bestaetigen."
+    ADMIN_UID=$(id -u "$ADMIN_USER")
+    if runuser -u "$ADMIN_USER" -- env \
+         DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$ADMIN_UID/bus" \
+         XDG_RUNTIME_DIR="/run/user/$ADMIN_UID" \
+         gio set "$DESKTOP_DIR/dialos-rekey.desktop" metadata::trusted true 2>/dev/null; then
+      echo "[dialos] Startsymbol als vertrauenswuerdig markiert."
+    else
+      echo "[dialos] Hinweis: 'gio set metadata::trusted' ging nicht - das gelingt nur,"
+      echo "[dialos]          wenn '$ADMIN_USER' gerade grafisch angemeldet ist. Sonst"
+      echo "[dialos]          beim ersten Doppelklick einmal 'Vertrauen und starten'"
+      echo "[dialos]          bestaetigen; danach ist Ruhe."
+    fi
   fi
 else
   echo "[dialos] WARNUNG: $REKEY_DESKTOP fehlt - lief Schritt 12 (Sicherheits-Werkzeuge) durch?" >&2
