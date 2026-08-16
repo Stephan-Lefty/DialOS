@@ -55,6 +55,29 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **`nutzer` hätte ein Home bekommen, das ihm nicht gehört - gefunden
+  beim ersten echten Lauf von Skript 3 (2026-08-16).** `adduser` meldete
+  "The home directory `/home/nutzer' already exists. Not touching this
+  directory" und ließ daraufhin **beides** bleiben: den `chown` auf das
+  neue Konto *und* das Kopieren von `/etc/skel`. Das Home gehörte danach
+  `root:root` - `nutzer` hätte sein eigenes Verzeichnis nicht beschreiben
+  können, GNOME weder `~/.config` noch `~/.cache` anlegen. Bei einem
+  Konto, das per Autologin startet und dessen Nutzer blind ist, wäre das
+  ein Totalausfall ohne jede Selbsthilfemöglichkeit gewesen. Ursache ist
+  der neue Aufbauweg selbst: `dialos-setup-home-partition.sh` legt die
+  verschlüsselte Partition an und mountet sie, *bevor* das Konto
+  existiert. `dialos-setup-nutzer.sh` arbeitet das jetzt nach (`/etc/skel`
+  kopieren, `chown`, `chmod 700`) - das Kopieren nur, wenn das Home außer
+  `lost+found` leer ist, damit vorhandene Daten nie überschrieben werden.
+- **Dabei aufgefallen: `/etc/skel` des echten Systems wurde nie
+  befüllt.** Die Schritte 9 und 10 kopierten die DialOS-Vorlagen aus dem
+  Repo bisher ausschließlich in `dialosadmin`s Home. `nutzer` hätte damit
+  weder die Bluetooth-Akku-Erweiterung noch Thunderbird als
+  Standard-Mailprogramm noch die Nautilus-Lesezeichen bekommen - obwohl
+  die Doku `/etc/skel` ausdrücklich als Weg "für neue Konten automatisch"
+  nennt. Beide Schritte legen die Dateien jetzt zusätzlich dort ab;
+  Admin-Skripte gehören weiterhin ausdrücklich **nicht** nach `/etc/skel`
+  (Korrektur vom 2026-08-14 gilt unverändert).
 - **Erster echter End-to-end-Lauf auf dem T490 (2026-08-16) - Skript 1
   und 2 komplett durchgelaufen.** Alle vorher behobenen Fehler wären real
   aufgetreten (der RustDesk-Abhängigkeits-Fallback hat sichtbar

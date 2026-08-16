@@ -204,6 +204,15 @@ schritt_09_gnome_erweiterungen() {
   mkdir -p ~/.local/share/gnome-shell/extensions
   cp -r "iso-build/config/includes.chroot/etc/skel/.local/share/gnome-shell/extensions/bluetooth-battery-monitor@v8v88v8v88.com" \
     ~/.local/share/gnome-shell/extensions/
+
+  # Zusaetzlich nach /etc/skel, damit "nutzer" (Schritt 13) die Erweiterung
+  # automatisch mitbekommt. Ergaenzt 2026-08-16: vorher wurde die Vorlage
+  # aus dem Repo NUR in dialosadmins Home kopiert und /etc/skel des echten
+  # Systems nie befuellt - "nutzer" hatte die Erweiterung damit nie, obwohl
+  # die Doku sie als Standard fuer neue Konten beschreibt.
+  sudo mkdir -p /etc/skel/.local/share/gnome-shell/extensions
+  sudo cp -r "iso-build/config/includes.chroot/etc/skel/.local/share/gnome-shell/extensions/bluetooth-battery-monitor@v8v88v8v88.com" \
+    /etc/skel/.local/share/gnome-shell/extensions/
   echo "Hinweis: Neue Erweiterungen werden unter Wayland erst nach einem echten Ab-/Anmelden erkannt."
 }
 
@@ -221,6 +230,15 @@ schritt_10_standardprogramme() {
 
   mkdir -p ~/.config/gtk-3.0
   cp iso-build/config/includes.chroot/etc/skel/.config/gtk-3.0/bookmarks ~/.config/gtk-3.0/bookmarks
+
+  # Ebenfalls nach /etc/skel, aus demselben Grund wie in Schritt 9: sonst
+  # bekommt "nutzer" weder Thunderbird als Standard-Mailprogramm noch die
+  # Nautilus-Lesezeichen. Wichtig: hier landen NUR Nutzer-Voreinstellungen
+  # in /etc/skel - die Admin-Skripte gehoeren ausdruecklich NICHT dorthin
+  # (siehe scripts/README.md, Korrektur vom 2026-08-14).
+  sudo mkdir -p /etc/skel/.config/gtk-3.0
+  sudo cp iso-build/config/includes.chroot/etc/skel/.config/mimeapps.list /etc/skel/.config/mimeapps.list
+  sudo cp iso-build/config/includes.chroot/etc/skel/.config/gtk-3.0/bookmarks /etc/skel/.config/gtk-3.0/bookmarks
 }
 
 schritt_11_sprachausgabe() {

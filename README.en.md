@@ -56,6 +56,29 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **`nutzer` would have got a home they don't own - found during the
+  first real run of script 3 (2026-08-16).** `adduser` reported "The home
+  directory `/home/nutzer' already exists. Not touching this directory"
+  and consequently skipped **both** the `chown` to the new account *and*
+  copying `/etc/skel`. The home was left owned by `root:root` - `nutzer`
+  could not have written to their own directory, and GNOME could have
+  created neither `~/.config` nor `~/.cache`. On an account that starts
+  via autologin and whose user is blind, that would have been a total
+  failure with no way to self-recover. The cause is the new build path
+  itself: `dialos-setup-home-partition.sh` creates and mounts the
+  encrypted partition *before* the account exists.
+  `dialos-setup-nutzer.sh` now handles this afterwards (copy `/etc/skel`,
+  `chown`, `chmod 700`) - copying only when the home is empty apart from
+  `lost+found`, so existing data is never overwritten.
+- **Noticed alongside it: the real system's `/etc/skel` was never
+  populated.** Steps 9 and 10 previously copied the DialOS templates from
+  the repo into `dialosadmin`'s home only. `nutzer` would therefore have
+  received neither the Bluetooth battery extension, nor Thunderbird as
+  the default mail client, nor the Nautilus bookmarks - even though the
+  guide explicitly names `/etc/skel` as the route "automatically for new
+  accounts". Both steps now additionally place the files there; admin
+  scripts still explicitly do **not** belong in `/etc/skel` (the
+  2026-08-14 correction stands unchanged).
 - **First real end-to-end run on the T490 (2026-08-16) - scripts 1 and 2
   completed.** Every fault fixed beforehand would have occurred for real
   (the RustDesk dependency fallback visibly kicked in), and the fixes

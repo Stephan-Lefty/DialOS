@@ -62,6 +62,36 @@ else
   echo "[dialos] Lege Standard-Benutzer '$USERNAME' an..."
   adduser --disabled-password --gecos "" "$USERNAME"
 fi
+
+# --- Home-Verzeichnis nacharbeiten ---
+# Bei diesem Aufbauweg ist /home/nutzer der NORMALFALL schon vorhanden:
+# dialos-setup-home-partition.sh legt die verschluesselte Partition an und
+# mountet sie, bevor das Konto existiert. adduser meldet dann "The home
+# directory already exists. Not touching this directory" und laesst
+# daraufhin BEIDES bleiben - den chown auf den neuen Benutzer und das
+# Kopieren von /etc/skel.
+#
+# Folge ohne diese Nacharbeit: das Home gehoert weiter root, "nutzer" kann
+# sein eigenes Verzeichnis nicht beschreiben. GNOME koennte weder
+# ~/.config noch ~/.cache anlegen, die Sitzung waere unbrauchbar - bei
+# einem Konto, das per Autologin startet und dessen Nutzer blind ist, ein
+# Totalausfall ohne Selbsthilfemoeglichkeit. Gefunden beim ersten echten
+# End-to-end-Lauf am 2026-08-16.
+HOME_DIR=$(getent passwd "$USERNAME" | cut -d: -f6)
+if [ -n "$HOME_DIR" ] && [ -d "$HOME_DIR" ]; then
+  # /etc/skel nur nachziehen, wenn das Home praktisch leer ist - bei einem
+  # frisch formatierten ext4 steht dort nur lost+found. Vorhandene
+  # Nutzerdaten werden so nie ueberschrieben.
+  if [ -z "$(ls -A "$HOME_DIR" 2>/dev/null | grep -v '^lost+found$')" ]; then
+    echo "[dialos] /home/$USERNAME war leer - kopiere /etc/skel nach."
+    cp -a /etc/skel/. "$HOME_DIR/"
+  fi
+  chown -R "$USERNAME":"$USERNAME" "$HOME_DIR"
+  # lost+found muss root gehoeren, sonst stolpert fsck spaeter darueber.
+  [ -d "$HOME_DIR/lost+found" ] && chown root:root "$HOME_DIR/lost+found"
+  chmod 700 "$HOME_DIR"
+  echo "[dialos] Besitzer und Rechte von $HOME_DIR gesetzt ($USERNAME, 700)."
+fi
 usermod -aG sudo,audio,video,plugdev,netdev,bluetooth,scanner,lpadmin,cdrom "$USERNAME"
 # Zufaelliges Passwort pro Setup-Lauf, nur fuer Sudo/Admin-Zwecke relevant -
 # der Endnutzer tippt nie etwas (Autologin uebernimmt die Anmeldung).

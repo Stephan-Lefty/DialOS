@@ -759,6 +759,33 @@ The security stick must **still be plugged in** at this point (see step
 4. Checks that the Firefox homepage policy from step 10 is set
    correctly.
 
+> **Two pitfalls around the `nutzer` account, found during the first real
+> run (2026-08-16), both fixed:**
+>
+> 1. **`adduser` does not touch an existing home.** On this build path
+>    `/home/nutzer` normally already exists -
+>    `dialos-setup-home-partition.sh` creates the encrypted partition and
+>    mounts it *before* the account exists. `adduser` then reports "The
+>    home directory already exists. Not touching this directory" and as a
+>    result skips **both** the `chown` to the new user *and* copying
+>    `/etc/skel`. The result was a home owned by `root:root` - `nutzer`
+>    could not have written to their own directory, and GNOME could have
+>    created neither `~/.config` nor `~/.cache`. On an account that starts
+>    via autologin and whose user is blind, that is a total failure with
+>    no way to self-recover. `dialos-setup-nutzer.sh` now handles this
+>    afterwards (copy skel, `chown`, `chmod 700`) - copying only when the
+>    home is empty apart from `lost+found`, so existing data is never
+>    overwritten.
+> 2. **The real system's `/etc/skel` was never populated.** Steps 9 and 10
+>    previously copied the DialOS templates from the repo only into
+>    `dialosadmin`'s home. `nutzer` would therefore have received neither
+>    the Bluetooth battery extension, nor Thunderbird as the default mail
+>    client, nor the Nautilus bookmarks - even though step 9 explicitly
+>    names `/etc/skel` as the route "automatically for new accounts". Both
+>    steps now additionally place the files under `/etc/skel/`.
+>    **Important:** only user preferences belong there, never the admin
+>    scripts (see the 2026-08-14 correction directly below).
+
 **Why sub-step 2 looks the way it does** (important correction from
 2026-08-14, still applies): all scripts in `scripts/` are **for
 `dialosadmin` only** - `nutzer` should never see them. They are therefore

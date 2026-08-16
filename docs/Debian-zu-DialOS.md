@@ -767,6 +767,35 @@ Das Skript erledigt nacheinander:
    AccountsService die neue Passwort-Zeile noch nicht bemerkt hatte).
 4. Prüft, ob die Firefox-Startseiten-Policy aus Schritt 10 korrekt sitzt.
 
+> **Zwei Fallen beim `nutzer`-Konto, gefunden beim ersten echten Lauf
+> (2026-08-16), beide behoben:**
+>
+> 1. **`adduser` fasst ein vorhandenes Home nicht an.** Bei diesem
+>    Aufbauweg ist `/home/nutzer` der Normalfall schon vorhanden -
+>    `dialos-setup-home-partition.sh` legt die verschlüsselte Partition an
+>    und mountet sie, *bevor* das Konto existiert. `adduser` meldet dann
+>    "The home directory already exists. Not touching this directory" und
+>    lässt daraufhin **beides** bleiben: den `chown` auf den neuen
+>    Benutzer *und* das Kopieren von `/etc/skel`. Ergebnis war ein Home,
+>    das `root:root` gehörte - `nutzer` hätte sein eigenes Verzeichnis
+>    nicht beschreiben können, GNOME weder `~/.config` noch `~/.cache`
+>    anlegen. Bei einem Konto, das per Autologin startet und dessen
+>    Nutzer blind ist, ein Totalausfall ohne Selbsthilfemöglichkeit.
+>    `dialos-setup-nutzer.sh` arbeitet das jetzt nach (skel kopieren,
+>    `chown`, `chmod 700`) - das Kopieren nur, wenn das Home außer
+>    `lost+found` leer ist, damit vorhandene Daten nie überschrieben
+>    werden.
+> 2. **`/etc/skel` des echten Systems wurde nie befüllt.** Die Schritte 9
+>    und 10 kopierten die DialOS-Vorlagen aus dem Repo bisher nur in
+>    `dialosadmin`s Home. `nutzer` hätte damit weder die
+>    Bluetooth-Akku-Erweiterung noch Thunderbird als Standard-Mailprogramm
+>    noch die Nautilus-Lesezeichen bekommen - obwohl Schritt 9 `/etc/skel`
+>    ausdrücklich als Weg "für neue Konten automatisch" nennt. Beide
+>    Schritte legen die Dateien jetzt zusätzlich unter `/etc/skel/` ab.
+>    **Wichtig:** dorthin gehören ausschließlich Nutzer-Voreinstellungen,
+>    niemals die Admin-Skripte (siehe die Korrektur vom 2026-08-14 direkt
+>    darunter).
+
 **Warum Teilschritt 2 so aussieht, wie er aussieht** (wichtige Korrektur
 vom 2026-08-14, gilt weiterhin): Alle Skripte in `scripts/` sind **nur
 für `dialosadmin`** gedacht - `nutzer` soll sie nie zu Gesicht bekommen.
