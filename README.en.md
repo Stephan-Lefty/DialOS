@@ -221,6 +221,33 @@ background) and `splash.png` (boot/login screen).
   (step 1) - now documented in `Debian-zu-DialOS.md`. Both new scripts
   are only syntax-checked so far, not yet tested for real - planned for
   the next full T490 rebuild (see TODO.md).
+- **Switched the weather location to GeoClue2:** triggered by a concrete
+  live finding - `dialos-start-ansage.py` previously queried `wttr.in`
+  without a location, which guesses the location itself via IP; on
+  Stephan's network that showed Vienna instead of his real location
+  (Seefeld in Tirol). A location fixed in the script was ruled out as a
+  fix since the device is also meant to be used while traveling. Now
+  `dialos-start-ansage.py` queries the location via GeoClue2 (system
+  bus, automatically uses the best available source - WiFi lookup via
+  Mozilla Location Service, otherwise an IP estimate as fallback) and
+  passes the coordinates directly to `wttr.in`. Tested live at the real
+  location along the way and found an important effect: GeoClue2 also
+  falls back to a coarse IP estimate ("ipf fallback", ~25-26 km
+  inaccurate, ~300 km off in reality) without a WiFi match in Mozilla's
+  database - so a new accuracy threshold was added (fixes less accurate
+  than 10 km are discarded), and the weather announcement is then
+  deliberately skipped rather than naming the wrong city/region (same
+  as with missing internet or missing Bluetooth devices - better to say
+  nothing than something wrong). Deliberate trade-off: in areas with
+  sparse WiFi-database coverage (e.g. rural regions), the weather
+  announcement may therefore be missing more often than before.
+  Prerequisite: unlock the app in `/etc/geoclue/geoclue.conf` +
+  `org.gnome.system.location enabled=true` (now in
+  `01-dialos-defaults`), otherwise `AccessDenied` - both found live and
+  carried into `scripts/dialos-full-office-setup.sh`/
+  `Debian-zu-DialOS.en.md`. Along the way: the weather announcement now
+  also names the detected location ("Das Wetter in Seefeld in Tirol
+  wird heute so sein.").
 
 ### 0.4.0
 - Removed Evolution and GNOME Calendar from the app grid and search

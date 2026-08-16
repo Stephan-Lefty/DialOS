@@ -13,6 +13,8 @@ firmware-linux-free
 firmware-iwlwifi
 firmware-misc-nonfree
 intel-microcode
+geoclue-2.0
+python3-dbus
 
 firefox-esr
 thunderbird

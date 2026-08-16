@@ -423,6 +423,18 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-start-ansage.d
 sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.desktop /etc/xdg/autostart/
 ```
 
+**Unlock location lookup for the weather (GeoClue2)** (since
+2026-08-14, see TODO.md for the backstory) - otherwise
+`AccessDenied: Geolocation disabled` when a location is requested:
+
+```bash
+printf '\n[dialos-start-ansage]\nallowed=true\nsystem=true\nusers=\n' | sudo tee -a /etc/geoclue/geoclue.conf > /dev/null
+```
+
+(Only append, don't overwrite - otherwise Debian's own default entries
+for other apps get lost. `org.gnome.system.location enabled=true` is
+already a dconf default in `01-dialos-defaults`, see step 3.)
+
 - `dialos-say.py`: a reusable voice-output script with audio ducking
   (mutes other audio sources for the duration of the announcement).
 - `dialos-start-ansage.py` ("Michael"): runs at every login, greets the
@@ -437,6 +449,20 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.
   practical rule here:** always switch accounts via a proper logout,
   never via GNOME "switch user" (see
   [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)).
+  **Weather location via GeoClue2 since 2026-08-14, instead of a fixed
+  or IP-guessed location** (the device is also used while traveling, so
+  a fixed location wasn't an option) - automatically uses the best
+  available source (WiFi lookup via Mozilla Location Service, otherwise
+  an IP estimate as a fallback). Fixes less accurate than 10 km
+  (typically a plain IP estimate with no WiFi match in Mozilla's
+  database - observed live: ~25 km inaccuracy, off by about 300 km from
+  the real position) are discarded and the weather announcement is
+  skipped rather than naming the wrong city. This means: **in areas
+  with sparse Mozilla WiFi-database coverage (e.g. rural/sparsely
+  populated regions), the weather announcement may be skipped more
+  often** than with the old, less accurate but always-"some answer"
+  IP-guess approach - that's a deliberate trade-off (better to say
+  nothing than something wrong).
 - `dialos-tts-indicator.py`: a panel icon that shows when something is
   currently being spoken (needs the AppIndicator extension from step 9).
 

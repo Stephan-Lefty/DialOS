@@ -9,6 +9,28 @@ architecture questions), these are concrete, checkable tasks. Completed
 items are marked with a checkmark, not deleted - so it stays traceable
 what has already been done.
 
+- [ ] `dialos-start-ansage.py` should ask `nutzer` for the desired
+  announcement volume during the startup announcement (100%, 75%, 50%,
+  25%, off) - currently no way to adjust the announcement's own volume.
+- [x] Switched the weather location to GeoClue2 instead of IP guessing -
+  done 2026-08-14, tested extensively live (see README changelog 0.5.0
+  and docs/Debian-zu-DialOS.en.md, step 11, for details). Trigger:
+  `wttr.in`'s own IP-based location showed Vienna instead of Stephan's
+  real location (Seefeld in Tirol) - a fixed location was ruled out
+  since the device is also used while traveling. Live finding along the
+  way: GeoClue2 also falls back to a coarse IP estimate ("ipf fallback",
+  ~25-26 km inaccurate, ~300 km off in reality) in areas with sparse
+  Mozilla WiFi-database coverage - so an accuracy threshold (>10 km gets
+  discarded) was added, and the weather announcement is then
+  deliberately skipped rather than naming the wrong city/region. Can
+  therefore be missing more often in rural areas than before - an
+  accepted trade-off.
+- [ ] `docs/hardware.md` still needs: whether the final reference
+  Bluetooth speaker/microphone supports German as its own announcement
+  language (the device's own firmware prompts like "connected"/low
+  battery, not DialOS itself) - standard Bluetooth profiles (A2DP/HFP)
+  offer no remote control for this, it's purely device-/vendor-
+  dependent. Factor this into the reference hardware selection.
 - [ ] **Next step:** completely reinstall the T490 and use it to really
   test the whole new flow (never run end-to-end yet): install Debian 13
   + GNOME manually (step 1, **with** the partitioning note documented

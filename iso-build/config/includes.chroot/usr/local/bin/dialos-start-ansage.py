@@ -209,16 +209,102 @@ def internet_verfuegbar():
         return False
 
 
+GEOCLUE_DESKTOP_ID = "dialos-start-ansage"
+GEOCLUE_ANGEFRAGTE_GENAUIGKEIT = 4  # GCLUE_ACCURACY_LEVEL_CITY - nicht mehr
+    # Praezision anfragen als fuers Wetter noetig (Datenschutz).
+GEOCLUE_MAX_UNGENAUIGKEIT_METER = 10000  # Fixes, die groeber sind als das
+    # (typischerweise eine reine IP-Schaetzung, "ipf fallback" - live am
+    # 2026-08-14 mit ~25-26 km Ungenauigkeit beobachtet, dabei komplett
+    # falsche Stadt), werden verworfen - lieber die Wetteransage auslassen
+    # als eine falsche Stadt/Region anzusagen (siehe Chat-Verlauf: Wien
+    # statt Seefeld in Tirol).
+GEOCLUE_WARTE_SEKUNDEN = 10
+
+
+def geoclue_standort():
+    """Aktuellen Standort (Breite, Laenge) per GeoClue2 ermitteln - nutzt
+    automatisch die beste verfuegbare Quelle (WLAN-Abgleich ueber Mozilla
+    Location Service, ggf. GPS/Mobilfunk falls vorhanden, sonst IP-
+    Schaetzung als Fallback). Laeuft ueber den System-Bus, nicht den
+    Session-Bus (GeoClue2 ist ein systemweiter Dienst). Gibt None zurueck,
+    wenn kein ausreichend genauer Standort ermittelt werden konnte -
+    absichtlich KEIN Fallback auf einen fest hinterlegten Ort, da das
+    Geraet auch unterwegs genutzt wird.
+
+    Voraussetzung: "dialos-start-ansage" muss in /etc/geoclue/geoclue.conf
+    freigeschaltet sein (siehe scripts/dialos-full-office-setup.sh,
+    Schritt 11) und org.gnome.system.location muss aktiviert sein (siehe
+    01-dialos-defaults) - sonst "AccessDenied", von diesem try/except
+    genauso abgefangen wie jeder andere Fehler.
+    """
+    try:
+        import dbus
+
+        bus = dbus.SystemBus()
+        manager = bus.get_object(
+            "org.freedesktop.GeoClue2", "/org/freedesktop/GeoClue2/Manager"
+        )
+        client_pfad = manager.GetClient(
+            dbus_interface="org.freedesktop.GeoClue2.Manager"
+        )
+        client = bus.get_object("org.freedesktop.GeoClue2", client_pfad)
+        client_props = dbus.Interface(client, "org.freedesktop.DBus.Properties")
+        client_props.Set(
+            "org.freedesktop.GeoClue2.Client", "DesktopId", GEOCLUE_DESKTOP_ID
+        )
+        client_props.Set(
+            "org.freedesktop.GeoClue2.Client",
+            "RequestedAccuracyLevel",
+            dbus.UInt32(GEOCLUE_ANGEFRAGTE_GENAUIGKEIT),
+        )
+        client.Start(dbus_interface="org.freedesktop.GeoClue2.Client")
+
+        standort_pfad = None
+        for _ in range(GEOCLUE_WARTE_SEKUNDEN):
+            pfad = client_props.Get("org.freedesktop.GeoClue2.Client", "Location")
+            if str(pfad) != "/":
+                standort_pfad = str(pfad)
+                break
+            time.sleep(1)
+
+        client.Stop(dbus_interface="org.freedesktop.GeoClue2.Client")
+
+        if not standort_pfad:
+            return None
+
+        standort = bus.get_object("org.freedesktop.GeoClue2", standort_pfad)
+        standort_props = dbus.Interface(standort, "org.freedesktop.DBus.Properties")
+        breite = float(
+            standort_props.Get("org.freedesktop.GeoClue2.Location", "Latitude")
+        )
+        laenge = float(
+            standort_props.Get("org.freedesktop.GeoClue2.Location", "Longitude")
+        )
+        genauigkeit = float(
+            standort_props.Get("org.freedesktop.GeoClue2.Location", "Accuracy")
+        )
+        if genauigkeit > GEOCLUE_MAX_UNGENAUIGKEIT_METER:
+            return None
+        return breite, laenge
+    except Exception:
+        return None
+
+
 def wetter_text():
+    standort = geoclue_standort()
+    if not standort:
+        return ""
+    breite, laenge = standort
     try:
         req = urllib.request.Request(
-            "http://wttr.in/?format=j1&lang=de", headers={"User-Agent": "curl"}
+            f"http://wttr.in/{breite},{laenge}?format=j1&lang=de",
+            headers={"User-Agent": "curl"},
         )
         with urllib.request.urlopen(req, timeout=6) as resp:
             daten = json.load(resp)
         ort = daten["nearest_area"][0]["areaName"][0]["value"]
         stundenwerte = {h["time"]: h for h in daten["weather"][0]["hourly"]}
-        teile = ["Das Wetter wird heute so sein."]
+        teile = [f"Das Wetter in {ort} wird heute so sein."]
         regen_erwartet = False
         for zeit_key, label in WETTER_SLOTS:
             eintrag = stundenwerte.get(zeit_key)

@@ -195,6 +195,15 @@ schritt_11_sprachausgabe() {
   sudo mkdir -p /etc/xdg/autostart
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-start-ansage.desktop /etc/xdg/autostart/
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.desktop /etc/xdg/autostart/
+
+  # Standortabfrage fuers Wetter (GeoClue2) freischalten - Pflicht, sonst
+  # "AccessDenied: Geolocation disabled" (live am 2026-08-14 gefunden).
+  # Nur anhaengen, nicht die ganze Datei ueberschreiben - sonst gehen
+  # Debians eigene Standard-Eintraege fuer andere Apps verloren.
+  if ! sudo grep -q "^\[dialos-start-ansage\]" /etc/geoclue/geoclue.conf 2>/dev/null; then
+    printf '\n[dialos-start-ansage]\nallowed=true\nsystem=true\nusers=\n' \
+      | sudo tee -a /etc/geoclue/geoclue.conf > /dev/null
+  fi
 }
 
 schritt_12_sicherheit() {

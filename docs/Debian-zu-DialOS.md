@@ -428,6 +428,19 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-start-ansage.d
 sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.desktop /etc/xdg/autostart/
 ```
 
+**Standortabfrage fürs Wetter (GeoClue2) freischalten** (seit
+2026-08-14, siehe TODO.md für die Geschichte dazu) - sonst
+`AccessDenied: Geolocation disabled` beim Standortversuch:
+
+```bash
+printf '\n[dialos-start-ansage]\nallowed=true\nsystem=true\nusers=\n' | sudo tee -a /etc/geoclue/geoclue.conf > /dev/null
+```
+
+(Nur anhängen, nicht überschreiben - sonst gehen Debians eigene
+Standard-Einträge für andere Apps verloren. `org.gnome.system.location
+enabled=true` steht schon als dconf-Standardwert in
+`01-dialos-defaults`, siehe Schritt 3.)
+
 - `dialos-say.py`: wiederverwendbares Sprachausgabe-Skript mit
   Audio-Ducking (mutet andere Audioquellen für die Dauer der Ansage).
 - `dialos-start-ansage.py` ("Michael"): läuft bei jedem Login, begrüßt,
@@ -442,6 +455,20 @@ sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.
   wichtig:** Kontowechsel immer über echtes Abmelden, nie über GNOME
   "Benutzer wechseln" (siehe
   [sicherheit-datenschutz.md](sicherheit-datenschutz.md)).
+  **Wetter-Standort seit 2026-08-14 per GeoClue2 statt fest/IP-geraten**
+  (das Gerät wird auch unterwegs genutzt, ein fest hinterlegter Ort war
+  deshalb keine Option) - nutzt automatisch die beste verfügbare Quelle
+  (WLAN-Abgleich über Mozilla Location Service, sonst IP-Schätzung als
+  Fallback). Fixes, die ungenauer als 10 km sind (typischerweise eine
+  reine IP-Schätzung ohne WLAN-Treffer in der Mozilla-Datenbank - live
+  beobachtet: ~25 km Ungenauigkeit, dabei rund 300 km von der echten
+  Position entfernt), werden verworfen und die Wetteransage
+  ausgelassen, statt eine falsche Stadt zu nennen. Das bedeutet:
+  **in Gegenden mit dünner Mozilla-WLAN-Datenbank-Abdeckung (z. B.
+  ländliche/dünn besiedelte Regionen) kann die Wetteransage öfter
+  ausbleiben** als mit der alten, ungenaueren aber immer "irgendeine"
+  Antwort liefernden IP-Ratelösung - das ist bewusst so gewählt
+  (lieber nichts sagen als etwas Falsches).
 - `dialos-tts-indicator.py`: Panel-Icon, das anzeigt, wenn gerade
   gesprochen wird (braucht die AppIndicator-Erweiterung aus Schritt 9).
 

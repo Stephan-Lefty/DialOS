@@ -229,6 +229,32 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   jetzt in `Debian-zu-DialOS.md` dokumentiert. Beide neuen Skripte sind
   bisher nur syntaktisch geprüft, noch nicht real getestet - geplant für
   den nächsten kompletten T490-Neuaufbau (siehe TODO.md).
+- **Wetter-Standort auf GeoClue2 umgestellt:** Auslöser war ein
+  konkreter Live-Fund - `dialos-start-ansage.py` fragte bisher `wttr.in`
+  ohne Ortsangabe ab, das rät den Standort selbst per IP; auf Stephans
+  Netzwerk zeigte das Wien statt seines echten Standorts (Seefeld in
+  Tirol). Ein fest im Skript hinterlegter Ort schied als Lösung aus, da
+  das Gerät auch unterwegs genutzt werden soll. Jetzt fragt
+  `dialos-start-ansage.py` den Standort per GeoClue2 ab (System-Bus,
+  nutzt automatisch die beste verfügbare Quelle - WLAN-Abgleich über
+  Mozilla Location Service, sonst IP-Schätzung als Fallback) und übergibt
+  die Koordinaten direkt an `wttr.in`. Dabei live am echten Standort
+  getestet und einen wichtigen Effekt gefunden: Auch GeoClue2 fällt ohne
+  WLAN-Treffer in der Mozilla-Datenbank auf eine grobe IP-Schätzung
+  zurück ("ipf fallback", ~25-26 km Ungenauigkeit, real ~300 km daneben)
+  - deshalb neuer Genauigkeits-Schwellwert (Fixes ungenauer als 10 km
+  werden verworfen), Wetteransage wird dann bewusst ausgelassen statt
+  eine falsche Stadt/Region zu nennen (genau wie bei fehlendem Internet
+  oder fehlenden Bluetooth-Geräten - lieber nichts sagen als etwas
+  Falsches). Bewusster Trade-off: in Gegenden mit dünner
+  WLAN-Datenbank-Abdeckung (z. B. ländliche Regionen) kann die
+  Wetteransage dadurch öfter fehlen als vorher. Voraussetzung: App in
+  `/etc/geoclue/geoclue.conf` freischalten +
+  `org.gnome.system.location enabled=true` (jetzt in
+  `01-dialos-defaults`), sonst `AccessDenied` - beides live gefunden und
+  in `scripts/dialos-full-office-setup.sh`/`Debian-zu-DialOS.md`
+  nachgezogen. Nebenbei: die Wetteransage nennt jetzt auch den erkannten
+  Ort ("Das Wetter in Seefeld in Tirol wird heute so sein.").
 
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur

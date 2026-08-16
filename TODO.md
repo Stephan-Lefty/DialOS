@@ -9,6 +9,29 @@ entschiedene Architekturfragen) sind das hier konkrete, abhakbare
 Aufgaben. Erledigte Punkte werden mit einem Häkchen markiert, nicht
 gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 
+- [ ] `dialos-start-ansage.py` soll `nutzer` bei der Start-Ansage nach
+  der gewünschten Lautstärke fragen (100 %, 75 %, 50 %, 25 %, aus) -
+  aktuell keine Lautstärke-Einstellmöglichkeit für die Ansage selbst
+  vorhanden.
+- [x] Wetter-Standort auf GeoClue2 umgestellt statt IP-geraten - erledigt
+  2026-08-14, ausführlich live getestet (siehe README-Änderungsprotokoll
+  0.5.0 und docs/Debian-zu-DialOS.md, Schritt 11, für Details). Auslöser:
+  `wttr.in`s eigene IP-Standorterkennung zeigte Wien statt Stephans
+  echtem Standort (Seefeld in Tirol) - ein fest hinterlegter Ort schied
+  aus, da das Gerät auch unterwegs genutzt wird. Live-Erkenntnis dabei:
+  GeoClue2 fällt in Gegenden mit dünner Mozilla-WLAN-Datenbank-Abdeckung
+  ebenfalls auf eine grobe IP-Schätzung zurück ("ipf fallback",
+  ~25-26 km ungenau, real ~300 km daneben) - deshalb Genauigkeits-
+  Schwellwert (>10 km wird verworfen) eingebaut, Wetteransage wird dann
+  bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
+  dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
+  Trade-off.
+- [ ] `docs/hardware.md` fehlt noch: ob der finale Referenz-Bluetooth-
+  Lautsprecher/-Mikrofon Deutsch als Ansage-Sprache unterstützt (eigene
+  Firmware-Ansagen des Geräts wie "verbunden"/Akku-Warnung, nicht
+  DialOS selbst) - Bluetooth-Standardprofile (A2DP/HFP) bieten dafür
+  keine Fernsteuerung, rein geräte-/herstellerabhängig. Bei der Auswahl
+  der Referenz-Hardware als Kriterium berücksichtigen.
 - [ ] **Nächster Schritt:** T490 komplett neu aufsetzen und dabei den
   kompletten neuen Ablauf real testen (noch nie end-to-end
   durchgelaufen): Debian 13 + GNOME manuell installieren (Schritt 1,
