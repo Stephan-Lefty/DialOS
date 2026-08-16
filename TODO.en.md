@@ -42,9 +42,15 @@ what has already been done.
   1. Decide on a reference microphone - **done**, AIRHUG 01.
   2. **Windows 11 desktop switch** - **built on 2026-08-16**, live test
      still pending (see next item).
-  3. Wake word + continuous listening loop.
-  4. hassil command grammar, with the desktop switch as the first real
-     voice command.
+  3. Wake word + continuous listening loop - **partly done on
+     2026-08-16**: the listening loop runs
+     (`dialos-sprachbefehl-desktop.py`), a wake word does not exist yet.
+     It hasn't been missed so far, because the restricted grammar only
+     admits three fixed sentences.
+  4. hassil command grammar - **the desktop switch as the first real
+     voice command was done on 2026-08-16**, though directly via a Vosk
+     grammar rather than hassil. hassil only pays off once there are
+     several commands with variants.
 
 - [x] **Optional Windows 11 look for GNOME built** (Stephan's request of
   2026-08-16, implemented the same day).
@@ -60,6 +66,16 @@ what has already been done.
   create no duplicate entries. Two faults were found and fixed along the
   way (GNOME Shell doesn't know freshly installed extensions; the ArcMenu
   schema is in the wrong directory in Debian) - details in the changelog.
+
+- [ ] **Test the voice command live** (open since 2026-08-16). So far
+  only verified with synthetically spoken sentences (Piper speaks, Vosk
+  listens): all three commands recognized verbatim, and the distractor
+  "ich habe früher windows benutzt" triggered nothing. The test with a
+  real voice over the built-in microphone is still pending - exactly the
+  combination that scored worst in the microphone comparison on
+  2026-08-13. Procedure: start
+  `/usr/local/bin/dialos-sprachbefehl-desktop.py` and say "auf Windows
+  umschalten" or "auf Linux umschalten".
 
 - [ ] **Visual sign-off of the Windows look after logging in** (open
   since 2026-08-16). The settings are demonstrably correct, but nobody

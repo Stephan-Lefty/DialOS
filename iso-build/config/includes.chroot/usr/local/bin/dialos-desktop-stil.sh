@@ -14,6 +14,9 @@
 #   dialos-desktop-stil.sh gnome     -> zurueck zum GNOME-Standard
 #   dialos-desktop-stil.sh status    -> was ist gerade aktiv
 #   dialos-desktop-stil.sh           -> wie "status"
+#   dialos-desktop-stil.sh wiederherstellen
+#                                    -> zuletzt gewaehlten Stil erneut
+#                                       anwenden, ohne Ansage (Autostart)
 #
 # Spaeter ist genau dieses Skript der erste echte Sprachbefehl (siehe
 # TODO.md, Fahrplan zur Sprachsteuerung) - deshalb ist die Rueckmeldung
@@ -367,12 +370,35 @@ zeige_status() {
 
 # ------------------------------------------------------------------- Start
 
+# Stellt beim Anmelden den zuletzt gewaehlten Stil wieder her - ohne
+# Ansage, weil dabei niemand etwas ausgeloest hat.
+#
+# Streng genommen ist das doppelt gemoppelt: Die Einstellungen liegen in
+# dconf und ueberleben einen Neustart von sich aus. Der Aufruf ist die
+# Zusicherung dafuer - er faengt den Fall ab, dass etwas anderes die
+# Erweiterungsliste zurueckgesetzt hat (Systemaktualisierung, ein
+# versehentliches "dconf reset", ein neu angelegtes Konto, das die
+# Merkdatei geerbt hat). Fuer einen blinden Nutzer waere ein Schreibtisch,
+# der nach dem Einschalten anders aussieht als zuletzt, kein
+# Schoenheitsfehler, sondern Orientierungsverlust.
+wiederherstellen() {
+  # Ohne Merkdatei gab es noch nie eine Wahl - dann NICHTS tun, statt
+  # ungefragt Einstellungen zurueckzusetzen.
+  [ -r "$STIL_DATEI" ] || { echo "Kein gemerkter Stil - nichts wiederherzustellen."; return 0; }
+  case "$(gemerkter_stil)" in
+    windows) auf_windows >/dev/null 2>&1 ;;
+    *)       auf_gnome  >/dev/null 2>&1 ;;
+  esac
+  echo "Stil wiederhergestellt: $(gemerkter_stil)"
+}
+
 case "${1:-status}" in
   windows|Windows|win) auf_windows ;;
   gnome|Gnome|GNOME|standard) auf_gnome ;;
+  wiederherstellen|--wiederherstellen) wiederherstellen ;;
   status|"") zeige_status ;;
   *)
-    echo "Aufruf: $0 [windows|gnome|status]" >&2
+    echo "Aufruf: $0 [windows|gnome|status|wiederherstellen]" >&2
     exit 1
     ;;
 esac

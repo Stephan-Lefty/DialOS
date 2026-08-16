@@ -349,6 +349,27 @@ schritt_11_sprachausgabe() {
   sudo mkdir -p /usr/local/share/dialos
   sudo cp iso-build/config/includes.chroot/usr/local/share/dialos/dialos-fenster-symbolic.svg /usr/local/share/dialos/
   sudo chmod 644 /usr/local/share/dialos/dialos-fenster-symbolic.svg
+
+  # Sprachbefehl "auf Linux/Windows umschalten" - der erste dauerhaft
+  # lauschende Dienst in DialOS. Braucht Vosk aus Schritt 15; fehlt es,
+  # beendet sich der Dienst mit einer Meldung, statt die Anmeldung
+  # aufzuhalten.
+  sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-sprachbefehl-desktop.py /usr/local/bin/
+  sudo chmod 755 /usr/local/bin/dialos-sprachbefehl-desktop.py
+  sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-sprachbefehl-desktop.desktop /etc/xdg/autostart/
+
+  # Deutsches Menue fuer ArcMenu. Debians Paket liefert die fertig
+  # uebersetzte de.mo mit, legt sie aber nach po/ statt in einen
+  # locale-Ordner - dort findet sie niemand, das Menue bleibt englisch.
+  # GNOME-Erweiterungen ohne eigenen locale-Ordner suchen in
+  # /usr/share/locale, also kommt sie dorthin. Kein msgfmt noetig, die
+  # Datei ist bereits kompiliert.
+  ARCMENU_MO="/usr/share/gnome-shell/extensions/arcmenu@arcmenu.com/po/de.mo"
+  if [ -f "$ARCMENU_MO" ]; then
+    sudo mkdir -p /usr/share/locale/de/LC_MESSAGES
+    sudo cp "$ARCMENU_MO" /usr/share/locale/de/LC_MESSAGES/arcmenu.mo
+    sudo chmod 644 /usr/share/locale/de/LC_MESSAGES/arcmenu.mo
+  fi
   sudo mkdir -p /etc/xdg/autostart
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-start-ansage.desktop /etc/xdg/autostart/
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-tts-indicator.desktop /etc/xdg/autostart/

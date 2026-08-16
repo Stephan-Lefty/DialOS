@@ -85,6 +85,72 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Sprachbefehl für die Desktop-Umschaltung - der erste dauerhaft
+  lauschende Dienst in DialOS (Stephans Vorgabe, 2026-08-16).** Bis
+  dahin wurde Vosk nur punktuell aufgerufen. `auf Linux umschalten` /
+  `auf Windows umschalten` (`auf Gnome umschalten` gilt gleich)
+  stellen die Optik jetzt auf Zuruf um, gestartet über
+  `/etc/xdg/autostart/`. Damit ist Punkt 4 des Fahrplans - die
+  Desktop-Umschaltung als erster echter Sprachbefehl - vorgezogen und
+  erreicht.
+  - **Der Befehl ist ein ganzer Satz, kein Einzelwort** - Stephans
+    Vorgabe, und sie löst ein echtes Problem: Ein einzelnes "Windows"
+    fällt im Gespräch ständig, der Schreibtisch würde sich ungefragt
+    umstellen, und ein blinder Nutzer wüsste nicht, warum plötzlich
+    alles anders klingt. Erkannt wird nur, was **beides** enthält, Ziel
+    *und* das Wort "umschalten". Der Gegentest dazu: Der gesprochene
+    Satz "ich habe früher windows benutzt" wurde als `auf auf windows`
+    erkannt - mit dem Wort "windows", aber ohne "umschalten", und löste
+    nichts aus.
+  - **Eingeschränkte Grammatik ist Voraussetzung, nicht Optimierung.**
+    Frei erkannt machte das deutsche Modell aus "gnome" zuverlässig
+    **"genug"**. Mit einer auf die drei Befehlssätze beschränkten
+    Grammatik lagen alle wörtlich richtig - geprüft mit synthetisch
+    gesprochenen Sätzen (Piper spricht, Vosk hört), derselbe Trick wie
+    schon bei der Lautstärke-Abfrage. Nebenbei kostet die kleine
+    Grammatik viel weniger Rechenzeit, was bei einem Dauerdienst den
+    Akku schont.
+  - **Zugehört wird über das eingebaute Mikrofon - anders als bei der
+    Lautstärke-Frage, und mit Absicht.** Das AIRHUG kann A2DP und HFP
+    nicht gleichzeitig: Bei einer einmaligen Frage ist Telefonqualität
+    ein kurzer Moment, bei dauerhaftem Zuhören wäre die Wiedergabe
+    **für immer** verschlechtert. Drei feste Sätze zu unterscheiden
+    gelingt auch mit dem eingebauten Mikrofon - genau der Vorteil einer
+    winzigen Grammatik.
+  - **Während das System spricht, wird nicht zugehört.** Sonst hört sich
+    der Dienst selbst - und weil seine eigene Ansage Ziel *und*
+    "umschalten" enthalten kann, würde die Satz-Bedingung sie gerade
+    nicht abfangen. Ausgewertet wird die Markierungsdatei, die
+    `dialos-say.py` ohnehin setzt. Dazu eine Sperrfrist von 5 Sekunden.
+  - **Keine Rückfrage, aber eine Ansage:** Ein "Willst du wirklich?" bei
+    jedem Befehl wäre lästig. Stattdessen sagt das System, was es getan
+    hat - wer es nicht wollte, sagt einfach den anderen Satz. Ein
+    Fehlgriff ist in Sekunden rücknehmbar, ohne hinsehen zu müssen.
+- **Deutsches Startmenü - zweiter Paketfehler in derselben Erweiterung
+  (2026-08-16).** Stephan meldete, dass "All Apps" und Konsorten
+  englisch bleiben. Ursache: Debians `gnome-shell-extension-arc-menu`
+  liefert die fertig übersetzte `de.mo` mit, legt sie aber nach `po/`
+  statt in einen `locale`-Ordner. Im GNOME-Quelltext nachgesehen
+  (`sharedInternals.js`): Fehlt der `locale`-Ordner, bindet die
+  Erweiterung gegen `/usr/share/locale` - also wird die Datei genau
+  dorthin kopiert. Kein `msgfmt` nötig, sie ist bereits kompiliert.
+  Nachgeprüft, dass es die richtige Datei ist: "All Apps" → "Alle
+  Anwendungen", "Frequent Apps" → "Häufige Anwendungen". Ein paar
+  Einträge (Power Off, Log Out, Restart, Search) sind auch in der
+  Übersetzung des Projekts unübersetzt und bleiben englisch.
+  `dash-to-panel` bringt sein Deutsch selbst korrekt mit;
+  `tiling-assistant` hat keine Übersetzung, zeigt in der Leiste aber
+  auch keinen Text.
+- **Die gewählte Optik übersteht Neustart und Abmelden.** Sie tut es
+  ohnehin, weil alle Einstellungen in dconf des Kontos liegen -
+  zusätzlich läuft jetzt `dialos-desktop-stil.sh wiederherstellen` beim
+  Anmelden, ohne Ansage. Das ist die Zusicherung für den Fall, dass
+  etwas anderes die Erweiterungsliste zurückgesetzt hat: eine
+  Systemaktualisierung, ein versehentliches `dconf reset`, ein neu
+  angelegtes Konto. Für einen blinden Nutzer wäre ein Schreibtisch, der
+  nach dem Einschalten anders aussieht als zuletzt, kein
+  Schönheitsfehler, sondern Orientierungsverlust. Ohne Merkdatei tut der
+  Aufruf bewusst nichts, statt ungefragt Einstellungen zurückzusetzen.
 - **Windows-11-Optik als umschaltbare Option gebaut (Stephans Wunsch vom
   2026-08-16, umgesetzt am selben Tag).** Anlass: Es gibt Interessenten,
   die DialOS wegen der Sprachsteuerung wollen, aber ihr Leben lang

@@ -84,6 +84,67 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Voice command for the desktop switch - the first continuously
+  listening service in DialOS (Stephan's requirement, 2026-08-16).**
+  Until then Vosk was only invoked at specific moments. `auf Linux
+  umschalten` / `auf Windows umschalten` (`auf Gnome umschalten` counts
+  the same) now switch the look on command, started from
+  `/etc/xdg/autostart/`. That brings forward and completes item 4 of the
+  roadmap - the desktop switch as the first real voice command.
+  - **The command is a whole sentence, not a single word** - Stephan's
+    requirement, and it solves a real problem: a lone "Windows" comes up
+    in conversation all the time, the desktop would change unasked, and
+    a blind user would not know why everything suddenly sounds
+    different. Only what contains **both** is accepted: the target *and*
+    the word "umschalten". The control test: the spoken sentence "ich
+    habe früher windows benutzt" was recognized as `auf auf windows` -
+    with the word "windows" but without "umschalten", and triggered
+    nothing.
+  - **The restricted grammar is a requirement, not an optimization.**
+    Freely recognized, the German model reliably turned "gnome" into
+    **"genug"** ("enough"). With a grammar limited to the three command
+    sentences all of them came out verbatim - verified with
+    synthetically spoken sentences (Piper speaks, Vosk listens), the
+    same trick already used for the volume prompt. The small grammar
+    also costs far less CPU, which spares the battery in a permanently
+    running service.
+  - **It listens on the built-in microphone - unlike the volume prompt,
+    and deliberately so.** The AIRHUG cannot do A2DP and HFP at once:
+    for a one-off question phone-grade audio is a brief moment, but with
+    continuous listening playback would be degraded **permanently**.
+    Distinguishing three fixed sentences works with the built-in
+    microphone too - exactly the benefit of a tiny grammar.
+  - **No listening while the system speaks.** Otherwise the service
+    hears itself - and since its own announcement can contain the target
+    *and* "umschalten", the sentence condition would specifically fail
+    to catch it. It watches the marker file `dialos-say.py` sets anyway,
+    plus a 5-second lockout.
+  - **No confirmation prompt, but an announcement:** an "are you sure?"
+    on every command would be tiresome. Instead the system says what it
+    did - anyone who didn't want it just says the other sentence. A
+    misfire is undoable in seconds, without having to look.
+- **German start menu - a second packaging fault in the same extension
+  (2026-08-16).** Stephan reported that "All Apps" and friends stayed
+  English. Cause: Debian's `gnome-shell-extension-arc-menu` ships the
+  finished translated `de.mo` but puts it in `po/` instead of a `locale`
+  directory. Checked in the GNOME source (`sharedInternals.js`): if the
+  `locale` directory is missing, the extension binds against
+  `/usr/share/locale` - so that is exactly where the file gets copied.
+  No `msgfmt` needed, it is already compiled. Verified it is the right
+  file: "All Apps" → "Alle Anwendungen", "Frequent Apps" → "Häufige
+  Anwendungen". A few entries (Power Off, Log Out, Restart, Search) are
+  untranslated in the project's own translation too and stay English.
+  `dash-to-panel` ships its German correctly itself; `tiling-assistant`
+  has no translation but shows no text in the panel either.
+- **The chosen look survives restart and logout.** It does so anyway,
+  because all settings live in the account's dconf - in addition,
+  `dialos-desktop-stil.sh wiederherstellen` now runs at login, without
+  an announcement. That is the guarantee for the case where something
+  else reset the extension list: a system update, an accidental `dconf
+  reset`, a freshly created account. For a blind user a desktop that
+  looks different after switching on than it did last time is not a
+  cosmetic flaw but a loss of orientation. With no memo file the call
+  deliberately does nothing, rather than resetting settings unasked.
 - **Built the Windows 11 look as a switchable option (Stephan's request
   of 2026-08-16, implemented the same day).** The reason: there are
   people who want DialOS for the voice control but have used Windows all

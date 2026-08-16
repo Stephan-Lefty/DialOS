@@ -874,6 +874,66 @@ Drei weitere Details, die beim Bauen wichtig waren:
   ist dieses Skript auch der vorgesehene **erste echte Sprachbefehl**,
   sobald die Befehlsgrammatik steht (siehe TODO.md).
 
+### 11c. Sprachbefehl für die Umschaltung (neu 2026-08-16)
+
+`dialos-sprachbefehl-desktop.py` ist der **erste dauerhaft lauschende
+Dienst in DialOS** - bis dahin wurde Vosk nur punktuell aufgerufen (die
+Lautstärke-Frage der Start-Ansage). Er hört über das Mikrofon mit und
+schaltet auf Zuruf um:
+
+> "auf Linux umschalten" &nbsp;·&nbsp; "auf Windows umschalten"
+
+"auf Gnome umschalten" gilt gleichbedeutend mit Linux. Gestartet wird er
+über `/etc/xdg/autostart/dialos-sprachbefehl-desktop.desktop` in jeder
+Sitzung.
+
+**Der Befehl ist bewusst ein ganzer Satz, kein Einzelwort** (Stephans
+Vorgabe). Ein einzelnes "Windows" fällt im Gespräch ständig; der
+Schreibtisch würde sich ungefragt umstellen, und ein blinder Nutzer
+wüsste nicht, warum plötzlich alles anders klingt. Deshalb muss der
+erkannte Satz **beides** enthalten: das Ziel *und* das Wort
+"umschalten".
+
+Fünf Punkte, die beim Bauen entschieden wurden - alle am 2026-08-16 mit
+synthetisch gesprochenen Sätzen (Piper spricht, Vosk hört) nachgemessen:
+
+| Entscheidung | Grund |
+|---|---|
+| **Eingeschränkte Grammatik** statt freier Erkennung | Voraussetzung, keine Optimierung: Frei erkannt wurde "gnome" zuverlässig als **"genug"**. Mit Grammatik lagen alle drei Sätze wörtlich richtig. Kostet nebenbei viel weniger Rechenzeit - bei einem Dauerdienst zählt das für den Akku. |
+| **Eingebautes Mikrofon** statt Bluetooth | Das AIRHUG kann A2DP und HFP nicht gleichzeitig. Bei der einmaligen Lautstärke-Frage ist die Telefonqualität ein kurzer Moment - bei dauerhaftem Zuhören wäre die Wiedergabe **für immer** verschlechtert. Drei feste Sätze zu unterscheiden gelingt auch mit dem eingebauten Mikrofon. |
+| **Während das System spricht, wird nicht zugehört** | Sonst hört sich der Dienst selbst. Seine eigene Ansage kann Ziel *und* "umschalten" enthalten - die Satz-Bedingung würde sie also gerade nicht abfangen. Ausgewertet wird die Markierungsdatei, die `dialos-say.py` ohnehin setzt. |
+| **Keine Rückfrage, aber eine Ansage** | Ein "Willst du wirklich?" bei jedem Befehl wäre lästig. Stattdessen sagt das System, was es getan hat - wer es nicht wollte, sagt einfach den anderen Satz. Ein Fehlgriff ist damit in Sekunden rücknehmbar, ohne hinsehen zu müssen. |
+| **Sperrfrist von 5 s** nach jedem Umschalten | Sonst löst ein langgezogener Satz mehrfach aus. |
+
+Der Gegentest, der die Satz-Bedingung rechtfertigt: Der gesprochene Satz
+"ich habe früher windows benutzt" wurde als `auf auf windows` erkannt -
+also durchaus mit dem Wort "windows", aber **ohne** "umschalten". Er
+löste nichts aus.
+
+### 11d. Deutsches Menü und Erhalt über den Neustart
+
+**Deutsches ArcMenu-Menü:** Debians Paket liefert die fertig übersetzte
+`de.mo` mit, legt sie aber nach `po/` statt in einen `locale`-Ordner -
+dort findet sie niemand, und das Startmenü bleibt englisch.
+GNOME-Erweiterungen ohne eigenen `locale`-Ordner suchen in
+`/usr/share/locale`, also wird sie dorthin kopiert (kein `msgfmt` nötig,
+die Datei ist bereits kompiliert). Zweiter Fehler im selben Paket wie der
+Schema-Pfad aus Schritt 11b. `dash-to-panel` bringt sein Deutsch selbst
+korrekt mit; `tiling-assistant` hat gar keine Übersetzung, zeigt in der
+Leiste aber auch keinen Text.
+
+**Erhalt über Neustart und Abmelden:** Die gewählte Optik bleibt, weil
+alle Einstellungen in dconf des jeweiligen Kontos liegen - das übersteht
+Neustarts von sich aus. Zusätzlich wird
+`dialos-desktop-stil.sh wiederherstellen` beim Anmelden ausgeführt (ohne
+Ansage, weil dabei niemand etwas ausgelöst hat). Das ist die Zusicherung
+für den Fall, dass etwas anderes die Erweiterungsliste zurückgesetzt hat -
+eine Systemaktualisierung, ein versehentliches `dconf reset`, ein neu
+angelegtes Konto. Für einen blinden Nutzer wäre ein Schreibtisch, der
+nach dem Einschalten anders aussieht als zuletzt, kein Schönheitsfehler,
+sondern Orientierungsverlust. Gibt es noch keine Merkdatei, tut der
+Aufruf bewusst nichts.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

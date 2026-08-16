@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Sprachbefehl Desktop-Optik
+Name[en]=DialOS voice command for desktop style
+Comment=Hört dauerhaft auf "GNOME" und "WINDOWS" und schaltet die Optik um
+Comment[en]=Listens continuously for "GNOME" and "WINDOWS" and switches the desktop style
+Exec=/usr/local/bin/dialos-sprachbefehl-desktop.py
+Icon=audio-input-microphone
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

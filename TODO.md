@@ -41,9 +41,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   1. Referenz-Mikrofon festlegen - **erledigt**, AIRHUG 01.
   2. **Windows-11-Umschaltung für den Desktop** - **gebaut am 2026-08-16**,
      Live-Test steht noch aus (siehe nächster Punkt).
-  3. Aufweckwort + dauerhafte Zuhör-Schleife.
-  4. hassil-Befehlsgrammatik, mit der Desktop-Umschaltung als erstem
-     echten Sprachbefehl.
+  3. Aufweckwort + dauerhafte Zuhör-Schleife - **teilweise erledigt am
+     2026-08-16**: Die Zuhör-Schleife läuft
+     (`dialos-sprachbefehl-desktop.py`), ein Aufweckwort gibt es noch
+     nicht. Es fehlt bisher auch nicht, weil die eingeschränkte
+     Grammatik nur drei feste Sätze zulässt.
+  4. hassil-Befehlsgrammatik - **die Desktop-Umschaltung als erster
+     echter Sprachbefehl ist am 2026-08-16 erledigt**, allerdings direkt
+     über eine Vosk-Grammatik statt über hassil. hassil lohnt sich erst,
+     wenn es mehrere Befehle mit Varianten gibt.
 
 - [x] **Optionale Windows-11-Optik für GNOME gebaut** (Stephans Wunsch
   vom 2026-08-16, umgesetzt am selben Tag).
@@ -60,6 +66,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   behoben (GNOME Shell kennt frisch installierte Erweiterungen nicht;
   ArcMenu-Schema liegt in Debian im falschen Ordner) - Details im
   Änderungsprotokoll.
+
+- [ ] **Sprachbefehl live testen** (offen seit 2026-08-16). Bisher nur
+  mit synthetisch gesprochenen Sätzen geprüft (Piper spricht, Vosk hört):
+  alle drei Befehle wörtlich erkannt, der Störsatz "ich habe früher
+  windows benutzt" löste nichts aus. Mit echter Stimme über das
+  eingebaute Mikrofon steht der Test noch aus - genau die Kombination,
+  die beim Mikrofon-Vergleich am 2026-08-13 am schwächsten abgeschnitten
+  hat. Ablauf: `/usr/local/bin/dialos-sprachbefehl-desktop.py` starten
+  und "auf Windows umschalten" bzw. "auf Linux umschalten" sagen.
 
 - [ ] **Optische Abnahme der Windows-Optik nach dem Anmelden** (offen seit
   2026-08-16). Die Einstellungen stimmen nachweislich, gesehen hat sie

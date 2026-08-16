@@ -853,6 +853,65 @@ Three further details that mattered while building this:
   intended **first real voice command** once the command grammar exists
   (see TODO.en.md).
 
+### 11c. Voice command for the switch (new 2026-08-16)
+
+`dialos-sprachbefehl-desktop.py` is the **first continuously listening
+service in DialOS** - until then Vosk was only invoked at specific
+moments (the volume question in the login announcement). It listens on
+the microphone and switches on command:
+
+> "auf Linux umschalten" &nbsp;·&nbsp; "auf Windows umschalten"
+> (German for "switch to Linux/Windows")
+
+"auf Gnome umschalten" counts the same as Linux. It is started from
+`/etc/xdg/autostart/dialos-sprachbefehl-desktop.desktop` in every
+session.
+
+**The command is deliberately a whole sentence, not a single word**
+(Stephan's requirement). A lone "Windows" comes up in conversation all
+the time; the desktop would change unasked, and a blind user would not
+know why everything suddenly sounds different. So the recognized
+sentence must contain **both**: the target *and* the word "umschalten"
+(switch).
+
+Five decisions made while building it - all measured on 2026-08-16 with
+synthetically spoken sentences (Piper speaks, Vosk listens):
+
+| Decision | Reason |
+|---|---|
+| **Restricted grammar** instead of free recognition | A requirement, not an optimization: free recognition turned "gnome" reliably into **"genug"** (German for "enough"). With the grammar all three sentences came out verbatim. It also costs far less CPU - which matters for battery life in a permanently running service. |
+| **Built-in microphone** instead of Bluetooth | The AIRHUG cannot do A2DP and HFP at once. For the one-off volume question, phone-grade audio is a brief moment - with continuous listening, playback would be degraded **permanently**. Distinguishing three fixed sentences works with the built-in microphone too. |
+| **No listening while the system speaks** | Otherwise the service hears itself. Its own announcement can contain both the target *and* "umschalten" - so the sentence condition would specifically fail to catch it. It watches the marker file `dialos-say.py` sets anyway. |
+| **No confirmation prompt, but an announcement** | A "are you sure?" on every command would be tiresome. Instead the system says what it did - anyone who didn't want it just says the other sentence. A misfire is undoable in seconds, without having to look. |
+| **A 5 s lockout** after each switch | Otherwise a drawn-out sentence triggers repeatedly. |
+
+The control test that justifies the sentence condition: the spoken
+sentence "ich habe früher windows benutzt" ("I used to use Windows") was
+recognized as `auf auf windows` - containing the word "windows", but
+**without** "umschalten". It triggered nothing.
+
+### 11d. German menu, and surviving a restart
+
+**German ArcMenu menu:** Debian's package ships the finished translated
+`de.mo` but puts it in `po/` instead of a `locale` directory - where
+nobody finds it, so the start menu stays English. GNOME extensions
+without their own `locale` directory look in `/usr/share/locale`, so
+that is where it gets copied (no `msgfmt` needed, the file is already
+compiled). This is the second fault in the same package as the schema
+path from step 11b. `dash-to-panel` ships its German correctly itself;
+`tiling-assistant` has no translation at all, but shows no text in the
+panel either.
+
+**Surviving restart and logout:** the chosen look persists because all
+settings live in the account's dconf, which survives restarts by itself.
+In addition, `dialos-desktop-stil.sh wiederherstellen` runs at login
+(without an announcement, since nobody triggered anything). That is the
+guarantee for the case where something else reset the extension list - a
+system update, an accidental `dconf reset`, a freshly created account.
+For a blind user a desktop that looks different after switching on than
+it did last time is not a cosmetic flaw but a loss of orientation. If
+there is no memo file yet, the call deliberately does nothing.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk
