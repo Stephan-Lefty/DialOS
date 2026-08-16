@@ -2,7 +2,7 @@
 
 # ISO-Builds
 
-Gebaute Live-/Installations-Images (`eggs produce`, siehe
+Gebaute Sicherungs-Abbilder (Rescuezilla/Clonezilla, siehe
 [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 16) werden **nicht**
 in Git versioniert - mehrere GB pro Datei, GitHub blockt einzelne
 Dateien über 100 MB ohnehin. Stattdessen: Datei liegt in Stephans

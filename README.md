@@ -55,6 +55,28 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Schritt 16: Penguins' Eggs entfällt, Rescuezilla übernimmt
+  (Stephans Entscheidung, 2026-08-16).** Der Anlass war profan: `eggs`
+  fehlte auf dem neu aufgebauten Gerät. Es ist nicht in Debians
+  Paketquellen, stand in keiner Paketliste, und **wie es installiert
+  wird, war nirgends dokumentiert** - weder in der Anleitung noch in der
+  Commit-Historie. Dieselbe Sorte Lücke wie bei `check_piper_voice.sh`:
+  einmal von Hand gemacht, nie aufgeschrieben, beim Reinstall verloren.
+  Weil die ISO seit Weg A ohnehin kein Installationsmedium mehr ist,
+  sondern nur noch Sicherungs-Schnappschuss, fiel die Wahl auf
+  [Rescuezilla](https://rescuezilla.com/) - die grafische Oberfläche für
+  Clonezilla, das in Debian liegt und kein Fremd-Repository braucht.
+  Stephan erstellt die Abbilder damit selbst; die Doku hält nur die drei
+  Punkte fest, die sich aus dem DialOS-Aufbau ergeben: Clonezilla läuft
+  nicht aus dem laufenden System, die **LUKS-Partition darf nicht ins
+  Abbild** (Clonezilla kann nicht hineinsehen und kopierte alle ~375 GB
+  Byte für Byte statt der ~15 GB belegter Blöcke), und `nutzer`s Daten
+  sind damit bewusst nicht enthalten. Mit entfernt wurden alle toten
+  Reste: die `splash.png` für den eggs-Bootbereich samt Schritt-3-Block,
+  das Verzeichnis `/etc/penguins-eggs.d`, und die Sudoers-Regel aus
+  `dialos-claude-setup.sh`, die passwortloses `sudo` für ein nicht mehr
+  existierendes `/usr/bin/eggs` gewährte - das Skript entfernt sie jetzt,
+  statt sie anzulegen.
 - **Aussprache: "DialOS" wird jetzt als "Dial OS" gesprochen (Stephans
   Wunsch, 2026-08-16).** Umgesetzt **zentral** in `dialos-say.py`: Jeder
   Text läuft vor dem Sprechen durch `fuer_sprachausgabe()`. Damit kann

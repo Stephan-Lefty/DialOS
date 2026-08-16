@@ -32,9 +32,10 @@ Datei/den Commit/die Doku, aus der es stammt.
    `iso-build/config/includes.chroot*/` im Repo dienen dabei als
    **Vorlage/Rezept, kein automatischer Build-Input** - jede Datei muss
    nach einer Änderung manuell auf das echte System kopiert werden.
-   Am Ende wird mit [Penguins' Eggs](https://penguins-eggs.net/) eine
-   startfähige ISO aus dem fertig eingerichteten System gezogen
-   (`eggs produce`).
+   Vom fertig eingerichteten System wird zum Schluss ein
+   Sicherungs-Abbild gezogen (Schritt 16) - seit 2026-08-16 mit
+   [Rescuezilla](https://rescuezilla.com/), der grafischen Oberfläche
+   für Clonezilla. Penguins' Eggs ist entfallen.
 
 Diese Anleitung beschreibt Weg 2. Referenz-Testgerät: Lenovo ThinkPad
 T490 (siehe [hardware.md](hardware.md)).
@@ -425,26 +426,11 @@ sudo update-grub
 Verifikation erst nach einem echten Neustart möglich (Splash zwischen
 Firmware-Logo und Anmeldung/Desktop).
 
-**Boot-Hintergrund von `eggs produce` selbst (GRUB/isolinux, Live-ISO):**
-Getrennt vom Plymouth-Theme oben kopiert `eggs produce` beim Bauen
-zusätzlich `/etc/penguins-eggs.d/brain.d/assets/splash.png` als
-Hintergrundbild in den GRUB- und isolinux-Bootbereich der fertigen
-Live-ISO - das ist die Grafik, die ganz am Anfang beim Booten von der
-ISO erscheint, noch vor Plymouth. Ohne eigene Datei zeigt das Paket
-`eggs` dort standardmäßig ein Pinguin-Foto:
-
-```bash
-sudo mkdir -p /etc/penguins-eggs.d/brain.d/assets
-sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/splash.png /etc/penguins-eggs.d/brain.d/assets/splash.png
-```
-
-Nutzt dieselbe schon komprimierte Datei wie das Plymouth-Theme oben
-(~2 MB statt der 14,7-MB-Rohversion aus `assets/`). **Noch nicht per
-echtem Live-Boot verifiziert**, ob die Auflösung (2559×1440) im
-isolinux-Kontext (traditionell 640×480-VESA-Erwartung) sauber
-skaliert/zentriert wird oder verzerrt/beschnitten erscheint - beim
-nächsten Live-Boot-Test mit prüfen, ggf. auf 640×480 zuschneiden falls
-nötig.
+> **Entfallen am 2026-08-16:** Hier stand bis dahin eine zweite
+> Grafik (`/etc/penguins-eggs.d/brain.d/assets/splash.png`) für den
+> GRUB-/isolinux-Bootbereich der von Penguins' Eggs gebauten Live-ISO.
+> Mit dem Wegfall von eggs (Schritt 16) ist sie wirkungslos - das
+> Plymouth-Theme oben bringt seine eigene `background.png` mit.
 
 ## 4. Autologin einrichten
 
@@ -1126,45 +1112,54 @@ ist Bluetooth-Mikrofon als primärer Weg, eingebautes Mikrofon als (noch
 nicht implementierter) Fallback. Details:
 [offene-punkte.md](offene-punkte.md), Abschnitt "Sprachsteuerung".
 
-## 16. ISO bauen (Penguins' Eggs)
+## 16. Sicherungs-Abbild (Clonezilla)
 
-Sobald alle vorigen Schritte durchgeführt sind, System einmal neu
-starten und verifizieren (Autologin, Splash, Ton, Orca, Piper,
-Programme). Dann:
+**Entscheidung vom 2026-08-16: Penguins' Eggs entfällt, Clonezilla
+übernimmt.** Bis dahin stand hier `eggs produce`. Mit Weg A (siehe
+Schritt 5) wird aus der ISO aber kein Installationsmedium mehr - kein
+Gerät wird davon installiert, jedes entsteht aus der Debian-ISO plus den
+drei Skripten. Übrig blieb der Zweck "Sicherungs-Schnappschuss", und
+dafür ist Clonezilla das passendere Werkzeug: Es liegt in Debian
+(`clonezilla`), braucht also kein Fremd-Repository, und tut genau eine
+Sache.
 
-```bash
-sudo eggs produce
-# oder, um dialosadmin/nutzer inkl. Home-Verzeichnissen zu übernehmen:
-sudo eggs produce --clone
-```
+Auslöser war, dass `eggs` beim Neuaufbau schlicht fehlte: Es ist nicht in
+Debians Paketquellen, stand in keiner Paketliste, und **wie es installiert
+wird, war nirgends dokumentiert** - weder in dieser Anleitung noch in der
+Commit-Historie. Dieselbe Sorte Lücke wie bei `check_piper_voice.sh`:
+einmal von Hand gemacht, nie aufgeschrieben, beim Reinstall verloren.
 
-**Wofür die ISO seit dem 2026-08-16 noch da ist:** Mit der Entscheidung
-für Weg A (siehe Schritt 5) wird kein Gerät mehr von einer DialOS-ISO
-installiert - jedes entsteht aus der Debian-ISO plus den drei Skripten.
-Die ISO ist damit ein **Sicherungs-Schnappschuss** des fertig
-eingerichteten Baugeräts (siehe [iso-builds.md](iso-builds.md)).
+**Stephan erstellt das Abbild selbst mit einer Clonezilla-Variante mit
+grafischer Oberfläche** - deshalb steht hier keine Klick-Anleitung.
+Festgehalten sind nur die drei Punkte, die man wissen muss, weil sie sich
+aus dem DialOS-Aufbau ergeben und beim ersten Mal überraschen:
 
-`--clone` übernimmt dabei `dialosadmin` und `nutzer` samt
-Home-Verzeichnissen; ohne `--clone` enthält die ISO nur einen generischen
-`live`-Nutzer. Für einen Schnappschuss ist `--clone` daher die sinnvolle
-Wahl.
+1. **Clonezilla läuft nicht aus dem laufenden System.** Die Systemplatte
+   muss unbenutzt sein, es wird also von einem eigenen Medium gebootet.
+2. **Die verschlüsselte Partition gehört NICHT ins Abbild.** Bei ext4 und
+   vfat sichert Clonezilla nur belegte Blöcke - root sind damit rund
+   15 GB statt 93. In `dialos-nutzer-home` (LUKS2) kann es aber nicht
+   hineinsehen und kopiert Byte für Byte alle ~375 GB; verschlüsselte
+   Daten lassen sich zudem nicht komprimieren. Deshalb nur `nvme0n1p1`
+   (root) und `nvme0n1p2` (EFI) auswählen. Die Swap-Partition ebenfalls
+   weglassen - sie wird bei jedem Start ohnehin neu erzeugt.
+3. **Das Abbild enthält damit `nutzer`s Daten nicht.** Das ist die Kehr-
+   seite der Verschlüsselung und beabsichtigt. Sollen die auch gesichert
+   werden, braucht es einen zweiten Weg im **entsperrten** Zustand, also
+   eine Dateisicherung statt eines Abbilds.
 
-Ausgabe liegt standardmäßig unter `/home/eggs/<generierter-name>.iso` -
-zur besseren Nachvollziehbarkeit passend umbenennen und auf die externe
-Platte verschieben, z. B. nach `DialOS-ISOs/DialOS-Live-0.5.0.iso`.
+Werden nur einzelne Partitionen gesichert, ist die Partitionstabelle
+nicht mit dabei. Der Rückweg lautet dann: Debian per Preseed
+installieren (Schritt 1 legt EFI + 100 GiB root an), danach das Abbild
+darüberspielen.
 
-**Versuch verworfen (2026-08-14): `--path` auf die externe Platte
-zeigen lassen**, um das mehrere GB große Zwischenmaterial gar nicht
-erst auf der internen Platte anfallen zu lassen. Schlägt fehl: Der
-`bootloader-copy`-Schritt von `eggs`/`coa` schreibt seine Dateien
-(u. a. `isolinux.bin`) unabhängig von `--path` hartkodiert nach
-`/home/eggs/isodir` - der Rest des Builds nutzt korrekt den
-`--path`-Zielordner, das fertige Image landet also ohne funktionierenden
-Bootloader (`xorriso`-Fehler: "Cannot find in ISO image ...
-bin_path='/isolinux/isolinux.bin'"). Bug in `eggs`/`coa`
-(Version 48.x), nicht an unserer Konfiguration. Bis das stromaufwärts
-gefixt ist: `--path` nicht verwenden, immer den internen
-Standardpfad `/home/eggs` nutzen und danach manuell verschieben.
+> **Der eigentliche Schnappschuss ist inzwischen dieses Repository.** Am
+> 2026-08-16 hat sich gezeigt, dass aus einer nackten
+> Debian-Installation in drei Befehlen das komplette System entsteht -
+> Skript 1 lief in 5-6 Minuten inklusive 1,9 GB Modell-Download. Ein
+> Abbild sichert *einen Zustand*, das Rezept sichert die *Fähigkeit, ihn
+> herzustellen*. Letzteres altert nicht, weil es bei jedem Gerät neu
+> geprüft wird. Das Abbild spart vor allem Zeit beim Wiederherstellen.
 
 ## Praxishinweis: externe Platte
 

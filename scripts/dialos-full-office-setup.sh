@@ -162,8 +162,10 @@ schritt_03_branding() {
   sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="quiet"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub
   sudo update-grub
 
-  sudo mkdir -p /etc/penguins-eggs.d/brain.d/assets
-  sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/splash.png /etc/penguins-eggs.d/brain.d/assets/splash.png
+  # Hier lag bis 2026-08-16 eine splash.png fuer den GRUB-/isolinux-
+  # Bootbereich der von "eggs produce" gebauten Live-ISO. Penguins' Eggs
+  # ist entfallen (Schritt 16), die Datei damit wirkungslos - das
+  # Plymouth-Theme oben bringt seine eigene background.png mit.
 }
 
 schritt_04_autologin() {
@@ -204,8 +206,9 @@ schritt_05_calamares_entfernen() {
 
   # Reste, die beim Purge stehen bleiben koennen bzw. von frueheren
   # DialOS-Versionen stammen.
-  sudo rm -rf /etc/calamares /etc/penguins-eggs.d/brain.d/assets/calamares
-  sudo rm -f /etc/penguins-eggs.d/brain.d/base.yaml.tmpl
+  # /etc/penguins-eggs.d komplett: seit dem Wegfall von eggs (Schritt 16)
+  # gibt es dort nichts mehr, was gebraucht wuerde.
+  sudo rm -rf /etc/calamares /etc/penguins-eggs.d
   sudo rm -f /usr/local/share/applications/calamares-install-debian.desktop
   # Das Icon, das der frueher mitgelieferte Autostart auf jede
   # Arbeitsflaeche gelegt hat - auch auf die von "nutzer", dessen Home

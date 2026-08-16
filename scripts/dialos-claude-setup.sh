@@ -2,8 +2,9 @@
 # DialOS: Stellt nach einem Reinstall des T490 die Arbeitsumgebung fuer
 # Claude Code wieder her - Dinge, die sonst bei jedem neuen System von
 # Hand wieder eingerichtet werden muessten:
-#   1. Sudoers-Regel, die "eggs produce" ohne Passwortabfrage erlaubt
-#      (eng begrenzt - keine allgemeine sudo-Freigabe).
+#   1. Entfernt die alte Sudoers-Regel fuer "eggs produce" (Penguins'
+#      Eggs ist am 2026-08-16 entfallen, siehe Schritt 16 der Doku -
+#      eine passwortlose sudo-Regel soll nicht als Altlast bleiben).
 #   2. Symlink ~/DialOS -> Repo auf der externen Platte.
 #   3. Git-Identitaet (user.name/user.email) + credential.helper=store
 #      fuer den Admin-Nutzer, damit "git push" nicht bei jedem Reinstall
@@ -30,8 +31,14 @@ set -euo pipefail
 ADMIN_USER="dialosadmin"
 REPO_PATH="/media/dialosadmin/SanDisk-Extreme/DialOS/repo"
 SYMLINK_PATH="/home/$ADMIN_USER/DialOS"
+# Bis 2026-08-16 legte dieses Skript hier eine Sudoers-Regel an, die
+# "eggs produce" ohne Passwortabfrage erlaubte. Penguins' Eggs ist mit
+# der Umstellung auf Clonezilla/Rescuezilla entfallen (siehe
+# docs/Debian-zu-DialOS.md, Schritt 16). Die Regel zeigte damit auf ein
+# /usr/bin/eggs, das es nicht mehr gibt - harmlos, aber eine
+# passwortlose sudo-Regel soll nicht als Altlast herumliegen. Sie wird
+# jetzt entfernt statt angelegt.
 SUDOERS_FILE="/etc/sudoers.d/dialos-eggs"
-SUDOERS_RULE='dialosadmin ALL=(root) NOPASSWD: /usr/bin/eggs produce, /usr/bin/eggs produce *'
 GIT_NAME="Stephan Rösner"
 GIT_EMAIL="stephan.roesner@protonmail.com"
 
@@ -40,18 +47,12 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-echo "=== 1/3: Sudoers-Regel fuer 'eggs produce' ==="
-if [ -f "$SUDOERS_FILE" ] && grep -qF "$SUDOERS_RULE" "$SUDOERS_FILE"; then
-  echo "  Bereits vorhanden, nichts zu tun."
+echo "=== 1/3: Alte 'eggs produce'-Sudoers-Regel entfernen ==="
+if [ -f "$SUDOERS_FILE" ]; then
+  rm -f "$SUDOERS_FILE"
+  echo "  Entfernt: $SUDOERS_FILE (eggs wird nicht mehr verwendet)."
 else
-  echo "$SUDOERS_RULE" > "$SUDOERS_FILE"
-  chmod 440 "$SUDOERS_FILE"
-  if ! visudo -c -f "$SUDOERS_FILE" >/dev/null 2>&1; then
-    echo "  FEHLER: Syntaxpruefung fehlgeschlagen, Datei wird wieder entfernt." >&2
-    rm -f "$SUDOERS_FILE"
-    exit 1
-  fi
-  echo "  Angelegt: $SUDOERS_FILE"
+  echo "  Nicht vorhanden, nichts zu tun."
 fi
 
 echo ""

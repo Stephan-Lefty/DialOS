@@ -246,7 +246,9 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   unten), aber die Zweitkopie selbst liegt noch da. Zwei unabhängige
   Kopien nebeneinander sind fehleranfällig - genau dadurch sind zwei nie
   gepushte Commits vom 13.08. am 14.08. fast verloren gegangen.
-- [ ] `/home/eggs/*.iso`-Restdateien der letzten Builds aufräumen
+- [x] **Gegenstandslos seit 2026-08-16:** `/home/eggs/*.iso`-Restdateien aufräumen -
+  Penguins' Eggs ist entfallen (Schritt 16, jetzt Rescuezilla), und auf dem
+  neu aufgebauten T490 war es ohnehin nie installiert. Ursprünglich:
   (gehören `root`, die `eggs produce`-NOPASSWD-Regel deckt nur
   `eggs produce` selbst ab, nicht `rm` - braucht Stephans manuelles
   `sudo rm`).

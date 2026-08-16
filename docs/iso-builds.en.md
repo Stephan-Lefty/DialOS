@@ -2,7 +2,7 @@
 
 # ISO builds
 
-Built live/installation images (`eggs produce`, see
+Built backup images (Rescuezilla/Clonezilla, see
 [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 16) are **not**
 versioned in Git - several GB per file, and GitHub blocks individual
 files over 100 MB anyway. Instead: the file lives in Stephan's
