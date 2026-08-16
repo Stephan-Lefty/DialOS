@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Application
+Name=Install Debian
+NoDisplay=true
+Exec=/bin/true
+Terminal=false
+
+# DialOS: blendet den Eintrag "Install Debian" aus, den
+# calamares-settings-debian unter
+# /usr/share/applications/calamares-install-debian.desktop mitliefert.
+#
+# Warum ueberschreiben statt loeschen: Dateien in
+# /usr/local/share/applications haben Vorrang vor /usr/share/applications
+# und werden von apt/dpkg nie angefasst - die Ausblendung ueberlebt also
+# jedes Debian-Update. Gleiches Muster wie bei Evolution und
+# GNOME-Kalender in Schritt 10.
+#
+# Warum ueberhaupt: Calamares selbst muss auf dem Baugeraet und in der
+# Live-ISO installiert BLEIBEN (es ist der Installer fuer Kundengeraete).
+# Sichtbar sein darf aber nur der eigene, gebrandete Starter "DialOS
+# installieren" - der generische Debian-Eintrag hat weder im Dash von
+# "nutzer" noch sonstwo etwas verloren. Gefunden 2026-08-16, als der
+# Eintrag nach dem ersten Neustart in nutzers Dash auftauchte.

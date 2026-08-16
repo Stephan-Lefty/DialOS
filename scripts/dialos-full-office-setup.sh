@@ -86,6 +86,48 @@ schritt_02_paketliste() {
   sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
 }
 
+schritt_02b_sprachen_aufraeumen() {
+  log "Schritt 2b: Fremdsprachige Eingabemethoden entfernen"
+  # WARUM DAS NOETIG IST: Schritt 1 der Doku sagt "Standard-Debian-
+  # Installation, GNOME als Desktop waehlen". Genau diese Auswahl
+  # installiert das Metapaket task-gnome-desktop - dasselbe Paket, vor dem
+  # Schritt 2 ausdruecklich warnt. Ueber dessen Recommends kommen die
+  # task-*-Pakete praktisch aller von Debian unterstuetzten Sprachen mit
+  # herein, darunter task-japanese samt ibus-mozc/ibus-anthy.
+  #
+  # Folge auf dem echten Geraet (gemessen 2026-08-16, erster Aufbau):
+  # ~140 task-Pakete installiert, und GNOME setzte die Tastatur auf
+  # Japanisch (Mozc) statt Deutsch - fuer BEIDE Konten. Die Doku kannte
+  # die Falle, hatte aber nicht bemerkt, dass ihr eigener Schritt 1 sie
+  # ausloest. Deshalb jetzt ein fester Schritt statt einer Fussnote.
+  #
+  # task-gnome-desktop selbst bleibt bewusst stehen: es haelt den
+  # GNOME-Desktop zusammen. Entfernt werden nur die Sprachpakete.
+  local behalten="task-desktop|task-gnome-desktop|task-laptop|task-german|task-german-desktop|task-english"
+  local weg
+  weg=$(dpkg-query -W -f='${Package} ${Status}\n' 'task-*' 2>/dev/null \
+    | awk '/ok installed/{print $1}' | grep -vE "^($behalten)$" || true)
+
+  if [ -n "$weg" ]; then
+    echo "Entferne $(printf '%s\n' "$weg" | wc -l) fremdsprachige task-Pakete ..."
+    # shellcheck disable=SC2086
+    sudo apt-get purge -y $weg
+  else
+    echo "Keine fremdsprachigen task-Pakete gefunden - nichts zu tun."
+  fi
+
+  # Eingabemethoden explizit nachpurgen: sie sind es, die die Tastatur
+  # umstellen, und autoremove erwischt sie nicht zuverlaessig.
+  sudo apt-get purge -y ibus-anthy ibus-mozc anthy anthy-common \
+    mozc-data mozc-server mozc-utils-gui 2>/dev/null || true
+  sudo apt-get autoremove --purge -y
+
+  # Der dauerhafte Teil der Loesung steckt in 01-dialos-defaults (Schritt
+  # 3): dort ist die deutsche Tastatur als einzige Eingabequelle fuer JEDES
+  # Konto hinterlegt. Das Aufraeumen hier entfernt nur, was gar nicht erst
+  # haette installiert werden sollen.
+}
+
 schritt_03_branding() {
   log "Schritt 3: Branding einspielen"
   sudo mkdir -p /usr/share/backgrounds/dialos
@@ -137,6 +179,27 @@ schritt_05_calamares() {
   sudo cp -r iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/assets/calamares/. /etc/penguins-eggs.d/brain.d/assets/calamares/
 
   sudo cp iso-build/config/includes.chroot/etc/penguins-eggs.d/brain.d/base.yaml.tmpl /etc/penguins-eggs.d/brain.d/base.yaml.tmpl
+
+  # Debians eigenen Installer-Eintrag ausblenden. Calamares selbst bleibt
+  # installiert (die Live-ISO braucht es), sichtbar sein soll aber nur der
+  # gebrandete Starter "DialOS installieren".
+  # 1) Dash-Eintrag: Ueberschreibung in /usr/local/share/applications,
+  #    die apt/dpkg nie anfasst (gleiches Muster wie Schritt 10).
+  sudo mkdir -p /usr/local/share/applications
+  sudo cp iso-build/config/includes.chroot/usr/local/share/applications/calamares-install-debian.desktop \
+    /usr/local/share/applications/
+  sudo update-desktop-database /usr/local/share/applications 2>/dev/null || true
+
+  # 2) Arbeitsflaechen-Icon: calamares-settings-debian legt per
+  #    /etc/xdg/autostart/calamares-desktop-icon.desktop bei JEDEM Login
+  #    ein Installer-Icon auf die Arbeitsflaeche - auch bei "nutzer".
+  #    Gefunden 2026-08-16, als es nach dem ersten Neustart in nutzers
+  #    Sitzung auftauchte. "Hidden=true" ist der vorgesehene Weg, einen
+  #    Autostart abzuschalten.
+  if [ -f /etc/xdg/autostart/calamares-desktop-icon.desktop ] \
+     && ! grep -q "^Hidden=true" /etc/xdg/autostart/calamares-desktop-icon.desktop; then
+    echo "Hidden=true" | sudo tee -a /etc/xdg/autostart/calamares-desktop-icon.desktop > /dev/null
+  fi
 }
 
 schritt_06_rustdesk() {
@@ -186,8 +249,17 @@ schritt_08_piper() {
     sudo mv /tmp/thorsten.onnx /usr/local/share/dialos-piper/voices/de_DE-thorsten-high.onnx
     sudo mv /tmp/thorsten.onnx.json /usr/local/share/dialos-piper/voices/de_DE-thorsten-high.onnx.json
   fi
+  # Wachposten fuer die Synthese-Kette. piper-generic.conf ruft ihn in
+  # GenericExecuteSynth als ERSTES Glied einer &&-Kette auf. Fehlte er
+  # (bis 2026-08-16 war er weder im Repo noch dokumentiert), brach die
+  # Kette sofort ab und es wurde NIE etwas synthetisiert - die
+  # Sprachausgabe blieb vollstaendig stumm, ohne sichtbaren Fehler.
+  sudo cp iso-build/config/includes.chroot/usr/local/share/dialos-piper/check_piper_voice.sh \
+    /usr/local/share/dialos-piper/check_piper_voice.sh
+
   sudo chmod -R a+rX /usr/local/share/dialos-piper
   sudo chmod +x /usr/local/share/dialos-piper/piper/piper
+  sudo chmod 755 /usr/local/share/dialos-piper/check_piper_voice.sh
 
   sudo mkdir -p /etc/speech-dispatcher/modules
   sudo cp iso-build/config/includes.chroot/etc/speech-dispatcher/modules/piper-generic.conf /etc/speech-dispatcher/modules/
@@ -314,7 +386,7 @@ schritt_15_vosk() {
 # NICHT Teil des normalen Laufs (device-spezifisch, siehe Funktion
 # oben), nur per --bluetooth-kopplung zuschaltbar oder einzeln per
 # "./dialos-full-office-setup.sh 14" aufrufbar.
-ALLE_SCHRITTE=(02_paketliste 03_branding 04_autologin 05_calamares 06_rustdesk
+ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 04_autologin 05_calamares 06_rustdesk
   07_claude_cli 08_piper 09_gnome_erweiterungen 10_standardprogramme
   11_sprachausgabe 12_sicherheit 14_bluetooth 15_vosk)
 

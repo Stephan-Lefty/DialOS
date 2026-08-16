@@ -1,3 +1,13 @@
+[org/gnome/desktop/input-sources]
+# Deutsche Tastatur als EINZIGE Eingabequelle - fuer jedes Konto, auch
+# fuer kuenftig angelegte. Ohne diesen Standard nimmt GNOME die erste
+# gefundene Eingabemethode; nach einer Debian-Installation mit
+# GNOME-Auswahl ist das Japanisch (Mozc), weil task-gnome-desktop ueber
+# Recommends task-japanese mitzieht (siehe Schritt 2b im Aufbau-Skript).
+# Gefunden beim ersten echten Aufbau am 2026-08-16: dialosadmin wie nutzer
+# hatten [('ibus', 'mozc-jp'), ('xkb', 'de')] - Mozc also an erster Stelle.
+sources=[('xkb', 'de')]
+
 [org/gnome/mutter]
 center-new-windows=true
 [org/gnome/system/location]

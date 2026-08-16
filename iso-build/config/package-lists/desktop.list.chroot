@@ -6,6 +6,7 @@ orca
 espeak-ng
 plymouth
 plymouth-themes
+pulseaudio-utils
 
 network-manager
 network-manager-gnome
