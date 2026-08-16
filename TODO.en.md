@@ -248,7 +248,10 @@ what has already been done.
   the second copy itself is still sitting there. Two independent copies
   side by side are error-prone - that's exactly how two never-pushed
   commits from 2026-08-13 were nearly lost on 2026-08-14.
-- [ ] Clean up leftover `/home/eggs/*.iso` files from the last builds
+- [x] **Moot since 2026-08-16:** clean up leftover `/home/eggs/*.iso`
+  files - Penguins' Eggs has been dropped (step 16, now Rescuezilla), and
+  on the rebuilt T490 it was never installed in the first place.
+  Originally: Clean up leftover `/home/eggs/*.iso` files from the last builds
   (owned by `root`; the `eggs produce` NOPASSWD rule only covers
   `eggs produce` itself, not `rm` - needs Stephan's manual `sudo rm`).
 
