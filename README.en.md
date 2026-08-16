@@ -67,7 +67,9 @@ background) and `splash.png` (boot/login screen).
   volume** - so it is immediately audible what was settled on. Every later
   login uses the remembered value without asking; deleting the file resets
   it. Since `nutzer`'s home sits on the encrypted partition, the setting is
-  as protected as the rest of their data.
+  as protected as the rest of their data. **Confirmed live the same
+  day:** the announcement ran, the question followed it, and Stephan's
+  spoken "25" was recognized and stored permanently.
   - **"off" is deliberately NOT stored permanently** and applies only to
     the current login. If it were permanent, no announcement would come -
     and therefore never this question again. A blind user would have no way

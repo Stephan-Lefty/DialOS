@@ -43,7 +43,18 @@ what has already been done.
   battery, not DialOS itself) - standard Bluetooth profiles (A2DP/HFP)
   offer no remote control for this, it's purely device-/vendor-
   dependent. Factor this into the reference hardware selection.
-- [ ] **Next step:** completely reinstall the T490 and use it to really
+- [x] **DONE on 2026-08-16 - the complete flow has run on real
+  hardware.** Result: a freshly installed Debian 13 became a running
+  DialOS. Proven: encrypted swap (comes up on its own at boot, evidenced
+  by the journal), `dialos-nutzer-home` at 374.9 GiB, autologin for
+  `nutzer`, audible speech output, German keyboard, and **both directions
+  of the stick gate**: without the stick a login screen requiring a
+  password and a closed LUKS container, with the stick a clean autologin
+  including announcements. Also confirmed live: the new volume logic -
+  announcement, then the question, spoken "25" recognized and stored
+  permanently. Eight faults surfaced along the way that no dry run would
+  have found (details in README changelog 0.5.0). Original entry:
+  completely reinstall the T490 and use it to really
   test the whole new flow (never run end-to-end yet): install Debian 13
   + GNOME manually (step 1, **with** the partitioning note documented
   since 2026-08-14 - 100 GB root, deliberately leave the rest of the
@@ -130,7 +141,10 @@ what has already been done.
   unplug the external SanDisk-Extreme drive first (otherwise it's
   selectable as the target disk!); verify the new stick partitioning
   (`DIALOS-KEY` 2 GiB + `DIALOS-DATA` ext4).
-- [ ] **New next step:** run a complete `dialos-install` installation
+- [x] **Moot since 2026-08-16:** `dialos-install` has been dropped
+  entirely (path A). This entry's checkpoints were covered by the new
+  flow instead and all passed - see the completed entry above.
+  Originally: run a complete `dialos-install` installation
   with the new home-partition design on real hardware (T490) (see
   docs/sicherheit-datenschutz.en.md, section "Encrypting nutzer's data +
   security stick", for the full design). Check: ~100 GiB unencrypted

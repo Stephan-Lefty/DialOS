@@ -68,7 +68,9 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   jedem weiteren Anmelden wird der gemerkte Wert verwendet, ohne erneut zu
   fragen; zum Zurücksetzen genügt das Löschen der Datei. Da `nutzer`s Home
   auf der verschlüsselten Partition liegt, ist die Einstellung genauso
-  geschützt wie dessen übrige Daten.
+  geschützt wie dessen übrige Daten. **Am selben Tag live bestätigt:**
+  Ansage lief, die Frage kam danach, Stephans gesprochene "25" wurde
+  erkannt und dauerhaft gemerkt.
   - **"aus" wird bewusst NICHT dauerhaft gespeichert**, sondern gilt nur
     für die laufende Anmeldung. Wäre es dauerhaft, käme keine Ansage mehr -
     und damit auch nie wieder diese Frage. Ein blinder Nutzer hätte ohne

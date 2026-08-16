@@ -42,7 +42,19 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   DialOS selbst) - Bluetooth-Standardprofile (A2DP/HFP) bieten dafür
   keine Fernsteuerung, rein geräte-/herstellerabhängig. Bei der Auswahl
   der Referenz-Hardware als Kriterium berücksichtigen.
-- [ ] **Nächster Schritt:** T490 komplett neu aufsetzen und dabei den
+- [x] **ERLEDIGT am 2026-08-16 - der komplette Ablauf ist auf echter
+  Hardware durchgelaufen.** Ergebnis: Aus einem frisch installierten
+  Debian 13 wurde ein laufendes DialOS. Bewiesen sind: verschlüsselter
+  Swap (kommt beim Boot von allein hoch, per Journal belegt),
+  `dialos-nutzer-home` mit 374,9 GiB, Autologin für `nutzer`,
+  Sprachausgabe hörbar, deutsche Tastatur, und **beide Richtungen des
+  Stick-Gates**: ohne Stick Anmeldebildschirm mit Passwortzwang und
+  geschlossenem LUKS-Container, mit Stick sauberer Autologin samt
+  Ansagen. Ebenfalls live bestätigt: die neue Lautstärke-Logik - Ansage,
+  danach die Frage, gesprochene "25" erkannt und dauerhaft gemerkt.
+  Dabei kamen acht Fehler ans Licht, die kein Trockenlauf gefunden hätte
+  (Details im README-Änderungsprotokoll 0.5.0). Ursprünglicher Eintrag:
+  T490 komplett neu aufsetzen und dabei den
   kompletten neuen Ablauf real testen (noch nie end-to-end
   durchgelaufen): Debian 13 + GNOME manuell installieren (Schritt 1,
   **mit** dem seit 2026-08-14 dokumentierten Partitionierungs-Hinweis -
@@ -147,7 +159,11 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   SanDisk-Extreme-Platte vorher abstecken (sonst als Zielfestplatte
   wählbar!); neue Stick-Partitionierung (`DIALOS-KEY` 2 GiB +
   `DIALOS-DATA` ext4) verifizieren.
-- [ ] **Neuer nächster Schritt:** komplette `dialos-install`-Installation
+- [x] **Hinfällig seit 2026-08-16:** `dialos-install` ist ersatzlos
+  entfallen (Weg A). Die Prüfpunkte dieses Eintrags wurden stattdessen
+  über den neuen Ablauf abgedeckt und sind alle bestanden - siehe den
+  erledigten Eintrag oben. Ursprünglich: komplette
+  `dialos-install`-Installation
   mit dem neuen Home-Partition-Design auf echter Hardware (T490)
   durchspielen (siehe docs/sicherheit-datenschutz.md, Abschnitt
   "Verschlüsselung von nutzers Daten + Sicherheits-Stick", für das
