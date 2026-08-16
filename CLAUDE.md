@@ -39,7 +39,7 @@ Plymouth-Splash, Calamares-Branding, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-14)
+## Aktueller Stand (Stand: 2026-08-16)
 
 Der ursprüngliche Zwei-Wege-Versuch ist entschieden, kein "neuer Plan"
 mehr, sondern der etablierte Ansatz:
@@ -61,19 +61,49 @@ mehr, sondern der etablierte Ansatz:
 **Aktuelle Version: 0.5.0** (in Arbeit) - alle Details im
 [README.md-Änderungsprotokoll](README.md#änderungsprotokoll). Zwei
 Test-ISOs bereits gebaut (`DialOS-Live-0.5.0.iso`,
-`DialOS-Live-0.5.0-clone.iso`).
+`DialOS-Live-0.5.0-clone.iso`, beide nicht mehr lokal vorhanden - siehe
+`docs/iso-builds.md`).
 
-**Blocker vom 14.08. entschärft:** Der geplante echte Live-Boot-Test von
-`dialos-install` mit dem Sicherheits-Stick ist gescheitert - Grund war
-kein Einzelbug, sondern dass der ganze LUKS/initramfs-Weg strukturell
-fehleranfällig ist (siehe
+**Grundlegende Sicherheits-Architektur seit 14./15.08. neu** (löst den
+früheren Ganze-Platte-LUKS-Ansatz komplett ab, siehe
 [docs/sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md),
-Abschnitt "Sicherheits-Stick als Anwesenheits-Token"). Als robustere
-Ergänzung (noch nicht als Ersatz - offene Entscheidung, siehe TODO.md)
-gibt es jetzt zusätzlich `dialos-stick-gate.service`: ein rein
-softwarebasierter Anwesenheits-Check, der `nutzer`s Autologin je nach
-gestecktem Sicherheits-Stick umschaltet, komplett ohne initramfs.
-Nächster Schritt laut TODO.md: auf echter Hardware testen.
+Abschnitt "Verschlüsselung von nutzers Daten + Sicherheits-Stick"):
+Nur noch eine eigene `dialos-nutzer-home`-Partition (LUKS2,
+ausschließlich `/home/nutzer`) ist verschlüsselt, root (~100 GiB,
+ext4) bootet immer unverschlüsselt normal.
+`dialos-stick-gate.service` öffnet die Home-Partition nach dem Boot
+(nicht im initramfs) und schaltet erst danach `nutzer`s Autologin frei.
+Sicherheits-Stick: `DIALOS-KEY` (Schlüssel) als ext4 - bewusst NICHT
+Windows-lesbar; `DIALOS-DATA` als exFAT - bewusst Windows/macOS/Linux-
+lesbar als Zusatzspeicher für `nutzer` (empfohlene Standardgröße 64 GB).
+
+**Zweiter Installations-Pfad seit 15./16.08.:** Neben `dialos-install`
+(Live-ISO klont das ganze System per rsync auf die Zielplatte) gibt es
+jetzt einen zweiten, leichteren Pfad für den direkten Aufbau auf echter
+Hardware: Basis-Installation (Schritt 1, Debian-Installer/Calamares,
+**muss** dabei bewusst Platz nach der 100-GB-root-Partition frei
+lassen) → [`scripts/dialos-full-office-setup.sh`](scripts/dialos-full-office-setup.sh)
+(automatisiert Schritte 2-12+15 aus Debian-zu-DialOS.md) →
+`dialos-setup-home-partition.sh` (richtet `dialos-nutzer-home` +
+Sicherheits-Stick im freigelassenen Platz ein, gleiche Logik wie
+`dialos-install` ohne dessen Platten-Wipe) →
+`scripts/dialos-buero-setup-abschliessen.sh` (`nutzer` anlegen). Beide
+neuen Skripte sind nur syntaktisch geprüft, **noch nie end-to-end auf
+einem frischen System durchgelaufen** - das ist der nächste geplante
+Schritt (kompletter T490-Neuaufbau, siehe TODO.md "Nächster Schritt").
+Offene Grundsatzfrage: ob `dialos-install`/`dialos-rekey` (Clone-Pfad)
+langfristig neben diesem zweiten Pfad bestehen bleiben oder entfallen.
+
+**Vosk/hassil ist jetzt produktiv im Einsatz** (nicht mehr nur das
+Testskript `dialos-vosk-test.py`): `dialos-start-ansage.py` fragt
+`nutzer` bei der Start-Ansage per Sprache nach der gewünschten
+Lautstärke (100/75/50/25 %/aus) - echt mit Stephans Stimme getestet
+(15./16.08.), dabei einen Timing-Bug gefunden und behoben (fehlendes
+Startsignal vor der Aufnahme). Außerdem: Wetter-Standort läuft jetzt
+über GeoClue2 statt IP-Raten (Auslöser: `wttr.in` zeigte Wien statt
+Stephans echtem Standort Seefeld in Tirol) - mit Genauigkeits-
+Schwellwert, der zu grobe Schätzungen verwirft und die Wetteransage
+dann bewusst ausfallen lässt, statt eine falsche Stadt zu nennen.
 
 Konkrete offene Aufgaben stehen ausschließlich in [TODO.md](TODO.md),
 nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
@@ -83,12 +113,16 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
 - Sudo-Rechte für den Standard-Benutzer "nutzer" (Platzhalter-Passwort
   aktuell zufällig generiert, echte Policy für die spätere
   sprachgesteuerte Wartung noch offen).
-- Referenz-Hardware final festlegen (aktuell T490 zum Testen, kein
-  WWAN-Modul verbaut).
+- Referenz-Hardware final festlegen (Laptop UND Sicherheits-Stick UND
+  Bluetooth-Lautsprecher/-Mikrofon - alle drei noch offen, siehe
+  `docs/hardware.md`).
 - Rechtschreibprüfung (hunspell/aspell) fehlt noch, siehe
   `docs/offene-punkte.md`.
-- `scripts/dialos-setup-nutzer.sh` noch nicht als Ganzes (nur in
-  Einzelschritten) durchgetestet.
+- Ob `dialos-install`/`dialos-rekey` (Ganze-System-Klon-Pfad) langfristig
+  neben dem neuen `dialos-full-office-setup.sh`+`dialos-setup-home-
+  partition.sh`-Pfad bestehen bleiben oder entfallen - siehe TODO.md.
+- Kompletter neuer Installations-Pfad (siehe oben) noch nicht
+  end-to-end auf einem frischen System getestet.
 
 ## Arbeitsweise mit Stephan
 
