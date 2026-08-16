@@ -469,6 +469,23 @@ enabled=true` steht schon als dconf-Standardwert in
   ausbleiben** als mit der alten, ungenaueren aber immer "irgendeine"
   Antwort liefernden IP-Ratelösung - das ist bewusst so gewählt
   (lieber nichts sagen als etwas Falsches).
+  **Lautstärke-Abfrage seit 2026-08-14** (nur für `nutzer`, siehe
+  TODO.md): Erste echte Vosk-Nutzung im Betrieb (vorher nur das
+  Testskript `dialos-vosk-test.py`) - fragt "Wie laut soll ich sein?
+  Sage 100, 75, 50, 25 oder aus.", nimmt 4 Sekunden per `parec` auf
+  (Bluetooth-Mikrofon bevorzugt, inkl. `headset-head-unit`-
+  Profilwechsel wie in `dialos-vosk-test.py`), erkennt mit dem kleinen
+  deutschen Vosk-Modell. Ergebnis steuert Speech-Dispatchers eigene
+  Lautstärke (`spd-say -i`, -100 bis +100) für den Rest der Ansage -
+  neuer `--lautstaerke`-Parameter in `dialos-say.py`. Bei "aus" wird
+  nur die Frage selbst (normale Lautstärke) gesprochen, der Rest der
+  Ansage komplett ausgelassen. **Bei jedem Fehlschlag** (nichts/nichts
+  Passendes verstanden, Vosk nicht verfügbar, kein Mikrofon) fällt die
+  Funktion auf 100 % zurück - die Ansage darf wegen dieser Zusatzfrage
+  nie ausbleiben oder hängen bleiben. Erkennungslogik mit Piper-
+  synthetisierten Testwörtern verifiziert (alle fünf Optionen korrekt
+  erkannt); ein echter Test mit tatsächlich gesprochener Antwort steht
+  noch aus (siehe TODO.md).
 - `dialos-tts-indicator.py`: Panel-Icon, das anzeigt, wenn gerade
   gesprochen wird (braucht die AppIndicator-Erweiterung aus Schritt 9).
 

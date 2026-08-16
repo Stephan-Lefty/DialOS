@@ -463,6 +463,24 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
   often** than with the old, less accurate but always-"some answer"
   IP-guess approach - that's a deliberate trade-off (better to say
   nothing than something wrong).
+  **Volume prompt since 2026-08-14** (only for `nutzer`, see TODO.md):
+  the first real production use of Vosk (previously only the test
+  script `dialos-vosk-test.py`) - asks "Wie laut soll ich sein? Sage
+  100, 75, 50, 25 oder aus." (How loud should I be? Say 100, 75, 50, 25
+  or off), records 4 seconds via `parec` (Bluetooth microphone
+  preferred, including the `headset-head-unit` profile switch like in
+  `dialos-vosk-test.py`), recognizes it with the small German Vosk
+  model. The result drives speech-dispatcher's own volume (`spd-say
+  -i`, -100 to +100) for the rest of the announcement - new
+  `--lautstaerke` parameter in `dialos-say.py`. On "off", only the
+  question itself (at normal volume) is spoken, the rest of the
+  announcement is skipped entirely. **On any failure** (nothing/nothing
+  matching understood, Vosk unavailable, no microphone), the function
+  falls back to 100% - the announcement must never be skipped or hang
+  because of this extra question. The recognition logic was verified
+  with Piper-synthesized test words (all five options recognized
+  correctly); a real test with an actually spoken answer is still
+  pending (see TODO.md).
 - `dialos-tts-indicator.py`: a panel icon that shows when something is
   currently being spoken (needs the AppIndicator extension from step 9).
 

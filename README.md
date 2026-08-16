@@ -255,6 +255,24 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   in `scripts/dialos-full-office-setup.sh`/`Debian-zu-DialOS.md`
   nachgezogen. Nebenbei: die Wetteransage nennt jetzt auch den erkannten
   Ort ("Das Wetter in Seefeld in Tirol wird heute so sein.").
+- **Lautstärke-Abfrage bei der Start-Ansage:** Neuer Wunsch von Stephan
+  - `dialos-start-ansage.py` fragt `nutzer` jetzt am Anfang der Ansage
+  per Sprache "Wie laut soll ich sein? Sage 100, 75, 50, 25 oder aus.",
+  nimmt 4 Sekunden auf (Bluetooth-Mikrofon bevorzugt, mit demselben
+  `headset-head-unit`-Profilwechsel wie in `dialos-vosk-test.py`) und
+  erkennt die Antwort mit dem kleinen deutschen Vosk-Modell - die
+  **erste echte Vosk-Nutzung im laufenden Betrieb** (vorher nur das
+  technische Testskript). Ergebnis steuert Speech-Dispatchers eigene
+  Lautstärke (`spd-say -i`, neuer `--lautstaerke`-Parameter in
+  `dialos-say.py`) für den Rest der Ansage; bei "aus" wird nur die
+  Frage selbst gesprochen, der Rest komplett ausgelassen. Nur für
+  `nutzer` - `dialosadmin` & Co. werden nie gefragt. Bei jedem
+  Fehlschlag (nichts verstanden, Vosk fehlt, kein Mikrofon) fällt die
+  Funktion auf 100 % zurück, damit die Ansage nie wegen dieser
+  Zusatzfrage ausbleibt oder hängen bleibt. Die Erkennungs-/
+  Zuordnungslogik wurde verifiziert, indem Piper alle fünf Optionen
+  synthetisch aussprach und Vosk sie korrekt erkannte - ein echter Test
+  mit tatsächlich gesprochener Antwort steht laut TODO.md noch aus.
 
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur

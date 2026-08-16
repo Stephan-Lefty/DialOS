@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""DialOS: Sprachansage beim Start (Uhrzeit, Akkustaende, Internet, Wetter)."""
+"""DialOS: Sprachansage beim Start (Uhrzeit, Akkustaende, Internet, Wetter,
+Lautstaerke-Abfrage per Vosk fuer nutzer)."""
 import getpass
 import json
 import os
@@ -44,6 +45,23 @@ WETTER_SLOTS = [
 ]
 BLUETOOTH_DEBUG_LOG = "/tmp/dialos-bluetooth-debug.log"
 LOCK_DATEI = "/tmp/dialos-start-ansage.pid"
+LAUTSTAERKE_OPTIONEN = {
+    "hundert": 100, "100": 100,
+    "fünfundsiebzig": 75, "75": 75,
+    "fünfzig": 50, "50": 50,
+    "fünfundzwanzig": 25, "25": 25,
+    "aus": 0, "stumm": 0,
+}
+# Prozent -> Speech-Dispatcher-Intensitaet (-i, -100 bis +100, 0 =
+# Normalwert) - Speech-Dispatcher kennt keine echten Prozent, "100 %"
+# wird deshalb auf den Normalwert 0 abgebildet, nicht auf +100 (das
+# waere lauter als normal, nicht "voll"). Grobe, aber nachvollziehbare
+# Naeherung - Feinjustierung erst nach echtem Hoertest moeglich (siehe
+# TODO.md).
+LAUTSTAERKE_ZU_INTENSITAET = {100: 0, 75: -25, 50: -50, 25: -75}
+LAUTSTAERKE_VOSK_MODELL = "/usr/local/share/vosk-model-de-small"
+LAUTSTAERKE_AUFNAHME_SEKUNDEN = 4
+LAUTSTAERKE_ABTASTRATE = 16000
 EINER = ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"]
 ZEHN_BIS_NEUNZEHN = ["zehn", "elf", "zwölf", "dreizehn", "vierzehn", "fünfzehn",
                      "sechzehn", "siebzehn", "achtzehn", "neunzehn"]
@@ -70,8 +88,106 @@ def ist_kundenkonto():
         return False
 
 
-def spd_say(text):
-    subprocess.run(["/usr/local/bin/dialos-say.py", text])
+def spd_say(text, intensitaet=None):
+    cmd = ["/usr/local/bin/dialos-say.py"]
+    if intensitaet is not None:
+        cmd += ["--lautstaerke", str(intensitaet)]
+    cmd.append(text)
+    subprocess.run(cmd)
+
+
+def bluetooth_karte_fuer_quelle(quelle_name):
+    praefix = "bluez_input."
+    if not quelle_name.startswith(praefix):
+        return None
+    return "bluez_card." + quelle_name[len(praefix):].replace(":", "_")
+
+
+def bluetooth_profil_setzen(karten_name, profil):
+    ergebnis = subprocess.run(
+        ["pactl", "set-card-profile", karten_name, profil],
+        capture_output=True, text=True,
+    )
+    return ergebnis.returncode == 0
+
+
+def waehle_mikrofon_fuer_lautstaerke():
+    try:
+        out = subprocess.run(
+            ["pactl", "-f", "json", "list", "sources"],
+            capture_output=True, text=True, timeout=5,
+        ).stdout
+        quellen = json.loads(out) if out.strip() else []
+    except Exception:
+        return None
+    # Bluetooth-Mikrofon bevorzugt (Zielbild laut docs/sprachsteuerung.md
+    # und offene-punkte.md: Bluetooth-Headset ist primaerer Weg), sonst
+    # irgendeine nicht-Monitor-Quelle als Fallback.
+    kandidaten = [q.get("name", "") for q in quellen if q.get("name") and not q["name"].endswith(".monitor")]
+    bluetooth = [n for n in kandidaten if n.startswith("bluez_input.")]
+    if bluetooth:
+        return bluetooth[0]
+    return kandidaten[0] if kandidaten else None
+
+
+def frage_lautstaerke():
+    """Fragt nutzer per Sprache nach der gewuenschten Ansage-Lautstaerke
+    (100/75/50/25 Prozent oder "aus"). Gibt bei JEDEM Fehlschlag (Vosk
+    fehlt, kein Mikrofon, nichts/nichts Passendes verstanden) 100 zurueck
+    - die eigentliche Ansage darf wegen dieser Zusatzfrage niemals
+    ausbleiben oder haengen bleiben."""
+    try:
+        import vosk
+    except ImportError:
+        return 100
+
+    quelle = waehle_mikrofon_fuer_lautstaerke()
+    bluetooth_karte = None
+    bluetooth_umgeschaltet = False
+    if quelle and quelle.startswith("bluez_input."):
+        bluetooth_karte = bluetooth_karte_fuer_quelle(quelle)
+        if bluetooth_karte and (
+            bluetooth_profil_setzen(bluetooth_karte, "headset-head-unit")
+            or bluetooth_profil_setzen(bluetooth_karte, "headset-head-unit-cvsd")
+        ):
+            bluetooth_umgeschaltet = True
+            time.sleep(1.5)
+    if quelle:
+        subprocess.run(["pactl", "set-default-source", quelle], capture_output=True)
+
+    spd_say("Wie laut soll ich sein? Sage 100, 75, 50, 25 oder aus.")
+
+    ergebnis = 100
+    try:
+        vosk.SetLogLevel(-1)
+        modell = vosk.Model(LAUTSTAERKE_VOSK_MODELL)
+        erkenner = vosk.KaldiRecognizer(modell, LAUTSTAERKE_ABTASTRATE)
+        prozess = subprocess.Popen(
+            ["parec", f"--rate={LAUTSTAERKE_ABTASTRATE}", "--channels=1", "--format=s16le"],
+            stdout=subprocess.PIPE,
+        )
+        audiodaten = bytearray()
+        ende = time.time() + LAUTSTAERKE_AUFNAHME_SEKUNDEN
+        while time.time() < ende:
+            chunk = prozess.stdout.read(4000)
+            if not chunk:
+                break
+            audiodaten.extend(chunk)
+        prozess.terminate()
+        prozess.stdout.close()
+        erkenner.AcceptWaveform(bytes(audiodaten))
+        text = json.loads(erkenner.FinalResult()).get("text", "")
+        for wort in text.split():
+            if wort in LAUTSTAERKE_OPTIONEN:
+                ergebnis = LAUTSTAERKE_OPTIONEN[wort]
+                break
+    except Exception:
+        ergebnis = 100
+
+    if bluetooth_umgeschaltet and bluetooth_karte:
+        bluetooth_profil_setzen(bluetooth_karte, "a2dp-sink")
+
+    return ergebnis
 
 
 def upower_geraete():
@@ -368,6 +484,11 @@ def main():
 
     bluetooth_debug_snapshot("02-Direkt vor der Ansage (nach Reconnect + Wartezeit)")
 
+    # Lautstaerke-Abfrage nur fuer nutzer (Kundenkonto) - dialosadmin/
+    # andere Konten werden nie gefragt, siehe TODO.md.
+    lautstaerke_prozent = frage_lautstaerke() if ist_kundenkonto() else 100
+    intensitaet = LAUTSTAERKE_ZU_INTENSITAET.get(lautstaerke_prozent, 0)
+
     akku_saetze = []
     for kind in kind_reihenfolge:
         werte = geraete.get(kind)
@@ -403,7 +524,10 @@ def main():
 
     text += " Ich wünsche Dir einen schönen Tag!"
 
-    spd_say(text)
+    if lautstaerke_prozent > 0:
+        spd_say(text, intensitaet=intensitaet)
+    # Bei "aus" (0) wird nur die Lautstaerke-Frage selbst (in normaler
+    # Lautstaerke) gesprochen, der Rest der Ansage bewusst ausgelassen.
 
     netzwerk_ueberwachung(hat_internet)
 

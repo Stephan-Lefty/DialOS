@@ -9,9 +9,16 @@ architecture questions), these are concrete, checkable tasks. Completed
 items are marked with a checkmark, not deleted - so it stays traceable
 what has already been done.
 
-- [ ] `dialos-start-ansage.py` should ask `nutzer` for the desired
-  announcement volume during the startup announcement (100%, 75%, 50%,
-  25%, off) - currently no way to adjust the announcement's own volume.
+- [x] Implemented a volume prompt during the startup announcement (only
+  `nutzer`, 100/75/50/25%/off) - done 2026-08-14, see
+  docs/Debian-zu-DialOS.en.md step 11. First real production use of
+  Vosk, recognition logic verified with Piper-synthesized test words
+  (all five options recognized correctly).
+- [ ] Run a real test of the volume prompt with an actually spoken
+  answer (so far only verified with Piper-synthesized test words, not a
+  real human voice/microphone) - in particular test via a Bluetooth
+  microphone (AIRHUG or similar) whether the `headset-head-unit`
+  profile switch works reliably there.
 - [x] Switched the weather location to GeoClue2 instead of IP guessing -
   done 2026-08-14, tested extensively live (see README changelog 0.5.0
   and docs/Debian-zu-DialOS.en.md, step 11, for details). Trigger:

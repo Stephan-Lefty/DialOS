@@ -58,7 +58,17 @@ def markierung_entfernen():
 
 
 def main():
-    text = " ".join(sys.argv[1:])
+    argv = sys.argv[1:]
+    intensitaet = None
+    if argv and argv[0] == "--lautstaerke":
+        # Speech-Dispatcher-Lautstaerke (-i, "Intensitaet"), -100 bis
+        # +100, siehe dialos-start-ansage.py fuer die Prozent-Zuordnung.
+        try:
+            intensitaet = int(argv[1])
+        except (IndexError, ValueError):
+            intensitaet = None
+        argv = argv[2:]
+    text = " ".join(argv)
     if not text:
         return
     streams = sink_inputs()
@@ -75,8 +85,11 @@ def main():
         # Kurze "Aufwaerm"-Ansage, damit ein evtl. eingeschlafener
         # Bluetooth-Lautsprecher rechtzeitig aufwacht, bevor der
         # eigentliche Text gesprochen wird (sonst geht der Anfang verloren).
-        subprocess.run(["spd-say", "--wait", "."])
-        subprocess.run(["spd-say", "--wait", text])
+        spd_cmd = ["spd-say", "--wait"]
+        if intensitaet is not None:
+            spd_cmd += ["-i", str(intensitaet)]
+        subprocess.run(spd_cmd + ["."])
+        subprocess.run(spd_cmd + [text])
     finally:
         for index in stummgeschaltet:
             set_mute(index, False)

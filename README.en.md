@@ -248,6 +248,25 @@ background) and `splash.png` (boot/login screen).
   `Debian-zu-DialOS.en.md`. Along the way: the weather announcement now
   also names the detected location ("Das Wetter in Seefeld in Tirol
   wird heute so sein.").
+- **Volume prompt during the startup announcement:** a new request from
+  Stephan - `dialos-start-ansage.py` now asks `nutzer` at the start of
+  the announcement, by voice, "Wie laut soll ich sein? Sage 100, 75,
+  50, 25 oder aus." (How loud should I be? Say 100, 75, 50, 25 or off),
+  records for 4 seconds (Bluetooth microphone preferred, with the same
+  `headset-head-unit` profile switch as in `dialos-vosk-test.py`) and
+  recognizes the answer with the small German Vosk model - the **first
+  real production use of Vosk** (previously only the technical test
+  script). The result drives speech-dispatcher's own volume (`spd-say
+  -i`, new `--lautstaerke` parameter in `dialos-say.py`) for the rest
+  of the announcement; on "off", only the question itself is spoken,
+  the rest is skipped entirely. Only for `nutzer` - `dialosadmin` & co.
+  are never asked. On any failure (nothing understood, Vosk missing, no
+  microphone), the function falls back to 100% so the announcement
+  never gets skipped or hangs because of this extra question. The
+  recognition/mapping logic was verified by having Piper synthetically
+  speak all five options and confirming Vosk recognized them correctly
+  - a real test with an actually spoken answer is still pending per
+  TODO.md.
 
 ### 0.4.0
 - Removed Evolution and GNOME Calendar from the app grid and search

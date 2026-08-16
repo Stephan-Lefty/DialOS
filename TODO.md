@@ -9,10 +9,16 @@ entschiedene Architekturfragen) sind das hier konkrete, abhakbare
 Aufgaben. Erledigte Punkte werden mit einem Häkchen markiert, nicht
 gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 
-- [ ] `dialos-start-ansage.py` soll `nutzer` bei der Start-Ansage nach
-  der gewünschten Lautstärke fragen (100 %, 75 %, 50 %, 25 %, aus) -
-  aktuell keine Lautstärke-Einstellmöglichkeit für die Ansage selbst
-  vorhanden.
+- [x] Lautstärke-Abfrage bei der Start-Ansage (nur `nutzer`, 100/75/50/
+  25 Prozent/aus) umgesetzt - erledigt 2026-08-14, siehe
+  docs/Debian-zu-DialOS.md Schritt 11. Erste echte Vosk-Nutzung im
+  Betrieb, Erkennungslogik mit Piper-synthetisierten Testwörtern
+  verifiziert (alle fünf Optionen korrekt erkannt).
+- [ ] Echten Test der Lautstärke-Abfrage mit tatsächlich gesprochener
+  Antwort durchführen (bisher nur mit Piper-synthetisierten Testwörtern
+  verifiziert, nicht mit echter menschlicher Stimme/Mikrofon) -
+  insbesondere über ein Bluetooth-Mikrofon (AIRHUG o. ä.) testen, ob der
+  `headset-head-unit`-Profilwechsel dabei zuverlässig funktioniert.
 - [x] Wetter-Standort auf GeoClue2 umgestellt statt IP-geraten - erledigt
   2026-08-14, ausführlich live getestet (siehe README-Änderungsprotokoll
   0.5.0 und docs/Debian-zu-DialOS.md, Schritt 11, für Details). Auslöser:
