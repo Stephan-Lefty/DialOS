@@ -190,6 +190,10 @@ Notable groups within it (in the order they appear in the file):
 - **Installer/security tools**: `zenity`, `polkitd`, `pkexec`,
   `parted`, `dosfstools`, `exfatprogs` (for the Windows-readable
   `DIALOS-DATA` partition on the security stick), `cryptsetup`,
+  **`systemd-cryptsetup`** (added 2026-08-16: Debian 13 split crypttab
+  handling out of the `systemd` package - without it there is neither the
+  generator nor `systemd-cryptsetup@.service`, and `/etc/crypttab` has no
+  effect at boot whatsoever; see step 12, encrypted swap),
   `rsync`, `grub-efi-amd64` (+ `-bin`), `openssl`,
   `systemd-timesyncd` (NTP, important for the installer later),
   `thunderbird-l10n-de`, `gnome-shell-extension-manager`.
@@ -668,6 +672,28 @@ decision from 2026-08-16, rationale in step 1. It does the following:
   paged out, the less of `nutzer`'s data ever leaves RAM,
 - sets `RESUME=none` + `update-initramfs -u`, so no half-configured
   hibernation setup is left behind.
+
+**Found during the first real run (2026-08-16), now fixed:**
+- **`systemd-cryptsetup` must be installed**, otherwise the whole crypttab
+  entry has no effect. Debian 13 split the handling out of the `systemd`
+  package; without it neither
+  `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator` nor
+  `systemd-cryptsetup@.service` exists, and swap simply stays inactive at
+  boot - **with no error message at all**. The package is now in the
+  package list (step 2), and the script additionally checks for it before
+  touching the partition table. The home partition is unaffected because
+  `dialos-stick-gate.sh` opens it itself via `cryptsetup open` - which is
+  why the omission only shows up for swap.
+- The new swap partition is cleaned with `wipefs -a` after creation. It
+  starts at the same offset as the old one, whose swap header would
+  otherwise remain: `blkid` kept reporting `swap` with the **old** UUID on
+  a partition that is about to be encrypted.
+- The fstab line gets `nofail`. A missing swap is a comfort problem; a
+  blocked boot on a device for blind users is a real one.
+- Immediate activation goes directly through `cryptsetup open --type
+  plain` + `mkswap` + `swapon`, not `systemctl start`: the crypttab unit
+  does not exist before the next boot, so `systemctl start` does nothing
+  and reports no useful error either.
 
 **Important details behind the reasoning:**
 - The crypttab entry deliberately points at `/dev/disk/by-partuuid/…`,

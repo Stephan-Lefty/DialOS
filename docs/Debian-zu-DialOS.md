@@ -193,6 +193,11 @@ Wichtige Gruppen darin (Reihenfolge wie in der Datei):
 - **Installer-/Sicherheits-Werkzeuge**: `zenity`, `polkitd`, `pkexec`,
   `parted`, `dosfstools`, `exfatprogs` (für die Windows-lesbare
   `DIALOS-DATA`-Partition auf dem Sicherheits-Stick), `cryptsetup`,
+  **`systemd-cryptsetup`** (ergänzt 2026-08-16: Debian 13 hat die
+  crypttab-Auswertung aus dem `systemd`-Paket herausgelöst - ohne dieses
+  Paket gibt es weder den Generator noch `systemd-cryptsetup@.service`,
+  und `/etc/crypttab` bleibt beim Booten komplett wirkungslos; siehe
+  Schritt 12, verschlüsselter Swap),
   `rsync`, `grub-efi-amd64` (+ `-bin`), `openssl`,
   `systemd-timesyncd` (NTP, wichtig für den späteren Installer),
   `thunderbird-l10n-de`, `gnome-shell-extension-manager`.
@@ -674,6 +679,30 @@ Entscheidung vom 2026-08-16, Begründung siehe Schritt 1. Es erledigt dabei:
   weniger von `nutzer`s Daten verlässt überhaupt den Arbeitsspeicher,
 - `RESUME=none` + `update-initramfs -u`, damit kein halb konfigurierter
   Ruhezustand zurückbleibt.
+
+**Beim ersten echten Lauf gefunden (2026-08-16), jetzt behoben:**
+- **`systemd-cryptsetup` muss installiert sein**, sonst ist der ganze
+  crypttab-Eintrag wirkungslos. Debian 13 hat die Auswertung aus dem
+  `systemd`-Paket herausgelöst; ohne das Paket existiert weder
+  `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator` noch
+  `systemd-cryptsetup@.service`, und der Swap bleibt beim Booten einfach
+  inaktiv - **ohne jede Fehlermeldung**. Das Paket steht jetzt in der
+  Paketliste (Schritt 2), und das Skript prüft es zusätzlich, bevor es die
+  Partitionstabelle anfasst. Dass die Home-Partition davon nichts merkt,
+  liegt daran, dass `dialos-stick-gate.sh` sie selbst per
+  `cryptsetup open` öffnet - deshalb fällt das Fehlen nur beim Swap auf.
+- Die neue Swap-Partition wird nach dem Anlegen mit `wipefs -a` gesäubert.
+  Sie beginnt am selben Offset wie die alte, deren Swap-Header sonst
+  stehen bliebe: `blkid` meldete danach weiterhin `swap` samt **alter**
+  UUID auf einer Partition, die künftig verschlüsselt wird.
+- Die fstab-Zeile bekommt `nofail`. Ein fehlender Swap ist ein
+  Komfortproblem, ein blockierter Start auf einem Gerät für blinde Nutzer
+  ein echtes.
+- Die Sofort-Aktivierung läuft direkt über `cryptsetup open --type plain`
+  + `mkswap` + `swapon`, nicht über `systemctl start`: die
+  crypttab-Unit existiert vor dem nächsten Boot noch gar nicht, ein
+  `systemctl start` darauf tut nichts und meldet auch keinen brauchbaren
+  Fehler.
 
 **Wichtige Details zur Begründung:**
 - Der crypttab-Eintrag zeigt bewusst auf `/dev/disk/by-partuuid/…`, nicht

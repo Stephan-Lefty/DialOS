@@ -56,6 +56,35 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **First real end-to-end run on the T490 (2026-08-16) - scripts 1 and 2
+  completed.** Every fault fixed beforehand would have occurred for real
+  (the RustDesk dependency fallback visibly kicked in), and the fixes
+  proved themselves in practice: the Vosk models are correctly unpacked
+  for the first time (3.2 GB instead of the previously doubly-nested
+  6.3 GB), user steps 9/10 landed in `/home/dialosadmin` rather than
+  `/root`, the key backup is now owned by `dialosadmin` with mode `600`
+  instead of `root` with `664` as in the 14 Aug run, and the ext4 label
+  inside the LUKS container reads `dialos-nutzer` untruncated. Result:
+  `dialos-nutzer-home` at 374.9 GiB, stick with `DIALOS-KEY` (2 GiB,
+  ext4) + `DIALOS-DATA` (57.8 GiB, exFAT). Also confirmed: Claude Code
+  2.1.233 runs on Debian's Node 20 despite the `EBADENGINE` warning - the
+  doc's claim still holds.
+- **Uncovered in the process: `systemd-cryptsetup` was missing from the
+  package list.** Debian 13 split `/etc/crypttab` handling out of the
+  `systemd` package. Without it, neither the generator nor
+  `systemd-cryptsetup@.service` exists - so the encrypted-swap entry had
+  **no effect whatsoever, with no error message**, and after the run there
+  was simply no active swap at all. The home partition still worked
+  because `dialos-stick-gate.sh` opens it itself via `cryptsetup open`,
+  which is why the omission only surfaced for swap. Package added, and the
+  script now checks for it *before* touching the partition table. Three
+  further fixes to the same code: the new swap partition is cleaned with
+  `wipefs -a` (it starts at the old one's offset, whose swap header and
+  old UUID would otherwise remain), the fstab line gets `nofail` (a
+  blocked boot would be worse on a device for blind users than a missing
+  swap), and immediate activation goes directly through `cryptsetup open
+  --type plain` instead of `systemctl start` on a unit that does not exist
+  before the next boot.
 - **Swap is now encrypted (8 GiB, key re-randomized every boot) - decided
   and implemented 2026-08-16.** Until then the T490 carried a 37.3 GiB
   plaintext swap partition. That allowed `nutzer`'s memory pages - open

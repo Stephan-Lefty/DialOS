@@ -136,7 +136,7 @@ SYS_DISK="/dev/$ROOT_DISK_NAME"
 # dass der Nutzer keinerlei Rueckmeldung mehr bekommt.
 swap_verschluesseln() {
   local plain_swaps swap_part partuuid nummern_vorher nummern_nachher neue_nr
-  local frei start_mib end_mib frage antwort name nr
+  local frei start_mib end_mib frage antwort name nr swap_status
 
   plain_swaps=$(lsblk -nlo NAME,FSTYPE "$SYS_DISK" 2>/dev/null | awk '$2=="swap"{print $1}')
 
@@ -170,6 +170,21 @@ swap_verschluesseln() {
   else
     warn "Swap-Umstellung uebersprungen (keine Rueckfrage moeglich) - der Swap bleibt unverschluesselt."
     return 0
+  fi
+
+  # /etc/crypttab wird von systemd nur ausgewertet, wenn die Integration
+  # ueberhaupt installiert ist. Debian 13 hat sie aus dem systemd-Paket
+  # herausgeloest ("systemd-cryptsetup") - ohne dieses Paket gibt es weder
+  # den Generator noch systemd-cryptsetup@.service, der crypttab-Eintrag
+  # bliebe beim Booten also wirkungslos und der Swap einfach inaktiv.
+  # Genau das ist beim ersten echten Lauf am 2026-08-16 passiert. Die
+  # Home-Partition merkt davon nichts, weil dialos-stick-gate.sh sie
+  # selbst per "cryptsetup open" oeffnet - deshalb faellt es nur hier auf.
+  # Pruefung bewusst VOR jeder Aenderung an der Partitionstabelle.
+  if [ ! -x /usr/lib/systemd/system-generators/systemd-cryptsetup-generator ]; then
+    echo "Paket 'systemd-cryptsetup' fehlt - wird nachinstalliert ..."
+    apt-get install -y systemd-cryptsetup >/dev/null 2>&1 \
+      || die "Konnte 'systemd-cryptsetup' nicht installieren. Ohne dieses Paket wertet Debian 13 /etc/crypttab nicht aus, der verschlüsselte Swap bliebe wirkungslos. Abbruch - an der Partitionstabelle wurde noch nichts geändert."
   fi
 
   # Alte Swap-Partitionen abschalten und entfernen. swapoff zuerst, sonst
@@ -219,6 +234,14 @@ swap_verschluesseln() {
   swap_part=$(partitionsgeraet "$SYS_DISK" "$neue_nr")
   [ -b "$swap_part" ] || die "Neue Swap-Partition $swap_part nicht gefunden - Abbruch."
 
+  # Frische Partition saeubern: sie beginnt am selben Offset wie die alte
+  # Swap-Partition, deren Header sonst einfach stehen bliebe. blkid meldet
+  # dann weiterhin "swap" samt ALTER UUID auf einer Partition, die kuenftig
+  # verschluesselt wird - das verwirrt die Sicherheitspruefungen von
+  # systemd-cryptsetup und sieht bei jeder spaeteren Fehlersuche falsch aus
+  # (beobachtet beim ersten echten Lauf, 2026-08-16).
+  wipefs -a "$swap_part" >/dev/null 2>&1 || true
+
   # Referenz per PARTUUID, NICHT per UUID: die crypttab-Option "swap" legt
   # bei jedem Start ein frisches Dateisystem an, die Dateisystem-UUID
   # aendert sich also staendig. Die PARTUUID steht dagegen fest in der
@@ -233,7 +256,11 @@ swap_verschluesseln() {
   # zusaetzliche Leerzeile stoert in beiden Dateien nicht.
   printf '\n%s /dev/disk/by-partuuid/%s /dev/urandom swap,cipher=aes-xts-plain64,size=256\n' \
     "$SWAP_MAPPER" "$partuuid" >> /etc/crypttab
-  printf '\n/dev/mapper/%s none swap sw 0 0\n' "$SWAP_MAPPER" >> /etc/fstab
+  # "nofail": taucht der Mapper beim Booten einmal nicht auf, soll der
+  # Start deswegen nicht haengen bleiben - ein fehlender Swap ist ein
+  # Komfortproblem, ein blockierter Boot auf einem Geraet fuer blinde
+  # Nutzer ein echtes.
+  printf '\n/dev/mapper/%s none swap sw,nofail 0 0\n' "$SWAP_MAPPER" >> /etc/fstab
 
   # Hibernate-Rest aufraeumen: ohne das versucht das initramfs weiter, von
   # einer Swap-Partition zu erwachen, die es so nicht mehr gibt.
@@ -248,13 +275,24 @@ swap_verschluesseln() {
     > /etc/sysctl.d/99-dialos-swappiness.conf
   sysctl -q vm.swappiness=10 2>/dev/null || true
 
-  # Sofort aktivieren, damit kein Neustart noetig ist. Klappt das nicht,
-  # greift es spaetestens beim naechsten Boot ueber crypttab/fstab.
+  # Sofort aktivieren - bewusst DIREKT per cryptsetup statt ueber
+  # "systemctl start systemd-cryptsetup@...": den crypttab-Eintrag wertet
+  # erst der Generator beim naechsten Boot aus, die Unit existiert also
+  # jetzt noch gar nicht. Ein "systemctl start" darauf tut schlicht nichts
+  # und meldet auch keinen brauchbaren Fehler - genau so blieb der Swap
+  # beim ersten echten Lauf am 2026-08-16 stumm inaktiv. Die Parameter
+  # hier entsprechen exakt der crypttab-Zeile oben.
   systemctl daemon-reload 2>/dev/null || true
-  systemctl start "systemd-cryptsetup@${SWAP_MAPPER}.service" 2>/dev/null || true
-  swapon -a 2>/dev/null || true
+  if cryptsetup open --type plain --key-file /dev/urandom --key-size 256 \
+       --cipher aes-xts-plain64 "$swap_part" "$SWAP_MAPPER" 2>/dev/null \
+     && mkswap -q "/dev/mapper/$SWAP_MAPPER" >/dev/null 2>&1 \
+     && swapon "/dev/mapper/$SWAP_MAPPER" 2>/dev/null; then
+    swap_status="sofort aktiv, kein Neustart nötig"
+  else
+    swap_status="wird erst beim nächsten Neustart aktiv"
+  fi
 
-  say "Verschlüsselter Swap eingerichtet: $swap_part → /dev/mapper/$SWAP_MAPPER (${SWAP_SIZE_MIB} MiB, Schlüssel bei jedem Start neu).\n\nvm.swappiness steht jetzt auf 10, der Ruhezustand ist deaktiviert.\nSicherungskopie der alten fstab: /etc/fstab.dialos-vor-swap-umstellung"
+  say "Verschlüsselter Swap eingerichtet: $swap_part → /dev/mapper/$SWAP_MAPPER (${SWAP_SIZE_MIB} MiB, Schlüssel bei jedem Start neu).\nStatus: $swap_status\n\nvm.swappiness steht jetzt auf 10, der Ruhezustand ist deaktiviert.\nSicherungskopie der alten fstab: /etc/fstab.dialos-vor-swap-umstellung"
 }
 
 swap_verschluesseln

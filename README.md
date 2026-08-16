@@ -55,6 +55,36 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Erster echter End-to-end-Lauf auf dem T490 (2026-08-16) - Skript 1
+  und 2 komplett durchgelaufen.** Alle vorher behobenen Fehler wären real
+  aufgetreten (der RustDesk-Abhängigkeits-Fallback hat sichtbar
+  gegriffen), und die Fixes haben sich im Betrieb bestätigt: die
+  Vosk-Modelle liegen erstmals korrekt entpackt (3,2 GB statt der früheren
+  doppelt verschachtelten 6,3 GB), die Benutzer-Schritte 9/10 landeten in
+  `/home/dialosadmin` statt in `/root`, das Schlüssel-Backup gehört jetzt
+  `dialosadmin` mit `600` statt wie beim Lauf vom 14.08. `root` mit `664`,
+  und das ext4-Label im LUKS-Container heißt ungekürzt `dialos-nutzer`.
+  Ergebnis: `dialos-nutzer-home` mit 374,9 GiB, Stick mit `DIALOS-KEY`
+  (2 GiB, ext4) + `DIALOS-DATA` (57,8 GiB, exFAT). Nebenbei bestätigt:
+  Claude Code 2.1.233 läuft trotz `EBADENGINE`-Warnung auf Debians
+  Node 20 - die Doku-Aussage stimmt weiterhin.
+- **Dabei aufgedeckt: `systemd-cryptsetup` fehlte in der Paketliste.**
+  Debian 13 hat die Auswertung von `/etc/crypttab` aus dem
+  `systemd`-Paket herausgelöst. Ohne dieses Paket existiert weder der
+  Generator noch `systemd-cryptsetup@.service` - der Eintrag für den
+  verschlüsselten Swap blieb dadurch **völlig wirkungslos, ohne jede
+  Fehlermeldung**, und nach dem Lauf war schlicht gar kein Swap aktiv.
+  Dass die Home-Partition trotzdem lief, liegt daran, dass
+  `dialos-stick-gate.sh` sie selbst per `cryptsetup open` öffnet; deshalb
+  fiel das Fehlen nur beim Swap auf. Paket nachgetragen, zusätzlich prüft
+  das Skript es jetzt, *bevor* es die Partitionstabelle anfasst. Drei
+  weitere Nachbesserungen am selben Code: die neue Swap-Partition wird mit
+  `wipefs -a` gesäubert (sie beginnt am Offset der alten, deren
+  Swap-Header samt alter UUID sonst stehen blieb), die fstab-Zeile bekommt
+  `nofail` (ein blockierter Start wäre auf einem Gerät für blinde Nutzer
+  gravierender als ein fehlender Swap), und die Sofort-Aktivierung läuft
+  direkt über `cryptsetup open --type plain` statt über `systemctl start`
+  auf eine Unit, die vor dem nächsten Boot noch gar nicht existiert.
 - **Swap wird jetzt verschlüsselt (8 GiB, Schlüssel pro Start neu) -
   entschieden und umgesetzt 2026-08-16.** Bis dahin lag auf dem T490
   eine 37,3-GiB-Klartext-Swap-Partition. Damit konnten `nutzer`s
