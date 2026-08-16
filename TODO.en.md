@@ -37,9 +37,11 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
-- [ ] `docs/hardware.md` still needs: whether the final reference
-  Bluetooth speaker/microphone supports German as its own announcement
-  language (the device's own firmware prompts like "connected"/low
+- [ ] **Reference device settled 2026-08-16: AIRHUG 01** (Bluetooth
+  headset, A2DP + HFP, documented in `docs/hardware.en.md`). Only the
+  original sub-question remains: whether it supports German as its own
+  announcement language (the device's own firmware prompts like
+  "connected"/low
   battery, not DialOS itself) - standard Bluetooth profiles (A2DP/HFP)
   offer no remote control for this, it's purely device-/vendor-
   dependent. Factor this into the reference hardware selection.

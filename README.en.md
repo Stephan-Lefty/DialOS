@@ -56,6 +56,18 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Reference audio device settled: AIRHUG 01 (Stephan, 2026-08-16).**
+  This decides the hardware question that was blocking voice control -
+  tuning recognition thresholds and recording durations against a
+  microphone that later changes would mean doing the work twice. Read off
+  the device and recorded in `docs/hardware.en.md`: class `0x00240404`,
+  profiles **A2DP** and **HFP**. The key point is that it cannot do both
+  at once - A2DP has no microphone channel, HFP degrades playback
+  quality. The profile switch in `dialos-start-ansage.py` is therefore
+  not a quirk of the code but a property of the Bluetooth profiles, and
+  will be needed with any comparable headset. Also documented: the input
+  devices (Logitech Pebble M350s/K380s), whose battery level the startup
+  announcement reads out to administrator accounts only.
 - **Step 16: Penguins' Eggs dropped, Rescuezilla takes over (Stephan's
   decision, 2026-08-16).** The trigger was mundane: `eggs` was missing on
   the rebuilt device. It is not in Debian's repositories, was in no

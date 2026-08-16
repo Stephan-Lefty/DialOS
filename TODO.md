@@ -36,8 +36,10 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
-- [ ] `docs/hardware.md` fehlt noch: ob der finale Referenz-Bluetooth-
-  Lautsprecher/-Mikrofon Deutsch als Ansage-Sprache unterstützt (eigene
+- [ ] **Referenzgerät steht seit 2026-08-16: AIRHUG 01** (Bluetooth-
+  Headset, A2DP + HFP, in `docs/hardware.md` dokumentiert). Offen bleibt
+  davon nur noch die ursprüngliche Teilfrage: ob es Deutsch als
+  Ansage-Sprache unterstützt (eigene
   Firmware-Ansagen des Geräts wie "verbunden"/Akku-Warnung, nicht
   DialOS selbst) - Bluetooth-Standardprofile (A2DP/HFP) bieten dafür
   keine Fernsteuerung, rein geräte-/herstellerabhängig. Bei der Auswahl

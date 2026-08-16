@@ -55,6 +55,19 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Referenz-Audiogerät festgelegt: AIRHUG 01 (Stephan, 2026-08-16).**
+  Damit ist der Hardware-Punkt entschieden, der die Sprachsteuerung
+  blockierte - Erkennungsschwellen und Aufnahmedauer gegen ein Mikrofon
+  zu justieren, das später wechselt, hieße zweimal arbeiten. Am Gerät
+  ausgelesen und in `docs/hardware.md` festgehalten: Klasse `0x00240404`,
+  Profile **A2DP** und **HFP**. Der wichtigste Punkt daran ist, dass es
+  beide nicht gleichzeitig kann - A2DP hat keinen Mikrofonkanal, HFP
+  senkt die Wiedergabequalität. Der Profilwechsel in
+  `dialos-start-ansage.py` ist damit keine Eigenart des Codes, sondern
+  eine Eigenschaft der Bluetooth-Profile, und wird bei jedem
+  vergleichbaren Headset nötig sein. Mit dokumentiert: die
+  Eingabegeräte (Logitech Pebble M350s/K380s), deren Akkustand die
+  Start-Ansage nur Administratorkonten vorliest.
 - **Schritt 16: Penguins' Eggs entfällt, Rescuezilla übernimmt
   (Stephans Entscheidung, 2026-08-16).** Der Anlass war profan: `eggs`
   fehlte auf dem neu aufgebauten Gerät. Es ist nicht in Debians
