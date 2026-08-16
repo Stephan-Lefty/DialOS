@@ -145,9 +145,10 @@ http://dialos.org/d-i/trixie/preseed.cfg
 ```
 
 Also: ein Ordner `d-i`, darin ein Ordner `trixie`, darin die Datei unter
-dem Namen `preseed.cfg`. Dieser Pfad ist nicht frei gewählt - der
-Debian-Installer setzt ihn bei der Kurzschreibweise unten genau so
-zusammen (`d-i` / Codename der Debian-Version / `preseed.cfg`).
+dem Namen `preseed.cfg`. Der Pfad ist frei wählbar - er wird unten in
+Schritt 1b vollständig ausgeschrieben. Diese Struktur ist trotzdem
+sinnvoll: Sie entspricht der Debian-Konvention und lässt Platz für
+künftige Debian-Versionen neben `trixie`.
 
 Das muss **einmal** gemacht werden, nicht pro Gerät. Bei einer künftigen
 Debian-Version ändert sich nur der Ordnername (`trixie` → Codename der
@@ -159,15 +160,19 @@ Textinhalt der Datei erscheinen, kein Download-Dialog und keine
 
 ### 1b. Den Installer damit starten (bei jedem Gerät)
 
-> ### ⚠ Netzwerkkabel ist Pflicht - WLAN geht nicht
->
-> Der Installer holt die Preseed-Datei über das Netzwerk, **bevor** er
-> überhaupt nach WLAN fragen kann. Es gibt also keinen Weg, das per WLAN
-> zu erledigen - auch nicht durch früheres Eingreifen. Ein per DHCP
-> versorgtes LAN-Kabel muss stecken, **bevor** du bootest.
->
-> Ohne Kabel bricht der Installer beim Laden des Preseeds ab. Dann bleibt
-> nur die Rückfallebene 1d: von Hand partitionieren.
+**Es braucht eine Internetverbindung - Kabel ODER WLAN.** Der Installer
+konfiguriert das Netzwerk, *bevor* er die Preseed-Datei holt (die
+Debian-Doku ist dazu eindeutig: „the network must be configured before
+the preseed file can be fetched"). Beides funktioniert also:
+
+- **Netzwerkkabel:** einfachster Fall, der Installer holt sich per DHCP
+  alles selbst, ohne dich zu fragen.
+- **WLAN:** genauso möglich. Der Installer fragt beim Netzwerk-Schritt
+  nach dem WLAN-Namen und dem Passwort, verbindet sich - und lädt erst
+  danach die Preseed-Datei. Die WLAN-Firmware für das ThinkPad ist in
+  den offiziellen Debian-13-Abbildern enthalten.
+
+Ablauf:
 
 1. Vom Debian-13-USB-Stick booten.
 2. Im Bootmenü **nicht** Enter drücken, sondern den Eintrag
@@ -182,19 +187,22 @@ Textinhalt der Datei erscheinen, kein Download-Dialog und keine
 4. Dort ans Ende - mit einem Leerzeichen davor - anhängen:
 
    ```
-   auto url=dialos.org
+   preseed/url=http://dialos.org/d-i/trixie/preseed.cfg
    ```
 
 5. Starten:
    - **UEFI:** **`Strg`+`X`** (oder `F10`).
    - **BIOS:** **`Enter`**.
 
-Falls die Kurzform einmal nicht greift, tut es die ausgeschriebene
-Adresse genauso - sie funktioniert unabhängig vom Ablageort:
-
-```
-auto url=http://dialos.org/d-i/trixie/preseed.cfg
-```
+> **Warum hier bewusst kein `auto` steht.** Die verbreitete Kurzform
+> `auto url=dialos.org` schaltet zusätzlich den Automatik-Modus ein. Der
+> schiebt Sprache und Tastatur nach hinten, damit man *auch sie*
+> preseeden kann - und senkt dabei die Fragen-Priorität. Für DialOS ist
+> das nicht nur unnötig (wir geben ausschließlich die Partitionierung
+> vor), sondern kontraproduktiv: Bei niedrigerer Priorität könnten
+> ausgerechnet die WLAN-Rückfragen übersprungen werden, und ohne Kabel
+> stünde die Installation dann. Mit der Schreibweise oben bleiben alle
+> gewohnten Fragen sichtbar.
 
 ### 1c. Was dann passiert
 

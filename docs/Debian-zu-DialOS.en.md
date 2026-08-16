@@ -138,9 +138,10 @@ http://dialos.org/d-i/trixie/preseed.cfg
 ```
 
 That is: a folder `d-i`, inside it a folder `trixie`, inside that the
-file named `preseed.cfg`. This path is not arbitrary - it is exactly what
-the Debian installer assembles for the short form below (`d-i` / Debian
-release codename / `preseed.cfg`).
+file named `preseed.cfg`. The path is freely choosable - it is spelled
+out in full in step 1b below. This structure still makes sense: it
+matches Debian convention and leaves room for future Debian releases
+alongside `trixie`.
 
 This is done **once**, not per device. For a future Debian release only
 the folder name changes (`trixie` → the new release's codename).
@@ -150,15 +151,19 @@ text content must appear, not a download dialog and not a 404 page.
 
 ### 1b. Start the installer with it (for every device)
 
-> ### ⚠ A network cable is mandatory - WiFi does not work
->
-> The installer fetches the preseed file over the network **before** it
-> can even ask about WiFi. There is therefore no way to do this over
-> WiFi - not by intervening earlier either. A DHCP-served Ethernet cable
-> must be plugged in **before** you boot.
->
-> Without a cable the installer aborts while loading the preseed. The
-> only remaining option is fallback 1d: partition by hand.
+**An internet connection is required - cable OR WiFi.** The installer
+configures the network *before* it fetches the preseed file (the Debian
+docs are unambiguous here: "the network must be configured before the
+preseed file can be fetched"). So both work:
+
+- **Ethernet cable:** the simplest case, the installer sorts everything
+  out via DHCP without asking you.
+- **WiFi:** works just as well. At the network step the installer asks
+  for the WiFi name and password, connects, and only then downloads the
+  preseed file. The WiFi firmware for the ThinkPad is included in the
+  official Debian 13 images.
+
+Procedure:
 
 1. Boot from the Debian 13 USB stick.
 2. In the boot menu, do **not** press Enter - only **highlight** the
@@ -172,19 +177,21 @@ text content must appear, not a download dialog and not a 404 page.
 4. Append at the end - with a space before it:
 
    ```
-   auto url=dialos.org
+   preseed/url=http://dialos.org/d-i/trixie/preseed.cfg
    ```
 
 5. Boot:
    - **UEFI:** **`Ctrl`+`X`** (or `F10`).
    - **BIOS:** **`Enter`**.
 
-If the short form ever fails, the spelled-out address works just as well
-and is independent of where the file lives:
-
-```
-auto url=http://dialos.org/d-i/trixie/preseed.cfg
-```
+> **Why there is deliberately no `auto` here.** The widespread short form
+> `auto url=dialos.org` additionally enables automated mode. That
+> postpones language and keyboard so *they* can be preseeded too - and
+> lowers the question priority in the process. For DialOS that is not
+> just unnecessary (we preseed partitioning only) but counterproductive:
+> at a lower priority the WiFi prompts of all things could be skipped,
+> and without a cable the installation would then stall. With the form
+> above, all the usual questions stay visible.
 
 ### 1c. What happens next
 

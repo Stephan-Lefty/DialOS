@@ -119,8 +119,18 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Swap im Rezept - den legt Schritt 12 verschlüsselt an. Doku-Schritt 1
   ist dafür in 1a bis 1d gegliedert: Ablageort auf dialos.org, die genaue
   Tastenfolge im Bootmenü (UEFI `e`, BIOS `Tab`), was danach passiert,
-  und die Rückfallebene von Hand. Voraussetzung ist ein Netzwerkkabel -
-  der Installer holt das Preseed, bevor er nach WLAN fragen kann.
+  und die Rückfallebene von Hand. **Korrektur am selben Tag:** Zuerst
+  stand dort, ein Netzwerkkabel sei zwingend. Das war falsch - die
+  Debian-Doku ist eindeutig, dass das Netzwerk konfiguriert wird, *bevor*
+  das Preseed geholt wird ("the network must be configured before the
+  preseed file can be fetched"). Über WLAN geht es also genauso: Der
+  Installer fragt beim Netzwerk-Schritt nach WLAN-Name und Passwort und
+  lädt die Datei erst danach. Aus derselben Prüfung stammt eine zweite
+  Verbesserung: Der verbreitete Kurzbefehl `auto url=…` entfällt. Der
+  Automatik-Modus dient nur dazu, auch Sprache und Tastatur preseeden zu
+  können, senkt dabei aber die Fragen-Priorität - und hätte damit
+  ausgerechnet die WLAN-Rückfragen unterdrücken können. Jetzt wird die
+  Adresse schlicht ausgeschrieben (`preseed/url=…`).
 - **Weg A entschieden (Stephan, 2026-08-16): Calamares und
   `dialos-install` ersatzlos entfernt.** Jedes Kundengerät wird im Büro
   aufgesetzt - leere Platte, jeweils aktuelle Debian-13/GNOME-ISO von

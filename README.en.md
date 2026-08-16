@@ -117,8 +117,17 @@ background) and `splash.png` (boot/login screen).
   encrypted one. Doc step 1 is structured into 1a-1d for this: where to
   put the file on dialos.org, the exact key sequence in the boot menu
   (UEFI `e`, BIOS `Tab`), what happens afterwards, and the manual
-  fallback. A network cable is required - the installer fetches the
-  preseed before it can ask about WiFi.
+  fallback. **Corrected the same day:** it first said a network cable was
+  mandatory. That was wrong - the Debian docs are unambiguous that the
+  network is configured *before* the preseed is fetched ("the network
+  must be configured before the preseed file can be fetched"). WiFi works
+  just as well: at the network step the installer asks for the WiFi name
+  and password and only then downloads the file. The same check produced
+  a second improvement: the widespread short command `auto url=…` is
+  gone. Automated mode exists only to preseed language and keyboard too,
+  but lowers the question priority in the process - which could have
+  suppressed the WiFi prompts of all things. The address is now simply
+  spelled out (`preseed/url=…`).
 - **Path A decided (Stephan, 2026-08-16): Calamares and `dialos-install`
   removed entirely.** Every customer device is set up in the office -
   empty disk, the current Debian 13/GNOME ISO off debian.org, creating
