@@ -3,7 +3,7 @@
 ## `dialos-fenster-symbolic.svg`
 
 Symbol auf dem Startknopf, wenn die Windows-Optik aktiv ist (siehe
-[Debian-zu-DialOS.md](../../../../../../docs/Debian-zu-DialOS.md),
+[Debian-zu-DialOS.md](../../../../../../../docs/Debian-zu-DialOS.md),
 Schritt 11b). Vier Kacheln im Quadrat, ohne Rahmen.
 
 **Bewusst nicht das Windows-Logo von Microsoft.** DialOS wird verkauft,
