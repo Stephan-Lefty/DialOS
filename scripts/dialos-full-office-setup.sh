@@ -1,7 +1,7 @@
 #!/bin/bash
-# DialOS: Buero-Setup-Konsolidierungsskript. Fuehrt die Schritte 2-12 +
-# 15 aus docs/Debian-zu-DialOS.md automatisiert und der Reihe nach aus,
-# statt sie manuell aus der Doku abzutippen.
+# DialOS: Buero-Setup-Konsolidierungsskript. Fuehrt die Schritte 2-12,
+# 14 (optional) und 15 aus docs/Debian-zu-DialOS.md automatisiert und
+# der Reihe nach aus, statt sie manuell aus der Doku abzutippen.
 #
 # Deckt BEWUSST NICHT ab (siehe docs/Debian-zu-DialOS.md fuer den Grund):
 #   Schritt 1  (Debian+GNOME-Basisinstallation) - manuell/Calamares,
@@ -12,18 +12,23 @@
 #              Stick und erzeugt das eigentliche Kundenkonto - kein
 #              Schritt, den man "nebenbei" in einem grossen
 #              unbeaufsichtigten Lauf verstecken sollte.
-#   Schritt 14 (Bluetooth-Kopplungsdaten uebernehmen) - optional,
-#              geraetespezifisch (nur sinnvoll auf demselben Testgeraet),
-#              deshalb NICHT Teil des Standardlaufs.
 #   Schritt 16 (ISO bauen) - eigener, bewusster letzter Schritt.
+#
+# Schritt 14 (Bluetooth-Kopplungsdaten uebernehmen) ist zwar als
+# Funktion vorhanden, aber NICHT Teil des Standardlaufs - nur sinnvoll,
+# wenn dasselbe Testgeraet wie vorher wiederverwendet wird (Kopplungs-
+# daten haengen an der MAC-Adresse des eingebauten Bluetooth-Adapters).
+# Per --bluetooth-kopplung zuschaltbar oder einzeln aufrufbar.
 #
 # Jede Funktion entspricht 1:1 einem Doku-Schritt (gleiche Nummer) -
 # neuer/geaenderter Doku-Schritt = neue/geaenderte Funktion hier, damit
 # Skript und Doku nicht auseinanderlaufen koennen.
 #
 # Aufruf:
-#   ./scripts/dialos-full-office-setup.sh          # alle Schritte
-#   ./scripts/dialos-full-office-setup.sh 08        # nur Schritt 8
+#   ./scripts/dialos-full-office-setup.sh                     # Standardlauf (ohne Schritt 14)
+#   ./scripts/dialos-full-office-setup.sh --bluetooth-kopplung # Standardlauf inkl. Schritt 14
+#   ./scripts/dialos-full-office-setup.sh 08                   # nur Schritt 8
+#   ./scripts/dialos-full-office-setup.sh 14                   # nur Schritt 14
 #
 # Voraussetzung: wird als dialosadmin mit sudo-Rechten ausgefuehrt,
 # aus einem lokal verfuegbaren Klon dieses Repos heraus (siehe
@@ -198,7 +203,9 @@ schritt_12_sicherheit() {
   sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
   sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
   sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
-  sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey /usr/local/sbin/dialos-stick-gate.sh
+  sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh /usr/local/sbin/
+  sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey \
+    /usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/dialos-setup-home-partition.sh
 
   sudo mkdir -p /usr/share/applications
   sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
@@ -207,6 +214,15 @@ schritt_12_sicherheit() {
   sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
   sudo systemctl daemon-reload
   sudo systemctl enable dialos-stick-gate.service
+}
+
+schritt_14_bluetooth() {
+  log "Schritt 14: Bluetooth-Kopplungsdaten übernehmen (optional, gerätespezifisch)"
+  echo "ACHTUNG: nur sinnvoll, wenn dies dasselbe Testgerät wie vorher ist -" >&2
+  echo "die Kopplungsdaten haengen an der MAC-Adresse des eingebauten" >&2
+  echo "Bluetooth-Adapters. Auf einem neuen/anderen Geraet normal koppeln" >&2
+  echo "statt dieses Schritts." >&2
+  sudo cp -r "iso-build/config/includes.chroot/var/lib/bluetooth/." /var/lib/bluetooth/
 }
 
 schritt_15_vosk() {
@@ -230,35 +246,50 @@ schritt_15_vosk() {
   sudo chmod 755 /usr/local/bin/dialos-vosk-test.py
 }
 
+# Vollstaendige Liste in Doku-Reihenfolge - 14_bluetooth ist bewusst
+# NICHT Teil des normalen Laufs (device-spezifisch, siehe Funktion
+# oben), nur per --bluetooth-kopplung zuschaltbar oder einzeln per
+# "./dialos-full-office-setup.sh 14" aufrufbar.
 ALLE_SCHRITTE=(02_paketliste 03_branding 04_autologin 05_calamares 06_rustdesk
   07_claude_cli 08_piper 09_gnome_erweiterungen 10_standardprogramme
-  11_sprachausgabe 12_sicherheit 15_vosk)
+  11_sprachausgabe 12_sicherheit 14_bluetooth 15_vosk)
 
 main() {
+  local bluetooth_kopplung=0
+  local einzelschritt=""
+  for arg in "$@"; do
+    case "$arg" in
+      --bluetooth-kopplung) bluetooth_kopplung=1 ;;
+      *) einzelschritt="$arg" ;;
+    esac
+  done
+
   pruefe_netzwerk
 
-  if [ $# -eq 1 ]; then
-    local gesucht="$1"
+  if [ -n "$einzelschritt" ]; then
     local treffer=""
     for schritt in "${ALLE_SCHRITTE[@]}"; do
-      if [[ "$schritt" == "$gesucht"_* || "$schritt" == "$gesucht" ]]; then
+      if [[ "$schritt" == "$einzelschritt"_* || "$schritt" == "$einzelschritt" ]]; then
         treffer="$schritt"
         break
       fi
     done
     if [ -z "$treffer" ]; then
-      echo "Unbekannter Schritt '$gesucht'. Verfuegbar: ${ALLE_SCHRITTE[*]}" >&2
+      echo "Unbekannter Schritt '$einzelschritt'. Verfuegbar: ${ALLE_SCHRITTE[*]}" >&2
       exit 1
     fi
     "schritt_${treffer}"
-    log "Fertig (nur Schritt $gesucht)."
+    log "Fertig (nur Schritt $einzelschritt)."
     return
   fi
 
   for schritt in "${ALLE_SCHRITTE[@]}"; do
+    if [ "$schritt" = "14_bluetooth" ] && [ "$bluetooth_kopplung" -ne 1 ]; then
+      continue
+    fi
     "schritt_${schritt}"
   done
-  log "Fertig. Naechster Schritt: sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin (Sicherheits-Stick muss dafuer schon eingesteckt sein)."
+  log "Fertig. Naechster Schritt: sudo /usr/local/sbin/dialos-setup-home-partition.sh (Sicherheits-Stick einstecken), danach sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin."
 }
 
 main "$@"

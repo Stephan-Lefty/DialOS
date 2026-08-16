@@ -39,6 +39,20 @@ Datei/den Commit/die Doku, aus der es stammt.
 Diese Anleitung beschreibt Weg 2. Referenz-Testgerät: Lenovo ThinkPad
 T490 (siehe [hardware.md](hardware.md)).
 
+> **Schnellweg seit 2026-08-14:** Die Schritte 2-12 + 15 (sowie
+> optional 14) lassen sich jetzt automatisiert per
+> [`scripts/dialos-full-office-setup.sh`](../scripts/dialos-full-office-setup.sh)
+> ausführen, statt sie einzeln abzutippen (siehe
+> [`scripts/README.md`](../scripts/README.md)). Die Einzelschritte unten
+> bleiben trotzdem die eigentliche, ausführliche Referenz - genau daraus
+> ist das Skript gebaut, und bei Problemen mit einem einzelnen Schritt
+> lässt sich das Skript auch gezielt nur für diesen einen Schritt
+> aufrufen (`./scripts/dialos-full-office-setup.sh 08`). Schritt 14
+> (Bluetooth-Kopplungsdaten) läuft dabei nur mit `--bluetooth-kopplung`
+> mit, da er gerätespezifisch ist. Schritt 1 (Basis-Installation), 13
+> (`nutzer`-Konto anlegen) und 16 (ISO bauen) bleiben bewusst eigene,
+> manuelle Schritte - siehe dort.
+
 ## 0. Voraussetzungen
 
 - Debian-13-("Trixie")-Installationsmedium mit GNOME-Desktop
@@ -63,6 +77,20 @@ Namen, damit Skripte und Doku nicht pro Gerät angepasst werden müssen.
 
 Zeitzone: `Europe`/`Berlin` als Standard (siehe Schritt 5, Calamares
 übernimmt das später automatisch für Kundeninstallationen).
+
+**Partitionierung - wichtig, manuell statt "geführt - gesamte Platte
+verwenden" wählen** (seit 2026-08-14, siehe
+[sicherheit-datenschutz.md](sicherheit-datenschutz.md), Abschnitt
+"Verschlüsselung von nutzers Daten + Sicherheits-Stick"):
+
+- GPT-Partitionstabelle.
+- EFI-Systempartition (~512 MB), `/boot/efi`.
+- Root-Partition, **genau 100 GB**, ext4, `/`.
+- **Den kompletten Rest der Platte unpartitioniert/frei lassen** - nicht
+  dem Installer überlassen, sonst hat
+  [`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
+  später (Schritt 12) keinen Platz mehr für die verschlüsselte
+  `dialos-nutzer-home`-Partition.
 
 ## 2. Paketliste installieren
 
@@ -435,7 +463,9 @@ sudo mkdir -p /usr/local/sbin
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey /usr/local/sbin/dialos-stick-gate.sh
+sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh /usr/local/sbin/
+sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey \
+  /usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/dialos-setup-home-partition.sh
 sudo mkdir -p /usr/share/applications
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
@@ -464,11 +494,30 @@ landen statt `nutzer` automatisch anzumelden und `/home/nutzer` muss
 leer/nicht gemountet sein; Stick wieder einstecken, erneut neu starten
 - `/home/nutzer` muss gemountet sein und Autologin muss wieder greifen.
 
+**Home-Partition auf einem frisch installierten System anlegen**
+(neu seit 2026-08-14, für den Weg über die Basis-Installation in
+Schritt 1 statt über `dialos-install`s Ganze-System-Kopie):
+`dialos-setup-home-partition.sh` übernimmt dieselbe LUKS/Stick-Logik
+wie `dialos-install`, aber ohne dessen Festplatten-Wipe/rsync-Kopie -
+nutzt stattdessen den in Schritt 1 bewusst frei gelassenen Platz am
+Ende der System-Platte:
+
+```bash
+sudo /usr/local/sbin/dialos-setup-home-partition.sh
+```
+
+Fragt nach Sicherheits-Stick, Wiederherstellungs-Passwort (≥12 Zeichen)
+und Bestätigung ("LOESCHEN" eingeben), bietet danach das gleiche
+verschlüsselte Nextcloud-Schlüssel-Backup wie `dialos-install` an. Am
+Ende wird `/home/nutzer` gleich gemountet (kein Neustart nötig), sofern
+`dialos-stick-gate.sh` schon installiert ist (siehe oben).
+
 **Wichtig für Schritt 13:** `scripts/dialos-setup-nutzer.sh` legt
 `nutzer`s Konto erst an, nachdem es geprüft (und notfalls per
 `dialos-stick-gate.sh` selbst ausgelöst) hat, dass `/home/nutzer`
-bereits gemountet ist - **der Sicherheits-Stick muss beim Ausführen von
-Schritt 13 also schon eingesteckt sein**, sonst bricht das Skript
+bereits gemountet ist - **`dialos-setup-home-partition.sh` muss also
+vor Schritt 13 gelaufen sein und der Sicherheits-Stick beim Ausführen
+von Schritt 13 noch eingesteckt sein**, sonst bricht das Skript
 kontrolliert ab (siehe sicherheit-datenschutz.md).
 
 ## 13. Nutzer-Konto anlegen + Büro-Setup abschließen

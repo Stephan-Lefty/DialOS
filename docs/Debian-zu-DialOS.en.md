@@ -35,6 +35,20 @@ points back to the file/commit/doc it comes from.
 This guide describes path 2. Reference test device: Lenovo ThinkPad
 T490 (see [hardware.en.md](hardware.en.md)).
 
+> **Fast path since 2026-08-14:** steps 2-12 + 15 (and optionally 14)
+> can now be run automatically via
+> [`scripts/dialos-full-office-setup.sh`](../scripts/dialos-full-office-setup.sh)
+> instead of typing them out one by one (see
+> [`scripts/README.md`](../scripts/README.md)). The individual steps
+> below remain the actual detailed reference, though - the script is
+> built directly from them, and if a single step causes trouble the
+> script can also be run for just that one step
+> (`./scripts/dialos-full-office-setup.sh 08`). Step 14 (Bluetooth
+> pairing data) only runs along with `--bluetooth-kopplung`, since it's
+> device-specific. Steps 1 (base install), 13 (create the `nutzer`
+> account) and 16 (build the ISO) deliberately remain their own manual
+> steps - see there.
+
 ## 0. Prerequisites
 
 - A Debian 13 ("Trixie") installation medium with the GNOME desktop
@@ -59,6 +73,20 @@ adjustment.
 
 Timezone: `Europe`/`Berlin` as the default (see step 5 - Calamares
 later picks this up automatically for customer installs).
+
+**Partitioning - important, choose manual instead of "guided - use
+entire disk"** (since 2026-08-14, see
+[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md), section
+"Encrypting nutzer's data + security stick"):
+
+- GPT partition table.
+- EFI system partition (~512 MB), `/boot/efi`.
+- Root partition, **exactly 100 GB**, ext4, `/`.
+- **Leave the entire rest of the disk unpartitioned/free** - don't let
+  the installer use it, otherwise
+  [`dialos-setup-home-partition.sh`](../iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh)
+  (step 12) won't have any room left for the encrypted
+  `dialos-nutzer-home` partition.
 
 ## 2. Install the package list
 
@@ -429,7 +457,9 @@ sudo mkdir -p /usr/local/sbin
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-install /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-rekey /usr/local/sbin/
 sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/
-sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey /usr/local/sbin/dialos-stick-gate.sh
+sudo cp iso-build/config/includes.chroot/usr/local/sbin/dialos-setup-home-partition.sh /usr/local/sbin/
+sudo chmod 755 /usr/local/sbin/dialos-install /usr/local/sbin/dialos-rekey \
+  /usr/local/sbin/dialos-stick-gate.sh /usr/local/sbin/dialos-setup-home-partition.sh
 sudo mkdir -p /usr/share/applications
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-install.desktop /usr/share/applications/
 sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
@@ -457,10 +487,29 @@ instead of autologging `nutzer`, and `/home/nutzer` must be
 empty/unmounted; plug the stick back in, reboot again - `/home/nutzer`
 must be mounted and autologin must work again.
 
+**Setting up the home partition on a freshly installed system** (new
+since 2026-08-14, for the path via the base install in step 1 instead
+of via `dialos-install`'s whole-system copy):
+`dialos-setup-home-partition.sh` uses the same LUKS/stick logic as
+`dialos-install`, but without its disk-wipe/rsync copy - instead it
+uses the space deliberately left free at the end of the system disk in
+step 1:
+
+```bash
+sudo /usr/local/sbin/dialos-setup-home-partition.sh
+```
+
+Asks for the security stick, a recovery passphrase (≥12 characters),
+and confirmation (type "LOESCHEN"), then offers the same encrypted
+Nextcloud key backup as `dialos-install`. At the end it mounts
+`/home/nutzer` right away (no reboot needed), provided
+`dialos-stick-gate.sh` is already installed (see above).
+
 **Important for step 13:** `scripts/dialos-setup-nutzer.sh` only
 creates `nutzer`'s account after checking (and, if needed, triggering
 `dialos-stick-gate.sh` itself) that `/home/nutzer` is already mounted -
-**the security stick must already be plugged in when running step 13**,
+**`dialos-setup-home-partition.sh` must have run before step 13, and
+the security stick must still be plugged in when running step 13**,
 otherwise the script aborts cleanly (see sicherheit-datenschutz.en.md).
 
 ## 13. Create the customer account + finish office setup

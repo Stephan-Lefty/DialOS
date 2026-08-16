@@ -15,20 +15,29 @@ und die `claude-desktop.deb`).
 
 ## dialos-full-office-setup.sh
 
-Konsolidierungs-Skript (neu 2026-08-14): führt die Schritte 2-12 + 15
-aus [Debian-zu-DialOS.md](../docs/Debian-zu-DialOS.md) automatisiert
-und der Reihe nach aus (Paketliste, Branding, Autologin-Bootstrap,
-Calamares, RustDesk, Claude-CLI, Piper, GNOME-Erweiterungen,
-Standardprogramme, Sprachausgabe-Skripte, Sicherheits-Werkzeuge,
-Vosk/hassil) - eine Funktion pro Doku-Schritt, gleiche Nummerierung,
-damit Skript und Doku nicht auseinanderlaufen. Deckt bewusst NICHT
-Schritt 1 (Basis-Installation), 13 (`nutzer`-Konto anlegen - bleibt
-eigener letzter Schritt, siehe unten), 14 (optional/gerätespezifisch)
-und 16 (ISO bauen) ab.
+Konsolidierungs-Skript (neu 2026-08-14): führt die Schritte 2-12, 14
+(optional) und 15 aus [Debian-zu-DialOS.md](../docs/Debian-zu-DialOS.md)
+automatisiert und der Reihe nach aus (Paketliste, Branding,
+Autologin-Bootstrap, Calamares, RustDesk, Claude-CLI, Piper,
+GNOME-Erweiterungen, Standardprogramme, Sprachausgabe-Skripte,
+Sicherheits-Werkzeuge, Bluetooth-Kopplungsdaten, Vosk/hassil) - eine
+Funktion pro Doku-Schritt, gleiche Nummerierung, damit Skript und Doku
+nicht auseinanderlaufen. Deckt bewusst NICHT Schritt 1
+(Basis-Installation), 13 (`nutzer`-Konto anlegen - bleibt eigener
+letzter Schritt, siehe unten) und 16 (ISO bauen) ab.
 
-Aufruf: `./dialos-full-office-setup.sh` (alle Schritte) oder
-`./dialos-full-office-setup.sh 08` (nur ein einzelner Schritt, zum
-gezielten Nachholen/Debuggen).
+Schritt 14 (Bluetooth-Kopplungsdaten übernehmen) ist zwar als Funktion
+vorhanden, läuft aber NICHT im Standardlauf mit - nur sinnvoll, wenn
+dasselbe Testgerät wie vorher wiederverwendet wird (Kopplungsdaten
+hängen an der MAC-Adresse des eingebauten Bluetooth-Adapters).
+
+Aufruf:
+- `./dialos-full-office-setup.sh` - Standardlauf ohne Schritt 14.
+- `./dialos-full-office-setup.sh --bluetooth-kopplung` - Standardlauf
+  inkl. Schritt 14.
+- `./dialos-full-office-setup.sh 08` - nur ein einzelner Schritt, zum
+  gezielten Nachholen/Debuggen (funktioniert für jeden Schritt,
+  einschließlich 14).
 
 **Noch nicht auf einem frischen System end-to-end getestet** - geplant
 für den nächsten kompletten Neuaufbau des T490.

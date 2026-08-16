@@ -9,6 +9,26 @@ architecture questions), these are concrete, checkable tasks. Completed
 items are marked with a checkmark, not deleted - so it stays traceable
 what has already been done.
 
+- [ ] **Next step:** completely reinstall the T490 and use it to really
+  test the whole new flow (never run end-to-end yet): install Debian 13
+  + GNOME manually (step 1, **with** the partitioning note documented
+  since 2026-08-14 - 100 GB root, deliberately leave the rest of the
+  disk free) → `scripts/dialos-full-office-setup.sh` (steps 2-12 + 15
+  automated) → new `dialos-setup-home-partition.sh` (sets up the
+  `dialos-nutzer-home` partition + security stick in the free space,
+  replaces `dialos-install`'s whole-system copy for this flow) →
+  `scripts/dialos-buero-setup-abschliessen.sh` (create `nutzer`).
+  Afterward, as Stephan planned: build out speech recognition/voice
+  commands step by step on real hardware and keep extending the install
+  routine.
+- [x] Created the consolidation script
+  `scripts/dialos-full-office-setup.sh` + new
+  `dialos-setup-home-partition.sh` (runs `dialos-install`'s LUKS/stick
+  logic on an already-installed system, without its disk-wipe/rsync
+  copy), updated `Debian-zu-DialOS.md`/`.en.md` accordingly (step 1:
+  partitioning note; step 12: new tool) - done 2026-08-14, both scripts
+  only syntax-checked (`bash -n`) so far, not run for real yet (see the
+  item above).
 - [ ] **Deprioritized, no longer the next step** (see the two new items
   below): Run a real live-boot test with `DialOS-Live-0.5.0-clone.iso`
   (supersedes the old, now outdated live-boot-test item for the 11.08

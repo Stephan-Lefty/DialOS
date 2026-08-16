@@ -9,19 +9,28 @@ entschiedene Architekturfragen) sind das hier konkrete, abhakbare
 Aufgaben. Erledigte Punkte werden mit einem Häkchen markiert, nicht
 gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
 
-- [ ] **Hier weitermachen (Session-Unterbrechung 14.08.):**
-  `scripts/dialos-full-office-setup.sh` ist neu angelegt (führt
-  Schritte 2-12 + 15 aus `Debian-zu-DialOS.md` automatisiert aus, siehe
-  `scripts/README.md`) und syntaktisch geprüft (`bash -n`), aber
-  **noch nicht end-to-end auf einem echten System getestet**. Laut
-  Stephan als Nächstes geplant: T490 komplett neu aufsetzen
-  (Schritt 1 manuell, dann dieses Skript testen), danach darauf
-  aufbauend Spracherkennung/Sprachbefehle Schritt für Schritt auf
-  echter Hardware ausarbeiten und die Installationsroutine
-  entsprechend erweitern. Noch offen aus derselben Session: Verweis auf
-  das neue Skript fehlt noch in `Debian-zu-DialOS.md`/`.en.md` und im
-  README-Änderungsprotokoll (nur `scripts/README.md` ist schon
-  aktualisiert).
+- [ ] **Nächster Schritt:** T490 komplett neu aufsetzen und dabei den
+  kompletten neuen Ablauf real testen (noch nie end-to-end
+  durchgelaufen): Debian 13 + GNOME manuell installieren (Schritt 1,
+  **mit** dem seit 2026-08-14 dokumentierten Partitionierungs-Hinweis -
+  100 GB root, Rest der Platte bewusst frei lassen) →
+  `scripts/dialos-full-office-setup.sh` (Schritte 2-12 + 15
+  automatisiert) → neues `dialos-setup-home-partition.sh`
+  (`dialos-nutzer-home`-Partition + Sicherheits-Stick auf dem
+  freigelassenen Platz einrichten, ersetzt für diesen Ablauf
+  `dialos-install`s Ganze-System-Kopie) →
+  `scripts/dialos-buero-setup-abschliessen.sh` (`nutzer` anlegen).
+  Danach wie von Stephan geplant: darauf aufbauend Spracherkennung/
+  Sprachbefehle Schritt für Schritt auf echter Hardware ausarbeiten und
+  die Installationsroutine weiter erweitern.
+- [x] Konsolidierungs-Skript `scripts/dialos-full-office-setup.sh` +
+  neues `dialos-setup-home-partition.sh` (führt `dialos-install`s LUKS/
+  Stick-Logik auf einem bereits installierten System aus, ohne dessen
+  Festplatten-Wipe/rsync-Kopie) erstellt, `Debian-zu-DialOS.md`/`.en.md`
+  entsprechend aktualisiert (Schritt 1: Partitionierungs-Hinweis;
+  Schritt 12: neues Werkzeug) - erledigt 2026-08-14, beide Skripte nur
+  syntaktisch geprüft (`bash -n`), noch nicht real gelaufen (siehe
+  Punkt oben).
 - [ ] **Zurückgestellt, nicht mehr nächster Schritt** (siehe die zwei
   neuen Punkte unten): Echten Live-Boot-Test mit
   `DialOS-Live-0.5.0-clone.iso` erneut durchführen: erster Versuch am

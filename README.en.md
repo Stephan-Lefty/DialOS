@@ -185,6 +185,42 @@ background) and `splash.png` (boot/login screen).
   TODO.md. Details:
   [docs/sicherheit-datenschutz.en.md](docs/sicherheit-datenschutz.en.md),
   section "Encrypting nutzer's data + security stick".
+- **Vosk/hassil speech recognition documented as a repeatable recipe:**
+  previously only installed live on the T490 by hand (TODO.md) -
+  re-checking confirmed that this installation had actually been lost
+  in the meantime (`import vosk` failed), due to a device reinstall.
+  `docs/Debian-zu-DialOS.md` (step 15) now has the full recipe:
+  system-wide install via
+  `pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0`
+  (Debian 13 otherwise blocks `pip install` into system Python via PEP
+  668), download + correctly unpacking the German models (large +
+  small). Found and avoided an unzip mistake from the original test run
+  in the new docs: the model ZIPs already contain a named folder -
+  `unzip -d <target>` therefore creates a doubly-nested structure under
+  which `vosk.Model()` finds nothing (only worked on the T490 by
+  accident, because `unzip` also copies files flat on a name collision
+  - but wastes disk space, measured ~6.3 GB instead of ~3.2 GB for the
+  large model). `dialos-vosk-test.py` (interactive technical test
+  script) is now in the repo too. A real recognition test (actually
+  speaking into it) is still pending per TODO.md.
+- **Consolidation script + standalone home-partition setup:** Stephan
+  wanted a continuous step-by-step guide from downloading the Debian
+  installer to a finished DialOS - that surfaced a real gap: the
+  `dialos-nutzer-home` partition + security stick could so far only be
+  set up via `dialos-install`, which also wipes the entire target disk
+  and copies the system onto it via rsync - wrong for a normal Debian
+  installer build. New: `scripts/dialos-full-office-setup.sh` runs
+  steps 2-12 + 15 from `Debian-zu-DialOS.md` automatically (one
+  function per doc step, also callable individually; step 14,
+  Bluetooth pairing data, is included as a function but only runs with
+  `--bluetooth-kopplung`, since it's device-specific);
+  `dialos-setup-home-partition.sh` reuses `dialos-install`'s LUKS/stick
+  logic unchanged, but without the disk wipe - instead using free space
+  at the end of the system disk. This requires deliberately leaving
+  space free after the 100 GB root partition during the base install
+  (step 1) - now documented in `Debian-zu-DialOS.md`. Both new scripts
+  are only syntax-checked so far, not yet tested for real - planned for
+  the next full T490 rebuild (see TODO.md).
 
 ### 0.4.0
 - Removed Evolution and GNOME Calendar from the app grid and search

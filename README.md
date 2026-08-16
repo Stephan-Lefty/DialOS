@@ -209,6 +209,26 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Modell). `dialos-vosk-test.py` (interaktives technisches Testskript)
   jetzt ebenfalls im Repo. Ein echter Erkennungstest (tatsächlich
   hineinsprechen) steht laut TODO.md noch aus.
+- **Konsolidierungs-Skript + eigenständige Home-Partitionierung:**
+  Stephan wollte eine durchgehende Schritt-für-Schritt-Anleitung von
+  Debian-Installer-Download bis fertigem DialOS - dabei fiel eine echte
+  Lücke auf: die `dialos-nutzer-home`-Partition + der Sicherheits-Stick
+  ließen sich bisher nur über `dialos-install` einrichten, das dabei
+  zusätzlich die ganze Zielfestplatte löscht und das System per rsync
+  draufkopiert - für einen normalen Debian-Installer-Aufbau falsch.
+  Neu: `scripts/dialos-full-office-setup.sh` führt die Schritte 2-12 +
+  15 aus `Debian-zu-DialOS.md` automatisiert aus (eine Funktion pro
+  Doku-Schritt, auch einzeln aufrufbar; Schritt 14, Bluetooth-
+  Kopplungsdaten, ist als Funktion enthalten, läuft aber nur mit
+  `--bluetooth-kopplung` mit, da gerätespezifisch);
+  `dialos-setup-home-partition.sh`
+  übernimmt `dialos-install`s LUKS/Stick-Logik unverändert, aber ohne
+  den Festplatten-Wipe - nutzt stattdessen freien Platz am Ende der
+  System-Platte. Dafür muss bei der Basis-Installation (Schritt 1)
+  bewusst Platz nach der 100-GB-root-Partition frei gelassen werden -
+  jetzt in `Debian-zu-DialOS.md` dokumentiert. Beide neuen Skripte sind
+  bisher nur syntaktisch geprüft, noch nicht real getestet - geplant für
+  den nächsten kompletten T490-Neuaufbau (siehe TODO.md).
 
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur
