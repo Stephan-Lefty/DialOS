@@ -122,6 +122,17 @@ schritt_02b_sprachen_aufraeumen() {
     mozc-data mozc-server mozc-utils-gui 2>/dev/null || true
   sudo apt-get autoremove --purge -y
 
+  # SICHERHEITSNETZ: "autoremove --purge" entfernt alles, was nach dem
+  # Purge der Sprachpakete niemand mehr anfordert - und trifft dabei auch
+  # Dinge, die wir sehr wohl wollen. Beim ersten echten Lauf am 2026-08-16
+  # erwischte es gnome-accessibility-themes, ausgerechnet auf einem System
+  # fuer Menschen mit Seheinschraenkung. Deshalb die Paketliste danach
+  # erneut durchsetzen: sie ist die Quelle der Wahrheit, und alles darin
+  # gilt anschliessend wieder als "manuell installiert" und ist damit vor
+  # kuenftigem autoremove geschuetzt.
+  echo "Stelle sicher, dass nichts aus der Paketliste mitentfernt wurde ..."
+  sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
+
   # Der dauerhafte Teil der Loesung steckt in 01-dialos-defaults (Schritt
   # 3): dort ist die deutsche Tastatur als einzige Eingabequelle fuer JEDES
   # Konto hinterlegt. Das Aufraeumen hier entfernt nur, was gar nicht erst

@@ -3,6 +3,7 @@ task-german-desktop
 gnome-core
 gdm3
 orca
+gnome-accessibility-themes
 espeak-ng
 plymouth
 plymouth-themes
