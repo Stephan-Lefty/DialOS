@@ -104,7 +104,8 @@ background) and `splash.png` (boot/login screen).
   holding the repo gets plugged into any second computer during the
   installation. That gives the drive a second purpose beyond "survives
   the reinstall", now also recorded in the practical note. No nginx
-  changes needed, WordPress stays untouched. - muting audio
+  changes needed, WordPress stays untouched.
+- **The startup announcement could hang indefinitely - muting audio
   forever in the process (found 2026-08-16 via Stephan's question about
   why the speech icon was permanently lit).** Of the four
   `subprocess.run` calls in `dialos-say.py`, the two `spd-say` calls of
