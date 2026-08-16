@@ -697,10 +697,36 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
   -i`, -100 to +100) for the rest of the announcement - new
   `--lautstaerke` parameter in `dialos-say.py`. On "off", only the
   question itself (at normal volume) is spoken, the rest of the
-  announcement is skipped entirely. **On any failure** (nothing/nothing
-  matching understood, Vosk unavailable, no microphone), the function
-  falls back to 100% - the announcement must never be skipped or hang
-  because of this extra question. Right after the question, "Und jetzt
+  announcement is skipped entirely.
+
+  **Changed on 2026-08-16 (Stephan's requirement): ask once, then
+  remember - and do it AFTER the announcement.** Until then the question
+  came at every login and before the announcement. Both were awkward:
+  someone who hears "how loud should I be?" as the very first thing has no
+  reference for how loud the system actually is - a meaningless yardstick
+  for a blind user. It now works like this:
+
+  - **First login:** announcement at normal volume, then the question. The
+    answer is remembered in `~/.config/dialos/lautstaerke` - for `nutzer`
+    that means on the encrypted partition, as protected as the rest of
+    their data. Then a confirmation **at the newly chosen volume**, so it
+    is immediately audible what was settled on.
+  - **Every later login:** the remembered value is used, no question.
+  - **To be asked again:** delete the file
+    (`rm ~/.config/dialos/lautstaerke`).
+
+  > **"off" is deliberately NOT stored permanently** and applies only to
+  > the current login. If it were permanent, no announcement would come -
+  > and therefore never this question again. A blind user would have no
+  > way back without outside help. A real permanent off switch needs a
+  > different route back first (a voice command), see TODO.md.
+
+  **On any failure** (nothing/nothing matching understood, Vosk
+  unavailable, no microphone) the function returns `None` and **nothing**
+  is stored - so the question comes again at the next login, and 100%
+  applies until then. Deliberately distinguished from "the user said 100":
+  only a real answer is written down. The announcement must never be
+  skipped or hang because of this extra question. Right after the question, "Und jetzt
   bitte." (And now, please.) follows as a clear start signal for the
   recording - the first real test with Stephan's voice didn't have this
   signal yet, and the answer was missed (only the 100% fallback came

@@ -55,6 +55,40 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Lautstärke-Abfrage: einmal fragen statt bei jedem Anmelden - und
+  danach statt davor (Stephans Vorgabe, 2026-08-16).** Bisher kam die
+  Frage bei jedem Login und noch **vor** der Ansage. Beides war
+  ungünstig: Wer als Allererstes "Wie laut soll ich sein?" hört, hat
+  keinen Anhaltspunkt, wie laut das System überhaupt ist - für einen
+  blinden Nutzer ein sinnloser Maßstab. Jetzt spricht `nutzer`s erste
+  Anmeldung zuerst die normale Ansage, fragt danach ("War das angenehm
+  laut? Du kannst es einmalig festlegen."), merkt die Antwort in
+  `~/.config/dialos/lautstaerke` und bestätigt sie **in der neu gewählten
+  Lautstärke** - so ist sofort hörbar, worauf man sich festgelegt hat. Bei
+  jedem weiteren Anmelden wird der gemerkte Wert verwendet, ohne erneut zu
+  fragen; zum Zurücksetzen genügt das Löschen der Datei. Da `nutzer`s Home
+  auf der verschlüsselten Partition liegt, ist die Einstellung genauso
+  geschützt wie dessen übrige Daten.
+  - **"aus" wird bewusst NICHT dauerhaft gespeichert**, sondern gilt nur
+    für die laufende Anmeldung. Wäre es dauerhaft, käme keine Ansage mehr -
+    und damit auch nie wieder diese Frage. Ein blinder Nutzer hätte ohne
+    fremde Hilfe keinen Weg zurück. Ein echter Dauer-Aus-Schalter braucht
+    erst einen anderen Rückweg über die Sprachsteuerung.
+  - `frage_lautstaerke()` liefert bei jedem Fehlschlag jetzt `None` statt
+    `100`. Nur so lässt sich "der Nutzer hat 100 gesagt" (merken) von "wir
+    haben nichts verstanden" (nichts merken, nächstes Mal erneut fragen)
+    unterscheiden - vorher wäre ein misslungener Erkennungsversuch
+    dauerhaft als bewusste Wahl festgeschrieben worden.
+- **Erster Neustart nach dem Aufbau: alle vier offenen Prüfungen bestanden
+  (2026-08-16).** Per Journal belegt: `systemd-cryptsetup@cryptswap`
+  startet und beendet sich sauber (der verschlüsselte Swap kommt also von
+  allein hoch - das war das letzte ungetestete Glied), `dialos-stick-gate`
+  findet den Stick, mountet die Home-Partition und aktiviert den Autologin,
+  und `nutzer` meldet sich daraufhin automatisch an. Nebenbei bestätigt
+  sich ein Designdetail: Der Sicherheits-Stick war von `/dev/sda` nach
+  `/dev/sdb` gewandert, weil die externe Platte zuerst erkannt wurde - weil
+  `dialos-stick-gate.sh` ihn über `blkid -L DIALOS-KEY` am Label sucht
+  statt am Gerätepfad, blieb das folgenlos.
 - **Preseed-Bereitstellung auf einen Befehl reduziert (2026-08-16).**
   Der Debian-Installer holt die Datei über **einfaches HTTP** - die
   Debian-Doku nennt für `preseed/url` nur `http://` und `tftp://`. Daran

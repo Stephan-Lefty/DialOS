@@ -130,16 +130,60 @@ def waehle_mikrofon_fuer_lautstaerke():
     return kandidaten[0] if kandidaten else None
 
 
+def lautstaerke_datei():
+    """Pfad der gemerkten Lautstaerke - im Home des jeweiligen Kontos.
+
+    Bei "nutzer" liegt das Home auf der verschluesselten Partition, die
+    Einstellung ist damit genauso geschuetzt wie dessen uebrige Daten.
+    """
+    basis = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    return os.path.join(basis, "dialos", "lautstaerke")
+
+
+def gespeicherte_lautstaerke():
+    """Gemerkte Lautstaerke in Prozent, oder None wenn noch keine da ist.
+
+    None bedeutet "noch nie beantwortet" - dann wird nach der ersten
+    Ansage gefragt (siehe main). Unplausible Werte werden verworfen, damit
+    eine beschaedigte Datei nicht die Ansage verstellt.
+    """
+    try:
+        with open(lautstaerke_datei(), encoding="utf-8") as datei:
+            wert = int(datei.read().strip())
+        return wert if wert in LAUTSTAERKE_ZU_INTENSITAET else None
+    except Exception:
+        return None
+
+
+def lautstaerke_speichern(prozent):
+    """Merkt die Lautstaerke dauerhaft. Fehler werden bewusst geschluckt -
+    liesse sie sich nicht schreiben, wird beim naechsten Anmelden eben
+    erneut gefragt. Das ist unschoen, aber harmlos."""
+    try:
+        pfad = lautstaerke_datei()
+        os.makedirs(os.path.dirname(pfad), exist_ok=True)
+        with open(pfad, "w", encoding="utf-8") as datei:
+            datei.write(f"{prozent}\n")
+        return True
+    except Exception:
+        return False
+
+
 def frage_lautstaerke():
-    """Fragt nutzer per Sprache nach der gewuenschten Ansage-Lautstaerke
-    (100/75/50/25 Prozent oder "aus"). Gibt bei JEDEM Fehlschlag (Vosk
-    fehlt, kein Mikrofon, nichts/nichts Passendes verstanden) 100 zurueck
-    - die eigentliche Ansage darf wegen dieser Zusatzfrage niemals
-    ausbleiben oder haengen bleiben."""
+    """Fragt per Sprache nach der gewuenschten Ansage-Lautstaerke
+    (100/75/50/25 Prozent oder "aus").
+
+    Rueckgabe: die verstandene Prozentzahl, 0 fuer "aus", oder None bei
+    JEDEM Fehlschlag (Vosk fehlt, kein Mikrofon, nichts oder nichts
+    Passendes verstanden). None wird bewusst NICHT als 100 ausgegeben:
+    der Aufrufer soll unterscheiden koennen zwischen "der Nutzer hat 100
+    gesagt" (merken) und "wir haben nichts verstanden" (nichts merken,
+    beim naechsten Mal erneut fragen).
+    """
     try:
         import vosk
     except ImportError:
-        return 100
+        return None
 
     quelle = waehle_mikrofon_fuer_lautstaerke()
     bluetooth_karte = None
@@ -155,13 +199,20 @@ def frage_lautstaerke():
     if quelle:
         subprocess.run(["pactl", "set-default-source", quelle], capture_output=True)
 
-    spd_say("Wie laut soll ich sein? Sage 100, 75, 50, 25 oder aus.")
+    # Formulierung bewusst als Rueckfrage NACH der Ansage: Der Nutzer hat
+    # sie gerade gehoert und kann die Lautstaerke daran messen. Vorher
+    # gefragt (bis 2026-08-16) musste er raten, wie laut das System
+    # ueberhaupt ist - fuer einen blinden Nutzer ein sinnloser Massstab.
+    spd_say(
+        "War das angenehm laut? Du kannst es einmalig festlegen. "
+        "Sage 100, 75, 50, 25 oder aus."
+    )
     # Klares Startsignal direkt vor der Aufnahme - live am 2026-08-14
     # getestet: ohne dieses Signal wusste der Testnutzer nicht genau,
     # wann das Aufnahme-Fenster beginnt, und die Antwort wurde verpasst.
     spd_say("Und jetzt bitte.")
 
-    ergebnis = 100
+    ergebnis = None
     try:
         vosk.SetLogLevel(-1)
         modell = vosk.Model(LAUTSTAERKE_VOSK_MODELL)
@@ -186,7 +237,7 @@ def frage_lautstaerke():
                 ergebnis = LAUTSTAERKE_OPTIONEN[wort]
                 break
     except Exception:
-        ergebnis = 100
+        ergebnis = None
 
     if bluetooth_umgeschaltet and bluetooth_karte:
         bluetooth_profil_setzen(bluetooth_karte, "a2dp-sink")
@@ -488,9 +539,22 @@ def main():
 
     bluetooth_debug_snapshot("02-Direkt vor der Ansage (nach Reconnect + Wartezeit)")
 
-    # Lautstaerke-Abfrage nur fuer nutzer (Kundenkonto) - dialosadmin/
-    # andere Konten werden nie gefragt, siehe TODO.md.
-    lautstaerke_prozent = frage_lautstaerke() if ist_kundenkonto() else 100
+    # Lautstaerke nur fuer nutzer (Kundenkonto) - dialosadmin und andere
+    # Konten werden nie gefragt, siehe TODO.md.
+    #
+    # Ablauf seit 2026-08-16 (Stephans Vorgabe): Beim ERSTEN Anmelden wird
+    # zuerst normal angesagt und erst DANACH gefragt - so hat der Nutzer
+    # die Lautstaerke gerade gehoert und kann sie beurteilen. Vorher
+    # gefragt musste er raten. Die Antwort wird gemerkt und bei jedem
+    # weiteren Anmelden verwendet, ohne erneut zu fragen.
+    lautstaerke_prozent = 100
+    frage_noetig = False
+    if ist_kundenkonto():
+        gespeichert = gespeicherte_lautstaerke()
+        if gespeichert is None:
+            frage_noetig = True   # noch nie beantwortet
+        else:
+            lautstaerke_prozent = gespeichert
     intensitaet = LAUTSTAERKE_ZU_INTENSITAET.get(lautstaerke_prozent, 0)
 
     akku_saetze = []
@@ -530,8 +594,33 @@ def main():
 
     if lautstaerke_prozent > 0:
         spd_say(text, intensitaet=intensitaet)
-    # Bei "aus" (0) wird nur die Lautstaerke-Frage selbst (in normaler
-    # Lautstaerke) gesprochen, der Rest der Ansage bewusst ausgelassen.
+    # Bei gemerkter "aus"-Einstellung kaeme man hier nie an - "aus" wird
+    # bewusst nicht gespeichert, siehe unten.
+
+    if frage_noetig:
+        gewaehlt = frage_lautstaerke()
+        if gewaehlt is None:
+            # Nichts verstanden: NICHT merken, damit beim naechsten
+            # Anmelden erneut gefragt wird. Bis dahin bleibt es bei 100 %.
+            pass
+        elif gewaehlt > 0:
+            gemerkt = lautstaerke_speichern(gewaehlt)
+            neue_intensitaet = LAUTSTAERKE_ZU_INTENSITAET.get(gewaehlt, 0)
+            # Bestaetigung in der NEU gewaehlten Lautstaerke - so hoert der
+            # Nutzer sofort, worauf er sich gerade festgelegt hat.
+            spd_say(
+                f"Alles klar, ich bleibe bei {gewaehlt} Prozent."
+                if gemerkt
+                else f"Alles klar, {gewaehlt} Prozent - merken konnte ich es "
+                     "leider nicht, ich frage beim nächsten Mal erneut.",
+                intensitaet=neue_intensitaet,
+            )
+        else:
+            # "aus" gilt bewusst NUR fuer diese Anmeldung und wird NICHT
+            # gespeichert. Waere es dauerhaft, kaeme keine Ansage mehr -
+            # und damit auch nie wieder diese Frage. Ein blinder Nutzer
+            # haette dann ohne fremde Hilfe keinen Weg zurueck.
+            spd_say("Alles klar, für diesmal bin ich still.")
 
     netzwerk_ueberwachung(hat_internet)
 

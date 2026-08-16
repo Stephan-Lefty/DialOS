@@ -56,6 +56,38 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Volume prompt: ask once instead of at every login - and afterwards
+  rather than before (Stephan's requirement, 2026-08-16).** Until now the
+  question came at every login and **before** the announcement. Both were
+  awkward: someone who hears "how loud should I be?" as the very first
+  thing has no reference for how loud the system actually is - a
+  meaningless yardstick for a blind user. Now `nutzer`'s first login
+  speaks the normal announcement first, then asks, remembers the answer in
+  `~/.config/dialos/lautstaerke` and confirms it **at the newly chosen
+  volume** - so it is immediately audible what was settled on. Every later
+  login uses the remembered value without asking; deleting the file resets
+  it. Since `nutzer`'s home sits on the encrypted partition, the setting is
+  as protected as the rest of their data.
+  - **"off" is deliberately NOT stored permanently** and applies only to
+    the current login. If it were permanent, no announcement would come -
+    and therefore never this question again. A blind user would have no way
+    back without outside help. A real permanent off switch needs a
+    different route back via voice control first.
+  - `frage_lautstaerke()` now returns `None` on any failure instead of
+    `100`. Only that distinguishes "the user said 100" (remember) from "we
+    understood nothing" (remember nothing, ask again next time) -
+    previously a failed recognition attempt would have been written down
+    permanently as a deliberate choice.
+- **First reboot after the build: all four open checks passed
+  (2026-08-16).** Evidenced by the journal: `systemd-cryptsetup@cryptswap`
+  starts and finishes cleanly (so the encrypted swap comes up on its own -
+  that was the last untested link), `dialos-stick-gate` finds the stick,
+  mounts the home partition and enables autologin, and `nutzer` then logs
+  in automatically. A design detail confirmed itself along the way: the
+  security stick had moved from `/dev/sda` to `/dev/sdb` because the
+  external drive was enumerated first - because `dialos-stick-gate.sh`
+  looks it up by label via `blkid -L DIALOS-KEY` rather than by device
+  path, that had no consequences.
 - **Preseed provisioning reduced to a single command (2026-08-16).** The
   Debian installer fetches the file over **plain HTTP** - the Debian docs
   list only `http://` and `tftp://` for `preseed/url`. Both obvious

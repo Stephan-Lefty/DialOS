@@ -714,10 +714,39 @@ enabled=true` steht schon als dconf-Standardwert in
   Lautstärke (`spd-say -i`, -100 bis +100) für den Rest der Ansage -
   neuer `--lautstaerke`-Parameter in `dialos-say.py`. Bei "aus" wird
   nur die Frage selbst (normale Lautstärke) gesprochen, der Rest der
-  Ansage komplett ausgelassen. **Bei jedem Fehlschlag** (nichts/nichts
-  Passendes verstanden, Vosk nicht verfügbar, kein Mikrofon) fällt die
-  Funktion auf 100 % zurück - die Ansage darf wegen dieser Zusatzfrage
-  nie ausbleiben oder hängen bleiben. Direkt nach der Frage folgt "Und
+  Ansage komplett ausgelassen.
+
+  **Umgestellt am 2026-08-16 (Stephans Vorgabe): einmal fragen, dann
+  merken - und zwar NACH der Ansage.** Bis dahin kam die Frage bei jedem
+  Anmelden und noch vor der Ansage. Beides war ungünstig: Wer als
+  Allererstes "Wie laut soll ich sein?" hört, hat noch keinen Anhaltspunkt,
+  wie laut das System überhaupt ist - für einen blinden Nutzer ein
+  sinnloser Maßstab. Jetzt läuft es so:
+
+  - **Erstes Anmelden:** Ansage in normaler Lautstärke, danach die Frage
+    ("War das angenehm laut? Du kannst es einmalig festlegen."). Die
+    Antwort wird in `~/.config/dialos/lautstaerke` gemerkt - bei `nutzer`
+    also auf der verschlüsselten Partition, genauso geschützt wie dessen
+    übrige Daten. Anschließend eine Bestätigung **in der neu gewählten
+    Lautstärke**, damit sofort hörbar ist, worauf man sich festgelegt hat.
+  - **Jedes weitere Anmelden:** gemerkter Wert wird verwendet, es wird
+    nicht mehr gefragt.
+  - **Erneut fragen lassen:** die Datei löschen
+    (`rm ~/.config/dialos/lautstaerke`), dann kommt die Frage beim
+    nächsten Anmelden wieder.
+
+  > **"aus" wird bewusst NICHT dauerhaft gespeichert**, sondern gilt nur
+  > für die laufende Anmeldung. Wäre es dauerhaft, käme keine Ansage mehr -
+  > und damit auch nie wieder diese Frage. Ein blinder Nutzer hätte ohne
+  > fremde Hilfe keinen Weg zurück. Ein echter Dauer-Aus-Schalter braucht
+  > erst einen anderen Rückweg (Sprachbefehl), siehe TODO.md.
+
+  **Bei jedem Fehlschlag** (nichts/nichts Passendes verstanden, Vosk nicht
+  verfügbar, kein Mikrofon) liefert die Funktion `None` und es wird
+  **nichts** gemerkt - beim nächsten Anmelden wird also erneut gefragt, bis
+  dahin bleibt es bei 100 %. Bewusst unterschieden von "der Nutzer hat 100
+  gesagt": Nur eine echte Antwort wird festgeschrieben. Die Ansage darf
+  wegen dieser Zusatzfrage nie ausbleiben oder hängen bleiben. Direkt nach der Frage folgt "Und
   jetzt bitte." als klares Startsignal für die Aufnahme - beim ersten
   echten Test mit Stephans Stimme fehlte dieses Signal noch, die Antwort
   wurde verpasst (nur der 100 %-Fallback kam an); mit dem Signal danach
