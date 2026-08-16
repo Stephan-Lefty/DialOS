@@ -108,7 +108,7 @@ background) and `splash.png` (boot/login screen).
   of an extra reboot per device and the risk of destroying the system if
   the shrink is interrupted. Hence the reverse approach: the correct
   layout is created during installation. New:
-  `iso-build/preseed/dialos-partitionierung.cfg` gives the Debian
+  `website/d-i/trixie/preseed.cfg` gives the Debian
   installer EFI + exactly 100 GiB root and leaves the **entire rest
   unpartitioned** - independent of disk size, with no number to adjust
   anywhere. The target disk deliberately stays an interactive question:

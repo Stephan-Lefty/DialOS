@@ -137,22 +137,30 @@ irgendwo eine Zahl angepasst werden muss.
 ### 1a. Die Preseed-Datei auf dialos.org ablegen (einmalig)
 
 Die Datei liegt im Repo unter
-[`iso-build/preseed/dialos-partitionierung.cfg`](../iso-build/preseed/dialos-partitionierung.cfg).
-Lade sie auf den Webserver von `dialos.org` - **genau an diesen Ort**:
+[`website/d-i/trixie/preseed.cfg`](../website/d-i/trixie/preseed.cfg) -
+also bei den übrigen Website-Dateien von `dialos.org`. **Der Pfad im Repo
+entspricht exakt dem Pfad auf dem Webserver**, und der Dateiname stimmt
+schon: Beim nächsten Hochladen der Website landet sie von selbst richtig
+unter
 
 ```
 http://dialos.org/d-i/trixie/preseed.cfg
 ```
 
-Also: ein Ordner `d-i`, darin ein Ordner `trixie`, darin die Datei unter
-dem Namen `preseed.cfg`. Der Pfad ist frei wählbar - er wird unten in
-Schritt 1b vollständig ausgeschrieben. Diese Struktur ist trotzdem
-sinnvoll: Sie entspricht der Debian-Konvention und lässt Platz für
-künftige Debian-Versionen neben `trixie`.
+Der Pfad ist frei wählbar - er wird unten in Schritt 1b vollständig
+ausgeschrieben. Diese Struktur ist trotzdem sinnvoll: Sie entspricht der
+Debian-Konvention und lässt Platz für künftige Debian-Versionen neben
+`trixie`.
 
 Das muss **einmal** gemacht werden, nicht pro Gerät. Bei einer künftigen
-Debian-Version ändert sich nur der Ordnername (`trixie` → Codename der
-neuen Version).
+Debian-Version kommt einfach ein Ordner neben `trixie` dazu (Codename
+der neuen Version), der alte kann stehen bleiben.
+
+> Bewusst **nicht** über GitHub ausgeliefert: Das DialOS-Repo ist privat,
+> und `raw.githubusercontent.com` verlangt dafür ein Token im Request -
+> der Debian-Installer kann sich nicht authentifizieren. Davon abgesehen
+> liefert GitHub ausschließlich über HTTPS, und ob der Installer HTTPS
+> für `preseed/url` beherrscht, ist versionsabhängig.
 
 **Prüfen, ob es liegt:** Die Adresse im Browser aufrufen - es muss der
 Textinhalt der Datei erscheinen, kein Download-Dialog und keine

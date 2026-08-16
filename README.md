@@ -110,7 +110,7 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Zusatz-Neustart pro Gerät und dem Risiko, dass ein Abbruch mitten im
   Schrumpfen das System zerstört. Deshalb der umgekehrte Weg: das richtige
   Layout entsteht gleich beim Installieren. Neu:
-  `iso-build/preseed/dialos-partitionierung.cfg` gibt dem Debian-Installer
+  `website/d-i/trixie/preseed.cfg` gibt dem Debian-Installer
   EFI + genau 100 GiB root vor und lässt den **kompletten Rest
   unpartitioniert** - unabhängig von der Plattengröße, ohne dass
   irgendwo eine Zahl angepasst werden muss. Die Zielplatte bleibt bewusst
