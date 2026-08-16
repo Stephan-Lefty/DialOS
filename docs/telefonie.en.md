@@ -7,6 +7,13 @@
 Telephony (landline replacement + mobile) and video calls should be fully
 usable via voice control.
 
+**Status 2026-08-16: none of this is implemented.** This document
+describes the target architecture throughout, not the current state.
+Neither ModemManager nor GNOME Calls is in the package list, and the test
+device (ThinkPad T490) has no WWAN module fitted - practical SIM tests
+are therefore not possible at all so far (see
+[hardware.en.md](hardware.en.md)).
+
 ## Shipping goal: built-in SIM
 
 The actual default configuration at delivery is a laptop with a

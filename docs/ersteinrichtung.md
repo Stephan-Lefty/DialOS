@@ -4,8 +4,15 @@
 
 ## Zwei-Phasen-Provisionierung
 
-1. **Büro-Setup (Stephan)**: Ein generisches "Golden Image" wird komplett
-   eingerichtet, inklusive Testlauf. Alles, was sich datenschutz- oder
+**Präzisierung seit 2026-08-16 (Weg A):** Es gibt kein "Golden Image",
+das vervielfältigt wird. Jedes Gerät wird einzeln im Büro aufgesetzt -
+leere Platte, jeweils aktuelle Debian-13/GNOME-ISO von debian.org, danach
+die drei DialOS-Skripte (siehe
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md)). Ein Kunde bekommt nie einen
+Installer zu sehen; Calamares und `dialos-install` sind deshalb entfallen.
+
+1. **Büro-Setup (Stephan)**: Das Gerät wird komplett eingerichtet,
+   inklusive Testlauf. Alles, was sich datenschutz- oder
    sicherheitstechnisch vorab erledigen lässt (siehe unten), passiert
    hier – nicht vor Ort.
 2. **Versand**: Laptop und Sicherheits-Stick werden getrennt verschickt
@@ -26,8 +33,14 @@ nicht vor Ort.
 Läuft beim allerersten Systemstart automatisch – unabhängig vom
 "Hilfe rufen"-Befehl für RustDesk – und muss auch funktionieren, wenn der
 Nutzer komplett allein ist. Neue Softwarekomponente (State-Machine-Dialog
-auf Vosk+Piper-Basis, getriggert durch eine Erstlauf-Markerdatei),
-aktuell noch nicht umgesetzt.
+auf Vosk+Piper-Basis, getriggert durch eine Erstlauf-Markerdatei).
+
+**Stand 2026-08-16: nicht umgesetzt.** Was es davon schon gibt, ist die
+Start-Ansage (`dialos-start-ansage.py`) samt der gesprochenen
+Lautstärke-Frage - der erste echte Sprachdialog des Systems und damit
+die Vorlage für diesen Assistenten (Ansage → Frage → Antwort per Vosk →
+Ergebnis merken). Der Assistent selbst, mit Namenserfassung und
+Stimmenauswahl, existiert noch nicht.
 
 Vor Ort per Sprache erfragt werden nur:
 - **Name** des Nutzers, mit Rückbestätigung ("Ich habe verstanden: Anna

@@ -20,8 +20,10 @@ durchgehend Priorität vor Bequemlichkeit oder Erkennungsqualität:
 Der Login-Bildschirm entfällt komplett (GDM-Autologin), da er für die
 Zielgruppe eine der größten Hürden wäre (Passwort blind tippen,
 Login-Auswahl bedienen). Trade-off: physischer Zugriff auf das Gerät
-bedeutet direkten Zugriff auf das System – das wird durch die
-Festplattenverschlüsselung mit Hardware-Schlüssel abgefedert (siehe unten).
+bedeutet direkten Zugriff auf das System – das wird dadurch abgefedert,
+dass `nutzer`s Daten auf einer eigenen, mit einem Hardware-Schlüssel
+verschlüsselten Partition liegen und das Konto ohne diesen Schlüssel
+gesperrt ist (siehe unten).
 
 **Admin-Zugriff:** Das Autologin-Konto ist immer `nutzer`
 (`AutomaticLogin=true`), das Admin-Konto `dialosadmin` bleibt aktiv, aber
@@ -73,9 +75,21 @@ Boot in der normalen, schon laufenden Systemumgebung geöffnet:
   enthält ausschließlich `/home/nutzer`. Wird per `blkid -L
   dialos-nutzer-home` gefunden (LUKS2-Label, kein `/etc/crypttab`-
   Eintrag nötig).
-- Der Sicherheits-Stick (Partition `DIALOS-KEY`) trägt weiterhin die
-  Schlüsseldatei, plus einen zweiten Datenbereich `DIALOS-DATA` für
-  allgemeinen Speicher - **unverändert** gegenüber vorher.
+- Der Sicherheits-Stick trägt weiterhin die Schlüsseldatei auf der
+  Partition `DIALOS-KEY` (**ext4**, damit die Datei unter Windows gar
+  nicht erst lesbar ist, und mit `root:root 755` selbst unter Linux nur
+  für root zugreifbar), plus einen zweiten Datenbereich `DIALOS-DATA`
+  (**exFAT**, damit `nutzer` ihn als normalen mobilen Datenträger unter
+  Windows/macOS/Linux nutzen kann).
+- **Der Swap ist seit 2026-08-16 ebenfalls verschlüsselt** (8 GiB,
+  Schlüssel pro Start neu aus `/dev/urandom`, Eintrag in
+  `/etc/crypttab`). Sonst könnten `nutzer`s ausgelagerte Speicherseiten -
+  offene Dokumente, Mails, Browserinhalte - am LUKS-Schutz vorbei im
+  Klartext auf der Platte landen. Der Zufallsschlüssel schließt den
+  Ruhezustand (Hibernate) endgültig aus; Suspend-to-RAM bleibt
+  unberührt. Wichtig beim Nachbauen: Debian 13 braucht dafür das eigene
+  Paket `systemd-cryptsetup`, sonst wird `/etc/crypttab` **ohne jede
+  Fehlermeldung** ignoriert.
 - `dialos-stick-gate.service` (systemd-oneshot, läuft bei **jedem
   Boot** vor `display-manager.service`) prüft, ob der Stick da ist:
   wenn ja, öffnet es `dialos-nutzer-home` mit dem Schlüssel vom Stick
@@ -86,8 +100,17 @@ Boot in der normalen, schon laufenden Systemumgebung geöffnet:
   irgendein Schritt fehl (kein Stick, falscher/beschädigter Stick,
   Home-Partition fehlt) bleibt `/home/nutzer` ein leeres Verzeichnis
   und Autologin wird deaktiviert - GDM zeigt den normalen Login-
-  Bildschirm, auf dem praktisch nur `dialosadmin` nutzbar ist (`nutzer`s
-  Passwort ist ein zufälliger, niemandem bekannter String).
+  Bildschirm.
+- **Zusätzlich wird `nutzer`s Konto ohne Stick gesperrt** (`usermod -L`,
+  seit 2026-08-16). Der abgeschaltete Autologin allein reichte nicht:
+  GDM zeigt ohne Stick weiterhin beide Konten, und wer `nutzer`s
+  Zufallspasswort kannte - es steht einmalig im Terminal, wenn
+  `dialos-setup-nutzer.sh` es würfelt - hätte sich trotzdem anmelden
+  können, in eine Sitzung gegen ein leeres Verzeichnis auf der
+  **unverschlüsselten** root-Partition. Die Reihenfolge ist dabei nicht
+  beliebig: erst entsperren, dann Autologin setzen, weil AccountsService
+  `SetAutomaticLogin` für ein gesperrtes Konto mit "user is locked"
+  ablehnt. `dialosadmin` wird nie gesperrt.
 - `dialosadmin` bleibt davon komplett unberührt: nie Autologin, immer
   normales getipptes Passwort am GDM-Screen, unabhängig vom Stick.
 
@@ -99,8 +122,16 @@ sensibelsten ist: `nutzer`s eigene Daten. System-Dateien,
 `dialosadmin`s Home und Logs bleiben bewusst unverschlüsselt (bewusster
 Kompromiss - siehe README-Änderungsprotokoll 0.5.0 für die Abwägung).
 
+**Am 2026-08-16 in beide Richtungen auf echter Hardware nachgewiesen**
+(per Journal belegt): ohne Stick greifen fünf Ebenen gleichzeitig -
+Stick physisch weg, LUKS-Container zu, `/home/nutzer` kein
+Einhängepunkt, Konto auf `L`, keine `nutzer`-Sitzung. Mit Stick meldet
+sich `nutzer` automatisch an, das Konto steht wieder auf `P`. Der
+verschlüsselte Swap läuft in beiden Fällen, weil er am Zufallsschlüssel
+hängt und nicht am Stick.
+
 Skripte/Units:
-`usr/local/sbin/dialos-install`, `usr/local/sbin/dialos-rekey`,
+`usr/local/sbin/dialos-rekey`,
 `usr/local/sbin/dialos-stick-gate.sh`,
 `etc/systemd/system/dialos-stick-gate.service` (alle im Repo unter
 `iso-build/config/includes.chroot/`, Installation siehe
@@ -110,7 +141,8 @@ Skripte/Units:
 - Der Stick sollte getrennt vom Laptop aufbewahrt werden (z. B. am
   Schlüsselbund), sonst bringt die Verschlüsselung wenig, falls beides
   zusammen entwendet wird.
-- **Empfohlene Standardgröße: 64 GB.** `dialos-install`/`dialos-rekey`
+- **Empfohlene Standardgröße: 64 GB.**
+  `dialos-setup-home-partition.sh`/`dialos-rekey`
   partitionieren den Stick immer in `DIALOS-KEY` (2 GiB, Schlüssel) +
   `DIALOS-DATA` (Rest der Kapazität, allgemeiner Speicher) - bei 64 GB
   bleiben `nutzer` dadurch automatisch ca. 62 GB als mobiler
@@ -157,8 +189,9 @@ Drei Wege, je nach Situation:
    Wiederherstellungs-Passwort und schreibt den Schlüssel auf einen neuen
    Stick.
 
-Für Weg 2 und 3 braucht es das **verschlüsselte Schlüssel-Backup**: Der
-Installer (`dialos-install`) und das Rekey-Werkzeug (`dialos-rekey`)
+Für Weg 2 und 3 braucht es das **verschlüsselte Schlüssel-Backup**: Das
+Einrichtungs-Skript (`dialos-setup-home-partition.sh`) und das
+Rekey-Werkzeug (`dialos-rekey`)
 verschlüsseln die kleine Schlüsseldatei (nicht die ganze Festplatte) mit
 einem eigenen, zufällig erzeugten Backup-Passwort (`openssl rand
 -base64 32`, verschlüsselt via `openssl enc -aes-256-cbc -pbkdf2`) und
@@ -205,7 +238,10 @@ nutzlos ist.
 
 Debian bleibt die Basis (kein Wechsel zu einem atomaren/unveränderlichen
 System wie Fedora Atomic/Silverblue oder openSUSE Aeon) – Stephans
-Priorität liegt auf Debians Stabilität, Hardware-Support und dem
-ausgereiften live-build-Tooling gegenüber eingebautem Atomic-Rollback.
+Priorität liegt auf Debians Stabilität und Hardware-Support gegenüber
+eingebautem Atomic-Rollback. (Der ursprünglich mitgenannte Grund
+"ausgereiftes live-build-Tooling" ist entfallen - live-build wird seit
+2026-08-16 nicht mehr verwendet, siehe
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 16.)
 Eine Rollback-Absicherung müsste bei Bedarf separat über Btrfs-Snapshots
 nachgerüstet werden.

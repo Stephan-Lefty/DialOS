@@ -5,14 +5,35 @@
 ## Stack
 
 - **Spracherkennung (STT)**: Vosk mit deutschem Modell, offline.
-- **Sprachausgabe (TTS)**: Piper oder RHVoice (natürlicher als
-  espeak-ng), als Backend für Orca.
+- **Sprachausgabe (TTS)**: Piper (natürlicher als espeak-ng), als
+  Backend für Orca - RHVoice stand zur Wahl und ist verworfen.
 - **Screenreader**: Orca (Standard-GNOME-Screenreader).
 - **Low-Level-Desktopsteuerung** (Maus, Fenster): Numen – Wayland-nativ,
   ebenfalls Vosk-basiert, Open Source.
 - **Intent-Erkennung**: [hassil](https://github.com/OHF-Voice/hassil)
   (Home Assistant Intent Language) - lernfähige Zuordnung über
   Beispielsatz-Vorlagen statt starrer Befehlsgrammatik (siehe unten).
+
+## Stand der Umsetzung (2026-08-16)
+
+Damit klar bleibt, was hier Konzept und was gebaut ist:
+
+- **Sprachausgabe: im Einsatz.** Piper läuft über ein
+  speech-dispatcher-Generic-Modul, `dialos-say.py` spricht jede Ansage
+  mit Audio-Ducking und Panel-Anzeige.
+- **Spracherkennung: installiert und erstmals produktiv.** Vosk beantwortet
+  die Lautstärke-Frage in der Start-Ansage (echt gesprochen getestet am
+  15./16.08.). Alles darüber hinaus ist noch nicht gebaut.
+- **Intent-Erkennung: hassil ist installiert, aber ungenutzt** - es gibt
+  noch keine einzige Beispielsatz-Vorlage im System.
+- **Dauerhaftes Zuhören mit Aufweckwort: nicht vorhanden.** Erkennung
+  läuft nur, wenn ein Skript sie gezielt aufruft.
+- **Screenreader Orca: installiert, aber noch nicht an Piper gekoppelt.**
+- **Numen: nicht installiert.**
+
+Das heißt: Die Sprach*ausgabe* ist fertig, die Sprach*steuerung* im
+eigentlichen Sinn - jederzeit ansprechbar sein und Befehle ausführen -
+steht noch aus. Sie ist der nächste große Arbeitsblock.
 
 ## Intent-Erkennung: flexibel statt starr
 

@@ -25,7 +25,8 @@ so nothing gets lost from the discussions.
 ## Security
 - Recovery path for the USB security stick in case of loss/damage:
   provisionally implemented as a master passphrase (second LUKS key
-  slot, asked for by the installer on every install) – whether that
+  slot, asked for by `dialos-setup-home-partition.sh` during setup, at
+  least 12 characters) – whether that
   should be the final solution (vs. a backup stick vs. no recovery) is
   not finally decided yet.
 - How sudo/admin rights for the default user ("nutzer") should work is
@@ -57,13 +58,21 @@ so nothing gets lost from the discussions.
   could unintentionally trigger the admin path instead of the normal
   `nutzer` autologin.
 
-## ISO build
-- Spell-checking (hunspell-de-de/hunspell-en-us, aspell) is missing
-  from the ISO: the package `dictionaries-common`, which both depend
-  on, reproducibly fails inside the Docker chroot build environment
-  (likely missing D-Bus during package configuration). Left out for
-  the first working build for now, needs to be added back (possibly
-  installed after first boot instead of at build time).
+## System
+- Spell-checking (hunspell-de-de/hunspell-en-us, aspell) is still
+  missing. **Rationale outdated (corrected 2026-08-16):** this used to
+  say `dictionaries-common` reproducibly fails inside the Docker chroot
+  build environment. That environment no longer exists since the move to
+  path A - the packages are installed today via `apt` on a running
+  system, where the problem doesn't occur. It is missing now simply
+  because it is in no package list. That makes it a concrete task rather
+  than an open question (see [TODO.en.md](../TODO.en.md)).
+- The single-instance lock of `dialos-start-ansage.py` uses a fixed path
+  in shared `/tmp` (`/tmp/dialos-start-ansage.pid`). The same design
+  caused trouble on 2026-08-16 with the speaking marker: because of the
+  sticky bit one account can neither overwrite nor delete another's
+  file, and the failure stays silent. The marker was moved to
+  `$XDG_RUNTIME_DIR`; this lock file has not been.
 
 ## Voice control
 - Wake-word engine for battery-saving continuous listening not yet

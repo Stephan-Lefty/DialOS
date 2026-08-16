@@ -20,8 +20,9 @@ take priority over convenience or recognition quality:
 The login screen is skipped entirely (GDM autologin), since it would be
 one of the biggest obstacles for the target group (typing a password
 blind, operating a login chooser). Trade-off: physical access to the
-device means direct access to the system — mitigated by disk encryption
-with a hardware key (see below).
+device means direct access to the system — mitigated by the fact that
+`nutzer`'s data lives on a dedicated partition encrypted with a hardware
+key, and that the account is locked without that key (see below).
 
 **Admin access:** The autologin account is always `nutzer`
 (`AutomaticLogin=true`), the admin account `dialosadmin` stays active but
@@ -70,9 +71,19 @@ already-running normal system environment:
 - **`dialos-nutzer-home` partition** (LUKS2, remaining capacity):
   holds exclusively `/home/nutzer`. Found via `blkid -L
   dialos-nutzer-home` (LUKS2 label, no `/etc/crypttab` entry needed).
-- The security stick (`DIALOS-KEY` partition) still carries the key
-  file, plus a second data area `DIALOS-DATA` for general storage -
-  **unchanged** from before.
+- The security stick still carries the key file on the `DIALOS-KEY`
+  partition (**ext4**, so the file isn't even readable under Windows,
+  and with `root:root 755` accessible only to root even under Linux),
+  plus a second data area `DIALOS-DATA` (**exFAT**, so `nutzer` can use
+  it as an ordinary portable drive under Windows/macOS/Linux).
+- **Swap has been encrypted as well since 2026-08-16** (8 GiB, key
+  re-drawn from `/dev/urandom` on every boot, entry in `/etc/crypttab`).
+  Otherwise `nutzer`'s paged-out memory - open documents, mail, browser
+  content - could end up on disk in the clear, bypassing the LUKS
+  protection. The random key rules out hibernation for good;
+  suspend-to-RAM is unaffected. Important when rebuilding: Debian 13
+  needs the separate `systemd-cryptsetup` package for this, otherwise
+  `/etc/crypttab` is ignored **without any error message**.
 - `dialos-stick-gate.service` (systemd oneshot, runs on **every boot**
   before `display-manager.service`) checks whether the stick is
   present: if so, it opens `dialos-nutzer-home` with the key from the
@@ -82,9 +93,17 @@ already-running normal system environment:
   and [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 4). If any
   step fails (no stick, wrong/damaged stick, home partition missing),
   `/home/nutzer` stays an empty directory and autologin is disabled -
-  GDM shows the normal login screen, on which practically only
-  `dialosadmin` is usable (`nutzer`'s password is a random string
-  nobody knows).
+  GDM shows the normal login screen.
+- **In addition, `nutzer`'s account is locked without the stick**
+  (`usermod -L`, since 2026-08-16). Disabling autologin alone was not
+  enough: without the stick GDM still lists both accounts, and anyone
+  who knew `nutzer`'s random password - it is printed once in the
+  terminal when `dialos-setup-nutzer.sh` generates it - could still have
+  logged in, into a session against an empty directory on the
+  **unencrypted** root partition. The order matters: unlock first, then
+  set autologin, because AccountsService rejects `SetAutomaticLogin` for
+  a locked account with "user is locked". `dialosadmin` is never
+  locked.
 - `dialosadmin` is completely unaffected: never autologin, always a
   normal typed password at the GDM screen, independent of the stick.
 
@@ -96,7 +115,14 @@ device: `nutzer`'s own data. System files, `dialosadmin`'s home, and
 logs stay deliberately unencrypted (a deliberate trade-off - see README
 changelog 0.5.0 for the reasoning).
 
-Scripts/units: `usr/local/sbin/dialos-install`,
+**Proven in both directions on real hardware on 2026-08-16** (backed by
+the journal): without the stick, five layers apply at once - stick
+physically absent, LUKS container closed, `/home/nutzer` not a mount
+point, account at `L`, no `nutzer` session. With the stick, `nutzer` logs
+in automatically and the account is back at `P`. The encrypted swap runs
+in both cases, because it depends on the random key, not on the stick.
+
+Scripts/units:
 `usr/local/sbin/dialos-rekey`, `usr/local/sbin/dialos-stick-gate.sh`,
 `etc/systemd/system/dialos-stick-gate.service` (all in the repo under
 `iso-build/config/includes.chroot/`, installation see
@@ -106,7 +132,8 @@ Scripts/units: `usr/local/sbin/dialos-install`,
 - The stick should be kept separately from the laptop (e.g. on a
   keyring), otherwise the encryption provides little benefit if both are
   stolen together.
-- **Recommended standard size: 64 GB.** `dialos-install`/`dialos-rekey`
+- **Recommended standard size: 64 GB.**
+  `dialos-setup-home-partition.sh`/`dialos-rekey`
   always partition the stick into `DIALOS-KEY` (2 GiB, key) +
   `DIALOS-DATA` (remaining capacity, general storage) - at 64 GB this
   gives `nutzer` about 62 GB of it automatically as portable storage
@@ -152,9 +179,9 @@ Three paths, depending on the situation:
    locally with the matching recovery passphrase, and writes the key
    onto a new stick.
 
-Paths 2 and 3 need the **encrypted key backup**: the installer
-(`dialos-install`) and the rekey tool (`dialos-rekey`) encrypt the
-small key file (not the whole disk) with a dedicated, randomly
+Paths 2 and 3 need the **encrypted key backup**: the setup script
+(`dialos-setup-home-partition.sh`) and the rekey tool (`dialos-rekey`)
+encrypt the small key file (not the whole disk) with a dedicated, randomly
 generated backup password (`openssl rand -base64 32`, encrypted via
 `openssl enc -aes-256-cbc -pbkdf2`) and offer to save the file —
 Stephan stores it in his own, self-hosted Nextcloud (one file per

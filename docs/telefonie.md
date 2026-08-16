@@ -7,6 +7,13 @@
 Telefonie (Festnetz-Ersatz + Handy) und Videocall sollen vollständig per
 Sprachsteuerung nutzbar sein.
 
+**Stand 2026-08-16: nichts davon ist umgesetzt.** Dieses Dokument
+beschreibt durchgehend die Zielarchitektur, nicht den Ist-Zustand. Weder
+ModemManager noch GNOME Calls stehen in der Paketliste, und das Testgerät
+(ThinkPad T490) hat kein WWAN-Modul verbaut - praktische SIM-Tests sind
+deshalb bisher gar nicht möglich (siehe
+[hardware.md](hardware.md)).
+
 ## Auslieferungsziel: eingebaute SIM
 
 Die eigentliche Standard-Konfiguration bei Auslieferung ist ein Laptop mit

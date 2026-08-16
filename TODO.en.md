@@ -37,6 +37,39 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
+- [ ] **Roadmap to real voice control** (agreed with Stephan on
+  2026-08-16, in this order):
+  1. Decide on a reference microphone - **done**, AIRHUG 01.
+  2. **Windows 11 desktop switch** (see next item).
+  3. Wake word + continuous listening loop.
+  4. hassil command grammar, with the desktop switch as the first real
+     voice command.
+
+- [ ] **Optional Windows 11 look for GNOME** (Stephan's request,
+  2026-08-16). Background: there are people who want DialOS for the voice
+  control but come from the Windows world - for them the desktop should
+  be switchable on request, without giving up GNOME's accessibility. All
+  three required extensions are in Debian, so no third-party repository
+  is needed: `gnome-shell-extension-dash-to-panel` (taskbar at the
+  bottom), `gnome-shell-extension-arc-menu` (start menu),
+  `gnome-shell-extension-tiling-assistant` (window snapping like
+  Windows). Intended as a switch script in both directions, not a
+  permanent conversion - and later triggerable by voice.
+
+- [ ] **Add spell-checking** (`hunspell-de-de`, `hunspell-en-us`,
+  `aspell`). It is in no package list. The earlier rationale in
+  `docs/offene-punkte.en.md` ("fails inside the Docker chroot build
+  environment") is moot with path A - installation happens today via
+  `apt` on a running system, where the problem doesn't occur. Belongs in
+  `iso-build/config/package-lists/desktop.list.chroot`.
+
+- [ ] **Move the lock file of `dialos-start-ansage.py` out of `/tmp`.**
+  `/tmp/dialos-start-ansage.pid` is a fixed path in shared `/tmp` - the
+  same design that caused a silent failure with the speaking marker on
+  2026-08-16 (sticky bit: one account can neither overwrite nor delete
+  another's file). The marker now lives under `$XDG_RUNTIME_DIR`, this
+  file does not.
+
 - [ ] **Test the microphone fallback without Bluetooth** (open since
   2026-08-16). The output side is proven - headset off, sound came from
   the built-in speaker. The input side is still missing: does the

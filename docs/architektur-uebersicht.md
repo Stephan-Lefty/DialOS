@@ -4,9 +4,13 @@
 
 ## Ziel
 
-DialOS ist eine auf Debian 13 (Trixie) + GNOME 48 basierende Live-ISO für
+DialOS ist ein auf Debian 13 (Trixie) + GNOME 48 basierendes System für
 Menschen, die einen Computer nur eingeschränkt nutzen können – insbesondere
-blinde und motorisch eingeschränkte Personen. Das System soll vollständig
+blinde und motorisch eingeschränkte Personen. Es wird nicht als Live-ISO
+verteilt, sondern im Büro auf jedem Gerät aus einer regulären
+Debian-Installation aufgebaut (siehe
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md)); eine ISO gibt es nur noch
+als Sicherungs-Abbild. Das System soll vollständig
 per Sprache bedienbar sein, inklusive der Systemwartung, und dabei gleich
 einfach für eine 18-Jährige wie für einen 80-Jährigen funktionieren.
 
@@ -35,24 +39,30 @@ vollständig ohne Tastatur/Maus bedienbar sein.
 Details siehe [telefonie.md](telefonie.md), [sicherheit-datenschutz.md](sicherheit-datenschutz.md),
 [sprachsteuerung.md](sprachsteuerung.md), [ersteinrichtung.md](ersteinrichtung.md).
 
-## Software-Stack (Diskussionsstand, noch nicht umgesetzt)
+## Software-Stack (Stand 2026-08-16)
 
-| Bereich | Wahl | Begründung |
-|---|---|---|
-| Distribution | Debian 13 + GNOME 48, live-build | Beste Orca/AT-SPI-Integration, ausgereiftes ISO-Tooling, Hardware-Support |
-| Spracherkennung (STT) | Vosk (deutsches Modell), offline | Datenschutz bei vulnerabler Zielgruppe, funktioniert auch unterwegs ohne Internet |
-| Sprachausgabe (TTS) | Piper oder RHVoice | Natürlicher als espeak-ng, als Orca-Backend nutzbar |
-| Intent-Erkennung | flexible/LLM-gestützte Zuordnung statt starrer Grammatik | Muss unterschiedliche Formulierungen derselben Absicht verstehen (18- bis 80-Jährige) |
-| Low-Level-Desktopsteuerung | Numen (Wayland-nativ, Vosk-basiert) | Maus/Fenster-Steuerung für motorisch eingeschränkte Nutzer |
-| Screenreader | Orca | Standard-GNOME-Screenreader, gekoppelt an Piper/RHVoice |
-| Mail/Kalender/Kontakte | Thunderbird | Eine App für alle drei Funktionen, gute Orca-Unterstützung |
-| Radio | Shortwave | GNOME-Internetradio-App |
-| Musik | Rhythmbox/GNOME Music | — |
-| Podcasts | GNOME Podcasts | — |
-| Textverarbeitung | LibreOffice Writer | — |
-| Browser | Firefox ESR | Für Suchfragen und ARD/ZDF-Mediatheken (kein nativer Linux-Client) |
-| Fernwartung | RustDesk | Open Source, selbst hostbar, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md) |
-| Videocall | Jitsi Meet (Browser) | Kein Konto nötig, WebRTC |
+Die Spalte "Stand" trennt Entschiedenes von Eingebautem: **installiert**
+heißt, das Paket kommt aus der DialOS-Paketliste; **im Einsatz** heißt,
+es wird von DialOS aktiv angesteuert; **geplant** heißt, entschieden,
+aber noch nichts davon im System.
+
+| Bereich | Wahl | Begründung | Stand |
+|---|---|---|---|
+| Distribution | Debian 13 + GNOME 48 | Beste Orca/AT-SPI-Integration, Hardware-Support | im Einsatz |
+| Spracherkennung (STT) | Vosk 0.3.45 (deutsche Modelle groß + klein), offline | Datenschutz bei vulnerabler Zielgruppe, funktioniert auch unterwegs ohne Internet | installiert, erste produktive Nutzung: Lautstärke-Abfrage bei der Start-Ansage |
+| Sprachausgabe (TTS) | Piper (RHVoice verworfen) | Natürlicher als espeak-ng, als Orca-Backend nutzbar | im Einsatz, über ein speech-dispatcher-Generic-Modul |
+| Intent-Erkennung | [hassil](https://github.com/OHF-Voice/hassil) (Entscheidung 2026-08-13, statt Rhasspy) | Muss unterschiedliche Formulierungen derselben Absicht verstehen (18- bis 80-Jährige) | installiert, aber noch keine Befehlsgrammatik hinterlegt |
+| Low-Level-Desktopsteuerung | Numen (Wayland-nativ, Vosk-basiert) | Maus/Fenster-Steuerung für motorisch eingeschränkte Nutzer | geplant, nicht installiert |
+| Screenreader | Orca | Standard-GNOME-Screenreader | installiert, Kopplung an Piper noch offen |
+| Mail/Kalender/Kontakte | Thunderbird | Eine App für alle drei Funktionen, gute Orca-Unterstützung | installiert, als Standard für `mailto:`/`text/calendar` gesetzt |
+| Radio | Shortwave | GNOME-Internetradio-App | installiert |
+| Musik | Rhythmbox/GNOME Music | — | installiert |
+| Podcasts | GNOME Podcasts | — | installiert |
+| Textverarbeitung | LibreOffice Writer | — | installiert |
+| Browser | Firefox ESR | Für Suchfragen und ARD/ZDF-Mediatheken (kein nativer Linux-Client) | installiert, Startseite per Enterprise-Policy gesetzt |
+| Fernwartung | RustDesk | Open Source, selbst hostbar, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md) | installiert, Autostart bewusst abgeschaltet |
+| Videocall | Jitsi Meet (Browser) | Kein Konto nötig, WebRTC | geplant |
+| Telefonie | ModemManager + GNOME Calls | siehe [telefonie.md](telefonie.md) | geplant, nicht installiert (kein WWAN-Modul im Testgerät) |
 
 ## Design-Prinzipien
 

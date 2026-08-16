@@ -36,6 +36,40 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
+- [ ] **Fahrplan bis zur echten Sprachsteuerung** (festgelegt mit Stephan
+  am 2026-08-16, in dieser Reihenfolge):
+  1. Referenz-Mikrofon festlegen - **erledigt**, AIRHUG 01.
+  2. **Windows-11-Umschaltung für den Desktop** (siehe nächster Punkt).
+  3. Aufweckwort + dauerhafte Zuhör-Schleife.
+  4. hassil-Befehlsgrammatik, mit der Desktop-Umschaltung als erstem
+     echten Sprachbefehl.
+
+- [ ] **Optionale Windows-11-Optik für GNOME** (Stephans Wunsch vom
+  2026-08-16). Hintergrund: Es gibt Interessenten, die DialOS wegen der
+  Sprachsteuerung wollen, aber aus der Windows-Welt kommen - für die soll
+  sich der Desktop auf Wunsch umschalten lassen, ohne die
+  Barrierefreiheit von GNOME aufzugeben. Alle drei nötigen Erweiterungen
+  liegen in Debian, es braucht also kein Fremd-Repository:
+  `gnome-shell-extension-dash-to-panel` (Taskleiste unten),
+  `gnome-shell-extension-arc-menu` (Startmenü),
+  `gnome-shell-extension-tiling-assistant` (Fenster-Andocken wie
+  Windows-Snap). Gedacht als Umschalt-Skript in beide Richtungen, nicht
+  als fester Umbau - und später per Sprachbefehl auslösbar.
+
+- [ ] **Rechtschreibprüfung nachrüsten** (`hunspell-de-de`,
+  `hunspell-en-us`, `aspell`). Steht in keiner Paketliste. Die frühere
+  Begründung in `docs/offene-punkte.md` ("scheitert in der
+  Docker-Chroot-Build-Umgebung") ist mit Weg A hinfällig - heute wird auf
+  einem laufenden System per `apt` installiert, wo das Problem nicht
+  auftritt. Gehört in `iso-build/config/package-lists/desktop.list.chroot`.
+
+- [ ] **Lock-Datei von `dialos-start-ansage.py` aus `/tmp` holen.**
+  `/tmp/dialos-start-ansage.pid` ist ein fester Pfad im geteilten `/tmp` -
+  dieselbe Bauart, die am 2026-08-16 bei der Sprechen-Markierung zu einem
+  stillen Fehlschlag geführt hat (Sticky-Bit: ein Konto kann die Datei
+  eines anderen weder überschreiben noch löschen). Die Markierung liegt
+  jetzt unter `$XDG_RUNTIME_DIR`, diese Datei noch nicht.
+
 - [ ] **Mikrofon-Fallback ohne Bluetooth testen** (offen seit
   2026-08-16). Die Ausgabeseite ist bewiesen - Headset aus, Ton kam aus
   dem eingebauten Lautsprecher. Die Eingabeseite fehlt noch: versteht das

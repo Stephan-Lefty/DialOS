@@ -981,7 +981,8 @@ not as root. If no session of that account is running, it says so and you
 confirm "trust and launch" once on the first double-click.
 
 The script deliberately takes the launcher template from
-`/usr/share/applications/dialos-install.desktop` (placed there in step
+`/usr/share/applications/dialos-rekey.desktop` (up to 2026-08-16 this
+was `dialos-install.desktop`, which went away with the tool) (placed there in step
 12) rather than from the repo - that way it also works when started from
 the desktop later, where no repo directory exists.
 

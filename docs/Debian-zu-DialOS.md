@@ -1012,8 +1012,9 @@ gerade keine Sitzung dieses Kontos, meldet es das und man bestätigt beim
 ersten Doppelklick einmalig "Vertrauen und starten".
 
 Das Skript nimmt die Vorlage für das Startsymbol bewusst aus
-`/usr/share/applications/dialos-install.desktop` (dort abgelegt in
-Schritt 12) statt aus dem Repo - so funktioniert es auch, wenn es später
+`/usr/share/applications/dialos-rekey.desktop` (dort abgelegt in
+Schritt 12; bis 2026-08-16 stand hier `dialos-install.desktop`, das mit
+dem Werkzeug entfallen ist) statt aus dem Repo - so funktioniert es auch, wenn es später
 von der Arbeitsfläche aus gestartet wird, wo es kein Repo-Verzeichnis
 gibt.
 

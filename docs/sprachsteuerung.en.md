@@ -5,13 +5,36 @@
 ## Stack
 
 - **Speech recognition (STT)**: Vosk with a German model, offline.
-- **Speech output (TTS)**: Piper or RHVoice (more natural than
-  espeak-ng), used as a backend for Orca.
+- **Speech output (TTS)**: Piper (more natural than espeak-ng), used as
+  a backend for Orca - RHVoice was considered and dropped.
 - **Screen reader**: Orca (the standard GNOME screen reader).
 - **Low-level desktop control** (mouse, windows): Numen – Wayland-native,
   also Vosk-based, open source.
-- **Intent recognition**: flexible/LLM-based matching instead of a rigid
-  command grammar (see below).
+- **Intent recognition**: [hassil](https://github.com/OHF-Voice/hassil)
+  (Home Assistant Intent Language) - adaptable matching via
+  example-sentence templates instead of a rigid command grammar (see
+  below).
+
+## Implementation status (2026-08-16)
+
+So it stays clear what is concept and what is built:
+
+- **Speech output: in use.** Piper runs via a speech-dispatcher generic
+  module; `dialos-say.py` speaks every announcement with audio ducking
+  and a panel indicator.
+- **Speech recognition: installed and productive for the first time.**
+  Vosk answers the volume question in the login announcement (tested with
+  a real voice on 2026-08-15/16). Nothing beyond that is built yet.
+- **Intent recognition: hassil is installed but unused** - there is not a
+  single example-sentence template in the system yet.
+- **Continuous listening with a wake word: does not exist.** Recognition
+  only runs when a script explicitly invokes it.
+- **Orca screen reader: installed, but not yet paired with Piper.**
+- **Numen: not installed.**
+
+In short: speech *output* is finished, voice *control* in the real sense
+- being addressable at any time and executing commands - is still
+pending. It is the next major block of work.
 
 ## Intent recognition: flexible instead of rigid
 

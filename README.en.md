@@ -84,6 +84,67 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Audited every Markdown file in the repo against reality
+  (2026-08-16).** Prompted by Stephan asking whether the "concept"
+  status shouldn't be revised too - he had a point: several `docs/`
+  files were still written in concept-phase language even though what
+  they describe has long been running, or pointedly isn't. All 25 (now
+  24) `.md` files were reviewed.
+  - **`architektur-uebersicht`**: still called DialOS a "live ISO" and
+    listed the software stack under the heading "discussion status, not
+    yet implemented". Both wrong - since path A, DialOS is built per
+    device from a regular Debian installation, and half the stack is
+    running. The table now has a **state** column with three clear
+    levels (installed / in use / planned) so that decisions no longer
+    look like implementations. Also corrected: `live-build` as the
+    rationale for the distribution, "Piper or RHVoice" (Piper is
+    decided) and "LLM-based matching" for intent recognition (hassil was
+    decided on 2026-08-13).
+  - **`sprachsteuerung`**: a new "implementation status" section with
+    the sentence that matters - speech *output* is finished, voice
+    *control* in the real sense is still pending. The English version
+    lagged additionally: it still named LLM-based matching while the
+    German had long described hassil.
+  - **`ersteinrichtung`**: spoke of a "generic golden image" being
+    duplicated - exactly what path A no longer does. And the
+    voice-guided first-run assistant still isn't built; that is now
+    stated, together with the note that the announcement's volume
+    question already serves as its template.
+  - **`telefonie`**: reads like a description of the system, but is
+    target architecture throughout - neither ModemManager nor GNOME
+    Calls is installed, and the test device has no WWAN module at all.
+    Now stated as a status right at the top.
+  - **`sicherheit-datenschutz`**: the weightiest findings. The **account
+    lock without the stick** was missing entirely (the document still
+    claimed that without the stick "practically only `dialosadmin`" was
+    usable - precisely the error the lock fixed), the **encrypted swap**
+    was missing, and the stick filesystems were listed as "unchanged"
+    instead of ext4/exFAT. Plus three references to the removed
+    `dialos-install` and "mature live-build tooling" as a reason to stay
+    on Debian. Added: the two-directional proof from 2026-08-16.
+  - **`offene-punkte`**: the heading "ISO build" no longer existed;
+    spell-checking is missing not because of the Docker chroot
+    environment (which is gone) but because it is in no package list -
+    making it a task rather than an open question.
+  - **`scripts/README.md`**: claimed "not yet tested end-to-end" and
+    described `dialos-claude-setup.sh` as creating a passwordless
+    sudoers rule for `eggs produce` - the script now *removes* that
+    rule.
+  - **`Debian-zu-DialOS`**: step 13 took the launcher template from
+    `dialos-install.desktop` - that file is deleted; what actually sits
+    there is `dialos-rekey.desktop`.
+  - **`iso-build/CUBIC-ANLEITUNG.md` deleted.** It described building a
+    live ISO with `dialos-install`, `dialos-keyscript`, an initramfs
+    hook and autologin via `/etc/gdm3/custom.conf` - four things that
+    either no longer exist or demonstrably don't work. A guide that
+    misleads whoever follows it is worse than none; it remains
+    reachable through the git history.
+  - **`TODO`**: the roadmap to voice control agreed with Stephan was
+    nowhere in the repo, nor was the requested Windows 11 switch. Both
+    added, along with two tasks found during the audit (spell-checking;
+    the lock file of `dialos-start-ansage.py` still lives in shared
+    `/tmp` - the same design that already caused a silent failure with
+    the speaking marker).
 - **README status and changelog brought in line with reality
   (2026-08-16).** The status section still read "concept phase - no
   working software exists yet"; that had been plainly wrong since the

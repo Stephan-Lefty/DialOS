@@ -5,8 +5,8 @@ diesem Ordner (neu angelegt, geändert, gelöscht) mit aktualisiert.
 
 **Wichtig:** Alle Skripte hier sind ausschließlich für `dialosadmin`
 gedacht - `nutzer` soll sie nie sehen. Deshalb werden sie explizit auf
-`dialosadmin`s Desktop kopiert (siehe
-[Debian-zu-DialOS.md](../docs/Debian-zu-DialOS.md), Schritt 13), **nicht**
+`dialosadmin`s Desktop kopiert (erledigt seit 2026-08-16 Schritt 2 von
+`dialos-buero-setup-abschliessen.sh`, siehe unten), **nicht**
 über `/etc/skel/Desktop/` verteilt - das würde ungewollt auch bei
 `nutzer` landen, da `/etc/skel/` in diesem Rezept nur `nutzer` als
 "künftig angelegtes Konto" betrifft, kein zweites Admin-Konto
@@ -47,8 +47,9 @@ Fehlermeldung im falschen Home. Alles, was Root-Rechte braucht, ruft
 `sudo` selbst auf; das Passwort wird zu Beginn einmal abgefragt
 (`sudo -v`), damit der Lauf nicht mitten in den Downloads stehen bleibt.
 
-**Noch nicht auf einem frischen System end-to-end getestet** - geplant
-für den nächsten kompletten Neuaufbau des T490.
+**Am 2026-08-16 erstmals auf einem frisch installierten T490
+end-to-end durchgelaufen** - zusammen mit den beiden anderen Skripten,
+anschließend Neustart mit und ohne Sicherheits-Stick geprüft.
 
 ## dialos-preseed-server.sh
 
@@ -97,8 +98,11 @@ Aufruf: `sudo ./dialos-setup-nutzer.sh [admin-benutzername]`
 ## dialos-claude-setup.sh
 
 Stellt nach einem Reinstall des T490 die Arbeitsumgebung für Claude
-Code wieder her: legt die eng begrenzte Sudoers-Regel für
-`eggs produce` (ohne Passwortabfrage) neu an, setzt den Symlink
+Code wieder her: **entfernt** die alte Sudoers-Regel für `eggs produce`
+(seit dem Wegfall von Penguins' Eggs am 2026-08-16 zeigte sie auf ein
+nicht mehr vorhandenes `/usr/bin/eggs` - harmlos, aber eine
+passwortlose sudo-Regel soll nicht als Altlast liegenbleiben), setzt den
+Symlink
 `~/DialOS` auf das Repo der externen Platte neu, und setzt Git-Identität
 (`user.name`/`user.email`) + `credential.helper=store` für
 `dialosadmin`, damit `git push` nach einem Reinstall nicht mehr an

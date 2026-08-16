@@ -4,9 +4,16 @@
 
 ## Two-phase provisioning
 
-1. **Office setup (Stephan)**: a generic "golden image" is fully set up,
-   including a test run. Everything that can be handled in advance for
-   privacy or security reasons (see below) happens here — not on site.
+**Clarification since 2026-08-16 (path A):** there is no "golden image"
+that gets duplicated. Every device is set up individually in the office -
+empty disk, the current Debian 13/GNOME ISO from debian.org, then the
+three DialOS scripts (see
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md)). A customer never sees
+an installer; Calamares and `dialos-install` were removed accordingly.
+
+1. **Office setup (Stephan)**: the device is fully set up, including a
+   test run. Everything that can be handled in advance for privacy or
+   security reasons (see below) happens here — not on site.
 2. **Shipping**: laptop and security stick are shipped separately (see
    [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)).
 3. **On-site setup at the user's home**: plug in the laptop, connect the
@@ -24,8 +31,14 @@ things like SIM activation also belong in the office setup, not on site.
 Runs automatically on the very first system start — independent of the
 "call for help" command for RustDesk — and must also work if the user is
 completely alone. A new software component (a state-machine dialog based
-on Vosk+Piper, triggered by a first-run marker file), not yet
-implemented.
+on Vosk+Piper, triggered by a first-run marker file).
+
+**Status 2026-08-16: not implemented.** What does exist is the login
+announcement (`dialos-start-ansage.py`) with its spoken volume question -
+the system's first real voice dialog and therefore the template for this
+assistant (announce → ask → answer via Vosk → remember the result). The
+assistant itself, with name capture and voice selection, does not exist
+yet.
 
 Only the following is asked for on site, via voice:
 - The user's **name**, with confirmation back ("I understood: Anna

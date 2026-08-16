@@ -4,9 +4,12 @@
 
 ## Goal
 
-DialOS is a live ISO based on Debian 13 (Trixie) + GNOME 48 for people
+DialOS is a system based on Debian 13 (Trixie) + GNOME 48 for people
 who can only use a computer to a limited extent — in particular blind and
-motor-impaired individuals. The system must be fully voice-controllable,
+motor-impaired individuals. It is not distributed as a live ISO but built
+in the office on each device from a regular Debian installation (see
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md)); an ISO now exists only
+as a backup image. The system must be fully voice-controllable,
 including system maintenance, and work equally well for an 18-year-old as
 for an 80-year-old.
 
@@ -35,24 +38,30 @@ operable without keyboard or mouse.
 Details: see [telefonie.en.md](telefonie.en.md), [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md),
 [sprachsteuerung.en.md](sprachsteuerung.en.md), [ersteinrichtung.en.md](ersteinrichtung.en.md).
 
-## Software stack (discussion status, not yet implemented)
+## Software stack (as of 2026-08-16)
 
-| Area | Choice | Rationale |
-|---|---|---|
-| Distribution | Debian 13 + GNOME 48, live-build | Best Orca/AT-SPI integration, mature ISO tooling, hardware support |
-| Speech recognition (STT) | Vosk (German model), offline | Privacy for a vulnerable target group, works on the go without internet |
-| Speech output (TTS) | Piper or RHVoice | More natural than espeak-ng, usable as an Orca backend |
-| Intent recognition | flexible/LLM-based matching instead of rigid grammar | Must understand different phrasings of the same intent (18 to 80 year olds) |
-| Low-level desktop control | Numen (Wayland-native, Vosk-based) | Mouse/window control for motor-impaired users |
-| Screen reader | Orca | Standard GNOME screen reader, paired with Piper/RHVoice |
-| Mail/calendar/contacts | Thunderbird | One app for all three functions, good Orca support |
-| Radio | Shortwave | GNOME internet radio app |
-| Music | Rhythmbox/GNOME Music | — |
-| Podcasts | GNOME Podcasts | — |
-| Word processing | LibreOffice Writer | — |
-| Browser | Firefox ESR | For search queries and ARD/ZDF Mediatheken (no native Linux client) |
-| Remote support | RustDesk | Open source, self-hostable, see [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md) |
-| Video calls | Jitsi Meet (browser) | No account needed, WebRTC |
+The "state" column separates what is decided from what is actually
+built in: **installed** means the package comes from the DialOS package
+list; **in use** means DialOS actively drives it; **planned** means
+decided, but nothing of it is in the system yet.
+
+| Area | Choice | Rationale | State |
+|---|---|---|---|
+| Distribution | Debian 13 + GNOME 48 | Best Orca/AT-SPI integration, hardware support | in use |
+| Speech recognition (STT) | Vosk 0.3.45 (German models, large + small), offline | Privacy for a vulnerable target group, works on the go without internet | installed, first productive use: the volume prompt in the login announcement |
+| Speech output (TTS) | Piper (RHVoice dropped) | More natural than espeak-ng, usable as an Orca backend | in use, via a speech-dispatcher generic module |
+| Intent recognition | [hassil](https://github.com/OHF-Voice/hassil) (decided 2026-08-13, instead of Rhasspy) | Must understand different phrasings of the same intent (18 to 80 year olds) | installed, but no command grammar defined yet |
+| Low-level desktop control | Numen (Wayland-native, Vosk-based) | Mouse/window control for motor-impaired users | planned, not installed |
+| Screen reader | Orca | Standard GNOME screen reader | installed, pairing with Piper still open |
+| Mail/calendar/contacts | Thunderbird | One app for all three functions, good Orca support | installed, set as the default for `mailto:`/`text/calendar` |
+| Radio | Shortwave | GNOME internet radio app | installed |
+| Music | Rhythmbox/GNOME Music | — | installed |
+| Podcasts | GNOME Podcasts | — | installed |
+| Word processing | LibreOffice Writer | — | installed |
+| Browser | Firefox ESR | For search queries and ARD/ZDF Mediatheken (no native Linux client) | installed, home page set via enterprise policy |
+| Remote support | RustDesk | Open source, self-hostable, see [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md) | installed, autostart deliberately disabled |
+| Video calls | Jitsi Meet (browser) | No account needed, WebRTC | planned |
+| Telephony | ModemManager + GNOME Calls | see [telefonie.en.md](telefonie.en.md) | planned, not installed (no WWAN module in the test device) |
 
 ## Design principles
 

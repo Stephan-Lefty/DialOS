@@ -48,8 +48,13 @@ mehr, sondern der etablierte Ansatz:
    verworfen nach ca. 18 Build-Versuchen ohne je eine fertige `.iso`
    gesehen zu haben (verschachteltes `live-build` in Docker in Claudes
    eigener Sandbox-Umgebung - praktisch jeder Bug ging darauf zurück).
-   Bleibt nur noch als Referenz/Fallback (zusätzlich gibt es eine
-   Cubic-Anleitung: `iso-build/CUBIC-ANLEITUNG.md`).
+   Bleibt nur noch als Referenz/Fallback. Die frühere Cubic-Anleitung
+   (`iso-build/CUBIC-ANLEITUNG.md`) ist am 2026-08-16 gelöscht worden -
+   sie beschrieb den Live-ISO-Bau mit `dialos-install`,
+   `dialos-keyscript`, initramfs-Hook und Autologin über
+   `/etc/gdm3/custom.conf`. Nichts davon existiert oder funktioniert
+   noch; sie hätte beim Nachbauen aktiv in die Irre geführt. Bei Bedarf
+   über die Git-Historie erreichbar.
 2. **Etablierter Ansatz:** Debian 13 + GNOME wird direkt auf echter
    Zielhardware (Lenovo ThinkPad T490) installiert und interaktiv
    konfiguriert - die `iso-build/`-Dateien dienen dabei nur noch als

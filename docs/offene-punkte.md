@@ -26,7 +26,8 @@ damit nichts aus den Diskussionen verloren geht.
 ## Sicherheit
 - Wiederherstellungsweg für den USB-Sicherheits-Stick bei Verlust/Defekt:
   vorläufig als Master-Passphrase umgesetzt (zweiter LUKS-Schlüsselslot,
-  wird bei jeder Installation vom Installer abgefragt) – ob das die
+  wird beim Einrichten von `dialos-setup-home-partition.sh` abgefragt,
+  mindestens 12 Zeichen) – ob das die
   endgültige Lösung sein soll (vs. Ersatz-Stick vs. kein Recovery) ist
   noch nicht final entschieden.
 - Wie sudo/Admin-Rechte für den Standard-Benutzer ("nutzer") gehandhabt
@@ -58,13 +59,23 @@ damit nichts aus den Diskussionen verloren geht.
   normalen Kundenboots ungewollt den Admin-Pfad statt des normalen
   `nutzer`-Autologins auslösen.
 
-## ISO-Build
-- Rechtschreibprüfung (hunspell-de-de/hunspell-en-us, aspell) fehlt in
-  der ISO: Das Paket `dictionaries-common`, von dem beide abhängen,
-  scheitert reproduzierbar in der Docker-Chroot-Build-Umgebung
-  (vermutlich fehlender D-Bus während der Paketkonfiguration). Für den
-  ersten lauffähigen Build vorerst ausgelassen, muss nachgerüstet
-  werden (ggf. Installation nach dem ersten Boot statt zur Build-Zeit).
+## System
+- Rechtschreibprüfung (hunspell-de-de/hunspell-en-us, aspell) fehlt
+  weiterhin. **Begründung überholt (korrigiert 2026-08-16):** Hier stand,
+  `dictionaries-common` scheitere reproduzierbar in der
+  Docker-Chroot-Build-Umgebung. Diese Umgebung gibt es seit dem Wechsel
+  auf Weg A nicht mehr - die Pakete werden heute auf einem laufenden
+  System per `apt` installiert, wo das Problem gar nicht auftritt. Es
+  fehlt jetzt schlicht, weil es in keiner Paketliste steht. Damit ist es
+  kein offener Punkt mehr, sondern eine konkrete Aufgabe (siehe
+  [TODO.md](../TODO.md)).
+- Die Ein-Instanz-Sperre von `dialos-start-ansage.py` liegt auf einem
+  festen Pfad im geteilten `/tmp` (`/tmp/dialos-start-ansage.pid`).
+  Dieselbe Bauart hat am 2026-08-16 bei der Sprechen-Markierung Ärger
+  gemacht: Wegen des Sticky-Bits kann ein Konto die Datei eines anderen
+  weder überschreiben noch löschen, der Fehler bleibt still. Für die
+  Markierung ist das auf `$XDG_RUNTIME_DIR` umgestellt worden, für diese
+  Lock-Datei noch nicht.
 
 ## Sprachsteuerung
 - Wake-Word-Engine für Akku-sparendes Dauerlauschen noch nicht final

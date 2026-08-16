@@ -85,6 +85,70 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Alle Markdown-Dateien des Repos gegen den Ist-Zustand geprüft
+  (2026-08-16).** Auslöser war Stephans Frage, ob der "Konzept"-Stand
+  nicht auch überarbeitet gehört - er traf einen wunden Punkt: Mehrere
+  `docs/`-Dateien waren noch in der Sprache der Konzeptphase verfasst,
+  obwohl das Beschriebene längst läuft oder gerade nicht läuft.
+  Durchgesehen wurden alle 25 (jetzt 24) `.md`-Dateien.
+  - **`architektur-uebersicht`**: hieß noch "Live-ISO" und führte den
+    Software-Stack unter der Überschrift "Diskussionsstand, noch nicht
+    umgesetzt". Beides falsch - DialOS wird seit Weg A pro Gerät aus
+    einer regulären Debian-Installation aufgebaut, und der halbe Stack
+    läuft. Die Tabelle hat jetzt eine Spalte **Stand** mit drei klaren
+    Stufen (installiert / im Einsatz / geplant), damit Entschiedenes
+    nicht mehr wie Gebautes aussieht. Nebenbei korrigiert: `live-build`
+    als Distributions-Begründung, "Piper oder RHVoice" (Piper ist
+    entschieden) und "LLM-gestützte Zuordnung" bei der Intent-Erkennung
+    (hassil ist seit dem 13.08. entschieden).
+  - **`sprachsteuerung`**: neuer Abschnitt "Stand der Umsetzung" mit dem
+    Satz, auf den es ankommt - die Sprach*ausgabe* ist fertig, die
+    Sprach*steuerung* im eigentlichen Sinn steht noch aus. Die englische
+    Fassung hing zusätzlich hinterher: Sie nannte noch die
+    LLM-Zuordnung, während die deutsche längst hassil beschrieb.
+  - **`ersteinrichtung`**: sprach vom "generischen Golden Image", das
+    vervielfältigt wird - genau das gibt es bei Weg A nicht mehr. Und
+    der sprachgeführte Ersteinrichtungs-Assistent ist weiterhin nicht
+    gebaut; das steht jetzt dort, zusammen mit dem Hinweis, dass die
+    Lautstärke-Frage der Start-Ansage bereits die Vorlage dafür ist.
+  - **`telefonie`**: liest sich wie eine Beschreibung des Systems, ist
+    aber durchgehend Zielarchitektur - weder ModemManager noch GNOME
+    Calls sind installiert, und das Testgerät hat gar kein WWAN-Modul.
+    Steht jetzt als Status gleich am Anfang.
+  - **`sicherheit-datenschutz`**: die inhaltlich gewichtigsten Funde.
+    Es fehlte die **Konto-Sperre ohne Stick** komplett (das Dokument
+    behauptete noch, ohne Stick sei "praktisch nur `dialosadmin`
+    nutzbar" - genau der Irrtum, den die Sperre behoben hat), es fehlte
+    der **verschlüsselte Swap**, und die Stick-Dateisysteme standen als
+    "unverändert" statt als ext4/exFAT. Dazu drei Verweise auf das
+    entfallene `dialos-install` und "ausgereiftes live-build-Tooling"
+    als Begründung, Debian zu behalten. Ergänzt: der Nachweis vom
+    2026-08-16 in beide Richtungen.
+  - **`offene-punkte`**: die Überschrift "ISO-Build" gab es nicht mehr;
+    die Rechtschreibprüfung fehlt nicht wegen der Docker-Chroot-Umgebung
+    (die es nicht mehr gibt), sondern weil sie in keiner Paketliste
+    steht - damit keine offene Frage mehr, sondern eine Aufgabe.
+  - **`scripts/README.md`**: behauptete "noch nicht end-to-end
+    getestet" und beschrieb `dialos-claude-setup.sh` als Anleger einer
+    passwortlosen Sudoers-Regel für `eggs produce` - das Skript
+    *entfernt* diese Regel inzwischen.
+  - **`Debian-zu-DialOS`**: Schritt 13 nahm die Vorlage fürs Startsymbol
+    aus `dialos-install.desktop` - diese Datei ist gelöscht, tatsächlich
+    liegt dort `dialos-rekey.desktop`.
+  - **`iso-build/CUBIC-ANLEITUNG.md` gelöscht.** Sie beschrieb den
+    Live-ISO-Bau mit `dialos-install`, `dialos-keyscript`,
+    initramfs-Hook und Autologin über `/etc/gdm3/custom.conf` - vier
+    Dinge, die es nicht mehr gibt oder die nachweislich nicht
+    funktionieren. Eine Anleitung, die beim Befolgen in die Irre führt,
+    ist schlechter als keine; über die Git-Historie bleibt sie
+    erreichbar.
+  - **`TODO`**: der mit Stephan vereinbarte Fahrplan zur Sprachsteuerung
+    stand nirgends im Repo, ebenso wenig die gewünschte
+    Windows-11-Umschaltung. Beides nachgetragen, dazu zwei beim Prüfen
+    gefundene Aufgaben (Rechtschreibprüfung; die Lock-Datei von
+    `dialos-start-ansage.py` liegt weiterhin im geteilten `/tmp` -
+    dieselbe Bauart, die bei der Sprechen-Markierung schon einen stillen
+    Fehlschlag verursacht hat).
 - **README-Status und Änderungsprotokoll auf den tatsächlichen Stand
   gebracht (2026-08-16).** Der Status-Abschnitt stand noch auf
   "Konzeptphase - es existiert noch keine lauffähige Software"; seit dem
