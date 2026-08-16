@@ -90,8 +90,15 @@ so nothing gets lost from the discussions.
     speech-dispatcher's default sink; when the Bluetooth device
     disappears, PipeWire moves the default sink to the built-in one by
     itself.
-  - **Neither has ever been tested without Bluetooth.** That is the
-    remaining open item - not a missing implementation.
+  - **Speaker: verified on 2026-08-16 with the headset switched off -
+    sound came from the built-in speaker.** The output side is therefore
+    proven.
+  - **Microphone: not yet tested without Bluetooth.** That is the
+    remaining open item - not a missing implementation. It can be checked
+    by deleting the remembered volume value
+    (`sudo rm /home/nutzer/.config/dialos/lautstaerke`) and logging in as
+    `nutzer` with the headset off: the question then comes again and has
+    to be understood through the built-in microphone.
 
   **Not covered and harder:** a device that is *connected* but transmits
   nothing (nearly dead battery, radio interference). No fallback triggers

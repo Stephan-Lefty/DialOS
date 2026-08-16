@@ -67,7 +67,11 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   eingebaute Mikrofon. Auf der Ausgabeseite zieht PipeWire die
   Standard-Senke selbst um. Der offene Punkt ist damit nicht das Fehlen
   der Logik, sondern dass **beides noch nie ohne Bluetooth getestet
-  wurde**; die Doku ist entsprechend korrigiert. Als schwierigerer,
+  wurde**; die Doku ist entsprechend korrigiert. **Die Ausgabeseite ist
+  noch am selben Tag belegt worden:** Headset ausgeschaltet, Ansage
+  gestartet - Ton kam aus dem eingebauten Lautsprecher. Offen bleibt nur
+  noch die Eingabeseite, also ob das eingebaute Mikrofon die
+  Lautstärke-Frage versteht. Als schwierigerer,
   weiterhin offener Fall benannt: ein Gerät, das *verbunden* ist, aber
   nichts überträgt - dann greift kein Fallback, weil von außen alles in
   Ordnung aussieht.

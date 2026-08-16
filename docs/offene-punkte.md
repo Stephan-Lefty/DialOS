@@ -93,8 +93,15 @@ damit nichts aus den Diskussionen verloren geht.
     Speech-Dispatchers Standard-Senke; verschwindet das
     Bluetooth-Gerät, zieht PipeWire die Standard-Senke selbst auf die
     eingebaute um.
-  - **Beides noch nie ohne Bluetooth getestet.** Genau das ist der
-    verbleibende offene Punkt - nicht das Fehlen der Logik.
+  - **Lautsprecher: am 2026-08-16 mit ausgeschaltetem Headset geprüft -
+    Ton kam aus dem eingebauten Lautsprecher.** Damit ist die
+    Ausgabeseite belegt.
+  - **Mikrofon: noch nicht ohne Bluetooth getestet.** Das ist der
+    verbleibende offene Punkt - nicht das Fehlen der Logik. Prüfen lässt
+    es sich, indem man den gemerkten Lautstärke-Wert löscht
+    (`sudo rm /home/nutzer/.config/dialos/lautstaerke`) und sich bei
+    ausgeschaltetem Headset als `nutzer` anmeldet: Dann kommt die Frage
+    erneut und muss über das eingebaute Mikrofon verstanden werden.
 
   **Nicht abgedeckt und schwieriger:** ein Gerät, das *verbunden* ist,
   aber nichts überträgt (fast leerer Akku, Funkstörung). Dann greift kein

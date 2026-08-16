@@ -67,7 +67,10 @@ background) and `splash.png` (boot/login screen).
   i.e. the built-in microphone. On the output side PipeWire moves the
   default sink by itself. The open item is therefore not missing logic but
   that **neither has ever been tested without Bluetooth**; the docs are
-  corrected accordingly. Named as the harder, still-open case: a device
+  corrected accordingly. **The output side was proven the same day:**
+  headset switched off, announcement started - sound came from the
+  built-in speaker. Only the input side remains open, i.e. whether the
+  built-in microphone understands the volume question. Named as the harder, still-open case: a device
   that is *connected* but transmits nothing - no fallback triggers there,
   because from the outside everything looks fine.
 - **Reference audio device settled: AIRHUG 01 (Stephan, 2026-08-16).**
