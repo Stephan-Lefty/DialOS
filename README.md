@@ -271,8 +271,15 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
   Funktion auf 100 % zurück, damit die Ansage nie wegen dieser
   Zusatzfrage ausbleibt oder hängen bleibt. Die Erkennungs-/
   Zuordnungslogik wurde verifiziert, indem Piper alle fünf Optionen
-  synthetisch aussprach und Vosk sie korrekt erkannte - ein echter Test
-  mit tatsächlich gesprochener Antwort steht laut TODO.md noch aus.
+  synthetisch aussprach und Vosk sie korrekt erkannte. **Update
+  2026-08-16, echter Test mit Stephans Stimme:** Dabei einen echten Bug
+  gefunden und behoben - beim ersten Versuch fehlte ein klares
+  Startsignal, wann genau das 4-Sekunden-Aufnahmefenster beginnt,
+  Stephans gesprochene Antwort ("25") wurde verpasst, nur der
+  100 %-Sicherheits-Fallback kam an. Fix: direkt vor der Aufnahme sagt
+  die Funktion jetzt zusätzlich "Und jetzt bitte." - danach im zweiten
+  Versuch korrekt erkannt (echtes gesprochenes "25" → 25 %, über das
+  Bluetooth-Mikrofon inkl. Profilwechsel).
 
 ### 0.4.0
 - Evolution und GNOME Kalender aus App-Grid und Suche entfernt (nur

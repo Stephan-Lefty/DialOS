@@ -482,10 +482,12 @@ enabled=true` steht schon als dconf-Standardwert in
   Ansage komplett ausgelassen. **Bei jedem Fehlschlag** (nichts/nichts
   Passendes verstanden, Vosk nicht verfügbar, kein Mikrofon) fällt die
   Funktion auf 100 % zurück - die Ansage darf wegen dieser Zusatzfrage
-  nie ausbleiben oder hängen bleiben. Erkennungslogik mit Piper-
-  synthetisierten Testwörtern verifiziert (alle fünf Optionen korrekt
-  erkannt); ein echter Test mit tatsächlich gesprochener Antwort steht
-  noch aus (siehe TODO.md).
+  nie ausbleiben oder hängen bleiben. Direkt nach der Frage folgt "Und
+  jetzt bitte." als klares Startsignal für die Aufnahme - beim ersten
+  echten Test mit Stephans Stimme fehlte dieses Signal noch, die Antwort
+  wurde verpasst (nur der 100 %-Fallback kam an); mit dem Signal danach
+  erfolgreich getestet (echtes "25" korrekt als 25 % erkannt, über das
+  Bluetooth-Mikrofon inkl. `headset-head-unit`-Profilwechsel).
 - `dialos-tts-indicator.py`: Panel-Icon, das anzeigt, wenn gerade
   gesprochen wird (braucht die AppIndicator-Erweiterung aus Schritt 9).
 

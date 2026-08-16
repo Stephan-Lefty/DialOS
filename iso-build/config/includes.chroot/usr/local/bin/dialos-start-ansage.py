@@ -156,6 +156,10 @@ def frage_lautstaerke():
         subprocess.run(["pactl", "set-default-source", quelle], capture_output=True)
 
     spd_say("Wie laut soll ich sein? Sage 100, 75, 50, 25 oder aus.")
+    # Klares Startsignal direkt vor der Aufnahme - live am 2026-08-14
+    # getestet: ohne dieses Signal wusste der Testnutzer nicht genau,
+    # wann das Aufnahme-Fenster beginnt, und die Antwort wurde verpasst.
+    spd_say("Und jetzt bitte.")
 
     ergebnis = 100
     try:

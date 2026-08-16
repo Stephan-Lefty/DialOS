@@ -14,11 +14,16 @@ what has already been done.
   docs/Debian-zu-DialOS.en.md step 11. First real production use of
   Vosk, recognition logic verified with Piper-synthesized test words
   (all five options recognized correctly).
-- [ ] Run a real test of the volume prompt with an actually spoken
-  answer (so far only verified with Piper-synthesized test words, not a
-  real human voice/microphone) - in particular test via a Bluetooth
-  microphone (AIRHUG or similar) whether the `headset-head-unit`
-  profile switch works reliably there.
+- [x] Ran a real test of the volume prompt with an actually spoken
+  answer (via the Bluetooth microphone, including the
+  `headset-head-unit` profile switch) - done 2026-08-16. Found and
+  fixed a real bug along the way: the first attempt lacked a clear
+  signal for exactly when the 4-second recording window starts -
+  Stephan's spoken answer ("25") was missed, only the 100% safety
+  fallback came through. Fix: `dialos-start-ansage.py` now additionally
+  says "Und jetzt bitte." (And now, please.) right before recording -
+  correctly recognized on the second attempt afterward (a real "25" →
+  25%).
 - [x] Switched the weather location to GeoClue2 instead of IP guessing -
   done 2026-08-14, tested extensively live (see README changelog 0.5.0
   and docs/Debian-zu-DialOS.en.md, step 11, for details). Trigger:

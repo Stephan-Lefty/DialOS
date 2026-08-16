@@ -477,10 +477,13 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
   announcement is skipped entirely. **On any failure** (nothing/nothing
   matching understood, Vosk unavailable, no microphone), the function
   falls back to 100% - the announcement must never be skipped or hang
-  because of this extra question. The recognition logic was verified
-  with Piper-synthesized test words (all five options recognized
-  correctly); a real test with an actually spoken answer is still
-  pending (see TODO.md).
+  because of this extra question. Right after the question, "Und jetzt
+  bitte." (And now, please.) follows as a clear start signal for the
+  recording - the first real test with Stephan's voice didn't have this
+  signal yet, and the answer was missed (only the 100% fallback came
+  through); tested successfully afterward with the signal added (a real
+  "25" correctly recognized as 25%, via the Bluetooth microphone
+  including the `headset-head-unit` profile switch).
 - `dialos-tts-indicator.py`: a panel icon that shows when something is
   currently being spoken (needs the AppIndicator extension from step 9).
 

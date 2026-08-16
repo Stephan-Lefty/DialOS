@@ -14,11 +14,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   docs/Debian-zu-DialOS.md Schritt 11. Erste echte Vosk-Nutzung im
   Betrieb, Erkennungslogik mit Piper-synthetisierten Testwörtern
   verifiziert (alle fünf Optionen korrekt erkannt).
-- [ ] Echten Test der Lautstärke-Abfrage mit tatsächlich gesprochener
-  Antwort durchführen (bisher nur mit Piper-synthetisierten Testwörtern
-  verifiziert, nicht mit echter menschlicher Stimme/Mikrofon) -
-  insbesondere über ein Bluetooth-Mikrofon (AIRHUG o. ä.) testen, ob der
-  `headset-head-unit`-Profilwechsel dabei zuverlässig funktioniert.
+- [x] Echten Test der Lautstärke-Abfrage mit tatsächlich gesprochener
+  Antwort durchgeführt (über das Bluetooth-Mikrofon, inkl.
+  `headset-head-unit`-Profilwechsel) - erledigt 2026-08-16. Dabei einen
+  echten Bug gefunden und behoben: Beim ersten Versuch fehlte ein
+  klares Startsignal, wann genau das 4-Sekunden-Aufnahmefenster
+  beginnt - Stephans gesprochene Antwort ("25") wurde verpasst, nur der
+  100 %-Sicherheits-Fallback kam an. Fix: `dialos-start-ansage.py`
+  sagt jetzt direkt vor der Aufnahme zusätzlich "Und jetzt bitte." -
+  danach im zweiten Versuch korrekt erkannt (echtes "25" → 25 %).
 - [x] Wetter-Standort auf GeoClue2 umgestellt statt IP-geraten - erledigt
   2026-08-14, ausführlich live getestet (siehe README-Änderungsprotokoll
   0.5.0 und docs/Debian-zu-DialOS.md, Schritt 11, für Details). Auslöser:

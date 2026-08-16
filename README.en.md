@@ -264,9 +264,15 @@ background) and `splash.png` (boot/login screen).
   microphone), the function falls back to 100% so the announcement
   never gets skipped or hangs because of this extra question. The
   recognition/mapping logic was verified by having Piper synthetically
-  speak all five options and confirming Vosk recognized them correctly
-  - a real test with an actually spoken answer is still pending per
-  TODO.md.
+  speak all five options and confirming Vosk recognized them correctly.
+  **Update 2026-08-16, real test with Stephan's voice:** found and
+  fixed a real bug along the way - the first attempt lacked a clear
+  signal for exactly when the 4-second recording window starts,
+  Stephan's spoken answer ("25") was missed, only the 100% safety
+  fallback came through. Fix: right before recording, the function now
+  additionally says "Und jetzt bitte." (And now, please.) - correctly
+  recognized on the second attempt afterward (a real spoken "25" → 25%,
+  via the Bluetooth microphone including the profile switch).
 
 ### 0.4.0
 - Removed Evolution and GNOME Calendar from the app grid and search
