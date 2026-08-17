@@ -162,6 +162,26 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   über das Headset-Mikrofon würde die Wiedergabe auf Telefonqualität
   ziehen und das Video schlechter klingen lassen, als das System ist.
 
+- [ ] **Referenz-Audiogerät neu entscheiden - der AIRHUG allein reicht
+  nicht** (offen seit 2026-08-17, Stephans Entscheidung). Gemessen ist:
+  Das Gerät kann nicht gleichzeitig gut klingen und zuhören (A2DP hat
+  `sources: 0`), seine Tasten erreichen den Laptop auf **keinem** Kanal -
+  weder als Tastencode noch als AVRCP-Lautstärke -, und seine Lautstärke
+  ist von GNOME entkoppelt. Damit fällt der Ausweg aus, per Tastendruck
+  kurz auf HFP zu schalten. Drei Möglichkeiten, siehe
+  `docs/hardware.md`: zwei Geräte (Mikrofon dauerhaft in HFP beim
+  Nutzer, Lautsprecher in A2DP), ein anderer Lautsprecher dessen Tasten
+  durchkommen, oder die Auflage dass der Laptop im selben Raum steht.
+
+- [ ] **DialOS kann die Lautstärke des AIRHUG nicht regeln** (offen seit
+  2026-08-17). Weil Gerätelautstärke und Systemlautstärke entkoppelt
+  sind, erreicht kein Softwarebefehl den Verstärker. Dreht jemand das
+  Gerät herunter, bleibt die Ansage leise - und ein blinder Nutzer findet
+  die Ursache nicht, weil sie außerhalb des Systems liegt. Bei einem
+  Gerät, das nur per Sprache bedient wird, ist das ein echter Mangel. Ob
+  das ein Ausschlusskriterium für den AIRHUG ist, gehört zur Entscheidung
+  oben.
+
 - [ ] **Mikrofon-Vergleich vom 2026-08-13 wiederholen.** Damals galt das
   eingebaute Mikrofon als dem AIRHUG deutlich unterlegen. Am 2026-08-16
   stellte sich heraus, dass ab Werk 60 dB Verstärkung anlagen und das

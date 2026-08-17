@@ -107,6 +107,42 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Stephans Reichweiten-Frage entwertet die Mikrofon-Entscheidung von
+  derselben Stunde - und deckt eine Lücke in der Referenz-Hardware auf
+  (2026-08-17).** Seine Frage: Der Laptop steht auf dem Schreibtisch, der
+  Bluetooth-Lautsprecher auf dem Wohnzimmertisch und spielt Radio - wie
+  ändert man von dort die Lautstärke? Über das eingebaute Mikrofon gar
+  nicht. Damit ist die Anforderung klar: **Das Eingabegerät muss dort
+  sein, wo der Nutzer ist; das Ausgabegerät darf überall stehen.**
+  - **Der naheliegende Ausweg wurde geprüft und ist tot:** eine Taste am
+    Lautsprecher als Startsignal, dann kurz HFP, zuhören, zurück. Gemessen
+    auf **zwei getrennten Wegen**, weil einer allein nichts bewiesen
+    hätte. Tastencodes (`/dev/input`): Der AIRHUG meldet sich als
+    Eingabegerät und der Kernel führt Medientasten für ihn auf - gedrückt
+    kommt nichts an, auch nicht während Audio läuft. AVRCP-Lautstärke
+    (ein völlig anderer Kanal, den ein Tastenleser nie sieht): ebenfalls
+    nichts. Stephans Befund dazu: „Die Lautstärke wird nur am Gerät
+    gesteuert, ist aber nicht mit der Lautstärke von GNOME gekoppelt."
+  - **Zwei der drei Testläufe waren wertlos, und beide Male lag es an
+    mir:** Beim ersten ging die Ausgabe im Puffer von `xxd | head`
+    verloren, beim zweiten scheiterte die Wiedergabe, weil das Skript
+    unter `sudo` lief und root keinen Zugriff auf die PipeWire-Sitzung
+    des Benutzers hat („Connection refused"). Erst der dritte Lauf war
+    sauber. Festgehalten, weil beide Fallen bei jedem künftigen
+    Hardware-Test wieder drohen.
+  - **Zweite Folge, unabhängig von der Auslöser-Frage:** Weil die
+    Gerätelautstärke von der Systemlautstärke entkoppelt ist, kann DialOS
+    den Lautsprecher **überhaupt nicht** leiser oder lauter machen. Dreht
+    jemand das Gerät herunter, bleibt die Ansage leise - und ein blinder
+    Nutzer findet die Ursache nicht, weil sie außerhalb des Systems
+    liegt. Bei einem rein sprachgesteuerten Gerät ist das ein echter
+    Mangel.
+  - **Damit steht die Festlegung vom 2026-08-16 („Referenzgerät ist der
+    AIRHUG 01") wieder zur Entscheidung.** Drei Möglichkeiten in
+    `docs/hardware.md`, alle mit ihrem Preis. Bis zur Entscheidung bleibt
+    es beim eingebauten Mikrofon, weil das wenigstens die Ausgabequalität
+    nicht beschädigt.
+
 - **Aufteilung von Ein- und Ausgabe festgelegt und in der Doku
   richtiggestellt (Stephans Nachfrage, 2026-08-17):
   Spracheingabe immer über das eingebaute Mikrofon, Sprachausgabe über

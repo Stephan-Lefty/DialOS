@@ -105,6 +105,40 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Stephan's range question invalidates the microphone decision from the
+  same hour - and exposes a gap in the reference hardware (2026-08-17).**
+  His question: the laptop sits on the desk, the Bluetooth speaker on the
+  living room table playing the radio - how do you change the volume from
+  there? Not via the built-in microphone. That makes the requirement
+  clear: **the input device must be where the user is; the output device
+  can be anywhere.**
+  - **The obvious workaround was tested and is dead:** a button on the
+    speaker as the start signal, then briefly HFP, listen, switch back.
+    Measured along **two separate paths**, because one alone would have
+    proven nothing. Key codes (`/dev/input`): the AIRHUG registers as an
+    input device and the kernel lists media keys for it - pressing them
+    delivers nothing, not even while audio plays. AVRCP volume (an
+    entirely different channel a key reader never sees): nothing either.
+    Stephan's finding: "the volume is controlled only on the device and
+    is not coupled to GNOME's volume."
+  - **Two of the three test runs were worthless, and both times it was my
+    fault:** in the first the output was lost in the buffer of
+    `xxd | head`; in the second playback failed because the script ran
+    under `sudo` and root has no access to the user's PipeWire session
+    ("Connection refused"). Only the third run was clean. Recorded
+    because both traps threaten every future hardware test.
+  - **Second consequence, independent of the trigger question:** because
+    device volume is decoupled from system volume, DialOS **cannot at
+    all** make the speaker louder or quieter. If someone turns the device
+    down, the announcement stays quiet - and a blind user cannot find the
+    cause, because it lies outside the system. On a purely voice-operated
+    device that is a real deficiency.
+  - **This puts the decision of 2026-08-16 ("the reference device is the
+    AIRHUG 01") back on the table.** Three options in
+    `docs/hardware.en.md`, each with its price. Until a decision, the
+    built-in microphone stays, because it at least does not damage output
+    quality.
+
 - **Split between input and output settled and corrected in the docs
   (Stephan's question, 2026-08-17): speech input always via the built-in
   microphone, speech output via the Bluetooth speaker whenever

@@ -59,6 +59,73 @@ Bluetooth-Standardprofile lässt sich das nicht fernsteuern, es ist rein
 geräteabhängig – bei einem System für blinde Nutzer aber nicht
 nebensächlich, weil diese Ansagen der Nutzer zwangsläufig mithört.
 
+## Reichweite und Tasten: warum ein Gerät nicht reicht
+
+**Erkannt am 2026-08-17 durch Stephans Frage:** Der Laptop steht auf dem
+Schreibtisch, der Bluetooth-Lautsprecher auf dem Wohnzimmertisch und
+spielt Radio - wie ändert der Nutzer von dort die Lautstärke? Über das
+eingebaute Mikrofon des Laptops gar nicht.
+
+Das ist keine Feinheit, sondern trifft den vorgesehenen Regelfall.
+Daraus folgt die Anforderung: **Das Eingabegerät muss dort sein, wo der
+Nutzer ist. Das Ausgabegerät darf überall stehen.**
+
+### Was der AIRHUG 01 kann - und was nicht
+
+| | |
+|---|---|
+| A2DP (gute Wiedergabe) | `sources: 0` - **kein Mikrofon** |
+| HFP (Mikrofon verfügbar) | Wiedergabe fällt auf 1 Kanal / 16000 Hz |
+| Tasten am Gerät | erreichen den Laptop **nicht** |
+| Lautstärketasten | regeln **nur den eigenen Verstärker**, nicht GNOME |
+
+Die ersten beiden Zeilen sind eine Eigenschaft von Bluetooth, keine
+Konfigurationsfrage: Das Gerät kann nicht gleichzeitig gut klingen und
+zuhören.
+
+Die dritte und vierte Zeile sind am 2026-08-17 gemessen worden, auf zwei
+**getrennten Wegen**, weil der erste allein nichts bewiesen hätte:
+
+- **Tastencodes** (`/dev/input`): Der AIRHUG meldet sich als
+  Eingabegerät („AIRHUG 01 (AVRCP)") und der Kernel führt Medientasten
+  für ihn auf - gedrückt kommt aber **nichts** an, auch nicht während
+  Audio läuft. In drei Durchgängen geprüft; die ersten beiden waren
+  wertlos (einmal ging die Ausgabe im Puffer verloren, einmal scheiterte
+  die Wiedergabe unter `sudo` an der PipeWire-Sitzung).
+- **AVRCP-Lautstärke** (Senken-Lautstärke in PipeWire): Ein Lautsprecher
+  kann seine Lautstärketasten auch auf diesem ganz anderen Kanal
+  schicken, den ein Tastenleser prinzipiell nie sieht. Auch dort kommt
+  nichts an - Stephans Beobachtung: „Die Lautstärke wird nur am Gerät
+  gesteuert, ist aber nicht mit der Lautstärke von GNOME gekoppelt."
+
+**Damit fällt die naheliegende Lösung aus**, per Tastendruck am
+Lautsprecher kurz auf HFP zu schalten, zuzuhören und zurückzuschalten.
+
+### Zweite Folge: DialOS kann den Lautsprecher nicht leiser oder lauter machen
+
+Weil die Gerätelautstärke von der Systemlautstärke entkoppelt ist,
+erreicht **kein** Softwarebefehl den Verstärker des AIRHUG. Die
+Lautstärke-Frage der Start-Ansage regelt nur die Software-Seite. Hat
+jemand das Gerät am Rad heruntergedreht, bleibt die Ansage leise - und
+ein blinder Nutzer findet die Ursache nicht, weil sie außerhalb des
+Systems liegt. Für ein Gerät, das ausschließlich per Sprache bedient
+wird, ist das ein echter Mangel.
+
+### Was bleibt
+
+- **Zwei Geräte:** ein Mikrofon, das dauerhaft in HFP beim Nutzer bleibt,
+  und getrennt davon der Lautsprecher in A2DP. Löst die Reichweite und
+  die Qualität, kostet ein Gerät mehr zum Laden und Koppeln.
+- **Anderer Lautsprecher**, dessen Tasten und Lautstärke den Rechner
+  erreichen. Das ist eine Geräte-Eigenschaft, keine Bluetooth-Grenze -
+  andere Freisprecheinrichtungen können beides.
+- **Nur eingebautes Mikrofon** und die Auflage, dass der Laptop im selben
+  Raum steht. Widerspricht dem Regelfall.
+
+**Offen - Stephans Entscheidung** (siehe [../TODO.md](../TODO.md)). Bis
+dahin bleibt es beim eingebauten Mikrofon, weil das wenigstens die
+Ausgabequalität nicht beschädigt.
+
 ## Aktuelle Test-Hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – kein WWAN-/LTE-Modul verbaut.

@@ -161,6 +161,25 @@ what has already been done.
   microphone would drag playback down to phone quality and make the video
   sound worse than the system actually is.
 
+- [ ] **Re-decide the reference audio device - the AIRHUG alone is not
+  enough** (open since 2026-08-17, Stephan's decision). What is measured:
+  the device cannot sound good and listen at the same time (A2DP has
+  `sources: 0`), its buttons reach the laptop on **neither** channel -
+  not as key codes, not as AVRCP volume - and its volume is decoupled
+  from GNOME. That rules out the workaround of briefly switching to HFP
+  by button. Three options, see `docs/hardware.en.md`: two devices
+  (microphone permanently in HFP with the user, speaker in A2DP), a
+  different speaker whose buttons get through, or the requirement that
+  the laptop be in the same room.
+
+- [ ] **DialOS cannot control the AIRHUG's volume** (open since
+  2026-08-17). Because device volume and system volume are decoupled, no
+  software command reaches the amplifier. If someone turns the device
+  down, the announcement stays quiet - and a blind user cannot find the
+  cause, because it lies outside the system. For a device operated solely
+  by voice, that is a real deficiency. Whether this disqualifies the
+  AIRHUG belongs to the decision above.
+
 - [ ] **Repeat the microphone comparison of 2026-08-13.** Back then the
   built-in microphone was judged clearly inferior to the AIRHUG. On
   2026-08-16 it turned out that 60 dB of gain were applied out of the box

@@ -57,6 +57,71 @@ offer no remote control over this, it is purely device-dependent – but
 not a side issue on a system for blind users, since they necessarily hear
 those prompts.
 
+## Range and buttons: why one device is not enough
+
+**Recognized on 2026-08-17 through Stephan's question:** the laptop sits
+on the desk, the Bluetooth speaker on the living room table playing the
+radio - how does the user change the volume from there? Not via the
+laptop's built-in microphone.
+
+This is not a detail but hits the intended normal case. Hence the
+requirement: **the input device must be where the user is. The output
+device can be anywhere.**
+
+### What the AIRHUG 01 can do - and what it cannot
+
+| | |
+|---|---|
+| A2DP (good playback) | `sources: 0` - **no microphone** |
+| HFP (microphone available) | playback drops to 1 channel / 16000 Hz |
+| Buttons on the device | do **not** reach the laptop |
+| Volume buttons | control **only its own amplifier**, not GNOME |
+
+The first two rows are a property of Bluetooth, not a configuration
+question: the device cannot sound good and listen at the same time.
+
+Rows three and four were measured on 2026-08-17 along two **separate**
+paths, because the first alone would have proven nothing:
+
+- **Key codes** (`/dev/input`): the AIRHUG registers as an input device
+  ("AIRHUG 01 (AVRCP)") and the kernel lists media keys for it - but
+  pressing them delivers **nothing**, not even while audio plays. Checked
+  in three runs; the first two were worthless (once the output was lost
+  in a buffer, once playback failed under `sudo` because root has no
+  access to the user's PipeWire session).
+- **AVRCP volume** (sink volume in PipeWire): a speaker can also send its
+  volume buttons over this entirely different channel, which a key reader
+  never sees. Nothing arrives there either - Stephan's observation: "the
+  volume is controlled only on the device and is not coupled to GNOME's
+  volume."
+
+**That rules out the obvious solution** of briefly switching to HFP by
+pressing a button on the speaker, listening, and switching back.
+
+### Second consequence: DialOS cannot make the speaker louder or quieter
+
+Because the device volume is decoupled from the system volume, **no**
+software command reaches the AIRHUG's amplifier. The volume question in
+the login announcement only controls the software side. If someone has
+turned the device down physically, the announcement stays quiet - and a
+blind user cannot find the cause, because it lies outside the system. For
+a device operated solely by voice, that is a real deficiency.
+
+### What remains
+
+- **Two devices:** a microphone that stays permanently in HFP with the
+  user, and separately the speaker in A2DP. Solves range and quality, at
+  the cost of one more device to charge and pair.
+- **A different speaker** whose buttons and volume do reach the computer.
+  That is a device property, not a Bluetooth limit - other speakerphones
+  manage both.
+- **Built-in microphone only**, with the requirement that the laptop is
+  in the same room. Contradicts the normal case.
+
+**Open - Stephan's decision** (see [../TODO.en.md](../TODO.en.md)). Until
+then the built-in microphone stays, because it at least does not damage
+output quality.
+
 ## Current test hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – no WWAN/LTE module fitted.
