@@ -89,6 +89,28 @@ what has already been done.
   after opening the recording, and re-adjusts on sustained clipping.
   Tested by deliberately turning it back up.
 
+- [ ] **Prevent false triggers from played-back content** (open since
+  2026-08-17, serious). The safeguard against self-triggering only covers
+  `dialos-say.py`, because only that script sets the marker. Everything
+  else the device plays - radio, music, media libraries, a WAV played via
+  `paplay` - is heard by the voice service, and the restricted grammar
+  forces fragments into a command. It occurred live while playing back
+  the login announcement. For a system meant to play radio and music this
+  is not an edge case: a newsreader saying "Windows" switches the
+  desktop. Two possible routes: **echo cancellation** (PipeWire ships
+  `module-echo-cancel`, which subtracts the speaker signal from the
+  microphone) or the **wake word** that is pending anyway. The marker file
+  cannot solve it in principle.
+
+- [ ] **Check pauses between the sentences of the announcement** (open
+  since 2026-08-17). Michael sounded "hectic", yet the tempo chosen was
+  faster - which suggests the missing breaths between sentences are the
+  real problem, not the speed. Piper strings sentences together almost
+  without a pause. A short pause per sentence end, centrally in
+  `dialos-say.py`, would calm the announcement without making individual
+  words drag. Build a listening sample first: same tempo, only with
+  pauses.
+
 - [ ] **Build the wake word with openWakeWord** (decided 2026-08-17).
   The Vosk grammar is ruled out - it forces every utterance into the
   nearest phrase, which is why "ich rufe michael an" came through as

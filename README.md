@@ -107,6 +107,33 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Michael spricht jetzt etwas zügiger: `GenericRateMultiply` von 0.85
+  auf 0.88 (Stephan, 2026-08-17, im Hörvergleich ausgewählt).** Verglichen
+  wurden 0.72, 0.78, 0.85, 0.88 und 0.90 am selben Satz. Der Wert wirkt in
+  der sox-Kette des Piper-Moduls und damit auf **jede** Sprachausgabe,
+  nicht nur auf die Start-Ansage.
+  - **Nebenbei eine offene Frage:** Zuerst hieß es, Michael klinge
+    „hektisch" - gewählt wurde dann ein *schnellerer* Wert. Das spricht
+    dafür, dass nicht das Tempo das Problem war, sondern die **fehlenden
+    Pausen zwischen den Sätzen**: Piper hängt sie fast atemlos aneinander,
+    was bei einer achtsätzigen Ansage gehetzt wirkt, obwohl jedes
+    einzelne Wort normal schnell kommt. Langsamer sprechen macht es dann
+    zäh statt ruhig. Steht als Vorschlag in TODO.md.
+- **Ernster Fund beim Vorspielen der Ansage: Der Schutz gegen
+  Selbst-Auslösung greift nur bei `dialos-say.py` (2026-08-17).** Beim
+  Abspielen einer WAV-Datei mit `paplay` - also an `dialos-say.py` vorbei
+  - schaltete der Sprachdienst mitten in der Wiedergabe den Desktop um.
+  Grund: Nur `dialos-say.py` setzt die Markierung „das System spricht
+  gerade". Der Dienst hörte also 23 Sekunden lang dem Lautsprecher zu,
+  und die eingeschränkte Grammatik presste Bruchstücke in einen Befehl.
+  **Das ist derselbe Mechanismus wie beim Selbst-Auslöser vom selben Tag,
+  aber deutlich breiter:** Betroffen ist alles, was das Gerät abspielt -
+  und DialOS soll Radio, Musik und Mediatheken abspielen. Ein
+  Nachrichtensprecher, der „Windows" sagt, würde den Schreibtisch
+  umstellen. Die Markierungsdatei reicht dafür prinzipiell nicht; nötig
+  ist Echo-Unterdrückung (PipeWire bringt ein Modul mit) oder das
+  ohnehin anstehende Aufweckwort. In TODO.md aufgenommen.
+
 - **Aufnahme von Vorführvideos eingerichtet und belegt (2026-08-17).**
   OBS mit **drei getrennten Tonspuren**: Spur 2 die DialOS-Stimme als
   Mitschnitt der Ausgabe, Spur 3 das Mikrofon, Spur 1 beides gemischt als

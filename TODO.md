@@ -90,6 +90,29 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   anhaltender Übersteuerung nach. Getestet durch absichtliches
   Hochdrehen.
 
+- [ ] **Fehlauslösung durch abgespielte Inhalte verhindern** (offen seit
+  2026-08-17, ernst). Der Schutz gegen Selbst-Auslösung greift nur bei
+  `dialos-say.py`, weil nur dieses Skript die Markierung setzt. Alles
+  andere, was das Gerät abspielt - Radio, Musik, Mediathek, ein per
+  `paplay` abgespieltes WAV - hört der Sprachdienst mit, und die
+  eingeschränkte Grammatik presst Bruchstücke in einen Befehl. Live
+  aufgetreten beim Vorspielen der Start-Ansage. Für ein System, das
+  Radio und Musik abspielen soll, ist das kein Randfall: Ein
+  Nachrichtensprecher, der „Windows" sagt, stellt den Schreibtisch um.
+  Zwei mögliche Wege: **Echo-Unterdrückung** (PipeWire bringt
+  `module-echo-cancel` mit - rechnet das Lautsprechersignal aus dem
+  Mikrofon heraus) oder das **Aufweckwort**, das ohnehin ansteht. Die
+  Markierungsdatei allein kann es prinzipiell nicht lösen.
+
+- [ ] **Pausen zwischen den Sätzen der Ansage prüfen** (offen seit
+  2026-08-17). Michael klang „hektisch", gewählt wurde dann aber ein
+  schnelleres Tempo - das spricht dafür, dass die fehlenden Atempausen
+  zwischen den Sätzen das eigentliche Problem sind, nicht die
+  Geschwindigkeit. Piper hängt Sätze fast ohne Pause aneinander. Eine
+  kurze Pause je Satzende, zentral in `dialos-say.py`, würde die Ansage
+  ruhiger machen, ohne einzelne Wörter schleppen zu lassen. Vorher eine
+  Hörprobe bauen: gleiches Tempo, nur mit Pausen.
+
 - [ ] **Aufweckwort mit openWakeWord bauen** (entschieden 2026-08-17).
   Die Vosk-Grammatik scheidet aus - sie presst jede Äußerung in die
   nächstliegende Phrase, weshalb "ich rufe michael an" als `hallo

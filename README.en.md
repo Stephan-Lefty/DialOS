@@ -105,6 +105,33 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Michael now speaks a little brisker: `GenericRateMultiply` from 0.85
+  to 0.88 (Stephan, 2026-08-17, chosen by listening comparison).** 0.72,
+  0.78, 0.85, 0.88 and 0.90 were compared on the same sentence. The value
+  acts in the Piper module's sox chain and therefore affects **every**
+  speech output, not just the login announcement.
+  - **An open question on the side:** the initial complaint was that
+    Michael sounded "hectic" - yet the value chosen was *faster*. That
+    suggests the problem was not the tempo but the **missing pauses
+    between sentences**: Piper strings them together almost without
+    breath, which feels rushed across an eight-sentence announcement even
+    though each individual word arrives at normal speed. Speaking more
+    slowly then makes it sluggish rather than calm. Noted as a proposal
+    in TODO.en.md.
+- **A serious finding while playing the announcement back: the safeguard
+  against self-triggering only covers `dialos-say.py` (2026-08-17).**
+  Playing a WAV file with `paplay` - i.e. bypassing `dialos-say.py` - made
+  the voice service switch the desktop mid-playback. The reason: only
+  `dialos-say.py` sets the "the system is speaking" marker. So the service
+  listened to the speaker for 23 seconds, and the restricted grammar
+  forced fragments into a command. **This is the same mechanism as the
+  self-trigger from the same day, but considerably broader:** it affects
+  anything the device plays - and DialOS is meant to play radio, music
+  and media libraries. A newsreader saying "Windows" would switch the
+  desktop. The marker file cannot cover that in principle; what is needed
+  is echo cancellation (PipeWire ships a module) or the wake word that is
+  pending anyway. Added to TODO.en.md.
+
 - **Demo video recording set up and proven (2026-08-17).** OBS with
   **three separate audio tracks**: track 2 the DialOS voice as a capture
   of the output, track 3 the microphone, track 1 both mixed as a
