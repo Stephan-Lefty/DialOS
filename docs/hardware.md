@@ -78,7 +78,7 @@ Nutzer ist. Das Ausgabegerät darf überall stehen.**
 | HFP (Mikrofon verfügbar) | Wiedergabe fällt auf 1 Kanal / 16000 Hz |
 | Tasten am Gerät | erreichen den Laptop **nicht** |
 | Lautstärketasten am Gerät | melden sich **nicht** am Rechner |
-| Lautstärke **vom Rechner** setzen | funktioniert (am 2026-08-17 bei 10 % gegen 100 % gehört) |
+| Lautstärke **vom Rechner** setzen | funktioniert (2026-08-17 zweimal geprüft, zuletzt mit dem Gerät auf 100 %) |
 
 Die ersten beiden Zeilen sind eine Eigenschaft von Bluetooth, keine
 Konfigurationsfrage: Das Gerät kann nicht gleichzeitig gut klingen und
@@ -111,7 +111,10 @@ Nachgemessen im Hörvergleich:
 
 - **Rechner → Gerät: funktioniert.** Bei 10 % gegen 100 % ist der
   Unterschied unüberhörbar. Ein Sprachbefehl „mach lauter" ist also
-  umsetzbar.
+  umsetzbar. **Zweimal geprüft**, beim zweiten Mal mit dem Gerät
+  ausdrücklich auf 100 % und im Wechsel leise-laut-leise-laut - der
+  erste Durchgang hätte sonst daran leiden können, dass das Gerät selbst
+  leise stand.
 - **Gerät → Rechner: funktioniert nicht.** Drückt jemand am AIRHUG Plus
   oder Minus, erfährt der Rechner nichts davon.
 

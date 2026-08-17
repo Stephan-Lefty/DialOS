@@ -76,7 +76,7 @@ device can be anywhere.**
 | HFP (microphone available) | playback drops to 1 channel / 16000 Hz |
 | Buttons on the device | do **not** reach the laptop |
 | Volume buttons on the device | do **not** report back to the computer |
-| Setting the volume **from the computer** | works (heard on 2026-08-17, 10 % vs. 100 %) |
+| Setting the volume **from the computer** | works (checked twice on 2026-08-17, the second time with the device at 100 %) |
 
 The first two rows are a property of Bluetooth, not a configuration
 question: the device cannot sound good and listen at the same time.
@@ -106,7 +106,10 @@ control the speaker at all. That was an overstatement, based on my not
 separating "not coupled" by direction. Re-measured by ear:
 
 - **Computer → device: works.** Between 10 % and 100 % the difference is
-  unmistakable. A voice command "louder" is therefore feasible.
+  unmistakable. A voice command "louder" is therefore feasible. **Checked
+  twice**, the second time with the device explicitly at 100 % and
+  alternating quiet-loud-quiet-loud - otherwise the first run could have
+  suffered from the device itself being turned down.
 - **Device → computer: does not work.** If someone presses plus or minus
   on the AIRHUG, the computer learns nothing about it.
 
