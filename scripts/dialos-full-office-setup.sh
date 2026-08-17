@@ -361,6 +361,15 @@ schritt_11_sprachausgabe() {
   sudo systemctl daemon-reload
   sudo systemctl enable --now dialos-mikrofon-pegel.service
 
+  # Echo-Unterdrueckung fuer das Mikrofon. MUSS vor dem Sprachbefehl
+  # kommen: Ohne sie hoert der Dienst alles mit, was das Geraet abspielt
+  # (eigene Ansage, Radio, Mediathek) und schaltet dadurch von selbst um.
+  # Gemessen am 2026-08-17: 6,13 % Pegel roh gegenueber 0,15 % bereinigt.
+  sudo mkdir -p /etc/pipewire/pipewire.conf.d
+  sudo cp iso-build/config/includes.chroot/etc/pipewire/pipewire.conf.d/99-dialos-echo-unterdrueckung.conf /etc/pipewire/pipewire.conf.d/
+  sudo chmod 644 /etc/pipewire/pipewire.conf.d/99-dialos-echo-unterdrueckung.conf
+  systemctl --user restart pipewire pipewire-pulse wireplumber 2>/dev/null || true
+
   # Sprachbefehl "auf Linux/Windows umschalten" - der erste dauerhaft
   # lauschende Dienst in DialOS. Braucht Vosk aus Schritt 15; fehlt es,
   # beendet sich der Dienst mit einer Meldung, statt die Anmeldung

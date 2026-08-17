@@ -978,6 +978,63 @@ anlagen, hat der Test nicht das Mikrofon gemessen, sondern die
 Übersteuerung. Der Vergleich gehört wiederholt, bevor die
 Bluetooth-Priorität als bewiesen gilt (siehe TODO.md).
 
+### 11f. Echo-Unterdrückung fürs Mikrofon (neu 2026-08-17)
+
+**Ohne sie hört der Sprachbefehl-Dienst alles mit, was das Gerät
+abspielt** - die eigene Ansage ebenso wie Radio, Musik oder eine
+Mediathek. Weil die Erkennung mit einer eingeschränkten Grammatik
+arbeitet, presst sie Bruchstücke davon in einen Befehl: Beim Vorspielen
+der Start-Ansage schaltete sich der Desktop mitten in der Wiedergabe um.
+Für ein System, das Radio und Musik abspielen soll, ist das kein
+Randfall - ein Nachrichtensprecher, der „Windows" sagt, würde denselben
+Effekt auslösen.
+
+Der frühere Schutz (Markierungsdatei „das System spricht gerade") kann
+das prinzipiell nicht lösen: Er kennt nur die eigene Ansage über
+`dialos-say.py`. Deshalb setzt die Lösung eine Stufe tiefer an, in der
+Audiokette.
+
+`/etc/pipewire/pipewire.conf.d/99-dialos-echo-unterdrueckung.conf` lädt
+PipeWires `module-echo-cancel` mit dem WebRTC-Algorithmus und stellt eine
+bereinigte Quelle **`dialos_mikrofon_ohne_echo`** bereit.
+`dialos-sprachbefehl-desktop.py` nimmt sie als erste Wahl.
+
+**Gemessen am 2026-08-17**, beide Quellen gleichzeitig aufgenommen,
+während der Lautsprecher die Start-Ansage abspielte:
+
+| Quelle | Pegel |
+|---|---|
+| rohes Mikrofon | 6,13 % RMS |
+| `dialos_mikrofon_ohne_echo` | **0,15 % RMS** |
+
+Das sind rund **32 dB** Dämpfung - und zwar über Bluetooth, wo wegen der
+schwankenden Laufzeit deutlich weniger zu erwarten gewesen wäre.
+Gegenprobe: dieselbe Ansage per `paplay` abgespielt, also ohne jeden
+Schutz - der Dienst erkannte **nichts** und schaltete nicht um.
+
+Zwei Entscheidungen in der Konfiguration:
+
+- **`monitor.mode = true`.** Ohne diese Option müssten alle Programme
+  ihren Ton in eine eigens angelegte Senke spielen, damit das Modul
+  weiß, was gerade zu hören ist - jede Audio-Ausgabe von DialOS wäre
+  umzubiegen, und jedes neue Programm müsste daran denken. Mit
+  `monitor.mode` nimmt das Modul den Mitschnitt der Ausgabe als Referenz.
+  Nichts muss umgeleitet werden.
+- **Kein `node.target` bei `playback.props`.** So folgt die Referenz
+  automatisch der Standard-Ausgabe; wechselt der Nutzer vom
+  Bluetooth-Lautsprecher auf die eingebauten, greift die Unterdrückung
+  weiter.
+
+**Falle beim Einrichten:** Der Neustart von PipeWire wirft das
+Bluetooth-Gerät in HFP zurück, und die Karte bietet danach **gar kein
+A2DP mehr an** - `pactl set-card-profile ... a2dp-sink` scheitert mit
+„No such entity". Das Profil taucht erst nach einem erneuten Verbinden
+wieder auf:
+
+```bash
+bluetoothctl disconnect <MAC> && sleep 3 && bluetoothctl connect <MAC>
+```
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

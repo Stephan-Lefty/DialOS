@@ -114,9 +114,10 @@ im [README.md-Änderungsprotokoll](README.md#änderungsprotokoll).
 > Nummer erfinden, weil viel dazugekommen ist, und nicht auf eine
 > abgeschlossene zurückfallen. Sagt Stephan eine neue Nummer an: neuen
 > Abschnitt oben anlegen, diese Zeile hier auf die neue Nummer ändern,
-> danach dort weiterschreiben. Von den
-alten ISOs sind am 2026-08-16 acht gelöscht worden (~59 GB); übrig ist
-nur `DialOS-Live-0.5.1-clone.iso`, bis Stephans erstes
+> danach dort weiterschreiben.
+
+Von den alten ISOs sind am 2026-08-16 acht gelöscht worden (~59 GB);
+übrig ist nur `DialOS-Live-0.5.1-clone.iso`, bis Stephans erstes
 Rescuezilla-Abbild existiert - siehe `docs/iso-builds.md`.
 
 **Grundlegende Sicherheits-Architektur seit 14./15.08. neu** (löst den

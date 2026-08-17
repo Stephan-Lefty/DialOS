@@ -105,6 +105,53 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Echo cancellation built - this fixes this morning's fault at the root
+  (2026-08-17).** PipeWire's `module-echo-cancel` with the WebRTC
+  algorithm subtracts the speaker signal from the microphone and provides
+  the source `dialos_mikrofon_ohne_echo`; the voice-command service takes
+  it as first choice. **Measured** with both sources recorded
+  simultaneously while the speaker played the login announcement: raw
+  microphone 6.13 % RMS versus 0.15 % on the cleaned source - about
+  **32 dB** of attenuation, over Bluetooth, where far less was to be
+  expected given the variable latency. **Control test with exactly the
+  case that failed before:** the same 23-second announcement played via
+  `paplay`, i.e. with no safeguard at all - the service recognized
+  nothing and did not switch.
+  - **`monitor.mode = true`** is the decisive setting: without it every
+    program would have to play its audio into a dedicated sink so the
+    module knows what is currently audible. Every audio output in DialOS
+    would need rerouting, and every new program would have to remember.
+    This way the output's monitor serves as the reference and nothing
+    needs rerouting.
+  - **A trap during setup, hit twice:** restarting PipeWire throws the
+    Bluetooth device back into HFP, and the card then offers **no A2DP at
+    all** - `pactl set-card-profile` fails with "No such entity". Only a
+    `bluetoothctl disconnect`/`connect` brings the profile back.
+    Documented in the recipe.
+- **Wake phrase decided: "Sprachsteuerung starten" / "Sprachsteuerung
+  stoppen" (Stephan's proposal, 2026-08-17).** Not a wake word before
+  every command but a **switch**. The proposal is measurably better than
+  my suggestion of using the assistant's name: "ich rufe michael an"
+  previously came through as `hallo michael` with full confidence; here
+  all three distractors stay quiet - "die **sprachsteuerung** von dialos
+  ist praktisch" becomes `sprachsteuerung [unk]`, "kannst du das
+  **starten**" becomes `starten`, "wir müssen das mal **stoppen**"
+  becomes `stoppen stoppen`. Two specific words in direct succession
+  barely occur in conversation, and neither on its own triggers anything.
+  That leaves open whether openWakeWord is needed at all - **not proof
+  yet**, tested with a synthetic voice and three distractors. The switch
+  itself is not built; it is in TODO.en.md and
+  [docs/sprachbefehle.en.md](docs/sprachbefehle.en.md).
+- **Pronunciation: "Tastatur" sounded like "Taschtatur" (Stephan,
+  2026-08-17).** German pronounces "st" at the start of a syllable as
+  "scht", and Piper puts the syllable boundary at "Ta-statur". Fixed via
+  the central pronunciation point in `dialos-say.py`: "Tas tatur", picked
+  by Stephan from five spellings by ear. On that occasion the rules were
+  converted from a single replacement to a **list** - a second one had
+  arrived, and more will follow. Each rule now carries its rationale in
+  the code; without it such a spelling later looks like a typo and gets
+  "corrected".
+
 - **Michael now speaks a little brisker: `GenericRateMultiply` from 0.85
   to 0.88 (Stephan, 2026-08-17, chosen by listening comparison).** 0.72,
   0.78, 0.85, 0.88 and 0.90 were compared on the same sentence. The value

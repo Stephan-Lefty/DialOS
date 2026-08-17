@@ -154,12 +154,26 @@ def sprich(text):
         print(text)
 
 
-def waehle_mikrofon():
-    """Eingebautes Mikrofon bevorzugt - Begruendung siehe Punkt 2 oben.
+ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
 
-    Ist keines da (Geraet ohne eingebautes Mikrofon), wird als letzter
-    Ausweg doch eine Bluetooth-Quelle genommen: schlechtere Wiedergabe
-    ist immer noch besser als ein Geraet, das gar nicht zuhoert.
+
+def waehle_mikrofon():
+    """Reihenfolge: Echo-bereinigte Quelle, sonst eingebaut, zuletzt Bluetooth.
+
+    ERSTE WAHL ist seit 2026-08-17 die Quelle ohne Echo (PipeWire-Modul
+    module-echo-cancel, eingerichtet in
+    /etc/pipewire/pipewire.conf.d/99-dialos-echo-unterdrueckung.conf). Sie
+    rechnet das Lautsprechersignal aus dem Mikrofon heraus. Ohne sie hoert
+    der Dienst alles mit, was das Geraet abspielt - die eigene Ansage
+    ebenso wie Radio oder Mediathek - und die eingeschraenkte Grammatik
+    presst Bruchstuecke davon in einen Befehl. Gemessen am selben Tag:
+    waehrend der Lautsprecher sprach, 6,13 % Pegel am rohen Mikrofon
+    gegenueber 0,15 % an der bereinigten Quelle, also rund 32 dB weniger.
+
+    ZWEITE WAHL das eingebaute Mikrofon - Begruendung siehe Punkt 2 oben.
+
+    LETZTE WAHL eine Bluetooth-Quelle: schlechtere Wiedergabe ist immer
+    noch besser als ein Geraet, das gar nicht zuhoert.
     """
     try:
         roh = subprocess.run(
@@ -171,6 +185,8 @@ def waehle_mikrofon():
         return None
     namen = [q.get("name", "") for q in quellen
              if q.get("name") and not q["name"].endswith(".monitor")]
+    if ECHO_QUELLE in namen:
+        return ECHO_QUELLE
     eingebaut = [n for n in namen if not n.startswith("bluez_input.")]
     if eingebaut:
         return eingebaut[0]

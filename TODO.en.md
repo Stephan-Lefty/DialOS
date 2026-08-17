@@ -89,8 +89,27 @@ what has already been done.
   after opening the recording, and re-adjusts on sustained clipping.
   Tested by deliberately turning it back up.
 
-- [ ] **Prevent false triggers from played-back content** (open since
-  2026-08-17, serious). The safeguard against self-triggering only covers
+- [x] **False triggers from played-back content fixed (2026-08-17).**
+  Echo cancellation via PipeWire's `module-echo-cancel` set up, 32 dB of
+  attenuation measured, and the case that failed before (announcement
+  played via `paplay`) no longer triggers anything. Details in the
+  changelog and in `docs/Debian-zu-DialOS.en.md`, step 11f.
+
+- [ ] **Build the "Sprachsteuerung starten/stoppen" switch** (decided
+  2026-08-17, not built yet). Until "starten", DialOS listens for that
+  one sentence only; afterwards it accepts commands until "stoppen".
+  Recognition is already measured as reliable with three distractors
+  staying quiet - what is open is the state itself: where is it
+  remembered (a file, like the desktop style?), what happens at login (on
+  or off?), and **how does a blind user find out which state they are
+  in**? Without an answer to that, the switch is more dangerous than no
+  switch: anyone who doesn't know recognition is off will think the
+  device is broken.
+
+- [ ] **Previous description of this item (for traceability):** the
+  safeguard against self-triggering only covered `dialos-say.py`;
+  everything else the device played was heard by the service. Superseded
+  by echo cancellation, see above. The safeguard against self-triggering only covers
   `dialos-say.py`, because only that script sets the marker. Everything
   else the device plays - radio, music, media libraries, a WAV played via
   `paplay` - is heard by the voice service, and the restricted grammar
@@ -110,6 +129,19 @@ what has already been done.
   `dialos-say.py`, would calm the announcement without making individual
   words drag. Build a listening sample first: same tempo, only with
   pauses.
+
+- [ ] **Distinguish announcements: question or hint?** (Stephan's
+  question of 2026-08-17). Today the system knows implicitly - the code
+  decides what gets said - but never passes it on: `dialos-say.py`
+  receives a text and speaks it. More important than the system knowing
+  is that **the user recognizes a question as a question**: for someone
+  who cannot see the screen, "is it waiting for me?" is the decisive
+  information. On 2026-08-16 the first test of the volume prompt failed
+  on exactly this - the system asked, Stephan didn't know when. The
+  stopgap was the sentence "Und jetzt bitte.". The clean solution: give
+  speech output a kind (hint/question), and on a question automatically
+  emit a short, always identical signal. A **tone** would serve better
+  than a sentence - faster, unmistakable, and it doesn't wear out.
 
 - [ ] **Build the wake word with openWakeWord** (decided 2026-08-17).
   The Vosk grammar is ruled out - it forces every utterance into the

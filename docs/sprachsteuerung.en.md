@@ -117,14 +117,35 @@ real probability instead of a forced match -
 [openWakeWord](https://github.com/dscripka/openWakeWord) was already
 suggested above and remains the candidate.
 
-**On the wording itself, independent of the technology: the assistant's
-name.** So "Hallo Michael", or "Hallo Anna" with a female voice. Two
-reasons: two words fire accidentally far less often than one, and the
-name is already established - the user picks their voice **by name**
+**Decided on 2026-08-17: "Sprachsteuerung starten" and
+"Sprachsteuerung stoppen"** (Stephan's proposal). This is not a wake word
+before every command but a **switch**: until "starten", DialOS listens
+for that one sentence only; afterwards it accepts commands until
+"stoppen" arrives.
+
+In the same test the proposal proved **clearly better than the
+assistant's name**:
+
+| said | recognized | |
+|---|---|---|
+| "sprachsteuerung starten" | `sprachsteuerung starten` | fires |
+| "sprachsteuerung stoppen" | `sprachsteuerung stoppen` | fires |
+| "die **sprachsteuerung** von dialos ist praktisch" | `sprachsteuerung [unk]` | quiet |
+| "kannst du das **starten**" | `starten` | quiet |
+| "wir müssen das mal **stoppen**" | `stoppen stoppen` | quiet |
+
+Where "Hallo Michael" failed on the distractor, the `[unk]` catch-all
+holds up cleanly here: two specific words in direct succession barely
+occur in conversation, and neither on its own triggers anything. That
+leaves open whether openWakeWord is needed at all - **this is not proof
+yet**, it was tested with a synthetic voice and three distractors, not
+with real conversation over time.
+
+The earlier proposal of using the assistant's name stays noted as a
+fallback: it would come from the same setting as the voice selection
 during first-run setup (see
 [ersteinrichtung.en.md](ersteinrichtung.en.md): Michael, Daniel, Anna,
-Julia). The wake word would therefore come from the same setting as the
-voice, with no second value to maintain anywhere.
+Julia).
 
 **What a wake word does NOT solve:** the microphone indicator in the top
 bar stays on. To hear the wake word, listening must continue - so the

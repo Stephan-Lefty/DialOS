@@ -148,14 +148,34 @@ echte Wahrscheinlichkeit liefert statt eines erzwungenen Treffers -
 [openWakeWord](https://github.com/dscripka/openWakeWord) stand oben schon
 als Vorschlag und bleibt es.
 
-**Zur Wortwahl, unabhängig von der Technik: der Name des Assistenten.**
-Also „Hallo Michael", bei einer weiblichen Stimme „Hallo Anna". Zwei
-Gründe: Zwei Wörter lösen deutlich seltener versehentlich aus als eines,
-und der Name steht ohnehin schon fest - der Nutzer wählt seine Stimme bei
-der Ersteinrichtung **mit Namen** (siehe
+**Entschieden am 2026-08-17: „Sprachsteuerung starten" und
+„Sprachsteuerung stoppen"** (Stephans Vorschlag). Das ist kein Weckwort
+vor jedem Befehl, sondern ein **Schalter**: Bis zum „starten" hört DialOS
+nur auf diesen einen Satz, danach nimmt es Befehle an, bis „stoppen"
+kommt.
+
+Der Vorschlag hat sich im selben Test als **deutlich besser als der
+Assistentenname** erwiesen:
+
+| gesagt | erkannt | |
+|---|---|---|
+| „sprachsteuerung starten" | `sprachsteuerung starten` | löst aus |
+| „sprachsteuerung stoppen" | `sprachsteuerung stoppen` | löst aus |
+| „die **sprachsteuerung** von dialos ist praktisch" | `sprachsteuerung [unk]` | ruhig |
+| „kannst du das **starten**" | `starten` | ruhig |
+| „wir müssen das mal **stoppen**" | `stoppen stoppen` | ruhig |
+
+Wo „Hallo Michael" am Störsatz scheiterte, hält hier der Auffangeintrag
+`[unk]` sauber dagegen: Zwei bestimmte Wörter direkt hintereinander
+fallen im Gespräch praktisch nicht, und jedes für sich löst nichts aus.
+Damit ist offen, ob openWakeWord überhaupt nötig wird - **das ist noch
+kein Beweis**, geprüft wurde mit synthetischer Stimme und drei
+Störsätzen, nicht mit echtem Gespräch über längere Zeit.
+
+Der frühere Vorschlag, den Assistentennamen zu nehmen, bleibt als
+Rückfallebene notiert: Er käme aus derselben Einstellung wie die
+Stimmenwahl bei der Ersteinrichtung (siehe
 [ersteinrichtung.md](ersteinrichtung.md): Michael, Daniel, Anna, Julia).
-Das Weckwort käme damit aus derselben Einstellung wie die Stimme, ohne
-dass irgendwo ein zweiter Wert gepflegt werden muss.
 
 **Was ein Aufweckwort NICHT löst:** Das Mikrofon-Symbol in der oberen
 Leiste bleibt an. Um das Weckwort zu hören, muss weiter zugehört werden -

@@ -17,6 +17,28 @@ import subprocess
 import sys
 
 
+# Aussprache-Regeln fuer Piper. Jede Zeile: Muster, Ersatz, Begruendung.
+# Die Begruendung steht bewusst mit im Code - ohne sie sieht eine solche
+# Regel spaeter wie ein Tippfehler aus und wird "korrigiert".
+AUSSPRACHE = [
+    (
+        re.compile(r"\bDialOS\b(?!\.)", re.IGNORECASE),
+        "Dial OS",
+        "Sonst als ein Wort gelesen; gemeint ist 'Dial O S'.",
+    ),
+    (
+        # Deutsch spricht "st" am Silbenanfang als "scht". Piper setzt die
+        # Silbengrenze bei "Ta-statur" und sagt deshalb "Taschtatur".
+        # Getrennt geschrieben liegt das s am Silbenende, das t beginnt neu -
+        # damit stimmt es. Von Stephan im Hoervergleich aus fuenf Schreib-
+        # weisen ausgewaehlt (2026-08-17).
+        re.compile(r"\bTastatur(en)?\b", re.IGNORECASE),
+        r"Tas tatur\1",
+        "Sonst 'Taschtatur' - falsche Silbengrenze.",
+    ),
+]
+
+
 def fuer_sprachausgabe(text):
     """Schreibweisen anpassen, die Piper sonst falsch ausspricht.
 
@@ -36,8 +58,14 @@ def fuer_sprachausgabe(text):
     ebenfalls getrennt. Das ist folgenlos: Skript- und Dateinamen kommen
     in gesprochenen Texten nicht vor, nur in Kommentaren und Pfaden - und
     die laufen nie durch diese Funktion.
+
+    Seit 2026-08-17 eine Liste statt einer einzelnen Ersetzung: Es kam die
+    zweite Regel dazu, und es werden weitere kommen. Neue Regel = eine
+    Zeile in AUSSPRACHE, mit einem Satz dazu, WARUM sie noetig ist.
     """
-    return re.sub(r"\bDialOS\b(?!\.)", "Dial OS", text, flags=re.IGNORECASE)
+    for muster, ersatz, _grund in AUSSPRACHE:
+        text = muster.sub(ersatz, text)
+    return text
 
 
 def markierungsdatei():

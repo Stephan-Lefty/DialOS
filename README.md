@@ -107,6 +107,53 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Echo-Unterdrückung gebaut - der Fehler von heute früh ist damit an
+  der Wurzel behoben (2026-08-17).** PipeWires `module-echo-cancel` mit
+  dem WebRTC-Algorithmus rechnet das Lautsprechersignal aus dem Mikrofon
+  heraus und stellt die Quelle `dialos_mikrofon_ohne_echo` bereit; der
+  Sprachbefehl-Dienst nimmt sie als erste Wahl. **Gemessen**, beide
+  Quellen gleichzeitig aufgenommen, während der Lautsprecher die
+  Start-Ansage abspielte: rohes Mikrofon 6,13 % RMS gegenüber 0,15 % an
+  der bereinigten Quelle - rund **32 dB** Dämpfung, und das über
+  Bluetooth, wo wegen der schwankenden Laufzeit deutlich weniger zu
+  erwarten war. **Gegenprobe mit genau dem Fall, der vorher scheiterte:**
+  dieselbe 23-Sekunden-Ansage per `paplay` abgespielt, also ohne jeden
+  Schutz - der Dienst erkannte nichts und schaltete nicht um.
+  - **`monitor.mode = true`** ist die entscheidende Einstellung: Ohne sie
+    müssten alle Programme ihren Ton in eine eigens angelegte Senke
+    spielen, damit das Modul weiß, was gerade zu hören ist. Jede
+    Audio-Ausgabe von DialOS wäre umzubiegen, und jedes neue Programm
+    müsste daran denken. So genügt der Mitschnitt der Ausgabe als
+    Referenz, und nichts muss umgeleitet werden.
+  - **Falle beim Einrichten, gleich zweimal aufgetreten:** Der Neustart
+    von PipeWire wirft das Bluetooth-Gerät in HFP zurück, und die Karte
+    bietet danach **gar kein A2DP mehr an** - `pactl set-card-profile`
+    scheitert mit „No such entity". Erst ein `bluetoothctl
+    disconnect`/`connect` bringt das Profil zurück. Steht im Rezept.
+- **Weckphrase entschieden: „Sprachsteuerung starten" / „Sprachsteuerung
+  stoppen" (Stephans Vorschlag, 2026-08-17).** Kein Weckwort vor jedem
+  Befehl, sondern ein **Schalter**. Der Vorschlag ist messbar besser als
+  mein Vorschlag mit dem Assistentennamen: „ich rufe michael an" kam
+  vorher als `hallo michael` mit voller Sicherheit durch; hier bleiben
+  alle drei Störsätze ruhig - „die **sprachsteuerung** von dialos ist
+  praktisch" wird zu `sprachsteuerung [unk]`, „kannst du das **starten**"
+  zu `starten`, „wir müssen das mal **stoppen**" zu `stoppen stoppen`.
+  Zwei bestimmte Wörter direkt hintereinander fallen im Gespräch
+  praktisch nicht, und jedes für sich löst nichts aus. Damit ist offen,
+  ob openWakeWord überhaupt nötig wird - **noch kein Beweis**, geprüft
+  wurde mit synthetischer Stimme und drei Störsätzen. Gebaut ist der
+  Schalter noch nicht, er steht in TODO.md und in
+  [docs/sprachbefehle.md](docs/sprachbefehle.md).
+- **Aussprache: „Tastatur" klang wie „Taschtatur" (Stephan,
+  2026-08-17).** Deutsch spricht „st" am Silbenanfang als „scht", und
+  Piper setzt die Silbengrenze bei „Ta-statur". Behoben über die zentrale
+  Aussprache-Stelle in `dialos-say.py`: „Tas tatur", von Stephan aus fünf
+  Schreibweisen herausgehört. Bei der Gelegenheit sind die Regeln von
+  einer einzelnen Ersetzung auf eine **Liste** umgestellt worden - es kam
+  die zweite dazu, und es werden weitere kommen. Jede Regel trägt jetzt
+  ihre Begründung im Code; ohne die sieht so eine Schreibweise später wie
+  ein Tippfehler aus und wird „korrigiert".
+
 - **Michael spricht jetzt etwas zügiger: `GenericRateMultiply` von 0.85
   auf 0.88 (Stephan, 2026-08-17, im Hörvergleich ausgewählt).** Verglichen
   wurden 0.72, 0.78, 0.85, 0.88 und 0.90 am selben Satz. Der Wert wirkt in

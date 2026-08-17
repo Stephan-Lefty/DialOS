@@ -954,6 +954,59 @@ applied back then, the test did not measure the microphone but the
 clipping. The comparison should be repeated before the Bluetooth
 priority counts as proven (see TODO.en.md).
 
+### 11f. Echo cancellation for the microphone (new 2026-08-17)
+
+**Without it the voice-command service hears everything the device
+plays** - its own announcement as well as radio, music or a media
+library. Because recognition uses a restricted grammar, it forces
+fragments of that into a command: while playing back the login
+announcement, the desktop switched mid-playback. For a system meant to
+play radio and music this is not an edge case - a newsreader saying
+"Windows" would have the same effect.
+
+The earlier safeguard (the "the system is speaking" marker file) cannot
+solve this in principle: it only knows about the system's own
+announcement via `dialos-say.py`. So the fix sits one level lower, in the
+audio chain.
+
+`/etc/pipewire/pipewire.conf.d/99-dialos-echo-unterdrueckung.conf` loads
+PipeWire's `module-echo-cancel` with the WebRTC algorithm and provides a
+cleaned source **`dialos_mikrofon_ohne_echo`**.
+`dialos-sprachbefehl-desktop.py` takes it as first choice.
+
+**Measured on 2026-08-17**, both sources recorded simultaneously while
+the speaker played the login announcement:
+
+| Source | Level |
+|---|---|
+| raw microphone | 6.13 % RMS |
+| `dialos_mikrofon_ohne_echo` | **0.15 % RMS** |
+
+That is about **32 dB** of attenuation - over Bluetooth, where far less
+would have been expected given the variable latency. Control test: the
+same announcement played via `paplay`, i.e. with no safeguard at all -
+the service recognized **nothing** and did not switch.
+
+Two decisions in the configuration:
+
+- **`monitor.mode = true`.** Without it, every program would have to play
+  its audio into a dedicated sink so the module knows what is currently
+  audible - every audio output in DialOS would need rerouting, and every
+  new program would have to remember. With `monitor.mode` the module uses
+  the output's monitor as the reference instead. Nothing needs rerouting.
+- **No `node.target` in `playback.props`.** That way the reference
+  follows the default output automatically; if the user switches from the
+  Bluetooth speaker to the built-in ones, cancellation keeps working.
+
+**Trap during setup:** restarting PipeWire throws the Bluetooth device
+back into HFP, and the card then offers **no A2DP at all** -
+`pactl set-card-profile ... a2dp-sink` fails with "No such entity". The
+profile only reappears after reconnecting:
+
+```bash
+bluetoothctl disconnect <MAC> && sleep 3 && bluetoothctl connect <MAC>
+```
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

@@ -27,7 +27,8 @@ Technischer Hintergrund zur Erkennung steht in
 
 | Sprachbefehl | Aktion |
 |---|---|
-| „Hallo Michael" (bzw. der gewählte Assistentenname) | Aufweckwort - erst danach werden weitere Befehle angenommen. Braucht ein eigenes Modell, siehe [sprachsteuerung.md](sprachsteuerung.md). |
+| „Sprachsteuerung starten" | Schaltet die Befehlserkennung ein. Bis dahin hört DialOS nur auf diesen einen Satz. |
+| „Sprachsteuerung stoppen" | Schaltet die Befehlserkennung wieder aus - für Gespräche, Besuch, Telefonate. |
 | „Hilfe rufen" | Startet RustDesk für die Fernwartung. Bewusst nur auf ausdrückliche Ansage, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md). |
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |

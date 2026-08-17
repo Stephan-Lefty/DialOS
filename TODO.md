@@ -90,8 +90,26 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   anhaltender Übersteuerung nach. Getestet durch absichtliches
   Hochdrehen.
 
-- [ ] **Fehlauslösung durch abgespielte Inhalte verhindern** (offen seit
-  2026-08-17, ernst). Der Schutz gegen Selbst-Auslösung greift nur bei
+- [x] **Fehlauslösung durch abgespielte Inhalte behoben (2026-08-17).**
+  Echo-Unterdrückung über PipeWires `module-echo-cancel` eingerichtet,
+  32 dB Dämpfung gemessen, und der Fall, der vorher scheiterte (Ansage
+  per `paplay` abgespielt), löst nichts mehr aus. Details im
+  Änderungsprotokoll und in `docs/Debian-zu-DialOS.md`, Schritt 11f.
+
+- [ ] **Schalter „Sprachsteuerung starten/stoppen" bauen** (entschieden
+  2026-08-17, noch nicht gebaut). Bis zum „starten" hört DialOS nur auf
+  diesen einen Satz, danach nimmt es Befehle an, bis „stoppen" kommt.
+  Gemessen ist bereits, dass die Erkennung trägt und drei Störsätze ruhig
+  bleiben - offen ist der Zustand selbst: Wo wird er gemerkt (Datei wie
+  bei der Desktop-Optik?), was passiert beim Anmelden (an oder aus?), und
+  **wie erfährt ein blinder Nutzer, in welchem Zustand er ist**? Ohne
+  eine Antwort darauf ist der Schalter gefährlicher als kein Schalter:
+  Wer nicht weiß, dass die Erkennung aus ist, hält das Gerät für kaputt.
+
+- [ ] **Alte Beschreibung des Punkts (zur Nachvollziehbarkeit):** Der
+  Schutz gegen Selbst-Auslösung griff nur bei `dialos-say.py`; alles
+  andere, was das Gerät abspielt, hörte der Dienst mit. Ersetzt durch die
+  Echo-Unterdrückung, siehe oben. Der Schutz gegen Selbst-Auslösung greift nur bei
   `dialos-say.py`, weil nur dieses Skript die Markierung setzt. Alles
   andere, was das Gerät abspielt - Radio, Musik, Mediathek, ein per
   `paplay` abgespieltes WAV - hört der Sprachdienst mit, und die
@@ -112,6 +130,19 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   kurze Pause je Satzende, zentral in `dialos-say.py`, würde die Ansage
   ruhiger machen, ohne einzelne Wörter schleppen zu lassen. Vorher eine
   Hörprobe bauen: gleiches Tempo, nur mit Pausen.
+
+- [ ] **Ansagen unterscheiden: Frage oder Hinweis?** (Stephans Frage vom
+  2026-08-17). Heute weiß das System es implizit - der Code entscheidet
+  ja, was gesagt wird -, gibt es aber nirgends weiter: `dialos-say.py`
+  bekommt einen Text und spricht ihn. Wichtiger als das Wissen des
+  Systems ist, dass **der Nutzer die Frage als Frage erkennt**: Für
+  jemanden, der den Bildschirm nicht sieht, ist „wartet es auf mich?" die
+  entscheidende Information. Am 2026-08-16 ist genau daran der erste Test
+  der Lautstärke-Frage gescheitert - das System fragte, Stephan wusste
+  nicht wann. Behelf war der Satz „Und jetzt bitte.". Sauber wäre: der
+  Sprachausgabe eine Art mitgeben (Hinweis/Frage), und bei einer Frage
+  automatisch ein kurzes, immer gleiches Signal. Ein **Ton** wäre dafür
+  besser als ein Satz - schneller, unmissverständlich, nutzt sich nicht ab.
 
 - [ ] **Aufweckwort mit openWakeWord bauen** (entschieden 2026-08-17).
   Die Vosk-Grammatik scheidet aus - sie presst jede Äußerung in die

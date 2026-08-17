@@ -29,7 +29,8 @@ Technical background on recognition is in
 
 | Voice command | Action |
 |---|---|
-| "Hallo Michael" (or the chosen assistant name) | Wake word — only afterwards are further commands accepted. Needs a dedicated model, see [sprachsteuerung.en.md](sprachsteuerung.en.md). |
+| "Sprachsteuerung starten" (start voice control) | Switches command recognition on. Until then DialOS listens for this one sentence only. |
+| "Sprachsteuerung stoppen" (stop voice control) | Switches command recognition off again - for conversations, visitors, phone calls. |
 | "Hilfe rufen" (call for help) | Starts RustDesk for remote support. Deliberately only on explicit request, see [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md). |
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
 | "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |
