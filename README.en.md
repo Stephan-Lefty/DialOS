@@ -99,6 +99,33 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **Two faults surfaced by the first morning in real use (2026-08-17).**
+  - **The autostart for restoring the style was missing - my mistake.**
+    The mode `dialos-desktop-stil.sh wiederherstellen` was built,
+    documented ("runs at login") and described in the changelog, but
+    **never wired up**: there was no entry under `/etc/xdg/autostart/`.
+    The documentation therefore claimed something that did not exist -
+    exactly the kind of gap the same changelog had cleaned up in other
+    files. Added as
+    `dialos-desktop-stil-wiederherstellen.desktop`.
+  - **The Bluetooth headset was stuck in HFP after the restart.** The
+    AIRHUG sat on `headset-head-unit` instead of `a2dp-sink`, so
+    playback ran permanently at phone quality. The likely trigger is the
+    volume question in the login announcement, which deliberately
+    switches to HFP for the recording and is supposed to switch back - if
+    the script ends before that, the profile stays. Reset by hand; a
+    permanent guard against it is tracked in TODO.en.md.
+- **Correction to the microphone clipping entry of 2026-08-16.** It
+  states that 60 dB of gain made recognition impossible. The link is
+  proven for that moment - taking the boost back removed the saturation
+  immediately - but **not as a general rule**: on the morning of
+  2026-08-17 `Internal Mic Boost` was back at +30 dB (WirePlumber
+  restores its saved state at login, after the system-wide service) and
+  the signal was clean nonetheless (0.2 % RMS, zero saturated samples).
+  The level service remains correct and demonstrably did its work
+  according to the journal, but the causal chain is evidently more
+  complex than described. It deserves a proper investigation before being
+  treated as understood.
 - **`dialosadmin` now belongs to the `adm` group (Stephan's decision,
   2026-08-16).** The gap surfaced while hunting the over-amplified
   microphone: `journalctl -u dialos-mikrofon-pegel.service` answered

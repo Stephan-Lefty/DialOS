@@ -1,0 +1,20 @@
+[Desktop Entry]
+# Stellt beim Anmelden den zuletzt gewaehlten Desktop-Stil wieder her.
+#
+# Diese Datei fehlte bis zum 2026-08-17 - ein Fehler: Der Modus
+# "wiederherstellen" war im Skript gebaut und in der Doku als "laeuft beim
+# Anmelden" beschrieben, aber nie verdrahtet. Die Doku behauptete damit
+# etwas, das es nicht gab.
+#
+# Ohne Merkdatei tut der Aufruf nichts, und er sagt auch nichts an -
+# beim Anmelden hat niemand etwas ausgeloest, eine Ansage waere nur
+# Laerm vor der eigentlichen Start-Ansage.
+Type=Application
+Name=DialOS Desktop-Stil wiederherstellen
+Name[en]=DialOS restore desktop style
+Comment=Stellt die zuletzt gewählte Optik (GNOME oder Windows) wieder her
+Comment[en]=Restores the last chosen look (GNOME or Windows)
+Exec=/usr/local/bin/dialos-desktop-stil.sh wiederherstellen
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

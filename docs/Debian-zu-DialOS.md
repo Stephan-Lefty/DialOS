@@ -925,7 +925,9 @@ Leiste aber auch keinen Text.
 **Erhalt über Neustart und Abmelden:** Die gewählte Optik bleibt, weil
 alle Einstellungen in dconf des jeweiligen Kontos liegen - das übersteht
 Neustarts von sich aus. Zusätzlich wird
-`dialos-desktop-stil.sh wiederherstellen` beim Anmelden ausgeführt (ohne
+`dialos-desktop-stil.sh wiederherstellen` über
+`/etc/xdg/autostart/dialos-desktop-stil-wiederherstellen.desktop` beim
+Anmelden ausgeführt (ohne
 Ansage, weil dabei niemand etwas ausgelöst hat). Das ist die Zusicherung
 für den Fall, dass etwas anderes die Erweiterungsliste zurückgesetzt hat -
 eine Systemaktualisierung, ein versehentliches `dconf reset`, ein neu

@@ -72,6 +72,25 @@ what has already been done.
   by 60 dB - the service could not possibly recognize anything. Fixed and
   permanently secured (`dialos-mikrofon-pegel.service`).
 
+- [ ] **Guard the Bluetooth profile against getting stuck** (open since
+  2026-08-17). After the restart the AIRHUG was on `headset-head-unit`
+  instead of `a2dp-sink` - playback ran permanently at phone quality,
+  without anyone unfamiliar with the device noticing.
+  `dialos-start-ansage.py` deliberately switches to HFP for the volume
+  question and back afterwards; if the script ends before that (abort,
+  logout, timeout) the profile stays. What is needed is a guard that
+  works independently of the script finishing - e.g. a check at login or
+  a `trap` on script exit.
+
+- [ ] **Properly determine the cause of the microphone clipping** (open
+  since 2026-08-17). On 2026-08-16, taking `Internal Mic Boost` back
+  removed the saturation immediately. The next morning the boost was at
+  +30 dB again - restored by WirePlumber after the system-wide service -
+  and the signal was clean nonetheless. So the link is not as simple as
+  assumed. To clarify: what actually saturated on 08-16, and does the
+  level service even act at the right place if WirePlumber overwrites it
+  afterwards?
+
 - [ ] **Record a demo video with voice input and output** (Stephan's
   idea of 2026-08-16, for the next working day). It should show what
   DialOS can actually do today: the login announcement with the volume

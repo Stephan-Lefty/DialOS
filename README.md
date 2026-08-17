@@ -100,6 +100,34 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Zwei Fehler, die der erste Morgen im Echtbetrieb aufgedeckt hat
+  (2026-08-17).**
+  - **Der Autostart für die Stil-Wiederherstellung fehlte - mein
+    Fehler.** Der Modus `dialos-desktop-stil.sh wiederherstellen` war
+    gebaut, dokumentiert ("läuft beim Anmelden") und im
+    Änderungsprotokoll beschrieben, aber **nie verdrahtet**: Es gab
+    keinen Eintrag unter `/etc/xdg/autostart/`. Die Doku behauptete damit
+    etwas, das es nicht gab - genau die Sorte Lücke, die im selben
+    Protokoll bei anderen Dateien aufgeräumt wurde. Nachgeholt als
+    `dialos-desktop-stil-wiederherstellen.desktop`.
+  - **Das Bluetooth-Headset hing nach dem Neustart in HFP.** Der AIRHUG
+    stand auf `headset-head-unit` statt `a2dp-sink`, die Wiedergabe lief
+    also dauerhaft in Telefonqualität. Ausgelöst hat das vermutlich die
+    Lautstärke-Frage der Start-Ansage, die für die Aufnahme bewusst auf
+    HFP umschaltet und danach zurückstellen soll - endet das Skript
+    vorher, bleibt das Profil hängen. Von Hand zurückgesetzt; ein
+    dauerhafter Riegel dagegen steht in TODO.md.
+- **Korrektur zur Mikrofon-Übersteuerung vom 2026-08-16.** Dort steht,
+  60 dB Verstärkung hätten die Erkennung unmöglich gemacht. Der
+  Zusammenhang ist belegt für den damaligen Moment - Boost zurücknehmen
+  behob die Sättigung sofort -, aber **nicht als allgemeine Regel**: Am
+  Morgen des 2026-08-17 stand `Internal Mic Boost` wieder auf +30 dB
+  (WirePlumber stellt seinen gespeicherten Zustand beim Anmelden wieder
+  her, nach dem systemweiten Dienst), und das Signal war trotzdem sauber
+  (0,2 % RMS, null gesättigte Werte). Der Pegel-Dienst bleibt richtig und
+  hat im Journal nachweislich gearbeitet, aber die Ursachenkette ist
+  offenkundig komplexer als beschrieben. Sie gehört sauber untersucht,
+  bevor sie als verstanden gilt.
 - **`dialosadmin` gehört jetzt zur Gruppe `adm` (Stephans Entscheidung,
   2026-08-16).** Aufgefallen ist die Lücke bei der Fehlersuche am
   übersteuerten Mikrofon: `journalctl -u dialos-mikrofon-pegel.service`

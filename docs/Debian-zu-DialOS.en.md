@@ -904,7 +904,8 @@ panel either.
 
 **Surviving restart and logout:** the chosen look persists because all
 settings live in the account's dconf, which survives restarts by itself.
-In addition, `dialos-desktop-stil.sh wiederherstellen` runs at login
+In addition, `dialos-desktop-stil.sh wiederherstellen` runs at login via
+`/etc/xdg/autostart/dialos-desktop-stil-wiederherstellen.desktop`
 (without an announcement, since nobody triggered anything). That is the
 guarantee for the case where something else reset the extension list - a
 system update, an accidental `dconf reset`, a freshly created account.

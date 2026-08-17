@@ -368,6 +368,9 @@ schritt_11_sprachausgabe() {
   sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-sprachbefehl-desktop.py /usr/local/bin/
   sudo chmod 755 /usr/local/bin/dialos-sprachbefehl-desktop.py
   sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-sprachbefehl-desktop.desktop /etc/xdg/autostart/
+  # Stellt beim Anmelden den zuletzt gewaehlten Desktop-Stil wieder her.
+  # Fehlte bis 2026-08-17, obwohl die Doku ihn beschrieb.
+  sudo cp iso-build/config/includes.chroot/etc/xdg/autostart/dialos-desktop-stil-wiederherstellen.desktop /etc/xdg/autostart/
 
   # Deutsches Menue fuer ArcMenu. Debians Paket liefert die fertig
   # uebersetzte de.mo mit, legt sie aber nach po/ statt in einen

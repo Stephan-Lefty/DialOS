@@ -72,6 +72,25 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   übersteuert war - der Dienst konnte prinzipiell nichts erkennen.
   Behoben und dauerhaft abgesichert (`dialos-mikrofon-pegel.service`).
 
+- [ ] **Bluetooth-Profil gegen Hängenbleiben absichern** (offen seit
+  2026-08-17). Nach dem Neustart stand der AIRHUG auf `headset-head-unit`
+  statt `a2dp-sink` - die Wiedergabe lief dauerhaft in Telefonqualität,
+  ohne dass es jemand bemerkt hätte, der das Gerät nicht kennt.
+  `dialos-start-ansage.py` schaltet für die Lautstärke-Frage bewusst auf
+  HFP und danach zurück; endet das Skript vorher (Abbruch, Abmelden,
+  Zeitüberschreitung), bleibt das Profil hängen. Nötig ist ein Riegel,
+  der unabhängig vom Skriptende greift - etwa eine Prüfung beim Anmelden
+  oder ein `trap` auf das Skriptende.
+
+- [ ] **Ursache der Mikrofon-Übersteuerung sauber klären** (offen seit
+  2026-08-17). Am 2026-08-16 behob das Zurücknehmen von `Internal Mic
+  Boost` die Sättigung sofort. Am Morgen darauf stand der Boost wieder
+  auf +30 dB - restauriert von WirePlumber nach dem systemweiten Dienst -
+  und das Signal war trotzdem sauber. Der Zusammenhang ist also nicht so
+  einfach wie angenommen. Zu klären: Was hat am 16.08. tatsächlich
+  gesättigt, und greift der Pegel-Dienst überhaupt an der richtigen
+  Stelle, wenn WirePlumber danach ohnehin überschreibt?
+
 - [ ] **Vorführvideo mit Sprachein- und -ausgabe aufnehmen** (Stephans
   Idee vom 2026-08-16, für den nächsten Arbeitstag). Zeigen soll es, was
   DialOS heute wirklich kann: Start-Ansage mit Lautstärke-Frage, dann
