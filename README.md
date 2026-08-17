@@ -70,6 +70,7 @@ Details zum jeweiligen Stand stehen im
 - [Sprachsteuerung](docs/sprachsteuerung.md) – STT/TTS-Stack, Intent-Erkennung, Design-Prinzipien
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
+- [Vorführvideos aufnehmen](docs/video-aufnahme.md) – OBS-Einrichtung mit getrennten Tonspuren, und die zwei Fallen, die den Ton ruinieren
 - [Offene Punkte](docs/offene-punkte.md) – was noch zu klären/entscheiden ist
 - [Abbild-Verzeichnis](docs/iso-builds.md) – welches Sicherungs-Abbild zu welchem Code-Stand gehört (Rescuezilla/Clonezilla)
 
@@ -105,6 +106,42 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 *In Arbeit seit 2026-08-17. Alles, was ab jetzt entsteht, wird hier
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
+
+- **Aufnahme von Vorführvideos eingerichtet und belegt (2026-08-17).**
+  OBS mit **drei getrennten Tonspuren**: Spur 2 die DialOS-Stimme als
+  Mitschnitt der Ausgabe, Spur 3 das Mikrofon, Spur 1 beides gemischt als
+  Referenz. Stephan schneidet damit in kdenlive mit den richtigen Spuren.
+  Fertige Konfiguration unter `~/.config/obs-studio/`, beschrieben in
+  [docs/video-aufnahme.md](docs/video-aufnahme.md) - die Datei ist nötig,
+  weil die Einrichtung sonst bei einem Reinstall verloren wäre.
+  Nachgeprüft: Die erzeugte MKV enthält tatsächlich eine Video- und
+  **drei** Tonspuren.
+  - **Zwei Grenzen, die den Ablauf bestimmen und sich nicht
+    wegprogrammieren lassen:** Der Systemstart lässt sich nicht vom Gerät
+    selbst aufnehmen (es läuft noch keine Aufnahmesoftware), und der
+    Benutzerwechsel beendet den Rekorder, weil er in der Sitzung läuft.
+    Beides braucht eine Kamera. Das ist keine Notlösung - der AIRHUG ist
+    ein Lautsprecher, die Kamera hört also Ansage und Befehle so, wie ein
+    Besucher sie hört.
+  - **Zwei Fallen, beide kurz vor der Aufnahme real aufgetreten.** Der
+    AIRHUG stand zweimal auf `headset-head-unit`; der Mitschnitt der
+    Ausgabe hatte dann 1 Kanal bei 16000 Hz statt 2 Kanälen bei 48000 Hz -
+    die aufgenommene Stimme hätte nach Telefon geklungen. Deshalb ist in
+    der Szene fest das **eingebaute** Mikrofon eingetragen, obwohl die
+    Standard-Eingabe das AIRHUG war, und das eingebaute ist jetzt
+    zusätzlich die Standard-Eingabe: So kann kein Programm mehr
+    versehentlich zum Bluetooth-Mikrofon greifen und HFP erzwingen.
+- **„DialOS" kommt in der Start-Ansage nicht mehr vor (Stephans Wunsch,
+  2026-08-17).** Es gab genau eine gesprochene Fundstelle: „DialOS ist so
+  eingerichtet, dass ich Dir jetzt den Akku-Stand aller angeschlossenen
+  Geräte mitteile." Gesprochen wurde daraus „Dial OS ist so
+  eingerichtet…". Ersetzt durch **„Ich nenne Dir noch die
+  Akku-Stände."** - kürzer, und vor allem: Der alte Satz erklärte eine
+  *Einrichtung*, statt die Information zu geben, und der Nutzer hört das
+  bei **jeder** Anmeldung. Michael hat sich zwei Sätze vorher vorgestellt
+  und kann es direkt sagen. Die Aussprache-Regel in `dialos-say.py`
+  bleibt bestehen, ist damit aber rein vorbeugend - gesprochen kommt der
+  Name jetzt nirgends mehr vor.
 
 ### 0.5.0
 - **Neue Datei `docs/sprachbefehle.md` (Stephans Wunsch, 2026-08-17):

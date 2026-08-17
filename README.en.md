@@ -70,6 +70,7 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 - [Voice control](docs/sprachsteuerung.en.md) – STT/TTS stack, intent recognition, design principles
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
+- [Recording demo videos](docs/video-aufnahme.en.md) – OBS setup with separate audio tracks, and the two traps that ruin the audio
 - [Open questions](docs/offene-punkte.en.md) – what still needs to be decided
 - [Image ledger](docs/iso-builds.en.md) – which backup image belongs to which code state (Rescuezilla/Clonezilla)
 
@@ -103,6 +104,42 @@ background) and `splash.png` (boot/login screen).
 
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
+
+- **Demo video recording set up and proven (2026-08-17).** OBS with
+  **three separate audio tracks**: track 2 the DialOS voice as a capture
+  of the output, track 3 the microphone, track 1 both mixed as a
+  reference. That gives Stephan the right tracks in kdenlive. The
+  finished configuration lives in `~/.config/obs-studio/` and is
+  described in [docs/video-aufnahme.en.md](docs/video-aufnahme.en.md) -
+  the file is needed because the setup would otherwise be lost in a
+  reinstall. Verified: the resulting MKV really does contain one video
+  and **three** audio tracks.
+  - **Two limits that shape the procedure and cannot be programmed
+    away:** the system start cannot be recorded by the device itself (no
+    recording software is running yet), and the user switch kills the
+    recorder because it runs inside the session. Both need a camera. That
+    is not a stopgap - the AIRHUG is a speaker, so the camera hears
+    announcement and commands the way a visitor hears them.
+  - **Two traps, both of which occurred for real shortly before
+    recording.** The AIRHUG sat on `headset-head-unit` twice; the output
+    capture then had 1 channel at 16000 Hz instead of 2 at 48000 Hz - the
+    recorded voice would have sounded like a phone call. That is why the
+    scene has the **built-in** microphone hard-wired even though the
+    default input was the AIRHUG, and the built-in one is now the default
+    input as well: so no program can grab the Bluetooth microphone by
+    accident and force HFP.
+- **"DialOS" no longer appears in the login announcement (Stephan's
+  request, 2026-08-17).** There was exactly one spoken occurrence:
+  "DialOS ist so eingerichtet, dass ich Dir jetzt den Akku-Stand aller
+  angeschlossenen Geräte mitteile" (DialOS is set up so that I now tell
+  you the battery level of all connected devices). Spoken, that became
+  "Dial OS ist so eingerichtet…". Replaced with **"Ich nenne Dir noch die
+  Akku-Stände."** (I'll also tell you the battery levels) - shorter, and
+  above all: the old sentence explained a *configuration* instead of
+  giving the information, and the user hears it at **every** login.
+  Michael introduced himself two sentences earlier and can just say it.
+  The pronunciation rule in `dialos-say.py` stays but is now purely
+  preventive - the name no longer occurs in any spoken text.
 
 ### 0.5.0
 - **New file `docs/sprachbefehle.en.md` (Stephan's request, 2026-08-17):

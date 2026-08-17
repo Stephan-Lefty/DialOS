@@ -573,10 +573,14 @@ def main():
         f"Heute ist {datum}. Die aktuelle Uhrzeit ist {uhrzeit}."
     )
     if akku_saetze:
-        text += (
-            " DialOS ist so eingerichtet, dass ich Dir jetzt den Akku-Stand aller "
-            "angeschlossenen Geräte mitteile. " + " ".join(akku_saetze)
-        )
+        # Frueher stand hier "DialOS ist so eingerichtet, dass ich Dir
+        # jetzt den Akku-Stand aller angeschlossenen Geraete mitteile."
+        # Zwei Gruende fuer die Kuerzung (Stephan, 2026-08-17): Der
+        # Produktname wurde als "Dial OS" gesprochen und klang sperrig -
+        # und der Satz erklaerte eine EINRICHTUNG, statt die Information
+        # zu geben. Der Nutzer hoert das bei JEDER Anmeldung; Michael hat
+        # sich zwei Saetze vorher vorgestellt und kann es direkt sagen.
+        text += " Ich nenne Dir noch die Akku-Stände. " + " ".join(akku_saetze)
 
     hat_internet = internet_verfuegbar()
     if hat_internet:
