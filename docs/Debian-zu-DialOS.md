@@ -1115,6 +1115,64 @@ Zwei Entscheidungen in der Konfiguration:
   Bluetooth-Lautsprecher auf die eingebauten, greift die Unterdrückung
   weiter.
 
+**Regel, die einen Totalausfall gekostet hat: Das Ziel der Aufnahme
+darf kein Gerät sein, das man ausschalten oder abziehen kann.**
+`capture.props.target.object` zeigt deshalb auf das **eingebaute**
+Mikrofon. Am 2026-08-17 stand dort zum Testen Stephans USB-Headset, und
+diese Testfassung blieb über einen Neustart im System stehen. Beim
+Anmelden war das Headset ausgeschaltet - und danach konnte **das ganze
+System keinen Ton mehr abspielen**, auch nicht über die eingebauten
+Lautsprecher.
+
+Der Ablauf, weil er ohne die Zwischenschritte unglaubwürdig klingt: Der
+USB-Dongle steckt und meldet eine Soundkarte, unabhängig davon, ob das
+Headset an ist. ALSA meldet für dieses Aufnahmegerät sogar
+`state: RUNNING`. Es kommt nur nichts - gemessen **0 Bytes in 3
+Sekunden**, während das eingebaute Mikrofon 64000 liefert. Die
+Echo-Unterdrückung braucht diese Aufnahme als Taktgeber; ohne Takt
+startet PipeWire den Graph nicht. Die Soundkarte bleibt dann auf
+`state: PREPARED` mit `trigger_time: 0.000000000` stehen, und jede
+Wiedergabe hängt für immer:
+
+```
+$ paplay -v bell.oga
+Connected to device alsa_output.pci-0000_00_1f.3.analog-stereo (index: 70, suspended: no).
+Time: 0,000 sec; Latency: 139332 usec.   Time: 0,000 sec; ...
+```
+
+Der Nutzer hört: nichts. Keine Fehlermeldung, kein Piepen, nur
+Sprachausgabe-Prozesse, die sich stapeln - beim Vorfall drei Ansagen und
+vier GNOME-Klänge, alle noch in der Warteschlange. Für einen blinden
+Nutzer ist das kein Tonproblem, sondern ein totes Gerät.
+
+**Zwei Prüfschritte, die den Fehler sofort einkreisen:**
+
+```bash
+# 1) Startet die Soundkarte ueberhaupt? PREPARED + trigger_time 0 = Graph steht.
+grep -E 'state|trigger_time|hw_ptr' /proc/asound/card0/pcm0p/sub0/status
+# 2) Liefert das Aufnahmeziel Daten? 0 Bytes = Ursache gefunden.
+timeout 4 parec -d <ziel> --format=s16le --rate=16000 --channels=1 | wc -c
+```
+
+Zum Einkreisen lässt sich die Unterdrückung ohne Neustart abschalten:
+Die Datei nach `.conf.aus` umbenennen (`.conf.d` liest nur `*.conf`) und
+`systemctl --user restart pipewire pipewire-pulse wireplumber`. Eine
+eigene Testfassung gehört nach
+`~/.config/pipewire/pipewire.conf.d/` - **nicht** nach `/etc`, wo sie
+einen Neustart überlebt.
+
+Der Verdacht lag zuerst auf `webrtc.gain_control`, das am selben Tag von
+`false` auf `true` gewechselt war und ebenfalls erst beim Neustart wirksam
+wurde. Beide Werte hingen gleich - erst der Reihentest über die
+Zielgeräte hat es gezeigt. Ohne `target.object` läuft der Ton übrigens
+auch, weil das Modul dann der Standardquelle folgt; das ist aber keine
+Absicherung, sondern nur eine andere Wahl desselben Risikos.
+
+**Offen bleibt damit:** Sobald ein externes Funkmikrofon zum Standard
+werden soll - und genau das ist geplant -, braucht es eine Absicherung,
+die erkennt, dass keine Daten kommen, und die Unterdrückung dann fallen
+lässt statt den Ton mitzunehmen. Siehe `TODO.md`.
+
 **Falle beim Einrichten:** Der Neustart von PipeWire wirft das
 Bluetooth-Gerät in HFP zurück, und die Karte bietet danach **gar kein
 A2DP mehr an** - `pactl set-card-profile ... a2dp-sink` scheitert mit

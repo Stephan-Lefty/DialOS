@@ -105,6 +105,48 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **A switched-off headset took the system's entire audio output with it
+  - and the cause was my test configuration (2026-08-17).** After
+  Stephan's reboot no announcement came in **either** account. The log
+  only said "spd-say nach 20s abgebrochen - Sprachausgabe antwortet
+  nicht." ("aborted after 20s - speech output not responding"); the
+  speaking icon appeared, nothing came out. Cause:
+  `capture.props.target.object` of echo cancellation pointed at Stephan's
+  USB headset, because I had re-targeted it for testing in the morning and
+  **left it in `/etc`**. At login the device delivered no data. The module
+  needs that capture as its clock - without a clock PipeWire does not
+  start the graph, the sound card stays at `state: PREPARED` with
+  `trigger_time: 0.000000000`, and **every** playback hangs forever, even
+  through the built-in speakers. Fixed by returning to the built-in
+  microphone; recorded as a rule in `docs/Debian-zu-DialOS.en.md` step
+  11f: **the echo cancellation target must never be a device that can be
+  switched off or unplugged.**
+  - **The test version should never have stayed in `/etc` across a
+    reboot.** A test configuration of one's own belongs in
+    `~/.config/pipewire/pipewire.conf.d/` - editable without a password
+    and harmless to everyone. That is also how I finally pinned the cause
+    down.
+  - **Two wrong conclusions along the way, both refuted by measuring:** I
+    first reported "PipeWire is healthy" because the module was loaded and
+    the sink showed "RUNNING" - that the clock was not ticking was visible
+    at the same spot. And I suspected `webrtc.gain_control`, which had
+    switched from `false` to `true` the same day and likewise only took
+    effect on reboot. The series test showed: both values hang alike, it
+    was the target device. The AIRHUG was innocent too - the built-in
+    speaker hung just the same.
+  - **The finding that makes the future safeguard hard: there is no
+    reliable indicator.** The capture device delivered **0 bytes in 3
+    seconds** (the built-in microphone 64000 for comparison) - while ALSA
+    reported `state: RUNNING` for that same device, the dongle offered a
+    sound card, and, as Stephan noted, the headset itself reported an
+    established connection to him. Only unplugging and replugging the
+    dongle produced the 64000 bytes. So a check must not rely on any
+    status report, only on the bytes that actually arrive. See `TODO.md`.
+  - **What the user would have experienced:** a dead device. No error, no
+    beep, just announcements piling up - three speech outputs and four
+    GNOME sounds still queued in this incident. For a blind user that is
+    not "the sound is gone" but "the device is broken".
+
 - **The desktop is now called "Linux Desktop" and "Windows Desktop"
   (Stephan's request, 2026-08-17).** In the morning the announcements had
   been cut from an explanatory sentence down to a single word - that was

@@ -107,6 +107,50 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Ein ausgeschaltetes Headset hat die komplette Tonausgabe des Systems
+  mitgenommen - und die Ursache war meine Testkonfiguration
+  (2026-08-17).** Nach Stephans Neustart kam bei **beiden** Konten keine
+  Ansage mehr. Im Protokoll stand nur „spd-say nach 20s abgebrochen -
+  Sprachausgabe antwortet nicht."; das Sprech-Symbol erschien, es kam
+  nichts. Ursache: `capture.props.target.object` der Echo-Unterdrückung
+  zeigte auf Stephans USB-Headset, weil ich das am Vormittag zum Testen
+  umgehängt und **in `/etc` stehen gelassen** hatte. Beim Anmelden lieferte
+  das Gerät keine Daten. Das Modul braucht diese Aufnahme als Taktgeber -
+  ohne Takt startet PipeWire den Graph nicht, die Soundkarte bleibt auf
+  `state: PREPARED` mit `trigger_time: 0.000000000`, und **jede**
+  Wiedergabe hängt für immer, auch über die eingebauten Lautsprecher.
+  Behoben durch Rückkehr auf das eingebaute Mikrofon; als Regel in
+  `docs/Debian-zu-DialOS.md` Schritt 11f festgehalten: **Das Ziel der
+  Echo-Unterdrückung darf kein Gerät sein, das man ausschalten oder
+  abziehen kann.**
+  - **Die Testfassung hätte nie über einen Neustart in `/etc` bleiben
+    dürfen.** Eine eigene Testkonfiguration gehört nach
+    `~/.config/pipewire/pipewire.conf.d/` - dort ist sie ohne Passwort
+    änderbar und tut niemandem weh. Genau darüber habe ich am Ende auch
+    die Ursache eingekreist.
+  - **Zwei Fehlschlüsse auf dem Weg, beide durch Messen widerlegt:** Ich
+    habe zuerst „PipeWire ist gesund" gemeldet, weil das Modul geladen
+    war und die Senke „RUNNING" zeigte - dass die Uhr nicht tickt, war an
+    derselben Stelle schon sichtbar. Und ich habe `webrtc.gain_control`
+    verdächtigt, das am selben Tag von `false` auf `true` gewechselt war
+    und ebenfalls erst beim Neustart wirksam wurde. Der Reihentest zeigte:
+    beide Werte hängen gleich, es war das Zielgerät. Auch der AIRHUG war
+    unschuldig - der eingebaute Lautsprecher hing genauso.
+  - **Der Befund, der die künftige Absicherung schwer macht: es gibt
+    keinen verlässlichen Anzeiger.** Das Aufnahmegerät lieferte **0 Bytes
+    in 3 Sekunden** (das eingebaute Mikrofon zum Vergleich 64000) -
+    während ALSA für dasselbe Gerät `state: RUNNING` meldete, der Dongle
+    eine Soundkarte anbot und, wie Stephan feststellte, das Headset ihm
+    selbst eine bestehende Verbindung meldete. Erst Abziehen und
+    Wiedereinstecken des Dongles brachte die 64000 Bytes. Eine Prüfung
+    darf sich deshalb auf keine Zustandsmeldung stützen, nur auf die
+    tatsächlich ankommenden Bytes. Siehe `TODO.md`.
+  - **Was der Nutzer erlebt hätte:** ein totes Gerät. Keine Fehlermeldung,
+    kein Piepen, nur Ansagen, die sich stapeln - beim Vorfall drei
+    Sprachausgaben und vier GNOME-Klänge, alle noch in der Warteschlange.
+    Für einen blinden Nutzer ist das nicht „der Ton ist weg", sondern
+    „das Gerät ist kaputt".
+
 - **Der Schreibtisch heißt jetzt „Linux Desktop" und „Windows Desktop"
   (Stephans Wunsch, 2026-08-17).** Die Ansagen waren am Vormittag von
   einem erklärenden Satz auf ein einzelnes Wort zusammengestrichen

@@ -196,6 +196,37 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   ab, der den Nutzer sonst ratlos zurückließe - er redet sonst gegen ein
   totes Gerät, ohne es zu merken. Achtung beim Schwellwert: Stille im
   Raum ist normal, dauerhaft **exakt** null Pegel dagegen nicht.
+  - **Am 2026-08-17 ist die Aufgabe größer geworden, als sie gedacht war
+    - der Fall ist eingetreten und hat die komplette Tonausgabe
+    mitgenommen.** Die Echo-Unterdrückung stand zum Testen auf dem
+    USB-Headset; beim Neustart war dessen Funkverbindung nicht da. Der
+    Dongle bietet trotzdem eine Soundkarte an, ALSA meldet sogar
+    `state: RUNNING` - es kommen nur 0 Bytes. Weil das Modul diese
+    Aufnahme als Taktgeber braucht, startete PipeWire den Graph nicht
+    mehr, und **nichts** im System konnte Ton abspielen, auch nicht über
+    die eingebauten Lautsprecher. Details in `docs/Debian-zu-DialOS.md`,
+    Schritt 11f.
+  - **Damit hängen zwei Dinge daran, nicht eines.** (1) Die Ansage, wenn
+    das Mikrofon verstummt - wie oben. (2) Eine Absicherung, die die
+    Echo-Unterdrückung fallen lässt, statt den Ton mitzunehmen. Solange
+    das Ziel das eingebaute Mikrofon ist, kann der Fall nicht auftreten;
+    sobald ein externes Funkmikrofon Standard werden soll - und das ist
+    geplant -, ist (2) Voraussetzung dafür, nicht Zubehör.
+  - **Zu prüfen dabei:** Ob PipeWire selbst einen Weg anbietet, eine
+    stumme Quelle nicht zum Taktgeber zu machen, wäre der saubere Weg.
+    Sonst muss ein Dienst das Ziel vor dem Laden prüfen (`parec` auf
+    Bytes testen) und die Unterdrückung nur dann einhängen.
+  - **Und der Befund, der die Aufgabe schwer macht: es gibt keinen
+    verlässlichen Anzeiger.** Nach Abziehen und Wiedereinstecken des
+    Dongles lieferte dasselbe Gerät 64000 Bytes statt 0. Stephan hat
+    dabei ausdrücklich festgestellt, dass ihm das Headset **schon vor dem
+    Neustecken** eine bestehende Verbindung gemeldet hatte, auch über den
+    Dongle. Also: Headset meldet verbunden, Dongle bietet eine Soundkarte
+    an, ALSA meldet `state: RUNNING` - und es kommen trotzdem 0 Bytes.
+    Meine erste Deutung („die Funkverbindung stand nicht") war damit
+    falsch. **Folge für die Absicherung:** Sie darf sich auf keine
+    Zustandsmeldung stützen, weder auf die des Geräts noch auf die von
+    ALSA. Nur die tatsächlich ankommenden Bytes zählen.
 
 - [x] **So stand die Aufgabe vorher da (zur Herkunft):** Gemessen ist:
   Das Gerät kann nicht gleichzeitig gut klingen und zuhören (A2DP hat

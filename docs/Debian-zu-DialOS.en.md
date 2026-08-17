@@ -1086,6 +1086,61 @@ Two decisions in the configuration:
   follows the default output automatically; if the user switches from the
   Bluetooth speaker to the built-in ones, cancellation keeps working.
 
+**A rule that cost a total outage: the capture target must never be a
+device that can be switched off or unplugged.**
+`capture.props.target.object` therefore points at the **built-in**
+microphone. On 2026-08-17 Stephan's USB headset was in there for testing,
+and that test version was left in the system across a reboot. At login
+the headset was switched off - and after that **the whole system could no
+longer play any sound**, not even through the built-in speakers.
+
+The sequence, because it sounds implausible without the intermediate
+steps: the USB dongle is plugged in and registers a sound card whether or
+not the headset is on. ALSA even reports `state: RUNNING` for that
+capture device. It just delivers nothing - measured **0 bytes in 3
+seconds**, while the built-in microphone delivers 64000. Echo
+cancellation needs that capture as its clock; without a clock PipeWire
+does not start the graph. The sound card then sits at `state: PREPARED`
+with `trigger_time: 0.000000000`, and every playback hangs forever:
+
+```
+$ paplay -v bell.oga
+Connected to device alsa_output.pci-0000_00_1f.3.analog-stereo (index: 70, suspended: no).
+Time: 0,000 sec; Latency: 139332 usec.   Time: 0,000 sec; ...
+```
+
+What the user hears: nothing. No error, no beep, just speech-output
+processes piling up - in this incident three announcements and four GNOME
+sounds, all still queued. For a blind user that is not an audio problem
+but a dead device.
+
+**Two checks that pin the fault down immediately:**
+
+```bash
+# 1) Does the sound card start at all? PREPARED + trigger_time 0 = stalled graph.
+grep -E 'state|trigger_time|hw_ptr' /proc/asound/card0/pcm0p/sub0/status
+# 2) Does the capture target deliver data? 0 bytes = cause found.
+timeout 4 parec -d <target> --format=s16le --rate=16000 --channels=1 | wc -c
+```
+
+For bisecting, cancellation can be switched off without a reboot: rename
+the file to `.conf.aus` (`.conf.d` only reads `*.conf`) and
+`systemctl --user restart pipewire pipewire-pulse wireplumber`. A test
+version of your own belongs in `~/.config/pipewire/pipewire.conf.d/` -
+**not** in `/etc`, where it survives a reboot.
+
+Suspicion first fell on `webrtc.gain_control`, which had switched from
+`false` to `true` the same day and likewise only took effect on reboot.
+Both values hung identically - only a series test across capture targets
+showed it. Without `target.object` the sound also works, because the
+module then follows the default source; but that is not a safeguard, just
+a different pick of the same risk.
+
+**What remains open:** as soon as an external wireless microphone is to
+become the standard - and that is exactly the plan - a safeguard is
+needed that notices no data is arriving and drops cancellation instead of
+taking the sound down with it. See `TODO.md`.
+
 **Trap during setup:** restarting PipeWire throws the Bluetooth device
 back into HFP, and the card then offers **no A2DP at all** -
 `pactl set-card-profile ... a2dp-sink` fails with "No such entity". The

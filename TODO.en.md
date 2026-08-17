@@ -196,6 +196,36 @@ what has already been done.
   the user clueless - they would be talking to a dead device without
   noticing. Careful with the threshold: silence in the room is normal, a
   permanently **exact** zero level is not.
+  - **On 2026-08-17 the task grew beyond what it was meant to be - the
+    case occurred and took the entire audio output with it.** Echo
+    cancellation was pointed at the USB headset for testing; at reboot
+    its link was not there. The dongle still offers a sound card, ALSA
+    even reports `state: RUNNING` - only 0 bytes arrive. Because the
+    module needs that capture as its clock, PipeWire no longer started
+    the graph, and **nothing** in the system could play audio, not even
+    through the built-in speakers. Details in
+    `docs/Debian-zu-DialOS.en.md`, step 11f.
+  - **So there are two things hanging on this, not one.** (1) The
+    announcement when the microphone goes quiet - as above. (2) A
+    safeguard that drops echo cancellation instead of taking the audio
+    down with it. As long as the target is the built-in microphone the
+    case cannot occur; as soon as an external wireless microphone is to
+    become the standard - and that is planned - (2) is a precondition,
+    not an accessory.
+  - **To investigate:** whether PipeWire itself offers a way to keep a
+    silent source from becoming the clock would be the clean route.
+    Otherwise a service has to check the target before loading (test
+    `parec` for bytes) and only then hook cancellation in.
+  - **And the finding that makes this hard: there is no reliable
+    indicator.** After unplugging and replugging the dongle the same
+    device delivered 64000 bytes instead of 0. Stephan explicitly noted
+    that **before** replugging, the headset had reported an established
+    connection to him, via the dongle too. So: the headset reports
+    connected, the dongle offers a sound card, ALSA reports
+    `state: RUNNING` - and still 0 bytes arrive. My first reading ("the
+    link was not up") was therefore wrong. **Consequence for the
+    safeguard:** it must not rely on any status report, neither the
+    device's nor ALSA's. Only the bytes that actually arrive count.
 
 - [x] **How the task was worded before (for provenance):** What is measured:
   the device cannot sound good and listen at the same time (A2DP has
