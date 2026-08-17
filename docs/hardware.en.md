@@ -161,7 +161,40 @@ untouched.
 - **USB Audio Class**, so it works on Linux without drivers.
 - Range across a flat, so at least 15-20 m through walls.
 
-### Candidates
+### Bluetooth or USB? To be tested, not decided
+
+**As of 2026-08-17.** USB was set first because it avoids the HFP trap.
+Stephan's objection exposed a point against it - and it concerns the
+hardest requirement above:
+
+| | Bluetooth microphone | USB wireless microphone |
+|---|---|---|
+| **Battery level visible** | **yes**, via BlueZ - the login announcement already reads it out and could warn | **no**, the receiver is only a sound card |
+| Interference with music | **risk**: a permanently open HFP link continuously consumes airtime on the same adapter the AIRHUG plays through | no shared scheduling, since it bypasses the Bluetooth stack |
+| Profile conflict | affects only the microphone device itself, not the speaker | none at all |
+
+So the difference is not "good versus bad" but **which failure one would
+rather have**: a microphone that goes flat unnoticed, or radio that might
+stutter while listening.
+
+That A2DP degrades with a simultaneously open SCO link is a known problem
+and depends on the adapter - **that can only be settled on the device,
+not by reading up on it.**
+
+**Approach (Stephan, 2026-08-17):** first an **inexpensive Bluetooth
+microphone to try out** - pair it, run the radio, let it listen, listen
+for stutter. If the test goes well it is the better solution, because the
+battery level stays visible. If it goes badly, that is known for €30
+instead of €150, and USB is the fallback.
+
+**To be built regardless:** the voice service measures the level
+continuously anyway. If **nothing at all** arrives for minutes even
+though the source is present, it can say so ("I can't hear anything from
+the microphone any more"). That does not replace a battery indicator but
+catches exactly the failure that would otherwise leave the user
+clueless - and it works with either design.
+
+### Candidates for the USB fallback
 
 - **[Hollyland Lark M2](https://www.hollyland.com/product/lark-m2)**
   (~€120-150): USB-C receiver with explicit UAC support, 10 h per

@@ -105,6 +105,31 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Bluetooth versus USB for the microphone: open after all, for a reason
+  I had underrated (Stephan's objection, 2026-08-17).** I had settled on
+  USB because it avoids the HFP trap. His objection hits exactly the
+  requirement I had myself called the hardest: **with Bluetooth, DialOS
+  sees the battery level** - the login announcement already reads it via
+  BlueZ and could warn before the microphone goes flat. With USB the
+  receiver is only a sound card; the transmitter can be empty without the
+  system noticing.
+  - **Against it stands a risk that cannot be settled by reading up:** a
+    permanently open HFP link continuously consumes airtime on the same
+    adapter the AIRHUG plays through - that A2DP stutters as a result is
+    a known problem and depends on the adapter.
+  - **So the difference is not "good versus bad" but which failure one
+    would rather have:** a microphone that goes flat unnoticed, or radio
+    that might stutter while listening. Hence an inexpensive Bluetooth
+    microphone to try first - if the test goes well it is the better
+    solution; if it goes badly, that is known for €30 instead of €150.
+- **New task, independent of the device choice: detect when the
+  microphone stops delivering.** The voice service measures the level
+  continuously anyway. If nothing at all arrives for minutes even though
+  the source is present, it should announce "I can't hear anything from
+  the microphone any more." That does not replace a battery indicator but
+  catches the failure that would otherwise leave the user clueless: they
+  talk to a dead device without noticing.
+
 - **Reference audio device decided: two devices instead of one (Stephan,
   2026-08-17).** The AIRHUG stays as the speaker in A2DP, joined by a
   wireless microphone with a **USB** receiver for input. Deliberately not

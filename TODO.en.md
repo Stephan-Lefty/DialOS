@@ -167,14 +167,35 @@ what has already been done.
   second Bluetooth device, which would bring back the HFP trap.
   Requirements and candidates in `docs/hardware.en.md`.
 
-- [ ] **Obtain and check the wireless microphone** (open since
-  2026-08-17). To clarify before buying: **can the transmitter run
-  permanently from a power supply?** Everything hinges on that - an empty
-  transmitter makes the system deaf, and a blind user cannot find the
-  cause. Then check on the device: `pactl list sources` (does it appear
-  without drivers?), range across the flat, recognition quality against
-  the built-in microphone. Candidates: Hollyland Lark M2 (UAC explicit,
-  Linux not named), Cubilux WM-C1BK (Linux explicit, range unclear).
+- [ ] **Obtain an inexpensive Bluetooth microphone to try out**
+  (Stephan, 2026-08-17 - the test decides the design). Bluetooth has one
+  advantage USB does not: **DialOS sees the battery level** via BlueZ and
+  can warn before the microphone goes flat. Against it stands a risk that
+  can only be settled on the device: a permanently open HFP link
+  continuously consumes airtime on the same adapter the AIRHUG plays
+  through - A2DP may stutter.
+
+  **Test plan:** pair it, run the radio through the AIRHUG, point the
+  voice service at the Bluetooth microphone, and listen for stutter.
+  Additionally: range across the flat, battery level appearing in the
+  login announcement, recognition quality against the built-in
+  microphone, and whether echo cancellation still suffices when the
+  microphone lies **next to** the speaker rather than far away.
+
+  If the test goes badly, the fallback is a USB wireless microphone
+  (candidates in `docs/hardware.en.md`) - but then without a battery
+  indicator, and it must be clarified before buying whether the
+  transmitter can run permanently from a power supply.
+
+- [ ] **Detect when the microphone stops delivering** (2026-08-17, to be
+  built regardless of the device choice). The voice service measures the
+  level continuously anyway. If **nothing at all** arrives for minutes
+  even though the source is present, it should say so: "I can't hear
+  anything from the microphone any more." That does not replace a battery
+  indicator but catches exactly the failure that would otherwise leave
+  the user clueless - they would be talking to a dead device without
+  noticing. Careful with the threshold: silence in the room is normal, a
+  permanently **exact** zero level is not.
 
 - [x] **How the task was worded before (for provenance):** What is measured:
   the device cannot sound good and listen at the same time (A2DP has

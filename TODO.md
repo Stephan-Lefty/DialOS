@@ -168,14 +168,34 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   zweites Bluetooth-Gerät, das brächte die HFP-Falle zurück. Anforderungen
   und Kandidaten in `docs/hardware.md`.
 
-- [ ] **Funkmikrofon beschaffen und prüfen** (offen seit 2026-08-17).
-  Vor dem Kauf zu klären: **Kann der Sender dauerhaft am Netzteil
-  laufen?** Davon hängt alles ab - ein leerer Sender macht das System
-  taub, und ein blinder Nutzer findet die Ursache nicht. Danach am Gerät
-  prüfen: `pactl list sources` (erscheint es ohne Treiber?), Reichweite
-  durch die Wohnung, Erkennungsqualität gegen das eingebaute Mikrofon.
-  Kandidaten: Hollyland Lark M2 (UAC ausdrücklich, Linux nicht genannt),
-  Cubilux WM-C1BK (Linux ausdrücklich, Reichweite unklar).
+- [ ] **Preiswertes Bluetooth-Mikrofon zum Ausprobieren beschaffen**
+  (Stephan, 2026-08-17 - der Test entscheidet über die Bauart). Bluetooth
+  hat einen Vorteil, den USB nicht hat: **DialOS sieht den Akkustand**
+  über BlueZ und kann warnen, bevor das Mikrofon leer ist. Dagegen steht
+  ein Risiko, das sich nur am Gerät klären lässt: Ein dauerhaft offenes
+  HFP belegt fortlaufend Funkzeit auf demselben Adapter, über den der
+  AIRHUG spielt - A2DP kann dabei stottern.
+
+  **Prüfplan:** koppeln, Radio über den AIRHUG laufen lassen, den
+  Sprachdienst auf das Bluetooth-Mikrofon legen, und hinhören ob die
+  Musik stottert. Zusätzlich: Reichweite durch die Wohnung, Akkustand
+  erscheint in der Start-Ansage, Erkennungsqualität gegen das eingebaute
+  Mikrofon, und ob die Echo-Unterdrückung noch reicht, wenn das Mikrofon
+  **neben** dem Lautsprecher liegt statt weit weg.
+
+  Fällt der Test schlecht aus, ist die Rückfallebene ein USB-Funkmikrofon
+  (Kandidaten in `docs/hardware.md`) - dann aber ohne Akkuanzeige, und
+  vor dem Kauf zu klären, ob der Sender dauerhaft am Netzteil laufen
+  kann.
+
+- [ ] **Erkennen, wenn das Mikrofon nichts mehr liefert** (2026-08-17,
+  unabhängig von der Gerätewahl zu bauen). Der Sprachdienst misst ohnehin
+  laufend den Pegel. Kommt über Minuten hinweg **gar nichts** an, obwohl
+  die Quelle da ist, soll er es ansagen: „Ich höre nichts mehr vom
+  Mikrofon." Das ersetzt keine Akkuanzeige, fängt aber genau den Ausfall
+  ab, der den Nutzer sonst ratlos zurückließe - er redet sonst gegen ein
+  totes Gerät, ohne es zu merken. Achtung beim Schwellwert: Stille im
+  Raum ist normal, dauerhaft **exakt** null Pegel dagegen nicht.
 
 - [x] **So stand die Aufgabe vorher da (zur Herkunft):** Gemessen ist:
   Das Gerät kann nicht gleichzeitig gut klingen und zuhören (A2DP hat

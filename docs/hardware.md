@@ -166,7 +166,40 @@ bleibt völlig unangetastet.
 - **USB Audio Class**, damit es unter Linux ohne Treiber läuft.
 - Reichweite über eine Wohnung, also mindestens 15-20 m durch Wände.
 
-### Kandidaten
+### Bluetooth oder USB? Zu prüfen, nicht entschieden
+
+**Stand 2026-08-17.** Zuerst war USB gesetzt, weil es die HFP-Falle
+umgeht. Stephans Einwand hat einen Punkt aufgedeckt, der dagegensteht -
+und ausgerechnet die härteste Anforderung von oben betrifft:
+
+| | Bluetooth-Mikrofon | USB-Funkmikrofon |
+|---|---|---|
+| **Akkustand sichtbar** | **ja**, über BlueZ - die Start-Ansage liest ihn heute schon vor und könnte warnen | **nein**, der Empfänger ist nur eine Soundkarte |
+| Störung der Musik | **Risiko**: dauerhaft offenes HFP belegt fortlaufend Funkzeit auf demselben Adapter, über den der AIRHUG spielt | keine gemeinsame Zeitplanung, weil am Bluetooth-Stack vorbei |
+| Profil-Konflikt | betrifft nur das Mikrofon-Gerät selbst, nicht den Lautsprecher | gar keiner |
+
+Der Unterschied ist also nicht „gut gegen schlecht", sondern **welchen
+Fehler man lieber hätte**: ein Mikrofon, das unbemerkt leer wird, oder
+Radio, das während des Zuhörens stottern könnte.
+
+Dass A2DP bei gleichzeitig offener SCO-Verbindung einbricht, ist ein
+bekanntes Problem und hängt vom Adapter ab - **das lässt sich nur am
+Gerät klären, nicht durch Nachlesen.**
+
+**Vorgehen (Stephan, 2026-08-17):** Zuerst ein **preiswertes
+Bluetooth-Mikrofon zum Ausprobieren** - koppeln, Radio laufen lassen,
+zuhören lassen, hinhören ob es stottert. Fällt der Test gut aus, ist es
+die bessere Lösung, weil der Akkustand sichtbar bleibt. Fällt er schlecht
+aus, weiß man es für 30 Euro statt für 150, und USB ist die
+Rückfallebene.
+
+**Unabhängig davon zu bauen:** Der Sprachdienst misst ohnehin laufend den
+Pegel. Kommt über Minuten hinweg **gar nichts** an, obwohl die Quelle da
+ist, kann er das ansagen („Ich höre nichts mehr vom Mikrofon"). Das
+ersetzt keine Akkuanzeige, fängt aber genau den Ausfall ab, der den
+Nutzer sonst ratlos zurückließe - und wirkt bei beiden Bauarten.
+
+### Kandidaten für die USB-Rückfallebene
 
 - **[Hollyland Lark M2](https://www.hollyland.com/product/lark-m2)**
   (~120-150 €): USB-C-Empfänger mit ausdrücklicher UAC-Unterstützung,

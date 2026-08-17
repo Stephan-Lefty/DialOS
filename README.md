@@ -107,6 +107,32 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Bluetooth gegen USB beim Mikrofon: doch offen, und aus einem Grund,
+  den ich unterschätzt hatte (Stephans Einwand, 2026-08-17).** Ich hatte
+  USB gesetzt, weil es die HFP-Falle umgeht. Sein Einwand trifft
+  ausgerechnet die Anforderung, die ich selbst als härteste bezeichnet
+  hatte: **Bei Bluetooth sieht DialOS den Akkustand** - die Start-Ansage
+  liest ihn über BlueZ heute schon vor und könnte warnen, bevor das
+  Mikrofon leer ist. Bei USB ist der Empfänger nur eine Soundkarte; der
+  Sender kann leer sein, ohne dass das System es merkt.
+  - **Dagegen steht ein Risiko, das sich nicht durch Nachlesen klären
+    lässt:** Ein dauerhaft offenes HFP belegt fortlaufend Funkzeit auf
+    demselben Adapter, über den der AIRHUG spielt - dass A2DP dabei
+    stottert, ist ein bekanntes Problem und hängt vom Adapter ab.
+  - **Der Unterschied ist also nicht „gut gegen schlecht", sondern welchen
+    Fehler man lieber hätte:** ein Mikrofon, das unbemerkt leer wird, oder
+    Radio, das während des Zuhörens stottern könnte. Deshalb zuerst ein
+    preiswertes Bluetooth-Mikrofon zum Ausprobieren - fällt der Test gut
+    aus, ist es die bessere Lösung; fällt er schlecht aus, weiß man es für
+    30 Euro statt für 150.
+- **Neue Aufgabe, unabhängig von der Gerätewahl: erkennen, wenn das
+  Mikrofon nichts mehr liefert.** Der Sprachdienst misst ohnehin laufend
+  den Pegel. Kommt über Minuten hinweg gar nichts an, obwohl die Quelle
+  da ist, soll er ansagen „Ich höre nichts mehr vom Mikrofon." Das
+  ersetzt keine Akkuanzeige, fängt aber den Ausfall ab, der den Nutzer
+  sonst ratlos zurückließe: Er redet gegen ein totes Gerät, ohne es zu
+  merken.
+
 - **Referenz-Audiogerät entschieden: zwei Geräte statt einem (Stephan,
   2026-08-17).** Der AIRHUG bleibt als Lautsprecher in A2DP, dazu kommt
   ein Funkmikrofon mit **USB**-Empfänger für die Eingabe. Bewusst kein
