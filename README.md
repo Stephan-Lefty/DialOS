@@ -107,6 +107,42 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Aufteilung von Ein- und Ausgabe festgelegt und in der Doku
+  richtiggestellt (Stephans Nachfrage, 2026-08-17):
+  Spracheingabe immer über das eingebaute Mikrofon, Sprachausgabe über
+  den Bluetooth-Lautsprecher, sofern verbunden.** Die letzte Stelle, die
+  noch anders arbeitete - die Lautstärke-Frage der Start-Ansage - ist
+  umgestellt; sie nimmt jetzt dieselbe echo-bereinigte Quelle wie der
+  Sprachbefehl-Dienst.
+  - **Das klingt widersprüchlich, ist aber genau der Punkt.** Weil
+    Lautsprecher und Mikrofon verschiedene Geräte sind, hört das Mikrofon
+    die Ausgabe im Raum mit - und genau das rechnet die
+    Echo-Unterdrückung heraus. Über das Bluetooth-Mikrofon ginge das
+    nicht, und das Headset fiele dabei auf Telefonqualität.
+  - **Der HFP-Profilwechsel entfällt damit ersatzlos** - am 2026-08-17
+    ist er dreimal hängengeblieben und hat den AIRHUG dauerhaft auf
+    Telefonqualität stehen lassen. Wer das Bluetooth-Mikrofon gar nicht
+    erst öffnet, kann auch nicht darin steckenbleiben.
+  - **Nebenbei behoben:** Die Lautstärke-Frage bog bisher die
+    **systemweite** Standard-Eingabe um (`pactl set-default-source`) - ein
+    Eingriff, der über diese eine Frage hinaus wirkt, weil jedes andere
+    Programm danach eine andere Quelle bekommt. Jetzt bekommt `parec` die
+    Quelle direkt übergeben.
+  - **Vier Doku-Stellen richtiggestellt**, die noch das Gegenteil
+    behaupteten („Bluetooth ist also der primäre Weg"). Sie stützten sich
+    auf den Mikrofon-Vergleich vom 2026-08-13 - der lief unter 60 dB
+    Übersteuerung und ist damit nicht belastbar; er steht als zu
+    wiederholen in TODO.md.
+- **Live-Test des Bedienmodells bestanden (2026-08-17, Stephans Stimme).**
+  Das Debug-Protokoll belegt beide Enden, nicht nur die Mitte: **Vor** dem
+  ersten „Sprachsteuerung starten" zeigt der Pegel gesprochene Sprache
+  (12 Messwerte über 5 %, Spitze 66,8 %) - und **keine einzige
+  Erkennung**. Dazwischen wurden alle sechs Befehle wörtlich erkannt.
+  **Nach** „Sprachsteuerung stoppen" wieder Sprache im Pegel, wieder
+  keine Erkennung. Der Schutz greift also nicht, indem etwas erkannt und
+  dann verworfen wird - im Zustand „aus" kann es gar nicht erst gebildet
+  werden.
+
 - **Bedienmodell entschieden und gebaut: Wann hört DialOS zu?
   (2026-08-17, Stephans Entwurf).** Der Anlass war seine Frage, ob das
   System merkt, dass es gerade etwas wissen will - dahinter steckte ein

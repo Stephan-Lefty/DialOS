@@ -120,6 +120,9 @@ def bluetooth_profil_setzen(karten_name, profil):
     return ergebnis.returncode == 0
 
 
+ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
+
+
 def waehle_mikrofon_fuer_lautstaerke():
     try:
         out = subprocess.run(
@@ -129,13 +132,33 @@ def waehle_mikrofon_fuer_lautstaerke():
         quellen = json.loads(out) if out.strip() else []
     except Exception:
         return None
-    # Bluetooth-Mikrofon bevorzugt (Zielbild laut docs/sprachsteuerung.md
-    # und offene-punkte.md: Bluetooth-Headset ist primaerer Weg), sonst
-    # irgendeine nicht-Monitor-Quelle als Fallback.
+    # UMGESTELLT AM 2026-08-17 (Stephans Entscheidung). Bis dahin stand
+    # hier das Bluetooth-Mikrofon an erster Stelle. Jetzt dieselbe
+    # Reihenfolge wie im Sprachbefehl-Dienst:
+    #
+    #   1. die echo-bereinigte Quelle (haengt selbst am eingebauten Mikrofon)
+    #   2. das eingebaute Mikrofon
+    #   3. Bluetooth nur, wenn es kein eingebautes gibt
+    #
+    # Drei Gruende fuer die Umstellung:
+    #
+    # - Das Umschalten auf HFP und wieder zurueck ist am 2026-08-17
+    #   DREIMAL haengengeblieben. Der AIRHUG stand dann dauerhaft auf
+    #   headset-head-unit, und die Wiedergabe lief in Telefonqualitaet -
+    #   ohne dass jemand, der das Geraet nicht kennt, den Grund erraten
+    #   koennte. Wer das Bluetooth-Mikrofon gar nicht erst oeffnet, kann
+    #   auch nicht darin steckenbleiben.
+    # - Die Echo-Unterdrueckung gibt es nur auf dem eingebauten Weg. Ueber
+    #   Bluetooth wuerde die Frage also wieder die eigene Ansage mithoeren.
+    # - Die Begruendung fuer die frueher bevorzugte Bluetooth-Quelle stammt
+    #   aus dem Mikrofon-Vergleich vom 2026-08-13. Der stand unter 60 dB
+    #   Uebersteuerung und ist damit nicht belastbar (siehe TODO.md).
     kandidaten = [q.get("name", "") for q in quellen if q.get("name") and not q["name"].endswith(".monitor")]
-    bluetooth = [n for n in kandidaten if n.startswith("bluez_input.")]
-    if bluetooth:
-        return bluetooth[0]
+    if ECHO_QUELLE in kandidaten:
+        return ECHO_QUELLE
+    eingebaut = [n for n in kandidaten if not n.startswith("bluez_input.")]
+    if eingebaut:
+        return eingebaut[0]
     return kandidaten[0] if kandidaten else None
 
 
@@ -206,7 +229,12 @@ def frage_lautstaerke():
             bluetooth_umgeschaltet = True
             time.sleep(1.5)
     if quelle:
-        subprocess.run(["pactl", "set-default-source", quelle], capture_output=True)
+        # Frueher wurde hier die systemweite Standard-Eingabe umgebogen.
+        # Das ist ein Eingriff, der ueber diese eine Frage hinaus wirkt -
+        # jedes andere Programm bekommt danach eine andere Quelle. Statt
+        # dessen bekommt parec die Quelle jetzt direkt uebergeben (siehe
+        # einmal_zuhoeren).
+        pass
 
     # Formulierung bewusst als Rueckfrage NACH der Ansage: Der Nutzer hat
     # sie gerade gehoert und kann die Lautstaerke daran messen. Vorher
@@ -228,10 +256,11 @@ def frage_lautstaerke():
             vosk.SetLogLevel(-1)
             modell = vosk.Model(LAUTSTAERKE_VOSK_MODELL)
             erkenner = vosk.KaldiRecognizer(modell, LAUTSTAERKE_ABTASTRATE)
-            prozess = subprocess.Popen(
-                ["parec", f"--rate={LAUTSTAERKE_ABTASTRATE}", "--channels=1", "--format=s16le"],
-                stdout=subprocess.PIPE,
-            )
+            befehl = ["parec", f"--rate={LAUTSTAERKE_ABTASTRATE}",
+                      "--channels=1", "--format=s16le"]
+            if quelle:
+                befehl.append(f"--device={quelle}")
+            prozess = subprocess.Popen(befehl, stdout=subprocess.PIPE)
             audiodaten = bytearray()
             ende = time.time() + LAUTSTAERKE_AUFNAHME_SEKUNDEN
             while time.time() < ende:

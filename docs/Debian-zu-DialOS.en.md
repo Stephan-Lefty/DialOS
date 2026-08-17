@@ -684,9 +684,10 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
   the first real production use of Vosk (previously only the test
   script `dialos-vosk-test.py`) - asks "Wie laut soll ich sein? Sage
   100, 75, 50, 25 oder aus." (How loud should I be? Say 100, 75, 50, 25
-  or off), records 4 seconds via `parec` (Bluetooth microphone
-  preferred, including the `headset-head-unit` profile switch like in
-  `dialos-vosk-test.py`), recognizes it with the small German Vosk
+  or off), records 4 seconds via `parec` (since
+  2026-08-17 via the echo-cancelled source on the **built-in**
+  microphone, rather than over Bluetooth with a `headset-head-unit`
+  profile switch as before - see step 11f), recognizes it with the small German Vosk
   model. The result drives speech-dispatcher's own volume (`spd-say
   -i`, -100 to +100) for the rest of the announcement - new
   `--lautstaerke` parameter in `dialos-say.py`. On "off", only the
@@ -1396,10 +1397,24 @@ Decision: **hassil instead of Rhasspy** for intent recognition (Rhasspy
 was archived by its creator, no longer maintained) - details and
 reasoning in [sprachsteuerung.en.md](sprachsteuerung.en.md).
 
-Core result of the microphone comparison test: a Bluetooth headset
-(e.g. AIRHUG) is clearly superior to the built-in laptop microphone -
-the target design is a Bluetooth microphone as the primary path, with
-the built-in microphone as a (not yet implemented) fallback. Details:
+On the split between input and output, **as of 2026-08-17**:
+
+- **Speech input: always the built-in microphone**, via the
+  echo-cancelled source (step 11f). Bluetooth only as a last resort on
+  devices without a built-in microphone.
+- **Speech output: the Bluetooth speaker** whenever connected -
+  otherwise the built-in speakers.
+
+That sounds contradictory but is exactly the point: because speaker and
+microphone are different devices, the microphone picks up the output in
+the room - and that is precisely what echo cancellation subtracts (32 dB
+measured). Using the Bluetooth microphone instead would drop the headset
+to HFP and the output to phone quality.
+
+The earlier microphone comparison test reached the opposite conclusion
+(Bluetooth clearly superior) but ran with the built-in microphone
+over-amplified by 60 dB and is therefore not reliable - it should be
+repeated (TODO.en.md). Details:
 [offene-punkte.en.md](offene-punkte.en.md), section "Voice control".
 
 ## 16. Backup image (Clonezilla)

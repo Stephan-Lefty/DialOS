@@ -105,6 +105,40 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Split between input and output settled and corrected in the docs
+  (Stephan's question, 2026-08-17): speech input always via the built-in
+  microphone, speech output via the Bluetooth speaker whenever
+  connected.** The last place still working differently - the volume
+  question in the login announcement - has been switched over; it now
+  uses the same echo-cancelled source as the voice-command service.
+  - **That sounds contradictory but is exactly the point.** Because
+    speaker and microphone are different devices, the microphone picks up
+    the output in the room - and that is precisely what echo cancellation
+    subtracts. It would not work over the Bluetooth microphone, and the
+    headset would drop to phone quality in the process.
+  - **The HFP profile switch is gone entirely** - on 2026-08-17 it got
+    stuck three times and left the AIRHUG permanently at phone quality.
+    Whatever never opens the Bluetooth microphone cannot get stuck in it.
+  - **Fixed along the way:** the volume question used to redirect the
+    **system-wide** default input (`pactl set-default-source`) - an
+    intervention reaching beyond that one question, since every other
+    program gets a different source afterwards. `parec` is now handed the
+    source directly.
+  - **Four documentation passages corrected** that still claimed the
+    opposite ("Bluetooth is therefore the primary path"). They rested on
+    the microphone comparison of 2026-08-13 - which ran under 60 dB of
+    over-amplification and is therefore not reliable; it is listed for
+    repetition in TODO.en.md.
+- **Live test of the interaction model passed (2026-08-17, Stephan's
+  voice).** The debug log proves both ends, not just the middle:
+  **before** the first "Sprachsteuerung starten" the level shows spoken
+  speech (12 measurements above 5 %, peak 66.8 %) - and **not a single
+  recognition**. In between, all six commands were recognized verbatim.
+  **After** "Sprachsteuerung stoppen", speech in the level again, again
+  no recognition. So the protection does not work by recognizing
+  something and then discarding it - in the "off" state it cannot even be
+  formed.
+
 - **Interaction model decided and built: when does DialOS listen?
   (2026-08-17, Stephan's design).** It started with his question whether
   the system notices that it wants to know something - behind it was a

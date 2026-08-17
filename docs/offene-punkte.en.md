@@ -84,11 +84,24 @@ so nothing gets lost from the discussions.
   a blind user that would be the total failure: they do not notice the
   headset is off and simply get no feedback at all.
 
-  The basis for this is the comparison test of 2026-08-13 (AIRHUG vs. the
-  built-in laptop microphone: 6 of 8 test sentences exactly correct over
-  Bluetooth at normal speaking volume, noticeably weaker with the
-  built-in microphone). Bluetooth is therefore the primary path, the
-  built-in devices are the fallback.
+  The basis for this was the comparison test of 2026-08-13 (AIRHUG vs.
+  the built-in laptop microphone: 6 of 8 test sentences exactly correct
+  over Bluetooth, noticeably weaker with the built-in microphone).
+
+  **Reversed since 2026-08-17, and for input completely:** speech input
+  now always uses the **built-in microphone**; output continues over the
+  Bluetooth speaker whenever it is connected. Three reasons:
+
+  - As soon as anything opens the Bluetooth microphone, the headset drops
+    to HFP - playback then runs at phone quality (1 channel, 16000 Hz
+    instead of 2 channels, 48000 Hz). On 2026-08-17 switching back got
+    stuck **three times**.
+  - Echo cancellation exists only on the built-in path; over Bluetooth,
+    recognition would again hear the system's own announcement.
+  - The comparison test itself is **not reliable**: it ran with the
+    built-in microphone over-amplified by 60 dB (see TODO.en.md, "repeat
+    the microphone comparison"). It may not have measured the microphone
+    at all, but the clipping.
 
   **Implementation status (corrected 2026-08-16 - this previously said
   "not implemented", which was wrong):**

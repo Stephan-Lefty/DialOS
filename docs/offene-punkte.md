@@ -88,11 +88,25 @@ damit nichts aus den Diskussionen verloren geht.
   das der Totalausfall: Er merkt nicht, dass das Headset aus ist, und
   bekommt keinerlei Rückmeldung mehr.
 
-  Grundlage der Entscheidung ist der Vergleichstest vom 2026-08-13
+  Grundlage der Entscheidung war der Vergleichstest vom 2026-08-13
   (AIRHUG gegen eingebautes Laptop-Mikrofon: 6 von 8 Testsätzen exakt
-  korrekt über Bluetooth bei normaler Sprechlautstärke, deutlich
-  schwächer beim eingebauten Mikrofon). Bluetooth ist also der primäre
-  Weg, die eingebauten Geräte sind die Rückfallebene.
+  korrekt über Bluetooth, deutlich schwächer beim eingebauten Mikrofon).
+
+  **Umgekehrt seit 2026-08-17, und zwar für die Eingabe vollständig:**
+  Zur Spracheingabe wird jetzt **immer das eingebaute Mikrofon** benutzt,
+  die Ausgabe läuft weiter über den Bluetooth-Lautsprecher, sofern er
+  verbunden ist. Drei Gründe:
+
+  - Sobald etwas das Bluetooth-Mikrofon öffnet, fällt das Headset auf
+    HFP - die Wiedergabe läuft dann in Telefonqualität (1 Kanal,
+    16000 Hz statt 2 Kanäle, 48000 Hz). Am 2026-08-17 ist das
+    Zurückschalten **dreimal** hängengeblieben.
+  - Die Echo-Unterdrückung gibt es nur auf dem eingebauten Weg; über
+    Bluetooth würde die Erkennung wieder die eigene Ansage mithören.
+  - Der Vergleichstest selbst ist **nicht belastbar**: Er lief unter
+    60 dB Übersteuerung des eingebauten Mikrofons (siehe TODO.md,
+    „Mikrofon-Vergleich wiederholen"). Er hat womöglich nicht das
+    Mikrofon gemessen, sondern die Übersteuerung.
 
   **Stand der Umsetzung (korrigiert am 2026-08-16 - hier stand vorher
   fälschlich "nicht implementiert"):**

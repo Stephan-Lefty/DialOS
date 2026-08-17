@@ -702,8 +702,9 @@ enabled=true` steht schon als dconf-Standardwert in
   TODO.md): Erste echte Vosk-Nutzung im Betrieb (vorher nur das
   Testskript `dialos-vosk-test.py`) - fragt "Wie laut soll ich sein?
   Sage 100, 75, 50, 25 oder aus.", nimmt 4 Sekunden per `parec` auf
-  (Bluetooth-Mikrofon bevorzugt, inkl. `headset-head-unit`-
-  Profilwechsel wie in `dialos-vosk-test.py`), erkennt mit dem kleinen
+  (seit 2026-08-17 über die echo-bereinigte Quelle am **eingebauten**
+  Mikrofon statt wie zuvor über Bluetooth mit `headset-head-unit`-
+  Profilwechsel - siehe Schritt 11f), erkennt mit dem kleinen
   deutschen Vosk-Modell. Ergebnis steuert Speech-Dispatchers eigene
   Lautstärke (`spd-say -i`, -100 bis +100) für den Rest der Ansage -
   neuer `--lautstaerke`-Parameter in `dialos-say.py`. Bei "aus" wird
@@ -1442,10 +1443,24 @@ Entscheidung **hassil statt Rhasspy** für die Intent-Erkennung
 (Rhasspy vom Ersteller archiviert, nicht mehr gepflegt) - Details und
 Begründung in [sprachsteuerung.md](sprachsteuerung.md).
 
-Kernergebnis des Mikrofon-Vergleichstests: ein Bluetooth-Headset (z. B.
-AIRHUG) ist dem eingebauten Laptop-Mikrofon klar überlegen - Zielbild
-ist Bluetooth-Mikrofon als primärer Weg, eingebautes Mikrofon als (noch
-nicht implementierter) Fallback. Details:
+Zur Aufteilung von Ein- und Ausgabe, **Stand 2026-08-17**:
+
+- **Spracheingabe: immer das eingebaute Mikrofon**, über die
+  echo-bereinigte Quelle (Schritt 11f). Bluetooth nur als letzter Ausweg
+  auf Geräten ohne eingebautes Mikrofon.
+- **Sprachausgabe: der Bluetooth-Lautsprecher**, sofern verbunden -
+  sonst die eingebauten Lautsprecher.
+
+Das klingt widersprüchlich, ist aber genau der Punkt: Weil Lautsprecher
+und Mikrofon verschiedene Geräte sind, hört das Mikrofon die Ausgabe im
+Raum mit - und genau das rechnet die Echo-Unterdrückung heraus (32 dB
+gemessen). Würde stattdessen das Bluetooth-Mikrofon benutzt, fiele das
+Headset auf HFP und die Ausgabe auf Telefonqualität.
+
+Der frühere Mikrofon-Vergleichstest kam zum gegenteiligen Ergebnis
+(Bluetooth klar überlegen), lief aber unter 60 dB Übersteuerung des
+eingebauten Mikrofons und ist deshalb nicht belastbar - er gehört
+wiederholt (TODO.md). Details:
 [offene-punkte.md](offene-punkte.md), Abschnitt "Sprachsteuerung".
 
 ## 16. Sicherungs-Abbild (Clonezilla)
