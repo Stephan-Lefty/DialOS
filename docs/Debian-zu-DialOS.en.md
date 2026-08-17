@@ -732,6 +732,42 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
 - `dialos-desktop-stil.sh`: switches the desktop's look between the GNOME
   standard and a Windows 11 imitation (see below).
 
+### 11a. Questions sound different from hints (new 2026-08-17)
+
+For someone who cannot see the screen, "is it waiting for me right now?"
+is the decisive information. On 2026-08-16 the first test of the volume
+prompt failed on exactly that: the system asked, but Stephan didn't know
+when to answer - the answer was lost.
+
+`dialos-say.py` therefore has the switch **`--frage`** (question):
+
+```bash
+dialos-say.py --frage "War das angenehm laut?"
+```
+
+**The default is the natural sentence melody.** Piper is trained on text
+with punctuation and produces a rising melody from the question mark by
+itself - compared on 2026-08-17 against a higher pitch and against a
+signal tone, and chosen by Stephan as the best variant. It sounds natural
+and does not wear out.
+
+**The signal tone is the option.** Enabled via
+`~/.config/dialos/frageton` containing `an`; the file played is
+`/usr/local/share/dialos/frage-ton.wav`. The reason to offer it at all: a
+rising melody at the end is only noticed by someone who was listening -
+anyone who missed the beginning, or has the radio on, needs a signal
+independent of that. Hence a setting rather than a decision.
+
+**Why a switch in the code rather than "detect the question mark":** a
+question mark can appear in the middle of a hint, and a rhetorical
+question wants no signal. The code building the announcement *knows*
+whether it wants to know something - that information should be passed
+on, not guessed from punctuation. Verified on 2026-08-17: with the option
+enabled, a question marked with `--frage` gets the tone, an ordinary hint
+does not.
+
+So far the only use: the volume question in the login announcement.
+
 ### 11b. Optional Windows 11 look (new 2026-08-16)
 
 **Why this exists:** there are people who want DialOS for the voice

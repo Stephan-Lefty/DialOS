@@ -107,6 +107,33 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Fragen klingen jetzt anders als Hinweise (Stephans Frage vom
+  2026-08-17, am selben Tag gebaut).** `dialos-say.py` kennt den Schalter
+  `--frage`; die Lautstärke-Frage der Start-Ansage ist der erste
+  Anwendungsfall.
+  - **Standard ist die natürliche Satzmelodie.** Im Hörvergleich wurden
+    vier Varianten gegeneinander gestellt: derselbe Satz als Aussage, als
+    Frage (nur das Satzzeichen anders), mit erhöhter Tonlage, und mit
+    einem Signalton davor. Stephan hat die reine Satzmelodie gewählt -
+    Piper erzeugt sie aus dem Fragezeichen von selbst, sie klingt
+    natürlich und nutzt sich nicht ab. Technisch kostet sie nichts: Der
+    Text trägt das Fragezeichen ohnehin.
+  - **Der Signalton bleibt als Option** (`~/.config/dialos/frageton` mit
+    Inhalt `an`, Stephans Wunsch: der Nutzer soll später entscheiden).
+    Der Grund, ihn anzubieten: Eine steigende Melodie am Satzende erkennt
+    nur, wer zugehört hat - wer den Anfang verpasst hat oder nebenbei
+    Radio hört, braucht ein davon unabhängiges Signal.
+  - **Warum ein Schalter im Code und nicht „erkenne das Fragezeichen
+    selbst":** Ein Fragezeichen kann mitten in einem Hinweis stehen, und
+    eine rhetorische Frage will kein Signal. Der Code, der die Ansage
+    baut, *weiß*, ob er etwas wissen will. Nachgewiesen: Bei
+    eingeschalteter Option bekommt eine mit `--frage` markierte Frage den
+    Ton, ein gewöhnlicher Hinweis nicht.
+  - Der Anlass dafür liegt am 2026-08-16: Beim ersten Test der
+    Lautstärke-Frage wusste das System, dass es fragt - **Stephan wusste
+    nur nicht, wann er antworten soll**, und die Antwort ging verloren.
+    Behelf war damals der Satz „Und jetzt bitte.".
+
 - **Echo-Unterdrückung gebaut - der Fehler von heute früh ist damit an
   der Wurzel behoben (2026-08-17).** PipeWires `module-echo-cancel` mit
   dem WebRTC-Algorithmus rechnet das Lautsprechersignal aus dem Mikrofon

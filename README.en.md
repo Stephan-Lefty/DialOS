@@ -105,6 +105,33 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Questions now sound different from hints (Stephan's question of
+  2026-08-17, built the same day).** `dialos-say.py` has the `--frage`
+  switch; the volume question in the login announcement is the first use.
+  - **The default is the natural sentence melody.** Four variants were
+    compared by ear: the same sentence as a statement, as a question
+    (only the punctuation differing), with raised pitch, and with a
+    signal tone in front. Stephan chose the plain sentence melody - Piper
+    produces it from the question mark by itself, it sounds natural and
+    does not wear out. Technically it costs nothing: the text carries the
+    question mark anyway.
+  - **The signal tone remains as an option**
+    (`~/.config/dialos/frageton` containing `an`; Stephan's wish: the
+    user should decide later). The reason to offer it: a rising melody at
+    the end of a sentence is only noticed by someone who was listening -
+    anyone who missed the beginning, or has the radio on, needs a signal
+    independent of that.
+  - **Why a switch in the code rather than "detect the question mark":**
+    a question mark can sit in the middle of a hint, and a rhetorical
+    question wants no signal. The code building the announcement *knows*
+    whether it wants to know something. Verified: with the option
+    enabled, a question marked `--frage` gets the tone, an ordinary hint
+    does not.
+  - The trigger for this dates to 2026-08-16: during the first test of
+    the volume prompt the system knew it was asking - **Stephan just
+    didn't know when to answer**, and the answer was lost. The stopgap
+    back then was the sentence "Und jetzt bitte.".
+
 - **Echo cancellation built - this fixes this morning's fault at the root
   (2026-08-17).** PipeWire's `module-echo-cancel` with the WebRTC
   algorithm subtracts the speaker signal from the microphone and provides

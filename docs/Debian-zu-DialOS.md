@@ -751,6 +751,43 @@ enabled=true` steht schon als dconf-Standardwert in
 - `dialos-desktop-stil.sh`: schaltet die Optik des Desktops zwischen
   GNOME-Standard und Windows-11-Nachbau um (siehe unten).
 
+### 11a. Fragen klingen anders als Hinweise (neu 2026-08-17)
+
+Für jemanden, der den Bildschirm nicht sieht, ist „wartet es gerade auf
+mich?" die entscheidende Information. Am 2026-08-16 ist genau daran der
+erste Test der Lautstärke-Frage gescheitert: Das System fragte, aber
+Stephan wusste nicht, wann er antworten soll - die Antwort ging verloren.
+
+`dialos-say.py` kennt deshalb den Schalter **`--frage`**:
+
+```bash
+dialos-say.py --frage "War das angenehm laut?"
+```
+
+**Standard ist die natürliche Satzmelodie.** Piper ist auf Text mit
+Satzzeichen trainiert und erzeugt aus dem Fragezeichen von selbst eine
+steigende Melodie - im Hörvergleich am 2026-08-17 gegen eine höhere
+Tonlage und gegen einen Signalton gestellt, und von Stephan als beste
+Variante gewählt. Sie klingt natürlich und nutzt sich nicht ab.
+
+**Der Signalton ist die Option.** Eingeschaltet über
+`~/.config/dialos/frageton` mit dem Inhalt `an`, abgespielt wird
+`/usr/local/share/dialos/frage-ton.wav`. Der Grund, ihn überhaupt
+anzubieten: Eine steigende Satzmelodie am Ende erkennt nur, wer zugehört
+hat - wer den Anfang verpasst hat oder nebenbei Radio hört, braucht ein
+Signal, das davon unabhängig ist. Deshalb eine Einstellung und keine
+Festlegung.
+
+**Warum ein Schalter im Code und nicht „erkenne das Fragezeichen
+selbst":** Ein Fragezeichen kann auch mitten in einem Hinweis stehen, und
+eine rhetorische Frage will kein Signal. Der Code, der die Ansage baut,
+*weiß*, ob er etwas wissen will - diese Information soll er weitergeben,
+statt sie am Satzzeichen raten zu lassen. Nachgewiesen am 2026-08-17: Bei
+eingeschalteter Option bekommt eine mit `--frage` markierte Frage den
+Ton, ein gewöhnlicher Hinweis nicht.
+
+Bisher einziger Anwendungsfall: die Lautstärke-Frage der Start-Ansage.
+
 ### 11b. Optionale Windows-11-Optik (neu 2026-08-16)
 
 **Warum das drin ist:** Es gibt Interessenten, die DialOS wegen der

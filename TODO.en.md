@@ -106,21 +106,6 @@ what has already been done.
   switch: anyone who doesn't know recognition is off will think the
   device is broken.
 
-- [ ] **Previous description of this item (for traceability):** the
-  safeguard against self-triggering only covered `dialos-say.py`;
-  everything else the device played was heard by the service. Superseded
-  by echo cancellation, see above. The safeguard against self-triggering only covers
-  `dialos-say.py`, because only that script sets the marker. Everything
-  else the device plays - radio, music, media libraries, a WAV played via
-  `paplay` - is heard by the voice service, and the restricted grammar
-  forces fragments into a command. It occurred live while playing back
-  the login announcement. For a system meant to play radio and music this
-  is not an edge case: a newsreader saying "Windows" switches the
-  desktop. Two possible routes: **echo cancellation** (PipeWire ships
-  `module-echo-cancel`, which subtracts the speaker signal from the
-  microphone) or the **wake word** that is pending anyway. The marker file
-  cannot solve it in principle.
-
 - [ ] **Check pauses between the sentences of the announcement** (open
   since 2026-08-17). Michael sounded "hectic", yet the tempo chosen was
   faster - which suggests the missing breaths between sentences are the
@@ -130,8 +115,15 @@ what has already been done.
   words drag. Build a listening sample first: same tempo, only with
   pauses.
 
-- [ ] **Distinguish announcements: question or hint?** (Stephan's
-  question of 2026-08-17). Today the system knows implicitly - the code
+- [x] **Distinguish announcements: question or hint - built on
+  2026-08-17.** `dialos-say.py --frage`; the default is the natural
+  sentence melody from the question mark, the signal tone is an option
+  via `~/.config/dialos/frageton`. See `docs/Debian-zu-DialOS.en.md`,
+  step 11a. What remains is making it switchable by voice later ("switch
+  on the signal tone") - that needs the "Sprachsteuerung starten/stoppen"
+  switch first.
+
+- [x] **Original description (Stephan's question of 2026-08-17).** Today the system knows implicitly - the code
   decides what gets said - but never passes it on: `dialos-say.py`
   receives a text and speaks it. More important than the system knowing
   is that **the user recognizes a question as a question**: for someone

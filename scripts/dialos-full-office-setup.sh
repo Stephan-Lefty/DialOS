@@ -349,6 +349,11 @@ schritt_11_sprachausgabe() {
   sudo mkdir -p /usr/local/share/dialos
   sudo cp iso-build/config/includes.chroot/usr/local/share/dialos/dialos-fenster-symbolic.svg /usr/local/share/dialos/
   sudo chmod 644 /usr/local/share/dialos/dialos-fenster-symbolic.svg
+  # Signalton fuer Fragen. Wird nur abgespielt, wenn der Nutzer ihn
+  # eingeschaltet hat (~/.config/dialos/frageton) - Standard ist die
+  # natuerliche Satzmelodie aus dem Fragezeichen.
+  sudo cp iso-build/config/includes.chroot/usr/local/share/dialos/frage-ton.wav /usr/local/share/dialos/
+  sudo chmod 644 /usr/local/share/dialos/frage-ton.wav
 
   # Mikrofon-Aufnahmepegel. MUSS vor dem Sprachbefehl kommen: Ab Werk
   # lagen auf dem T490 60 dB Verstaerkung an (Capture +30 dB UND Internal

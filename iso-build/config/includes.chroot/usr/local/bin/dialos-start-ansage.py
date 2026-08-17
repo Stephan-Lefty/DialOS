@@ -88,10 +88,19 @@ def ist_kundenkonto():
         return False
 
 
-def spd_say(text, intensitaet=None):
+def spd_say(text, intensitaet=None, frage=False):
+    """Sprechen. frage=True markiert eine echte Frage an den Nutzer.
+
+    Der Text behaelt sein Fragezeichen - Piper erzeugt daraus von selbst
+    eine steigende Satzmelodie. Zusaetzlich stellt dialos-say.py einen
+    kurzen Signalton voran, WENN der Nutzer das eingeschaltet hat
+    (~/.config/dialos/frageton). Standard ist die Melodie allein.
+    """
     cmd = ["/usr/local/bin/dialos-say.py"]
     if intensitaet is not None:
         cmd += ["--lautstaerke", str(intensitaet)]
+    if frage:
+        cmd.append("--frage")
     cmd.append(text)
     subprocess.run(cmd)
 
@@ -205,7 +214,8 @@ def frage_lautstaerke():
     # ueberhaupt ist - fuer einen blinden Nutzer ein sinnloser Massstab.
     spd_say(
         "War das angenehm laut? Du kannst es einmalig festlegen. "
-        "Sage 100, 75, 50, 25 oder aus."
+        "Sage 100, 75, 50, 25 oder aus.",
+        frage=True,
     )
     # Klares Startsignal direkt vor der Aufnahme - live am 2026-08-14
     # getestet: ohne dieses Signal wusste der Testnutzer nicht genau,

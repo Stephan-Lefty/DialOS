@@ -106,22 +106,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   eine Antwort darauf ist der Schalter gefährlicher als kein Schalter:
   Wer nicht weiß, dass die Erkennung aus ist, hält das Gerät für kaputt.
 
-- [ ] **Alte Beschreibung des Punkts (zur Nachvollziehbarkeit):** Der
-  Schutz gegen Selbst-Auslösung griff nur bei `dialos-say.py`; alles
-  andere, was das Gerät abspielt, hörte der Dienst mit. Ersetzt durch die
-  Echo-Unterdrückung, siehe oben. Der Schutz gegen Selbst-Auslösung greift nur bei
-  `dialos-say.py`, weil nur dieses Skript die Markierung setzt. Alles
-  andere, was das Gerät abspielt - Radio, Musik, Mediathek, ein per
-  `paplay` abgespieltes WAV - hört der Sprachdienst mit, und die
-  eingeschränkte Grammatik presst Bruchstücke in einen Befehl. Live
-  aufgetreten beim Vorspielen der Start-Ansage. Für ein System, das
-  Radio und Musik abspielen soll, ist das kein Randfall: Ein
-  Nachrichtensprecher, der „Windows" sagt, stellt den Schreibtisch um.
-  Zwei mögliche Wege: **Echo-Unterdrückung** (PipeWire bringt
-  `module-echo-cancel` mit - rechnet das Lautsprechersignal aus dem
-  Mikrofon heraus) oder das **Aufweckwort**, das ohnehin ansteht. Die
-  Markierungsdatei allein kann es prinzipiell nicht lösen.
-
 - [ ] **Pausen zwischen den Sätzen der Ansage prüfen** (offen seit
   2026-08-17). Michael klang „hektisch", gewählt wurde dann aber ein
   schnelleres Tempo - das spricht dafür, dass die fehlenden Atempausen
@@ -131,8 +115,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   ruhiger machen, ohne einzelne Wörter schleppen zu lassen. Vorher eine
   Hörprobe bauen: gleiches Tempo, nur mit Pausen.
 
-- [ ] **Ansagen unterscheiden: Frage oder Hinweis?** (Stephans Frage vom
-  2026-08-17). Heute weiß das System es implizit - der Code entscheidet
+- [x] **Ansagen unterscheiden: Frage oder Hinweis - gebaut am
+  2026-08-17.** `dialos-say.py --frage`, Standard ist die natürliche
+  Satzmelodie aus dem Fragezeichen, der Signalton ist Option über
+  `~/.config/dialos/frageton`. Siehe `docs/Debian-zu-DialOS.md`,
+  Schritt 11a. Offen bleibt nur, das später per Sprachbefehl umschaltbar
+  zu machen („Signalton einschalten") - das braucht erst den Schalter
+  „Sprachsteuerung starten/stoppen".
+
+- [x] **Ursprüngliche Beschreibung (Stephans Frage vom 2026-08-17).** Heute weiß das System es implizit - der Code entscheidet
   ja, was gesagt wird -, gibt es aber nirgends weiter: `dialos-say.py`
   bekommt einen Text und spricht ihn. Wichtiger als das Wissen des
   Systems ist, dass **der Nutzer die Frage als Frage erkennt**: Für

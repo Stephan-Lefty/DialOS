@@ -68,6 +68,45 @@ def fuer_sprachausgabe(text):
     return text
 
 
+FRAGE_TON = "/usr/local/share/dialos/frage-ton.wav"
+
+
+def frageton_gewuenscht():
+    """Soll vor einer Frage ein kurzer Ton kommen?
+
+    Stephans Entscheidung vom 2026-08-17: Die natuerliche Satzmelodie ist
+    der Standard - Piper erzeugt bei einem Fragezeichen von selbst eine
+    steigende Melodie, das klingt besser als jedes kuenstliche Signal und
+    nutzt sich nicht ab. Der Ton ist die OPTION fuer Nutzer, denen das
+    nicht genuegt.
+
+    Und es gibt gute Gruende, ihn zu wollen: Eine steigende Satzmelodie
+    am Ende erkennt nur, wer zugehoert hat. Wer den Anfang verpasst hat
+    oder nebenbei Radio hoert, braucht ein Signal, das unabhaengig davon
+    funktioniert. Deshalb ist es eine Einstellung und keine Festlegung.
+
+    Datei mit dem Inhalt "an" schaltet ihn ein; fehlt sie, bleibt es bei
+    der Satzmelodie allein.
+    """
+    pfad = os.path.join(
+        os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
+        "dialos", "frageton")
+    try:
+        with open(pfad) as f:
+            return f.read().strip().lower() in ("an", "ein", "ja", "1")
+    except OSError:
+        return False
+
+
+def frageton_abspielen():
+    if not os.path.exists(FRAGE_TON):
+        return
+    try:
+        subprocess.run(["paplay", FRAGE_TON], capture_output=True, timeout=5)
+    except Exception:
+        pass
+
+
 def markierungsdatei():
     """Pro Konto eigener Pfad - bewusst NICHT ein fester Name in /tmp.
 
@@ -172,6 +211,20 @@ def sprich(cmd, grenze_s):
 
 def main():
     argv = sys.argv[1:]
+    # "--frage" markiert die Ausgabe als Frage an den Nutzer. Der Text
+    # selbst bleibt unveraendert - sein Fragezeichen sorgt bei Piper fuer
+    # die steigende Satzmelodie. Zusaetzlich wird, falls eingeschaltet,
+    # ein kurzer Ton vorangestellt.
+    #
+    # Warum ueberhaupt ein Schalter und nicht "erkenne das Fragezeichen
+    # selbst": Ein Fragezeichen kann auch mitten in einem Hinweis stehen,
+    # und eine rhetorische Frage will kein Signal. Der Code, der die
+    # Ansage baut, WEISS ob er etwas wissen will - diese Information soll
+    # er weitergeben, statt sie am Satzzeichen raten zu lassen.
+    ist_frage = False
+    if "--frage" in argv:
+        ist_frage = True
+        argv = [a for a in argv if a != "--frage"]
     intensitaet = None
     if argv and argv[0] == "--lautstaerke":
         # Speech-Dispatcher-Lautstaerke (-i, "Intensitaet"), -100 bis
@@ -182,6 +235,8 @@ def main():
             intensitaet = None
         argv = argv[2:]
     text = fuer_sprachausgabe(" ".join(argv))
+    if ist_frage and frageton_gewuenscht():
+        frageton_abspielen()
     if not text:
         return
     streams = sink_inputs()
