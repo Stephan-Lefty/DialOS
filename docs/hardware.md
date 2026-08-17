@@ -140,6 +140,80 @@ Restrisiko, aber kein Ausschlusskriterium.
 dahin bleibt es beim eingebauten Mikrofon, weil das wenigstens die
 Ausgabequalität nicht beschädigt.
 
+## Zwei Geräte statt einem (Entscheidung 2026-08-17)
+
+Aus den Messungen weiter oben folgt: Ein einzelnes Bluetooth-Gerät kann
+nicht beides. Stephans Entscheidung ist deshalb ein **Paar**:
+
+| Aufgabe | Gerät | Weg |
+|---|---|---|
+| Sprachausgabe, Musik, Radio | AIRHUG 01, bleibt | Bluetooth A2DP |
+| Spracheingabe | Funkmikrofon mit USB-Empfänger | USB Audio Class |
+
+**Warum kein zweites Bluetooth-Gerät:** Das brächte die HFP-Falle zurück,
+die den ganzen Vormittag des 2026-08-17 gekostet hat. Ein Funkmikrofon
+mit USB-Empfänger meldet sich dagegen als gewöhnliche USB-Soundkarte -
+kein Profil, kein A2DP/HFP-Konflikt, keine Kopplung, und der Lautsprecher
+bleibt völlig unangetastet.
+
+### Anforderungen an das Mikrofon
+
+- **Kein Akku im Dauerbetrieb**, oder wenigstens Betrieb am Netzteil.
+  Das ist die härteste Anforderung, und sie stammt aus der Zielgruppe:
+  Ein leerer Sender macht das System **taub**, und ein blinder Nutzer
+  findet die Ursache nicht - sie liegt außerhalb des Systems. Dieselbe
+  Sorte Fehler wie die entkoppelte Gerätelautstärke.
+- **USB Audio Class**, damit es unter Linux ohne Treiber läuft.
+- Reichweite über eine Wohnung, also mindestens 15-20 m durch Wände.
+
+### Kandidaten
+
+- **[Hollyland Lark M2](https://www.hollyland.com/product/lark-m2)**
+  (~120-150 €): USB-C-Empfänger mit ausdrücklicher UAC-Unterstützung,
+  10 h pro Sender, Ladecase für insgesamt 30 h, zwei Sender im Set.
+  **Vor dem Kauf zu klären:** ob der Sender dauerhaft am Netzteil laufen
+  kann - davon hängt ab, ob die Akku-Anforderung erfüllt ist. Linux wird
+  nirgends ausdrücklich genannt; UAC-Geräte laufen dort üblicherweise
+  ohne Treiber, aber „üblicherweise" ist kein Beleg.
+- **[Cubilux WM-C1BK](https://www.cubilux.com/products/usb-c-wireless-lavalier-microphone)**:
+  nennt Linux ausdrücklich, deutlich billiger - aber keine belastbaren
+  Angaben zu Reichweite und Laufzeit gefunden.
+
+**Geprüft und verworfen:** USB-Konferenzmikrofon an einer aktiven
+USB-Verlängerung. Technisch die sauberste Lösung - kein Akku, immer an,
+nichts zu laden. Aber ein Kabel quer durchs Wohnzimmer ist bei einem
+blinden Nutzer eine **Stolperfalle**. Für ein Testgerät brauchbar, für
+ein Kundengerät nicht.
+
+**Prüfung nach dem Kauf**, dauert eine Stunde: einstecken,
+`pactl list sources` - erscheint das Gerät, ist die halbe Miete drin.
+Danach Reichweite in der Wohnung und Erkennungsqualität gegen das
+eingebaute Mikrofon.
+
+### Telefonie und Videocall: welches Gerät?
+
+**Noch nicht zu entscheiden** - Telefonie ist nicht umgesetzt (siehe
+[telefonie.md](telefonie.md)). Festgehalten als Entscheidungsvorlage,
+damit die Überlegung nicht verlorengeht:
+
+Der naheliegende Weg wäre, für ein Gespräch auf **HFP** zu schalten: Der
+AIRHUG wird zum Freisprecher, Mikrofon und Wiedergabe aus einem Gerät.
+Telefonqualität ist bei einem Telefonat kein Verlust.
+
+Der bessere Weg ist vermutlich, **gar nicht umzuschalten**: Eingang das
+USB-Mikrofon, Ausgang der AIRHUG in A2DP. Dann läuft das Gespräch in
+**beide** Richtungen in voller Qualität statt in Telefonqualität. Zwei
+weitere Gründe sprechen dafür: Das Profilwechsel-Problem entfällt
+vollständig (es ist am 2026-08-17 dreimal hängengeblieben), und die
+Echo-Unterdrückung ist ohnehin schon eingerichtet.
+
+**Der Vorbehalt dazu:** Bei getrenntem Lautsprecher und Mikrofon hört der
+Gesprächspartner sich selbst, wenn die Echo-Unterdrückung nicht greift -
+und im Gespräch ist sie anspruchsvoller als in unserem bisherigen Fall.
+Wir rechnen bisher nur die *eigene* Ansage heraus; bei einem Gespräch
+läuft der Ton gleichzeitig in beide Richtungen. Die gemessenen 32 dB sind
+ein gutes Zeichen, aber kein Beweis für den Gesprächsfall.
+
 ## Aktuelle Test-Hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – kein WWAN-/LTE-Modul verbaut.

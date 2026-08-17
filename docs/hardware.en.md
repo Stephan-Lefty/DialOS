@@ -135,6 +135,78 @@ disqualification.
 then the built-in microphone stays, because it at least does not damage
 output quality.
 
+## Two devices instead of one (decision 2026-08-17)
+
+The measurements above lead to one conclusion: a single Bluetooth device
+cannot do both. Stephan's decision is therefore a **pair**:
+
+| Job | Device | Path |
+|---|---|---|
+| Speech output, music, radio | AIRHUG 01, stays | Bluetooth A2DP |
+| Speech input | wireless microphone with USB receiver | USB Audio Class |
+
+**Why not a second Bluetooth device:** that would bring back the HFP trap
+that cost the whole morning of 2026-08-17. A wireless microphone with a
+USB receiver registers as an ordinary USB sound card instead - no
+profile, no A2DP/HFP conflict, no pairing, and the speaker stays entirely
+untouched.
+
+### Requirements for the microphone
+
+- **No battery in continuous operation**, or at least operation from a
+  power supply. This is the hardest requirement and it comes from the
+  target group: an empty transmitter makes the system **deaf**, and a
+  blind user cannot find the cause - it lies outside the system. The same
+  class of fault as the decoupled device volume.
+- **USB Audio Class**, so it works on Linux without drivers.
+- Range across a flat, so at least 15-20 m through walls.
+
+### Candidates
+
+- **[Hollyland Lark M2](https://www.hollyland.com/product/lark-m2)**
+  (~€120-150): USB-C receiver with explicit UAC support, 10 h per
+  transmitter, charging case for 30 h total, two transmitters in the set.
+  **To clarify before buying:** whether the transmitter can run
+  permanently from a power supply - that determines whether the battery
+  requirement is met. Linux is nowhere explicitly named; UAC devices
+  usually work there without drivers, but "usually" is not evidence.
+- **[Cubilux WM-C1BK](https://www.cubilux.com/products/usb-c-wireless-lavalier-microphone)**:
+  names Linux explicitly and is considerably cheaper - but no reliable
+  figures on range and runtime were found.
+
+**Considered and rejected:** a USB conference microphone on an active USB
+extension. Technically the cleanest solution - no battery, always on,
+nothing to charge. But a cable across the living room is a **trip hazard**
+for a blind user. Usable for a test device, not for a customer device.
+
+**Check after purchase**, takes an hour: plug it in, `pactl list sources`
+- if the device appears, half the battle is won. Then range within the
+flat and recognition quality against the built-in microphone.
+
+### Telephony and video calls: which device?
+
+**Not to be decided yet** - telephony is not implemented (see
+[telefonie.en.md](telefonie.en.md)). Recorded as a decision aid so the
+reasoning is not lost:
+
+The obvious route would be to switch to **HFP** for a call: the AIRHUG
+becomes a speakerphone, microphone and playback from one device. Phone
+quality is no loss on a phone call.
+
+The better route is probably **not to switch at all**: input the USB
+microphone, output the AIRHUG in A2DP. The call then runs in **both**
+directions at full quality rather than phone quality. Two further points
+favour it: the profile-switching problem disappears entirely (it got
+stuck three times on 2026-08-17), and echo cancellation is already set
+up.
+
+**The caveat:** with speaker and microphone separated, the other party
+hears themselves if echo cancellation does not hold - and during a call
+it is more demanding than in our case so far. We currently only subtract
+our *own* announcement; in a call, audio runs in both directions
+simultaneously. The measured 32 dB are a good sign but no proof for the
+call case.
+
 ## Current test hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – no WWAN/LTE module fitted.

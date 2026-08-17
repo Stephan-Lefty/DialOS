@@ -107,6 +107,37 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Referenz-Audiogerät entschieden: zwei Geräte statt einem (Stephan,
+  2026-08-17).** Der AIRHUG bleibt als Lautsprecher in A2DP, dazu kommt
+  ein Funkmikrofon mit **USB**-Empfänger für die Eingabe. Bewusst kein
+  zweites Bluetooth-Gerät: Das brächte die HFP-Falle zurück, die den
+  ganzen Vormittag gekostet hat. Ein USB-Empfänger meldet sich als
+  gewöhnliche Soundkarte - kein Profil, kein Konflikt, keine Kopplung,
+  und der Lautsprecher bleibt unangetastet.
+  - **Die härteste Anforderung ist der Akku, nicht der Klang.** Ein
+    leerer Sender macht das System **taub**, und ein blinder Nutzer
+    findet die Ursache nicht - sie liegt außerhalb des Systems. Dieselbe
+    Sorte Fehler wie die entkoppelte Gerätelautstärke. Der Hollyland
+    Lark M2 hält 10 Stunden pro Sender; vor dem Kauf ist deshalb zu
+    klären, ob der Sender **dauerhaft am Netzteil** laufen kann.
+  - **Geprüft und verworfen: USB-Konferenzmikrofon an aktiver
+    Verlängerung.** Technisch die sauberste Lösung - kein Akku, immer an.
+    Aber ein Kabel quer durchs Wohnzimmer ist bei einem blinden Nutzer
+    eine Stolperfalle. Für ein Testgerät brauchbar, für ein Kundengerät
+    nicht.
+- **Entscheidungsvorlage für Telefonie festgehalten (Stephans Frage,
+  2026-08-17).** Telefonie ist nicht umgesetzt, die Überlegung wäre sonst
+  aber verloren: Der naheliegende Weg für ein Gespräch wäre, auf HFP zu
+  schalten - der AIRHUG wird zum Freisprecher. Der **bessere** Weg ist
+  vermutlich, gar nicht umzuschalten: Eingang das USB-Mikrofon, Ausgang
+  der AIRHUG in A2DP. Dann läuft das Gespräch in **beide** Richtungen in
+  voller Qualität statt in Telefonqualität, das Profilwechsel-Problem
+  entfällt vollständig, und die Echo-Unterdrückung ist ohnehin da. **Der
+  Vorbehalt:** Im Gespräch läuft der Ton gleichzeitig in beide
+  Richtungen - das ist für eine Echo-Unterdrückung anspruchsvoller als
+  unser bisheriger Fall. Die gemessenen 32 dB sind ein gutes Zeichen,
+  aber kein Beweis dafür.
+
 - **Stephans Reichweiten-Frage entwertet die Mikrofon-Entscheidung von
   derselben Stunde - und deckt eine Lücke in der Referenz-Hardware auf
   (2026-08-17).** Seine Frage: Der Laptop steht auf dem Schreibtisch, der

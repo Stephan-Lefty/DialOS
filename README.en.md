@@ -105,6 +105,34 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Reference audio device decided: two devices instead of one (Stephan,
+  2026-08-17).** The AIRHUG stays as the speaker in A2DP, joined by a
+  wireless microphone with a **USB** receiver for input. Deliberately not
+  a second Bluetooth device: that would bring back the HFP trap that cost
+  the whole morning. A USB receiver registers as an ordinary sound card -
+  no profile, no conflict, no pairing, and the speaker stays untouched.
+  - **The hardest requirement is the battery, not the sound.** An empty
+    transmitter makes the system **deaf**, and a blind user cannot find
+    the cause - it lies outside the system. The same class of fault as
+    the decoupled device volume. The Hollyland Lark M2 lasts 10 hours per
+    transmitter; before buying it must therefore be clarified whether the
+    transmitter can run **permanently from a power supply**.
+  - **Considered and rejected: a USB conference microphone on an active
+    extension.** Technically the cleanest solution - no battery, always
+    on. But a cable across the living room is a trip hazard for a blind
+    user. Usable for a test device, not for a customer device.
+- **Decision aid for telephony recorded (Stephan's question,
+  2026-08-17).** Telephony is not implemented, but the reasoning would
+  otherwise be lost: the obvious route for a call would be to switch to
+  HFP - the AIRHUG becomes a speakerphone. The **better** route is
+  probably not to switch at all: input the USB microphone, output the
+  AIRHUG in A2DP. The call then runs in **both** directions at full
+  quality rather than phone quality, the profile-switching problem
+  disappears entirely, and echo cancellation is there anyway. **The
+  caveat:** during a call audio runs in both directions simultaneously -
+  more demanding for echo cancellation than our case so far. The measured
+  32 dB are a good sign but no proof of that.
+
 - **Stephan's range question invalidates the microphone decision from the
   same hour - and exposes a gap in the reference hardware (2026-08-17).**
   His question: the laptop sits on the desk, the Bluetooth speaker on the

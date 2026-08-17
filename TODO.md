@@ -162,8 +162,22 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   über das Headset-Mikrofon würde die Wiedergabe auf Telefonqualität
   ziehen und das Video schlechter klingen lassen, als das System ist.
 
-- [ ] **Referenz-Audiogerät neu entscheiden - der AIRHUG allein reicht
-  nicht** (offen seit 2026-08-17, Stephans Entscheidung). Gemessen ist:
+- [x] **Referenz-Audiogerät entschieden (Stephan, 2026-08-17): zwei
+  Geräte.** AIRHUG bleibt als Lautsprecher in A2DP, dazu ein
+  Funkmikrofon mit **USB**-Empfänger für die Eingabe - bewusst kein
+  zweites Bluetooth-Gerät, das brächte die HFP-Falle zurück. Anforderungen
+  und Kandidaten in `docs/hardware.md`.
+
+- [ ] **Funkmikrofon beschaffen und prüfen** (offen seit 2026-08-17).
+  Vor dem Kauf zu klären: **Kann der Sender dauerhaft am Netzteil
+  laufen?** Davon hängt alles ab - ein leerer Sender macht das System
+  taub, und ein blinder Nutzer findet die Ursache nicht. Danach am Gerät
+  prüfen: `pactl list sources` (erscheint es ohne Treiber?), Reichweite
+  durch die Wohnung, Erkennungsqualität gegen das eingebaute Mikrofon.
+  Kandidaten: Hollyland Lark M2 (UAC ausdrücklich, Linux nicht genannt),
+  Cubilux WM-C1BK (Linux ausdrücklich, Reichweite unklar).
+
+- [x] **So stand die Aufgabe vorher da (zur Herkunft):** Gemessen ist:
   Das Gerät kann nicht gleichzeitig gut klingen und zuhören (A2DP hat
   `sources: 0`), seine Tasten erreichen den Laptop auf **keinem** Kanal -
   weder als Tastencode noch als AVRCP-Lautstärke -, und seine Lautstärke
@@ -242,14 +256,18 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   nichts verstanden, greift der 100-%-Rückfall - die Ansage bleibt also
   hörbar, aber der Nutzer könnte die Lautstärke nicht mehr selbst ändern.
 
-- [ ] **Referenzgerät steht seit 2026-08-16: AIRHUG 01** (Bluetooth-
-  Headset, A2DP + HFP, in `docs/hardware.md` dokumentiert). Offen bleibt
-  davon nur noch die ursprüngliche Teilfrage: ob es Deutsch als
-  Ansage-Sprache unterstützt (eigene
-  Firmware-Ansagen des Geräts wie "verbunden"/Akku-Warnung, nicht
-  DialOS selbst) - Bluetooth-Standardprofile (A2DP/HFP) bieten dafür
-  keine Fernsteuerung, rein geräte-/herstellerabhängig. Bei der Auswahl
-  der Referenz-Hardware als Kriterium berücksichtigen.
+- [ ] **Deutsche Firmware-Ansagen des Lautsprechers prüfen** (offen seit
+  2026-08-16, Stephans Anforderung a). Gemeint sind die Ansagen des
+  Geräts selbst („verbunden", Akku-Warnung), nicht die von DialOS. Sie
+  sind für einen blinden Nutzer die **einzige** Rückmeldung, die er vom
+  Gerät unabhängig vom Laptop bekommt - eine unverstandene Akkuwarnung
+  heißt, dass die Ausgabe unangekündigt ausfällt. Über die
+  Bluetooth-Standardprofile lässt sich das nicht fernsteuern, es hängt
+  rein am Gerät. Beim AIRHUG noch nicht geprüft.
+
+  *(Die frühere Fassung dieses Punkts nannte den AIRHUG als alleiniges
+  Referenzgerät. Das ist seit 2026-08-17 überholt: Es sind zwei Geräte,
+  siehe oben und `docs/hardware.md`.)*
 - [x] **ERLEDIGT am 2026-08-16 - der komplette Ablauf ist auf echter
   Hardware durchgelaufen.** Ergebnis: Aus einem frisch installierten
   Debian 13 wurde ein laufendes DialOS. Bewiesen sind: verschlüsselter

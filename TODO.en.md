@@ -161,8 +161,22 @@ what has already been done.
   microphone would drag playback down to phone quality and make the video
   sound worse than the system actually is.
 
-- [ ] **Re-decide the reference audio device - the AIRHUG alone is not
-  enough** (open since 2026-08-17, Stephan's decision). What is measured:
+- [x] **Reference audio device decided (Stephan, 2026-08-17): two
+  devices.** The AIRHUG stays as the speaker in A2DP, plus a wireless
+  microphone with a **USB** receiver for input - deliberately not a
+  second Bluetooth device, which would bring back the HFP trap.
+  Requirements and candidates in `docs/hardware.en.md`.
+
+- [ ] **Obtain and check the wireless microphone** (open since
+  2026-08-17). To clarify before buying: **can the transmitter run
+  permanently from a power supply?** Everything hinges on that - an empty
+  transmitter makes the system deaf, and a blind user cannot find the
+  cause. Then check on the device: `pactl list sources` (does it appear
+  without drivers?), range across the flat, recognition quality against
+  the built-in microphone. Candidates: Hollyland Lark M2 (UAC explicit,
+  Linux not named), Cubilux WM-C1BK (Linux explicit, range unclear).
+
+- [x] **How the task was worded before (for provenance):** What is measured:
   the device cannot sound good and listen at the same time (A2DP has
   `sources: 0`), its buttons reach the laptop on **neither** channel -
   not as key codes, not as AVRCP volume - and its volume is decoupled
@@ -239,14 +253,18 @@ what has already been done.
   understood, the 100% fallback applies - the announcement stays audible,
   but the user could no longer change the volume themselves.
 
-- [ ] **Reference device settled 2026-08-16: AIRHUG 01** (Bluetooth
-  headset, A2DP + HFP, documented in `docs/hardware.en.md`). Only the
-  original sub-question remains: whether it supports German as its own
-  announcement language (the device's own firmware prompts like
-  "connected"/low
-  battery, not DialOS itself) - standard Bluetooth profiles (A2DP/HFP)
-  offer no remote control for this, it's purely device-/vendor-
-  dependent. Factor this into the reference hardware selection.
+- [ ] **Check the speaker's German firmware prompts** (open since
+  2026-08-16, Stephan's requirement a). This means the device's own
+  prompts ("connected", low battery), not those of DialOS. For a blind
+  user they are the **only** feedback received from the device
+  independently of the laptop - a misunderstood battery warning means
+  output fails without notice. Standard Bluetooth profiles offer no
+  remote control for this; it depends purely on the device. Not yet
+  checked on the AIRHUG.
+
+  *(The earlier wording of this item named the AIRHUG as the sole
+  reference device. That is superseded since 2026-08-17: there are two
+  devices, see above and `docs/hardware.en.md`.)*
 - [x] **DONE on 2026-08-16 - the complete flow has run on real
   hardware.** Result: a freshly installed Debian 13 became a running
   DialOS. Proven: encrypted swap (comes up on its own at boot, evidenced
