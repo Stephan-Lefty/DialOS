@@ -99,6 +99,11 @@ background) and `splash.png` (boot/login screen).
 
 ## Changelog
 
+### 0.5.1
+
+*In progress since 2026-08-17. Everything created from now on goes here -
+0.5.0 is closed with the voice command for the desktop switch.*
+
 ### 0.5.0
 - **New file `docs/sprachbefehle.en.md` (Stephan's request, 2026-08-17):
   a table of voice command → action** that grows with every new command.

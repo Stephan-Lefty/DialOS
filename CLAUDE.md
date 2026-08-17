@@ -104,7 +104,10 @@ mehr, sondern der etablierte Ansatz:
    Sicherungs-Abbild mit **[Rescuezilla](https://rescuezilla.com/)**
    (seit 2026-08-16; Penguins' Eggs ist entfallen, siehe Schritt 16).
 
-**Aktuelle Version: 0.5.0** (in Arbeit) - alle Details im
+**Aktuelle Version: 0.5.1** (in Arbeit seit 2026-08-17, Stephans
+Festlegung) - **alles Neue gehört ab jetzt unter `### 0.5.1`**, 0.5.0 ist
+mit dem Sprachbefehl für die Desktop-Umschaltung abgeschlossen. Alle
+Details im
 [README.md-Änderungsprotokoll](README.md#änderungsprotokoll). Von den
 alten ISOs sind am 2026-08-16 acht gelöscht worden (~59 GB); übrig ist
 nur `DialOS-Live-0.5.1-clone.iso`, bis Stephans erstes

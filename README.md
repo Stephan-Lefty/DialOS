@@ -100,6 +100,12 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 
 ## Änderungsprotokoll
 
+### 0.5.1
+
+*In Arbeit seit 2026-08-17. Alles, was ab jetzt entsteht, wird hier
+eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
+abgeschlossen.*
+
 ### 0.5.0
 - **Neue Datei `docs/sprachbefehle.md` (Stephans Wunsch, 2026-08-17):
   eine Tabelle Sprachbefehl → Aktion**, die mit jedem neuen Befehl
