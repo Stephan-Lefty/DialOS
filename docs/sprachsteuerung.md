@@ -112,6 +112,59 @@ volle Spracherkennung aktiviert. Noch nicht final entschieden/umgesetzt.
 Welche Befehle es konkret gibt, steht in
 [sprachbefehle.md](sprachbefehle.md).
 
+## Wann hört DialOS zu? Das Bedienmodell
+
+**Entschieden am 2026-08-17 mit Stephan.** Es gibt **zwei verschiedene
+Wege**, auf denen das Mikrofon scharf wird - und der Unterschied ist
+nicht technisch, sondern liegt daran, wer das Gespräch begonnen hat.
+
+### 1. Das System fragt - es macht selbst auf und wieder zu
+
+Wenn DialOS etwas wissen will, weiß es das ja. Es öffnet die Erkennung
+selbst, nimmt die Antwort entgegen und schließt sie danach wieder. **Der
+Nutzer muss sich nicht anmelden** - er wurde gerade angesprochen.
+
+Genau dafür trägt `dialos-say.py` den Schalter `--frage` (siehe
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 11a): Die Information
+„ich will jetzt etwas wissen" ist im Code ohnehin vorhanden.
+
+**Antwortet der Nutzer nicht**, wird **einmal** nachgefragt. Bleibt es
+auch dann still, sagt Michael „Schade, dass Du nicht antwortest." und
+schließt das Fenster. Bewusst kein stilles Schließen: Der Nutzer soll
+hören, dass die Frage vorbei ist - sonst spricht er womöglich ins Leere.
+
+### 2. Der Nutzer will etwas - er meldet sich an
+
+Hier kann das System nicht ahnen, dass es gemeint ist. Deshalb:
+
+> „Sprachsteuerung starten" → **„Ich höre."**
+> … Befehle …
+> „Sprachsteuerung stoppen" → **„Ich höre nicht mehr."**
+
+Die Bestätigungen sind kurz und immer gleich - der Nutzer hört sie
+täglich, da zählt Wiedererkennbarkeit mehr als Abwechslung. Sie sind aus
+Michaels Sicht formuliert, nicht als Statusmeldung („Sprachsteuerung ist
+eingeschaltet").
+
+**Nach zwei Minuten ohne Befehl schaltet sich die Erkennung von selbst
+ab**, mit Ansage: „Ich schalte die Sprachsteuerung wieder aus." Der Grund
+ist kein Stromsparen, sondern Sicherheit: Wer das „stoppen" vergisst,
+hätte sonst dauerhaft ein offenes Mikrofon - und damit wären wir zurück
+bei dem Radio, das den Schreibtisch umschaltet.
+
+**Beim Anmelden ist die Erkennung immer aus.** Vorhersagbar und sicher;
+der Nutzer schaltet sie ein, wenn er sie braucht.
+
+### Warum das die Zustandsfrage löst
+
+Die offene Frage war: Woher weiß ein blinder Nutzer, ob die Erkennung an
+ist? Antwort: **Er hört jeden Wechsel** - beim Ein- und Ausschalten,
+und auch, wenn die Zeit abläuft. Und ist er unsicher, sagt er einfach
+„Sprachsteuerung starten": Läuft sie schon, sagt das System es ihm.
+
+Ein Zustand, den man nur sehen kann, wäre für diese Zielgruppe kein
+Zustand.
+
 ## Aufweckwort: gemessen, und der naheliegende Weg scheidet aus
 
 **Stand 2026-08-17.** Ein Aufweckwort fehlt weiterhin. Die naheliegende

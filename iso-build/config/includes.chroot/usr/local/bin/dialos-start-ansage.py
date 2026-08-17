@@ -222,32 +222,53 @@ def frage_lautstaerke():
     # wann das Aufnahme-Fenster beginnt, und die Antwort wurde verpasst.
     spd_say("Und jetzt bitte.")
 
-    ergebnis = None
-    try:
-        vosk.SetLogLevel(-1)
-        modell = vosk.Model(LAUTSTAERKE_VOSK_MODELL)
-        erkenner = vosk.KaldiRecognizer(modell, LAUTSTAERKE_ABTASTRATE)
-        prozess = subprocess.Popen(
-            ["parec", f"--rate={LAUTSTAERKE_ABTASTRATE}", "--channels=1", "--format=s16le"],
-            stdout=subprocess.PIPE,
-        )
-        audiodaten = bytearray()
-        ende = time.time() + LAUTSTAERKE_AUFNAHME_SEKUNDEN
-        while time.time() < ende:
-            chunk = prozess.stdout.read(4000)
-            if not chunk:
-                break
-            audiodaten.extend(chunk)
-        prozess.terminate()
-        prozess.stdout.close()
-        erkenner.AcceptWaveform(bytes(audiodaten))
-        text = json.loads(erkenner.FinalResult()).get("text", "")
-        for wort in text.split():
-            if wort in LAUTSTAERKE_OPTIONEN:
-                ergebnis = LAUTSTAERKE_OPTIONEN[wort]
-                break
-    except Exception:
-        ergebnis = None
+    def einmal_zuhoeren():
+        """Ein Aufnahmefenster: aufnehmen, erkennen, Antwort zurueckgeben."""
+        try:
+            vosk.SetLogLevel(-1)
+            modell = vosk.Model(LAUTSTAERKE_VOSK_MODELL)
+            erkenner = vosk.KaldiRecognizer(modell, LAUTSTAERKE_ABTASTRATE)
+            prozess = subprocess.Popen(
+                ["parec", f"--rate={LAUTSTAERKE_ABTASTRATE}", "--channels=1", "--format=s16le"],
+                stdout=subprocess.PIPE,
+            )
+            audiodaten = bytearray()
+            ende = time.time() + LAUTSTAERKE_AUFNAHME_SEKUNDEN
+            while time.time() < ende:
+                chunk = prozess.stdout.read(4000)
+                if not chunk:
+                    break
+                audiodaten.extend(chunk)
+            prozess.terminate()
+            prozess.stdout.close()
+            erkenner.AcceptWaveform(bytes(audiodaten))
+            text = json.loads(erkenner.FinalResult()).get("text", "")
+            for wort in text.split():
+                if wort in LAUTSTAERKE_OPTIONEN:
+                    return LAUTSTAERKE_OPTIONEN[wort]
+        except Exception:
+            pass
+        return None
+
+    # EINMAL NACHFRAGEN, dann aufgeben (Stephan, 2026-08-17).
+    #
+    # Warum ueberhaupt nachfragen: Ein einzelner Versuch scheitert schon
+    # an einem Rauspern oder daran, dass jemand den Beginn des Fensters
+    # verpasst. Genau das ist am 2026-08-16 beim ersten echten Test
+    # passiert.
+    #
+    # Warum nur EINMAL und dann mit Ansage aufgeben: Ein Geraet, das
+    # immer weiter fragt, ist fuer jemanden, der es nicht wegklicken
+    # kann, eine Zumutung. Und das stille Aufgeben waere schlimmer als
+    # das laute - wer nicht hoert, dass die Frage vorbei ist, spricht
+    # womoeglich ins Leere.
+    ergebnis = einmal_zuhoeren()
+    if ergebnis is None:
+        spd_say("Ich habe Dich nicht verstanden.", frage=True)
+        spd_say("Und jetzt bitte.")
+        ergebnis = einmal_zuhoeren()
+        if ergebnis is None:
+            spd_say("Schade, dass Du nicht antwortest.")
 
     if bluetooth_umgeschaltet and bluetooth_karte:
         bluetooth_profil_setzen(bluetooth_karte, "a2dp-sink")

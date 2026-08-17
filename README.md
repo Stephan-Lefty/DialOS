@@ -107,6 +107,38 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Bedienmodell entschieden und gebaut: Wann hört DialOS zu?
+  (2026-08-17, Stephans Entwurf).** Der Anlass war seine Frage, ob das
+  System merkt, dass es gerade etwas wissen will - dahinter steckte ein
+  vollständiges Modell mit **zwei Wegen ins Mikrofon**, je nachdem, wer
+  das Gespräch begonnen hat.
+  - **Das System fragt** → es öffnet die Erkennung selbst und schließt
+    sie danach wieder. Der Nutzer meldet sich nicht an, er wurde ja
+    gerade angesprochen. **Antwortet er nicht, wird einmal nachgefragt**;
+    bleibt es still, sagt Michael „Schade, dass Du nicht antwortest."
+    Bewusst kein stilles Aufgeben - wer nicht hört, dass die Frage vorbei
+    ist, spricht womöglich ins Leere. Und bewusst nur *einmal*: Ein
+    Gerät, das immer weiter fragt, ist für jemanden, der es nicht
+    wegklicken kann, eine Zumutung. Eingebaut in die Lautstärke-Frage.
+  - **Der Nutzer will etwas** → „Sprachsteuerung starten" → **„Ich
+    höre."** … Befehle … „Sprachsteuerung stoppen" → **„Ich höre nicht
+    mehr."** Läuft sie schon: „Ich höre schon."
+  - **Nach zwei Minuten ohne Befehl schaltet sie sich selbst ab**, mit
+    Ansage. Nicht zum Stromsparen: Wer das „stoppen" vergisst, hätte
+    sonst dauerhaft ein offenes Mikrofon - und damit wären wir zurück
+    beim Radio, das den Schreibtisch umschaltet.
+  - **Beim Anmelden ist die Erkennung immer aus.** Technisch ist das der
+    eigentliche Schutz: Im Zustand „aus" kennt die Vosk-Grammatik nur
+    einen einzigen Satz, also kann nichts anderes überhaupt erkannt
+    werden - nicht bloß ignoriert, sondern gar nicht erst gebildet.
+  - **Damit ist die offene Zustandsfrage beantwortet**, an der ich mich
+    festgefahren hatte: Woher weiß ein blinder Nutzer, ob die Erkennung
+    an ist? Er **hört jeden Wechsel** - beim Ein- und Ausschalten und
+    beim Ablauf der Zeit. Und ist er unsicher, sagt er einfach
+    „Sprachsteuerung starten"; läuft sie schon, sagt das System es ihm.
+    Ein Zustand, den man nur sehen kann, wäre für diese Zielgruppe kein
+    Zustand.
+
 - **Fragen klingen jetzt anders als Hinweise (Stephans Frage vom
   2026-08-17, am selben Tag gebaut).** `dialos-say.py` kennt den Schalter
   `--frage`; die Lautstärke-Frage der Start-Ansage ist der erste

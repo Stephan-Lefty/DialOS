@@ -1,6 +1,29 @@
 #!/usr/bin/env python3
-"""DialOS: hoert dauerhaft auf "auf Linux umschalten" / "auf Windows
-umschalten" und stellt die Desktop-Optik entsprechend um.
+"""DialOS: Sprachbefehle - der Dienst, der zuhoert.
+
+BEDIENMODELL (entschieden mit Stephan am 2026-08-17, ausfuehrlich in
+docs/sprachsteuerung.md, Abschnitt "Wann hoert DialOS zu?"):
+
+  AUS   Normalzustand, auch direkt nach dem Anmelden. DialOS hoert
+        ausschliesslich auf "Sprachsteuerung starten". Das ist der
+        eigentliche Schutz - solange die Erkennung aus ist, kennt die
+        Grammatik gar keinen anderen Satz, also kann weder ein Gespraech
+        noch das Radio etwas ausloesen.
+  AN    "Ich hoere." Jetzt gelten die Befehle, bis "Sprachsteuerung
+        stoppen" kommt oder zwei Minuten lang nichts.
+
+Beide Wechsel werden ANGESAGT. Fuer einen blinden Nutzer waere ein
+Zustand, den man nur sehen kann, kein Zustand: Er hoert jeden Wechsel,
+und ist er unsicher, sagt er "Sprachsteuerung starten" - laeuft sie
+schon, sagt das System es ihm.
+
+Der zweite Weg ins Mikrofon laeuft NICHT ueber diesen Dienst: Wenn das
+System selbst etwas fragt, oeffnet es die Erkennung fuer die Antwort und
+schliesst sie danach wieder (dialos-say.py --frage). Der Nutzer muss sich
+dafuer nicht anmelden - er wurde ja gerade angesprochen.
+
+Die Desktop-Umschaltung ("auf Linux/Windows umschalten") ist bisher der
+einzige Befehl.
 
 Stephans Vorgabe vom 2026-08-16: Das Umschalten der Desktop-Optik muss
 per Sprache gehen - kein Menue, kein Terminal. Fuer die Zielgruppe ist
@@ -102,21 +125,52 @@ STIL_DATEI = os.path.join(
     "dialos", "desktop-stil",
 )
 
-# Nur diese Saetze stehen zur Auswahl. "[unk]" ist Vosks Auffangeintrag
-# fuer alles andere - ohne ihn presst das Modell jedes Geraeusch in einen
-# der Saetze und schaltet staendig um.
-GRAMMATIK = json.dumps([
+# ZWEI ZUSTAENDE, ZWEI GRAMMATIKEN (Bedienmodell vom 2026-08-17, siehe
+# docs/sprachsteuerung.md, Abschnitt "Wann hoert DialOS zu?").
+#
+# AUS ist der Normalzustand, auch direkt nach dem Anmelden. Dann hoert
+# DialOS ausschliesslich auf den einen Satz, mit dem der Nutzer sich
+# anmeldet. Das ist der eigentliche Schutz: Solange die Erkennung aus
+# ist, kann kein Gespraech und kein Radio irgendetwas ausloesen, weil die
+# Grammatik gar keinen anderen Satz kennt.
+#
+# AN kennt zusaetzlich die Befehle und den Satz zum Ausschalten.
+#
+# "[unk]" ist Vosks Auffangeintrag fuer alles andere - ohne ihn presst
+# das Modell jedes Geraeusch in einen der Saetze.
+STARTSATZ = "sprachsteuerung starten"
+STOPPSATZ = "sprachsteuerung stoppen"
+
+GRAMMATIK_AUS = json.dumps([STARTSATZ, "[unk]"])
+GRAMMATIK_AN = json.dumps([
+    STARTSATZ,
+    STOPPSATZ,
     "auf linux umschalten",
     "auf gnome umschalten",
     "auf windows umschalten",
     "[unk]",
 ])
 
+# Nach so langer Stille schaltet sich die Erkennung von selbst ab
+# (Stephan, 2026-08-17: zwei Minuten, mit Ansage). Der Grund ist nicht
+# Stromsparen, sondern Sicherheit: Wer das "stoppen" vergisst, haette
+# sonst dauerhaft ein offenes Mikrofon.
+ZEITGRENZE_S = 120.0
+
 # Erkannt wird nur, was BEIDES enthaelt: ein Ziel und das Wort
 # "umschalten". Siehe Kopf der Datei - ohne die zweite Bedingung reicht
 # ein beilaeufiges "windows" im Gespraech.
 AUSLOESER = "umschalten"
 ZIELE = {"linux": "gnome", "gnome": "gnome", "windows": "windows"}
+
+# Kurz und immer gleich - der Nutzer hoert sie taeglich, da zaehlt
+# Wiedererkennbarkeit mehr als Abwechslung. Aus Michaels Sicht
+# formuliert, nicht als Statusmeldung ("Sprachsteuerung ist
+# eingeschaltet").
+ANSAGE_AN = "Ich höre."
+ANSAGE_AUS = "Ich höre nicht mehr."
+ANSAGE_ZEITGRENZE = "Ich schalte die Sprachsteuerung wieder aus."
+ANSAGE_LAEUFT_SCHON = "Ich höre schon."
 
 SPERRFRIST_S = 5.0          # nach einem Umschalten so lange nicht zuhoeren
 WARTEN_BEIM_SPRECHEN_S = 0.3
@@ -268,15 +322,29 @@ def main():
         print("Kein Mikrofon gefunden.", file=sys.stderr)
         return 1
 
-    erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK)
+    # Beim Anmelden ist die Erkennung immer AUS - vorhersagbar und sicher.
+    hoert_zu = False
+    erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
     prozess = aufnahme_starten(quelle)
     letzte_aktion = 0.0
+    letzte_aktivitaet = time.time()
     aufnahme_verwerfen = False
     saettigungen = 0
     letzte_pegelkorrektur = 0.0
 
     try:
         while True:
+            # Zeitgrenze: Wer das "stoppen" vergisst, haette sonst dauerhaft
+            # ein offenes Mikrofon. Mit Ansage, damit der Nutzer den Wechsel
+            # hoert - ein Zustand, den man nur sehen kann, waere fuer diese
+            # Zielgruppe kein Zustand.
+            if hoert_zu and time.time() - letzte_aktivitaet > ZEITGRENZE_S:
+                hoert_zu = False
+                erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
+                sprich(ANSAGE_ZEITGRENZE)
+                letzte_aktion = time.time()
+                continue
+
             # Es gibt zwei Gruende, gerade NICHT zuzuhoeren: Das System
             # spricht selbst, oder das letzte Umschalten liegt noch keine
             # Sperrfrist zurueck. Beide werden gleich behandelt, weil in
@@ -308,7 +376,9 @@ def main():
                 # nicht mehr in die neue Aufnahme faellt.
                 time.sleep(NACHHALL_WARTEN_S)
                 prozess = aufnahme_starten(quelle)
-                erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK)
+                erkenner = vosk.KaldiRecognizer(
+                    modell, ABTASTRATE,
+                    GRAMMATIK_AN if hoert_zu else GRAMMATIK_AUS)
                 if DEBUG:
                     print("\n  (Aufnahme nach Sprechpause neu begonnen)")
                 continue
@@ -320,7 +390,9 @@ def main():
                 time.sleep(1)
                 quelle = waehle_mikrofon()
                 prozess = aufnahme_starten(quelle)
-                erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK)
+                erkenner = vosk.KaldiRecognizer(
+                    modell, ABTASTRATE,
+                    GRAMMATIK_AN if hoert_zu else GRAMMATIK_AUS)
                 continue
 
             pegel = max(abs(int.from_bytes(block[i:i + 2], "little", signed=True))
@@ -357,6 +429,34 @@ def main():
             if not text:
                 continue
             worte = text.split()
+            satz = " ".join(worte)
+
+            # --- Zustandswechsel: anmelden ---
+            if STARTSATZ in satz:
+                if hoert_zu:
+                    sprich(ANSAGE_LAEUFT_SCHON)
+                else:
+                    hoert_zu = True
+                    erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AN)
+                    sprich(ANSAGE_AN)
+                letzte_aktion = time.time()
+                letzte_aktivitaet = time.time()
+                continue
+
+            # Ist die Erkennung aus, kann hier nichts anderes mehr kommen -
+            # die Grammatik kennt in diesem Zustand keinen weiteren Satz.
+            if not hoert_zu:
+                continue
+
+            # --- Zustandswechsel: abmelden ---
+            if STOPPSATZ in satz:
+                hoert_zu = False
+                erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
+                sprich(ANSAGE_AUS)
+                letzte_aktion = time.time()
+                continue
+
+            # --- Befehle ---
             if AUSLOESER not in worte:
                 continue
             for wort in worte:
@@ -364,6 +464,7 @@ def main():
                 if ziel:
                     umschalten(ziel)
                     letzte_aktion = time.time()
+                    letzte_aktivitaet = time.time()
                     erkenner.Reset()
                     break
     except KeyboardInterrupt:

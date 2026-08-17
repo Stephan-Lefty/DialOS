@@ -95,8 +95,12 @@ what has already been done.
   played via `paplay`) no longer triggers anything. Details in the
   changelog and in `docs/Debian-zu-DialOS.en.md`, step 11f.
 
-- [ ] **Build the "Sprachsteuerung starten/stoppen" switch** (decided
-  2026-08-17, not built yet). Until "starten", DialOS listens for that
+- [x] **"Sprachsteuerung starten/stoppen" switch built (2026-08-17).**
+  Two states with their own grammar, an announcement on every change, and
+  a two-minute timeout. That answers the open state question: the user
+  hears every change. A live test with a real voice is still pending.
+
+- [x] **How the task was worded before (for provenance):** Until "starten", DialOS listens for that
   one sentence only; afterwards it accepts commands until "stoppen".
   Recognition is already measured as reliable with three distractors
   staying quiet - what is open is the state itself: where is it

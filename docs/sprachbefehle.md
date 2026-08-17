@@ -16,8 +16,16 @@ Technischer Hintergrund zur Erkennung steht in
 
 ## Umgesetzt
 
+Die Erkennung ist nach dem Anmelden **aus**. Bis auf „Sprachsteuerung
+starten" hört DialOS dann auf nichts - das ist der eigentliche Schutz
+davor, dass ein Gespräch oder das Radio etwas auslöst. Das Modell
+dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
+„Wann hört DialOS zu?".
+
 | Sprachbefehl | Aktion |
 |---|---|
+| **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre." Läuft sie schon: „Ich höre schon." |
+| **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre nicht mehr." Nach zwei Minuten ohne Befehl geschieht das von selbst, mit Ansage. |
 | „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). |
 | „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
@@ -27,8 +35,6 @@ Technischer Hintergrund zur Erkennung steht in
 
 | Sprachbefehl | Aktion |
 |---|---|
-| „Sprachsteuerung starten" | Schaltet die Befehlserkennung ein. Bis dahin hört DialOS nur auf diesen einen Satz. |
-| „Sprachsteuerung stoppen" | Schaltet die Befehlserkennung wieder aus - für Gespräche, Besuch, Telefonate. |
 | „Hilfe rufen" | Startet RustDesk für die Fernwartung. Bewusst nur auf ausdrückliche Ansage, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md). |
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |

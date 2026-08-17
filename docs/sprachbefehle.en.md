@@ -18,8 +18,16 @@ Technical background on recognition is in
 
 ## Implemented
 
+Recognition is **off** after login. Until "Sprachsteuerung starten",
+DialOS listens for nothing else - that is the actual protection against a
+conversation or the radio triggering something. The model behind it is in
+[sprachsteuerung.en.md](sprachsteuerung.en.md), section "When does DialOS
+listen?".
+
 | Voice command | Action |
 |---|---|
+| **"Sprachsteuerung starten"** (start voice control) | Switches command recognition on, reply: "Ich höre." If already running: "Ich höre schon." |
+| **"Sprachsteuerung stoppen"** (stop voice control) | Switches it off again, reply: "Ich höre nicht mehr." After two minutes without a command this happens by itself, with an announcement. |
 | "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). |
 | "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. |
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |
@@ -29,8 +37,6 @@ Technical background on recognition is in
 
 | Voice command | Action |
 |---|---|
-| "Sprachsteuerung starten" (start voice control) | Switches command recognition on. Until then DialOS listens for this one sentence only. |
-| "Sprachsteuerung stoppen" (stop voice control) | Switches command recognition off again - for conversations, visitors, phone calls. |
 | "Hilfe rufen" (call for help) | Starts RustDesk for remote support. Deliberately only on explicit request, see [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md). |
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
 | "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |

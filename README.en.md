@@ -105,6 +105,37 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Interaction model decided and built: when does DialOS listen?
+  (2026-08-17, Stephan's design).** It started with his question whether
+  the system notices that it wants to know something - behind it was a
+  complete model with **two ways into the microphone**, depending on who
+  started the conversation.
+  - **The system asks** → it opens recognition itself and closes it
+    afterwards. The user does not announce themselves; they were just
+    addressed. **If they don't answer, the question is repeated once**;
+    if it stays silent, Michael says "Schade, dass Du nicht antwortest."
+    Deliberately not a silent give-up - anyone who doesn't hear that the
+    question is over may be speaking into the void. And deliberately only
+    *once*: a device that keeps asking is an imposition for someone who
+    cannot click it away. Built into the volume prompt.
+  - **The user wants something** → "Sprachsteuerung starten" → **"Ich
+    höre."** … commands … "Sprachsteuerung stoppen" → **"Ich höre nicht
+    mehr."** If already running: "Ich höre schon."
+  - **After two minutes without a command it switches itself off**, with
+    an announcement. Not for power saving: anyone who forgets the
+    "stoppen" would otherwise have a permanently open microphone - and we
+    would be back to the radio switching the desktop.
+  - **At login recognition is always off.** Technically that is the
+    actual protection: in the "off" state the Vosk grammar knows a single
+    sentence, so nothing else can even be recognized - not merely
+    ignored, but never formed in the first place.
+  - **This answers the open state question** I had got stuck on: how does
+    a blind user know whether recognition is on? They **hear every
+    change** - switching on, switching off, and the timeout. And if
+    unsure, they simply say "Sprachsteuerung starten"; if it is already
+    running, the system says so. A state that can only be seen would be
+    no state at all for this target group.
+
 - **Questions now sound different from hints (Stephan's question of
   2026-08-17, built the same day).** `dialos-say.py` has the `--frage`
   switch; the volume question in the login announcement is the first use.

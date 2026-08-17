@@ -81,6 +81,60 @@ decided/implemented.
 The concrete list of commands is in
 [sprachbefehle.en.md](sprachbefehle.en.md).
 
+## When does DialOS listen? The interaction model
+
+**Decided on 2026-08-17 with Stephan.** There are **two different ways**
+the microphone goes live - and the difference is not technical but comes
+down to who started the conversation.
+
+### 1. The system asks - it opens and closes the window itself
+
+When DialOS wants to know something, it knows that. It opens recognition
+itself, takes the answer and closes again afterwards. **The user does not
+have to announce themselves** - they were just addressed.
+
+That is exactly what the `--frage` switch in `dialos-say.py` is for (see
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 11a): the
+information "I want to know something now" exists in the code anyway.
+
+**If the user does not answer**, the question is repeated **once**. If it
+stays silent after that, Michael says "Schade, dass Du nicht antwortest."
+(a shame you're not answering) and closes the window. Deliberately not a
+silent close: the user should hear that the question is over - otherwise
+they may be speaking into the void.
+
+### 2. The user wants something - they announce themselves
+
+Here the system cannot guess that it is being addressed. Hence:
+
+> "Sprachsteuerung starten" → **"Ich höre."** (I'm listening.)
+> … commands …
+> "Sprachsteuerung stoppen" → **"Ich höre nicht mehr."** (I'm no longer listening.)
+
+The confirmations are short and always identical - the user hears them
+daily, so recognizability matters more than variety. They are phrased
+from Michael's perspective, not as a status report ("voice control is
+enabled").
+
+**After two minutes without a command, recognition switches itself off**,
+with an announcement: "Ich schalte die Sprachsteuerung wieder aus." The
+reason is not power saving but safety: anyone who forgets the "stoppen"
+would otherwise have a permanently open microphone - and we would be back
+to the radio switching the desktop.
+
+**At login, recognition is always off.** Predictable and safe; the user
+switches it on when they need it.
+
+### Why this solves the state question
+
+The open question was: how does a blind user know whether recognition is
+on? Answer: **they hear every change** - when switching on and off, and
+when the timeout expires too. And if unsure, they simply say
+"Sprachsteuerung starten": if it is already running, the system says so.
+
+A state that can only be seen would be no state at all for this target
+group.
+
 ## Wake word: measured, and the obvious route is ruled out
 
 **Status 2026-08-17.** A wake word is still missing. The obvious

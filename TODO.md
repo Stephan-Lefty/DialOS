@@ -96,8 +96,13 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   per `paplay` abgespielt), löst nichts mehr aus. Details im
   Änderungsprotokoll und in `docs/Debian-zu-DialOS.md`, Schritt 11f.
 
-- [ ] **Schalter „Sprachsteuerung starten/stoppen" bauen** (entschieden
-  2026-08-17, noch nicht gebaut). Bis zum „starten" hört DialOS nur auf
+- [x] **Schalter „Sprachsteuerung starten/stoppen" gebaut
+  (2026-08-17).** Zwei Zustände mit eigener Grammatik, Ansage bei jedem
+  Wechsel, Abschaltung nach zwei Minuten. Die offene Zustandsfrage ist
+  damit beantwortet: Der Nutzer hört jeden Wechsel. Live-Test mit echter
+  Stimme steht noch aus.
+
+- [x] **So stand die Aufgabe vorher da (zur Herkunft):** Bis zum „starten" hört DialOS nur auf
   diesen einen Satz, danach nimmt es Befehle an, bis „stoppen" kommt.
   Gemessen ist bereits, dass die Erkennung trägt und drei Störsätze ruhig
   bleiben - offen ist der Zustand selbst: Wo wird er gemerkt (Datei wie
