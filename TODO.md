@@ -36,6 +36,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
+- [ ] **Nächster Block: die Anwendungen** (Stephan, 2026-08-17). Bis
+  hierher ging es um Grundlagen - Sprachausgabe, Erkennung, Audio-Wege,
+  Desktop-Optik. Als Nächstes kommt dran, welche Programme DialOS
+  mitbringt und wie sie per Sprache bedient werden. **Einstiegspunkt ist
+  die Tabelle „Vorgesehen, noch nicht gebaut" in
+  `docs/sprachbefehle.md`** (Radio/Musik, Hilfe rufen, Systemwartung,
+  Telefonie) - keine neue Liste anlegen, sondern die bestehende abarbeiten
+  und für jeden neuen Befehl die Regeln aus derselben Datei einhalten.
+
 - [ ] **Unerklaert: Die Bluetooth-Senke stand ploetzlich auf 70 %**
   (2026-08-17). Zwischen zwei Messungen wechselte die Lautstaerke des
   AIRHUG von 100 % auf 70 %, ohne dass DialOS etwas getan hatte. Drei

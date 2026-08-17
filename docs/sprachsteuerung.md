@@ -237,6 +237,50 @@ tatsächlich zu, und bei einer Zielgruppe, die den Bildschirm nicht sieht,
 wäre es das Schlechteste, genau das zu verstecken. Entscheidend ist, dass
 nichts das Gerät verlässt - Vosk läuft vollständig offline.
 
+## Wie schnell antwortet DialOS? (gemessen 2026-08-17)
+
+Das ist kein Komfortthema. Wer den Bildschirm nicht sieht, hat nur die
+Antwort als Rückmeldung - und wenn sie ausbleibt, spricht er lauter,
+statt zu warten. Genau das ist an einem Tag zweimal passiert.
+
+| Was | Vorher | Jetzt |
+|---|---|---|
+| Ansage „Ich höre." | 2172 ms | **rund 1200 ms**, davon 1130 ms die Ansage selbst |
+| Taubheit nach einem Umschalten | ≈ 5,1 s | solange gesprochen wird, plus 0,7 s |
+
+Die Ansagezeit kam durch einen **Ansagen-Speicher** herunter: Gesprochene
+Sätze liegen als WAV unter `~/.cache/dialos/ansagen` und werden beim
+nächsten Mal von dort gespielt (Details in `Debian-zu-DialOS.md`,
+Schritt 11).
+
+Die Taubheit kam durch das **Entfernen der Sperrfrist** herunter. Sie
+sollte doppeltes Auslösen verhindern, war dafür aber überflüssig, seit die
+Aufnahme nach jedem Sprechen verworfen und neu begonnen wird. Was sie
+tatsächlich bewirkte: Nach einem Umschalten liefen 2,4 s Skript samt
+Ansage, 2,0 s Sperrfrist und 0,7 s Nachhall-Pause - die Ansage endete
+aber nach 1,5 s. Der Nutzer hörte also die Antwort und sprach 3,6
+Sekunden gegen ein taubes System.
+
+**Die Lehre, die über diesen Fall hinausgeht:** „Ich muss lauter reden"
+ist als Fehlerbeschreibung fast immer irreführend. Zweimal an einem Tag
+war die Ursache eine Zeitspanne, in der das System nicht zuhörte - und
+beide Male klang die Meldung nach einem Pegelproblem. Wer so eine Meldung
+bekommt, sollte zuerst fragen, **welcher** Befehl in der Reihe nicht
+ankam: Stephans Präzisierung „den *zweiten* Befehl" hat den Fall beide
+Male aufgeklärt.
+
+## Welches Mikrofon? (festgelegt 2026-08-17)
+
+**Immer das eingebaute.** Kein Bluetooth, kein USB - die Begründung steht
+in `hardware.md`, Abschnitt „Was bleibt". Kurz: Solange DialOS nie ein
+Bluetooth-Mikrofon öffnet, kann das Gerät nicht in Telefonqualität
+rutschen, und ein Mikrofon, das man ausschalten kann, gefährdet über die
+Echo-Unterdrückung die ganze Tonausgabe.
+
+Fällt das eingebaute Mikrofon aus, gibt es **keine** Rückfallebene mehr -
+das ist Absicht. Der Dienst sagt es dann an („Ich finde kein Mikrofon.")
+statt still tot zu sein.
+
 ## Offene Punkte
 
 - Wake-Word-Engine noch nicht final entschieden.

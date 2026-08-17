@@ -111,7 +111,42 @@ separating "not coupled" by direction. Re-measured by ear:
   alternating quiet-loud-quiet-loud - otherwise the first run could have
   suffered from the device itself being turned down.
 - **Device → computer: does not work.** If someone presses plus or minus
-  on the AIRHUG, the computer learns nothing about it.
+  on the AIRHUG, the computer learns nothing about it. **Re-checked in
+  three conditions on 2026-08-17**, because an observation seemed to
+  contradict it (the sink suddenly stood at 70 %): button press with no
+  audio, start of a playback, and button press **during** an active
+  playback - the value stayed unchanged every time. The 70 % remain
+  unexplained, see [../TODO.en.md](../TODO.en.md).
+
+### How the volume is actually transmitted (measured 2026-08-17)
+
+This matters more than it sounds, because the obvious assumption is wrong
+- and it led me into a recommendation I had to retract:
+
+| Route | What happens | Does it work? |
+|---|---|---|
+| sink volume (GNOME slider, `pactl`) | the value goes **to the device via AVRCP**, the signal is unchanged | yes, audibly |
+| attenuation in the signal (sox, `paplay --volume`) | the signal leaves the laptop correctly attenuated | **no** - the AIRHUG undoes it |
+
+Proven on the Bluetooth sink's monitor, i.e. on what leaves the laptop:
+half amplitude in the file arrives as **0.071559** against **0.143117**,
+exactly a factor of 0.5000. Sink at 100 % versus sink at 30 %, by
+contrast, gives **0.143117 both times**, identical to the last digit. So
+the sink volume is not computed into the signal at all but commanded to
+the device. On the built-in speaker the signal attenuation is audible the
+other way round (confirmed by ear).
+
+**Two conclusions:**
+
+- `bluez5.enable-hw-volume = false` would be a mistake, even though on
+  paper it does exactly what one wants (device stays at 100 %, OS
+  controls). DialOS would then attenuate on the route that does nothing
+  on the AIRHUG - there would be **no** volume control left at all.
+- "announcements quieter than music" is unreachable on the AIRHUG,
+  because only the device volume works there and that applies to
+  everything. An AVRCP command costs a measured 19-36 ms, so briefly
+  lowering it during an announcement would be affordable - decision open,
+  see `TODO.en.md`.
 
 What follows in practice: DialOS can control the volume, but it **does
 not know where it stands** once someone has turned the dial. If the user
@@ -131,9 +166,28 @@ disqualification.
 - **Built-in microphone only**, with the requirement that the laptop is
   in the same room. Contradicts the normal case.
 
-**Open - Stephan's decision** (see [../TODO.en.md](../TODO.en.md)). Until
-then the built-in microphone stays, because it at least does not damage
-output quality.
+**Decided on 2026-08-17 (Stephan): the third variant for now - input is
+always the built-in microphone**, output the Bluetooth speaker as long as
+it actually plays, otherwise the built-in ones. External microphones will
+be revisited only at the very end.
+
+This is explicitly **not a stopgap**; it also solves two problems that
+would otherwise need solving in their own right:
+
+1. **The A2DP/HFP forced choice disappears.** As long as DialOS never
+   opens a Bluetooth microphone, the device cannot drop into phone
+   quality. That trap has cost the audio quality of the video recording
+   and sits inside several open items - it is now not solved but
+   untouched.
+2. **A microphone that can be switched off is a risk to the entire audio
+   output.** If echo cancellation hangs on it, its failure takes
+   everything down - exactly what happened on 2026-08-17, details in
+   `Debian-zu-DialOS.en.md`, step 11f. A built-in microphone cannot be
+   switched off.
+
+The price is range: voice control only at the laptop. That is precisely
+why the search for an external microphone stays on the list - just not as
+a precondition for everything else.
 
 ## Two devices instead of one (decision 2026-08-17)
 

@@ -37,6 +37,15 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
+- [ ] **Next block: the applications** (Stephan, 2026-08-17). So far it
+  has been foundations - speech output, recognition, audio routing, desktop
+  look. Next up is which programs DialOS ships and how they are operated
+  by voice. **The entry point is the "Planned, not built yet" table in
+  `docs/sprachbefehle.en.md`** (radio/music, call for help, system
+  maintenance, telephony) - do not start a new list, work through the
+  existing one and follow the rules from that same file for every new
+  command.
+
 - [ ] **Unexplained: the Bluetooth sink suddenly stood at 70 %**
   (2026-08-17). Between two measurements the AIRHUG's volume changed from
   100 % to 70 % without DialOS having done anything. Three explanations are

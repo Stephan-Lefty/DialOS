@@ -208,6 +208,47 @@ and for a target group that cannot see the screen, hiding exactly that
 would be the worst option. What matters is that nothing leaves the device
 - Vosk runs entirely offline.
 
+## How fast does DialOS answer? (measured 2026-08-17)
+
+This is not a comfort question. Someone who cannot see the screen has only
+the answer as feedback - and when it fails to come, they speak louder
+instead of waiting. That happened twice in one day.
+
+| What | Before | Now |
+|---|---|---|
+| announcement "Ich höre." | 2172 ms | **about 1200 ms**, 1130 ms of which is the announcement itself |
+| deafness after a switch | ≈ 5.1 s | while it speaks, plus 0.7 s |
+
+The announcement time came down through an **announcement cache**: spoken
+sentences are stored as WAV under `~/.cache/dialos/ansagen` and played
+from there next time (details in `Debian-zu-DialOS.en.md`, step 11).
+
+The deafness came down through **removing the lockout**. It was meant to
+prevent double triggering, but it was redundant once the recording is
+discarded and restarted after every utterance. What it actually did: after
+a switch, 2.4 s of script including its announcement, 2.0 s of lockout and
+0.7 s of reverberation pause - but the announcement ended after 1.5 s. So
+the user heard the answer and spoke into a deaf system for 3.6 seconds.
+
+**The lesson beyond this case:** "I have to speak louder" is almost always
+a misleading fault description. Twice in one day the cause was a window in
+which the system was not listening - and both times the report sounded
+like a level problem. Anyone receiving such a report should first ask
+**which** command in the sequence failed: Stephan's clarification "the
+*second* command" solved it both times.
+
+## Which microphone? (settled 2026-08-17)
+
+**Always the built-in one.** No Bluetooth, no USB - the reasoning is in
+`hardware.en.md`, section "What remains". In short: as long as DialOS
+never opens a Bluetooth microphone, the device cannot drop into phone
+quality, and a microphone that can be switched off endangers the entire
+audio output through echo cancellation.
+
+If the built-in microphone fails there is **no** fallback left - that is
+deliberate. The service then announces it ("Ich finde kein Mikrofon.")
+instead of being silently dead.
+
 ## Open questions
 
 - The concrete intent layer (custom middleware vs. an existing framework

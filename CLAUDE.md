@@ -39,7 +39,7 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-16)
+## Aktueller Stand (Stand: 2026-08-17)
 
 **Neu am Abend des 2026-08-16: DialOS hat seinen ersten echten
 Sprachbefehl.** `dialos-sprachbefehl-desktop.py` laeuft dauerhaft mit
@@ -223,16 +223,31 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
 - Sudo-Rechte für den Standard-Benutzer "nutzer" (Platzhalter-Passwort
   aktuell zufällig generiert, echte Policy für die spätere
   sprachgesteuerte Wartung noch offen).
-- Referenz-Hardware final festlegen: Bluetooth-Lautsprecher/-Mikrofon
-  ist seit 2026-08-16 entschieden (AIRHUG 01), Laptop und
-  Sicherheits-Stick noch offen (siehe `docs/hardware.md`). Der
-  Mikrofon-Fallback auf das eingebaute Gerät ist noch ungetestet, der
-  Ausgabe-Fallback dagegen belegt.
+- Referenz-Hardware final festlegen: Bluetooth-Lautsprecher ist seit
+  2026-08-16 entschieden (AIRHUG 01), Laptop und Sicherheits-Stick noch
+  offen (siehe `docs/hardware.md`). **Beim Mikrofon ist die Frage seit
+  2026-08-17 vertagt, nicht offen:** Eingabe ist immer das eingebaute
+  Mikrofon, ein externes Funkmikrofon wird erst zum Schluss wieder
+  betrachtet. Der Ausgabe-Fallback auf die eingebauten Lautsprecher ist
+  belegt und läuft jetzt über `dialos-ton-ausgabe.py`.
 - Rechtschreibprüfung (hunspell/aspell) fehlt noch, siehe
   `docs/offene-punkte.md`.
 - Mikrofon-Vergleich eingebaut gegen AIRHUG wiederholen, nachdem die
-  60-dB-Übersteuerung behoben ist - davon hängt ab, ob die
-  Bluetooth-Priorität überhaupt begründet ist.
+  60-dB-Übersteuerung behoben ist. **Nicht mehr dringend seit der
+  Audio-Festlegung vom 2026-08-17** - die Bluetooth-Priorität beim
+  Mikrofon ist damit ohnehin entfallen. Interessant bleibt der Vergleich
+  für die spätere Entscheidung über ein externes Mikrofon.
+
+## Nächster Schritt (Stephan, 2026-08-17)
+
+**Morgen gehen wir an die Anwendungen.** Bis hierher ging es um die
+Grundlagen - Sprachausgabe, Spracherkennung, Audio-Wege, Desktop-Optik.
+Was DialOS an Programmen mitbringt und wie sie per Sprache bedient
+werden, ist der nächste Block. Die vorgesehenen Sprachbefehle dazu
+stehen schon in [docs/sprachbefehle.md](docs/sprachbefehle.md) in der
+Tabelle „Vorgesehen, noch nicht gebaut" (Radio/Musik, Hilfe rufen,
+Systemwartung, Telefonie) - das ist der Einstiegspunkt, nicht eine neue
+Liste.
 
 ## Arbeitsweise mit Stephan
 

@@ -116,7 +116,42 @@ Nachgemessen im Hörvergleich:
   erste Durchgang hätte sonst daran leiden können, dass das Gerät selbst
   leise stand.
 - **Gerät → Rechner: funktioniert nicht.** Drückt jemand am AIRHUG Plus
-  oder Minus, erfährt der Rechner nichts davon.
+  oder Minus, erfährt der Rechner nichts davon. **Am 2026-08-17 in drei
+  Bedingungen nachgeprüft**, weil eine Beobachtung dem zu widersprechen
+  schien (die Senke stand plötzlich auf 70 %): Tastendruck ohne Ton,
+  Start einer Wiedergabe, und Tastendruck **während** laufender
+  Wiedergabe - der Wert blieb jedes Mal unverändert. Die 70 % bleiben
+  unerklärt, siehe [../TODO.md](../TODO.md).
+
+### Wie die Lautstärke wirklich übertragen wird (gemessen 2026-08-17)
+
+Das ist wichtiger als es klingt, weil die naheliegende Annahme falsch
+ist - und mich zu einer Empfehlung verleitet hat, die ich zurücknehmen
+musste:
+
+| Weg | Was passiert | Wirkt es? |
+|---|---|---|
+| Senken-Lautstärke (GNOME-Regler, `pactl`) | Wert geht **per AVRCP ans Gerät**, das Signal bleibt unverändert | ja, hörbar |
+| Dämpfung im Signal (sox, `paplay --volume`) | Signal verlässt den Laptop korrekt gedämpft | **nein** - der AIRHUG rechnet es weg |
+
+Nachgewiesen am Monitor der Bluetooth-Senke, also an dem, was den Laptop
+verlässt: Halbe Amplitude in der Datei ergibt dort **0,071559** gegen
+**0,143117**, genau Faktor 0,5000. Senke auf 100 % gegen Senke auf 30 %
+dagegen **beide Male 0,143117**, auf die letzte Stelle identisch. Die
+Senken-Lautstärke wird also gar nicht ins Signal gerechnet, sondern dem
+Gerät befohlen. Am eingebauten Lautsprecher ist die Dämpfung im Signal
+umgekehrt hörbar (im Hörvergleich bestätigt).
+
+**Zwei Folgerungen:**
+
+- `bluez5.enable-hw-volume = false` wäre ein Fehler, obwohl es auf dem
+  Papier genau das täte, was man will (Gerät bleibt auf 100 %, OS regelt).
+  DialOS würde danach auf dem Weg dämpfen, der beim AIRHUG nichts
+  bewirkt - es gäbe **überhaupt keine** Lautstärkeregelung mehr.
+- „Ansagen leiser als Musik" ist am AIRHUG nicht erreichbar, weil dort
+  nur die Geräte-Lautstärke wirkt und die für alles gilt. Ein
+  AVRCP-Befehl kostet gemessen 19-36 ms, ein kurzes Absenken während der
+  Ansage wäre also bezahlbar - Entscheidung offen, siehe `TODO.md`.
 
 Was daraus praktisch folgt: DialOS kann die Lautstärke steuern, aber es
 **weiß nicht, wo sie steht**, wenn jemand am Gerät gedreht hat. Hat der
@@ -136,9 +171,29 @@ Restrisiko, aber kein Ausschlusskriterium.
 - **Nur eingebautes Mikrofon** und die Auflage, dass der Laptop im selben
   Raum steht. Widerspricht dem Regelfall.
 
-**Offen - Stephans Entscheidung** (siehe [../TODO.md](../TODO.md)). Bis
-dahin bleibt es beim eingebauten Mikrofon, weil das wenigstens die
-Ausgabequalität nicht beschädigt.
+**Entschieden am 2026-08-17 (Stephan): vorerst die dritte Variante -
+Eingabe immer das eingebaute Mikrofon**, Ausgabe der
+Bluetooth-Lautsprecher solange er wirklich abspielt, sonst die
+eingebauten. Externe Mikrofone werden erst zum Schluss wieder
+betrachtet.
+
+Das ist ausdrücklich **keine Notlösung**, sondern löst zwei Probleme mit,
+die sonst eigens zu lösen wären:
+
+1. **Die A2DP/HFP-Zwangswahl entfällt.** Solange DialOS nie ein
+   Bluetooth-Mikrofon öffnet, kann das Gerät nicht in Telefonqualität
+   rutschen. Diese Falle hat bisher die Tonqualität der Videoaufnahme
+   gekostet und steckt in mehreren offenen Punkten - sie ist jetzt nicht
+   gelöst, sondern unberührt.
+2. **Ein abschaltbares Mikrofon ist ein Risiko für die ganze
+   Tonausgabe.** Hängt die Echo-Unterdrückung daran, nimmt sein Ausfall
+   alles mit - am 2026-08-17 genau so passiert, Details in
+   `Debian-zu-DialOS.md`, Schritt 11f. Ein eingebautes Mikrofon kann man
+   nicht ausschalten.
+
+Der Preis ist die Reichweite: Sprachsteuerung nur am Laptop. Genau
+deshalb bleibt die Suche nach einem externen Mikrofon auf der Liste, nur
+eben nicht als Voraussetzung für alles andere.
 
 ## Zwei Geräte statt einem (Entscheidung 2026-08-17)
 
