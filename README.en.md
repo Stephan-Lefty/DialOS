@@ -127,12 +127,15 @@ background) and `splash.png` (boot/login screen).
     under `sudo` and root has no access to the user's PipeWire session
     ("Connection refused"). Only the third run was clean. Recorded
     because both traps threaten every future hardware test.
-  - **Second consequence, independent of the trigger question:** because
-    device volume is decoupled from system volume, DialOS **cannot at
-    all** make the speaker louder or quieter. If someone turns the device
-    down, the announcement stays quiet - and a blind user cannot find the
-    cause, because it lies outside the system. On a purely voice-operated
-    device that is a real deficiency.
+  - **Second consequence - and here I had to correct myself the same
+    day.** It first said DialOS could not control the speaker at all.
+    That was an overstatement: I had not separated "not coupled" by
+    direction. A listening comparison (10 % vs. 100 %) showed the
+    **computer can control the AIRHUG perfectly well** - only its own
+    buttons don't report back. So "louder" is feasible. What remains is a
+    residual risk: DialOS **does not know where the volume stands** once
+    someone has turned the dial. With the software already at 100 %, no
+    voice command helps, and the cause lies outside the system.
   - **This puts the decision of 2026-08-16 ("the reference device is the
     AIRHUG 01") back on the table.** Three options in
     `docs/hardware.en.md`, each with its price. Until a decision, the

@@ -77,7 +77,8 @@ Nutzer ist. Das Ausgabegerät darf überall stehen.**
 | A2DP (gute Wiedergabe) | `sources: 0` - **kein Mikrofon** |
 | HFP (Mikrofon verfügbar) | Wiedergabe fällt auf 1 Kanal / 16000 Hz |
 | Tasten am Gerät | erreichen den Laptop **nicht** |
-| Lautstärketasten | regeln **nur den eigenen Verstärker**, nicht GNOME |
+| Lautstärketasten am Gerät | melden sich **nicht** am Rechner |
+| Lautstärke **vom Rechner** setzen | funktioniert (am 2026-08-17 bei 10 % gegen 100 % gehört) |
 
 Die ersten beiden Zeilen sind eine Eigenschaft von Bluetooth, keine
 Konfigurationsfrage: Das Gerät kann nicht gleichzeitig gut klingen und
@@ -101,15 +102,25 @@ Die dritte und vierte Zeile sind am 2026-08-17 gemessen worden, auf zwei
 **Damit fällt die naheliegende Lösung aus**, per Tastendruck am
 Lautsprecher kurz auf HFP zu schalten, zuzuhören und zurückzuschalten.
 
-### Zweite Folge: DialOS kann den Lautsprecher nicht leiser oder lauter machen
+### Die Entkopplung gilt nur in EINE Richtung
 
-Weil die Gerätelautstärke von der Systemlautstärke entkoppelt ist,
-erreicht **kein** Softwarebefehl den Verstärker des AIRHUG. Die
-Lautstärke-Frage der Start-Ansage regelt nur die Software-Seite. Hat
-jemand das Gerät am Rad heruntergedreht, bleibt die Ansage leise - und
-ein blinder Nutzer findet die Ursache nicht, weil sie außerhalb des
-Systems liegt. Für ein Gerät, das ausschließlich per Sprache bedient
-wird, ist das ein echter Mangel.
+**Richtigstellung vom 2026-08-17.** Hier stand zunächst, DialOS könne den
+Lautsprecher überhaupt nicht regeln. Das war zu weit gegriffen und beruhte
+darauf, dass ich „nicht gekoppelt" nicht nach Richtung getrennt hatte.
+Nachgemessen im Hörvergleich:
+
+- **Rechner → Gerät: funktioniert.** Bei 10 % gegen 100 % ist der
+  Unterschied unüberhörbar. Ein Sprachbefehl „mach lauter" ist also
+  umsetzbar.
+- **Gerät → Rechner: funktioniert nicht.** Drückt jemand am AIRHUG Plus
+  oder Minus, erfährt der Rechner nichts davon.
+
+Was daraus praktisch folgt: DialOS kann die Lautstärke steuern, aber es
+**weiß nicht, wo sie steht**, wenn jemand am Gerät gedreht hat. Hat der
+Nutzer den AIRHUG am Rad heruntergedreht, hilft „mach lauter" nur, wenn
+die Software-Lautstärke noch Spielraum hat - steht sie schon auf 100 %,
+bleibt es leise, und die Ursache liegt außerhalb des Systems. Ein
+Restrisiko, aber kein Ausschlusskriterium.
 
 ### Was bleibt
 

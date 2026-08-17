@@ -130,13 +130,16 @@ abgeschlossen.*
     des Benutzers hat („Connection refused"). Erst der dritte Lauf war
     sauber. Festgehalten, weil beide Fallen bei jedem künftigen
     Hardware-Test wieder drohen.
-  - **Zweite Folge, unabhängig von der Auslöser-Frage:** Weil die
-    Gerätelautstärke von der Systemlautstärke entkoppelt ist, kann DialOS
-    den Lautsprecher **überhaupt nicht** leiser oder lauter machen. Dreht
-    jemand das Gerät herunter, bleibt die Ansage leise - und ein blinder
-    Nutzer findet die Ursache nicht, weil sie außerhalb des Systems
-    liegt. Bei einem rein sprachgesteuerten Gerät ist das ein echter
-    Mangel.
+  - **Zweite Folge - und hier musste ich mich am selben Tag
+    korrigieren.** Zuerst stand hier, DialOS könne den Lautsprecher
+    überhaupt nicht regeln. Das war zu weit gegriffen: Ich hatte „nicht
+    gekoppelt" nicht nach Richtung getrennt. Im Hörvergleich (10 % gegen
+    100 %) zeigte sich, dass der **Rechner den AIRHUG sehr wohl steuern
+    kann** - nur seine eigenen Tasten melden sich nicht zurück. „Mach
+    lauter" ist also umsetzbar. Was bleibt, ist ein Restrisiko: DialOS
+    **weiß nicht, wo die Lautstärke steht**, wenn jemand am Gerät gedreht
+    hat. Steht die Software schon auf 100 %, hilft kein Sprachbefehl mehr,
+    und die Ursache liegt außerhalb des Systems.
   - **Damit steht die Festlegung vom 2026-08-16 („Referenzgerät ist der
     AIRHUG 01") wieder zur Entscheidung.** Drei Möglichkeiten in
     `docs/hardware.md`, alle mit ihrem Preis. Bis zur Entscheidung bleibt

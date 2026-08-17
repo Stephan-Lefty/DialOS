@@ -173,14 +173,19 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Nutzer, Lautsprecher in A2DP), ein anderer Lautsprecher dessen Tasten
   durchkommen, oder die Auflage dass der Laptop im selben Raum steht.
 
-- [ ] **DialOS kann die Lautstärke des AIRHUG nicht regeln** (offen seit
-  2026-08-17). Weil Gerätelautstärke und Systemlautstärke entkoppelt
-  sind, erreicht kein Softwarebefehl den Verstärker. Dreht jemand das
-  Gerät herunter, bleibt die Ansage leise - und ein blinder Nutzer findet
-  die Ursache nicht, weil sie außerhalb des Systems liegt. Bei einem
-  Gerät, das nur per Sprache bedient wird, ist das ein echter Mangel. Ob
-  das ein Ausschlusskriterium für den AIRHUG ist, gehört zur Entscheidung
-  oben.
+- [x] **Geklärt am 2026-08-17: Die Lautstärke-Entkopplung gilt nur in
+  eine Richtung.** Der Rechner kann den AIRHUG sehr wohl regeln (10 %
+  gegen 100 % im Hörvergleich eindeutig); nur seine eigenen Tasten melden
+  sich nicht zurück. Meine erste Einschätzung („DialOS kann überhaupt
+  nicht regeln") war zu weit gegriffen. Kein Ausschlusskriterium.
+
+- [ ] **Restrisiko dazu:** DialOS kennt die am Gerät eingestellte
+  Lautstärke nicht. Hat jemand den AIRHUG am Rad heruntergedreht, hilft
+  „mach lauter" nur, solange die Software-Lautstärke noch Spielraum hat -
+  bei 100 % bleibt es leise, und die Ursache liegt außerhalb des Systems.
+  Zu überlegen: Erkennt DialOS diesen Fall (Software auf 100 %, Nutzer
+  sagt weiter „lauter") und sagt dann, dass am Gerät selbst gedreht
+  werden muss?
 
 - [ ] **Mikrofon-Vergleich vom 2026-08-13 wiederholen.** Damals galt das
   eingebaute Mikrofon als dem AIRHUG deutlich unterlegen. Am 2026-08-16

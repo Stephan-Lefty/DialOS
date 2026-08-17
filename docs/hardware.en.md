@@ -75,7 +75,8 @@ device can be anywhere.**
 | A2DP (good playback) | `sources: 0` - **no microphone** |
 | HFP (microphone available) | playback drops to 1 channel / 16000 Hz |
 | Buttons on the device | do **not** reach the laptop |
-| Volume buttons | control **only its own amplifier**, not GNOME |
+| Volume buttons on the device | do **not** report back to the computer |
+| Setting the volume **from the computer** | works (heard on 2026-08-17, 10 % vs. 100 %) |
 
 The first two rows are a property of Bluetooth, not a configuration
 question: the device cannot sound good and listen at the same time.
@@ -98,14 +99,23 @@ paths, because the first alone would have proven nothing:
 **That rules out the obvious solution** of briefly switching to HFP by
 pressing a button on the speaker, listening, and switching back.
 
-### Second consequence: DialOS cannot make the speaker louder or quieter
+### The decoupling applies in ONE direction only
 
-Because the device volume is decoupled from the system volume, **no**
-software command reaches the AIRHUG's amplifier. The volume question in
-the login announcement only controls the software side. If someone has
-turned the device down physically, the announcement stays quiet - and a
-blind user cannot find the cause, because it lies outside the system. For
-a device operated solely by voice, that is a real deficiency.
+**Correction of 2026-08-17.** This initially said DialOS could not
+control the speaker at all. That was an overstatement, based on my not
+separating "not coupled" by direction. Re-measured by ear:
+
+- **Computer → device: works.** Between 10 % and 100 % the difference is
+  unmistakable. A voice command "louder" is therefore feasible.
+- **Device → computer: does not work.** If someone presses plus or minus
+  on the AIRHUG, the computer learns nothing about it.
+
+What follows in practice: DialOS can control the volume, but it **does
+not know where it stands** once someone has turned the dial. If the user
+has turned the AIRHUG down physically, "louder" only helps while the
+software volume still has headroom - at 100 % it stays quiet, and the
+cause lies outside the system. A residual risk, but not a
+disqualification.
 
 ### What remains
 

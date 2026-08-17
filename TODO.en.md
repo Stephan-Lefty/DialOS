@@ -172,13 +172,18 @@ what has already been done.
   different speaker whose buttons get through, or the requirement that
   the laptop be in the same room.
 
-- [ ] **DialOS cannot control the AIRHUG's volume** (open since
-  2026-08-17). Because device volume and system volume are decoupled, no
-  software command reaches the amplifier. If someone turns the device
-  down, the announcement stays quiet - and a blind user cannot find the
-  cause, because it lies outside the system. For a device operated solely
-  by voice, that is a real deficiency. Whether this disqualifies the
-  AIRHUG belongs to the decision above.
+- [x] **Clarified on 2026-08-17: the volume decoupling applies in one
+  direction only.** The computer can control the AIRHUG perfectly well
+  (10 % vs. 100 % unmistakable by ear); only its own buttons don't report
+  back. My first assessment ("DialOS cannot control it at all") was an
+  overstatement. Not a disqualification.
+
+- [ ] **Residual risk from this:** DialOS does not know the volume set on
+  the device. If someone has turned the AIRHUG down by hand, "louder"
+  only helps while the software volume still has headroom - at 100 % it
+  stays quiet, and the cause lies outside the system. Worth considering:
+  should DialOS detect this case (software at 100 %, user keeps saying
+  "louder") and say that the device itself needs turning up?
 
 - [ ] **Repeat the microphone comparison of 2026-08-13.** Back then the
   built-in microphone was judged clearly inferior to the AIRHUG. On
