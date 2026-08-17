@@ -194,6 +194,41 @@ the microphone any more"). That does not replace a battery indicator but
 catches exactly the failure that would otherwise leave the user
 clueless - and it works with either design.
 
+### The USB route is proven on this machine (2026-08-17)
+
+The open question "does a wireless microphone with a USB receiver appear
+as a sound card under Linux?" is answered - with hardware Stephan already
+owned: a **TeckNet TK-HS005** headset with a 2.4 GHz USB dongle.
+
+| | |
+|---|---|
+| USB ID | `10d6:dd00` |
+| Manufacturer **per device** | "Generic" |
+| Product per device | `TK-HS005-PHONE` |
+| Brand | **TeckNet** - printed only, not in the descriptor |
+| Chipset | Actions Semiconductor |
+
+Plugged in, it registers without drivers and without pairing as a sound
+card - and, decisively, with a profile carrying **output and input
+simultaneously**:
+
+```
+output:analog-stereo+input:mono-fallback   (sinks: 1, sources: 1)
+```
+
+That is exactly what Bluetooth cannot do: on the AIRHUG every A2DP
+profile has `sources: 0`, forcing a choice between good sound and the
+microphone. On the USB device there is no such choice because none is
+needed. And it consumes no airtime on the Bluetooth adapter - the
+"music stutters" risk disappears entirely on the USB route.
+
+**What the device is not suited for:** reference hardware. The
+manufacturer appears nowhere in the descriptor, "Actions Semiconductor"
+is only the chip supplier, and the same chip in the same housing is sold
+under any number of brand names. A device that must be re-orderable for
+years should be identifiable. As **proof that the route works**, it has
+served its purpose.
+
 ### Checked and rejected: Godox Cube-SC Kit2 (2026-08-17)
 
 2.4 GHz wireless microphone with USB-C receiver, around €60-80. Checked

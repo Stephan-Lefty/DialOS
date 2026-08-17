@@ -105,6 +105,30 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The USB route is proven - with hardware that was already there
+  (2026-08-17).** Stephan's existing headset, a **TeckNet TK-HS005** with
+  a 2.4 GHz USB dongle, registers without drivers and without pairing as
+  a sound card. Its profile is the decisive part:
+  `output:analog-stereo+input:mono-fallback` with `sinks: 1, sources: 1` -
+  **output and input simultaneously.** Exactly what Bluetooth cannot do:
+  on the AIRHUG every A2DP profile has `sources: 0`, forcing a choice
+  between good sound and the microphone. That answers the open question
+  in `hardware.en.md`, and the "music stutters" risk disappears entirely
+  on the USB route because no airtime is consumed on the Bluetooth
+  adapter.
+  - **The device is still not suitable as reference hardware:** the USB
+    descriptor gives the manufacturer literally as "Generic"; "Actions
+    Semiconductor" is only the chip supplier, and the TeckNet brand is
+    merely printed on the housing. The same chip in the same housing is
+    sold under any number of names. A device that must be re-orderable
+    for years should be identifiable.
+  - **A mistake of my own while re-targeting echo cancellation:** I only
+    changed the test copy in the user directory. But the system file
+    under `/etc/pipewire/pipewire.conf.d/` is loaded first and claims the
+    node name - the user file failed silently on the collision, and
+    cancellation stayed on the built-in microphone. Noticed while
+    checking, because the capture hung on source 68 instead of 63.
+
 - **Godox Cube-SC Kit2 checked and rejected (Stephan's suggestion,
   2026-08-17).** A 2.4 GHz wireless microphone with USB-C receiver that
   fits well on paper: **UAC** explicitly supported and intended for PC

@@ -199,6 +199,41 @@ ist, kann er das ansagen („Ich höre nichts mehr vom Mikrofon"). Das
 ersetzt keine Akkuanzeige, fängt aber genau den Ausfall ab, der den
 Nutzer sonst ratlos zurückließe - und wirkt bei beiden Bauarten.
 
+### Der USB-Weg ist auf diesem Gerät bewiesen (2026-08-17)
+
+Die offene Frage „erscheint ein Funkmikrofon mit USB-Empfänger unter
+Linux als Soundkarte?" ist beantwortet - mit Hardware, die Stephan schon
+besaß: einem **TeckNet TK-HS005** Headset mit 2,4-GHz-USB-Dongle.
+
+| | |
+|---|---|
+| USB-Kennung | `10d6:dd00` |
+| Hersteller **laut Gerät** | „Generic" |
+| Produkt laut Gerät | `TK-HS005-PHONE` |
+| Marke | **TeckNet** - nur aufgedruckt, nicht im Deskriptor |
+| Chipsatz | Actions Semiconductor |
+
+Eingesteckt meldet es sich ohne Treiber und ohne Kopplung als
+Soundkarte - und, entscheidend, mit einem Profil, das **Ausgabe und
+Eingabe gleichzeitig** führt:
+
+```
+output:analog-stereo+input:mono-fallback   (sinks: 1, sources: 1)
+```
+
+Genau das kann Bluetooth nicht: Beim AIRHUG hat jedes A2DP-Profil
+`sources: 0`, man muss zwischen gutem Klang und Mikrofon wählen. Beim
+USB-Gerät gibt es diese Wahl nicht, weil sie nicht nötig ist. Und es
+belegt keine Funkzeit auf dem Bluetooth-Adapter - das Risiko
+„Musik stottert" entfällt beim USB-Weg vollständig.
+
+**Was das Gerät nicht taugt:** als Referenz-Hardware. Der Hersteller
+steht nirgends im Deskriptor, „Actions Semiconductor" ist nur der
+Chiplieferant, und derselbe Chip im selben Gehäuse wird unter beliebig
+vielen Markennamen verkauft. Ein Gerät, das man über Jahre nachkaufen
+können muss, sollte identifizierbar sein. Als **Beweis, dass der Weg
+funktioniert**, hat es seinen Zweck erfüllt.
+
 ### Geprüft und verworfen: Godox Cube-SC Kit2 (2026-08-17)
 
 2,4-GHz-Funkmikrofon mit USB-C-Empfänger, rund 60-80 €. Auf Stephans

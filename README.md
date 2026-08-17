@@ -107,6 +107,30 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Der USB-Weg ist bewiesen - mit Hardware, die schon da war
+  (2026-08-17).** Stephans vorhandenes Headset, ein **TeckNet TK-HS005**
+  mit 2,4-GHz-USB-Dongle, meldet sich ohne Treiber und ohne Kopplung als
+  Soundkarte. Entscheidend ist sein Profil:
+  `output:analog-stereo+input:mono-fallback` mit `sinks: 1, sources: 1` -
+  **Ausgabe und Eingabe gleichzeitig.** Genau das, was Bluetooth nicht
+  kann: Beim AIRHUG hat jedes A2DP-Profil `sources: 0`, man muss zwischen
+  gutem Klang und Mikrofon wählen. Damit ist die offene Frage aus
+  `hardware.md` beantwortet, und das Risiko „Musik stottert" entfällt auf
+  dem USB-Weg vollständig, weil keine Funkzeit auf dem Bluetooth-Adapter
+  belegt wird.
+  - **Als Referenz-Hardware taugt das Gerät trotzdem nicht:** Im
+    USB-Deskriptor steht als Hersteller wörtlich „Generic"; „Actions
+    Semiconductor" ist nur der Chiplieferant, und die Marke TeckNet steht
+    lediglich aufgedruckt auf dem Gehäuse. Derselbe Chip im selben
+    Gehäuse wird unter beliebig vielen Namen verkauft. Ein Gerät, das
+    über Jahre nachkaufbar sein muss, sollte identifizierbar sein.
+  - **Beim Umhängen der Echo-Unterdrückung ein eigener Fehler:** Ich
+    hatte nur die Testkopie im Benutzerordner geändert. Die Systemdatei
+    unter `/etc/pipewire/pipewire.conf.d/` wird aber zuerst geladen und
+    belegt den Knotennamen - die Benutzerdatei scheiterte still an der
+    Kollision, und die Unterdrückung hing weiter am eingebauten Mikrofon.
+    Beim Prüfen aufgefallen, weil die Aufnahme an Quelle 68 statt 63 hing.
+
 - **Godox Cube-SC Kit2 geprüft und verworfen (Stephans Vorschlag,
   2026-08-17).** Ein 2,4-GHz-Funkmikrofon mit USB-C-Empfänger, das auf
   dem Papier gut passt: **UAC** ausdrücklich unterstützt und für den
