@@ -66,6 +66,7 @@ Details zum jeweiligen Stand stehen im
 - [Architektur-Übersicht](docs/architektur-uebersicht.md) – Ziel, Zielgruppe, Kernfunktionen, Software-Stack
 - [Hardware](docs/hardware.md) – Referenzgerät, Test-Hardware, WWAN-Anforderungen
 - [Sicherheit & Datenschutz](docs/sicherheit-datenschutz.md) – Autologin, Verschlüsselung, Fernwartung, Versand
+- [Sprachbefehle](docs/sprachbefehle.md) – die Liste aller Sprachbefehle: was das System versteht und was es dann tut
 - [Sprachsteuerung](docs/sprachsteuerung.md) – STT/TTS-Stack, Intent-Erkennung, Design-Prinzipien
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
@@ -100,6 +101,74 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Änderungsprotokoll
 
 ### 0.5.0
+- **Neue Datei `docs/sprachbefehle.md` (Stephans Wunsch, 2026-08-17):
+  eine Tabelle Sprachbefehl → Aktion**, die mit jedem neuen Befehl
+  mitwächst. Bewusst **zwei getrennte Tabellen** - umgesetzt und
+  vorgesehen. Vermischt sähe Geplantes wie Vorhandenes aus, und genau
+  dieser Fehler musste in diesem Projekt schon einmal aufgeräumt werden.
+  Dazu die Regeln, die jeder neue Befehl einhalten muss; jede davon
+  stammt aus einem tatsächlich aufgetretenen Fehler: ganzer Satz statt
+  Einzelwort, Ja/Nein-Rückfrage bei sicherheitskritischen Aktionen,
+  jeder Befehl sagt an was er getan hat, neue Wörter erst gegen das
+  Modell prüfen, und nach jedem Sprechen die Aufnahme neu beginnen.
+  Verlinkt aus README, `sprachsteuerung.md` und CLAUDE.md.
+- **Der Sprachdienst hat sich selbst umgeschaltet - Ursache war
+  Arithmetik, nicht Fehlerkennung (gefunden und behoben 2026-08-17).**
+  Er schaltete auf Windows um und 15 Sekunden später von selbst zurück.
+  Die Schutzmaßnahme "während das System spricht, wird nicht zugehört"
+  war eingebaut und griff auch - sie verhindert aber nur das **Zuhören**,
+  nicht das **Aufzeichnen**. `parec` erzeugt bei 16 kHz mono 16 Bit rund
+  32.000 Bytes pro Sekunde; der Dienst verwarf währenddessen 4.000 Bytes
+  alle 0,3 Sekunden, also nur rund 13.000 pro Sekunde. Er leerte die
+  Warteschlange langsamer, als sie volllief - nach einer acht Sekunden
+  langen Ansage standen rund fünf Sekunden **eigene Stimme** in der Pipe,
+  die er danach ganz normal auswertete. Und weil die eingeschränkte
+  Grammatik alles in einen der drei Sätze presst, wurde daraus ein
+  Befehl. Behoben, indem die Aufnahme nach jedem Sprechen **komplett neu
+  begonnen** wird - ein frischer `parec`-Prozess hat keinen Rückstand.
+  Dieselbe Behandlung gilt jetzt für die Sperrfrist nach dem Umschalten.
+  Regressionstest ohne Sprechen möglich, weil die eigene Ansage der
+  Auslöser war: umgeschaltet, 30 Sekunden beobachtet, kein
+  Zurückschalten mehr.
+- **Der Pegel-Dienst lief strukturell zu früh - jetzt richtet der
+  Sprachdienst den Pegel selbst (2026-08-17).**
+  `dialos-mikrofon-pegel.service` läuft beim Booten, also **vor** der
+  Anmeldung. WirePlumber stellt seine gespeicherten Geräte-Einstellungen
+  aber erst in der Sitzung wieder her und hebt `Internal Mic Boost` dabei
+  zurück auf +30 dB. Im Debug-Protokoll war die Folge unmittelbar zu
+  sehen: durchgehend "ÜBERSTEUERT", und Stephans Befehle kamen nur als
+  Bruchstücke an (`'linux'`, `'auf'`, `'windows gnome'` - ohne
+  "umschalten", also ohne Wirkung). Der Sprachdienst richtet den Pegel
+  jetzt selbst, **nachdem** er die Aufnahme geöffnet hat, also nach
+  WirePlumbers Zugriff; zusätzlich erkennt er anhaltende Übersteuerung im
+  Betrieb und regelt nach (höchstens einmal pro Minute, damit ein lautes
+  Umfeld keine Dauerschleife auslöst). Getestet, indem der Boost
+  absichtlich wieder hochgedreht wurde - der Dienst hat ihn beim Start
+  selbst zurückgenommen. Damit ist auch die gestern zurückgenommene
+  Erklärung wieder belastbar: Die 60 dB waren die Ursache, nur lag der
+  Boost bei der Gegenmessung am Morgen gerade nicht auf dem aktiven
+  Aufnahmeweg.
+- **Aufweckwort durchgemessen - und der naheliegende Weg scheidet aus
+  (2026-08-17).** Die Idee, dieselbe eingeschränkte Vosk-Grammatik auch
+  fürs Weckwort zu nehmen, wurde geprüft und **verworfen**. Erkannt
+  werden alle Kandidaten sauber ("Michael", "Hallo Michael", "Anna",
+  "Computer") - die Wörter stehen also im Wortschatz des Modells, was
+  nach "gnome" → "genug" nicht selbstverständlich war. Aber die
+  Störsätze lösen aus: "ich rufe michael an" wird zu `hallo michael`,
+  "der computer ist langsam" zu `computer`. Der Grund ist derselbe wie
+  beim Selbst-Auslöser oben: **Eine eingeschränkte Grammatik hat keine
+  Wahl, sie presst alles in die nächstliegende Phrase.** Für Befehle ist
+  das ein Vorteil, fürs Weckwort das Gegenteil. Und die naheliegende
+  Rettung greift nicht - "ich rufe michael an" wurde mit **conf 1.00**
+  durchgereicht, ein Schwellwert trennt also nicht. Konsequenz:
+  openWakeWord bleibt der Weg. Zur Wortwahl entschieden: **der Name des
+  Assistenten** ("Hallo Michael", bei weiblicher Stimme "Hallo Anna") -
+  er steht durch die Stimmenwahl bei der Ersteinrichtung ohnehin fest,
+  womit auch Stephans geplante weibliche Stimme abgedeckt ist.
+  **Korrektur einer eigenen Aussage:** Ein Aufweckwort schaltet das
+  Mikrofon-Symbol **nicht** aus - um das Weckwort zu hören, muss weiter
+  zugehört werden. Das ist auch richtig so: Das Gerät hört tatsächlich
+  zu, und das zu verstecken wäre bei dieser Zielgruppe das Schlechteste.
 - **Zwei Fehler, die der erste Morgen im Echtbetrieb aufgedeckt hat
   (2026-08-17).**
   - **Der Autostart für die Stil-Wiederherstellung fehlte - mein

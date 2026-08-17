@@ -66,6 +66,7 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 - [Architecture overview](docs/architektur-uebersicht.en.md) – goal, target audience, core features, software stack
 - [Hardware](docs/hardware.en.md) – reference device, test hardware, WWAN requirements
 - [Security & privacy](docs/sicherheit-datenschutz.en.md) – autologin, encryption, remote support, shipping
+- [Voice commands](docs/sprachbefehle.en.md) – the list of all voice commands: what the system understands and what it then does
 - [Voice control](docs/sprachsteuerung.en.md) – STT/TTS stack, intent recognition, design principles
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
@@ -99,6 +100,70 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.0
+- **New file `docs/sprachbefehle.en.md` (Stephan's request, 2026-08-17):
+  a table of voice command → action** that grows with every new command.
+  Deliberately **two separate tables** - implemented and planned. Mixed
+  together, the planned would look like the existing, and that exact
+  mistake already had to be cleaned up once in this project. Plus the
+  rules every new command must follow; each of them comes from a fault
+  that actually occurred: whole sentence instead of a single word,
+  yes/no confirmation for safety-critical actions, every command
+  announces what it did, check new words against the model first, and
+  restart the recording after every spoken output. Linked from the
+  README, `sprachsteuerung.en.md` and CLAUDE.md.
+- **The voice service switched itself back - the cause was arithmetic,
+  not misrecognition (found and fixed 2026-08-17).** It switched to
+  Windows and 15 seconds later switched back on its own. The safeguard
+  "no listening while the system speaks" was in place and did work - but
+  it only prevents **listening**, not **recording**. `parec` produces
+  about 32,000 bytes per second at 16 kHz mono 16-bit; meanwhile the
+  service discarded 4,000 bytes every 0.3 seconds, i.e. only about
+  13,000 per second. It drained the queue more slowly than it filled -
+  after an eight-second announcement about five seconds of **its own
+  voice** sat in the pipe, which it then evaluated as normal. And since
+  the restricted grammar forces everything into one of the three
+  sentences, that became a command. Fixed by **restarting the recording
+  entirely** after every spoken output - a fresh `parec` process has no
+  backlog. The same treatment now applies to the lockout after
+  switching. A regression test was possible without speaking, because
+  the system's own announcement was the trigger: switched, watched for
+  30 seconds, no more switching back.
+- **The level service ran structurally too early - the voice service now
+  sets the level itself (2026-08-17).**
+  `dialos-mikrofon-pegel.service` runs at boot, i.e. **before** login.
+  But WirePlumber restores its saved device settings only within the
+  session, raising `Internal Mic Boost` back to +30 dB. The debug log
+  showed the consequence directly: "CLIPPING" throughout, and Stephan's
+  commands arrived only as fragments (`'linux'`, `'auf'`, `'windows
+  gnome'` - without "umschalten", so without effect). The voice service
+  now sets the level itself **after** opening the recording, i.e. after
+  WirePlumber's access; in addition it detects sustained clipping during
+  operation and re-adjusts (at most once a minute, so a loud environment
+  doesn't cause a loop). Tested by deliberately turning the boost back
+  up - the service took it back down at startup. This also restores
+  yesterday's retracted explanation: the 60 dB were the cause; the boost
+  simply wasn't on the active capture path during the morning's
+  counter-measurement.
+- **Wake word measured - and the obvious route is ruled out
+  (2026-08-17).** The idea of using the same restricted Vosk grammar for
+  the wake word too was tested and **rejected**. All candidates are
+  recognized cleanly ("Michael", "Hallo Michael", "Anna", "Computer") -
+  so the words are in the model's vocabulary, which was not a given
+  after "gnome" → "genug". But the distractors fire: "ich rufe michael
+  an" becomes `hallo michael`, "der computer ist langsam" becomes
+  `computer`. The reason is the same as for the self-trigger above: **a
+  restricted grammar has no choice, it forces everything into the
+  nearest phrase.** For commands that is an advantage, for a wake word
+  the opposite. And the obvious remedy fails - "ich rufe michael an" was
+  passed through with **conf 1.00**, so a threshold does not separate.
+  Consequence: openWakeWord remains the route. On the wording, decided:
+  **the assistant's name** ("Hallo Michael", or "Hallo Anna" with a
+  female voice) - it is already fixed by the voice selection during
+  first-run setup, which also covers Stephan's planned female voice.
+  **Correction of my own claim:** a wake word does **not** turn the
+  microphone indicator off - to hear the wake word, listening must
+  continue. And that is right: the device really is listening, and
+  hiding that would be the worst option for this target group.
 - **Two faults surfaced by the first morning in real use (2026-08-17).**
   - **The autostart for restoring the style was missing - my mistake.**
     The mode `dialos-desktop-stil.sh wiederherstellen` was built,

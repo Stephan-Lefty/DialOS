@@ -46,12 +46,28 @@ FUENF ENTSCHEIDUNGEN, DIE HIER DRINSTECKEN
    unterscheiden gelingt auch damit - genau das ist der Vorteil einer
    winzigen Grammatik.
 
-3. WAEHREND DAS SYSTEM SPRICHT, WIRD NICHT ZUGEHOERT.
-   Sonst hoert sich der Dienst selbst - und weil seine eigene Ansage
-   sowohl das Ziel als auch das Wort "umschalten" enthalten kann, wuerde
-   die Satz-Bedingung aus dem Kopf dieser Datei sie gerade NICHT
-   abfangen. Endlosschleife. Ausgewertet wird die
-   Markierungsdatei, die dialos-say.py ohnehin schon setzt.
+3. WAEHREND DAS SYSTEM SPRICHT, WIRD NICHT ZUGEHOERT - UND DANACH WIRD
+   DIE AUFNAHME NEU BEGONNEN.
+   Der erste Teil war von Anfang an da (Markierungsdatei, die
+   dialos-say.py ohnehin setzt). Der zweite Teil fehlte, und genau daran
+   ist der Dienst am 2026-08-17 gescheitert: Er schaltete auf Windows um,
+   und 15 Sekunden spaeter von selbst wieder zurueck.
+
+   Der Grund ist Arithmetik, nicht Logik. parec erzeugt bei 16 kHz mono
+   16 Bit rund 32.000 Bytes pro Sekunde. Der Dienst verwarf waehrend des
+   Sprechens 4.000 Bytes und schlief dann 0,3 Sekunden - also nur rund
+   13.000 Bytes pro Sekunde. Er leerte die Warteschlange also LANGSAMER
+   als parec sie fuellte. Nach einer acht Sekunden langen Ansage standen
+   rund fuenf Sekunden Ansage-Ton in der Pipe, die er anschliessend ganz
+   normal auswertete - und weil die eingeschraenkte Grammatik alles auf
+   einen der drei Saetze zwingt, wurde daraus ein Befehl.
+
+   Die Markierung allein reicht also nicht: Sie verhindert das Zuhoeren,
+   nicht das Aufzeichnen. Deshalb wird die Aufnahme nach jedem Sprechen
+   komplett neu begonnen - ein frischer parec-Prozess hat keinen
+   Rueckstand. Das kostet ein paar hundert Millisekunden und ist der
+   einzige Weg, bei dem nichts von der eigenen Stimme uebrig bleiben
+   kann.
 
 4. KEINE RUECKFRAGE, ABER EINE ANSAGE.
    Ein "Willst du wirklich?" bei jedem Wort waere laestig. Stattdessen
@@ -80,6 +96,7 @@ MODELL = "/usr/local/share/vosk-model-de-small"
 ABTASTRATE = 16000
 UMSCHALT_SKRIPT = "/usr/local/bin/dialos-desktop-stil.sh"
 SAY = "/usr/local/bin/dialos-say.py"
+PEGEL_SKRIPT = "/usr/local/sbin/dialos-mikrofon-pegel.sh"
 STIL_DATEI = os.path.join(
     os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
     "dialos", "desktop-stil",
@@ -103,6 +120,9 @@ ZIELE = {"linux": "gnome", "gnome": "gnome", "windows": "windows"}
 
 SPERRFRIST_S = 5.0          # nach einem Umschalten so lange nicht zuhoeren
 WARTEN_BEIM_SPRECHEN_S = 0.3
+NACHHALL_WARTEN_S = 0.7     # Pause nach dem Sprechen, bevor neu aufgenommen wird
+SAETTIGUNG_GRENZE = 15      # so viele uebersteuerte Bloecke in Folge = Pegel richten
+PEGEL_ABSTAND_S = 60.0      # hoechstens einmal pro Minute nachregeln
 
 # Mit "--debug" gestartet zeigt der Dienst jeden erkannten Satz und den
 # Aussteuerungspegel an. Das ist kein Entwickler-Spielzeug, sondern die
@@ -179,12 +199,40 @@ def umschalten(ziel):
     subprocess.run([UMSCHALT_SKRIPT, ziel], capture_output=True, timeout=120)
 
 
+def pegel_richten():
+    """Setzt die Aufnahme-Verstaerkung zurueck, falls sie uebersteuert.
+
+    Warum das hier steht und nicht nur im Systemdienst (gefunden
+    2026-08-17): dialos-mikrofon-pegel.service laeuft beim Booten, also
+    VOR der Benutzeranmeldung. WirePlumber stellt seine gespeicherten
+    Geraete-Einstellungen aber erst in der Sitzung wieder her - und
+    hebt "Internal Mic Boost" dabei zurueck auf +30 dB. Der Systemdienst
+    ist damit strukturell zu frueh dran.
+
+    Deshalb richtet der Dienst, der das Mikrofon tatsaechlich benutzt,
+    den Pegel selbst - direkt nachdem die Aufnahme geoeffnet ist, also
+    nach WirePlumbers Zugriff. Das Skript braucht keine Root-Rechte:
+    amixer darf jedes Konto der Gruppe "audio" bedienen.
+    """
+    if not os.access(PEGEL_SKRIPT, os.X_OK):
+        return
+    try:
+        subprocess.run([PEGEL_SKRIPT], capture_output=True, timeout=15)
+    except Exception:
+        pass
+
+
 def aufnahme_starten(quelle):
     befehl = ["parec", f"--rate={ABTASTRATE}", "--channels=1", "--format=s16le"]
     if quelle:
         befehl.append(f"--device={quelle}")
-    return subprocess.Popen(befehl, stdout=subprocess.PIPE,
-                            stderr=subprocess.DEVNULL)
+    p = subprocess.Popen(befehl, stdout=subprocess.PIPE,
+                         stderr=subprocess.DEVNULL)
+    # Erst nach dem Oeffnen des Datenstroms - vorher greift WirePlumber
+    # noch einmal auf die Regler zu.
+    time.sleep(0.3)
+    pegel_richten()
+    return p
 
 
 def main():
@@ -207,21 +255,46 @@ def main():
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK)
     prozess = aufnahme_starten(quelle)
     letzte_aktion = 0.0
+    aufnahme_verwerfen = False
+    saettigungen = 0
+    letzte_pegelkorrektur = 0.0
 
     try:
         while True:
-            if spricht_gerade():
-                # Aufnahme laeuft weiter, wird aber verworfen: Wuerde sie
-                # angehalten, muesste parec staendig neu starten, was
-                # jedes Mal ein paar hundert Millisekunden kostet.
-                prozess.stdout.read(4000)
-                erkenner.Reset()
+            # Es gibt zwei Gruende, gerade NICHT zuzuhoeren: Das System
+            # spricht selbst, oder das letzte Umschalten liegt noch keine
+            # Sperrfrist zurueck. Beide werden gleich behandelt, weil in
+            # beiden Faellen dasselbe passieren muss - siehe unten.
+            if spricht_gerade() or time.time() - letzte_aktion < SPERRFRIST_S:
+                aufnahme_verwerfen = True
                 time.sleep(WARTEN_BEIM_SPRECHEN_S)
                 continue
 
-            if time.time() - letzte_aktion < SPERRFRIST_S:
-                prozess.stdout.read(4000)
-                erkenner.Reset()
+            if aufnahme_verwerfen:
+                # Waehrend der Pause hat parec weiter aufgezeichnet - unter
+                # anderem die eigene Ansage. Diese Aufzeichnung steht jetzt
+                # in der Warteschlange und wuerde als Naechstes ganz normal
+                # ausgewertet. Genau daran ist der Dienst am 2026-08-17
+                # gescheitert: Er schaltete auf Windows um und 15 Sekunden
+                # spaeter von selbst zurueck.
+                #
+                # Die Markierungsdatei verhindert das Zuhoeren, nicht das
+                # Aufzeichnen. Deshalb wird die Aufnahme hier komplett
+                # verworfen und neu begonnen - ein frischer parec-Prozess
+                # hat keinen Rueckstand.
+                aufnahme_verwerfen = False
+                try:
+                    prozess.terminate()
+                    prozess.stdout.close()
+                except Exception:
+                    pass
+                # Kurz warten, damit auch der Nachhall der Ansage im Raum
+                # nicht mehr in die neue Aufnahme faellt.
+                time.sleep(NACHHALL_WARTEN_S)
+                prozess = aufnahme_starten(quelle)
+                erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK)
+                if DEBUG:
+                    print("\n  (Aufnahme nach Sprechpause neu begonnen)")
                 continue
 
             block = prozess.stdout.read(4000)
@@ -234,13 +307,31 @@ def main():
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK)
                 continue
 
+            pegel = max(abs(int.from_bytes(block[i:i + 2], "little", signed=True))
+                        for i in range(0, len(block) - 1, 2))
+            gesaettigt = pegel >= 32000
             if DEBUG:
-                pegel = max(abs(int.from_bytes(block[i:i + 2], "little", signed=True))
-                            for i in range(0, len(block) - 1, 2))
-                gesaettigt = pegel >= 32000
                 print(f"\rPegel {100 * pegel / 32768:5.1f} %"
                       f"{'  UEBERSTEUERT' if gesaettigt else '            '}",
                       end="", flush=True)
+
+            # Selbstheilung: Uebersteuert die Aufnahme laenger, ist die
+            # Erkennung wertlos - Vosk braucht die Pausen zwischen den
+            # Woertern, und die gibt es im Dauervollausschlag nicht.
+            # Statt still nichts zu verstehen, wird der Pegel neu
+            # gerichtet. Hoechstens einmal pro Minute, damit ein
+            # tatsaechlich lautes Umfeld keine Dauerschleife ausloest.
+            if gesaettigt:
+                saettigungen += 1
+                if (saettigungen >= SAETTIGUNG_GRENZE
+                        and time.time() - letzte_pegelkorrektur > PEGEL_ABSTAND_S):
+                    if DEBUG:
+                        print("\n  (uebersteuert - Pegel wird neu gerichtet)")
+                    pegel_richten()
+                    letzte_pegelkorrektur = time.time()
+                    saettigungen = 0
+            else:
+                saettigungen = 0
 
             if not erkenner.AcceptWaveform(block):
                 continue

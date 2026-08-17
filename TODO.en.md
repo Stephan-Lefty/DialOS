@@ -82,14 +82,21 @@ what has already been done.
   works independently of the script finishing - e.g. a check at login or
   a `trap` on script exit.
 
-- [ ] **Properly determine the cause of the microphone clipping** (open
-  since 2026-08-17). On 2026-08-16, taking `Internal Mic Boost` back
-  removed the saturation immediately. The next morning the boost was at
-  +30 dB again - restored by WirePlumber after the system-wide service -
-  and the signal was clean nonetheless. So the link is not as simple as
-  assumed. To clarify: what actually saturated on 08-16, and does the
-  level service even act at the right place if WirePlumber overwrites it
-  afterwards?
+- [x] **Cause of the microphone clipping determined (2026-08-17).** The
+  system-wide service runs at boot; WirePlumber restores its state only
+  within the session and raises the boost back - so the service was
+  structurally too early. The voice service now sets the level itself
+  after opening the recording, and re-adjusts on sustained clipping.
+  Tested by deliberately turning it back up.
+
+- [ ] **Build the wake word with openWakeWord** (decided 2026-08-17).
+  The Vosk grammar is ruled out - it forces every utterance into the
+  nearest phrase, which is why "ich rufe michael an" came through as
+  `hallo michael`, and with full confidence at that (conf 1.00). So a
+  threshold does not separate. The wake phrase should be the assistant's
+  name ("Hallo Michael", or "Hallo Anna" with a female voice), read from
+  the same setting as the voice selection. Details in
+  `docs/sprachsteuerung.en.md`.
 
 - [ ] **Record a demo video with voice input and output** (Stephan's
   idea of 2026-08-16, for the next working day). It should show what

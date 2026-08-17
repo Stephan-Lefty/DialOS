@@ -177,6 +177,13 @@ Stephans echtem Standort Seefeld in Tirol) - mit Genauigkeits-
 Schwellwert, der zu grobe Schätzungen verwirft und die Wetteransage
 dann bewusst ausfallen lässt, statt eine falsche Stadt zu nennen.
 
+**Alle Sprachbefehle stehen in
+[docs/sprachbefehle.md](docs/sprachbefehle.md)** (Stephans Wunsch vom
+2026-08-17): eine Tabelle Befehl → Aktion, getrennt nach umgesetzt und
+vorgesehen. Dort stehen auch die Regeln, die jeder neue Befehl einhalten
+muss - jede davon stammt aus einem Fehler, der schon aufgetreten ist.
+Bei jedem neuen Sprachbefehl gehört diese Datei mit aktualisiert.
+
 Konkrete offene Aufgaben stehen ausschließlich in [TODO.md](TODO.md),
 nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
 

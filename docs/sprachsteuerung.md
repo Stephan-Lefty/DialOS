@@ -109,6 +109,61 @@ sehr sparsamen Wake-Word-Modell (z. B. openWakeWord), das permanent nur
 auf ein Trigger-Wort lauscht; erst danach wird die rechenintensivere
 volle Spracherkennung aktiviert. Noch nicht final entschieden/umgesetzt.
 
+Welche Befehle es konkret gibt, steht in
+[sprachbefehle.md](sprachbefehle.md).
+
+## Aufweckwort: gemessen, und der naheliegende Weg scheidet aus
+
+**Stand 2026-08-17.** Ein Aufweckwort fehlt weiterhin. Die naheliegende
+Umsetzung - dieselbe eingeschränkte Vosk-Grammatik wie beim
+Desktop-Sprachbefehl, nur mit dem Weckwort darin - wurde gemessen und
+**verworfen**.
+
+Geprüft mit der bewährten Methode (Piper spricht, Vosk hört):
+
+| gesagt | erkannt | |
+|---|---|---|
+| „Michael" | `michael` | erkannt |
+| „Hallo Michael" | `hallo michael` | erkannt |
+| „Anna" / „Computer" | `anna` / `computer` | erkannt |
+| **„ich rufe michael an"** | **`hallo michael`** | **Fehlalarm** |
+| **„der computer ist langsam"** | **`computer`** | **Fehlalarm** |
+| „hallo wie geht es dir" | `hallo` | ruhig |
+
+Die Wörter selbst sind also alle im Wortschatz des Modells - das war
+nicht selbstverständlich (siehe „gnome" → „genug" beim
+Desktop-Sprachbefehl). Das Problem liegt woanders: **Eine eingeschränkte
+Grammatik hat keine Wahl. Sie presst jede Äußerung in die nächstliegende
+Phrase.** Für Befehle ist das ein Vorteil - man sagt sie absichtlich und
+deutlich. Für ein Weckwort ist es fatal, denn es muss im normalen
+Gespräch gerade *nicht* anspringen.
+
+Die naheliegende Rettung greift nicht: Vosk liefert auf Wunsch
+Wort-Sicherheiten, aber „ich rufe michael an" wurde mit **conf 1.00** -
+also voller Sicherheit - als „michael" durchgereicht. Ein Schwellwert
+trennt echte von falschen Treffern nicht.
+
+**Konsequenz:** Für das Weckwort braucht es ein eigenes Modell, das eine
+echte Wahrscheinlichkeit liefert statt eines erzwungenen Treffers -
+[openWakeWord](https://github.com/dscripka/openWakeWord) stand oben schon
+als Vorschlag und bleibt es.
+
+**Zur Wortwahl, unabhängig von der Technik: der Name des Assistenten.**
+Also „Hallo Michael", bei einer weiblichen Stimme „Hallo Anna". Zwei
+Gründe: Zwei Wörter lösen deutlich seltener versehentlich aus als eines,
+und der Name steht ohnehin schon fest - der Nutzer wählt seine Stimme bei
+der Ersteinrichtung **mit Namen** (siehe
+[ersteinrichtung.md](ersteinrichtung.md): Michael, Daniel, Anna, Julia).
+Das Weckwort käme damit aus derselben Einstellung wie die Stimme, ohne
+dass irgendwo ein zweiter Wert gepflegt werden muss.
+
+**Was ein Aufweckwort NICHT löst:** Das Mikrofon-Symbol in der oberen
+Leiste bleibt an. Um das Weckwort zu hören, muss weiter zugehört werden -
+die Aufnahme bleibt also offen. Das ist auch richtig so: Das Gerät hört
+tatsächlich zu, und bei einer Zielgruppe, die den Bildschirm nicht sieht,
+wäre es das Schlechteste, genau das zu verstecken. Entscheidend ist, dass
+nichts das Gerät verlässt - Vosk läuft vollständig offline.
+
 ## Offene Punkte
 
 - Wake-Word-Engine noch nicht final entschieden.

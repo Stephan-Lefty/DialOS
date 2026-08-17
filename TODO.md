@@ -82,14 +82,22 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   der unabhängig vom Skriptende greift - etwa eine Prüfung beim Anmelden
   oder ein `trap` auf das Skriptende.
 
-- [ ] **Ursache der Mikrofon-Übersteuerung sauber klären** (offen seit
-  2026-08-17). Am 2026-08-16 behob das Zurücknehmen von `Internal Mic
-  Boost` die Sättigung sofort. Am Morgen darauf stand der Boost wieder
-  auf +30 dB - restauriert von WirePlumber nach dem systemweiten Dienst -
-  und das Signal war trotzdem sauber. Der Zusammenhang ist also nicht so
-  einfach wie angenommen. Zu klären: Was hat am 16.08. tatsächlich
-  gesättigt, und greift der Pegel-Dienst überhaupt an der richtigen
-  Stelle, wenn WirePlumber danach ohnehin überschreibt?
+- [x] **Ursache der Mikrofon-Übersteuerung geklärt (2026-08-17).** Der
+  systemweite Dienst läuft beim Booten, WirePlumber stellt seinen Zustand
+  erst in der Sitzung wieder her und hebt den Boost dabei zurück - der
+  Dienst war strukturell zu früh dran. Der Sprachdienst richtet den Pegel
+  jetzt selbst, nachdem er die Aufnahme geöffnet hat, und regelt bei
+  anhaltender Übersteuerung nach. Getestet durch absichtliches
+  Hochdrehen.
+
+- [ ] **Aufweckwort mit openWakeWord bauen** (entschieden 2026-08-17).
+  Die Vosk-Grammatik scheidet aus - sie presst jede Äußerung in die
+  nächstliegende Phrase, weshalb "ich rufe michael an" als `hallo
+  michael` durchkam, und zwar mit voller Sicherheit (conf 1.00). Ein
+  Schwellwert trennt also nicht. Weckphrase soll der Name des
+  Assistenten sein ("Hallo Michael", bei weiblicher Stimme "Hallo
+  Anna"), gelesen aus derselben Einstellung wie die Stimmenwahl. Details
+  in `docs/sprachsteuerung.md`.
 
 - [ ] **Vorführvideo mit Sprachein- und -ausgabe aufnehmen** (Stephans
   Idee vom 2026-08-16, für den nächsten Arbeitstag). Zeigen soll es, was

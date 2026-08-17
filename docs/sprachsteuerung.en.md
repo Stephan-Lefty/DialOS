@@ -78,6 +78,61 @@ listens only for a trigger word; only after that is the more
 compute-intensive full speech recognition activated. Not yet finally
 decided/implemented.
 
+The concrete list of commands is in
+[sprachbefehle.en.md](sprachbefehle.en.md).
+
+## Wake word: measured, and the obvious route is ruled out
+
+**Status 2026-08-17.** A wake word is still missing. The obvious
+implementation - the same restricted Vosk grammar as for the desktop
+voice command, just with the wake word in it - was measured and
+**rejected**.
+
+Tested with the proven method (Piper speaks, Vosk listens):
+
+| said | recognized | |
+|---|---|---|
+| "Michael" | `michael` | recognized |
+| "Hallo Michael" | `hallo michael` | recognized |
+| "Anna" / "Computer" | `anna` / `computer` | recognized |
+| **"ich rufe michael an"** | **`hallo michael`** | **false alarm** |
+| **"der computer ist langsam"** | **`computer`** | **false alarm** |
+| "hallo wie geht es dir" | `hallo` | quiet |
+
+So the words themselves are all in the model's vocabulary - which was not
+a given (see "gnome" → "genug" for the desktop voice command). The
+problem lies elsewhere: **a restricted grammar has no choice. It forces
+every utterance into the nearest phrase.** For commands that is an
+advantage - you say them deliberately and clearly. For a wake word it is
+fatal, because it specifically must *not* fire during ordinary
+conversation.
+
+The obvious remedy does not work: Vosk can return per-word confidences,
+but "ich rufe michael an" was passed through as "michael" with **conf
+1.00** - full confidence. A threshold does not separate real from false
+hits.
+
+**Consequence:** the wake word needs its own model, one that returns a
+real probability instead of a forced match -
+[openWakeWord](https://github.com/dscripka/openWakeWord) was already
+suggested above and remains the candidate.
+
+**On the wording itself, independent of the technology: the assistant's
+name.** So "Hallo Michael", or "Hallo Anna" with a female voice. Two
+reasons: two words fire accidentally far less often than one, and the
+name is already established - the user picks their voice **by name**
+during first-run setup (see
+[ersteinrichtung.en.md](ersteinrichtung.en.md): Michael, Daniel, Anna,
+Julia). The wake word would therefore come from the same setting as the
+voice, with no second value to maintain anywhere.
+
+**What a wake word does NOT solve:** the microphone indicator in the top
+bar stays on. To hear the wake word, listening must continue - so the
+recording stays open. And that is right: the device really is listening,
+and for a target group that cannot see the screen, hiding exactly that
+would be the worst option. What matters is that nothing leaves the device
+- Vosk runs entirely offline.
+
 ## Open questions
 
 - The concrete intent layer (custom middleware vs. an existing framework
