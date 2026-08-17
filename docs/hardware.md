@@ -199,6 +199,42 @@ ist, kann er das ansagen („Ich höre nichts mehr vom Mikrofon"). Das
 ersetzt keine Akkuanzeige, fängt aber genau den Ausfall ab, der den
 Nutzer sonst ratlos zurückließe - und wirkt bei beiden Bauarten.
 
+### Geprüft und verworfen: Godox Cube-SC Kit2 (2026-08-17)
+
+2,4-GHz-Funkmikrofon mit USB-C-Empfänger, rund 60-80 €. Auf Stephans
+Vorschlag geprüft.
+
+**Was dafür sprach:** Der Empfänger unterstützt ausdrücklich **UAC** und
+ist für den PC-Einsatz vorgesehen - beste Voraussetzung, dass er unter
+Linux ohne Treiber läuft. 300 m Reichweite, 48 kHz/24 Bit,
+Rauschunterdrückung, zwei Sender im Set, deutlich günstiger als der
+Lark M2.
+
+**Warum es trotzdem ausscheidet:** Die Sender laden **ausschließlich über
+Kontakte im Ladecase** - keine eigene Ladebuchse. Damit ist
+Dauerbetrieb am Netzteil ausgeschlossen; nach 8-10 Stunden muss der
+Sender ins Case, und das System ist so lange taub. Das ist genau die
+Anforderung, die weiter oben als härteste bestimmt wurde.
+
+Dazu: **Der Akkustand ist für DialOS unsichtbar.** Godox zeigt ihn in
+einer Handy-App - die es unter Linux nicht gibt und die ein blinder
+Nutzer ohnehin nicht bedienen könnte.
+
+**Wofür es trotzdem taugt:** als **Testgerät für den USB-Weg**. Es
+beantwortet für wenig Geld, ob ein 2,4-GHz-Mikrofon unter Linux als
+Soundkarte erscheint und wie die Erkennung damit klappt. Nur die
+Akkufrage lässt es offen - und die beantwortet der Bluetooth-Test
+besser.
+
+**Eine Sache könnte es retten**, die sich aus keiner Beschreibung ergibt:
+ob der Sender **im geöffneten Case betrieben** werden kann, also dauerhaft
+gedockt und geladen. Wäre das so, wäre es die gesuchte Netzteil-Lösung.
+Frage an den Händler oder Fall fürs Rückgaberecht.
+
+*(Die Laufzeitangaben widersprechen sich zwischen den Händlern: mal 8,
+mal 10 Stunden je Sender; „30 Stunden" bezieht sich immer auf das
+Ladecase. Am Kern ändert das nichts.)*
+
 ### Kandidaten für die USB-Rückfallebene
 
 - **[Hollyland Lark M2](https://www.hollyland.com/product/lark-m2)**

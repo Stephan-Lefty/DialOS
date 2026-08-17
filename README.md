@@ -107,6 +107,29 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Godox Cube-SC Kit2 geprüft und verworfen (Stephans Vorschlag,
+  2026-08-17).** Ein 2,4-GHz-Funkmikrofon mit USB-C-Empfänger, das auf
+  dem Papier gut passt: **UAC** ausdrücklich unterstützt und für den
+  PC-Einsatz vorgesehen, 300 m Reichweite, 48 kHz/24 Bit, zwei Sender im
+  Set, rund halb so teuer wie der Lark M2. Es scheitert an einem Detail,
+  das in keiner Datenblatt-Zeile steht, sondern erst im Testbericht
+  auftaucht: **Die Sender laden ausschließlich über Kontakte im Ladecase
+  und haben keine eigene Ladebuchse.** Damit ist Dauerbetrieb am Netzteil
+  ausgeschlossen - nach 8 bis 10 Stunden muss der Sender ins Case, und
+  das System ist so lange taub. Genau die Anforderung, die als härteste
+  bestimmt worden war. Dazu bleibt der Akkustand für DialOS unsichtbar;
+  Godox zeigt ihn in einer Handy-App, die es unter Linux nicht gibt und
+  die ein blinder Nutzer nicht bedienen könnte.
+  - **Als Testgerät bleibt es brauchbar:** Es beantwortet billig, ob ein
+    2,4-GHz-Mikrofon unter Linux als Soundkarte erscheint und wie die
+    Erkennung damit klappt. Die wichtigere Frage - Akkustand-Sichtbarkeit
+    gegen mögliches Stottern der Musik - beantwortet nur der
+    Bluetooth-Test.
+  - **Offen geblieben, weil keine Beschreibung es hergibt:** ob der
+    Sender im geöffneten Case betrieben werden kann, also dauerhaft
+    gedockt und geladen. Wäre das so, wäre es die gesuchte
+    Netzteil-Lösung.
+
 - **Bluetooth gegen USB beim Mikrofon: doch offen, und aus einem Grund,
   den ich unterschätzt hatte (Stephans Einwand, 2026-08-17).** Ich hatte
   USB gesetzt, weil es die HFP-Falle umgeht. Sein Einwand trifft

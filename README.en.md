@@ -105,6 +105,29 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Godox Cube-SC Kit2 checked and rejected (Stephan's suggestion,
+  2026-08-17).** A 2.4 GHz wireless microphone with USB-C receiver that
+  fits well on paper: **UAC** explicitly supported and intended for PC
+  use, 300 m range, 48 kHz/24 bit, two transmitters in the kit, about
+  half the price of the Lark M2. It fails on a detail that appears in no
+  spec sheet line but only in the review: **the transmitters charge
+  exclusively via contacts in the charging case and have no charging port
+  of their own.** That rules out continuous operation from a power
+  supply - after 8 to 10 hours the transmitter has to go into the case,
+  and the system is deaf for that time. Exactly the requirement that had
+  been identified as the hardest. On top of that the battery level stays
+  invisible to DialOS; Godox shows it in a phone app that does not exist
+  on Linux and that a blind user could not operate.
+  - **It remains usable as a test device:** it cheaply answers whether a
+    2.4 GHz microphone appears as a sound card under Linux and how well
+    recognition works with it. The more important question - battery
+    visibility versus possible stutter in the music - is only answered by
+    the Bluetooth test.
+  - **Left open because no description covers it:** whether the
+    transmitter can be operated inside the opened case, i.e. permanently
+    docked and charging. If so, that would be the sought-after mains
+    solution.
+
 - **Bluetooth versus USB for the microphone: open after all, for a reason
   I had underrated (Stephan's objection, 2026-08-17).** I had settled on
   USB because it avoids the HFP trap. His objection hits exactly the

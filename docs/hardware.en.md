@@ -194,6 +194,40 @@ the microphone any more"). That does not replace a battery indicator but
 catches exactly the failure that would otherwise leave the user
 clueless - and it works with either design.
 
+### Checked and rejected: Godox Cube-SC Kit2 (2026-08-17)
+
+2.4 GHz wireless microphone with USB-C receiver, around €60-80. Checked
+at Stephan's suggestion.
+
+**What spoke for it:** the receiver explicitly supports **UAC** and is
+intended for PC use - the best precondition for running on Linux without
+drivers. 300 m range, 48 kHz/24 bit, noise cancelling, two transmitters
+in the kit, considerably cheaper than the Lark M2.
+
+**Why it is out anyway:** the transmitters charge **exclusively via
+contacts in the charging case** - no charging port of their own. That
+rules out continuous operation from a power supply; after 8-10 hours the
+transmitter has to go into the case, and the system is deaf for that
+time. This is precisely the requirement identified above as the hardest.
+
+On top of that: **the battery level is invisible to DialOS.** Godox shows
+it in a phone app - which does not exist on Linux and which a blind user
+could not operate anyway.
+
+**What it is still good for:** as a **test device for the USB path**. For
+little money it answers whether a 2.4 GHz microphone appears as a sound
+card under Linux and how well recognition works with it. It only leaves
+the battery question open - and the Bluetooth test answers that better.
+
+**One thing could rescue it**, which no description covers: whether the
+transmitter can be **operated inside the opened case**, i.e. permanently
+docked and charging. If so, that would be the sought-after mains
+solution. A question for the dealer, or a case for the return period.
+
+*(Runtime figures contradict each other between retailers: sometimes 8,
+sometimes 10 hours per transmitter; "30 hours" always refers to the
+charging case. That changes nothing essential.)*
+
 ### Candidates for the USB fallback
 
 - **[Hollyland Lark M2](https://www.hollyland.com/product/lark-m2)**
