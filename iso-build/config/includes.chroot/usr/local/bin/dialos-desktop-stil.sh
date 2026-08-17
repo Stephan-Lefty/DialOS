@@ -45,8 +45,15 @@ STARTKNOPF_ICON="/usr/local/share/dialos/dialos-fenster-symbolic.svg"
 # Sagt den Text und schreibt ihn zusaetzlich ins Terminal. Die Zielgruppe
 # sieht den Bildschirm nicht - eine rein geschriebene Meldung waere fuer
 # sie dasselbe wie gar keine.
+#
+# STUMM=1 unterdrueckt nur das Sprechen, nicht die Zeile im Terminal.
+# Gebraucht wird das ausschliesslich beim Wiederherstellen nach dem
+# Anmelden - dort hat niemand etwas ausgeloest, also gibt es auch nichts
+# zu melden.
+STUMM=0
 melde() {
   echo "$1"
+  [ "$STUMM" = "1" ] && return 0
   [ -x "$SAY" ] && "$SAY" "$1" >/dev/null 2>&1
   return 0
 }
@@ -236,7 +243,13 @@ gemerkter_stil() {
 D2P_ELEMENTE='{"0":[{"element":"showAppsButton","visible":false,"position":"stackedTL"},{"element":"activitiesButton","visible":false,"position":"stackedTL"},{"element":"leftBox","visible":true,"position":"stackedTL"},{"element":"taskbar","visible":true,"position":"centerMonitor"},{"element":"centerBox","visible":true,"position":"stackedBR"},{"element":"rightBox","visible":true,"position":"stackedBR"},{"element":"dateMenu","visible":true,"position":"stackedBR"},{"element":"systemMenu","visible":true,"position":"stackedBR"},{"element":"desktopButton","visible":true,"position":"stackedBR"}]}'
 
 auf_windows() {
-  local fehlt
+  local fehlt vorher
+  # VOR dem Umstellen merken, sonst laesst sich hinterher nicht mehr
+  # sagen, ob sich ueberhaupt etwas geaendert hat (Stephans Meldung vom
+  # 2026-08-17: er befiehlt versehentlich den Stil, auf dem er schon
+  # steht, und hoert dieselbe Ansage wie bei einem echten Wechsel -
+  # ununterscheidbar, wenn man den Bildschirm nicht sieht).
+  vorher="$(gemerkter_stil)"
   mapfile -t fehlt < <(fehlende_erweiterungen)
   if [ "${#fehlt[@]}" -gt 0 ] && [ -n "${fehlt[0]}" ]; then
     echo "Nicht installiert: ${fehlt[*]}" >&2
@@ -313,16 +326,27 @@ auf_windows() {
   # Windows-Snap (an den Rand ziehen, Kachel-Vorschlag danach).
 
   stil_merken windows
+  # KURZ HALTEN (geaendert 2026-08-17). Hier stand zuerst ein erklaerender
+  # Satz ueber Taskleiste und Startmenue - rund acht Sekunden lang. Beim
+  # ersten Mal hilfreich, taeglich gehoert eine Zumutung. Und er kostet
+  # doppelt: Waehrend das System spricht, hoert es bewusst nicht zu, der
+  # Nutzer muss also acht Sekunden warten, bevor er den naechsten Befehl
+  # sagen kann. Stephan ist genau darueber gestolpert. Was die Optik
+  # aendert, steht in der Doku - eine Ansage ist der falsche Ort dafuer.
   if [ "$neustart_noetig" -eq 1 ]; then
-    melde "Die Windows-Optik ist eingestellt. Sie erscheint aber erst, wenn du dich einmal abmeldest und wieder anmeldest."
+    melde "Windows-Optik eingestellt. Sie erscheint nach dem naechsten Anmelden."
+  elif [ "$vorher" = "windows" ]; then
+    melde "Steht schon auf Windows Desktop."
   else
-    melde "Der Schreibtisch sieht jetzt aus wie unter Windows. Die Taskleiste ist unten, das Startmenue links. Sage Bescheid, wenn du zurueck willst."
+    melde "Windows Desktop."
   fi
 }
 
 # -------------------------------------------------------------- GNOME-Stil
 
 auf_gnome() {
+  local vorher
+  vorher="$(gemerkter_stil)"   # siehe Kommentar in auf_windows
   echo "Schalte zurueck auf den GNOME-Standard ..."
 
   shell_liste_lesen
@@ -360,7 +384,11 @@ auf_gnome() {
   zuruecksetzen org.gnome.desktop.interface clock-show-date
 
   stil_merken gnome
-  melde "Der Schreibtisch ist wieder im GNOME-Standard."
+  if [ "$vorher" = "gnome" ]; then
+    melde "Steht schon auf Linux Desktop."
+  else
+    melde "Linux Desktop."
+  fi
 }
 
 # ----------------------------------------------------------------- Status
@@ -406,6 +434,14 @@ zeige_status() {
 # Stellt beim Anmelden den zuletzt gewaehlten Stil wieder her - ohne
 # Ansage, weil dabei niemand etwas ausgeloest hat.
 #
+# "Ohne Ansage" stand hier von Anfang an, war aber bis zum 2026-08-17
+# nicht wahr: Das ">/dev/null" unten schluckt nur die Terminal-Zeile, das
+# Sprechen lief trotzdem. Bei jedem Anmelden hat der Schreibtisch also
+# ungefragt geredet - und zwar mitten in die Start-Ansage hinein, weil
+# beide Autostarts gleichzeitig loslaufen. Stephan hatte genau das
+# gemeldet ("die Ansage mit dem Desktop kam dazwischen"); ich hatte es
+# damals fuer ein Zeitproblem gehalten. Dafuer ist STUMM da.
+#
 # Streng genommen ist das doppelt gemoppelt: Die Einstellungen liegen in
 # dconf und ueberleben einen Neustart von sich aus. Der Aufruf ist die
 # Zusicherung dafuer - er faengt den Fall ab, dass etwas anderes die
@@ -418,6 +454,7 @@ wiederherstellen() {
   # Ohne Merkdatei gab es noch nie eine Wahl - dann NICHTS tun, statt
   # ungefragt Einstellungen zurueckzusetzen.
   [ -r "$STIL_DATEI" ] || { echo "Kein gemerkter Stil - nichts wiederherzustellen."; return 0; }
+  STUMM=1
   case "$(gemerkter_stil)" in
     windows) auf_windows >/dev/null 2>&1 ;;
     *)       auf_gnome  >/dev/null 2>&1 ;;

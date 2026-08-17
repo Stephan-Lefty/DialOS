@@ -672,6 +672,21 @@ enabled=true` steht schon als dconf-Standardwert in
   Weitere Aussprache-Regeln gehören ebenfalls dorthin. Nicht getroffen
   werden `dialosadmin` (kein Wortende nach "dialos") und `dialos.org`
   (Punkt ist ausgenommen).
+  **Ansagen-Speicher seit 2026-08-17:** Erzeugen und Abspielen eines
+  Satzes kostete gut 2,2 Sekunden, davon rund 1,1 Sekunden reiner
+  Vorlauf - jedes Mal neu berechnet für Sätze wie "Ich höre.", die sich
+  nie ändern. Gesprochene Sätze landen deshalb als WAV unter
+  `~/.cache/dialos/ansagen` und werden beim nächsten Mal von dort
+  gespielt (gemessen: 2172 ms → rund 1200 ms, und davon sind 1,13 s die
+  Ansage selbst). Der Speicher füllt sich von selbst: Beim ersten Mal
+  läuft der normale Weg, die Aufzeichnung passiert nebenbei im
+  Hintergrund. Es gibt also keine Liste zu pflegen. **Der Schlüssel ist
+  ein Hash aus Text + Änderungszeit von `PIPER_CONF` und dem
+  Stimmen-Ordner** - ändert sich Tempo oder Stimme, entstehen neue
+  Schlüssel und der alte Bestand wird nicht mehr gefunden; ohne das
+  spräche DialOS nach einer Tempoänderung teils im alten, teils im neuen
+  Tempo. Der Speicher darf jederzeit gelöscht werden, er baut sich neu
+  auf.
 - `dialos-start-ansage.py` ("Michael"): läuft bei jedem Login, begrüßt,
   nennt Datum/Uhrzeit, Akkustände (kontobasiert gefiltert - `nutzer`
   bekommt nur Laptop+Lautsprecher, jedes andere Konto zusätzlich
@@ -941,12 +956,36 @@ synthetisch gesprochenen Sätzen (Piper spricht, Vosk hört) nachgemessen:
 | **Eingebautes Mikrofon** statt Bluetooth | Das AIRHUG kann A2DP und HFP nicht gleichzeitig. Bei der einmaligen Lautstärke-Frage ist die Telefonqualität ein kurzer Moment - bei dauerhaftem Zuhören wäre die Wiedergabe **für immer** verschlechtert. Drei feste Sätze zu unterscheiden gelingt auch mit dem eingebauten Mikrofon. |
 | **Während das System spricht, wird nicht zugehört** | Sonst hört sich der Dienst selbst. Seine eigene Ansage kann Ziel *und* "umschalten" enthalten - die Satz-Bedingung würde sie also gerade nicht abfangen. Ausgewertet wird die Markierungsdatei, die `dialos-say.py` ohnehin setzt. |
 | **Keine Rückfrage, aber eine Ansage** | Ein "Willst du wirklich?" bei jedem Befehl wäre lästig. Stattdessen sagt das System, was es getan hat - wer es nicht wollte, sagt einfach den anderen Satz. Ein Fehlgriff ist damit in Sekunden rücknehmbar, ohne hinsehen zu müssen. |
-| **Sperrfrist von 5 s** nach jedem Umschalten | Sonst löst ein langgezogener Satz mehrfach aus. |
+| **Sperrfrist von 2 s** nach einem Umschalten | Sonst löst ein langgezogener Satz mehrfach aus. Waren zuerst 5 s und galten auch nach "Ich höre." - siehe unten, das war ein Fehler. |
 
 Der Gegentest, der die Satz-Bedingung rechtfertigt: Der gesprochene Satz
 "ich habe früher windows benutzt" wurde als `auf auf windows` erkannt -
 also durchaus mit dem Wort "windows", aber **ohne** "umschalten". Er
 löste nichts aus.
+
+**Die Sperrfrist gilt seit 2026-08-17 nur noch nach echtem Umschalten.**
+Vorher stand sie auch hinter den Ansagen "Ich höre." und "Ich höre nicht
+mehr." - der Dienst war damit ausgerechnet in den fünf Sekunden nach
+"Ich höre." taub, also genau dann, wenn der Nutzer seinen Befehl sagt.
+Für Stephan sah das aus wie ein Lautstärkeproblem ("ich muss sehr laut
+reden"): Er sprach, nichts geschah, er wiederholte lauter - und dann war
+die Frist abgelaufen. Aufgefallen ist es erst durch seine Präzisierung,
+dass der *zweite* Befehl das Problem war, nicht der erste. Gegen die
+eigene Stimme schützt ohnehin schon das Verwerfen und Neubeginnen der
+Aufnahme nach jedem Sprechen.
+
+**Die Ansagen nach dem Umschalten** lauten "Linux Desktop." und "Windows
+Desktop." (1,5 s). Sie waren zuerst ein erklärender Satz über Taskleiste
+und Startmenü - rund acht Sekunden, in denen der Dienst bewusst nicht
+zuhört, also acht Sekunden Wartezeit vor dem nächsten Befehl. Der Weg
+zurück über ein einzelnes "Windows." war dann zu kurz: ein Stichwort,
+kein Satz - wer nur zuhört, weiß nicht, ob das die Antwort auf seinen
+Befehl war. **Steht der Schreibtisch schon auf dem angesagten Stil**,
+lautet die Ansage "Steht schon auf Linux Desktop." Der Stil wird trotzdem
+neu gesetzt (dieselbe Zusicherung wie beim Wiederherstellen), nur die
+Ansage unterscheidet - vorher war ein wirkungsloser Befehl von einem
+echten Wechsel nicht zu unterscheiden, wenn man den Bildschirm nicht
+sieht.
 
 ### 11d. Deutsches Menü und Erhalt über den Neustart
 
@@ -973,6 +1012,19 @@ angelegtes Konto. Für einen blinden Nutzer wäre ein Schreibtisch, der
 nach dem Einschalten anders aussieht als zuletzt, kein Schönheitsfehler,
 sondern Orientierungsverlust. Gibt es noch keine Merkdatei, tut der
 Aufruf bewusst nichts.
+
+**„Ohne Ansage" war bis zum 2026-08-17 nicht wahr.** Der Aufruf im
+Skript ist mit `>/dev/null 2>&1` umgeleitet, und diese Zeile hier hat
+das als Beleg für „stumm" gelesen. Die Umleitung schluckt aber nur die
+Terminal-Zeile - `melde()` ruft die Sprachausgabe direkt auf, und die
+spricht weiter. **Bei jedem Anmelden hat der Schreibtisch also ungefragt
+geredet**, mitten in die Start-Ansage hinein, weil beide Autostarts
+gleichzeitig loslaufen. Genau das hatte Stephan gemeldet („die Ansage
+mit dem Desktop kam dazwischen"), es war aber als Zeitproblem zwischen
+zwei Autostarts abgelegt worden. Seitdem gibt es die Variable `STUMM`:
+`wiederherstellen` setzt sie auf 1, `melde()` überspringt dann das
+Sprechen - die Terminal-Zeile bleibt. Beim Prüfen zählt die Dauer: Der
+Aufruf braucht rund 800 ms; käme die Ansage dazu, wären es über 1800 ms.
 
 ### 11e. Mikrofon-Aufnahmepegel (neu 2026-08-16)
 

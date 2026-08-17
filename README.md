@@ -107,6 +107,92 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Der Schreibtisch heißt jetzt „Linux Desktop" und „Windows Desktop"
+  (Stephans Wunsch, 2026-08-17).** Die Ansagen waren am Vormittag von
+  einem erklärenden Satz auf ein einzelnes Wort zusammengestrichen
+  worden - das war zu weit gekürzt. „Windows." allein ist kein Satz,
+  sondern ein Stichwort; wer nur zuhört, weiß nicht, ob das die Antwort
+  auf seinen Befehl war oder eine Meldung von irgendwoher. Mit dem
+  Zusatz kostet es 0,6 Sekunden mehr (1,59 s statt 0,93 s) und ist
+  eindeutig.
+  - **Dazu die Rückmeldung, die Stephan schon gemeldet hatte:** Befiehlt
+    er den Stil, auf dem er ohnehin steht, sagt DialOS jetzt „Steht schon
+    auf Linux Desktop." Vorher kam dieselbe Ansage wie bei einem echten
+    Wechsel - für einen blinden Nutzer ununterscheidbar. Der Stil wird in
+    dem Fall trotzdem neu gesetzt; das ist die Absicherung dagegen, dass
+    eine Systemaktualisierung die Erweiterungsliste zurückgesetzt hat.
+
+- **Die Start-Ansage wurde von der Desktop-Ansage überredet - und zwar
+  seit dem ersten Tag (gefunden 2026-08-17).** Stephan hatte das am
+  Vormittag gemeldet („die Ansage mit dem Desktop kam dazwischen"), und
+  ich hatte es für ein Zeitproblem zwischen zwei Autostarts gehalten. Es
+  war ein Fehler im Skript: `wiederherstellen` ruft beim Anmelden
+  `auf_gnome` bzw. `auf_windows` mit `>/dev/null 2>&1` auf, und im
+  Kommentar darüber stand „ohne Ansage, weil dabei niemand etwas
+  ausgelöst hat". Die Umleitung schluckt aber nur die Terminal-Zeile -
+  `melde()` ruft die Sprachausgabe direkt auf, und die spricht weiter.
+  **Bei jedem Anmelden hat der Schreibtisch also ungefragt geredet**,
+  mitten in die Start-Ansage hinein, weil beide Autostarts gleichzeitig
+  loslaufen. Behoben mit einem `STUMM`-Schalter, der nur das Sprechen
+  abschaltet, nicht die Terminal-Zeile.
+  - **Was daran lehrreich ist:** Der Kommentar hat die Absicht
+    beschrieben, nicht das Verhalten - und ich habe ihn beim Suchen als
+    Beleg gelesen statt als Behauptung. Bis heute stand acht Sekunden
+    Windows-Text in dieser Lücke, ohne dass jemand die Ursache gesucht
+    hätte.
+
+- **Ansagen kommen jetzt aus einem Speicher: 2172 ms auf rund 1200 ms
+  (Stephans Meldung „die Pause ist zu groß", 2026-08-17).** Zwischen
+  „Sprachsteuerung starten" und Michaels „Ich höre." lagen gut zwei
+  Sekunden. Gemessen: Die Ansage selbst dauert 1,13 s, `paplay` einer
+  fertigen Datei braucht 1,18 s - **rund 1,1 Sekunden waren reiner
+  Vorlauf**, jedes Mal neu erzeugt für einen Satz, der sich nie ändert.
+  `dialos-say.py` legt gesprochene Sätze deshalb unter
+  `~/.cache/dialos/ansagen` ab und spielt sie beim nächsten Mal von dort.
+  - **Der Speicher füllt sich von selbst.** Beim ersten Mal geht der Satz
+    den normalen Weg und wird nebenbei im Hintergrund aufgezeichnet; ab
+    dem zweiten Mal kommt er aus der Datei. Keine Liste, die gepflegt
+    werden muss, und nichts, das veralten kann, weil jemand einen neuen
+    Satz eingebaut und den Speicher vergessen hat.
+  - **Der Schlüssel enthält die Änderungszeit von `PIPER_CONF` und dem
+    Stimmen-Ordner.** Ändert sich das Tempo - wie heute von 0,85 auf 0,88 -
+    oder die Stimme, entstehen automatisch neue Schlüssel und der alte
+    Bestand wird nicht mehr gefunden. Ohne das spräche DialOS nach einer
+    Tempoänderung teils im alten, teils im neuen Tempo.
+  - **Ein eigener Fehler, der sich selbst versteckt hat:** Ich fange in
+    der Speicher-Funktion alle Ausnahmen ab, damit ein Fehler dort nie
+    eine Ansage verhindert - und habe damit den eigenen Fehler unsichtbar
+    gemacht. Der Speicher blieb leer, ohne dass irgendwo etwas stand.
+    Erst ein Nachbau mit sichtbaren Ausnahmen brachte es heraus: Die
+    Zwischendatei hieß `….wav.teil`, und **sox bestimmt das
+    Ausgabeformat an der Dateiendung**. Die Vorsichtsmaßnahme gegen
+    halbfertige Dateien hat die Datei verhindert. Behoben mit `-t wav`.
+
+- **„Ich muss sehr laut reden" war kein Pegelproblem, sondern eine
+  selbstgebaute Taubheit (Stephans Meldung, 2026-08-17).** Ich habe
+  zuerst an der Mikrofon-Verstärkung gesucht, weil die Beschreibung genau
+  danach klang. Stephans Präzisierung hat es gedreht: **„Den *zweiten*
+  Befehl musste ich wesentlich lauter ins Mikro brüllen."** Der erste
+  ging also normal. Im Code stand nach der Ansage „Ich höre."
+  `letzte_aktion = time.time()` - dieselbe Sperrfrist von fünf Sekunden,
+  die nach einem echten Umschalten sinnvoll ist. Der Dienst war damit
+  **ausgerechnet in den fünf Sekunden nach „Ich höre." taub**, also genau
+  dann, wenn der Nutzer seinen Befehl sagt. Für Stephan sah das aus wie
+  zu leise: Er sprach, nichts geschah, er wiederholte lauter - und dann
+  war die Frist abgelaufen und es klappte. Die Sperrfrist gilt jetzt nur
+  noch nach echtem Umschalten und liegt bei zwei Sekunden; gegen die
+  eigene Stimme schützt ohnehin das Verwerfen der Aufnahme nach jedem
+  Sprechen.
+  - **Und ein echter Beitrag am Pegel:** `webrtc.gain_control` steht
+    jetzt auf `true`. Die Begründung für `false` bezog sich auf das
+    eingebaute Mikrofon, das um 60 dB übersteuert war - dort hätte eine
+    zusätzliche Verstärkung geschadet. Am Headset ist die Lage umgekehrt.
+    **Im Auge behalten:** Eine Verstärkungsregelung hebt in Sprechpausen
+    auch das Grundrauschen an. Arbeitet sie zu kräftig, hört die
+    Erkennung überall Sprache und die Fehlauslösungen kommen zurück -
+    nach einer Umstellung also nicht nur prüfen, ob es lauter wird,
+    sondern auch, ob es in Ruhephasen still bleibt.
+
 - **Der USB-Weg ist bewiesen - mit Hardware, die schon da war
   (2026-08-17).** Stephans vorhandenes Headset, ein **TeckNet TK-HS005**
   mit 2,4-GHz-USB-Dongle, meldet sich ohne Treiber und ohne Kopplung als

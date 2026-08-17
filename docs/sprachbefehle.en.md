@@ -28,8 +28,8 @@ listen?".
 |---|---|
 | **"Sprachsteuerung starten"** (start voice control) | Switches command recognition on, reply: "Ich höre." If already running: "Ich höre schon." |
 | **"Sprachsteuerung stoppen"** (stop voice control) | Switches it off again, reply: "Ich höre nicht mehr." After two minutes without a command this happens by itself, with an announcement. |
-| "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). |
-| "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. |
+| "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). Reply: "Windows Desktop." If it is already there: "Steht schon auf Windows Desktop." |
+| "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. Reply: "Linux Desktop." or "Steht schon auf Linux Desktop." |
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |
 
@@ -59,6 +59,15 @@ occurred:
 - **Every command announces what it did.** The user cannot see the
   screen; without an announcement they do not know whether anything
   happened.
+- **And it says it differently when nothing changed.** "Auf Linux
+  umschalten" while the desktop is already on Linux gave the same
+  announcement as a real switch - indistinguishable for Stephan
+  (reported 2026-08-17). Since then: "Steht schon auf Linux Desktop."
+- **Keep announcements short, but keep them sentences.** While the system
+  speaks it deliberately does not listen - every second of announcement
+  is a second the user has to wait. Eight seconds of explanation were too
+  much, a bare "Windows." too little: a keyword that is not recognizably
+  the answer to the command.
 - **Check new words against the model first.** Not every word is in the
   vocabulary: freely recognized, "gnome" reliably became **"genug"**
   ("enough"). Test method without speaking: Piper says the sentence, Vosk

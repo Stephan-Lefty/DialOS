@@ -172,7 +172,18 @@ ANSAGE_AUS = "Ich höre nicht mehr."
 ANSAGE_ZEITGRENZE = "Ich schalte die Sprachsteuerung wieder aus."
 ANSAGE_LAEUFT_SCHON = "Ich höre schon."
 
-SPERRFRIST_S = 5.0          # nach einem Umschalten so lange nicht zuhoeren
+# Sperrfrist NACH EINEM UMSCHALTEN. Bewusst kurz und bewusst NICHT nach
+# den Ansagen "Ich hoere." / "Ich hoere nicht mehr" (Fehler vom
+# 2026-08-17): Dort stand sie zuerst auch, mit der Folge, dass der Dienst
+# ausgerechnet in den fuenf Sekunden nach "Ich hoere." taub war - also
+# genau dann, wenn der Nutzer seinen Befehl sagt. Fuer Stephan sah das
+# aus wie ein Lautstaerkeproblem: Er sprach, nichts geschah, er
+# wiederholte lauter - und dann war die Frist abgelaufen.
+#
+# Noetig ist sie ueberhaupt nur noch als Rest: Das Verwerfen und
+# Neubeginnen der Aufnahme nach jedem Sprechen faengt die eigene Stimme
+# bereits ab. Zwei Sekunden reichen gegen ein langgezogenes Wort.
+SPERRFRIST_S = 2.0
 WARTEN_BEIM_SPRECHEN_S = 0.3
 NACHHALL_WARTEN_S = 0.7     # Pause nach dem Sprechen, bevor neu aufgenommen wird
 SAETTIGUNG_GRENZE = 15      # so viele uebersteuerte Bloecke in Folge = Pegel richten
@@ -439,7 +450,10 @@ def main():
                     hoert_zu = True
                     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AN)
                     sprich(ANSAGE_AN)
-                letzte_aktion = time.time()
+                # KEINE Sperrfrist hier - siehe Kommentar bei
+                # SPERRFRIST_S. Direkt nach "Ich hoere." erwartet der
+                # Nutzer, dass er sprechen kann. Gegen die eigene Ansage
+                # schuetzt das Neubeginnen der Aufnahme.
                 letzte_aktivitaet = time.time()
                 continue
 
@@ -453,7 +467,6 @@ def main():
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
                 sprich(ANSAGE_AUS)
-                letzte_aktion = time.time()
                 continue
 
             # --- Befehle ---

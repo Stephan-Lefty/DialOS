@@ -26,8 +26,8 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 |---|---|
 | **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre." Läuft sie schon: „Ich höre schon." |
 | **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre nicht mehr." Nach zwei Minuten ohne Befehl geschieht das von selbst, mit Ansage. |
-| „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). |
-| „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. |
+| „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Steht schon auf Windows Desktop." |
+| „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Steht schon auf Linux Desktop." |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |
 
@@ -56,6 +56,16 @@ einmal aufgetreten ist:
   die Erkennung war.
 - **Jeder Befehl sagt an, was er getan hat.** Der Nutzer sieht den
   Bildschirm nicht; ohne Ansage weiß er nicht, ob etwas passiert ist.
+- **Und er sagt es anders, wenn sich nichts geändert hat.** „Auf Linux
+  umschalten", während der Schreibtisch schon auf Linux steht, gab
+  dieselbe Ansage wie ein echter Wechsel - für Stephan nicht zu
+  unterscheiden (gemeldet am 2026-08-17). Seitdem: „Steht schon auf Linux
+  Desktop."
+- **Ansagen kurz halten, aber als Satz.** Während das System spricht,
+  hört es bewusst nicht zu - jede Sekunde Ansage ist eine Sekunde, in der
+  der Nutzer warten muss. Acht Sekunden Erklärung waren zu viel, ein
+  einzelnes „Windows." war zu wenig: ein Stichwort, das nicht erkennbar
+  zum Befehl gehört.
 - **Neue Wörter erst gegen das Modell prüfen.** Nicht jedes Wort steht im
   Wortschatz: „gnome" wurde frei erkannt zuverlässig zu **„genug"**.
   Prüfmethode ohne Sprechen: Piper spricht den Satz, Vosk hört zu

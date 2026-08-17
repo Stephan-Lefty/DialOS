@@ -654,6 +654,20 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
   in the source. Further pronunciation rules belong there too. Not
   matched: `dialosadmin` (no word end after "dialos") and `dialos.org`
   (the dot is excluded).
+  **Announcement cache since 2026-08-17:** generating and playing a
+  sentence cost a good 2.2 seconds, about 1.1 seconds of which was pure
+  overhead - recomputed every time for sentences like "Ich höre." that
+  never change. Spoken sentences are therefore stored as WAV under
+  `~/.cache/dialos/ansagen` and played from there next time (measured:
+  2172 ms → about 1200 ms, and 1.13 s of that is the announcement
+  itself). The cache fills itself: the first time takes the normal
+  route, the recording happens alongside in the background. So there is
+  no list to maintain. **The key is a hash of the text plus the
+  modification times of `PIPER_CONF` and the voices directory** - if the
+  tempo or the voice changes, new keys arise and the old stock is no
+  longer found; without that, DialOS would speak partly at the old and
+  partly at the new tempo after a tempo change. The cache may be deleted
+  at any time, it rebuilds itself.
 - `dialos-start-ansage.py` ("Michael"): runs at every login, greets the
   user, states date/time, battery levels (filtered by account -
   `nutzer` only gets laptop+speaker, every other account also gets
@@ -920,12 +934,36 @@ synthetically spoken sentences (Piper speaks, Vosk listens):
 | **Built-in microphone** instead of Bluetooth | The AIRHUG cannot do A2DP and HFP at once. For the one-off volume question, phone-grade audio is a brief moment - with continuous listening, playback would be degraded **permanently**. Distinguishing three fixed sentences works with the built-in microphone too. |
 | **No listening while the system speaks** | Otherwise the service hears itself. Its own announcement can contain both the target *and* "umschalten" - so the sentence condition would specifically fail to catch it. It watches the marker file `dialos-say.py` sets anyway. |
 | **No confirmation prompt, but an announcement** | A "are you sure?" on every command would be tiresome. Instead the system says what it did - anyone who didn't want it just says the other sentence. A misfire is undoable in seconds, without having to look. |
-| **A 5 s lockout** after each switch | Otherwise a drawn-out sentence triggers repeatedly. |
+| **A 2 s lockout** after a switch | Otherwise a drawn-out sentence triggers repeatedly. It was 5 s at first and also applied after "Ich höre." - see below, that was a mistake. |
 
 The control test that justifies the sentence condition: the spoken
 sentence "ich habe früher windows benutzt" ("I used to use Windows") was
 recognized as `auf auf windows` - containing the word "windows", but
 **without** "umschalten". It triggered nothing.
+
+**Since 2026-08-17 the lockout applies only after a real switch.**
+Before that it also sat behind the announcements "Ich höre." and "Ich
+höre nicht mehr." - which left the service deaf for exactly the five
+seconds after "Ich höre.", precisely when the user speaks their command.
+To Stephan it looked like a volume problem ("I have to speak very
+loudly"): he spoke, nothing happened, he repeated it louder - and by
+then the lockout had expired. It only came to light through his
+clarification that the *second* command was the problem, not the first.
+Against the system's own voice, discarding and restarting the recording
+after every utterance already protects.
+
+**The announcements after a switch** are "Linux Desktop." and "Windows
+Desktop." (1.5 s). They started out as an explanatory sentence about the
+taskbar and start menu - some eight seconds during which the service
+deliberately does not listen, so eight seconds of waiting before the next
+command. The way back via a bare "Windows." was then too short: a
+keyword, not a sentence - someone who only listens cannot tell whether it
+was the answer to their command. **If the desktop is already on the
+requested style**, the announcement is "Steht schon auf Linux Desktop."
+("already on Linux Desktop"). The style is still re-applied (the same
+guarantee as when restoring), only the announcement differs - before,
+an ineffective command was indistinguishable from a real switch if you
+cannot see the screen.
 
 ### 11d. German menu, and surviving a restart
 
@@ -949,6 +987,19 @@ system update, an accidental `dconf reset`, a freshly created account.
 For a blind user a desktop that looks different after switching on than
 it did last time is not a cosmetic flaw but a loss of orientation. If
 there is no memo file yet, the call deliberately does nothing.
+
+**"Without an announcement" was not true until 2026-08-17.** The call in
+the script is redirected with `>/dev/null 2>&1`, and this line here read
+that as evidence for "silent". But the redirection only swallows the
+terminal line - `melde()` invokes speech output directly, and that keeps
+talking. **So at every login the desktop spoke unasked**, straight into
+the login announcement, because both autostarts fire at the same time.
+That is exactly what Stephan had reported ("the desktop announcement
+came in between"), but it had been filed as a timing problem between two
+autostarts. Since then there is a `STUMM` (mute) variable:
+`wiederherstellen` sets it to 1 and `melde()` then skips the speaking -
+the terminal line stays. When checking, the duration is the tell: the
+call takes about 800 ms; with the announcement it would be over 1800 ms.
 
 ### 11e. Microphone recording level (new 2026-08-16)
 

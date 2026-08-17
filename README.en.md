@@ -105,6 +105,87 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The desktop is now called "Linux Desktop" and "Windows Desktop"
+  (Stephan's request, 2026-08-17).** In the morning the announcements had
+  been cut from an explanatory sentence down to a single word - that was
+  one step too far. "Windows." on its own is not a sentence but a
+  keyword; someone who only listens cannot tell whether it was the answer
+  to their command or a message from somewhere else. The addition costs
+  0.6 seconds (1.59 s instead of 0.93 s) and is unambiguous.
+  - **Plus the feedback Stephan had already reported:** if he commands
+    the style he is already on, DialOS now says "Steht schon auf Linux
+    Desktop." ("already on Linux Desktop"). Before, it gave the same
+    announcement as a real switch - indistinguishable for a blind user.
+    The style is still re-applied in that case; that is the safeguard
+    against a system update having reset the extension list.
+
+- **The login announcement was being talked over by the desktop
+  announcement - since day one (found 2026-08-17).** Stephan had reported
+  it in the morning ("the desktop announcement came in between") and I
+  had taken it for a timing problem between two autostarts. It was a bug
+  in the script: at login `wiederherstellen` calls `auf_gnome` or
+  `auf_windows` with `>/dev/null 2>&1`, and the comment above it read
+  "without an announcement, because nobody triggered anything". But the
+  redirection only swallows the terminal line - `melde()` invokes speech
+  output directly, and that keeps talking. **So at every login the
+  desktop spoke unasked**, straight into the login announcement, because
+  both autostarts fire at the same time. Fixed with a `STUMM` (mute)
+  switch that silences only the speech, not the terminal line.
+  - **What is instructive about it:** the comment described the
+    intention, not the behaviour - and while searching I read it as
+    evidence rather than as a claim. Until today eight seconds of Windows
+    text sat in that gap without anyone looking for the cause.
+
+- **Announcements now come from a cache: 2172 ms down to about 1200 ms
+  (Stephan's report "the pause is too long", 2026-08-17).** A good two
+  seconds passed between "Sprachsteuerung starten" and Michael's "Ich
+  höre." Measured: the announcement itself takes 1.13 s, `paplay` of a
+  ready file needs 1.18 s - **about 1.1 seconds were pure overhead**,
+  regenerated every time for a sentence that never changes.
+  `dialos-say.py` therefore stores spoken sentences under
+  `~/.cache/dialos/ansagen` and plays them from there next time.
+  - **The cache fills itself.** The first time, the sentence takes the
+    normal route and is recorded in the background alongside; from the
+    second time on it comes from the file. No list to maintain, and
+    nothing that can go stale because someone added a new sentence and
+    forgot the cache.
+  - **The key contains the modification times of `PIPER_CONF` and the
+    voices directory.** If the tempo changes - as today from 0.85 to 0.88
+    - or the voice does, new keys arise automatically and the old stock
+    is simply no longer found. Without that, DialOS would speak partly at
+    the old and partly at the new tempo after a tempo change.
+  - **A mistake of my own that hid itself:** I catch every exception in
+    the cache function so that a fault there can never prevent an
+    announcement - and thereby made my own fault invisible. The cache
+    stayed empty with nothing reported anywhere. Only a rebuild with
+    visible exceptions brought it out: the temporary file was named
+    `….wav.teil`, and **sox derives the output format from the file
+    extension**. The precaution against half-written files prevented the
+    file. Fixed with `-t wav`.
+
+- **"I have to speak very loudly" was not a level problem but a
+  self-inflicted deafness (Stephan's report, 2026-08-17).** I first
+  looked at microphone gain, because the description sounded exactly like
+  that. Stephan's clarification turned it around: **"I had to shout the
+  *second* command into the mic much louder."** So the first one was
+  fine. In the code, after the announcement "Ich höre." stood
+  `letzte_aktion = time.time()` - the same five-second lockout that makes
+  sense after a real switch. That left the service **deaf for exactly the
+  five seconds after "Ich höre."**, which is precisely when the user
+  speaks their command. To Stephan it looked like too quiet: he spoke,
+  nothing happened, he repeated it louder - and by then the lockout had
+  expired and it worked. The lockout now applies only after a real switch
+  and lasts two seconds; against the system's own voice, discarding the
+  recording after every utterance already protects.
+  - **And one genuine contribution on the level:** `webrtc.gain_control`
+    is now `true`. The reasoning for `false` referred to the built-in
+    microphone, which was 60 dB over-driven - extra gain would have hurt
+    there. On a headset the situation is reversed. **To keep an eye on:**
+    automatic gain control also lifts the noise floor during pauses. If
+    it works too hard, recognition hears speech everywhere and the false
+    triggers come back - so after a change, check not only that it gets
+    louder but also that it stays quiet during silence.
+
 - **The USB route is proven - with hardware that was already there
   (2026-08-17).** Stephan's existing headset, a **TeckNet TK-HS005** with
   a 2.4 GHz USB dongle, registers without drivers and without pairing as

@@ -11,8 +11,11 @@ reagiert dialos-tts-indicator.py mit einem Icon im GNOME-Panel, nuetzlich
 falls die Lautstaerke zu leise eingestellt ist.
 """
 import json
+import hashlib
+import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 
@@ -69,6 +72,105 @@ def fuer_sprachausgabe(text):
 
 
 FRAGE_TON = "/usr/local/share/dialos/frage-ton.wav"
+
+# Zwischenspeicher fuer wiederkehrende Ansagen.
+#
+# WARUM (gemessen 2026-08-17): "Ich hoere." dauert ueber
+# speech-dispatcher 2,2 Sekunden - bei nur 1,13 Sekunden Audio. Rund
+# 1,1 Sekunden sind reiner Vorlauf: Dienst anstossen, Modul aufrufen,
+# Piper synthetisieren, und das jedes Mal fuer denselben Satz. Stephan
+# ist das als zu lange Pause zwischen Befehl und Antwort aufgefallen.
+# Dieselbe Datei mit paplay: 50 ms Vorlauf.
+#
+# Der Speicher fuellt sich von selbst - beim ersten Mal geht der Satz den
+# normalen Weg und wird nebenbei aufgezeichnet, ab dem zweiten Mal kommt
+# er aus der Datei. Kein Pflegeaufwand, keine Liste, die veralten kann.
+#
+# Der Schluessel enthaelt die Aenderungszeit der Piper-Konfiguration und
+# der Stimme. Aendert sich Tempo oder Stimme, entstehen dadurch neue
+# Schluessel und der alte Bestand wird einfach nicht mehr gefunden -
+# sonst spraeche DialOS nach einer Tempo-Aenderung teils alt, teils neu.
+SPEICHER = os.path.join(
+    os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache")),
+    "dialos", "ansagen")
+PIPER_CONF = "/etc/speech-dispatcher/modules/piper-generic.conf"
+PIPER_STIMMEN = "/usr/local/share/dialos-piper/voices"
+
+
+def speicher_schluessel(text):
+    """Eindeutiger Name fuer eine Ansage, inkl. Stimme und Tempo."""
+    teile = [text]
+    for pfad in (PIPER_CONF, PIPER_STIMMEN):
+        try:
+            teile.append(str(os.path.getmtime(pfad)))
+        except OSError:
+            pass
+    return hashlib.sha256("\x00".join(teile).encode("utf-8")).hexdigest()[:32]
+
+
+def speicher_fuellen(text):
+    """Legt die Ansage fuer das naechste Mal ab - im Hintergrund.
+
+    Bewusst NACH dem Sprechen und ohne darauf zu warten: Der Nutzer soll
+    von diesem Aufwand nichts merken. Beim ersten Mal ist die Ansage also
+    genauso langsam wie bisher, ab dem zweiten Mal schnell.
+
+    Die Kette entspricht der, die speech-dispatcher benutzt (piper | sox
+    mit tempo aus GenericRateMultiply). Sie wird hier nachgebaut statt
+    ausgelesen - die Konfigurationszeile ist eine einzige lange
+    Kommandozeile mit Platzhaltern, die sich nicht zuverlaessig zerlegen
+    laesst. Der Tempo-Wert wird gelesen, weil genau der sich aendert.
+    """
+    try:
+        os.makedirs(SPEICHER, exist_ok=True)
+        stimmen = [d for d in os.listdir(PIPER_STIMMEN) if d.endswith(".onnx")]
+        if not stimmen:
+            return
+        stimme = os.path.join(PIPER_STIMMEN, stimmen[0])
+        tempo = "1.0"
+        try:
+            with open(PIPER_CONF) as f:
+                for zeile in f:
+                    if zeile.startswith("GenericRateMultiply"):
+                        tempo = zeile.split()[1]
+                        break
+        except OSError:
+            pass
+        with open(stimme + ".json") as f:
+            rate = str(json.load(f)["audio"]["sample_rate"])
+        ziel = os.path.join(SPEICHER, speicher_schluessel(text) + ".wav")
+        # Ueber eine Zwischendatei, damit ein Abbruch keine halbe Ansage
+        # hinterlaesst, die beim naechsten Mal abgespielt wuerde.
+        vorlaeufig = ziel + ".teil"
+        befehl = (
+            f"printf %s {shlex.quote(text)} | "
+            f"{shlex.quote(os.path.join(os.path.dirname(PIPER_STIMMEN), 'piper', 'piper'))} "
+            f"--model {shlex.quote(stimme)} --output_raw 2>/dev/null | "
+            # "-t wav" ist Pflicht: sox bestimmt das Ausgabeformat sonst an
+            # der Dateiendung, und die Zwischendatei heisst ".teil". Ohne
+            # die Angabe bricht sox ab - der Speicher blieb dadurch beim
+            # ersten Anlauf still leer (2026-08-17).
+            f"sox -r {rate} -c 1 -b 16 -e signed-integer -t raw - "
+            f"-t wav {shlex.quote(vorlaeufig)} tempo {shlex.quote(tempo)} norm 2>/dev/null "
+            f"&& mv {shlex.quote(vorlaeufig)} {shlex.quote(ziel)}"
+        )
+        subprocess.Popen(["sh", "-c", befehl],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+    except Exception:
+        pass
+
+
+def aus_speicher(text):
+    """Spielt die Ansage aus dem Speicher, wenn sie dort liegt."""
+    pfad = os.path.join(SPEICHER, speicher_schluessel(text) + ".wav")
+    if not os.path.exists(pfad):
+        return False
+    try:
+        erg = subprocess.run(["paplay", pfad], capture_output=True, timeout=60)
+        return erg.returncode == 0
+    except Exception:
+        return False
 
 
 def frageton_gewuenscht():
@@ -250,6 +352,17 @@ def main():
             stummgeschaltet.append(index)
     markierung_setzen()
     try:
+        # ZUERST im Speicher nachsehen. Nur wenn keine Lautstaerke
+        # vorgegeben ist - eine gespeicherte Datei traegt die Lautstaerke
+        # von damals, und "--lautstaerke" kommt ohnehin nur bei der
+        # Start-Ansage vor, die jedes Mal anders lautet.
+        #
+        # Die Stummschaltung und die Markierung sind hier bereits gesetzt,
+        # der gespeicherte Weg verhaelt sich also nach aussen genauso wie
+        # der normale - insbesondere hoert der Sprachbefehl-Dienst
+        # waehrenddessen nicht zu.
+        if intensitaet is None and aus_speicher(text):
+            return
         # Kurze "Aufwaerm"-Ansage, damit ein evtl. eingeschlafener
         # Bluetooth-Lautsprecher rechtzeitig aufwacht, bevor der
         # eigentliche Text gesprochen wird (sonst geht der Anfang verloren).
@@ -265,6 +378,8 @@ def main():
         # Nutzer schlimmer als eine verspaetete.
         sprich(spd_cmd + ["."], AUFWAERM_TIMEOUT_S)
         sprich(spd_cmd + [text], text_timeout)
+        if intensitaet is None:
+            speicher_fuellen(text)
     finally:
         for index in stummgeschaltet:
             set_mute(index, False)
