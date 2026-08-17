@@ -105,6 +105,124 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Input and output are settled - and the simplification also solves two
+  problems we would otherwise have had to solve (Stephan's decision,
+  2026-08-17).** Input is **always** the built-in microphone, output is the
+  Bluetooth speaker as long as it actually plays, otherwise the built-in
+  speakers. External microphones come up again at the very end.
+  - **The important part is not the simplification.** If DialOS never
+    opens a Bluetooth microphone, the device can never drop into HFP - the
+    A2DP/HFP forced choice disappears, not because we solved it but
+    because we no longer touch it. It has cost us the audio quality of the
+    video recording and sits inside several open items. And today's total
+    outage becomes structurally impossible: echo cancellation needs its
+    capture device as a clock, and a built-in microphone cannot be
+    switched off.
+  - **Newly built: `dialos-ton-ausgabe.py`** with
+    `/etc/xdg/autostart/dialos-ton-ausgabe.desktop`. It runs for the whole
+    session, because the speaker can also be switched on or off mid-session,
+    and waits on `pactl subscribe` events instead of polling every second.
+  - **It believes no status report.** Instead of checking whether a device
+    is "there", it sends 150 ms of silence and watches, with a timeout,
+    whether the call completes. Exactly today's case - sink reports
+    `RUNNING`, accepts the stream, never plays - is caught by that.
+    Silence as the test tone so the user does not hear a beep on every
+    event.
+  - **At login it chooses but does not announce.** The same lesson as the
+    desktop restore today: whoever is logging in has not switched
+    anything, and an announcement would talk over the login announcement.
+  - **Two mistakes while building, both mine.** First, the test tone would
+    have caused an endless loop: it is itself a `sink-input` event, and my
+    filter matched on "sink". Found before the first run. Second, the
+    announcement did **not** come in the test even though the audio moved
+    correctly - I compared against the system's default sink, and
+    WirePlumber had already changed it before my service looked. Both
+    sides agreed, so it stayed silent. It now remembers its **own** last
+    choice. The same class of mistake as twice before that day: believing
+    a status report instead of tracking my own state.
+  - **Then confirmed live** (Stephan, speaker off and on again): both
+    transitions logged as real changes, both announcements evidenced by
+    new cache files, and "it worked now".
+
+- **The lockout is gone entirely - and I had half-fixed the same fault
+  that morning (2026-08-17).** Stephan reported that commands 1 and 2 were
+  fine but 3 and 4 had to be spoken "much louder". Command 2 was a real
+  switch. After it the service was **deaf for about five seconds:**
+
+  | Segment | Duration |
+  |---|---|
+  | switch script runs and speaks, blocking the service | 2.4 s |
+  | lockout afterwards | 2.0 s |
+  | reverberation pause, then new recording | 0.7 s |
+  | **total** | **≈ 5.1 s** |
+
+  But the announcement ends after 1.5 s. So the user hears the answer,
+  keeps speaking - and talks into a deaf system for 3.6 seconds. Then they
+  repeat it louder, and by that moment the lockout has just expired.
+  **Louder was never the fix, waiting was.**
+  - **The charge against myself:** I had written exactly that reasoning
+    down that morning when removing the lockout after "Ich höre." - and
+    then failed to apply it to switching, shortening the number from 5 s
+    to 2 s instead. A half fix looks like a fix and costs a second test
+    run.
+  - **It was not needed any more anyway.** It was meant to stop a
+    drawn-out sentence from triggering twice; discarding and restarting
+    the recording after every utterance has done that since the morning.
+    The service is now deaf only while it speaks, plus 0.7 s.
+  - **Evidence:** two complete runs in Stephan's voice, seven commands,
+    all recognized, without getting louder.
+
+- **Measured how the Bluetooth speaker's volume is really controlled - and
+  I have to retract a recommendation (2026-08-17).** Trigger was Stephan's
+  wish for announcements 30 % quieter, and his question how to keep the
+  device permanently at 100 % and control everything from the OS.
+
+  | Route | What happens | Does it work? |
+  |---|---|---|
+  | sink volume (GNOME slider, `pactl`) | the value goes **to the device via AVRCP**, the signal is unchanged | yes, audibly |
+  | attenuation in the signal (file, sox, `paplay --volume`) | the signal leaves the laptop correctly attenuated | **no** - the AIRHUG undoes it |
+
+  The proof is a measurement on the Bluetooth sink's monitor, i.e. on what
+  leaves the laptop: at half amplitude in the file it arrives as
+  **0.071559** against **0.143117**, exactly a factor of 0.5000. With sink
+  at 100 % versus sink at 30 %, however, **0.143117 both times**,
+  identical to the last digit - so the sink volume is not computed into
+  the signal at all but commanded to the device. On the laptop speaker the
+  signal attenuation is audible the other way round (confirmed by
+  Stephan).
+  - **Retracted:** I had proposed `bluez5.enable-hw-volume = false` so the
+    device stays at 100 % and the OS attenuates in software. That would
+    have been exactly wrong - DialOS would then attenuate on the route
+    that demonstrably does nothing on the AIRHUG, and there would be **no**
+    volume control left at all. The proposal rested on my assumption that
+    software attenuation arrives; the measurement says the opposite.
+  - **Stephan's goal is therefore already met:** the GNOME slider *is* the
+    OS controlling the speaker - it does so by sending the device a value
+    instead of touching the signal.
+  - **Side finding that affected a whole feature:** our sox chain ends in
+    `norm`, and that lifts every output back to full scale. So
+    `GenericVolume` is **ineffective** in DialOS - speech-dispatcher cannot
+    control the volume at all, and it had never been noticed because
+    nobody had ever needed it. It only surfaced because my first demo was
+    twice identically loud (RMS 0.1428 against 0.1489).
+  - **Consequence for "announcements 30 % quieter":** doable on the laptop
+    speaker, not on the AIRHUG - there only the device volume works, and
+    that applies to everything. An AVRCP command costs a measured 19-36 ms,
+    so briefly lowering it during an announcement would be affordable. Not
+    built yet, decision open.
+
+- **Checked three ways and confirmed: the AIRHUG never reports its volume
+  back (2026-08-17).** The trigger was an observation that seemed to
+  contradict the midday finding - the sink suddenly stood at 70 % without
+  DialOS having done anything. Three conditions were tested: button press
+  with no audio, start of a playback, and button press **during** an active
+  playback. In all three the value stayed unchanged.
+  - **The 70 % remain unexplained.** Three attempted explanations are
+    refuted, WirePlumber's stored value is 100 %, and the event log shows
+    no re-creation of the sink in the relevant window. A fourth guess
+    would be just that - recorded in `TODO.md` so a second occurrence
+    yields a second data point instead of starting over.
+
 - **A switched-off headset took the system's entire audio output with it
   - and the cause was my test configuration (2026-08-17).** After
   Stephan's reboot no announcement came in **either** account. The log

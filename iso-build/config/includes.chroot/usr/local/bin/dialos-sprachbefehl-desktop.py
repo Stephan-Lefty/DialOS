@@ -99,10 +99,14 @@ FUENF ENTSCHEIDUNGEN, DIE HIER DRINSTECKEN
    Sekunden ruecknehmbar, ohne dass jemand sehen muss, was passiert ist.
    Steht die Optik schon so, wird nur das gesagt und nichts geaendert.
 
-5. SPERRFRIST NACH JEDEM UMSCHALTEN.
-   Ohne die wuerde ein einzelnes langgezogenes "Windows" mehrfach
-   ausgeloest, und die Ansage des Umschaltens koennte trotz Punkt 3 in
-   einer Randlage noch einmal greifen.
+5. KEINE SPERRFRIST - sie ist am 2026-08-17 entfallen.
+   Sie sollte verhindern, dass ein langgezogener Satz mehrfach ausloest.
+   Das erledigt Punkt 3 aber vollstaendig: Ein frischer parec-Prozess
+   plus "erkenner.Reset()" hat keinen Rueckstand. Tatsaechlich bewirkt
+   hat sie, dass der Dienst nach einem Umschalten rund fuenf Sekunden
+   taub war - ausgerechnet in dem Moment, in dem der Nutzer den naechsten
+   Befehl sagt. Stephan hat das zweimal als "ich muss viel lauter reden"
+   gemeldet. Die ausfuehrliche Rechnung steht bei WARTEN_BEIM_SPRECHEN_S.
 
 Aufruf: laeuft ueber /etc/xdg/autostart/dialos-sprachbefehl-desktop.desktop
 automatisch in jeder Sitzung. Von Hand zum Testen einfach starten;
@@ -172,18 +176,28 @@ ANSAGE_AUS = "Ich höre nicht mehr."
 ANSAGE_ZEITGRENZE = "Ich schalte die Sprachsteuerung wieder aus."
 ANSAGE_LAEUFT_SCHON = "Ich höre schon."
 
-# Sperrfrist NACH EINEM UMSCHALTEN. Bewusst kurz und bewusst NICHT nach
-# den Ansagen "Ich hoere." / "Ich hoere nicht mehr" (Fehler vom
-# 2026-08-17): Dort stand sie zuerst auch, mit der Folge, dass der Dienst
-# ausgerechnet in den fuenf Sekunden nach "Ich hoere." taub war - also
-# genau dann, wenn der Nutzer seinen Befehl sagt. Fuer Stephan sah das
-# aus wie ein Lautstaerkeproblem: Er sprach, nichts geschah, er
-# wiederholte lauter - und dann war die Frist abgelaufen.
+# KEINE Sperrfrist mehr - zweimal am 2026-08-17 als Ursache derselben
+# Fehlermeldung entlarvt, und beim ersten Mal habe ich nur die Haelfte
+# behoben.
 #
-# Noetig ist sie ueberhaupt nur noch als Rest: Das Verwerfen und
-# Neubeginnen der Aufnahme nach jedem Sprechen faengt die eigene Stimme
-# bereits ab. Zwei Sekunden reichen gegen ein langgezogenes Wort.
-SPERRFRIST_S = 2.0
+# Sie sollte verhindern, dass ein langgezogener Satz mehrfach ausloest.
+# Dafuer ist sie ueberfluessig, seit die Aufnahme nach jedem Sprechen
+# verworfen und neu begonnen wird (siehe "aufnahme_verwerfen"): Ein
+# frischer parec-Prozess plus "erkenner.Reset()" hat keinen Rueckstand,
+# aus dem heraus etwas doppelt ausloesen koennte.
+#
+# Was sie tatsaechlich bewirkt hat: Nach einem Umschalten war der Dienst
+# rund fuenf Sekunden taub - 2,4 s laeuft das Umschalt-Skript und spricht
+# dabei, 2,0 s Sperrfrist, 0,7 s Nachhall-Pause. Die Ansage endet aber
+# schon nach 1,5 s. Der Nutzer hoert also die Antwort, spricht weiter und
+# redet 3,6 Sekunden gegen ein taubes System. Stephan hat das zweimal
+# als "ich muss viel lauter reden" gemeldet - lauter half nie, das
+# Warten half. Beim ersten Mal habe ich die Frist nur nach "Ich hoere."
+# entfernt und von 5 s auf 2 s gekuerzt, statt die eigene Begruendung
+# auch auf das Umschalten anzuwenden.
+#
+# Bleibt taub ist damit nur noch: solange das System spricht (ueber die
+# Markierungsdatei) plus NACHHALL_WARTEN_S danach.
 WARTEN_BEIM_SPRECHEN_S = 0.3
 NACHHALL_WARTEN_S = 0.7     # Pause nach dem Sprechen, bevor neu aufgenommen wird
 SAETTIGUNG_GRENZE = 15      # so viele uebersteuerte Bloecke in Folge = Pegel richten
@@ -237,8 +251,24 @@ def waehle_mikrofon():
 
     ZWEITE WAHL das eingebaute Mikrofon - Begruendung siehe Punkt 2 oben.
 
-    LETZTE WAHL eine Bluetooth-Quelle: schlechtere Wiedergabe ist immer
-    noch besser als ein Geraet, das gar nicht zuhoert.
+    KEIN BLUETOOTH, KEIN USB - Stephans Festlegung vom 2026-08-17: Die
+    Eingabe ist bis auf Weiteres immer das eingebaute Mikrofon, externe
+    Geraete kommen zum Schluss noch einmal dran. Hier stand vorher eine
+    Bluetooth-Quelle als letzte Rueckfallebene, mit der Begruendung
+    "schlechtere Wiedergabe ist besser als ein Geraet, das nicht
+    zuhoert". Diese Begruendung war falsch herum gedacht, aus zwei
+    Gruenden:
+
+    1. Greift DialOS nie ein Bluetooth-Mikrofon an, kann das Geraet auch
+       nie in HFP rutschen. Die ganze A2DP/HFP-Zwangswahl faellt weg -
+       nicht weil wir sie geloest haetten, sondern weil wir sie nicht
+       mehr beruehren. Sie hat bisher die Tonqualitaet der Videoaufnahme
+       gekostet und steckt in mehreren offenen Punkten.
+    2. Ein abschaltbares Mikrofon ist ein Risiko fuer die GANZE
+       Tonausgabe, nicht nur fuer die Erkennung: Haengt die
+       Echo-Unterdrueckung daran, nimmt sein Ausfall alles mit (siehe
+       docs/Debian-zu-DialOS.md, Schritt 11f - am 2026-08-17 passiert).
+       Das eingebaute Mikrofon kann man nicht ausschalten.
     """
     try:
         roh = subprocess.run(
@@ -252,10 +282,14 @@ def waehle_mikrofon():
              if q.get("name") and not q["name"].endswith(".monitor")]
     if ECHO_QUELLE in namen:
         return ECHO_QUELLE
-    eingebaut = [n for n in namen if not n.startswith("bluez_input.")]
+    eingebaut = [n for n in namen if n.startswith("alsa_input.pci-")]
     if eingebaut:
         return eingebaut[0]
-    return namen[0] if namen else None
+    # Bewusst KEINE weitere Rueckfallebene: Findet sich kein eingebautes
+    # Mikrofon, ist die Erkennung aus - lieber gar nicht zuhoeren als
+    # ueber ein Geraet, das die Wiedergabe verschlechtert oder beim
+    # Ausschalten den ganzen Ton mitnimmt. Der Aufrufer sagt das an.
+    return None
 
 
 def aktueller_stil():
@@ -330,14 +364,21 @@ def main():
     modell = vosk.Model(MODELL)
     quelle = waehle_mikrofon()
     if not quelle:
+        # ANSAGEN, nicht nur nach stderr schreiben: Die Zielgruppe sieht
+        # kein Terminal. Ohne Ansage waere die Sprachsteuerung einfach
+        # stumm tot - und niemand wuesste, warum nichts reagiert.
         print("Kein Mikrofon gefunden.", file=sys.stderr)
+        sprich("Ich finde kein Mikrofon. Die Sprachsteuerung ist aus.")
         return 1
+
+    # Merker fuer die Ansage "kein Mikrofon" - damit sie einmal kommt und
+    # nicht alle fuenf Sekunden.
+    mikrofon_fehlt_gemeldet = False
 
     # Beim Anmelden ist die Erkennung immer AUS - vorhersagbar und sicher.
     hoert_zu = False
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
     prozess = aufnahme_starten(quelle)
-    letzte_aktion = 0.0
     letzte_aktivitaet = time.time()
     aufnahme_verwerfen = False
     saettigungen = 0
@@ -353,14 +394,12 @@ def main():
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
                 sprich(ANSAGE_ZEITGRENZE)
-                letzte_aktion = time.time()
                 continue
 
-            # Es gibt zwei Gruende, gerade NICHT zuzuhoeren: Das System
-            # spricht selbst, oder das letzte Umschalten liegt noch keine
-            # Sperrfrist zurueck. Beide werden gleich behandelt, weil in
-            # beiden Faellen dasselbe passieren muss - siehe unten.
-            if spricht_gerade() or time.time() - letzte_aktion < SPERRFRIST_S:
+            # Nicht zuhoeren, solange das System selbst spricht - sonst
+            # hoert der Dienst seine eigene Ansage. Danach wird die
+            # Aufnahme verworfen und neu begonnen, siehe unten.
+            if spricht_gerade():
                 aufnahme_verwerfen = True
                 time.sleep(WARTEN_BEIM_SPRECHEN_S)
                 continue
@@ -399,7 +438,23 @@ def main():
                 # parec beendet (z. B. Audiogeraet gewechselt) - neu
                 # aufsetzen statt den Dienst sterben zu lassen.
                 time.sleep(1)
-                quelle = waehle_mikrofon()
+                neu = waehle_mikrofon()
+                if not neu:
+                    # Seit die Bluetooth-Rueckfallebene weg ist, kann hier
+                    # tatsaechlich None stehen (Mikrofon abgemeldet, Karte
+                    # verschwunden). Einmal ansagen und weiter warten -
+                    # aufnahme_starten(None) waere ein Absturz, und ein
+                    # abgestuerzter Dienst kommt in dieser Sitzung nicht
+                    # mehr wieder.
+                    if not mikrofon_fehlt_gemeldet:
+                        sprich("Ich finde kein Mikrofon mehr.")
+                        mikrofon_fehlt_gemeldet = True
+                    time.sleep(5)
+                    continue
+                if mikrofon_fehlt_gemeldet:
+                    sprich("Das Mikrofon ist wieder da.")
+                    mikrofon_fehlt_gemeldet = False
+                quelle = neu
                 prozess = aufnahme_starten(quelle)
                 erkenner = vosk.KaldiRecognizer(
                     modell, ABTASTRATE,
@@ -476,7 +531,6 @@ def main():
                 ziel = ZIELE.get(wort)
                 if ziel:
                     umschalten(ziel)
-                    letzte_aktion = time.time()
                     letzte_aktivitaet = time.time()
                     erkenner.Reset()
                     break

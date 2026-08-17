@@ -37,6 +37,33 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
+- [ ] **Unexplained: the Bluetooth sink suddenly stood at 70 %**
+  (2026-08-17). Between two measurements the AIRHUG's volume changed from
+  100 % to 70 % without DialOS having done anything. Three explanations are
+  refuted: the device does not report its volume (tested on button press
+  with no audio, on playback start, and on button press **during** an
+  active playback - no change in all three), WirePlumber's stored value is
+  100 %, and the event log shows no re-creation of the sink in the relevant
+  window. **Deliberately no fourth guess** - recorded so that a second
+  occurrence yields a second data point. It matters because a volume that
+  changes by itself is not comprehensible to a blind user.
+
+- [ ] **Decision open: announcements quieter than music** (Stephan's wish
+  of 2026-08-17, "throttle by about 30 %"). On the laptop speaker it is
+  doable - signal attenuation works there, confirmed by Stephan by ear. On
+  the AIRHUG it does **not**: it undoes the attenuation (measurement in
+  `docs/Debian-zu-DialOS.en.md`, step 11g), only the device volume works
+  there, and that applies to everything. One option would be to lower it
+  briefly via AVRCP **during** the announcement; such a command costs a
+  measured 19-36 ms, negligible against a 1200 ms announcement. Open is
+  whether lowering it audibly steps or clicks on the device - that decides
+  whether it is usable. After Stephan set the volume on the device, the
+  question may be moot anyway.
+  - **To fix along with it:** `GenericVolume` is ineffective in DialOS,
+    because the sox chain ends in `norm` and cancels any attenuation
+    before it. Anyone wanting to control the volume through
+    speech-dispatcher must write `norm vol <factor>`.
+
 - [ ] **Roadmap to real voice control** (agreed with Stephan on
   2026-08-16, in this order):
   1. Decide on a reference microphone - **done**, AIRHUG 01.

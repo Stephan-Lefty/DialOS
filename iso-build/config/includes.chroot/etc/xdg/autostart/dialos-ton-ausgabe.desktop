@@ -1,0 +1,21 @@
+[Desktop Entry]
+# Waehlt das Ausgabegeraet: Bluetooth-Lautsprecher solange er wirklich
+# abspielt, sonst die eingebauten Lautsprecher (Stephans Festlegung vom
+# 2026-08-17). Laeuft die ganze Sitzung mit, weil der Lautsprecher auch
+# mitten in der Sitzung ein- oder ausgeschaltet werden kann.
+#
+# Warum es einen eigenen Dienst braucht, obwohl PipeWire von sich aus das
+# neueste Geraet nimmt: "vorhanden" heisst nicht "spielt ab". Am
+# 2026-08-17 hat eine Senke, die RUNNING meldete und nie abspielte, die
+# komplette Tonausgabe lahmgelegt. Der Dienst probiert es deshalb aus,
+# statt eine Zustandsmeldung zu glauben - siehe Kopf des Skripts.
+Type=Application
+Name=DialOS Tonausgabe waehlen
+Name[en]=DialOS audio output selection
+Comment=Bluetooth-Lautsprecher wenn er spielt, sonst die eingebauten Lautsprecher
+Comment[en]=Bluetooth speaker when it actually plays, otherwise the built-in speakers
+Exec=/usr/local/bin/dialos-ton-ausgabe.py
+Icon=audio-speakers
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

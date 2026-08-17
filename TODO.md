@@ -36,6 +36,35 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
+- [ ] **Unerklaert: Die Bluetooth-Senke stand ploetzlich auf 70 %**
+  (2026-08-17). Zwischen zwei Messungen wechselte die Lautstaerke des
+  AIRHUG von 100 % auf 70 %, ohne dass DialOS etwas getan hatte. Drei
+  Erklaerungen sind widerlegt: Das Geraet meldet seine Lautstaerke nicht
+  (geprueft bei Tastendruck ohne Ton, bei Wiedergabestart und bei
+  Tastendruck **waehrend** laufender Wiedergabe - dreimal keine
+  Aenderung), WirePlumbers gespeicherter Wert steht auf 100 %, und im
+  Ereignisprotokoll gab es im passenden Zeitraum keinen Neuaufbau der
+  Senke. **Absichtlich keine vierte Vermutung** - festgehalten, damit ein
+  zweites Auftreten einen zweiten Datenpunkt liefert. Wichtig ist es,
+  weil eine Lautstaerke, die sich von selbst aendert, fuer einen blinden
+  Nutzer nicht nachvollziehbar ist.
+
+- [ ] **Entscheidung offen: Ansagen leiser als Musik** (Stephans Wunsch
+  vom 2026-08-17, "um ca. 30 % drosseln"). Am Laptop-Lautsprecher ist es
+  machbar - Daempfung im Signal wirkt dort, von Stephan im Hoervergleich
+  bestaetigt. Am AIRHUG **nicht**: Er rechnet die Daempfung wieder weg
+  (Messung in `docs/Debian-zu-DialOS.md`, Schritt 11g), dort wirkt nur die
+  Geraete-Lautstaerke, und die gilt fuer alles. Moeglich waere, sie per
+  AVRCP **waehrend** der Ansage kurz abzusenken; ein solcher Befehl kostet
+  gemessen nur 19-36 ms, faellt gegen 1200 ms Ansage also nicht auf.
+  Offen ist, ob das Absenken am Geraet hoerbar stuft oder klickt - das
+  entscheidet, ob es brauchbar ist. Nach Stephans Einstellung der
+  Lautstaerke am Geraet ist die Frage vielleicht ohnehin erledigt.
+  - **Dabei zu beheben:** `GenericVolume` ist in DialOS wirkungslos, weil
+    die sox-Kette auf `norm` endet und jede Daempfung davor wegrechnet.
+    Wer die Lautstaerke ueber speech-dispatcher regeln will, muss
+    `norm vol <faktor>` schreiben.
+
 - [ ] **Fahrplan bis zur echten Sprachsteuerung** (festgelegt mit Stephan
   am 2026-08-16, in dieser Reihenfolge):
   1. Referenz-Mikrofon festlegen - **erledigt**, AIRHUG 01.

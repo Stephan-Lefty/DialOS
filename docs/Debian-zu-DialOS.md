@@ -963,7 +963,18 @@ Der Gegentest, der die Satz-Bedingung rechtfertigt: Der gesprochene Satz
 also durchaus mit dem Wort "windows", aber **ohne** "umschalten". Er
 löste nichts aus.
 
-**Die Sperrfrist gilt seit 2026-08-17 nur noch nach echtem Umschalten.**
+**Die Sperrfrist ist seit 2026-08-17 ganz entfallen** - in zwei Schritten,
+und der erste war nur eine halbe Behebung. Zuerst galt sie auch hinter den
+Ansagen "Ich hoere." und "Ich hoere nicht mehr.", dann nur noch nach
+echtem Umschalten mit 2 s, jetzt nicht mehr. Der Grund fuer den zweiten
+Schritt: Nach einem Umschalten war der Dienst rund **fuenf Sekunden** taub
+- 2,4 s laeuft das Umschalt-Skript und spricht dabei, 2,0 s Sperrfrist,
+0,7 s Nachhall-Pause. Die Ansage endet aber schon nach 1,5 s, der Nutzer
+spricht also 3,6 Sekunden gegen ein taubes System. Noetig war sie
+ohnehin nicht mehr: Das Verwerfen und Neubeginnen der Aufnahme nach jedem
+Sprechen verhindert Doppelausloesung vollstaendig.
+
+**Der alte Text dazu, weil die Diagnose lehrreich ist:**
 Vorher stand sie auch hinter den Ansagen "Ich höre." und "Ich höre nicht
 mehr." - der Dienst war damit ausgerechnet in den fünf Sekunden nach
 "Ich höre." taub, also genau dann, wenn der Nutzer seinen Befehl sagt.
@@ -1182,6 +1193,67 @@ wieder auf:
 ```bash
 bluetoothctl disconnect <MAC> && sleep 3 && bluetoothctl connect <MAC>
 ```
+
+### 11g. Tonausgabe waehlen: Bluetooth oder Laptop (neu 2026-08-17)
+
+**Stephans Festlegung vom 2026-08-17:** Eingabe immer das eingebaute
+Mikrofon, Ausgabe der Bluetooth-Lautsprecher solange er wirklich
+abspielt, sonst die eingebauten Lautsprecher. Externe Mikrofone kommen
+zum Schluss noch einmal dran.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-ton-ausgabe.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/xdg/autostart/dialos-ton-ausgabe.desktop /etc/xdg/autostart/
+```
+
+**Der wichtigere Teil der Entscheidung ist die Eingabe.** Wenn DialOS nie
+ein Bluetooth-Mikrofon oeffnet, kann das Geraet auch nie in HFP rutschen -
+die A2DP/HFP-Zwangswahl aus Schritt 11c faellt damit weg, nicht weil sie
+geloest waere, sondern weil sie nicht mehr beruehrt wird. Und der
+Totalausfall aus 11f wird strukturell unmoeglich: Ein eingebautes
+Mikrofon kann man nicht ausschalten.
+
+**Warum es dafuer einen eigenen Dienst braucht**, obwohl PipeWire von
+sich aus das neueste Geraet zur Vorgabe macht: Weil "vorhanden" nicht
+"spielt ab" heisst. Am 2026-08-17 hat eine Senke, die `RUNNING` meldete
+und den Strom annahm, nie abgespielt - und damit die komplette
+Tonausgabe lahmgelegt. Der Dienst fragt deshalb keine Zustandsmeldung ab,
+sondern **probiert es aus**: 150 ms Stille hinschicken und mit Zeitlimit
+schauen, ob `paplay` durchlaeuft. Stille als Testton, damit der Nutzer
+nicht bei jedem Ereignis ein Piepen hoert.
+
+Drei Entscheidungen, jede aus einem Fehler desselben Tages:
+
+| Entscheidung | Grund |
+|---|---|
+| **Beim Anmelden waehlen, aber nicht ansagen** | Wer sich anmeldet, hat nichts umgeschaltet. Genau daran ist die Desktop-Wiederherstellung gescheitert (11d) - sie sprach und fiel der Start-Ansage ins Wort. |
+| **Vergleich mit der EIGENEN letzten Wahl**, nicht mit der Vorgabe-Senke | WirePlumber stellt beim Verschwinden eines Geraets selbst um, und zwar bevor der Dienst hinschaut. Der Vergleich mit dem Systemzustand ergab immer "nichts geaendert", und die Ansage blieb aus - obwohl der Ton gewandert war. |
+| **Filter auf `" on sink #"`**, nicht auf `"sink"` | Der eigene Testton ist selbst ein `sink-input`-Ereignis. Mit dem breiten Filter haette jeder Testton den naechsten ausgeloest. |
+
+Live bestaetigt am 2026-08-17: Lautsprecher aus - "Ton ueber Laptop.",
+Lautsprecher an - "Ton ueber Lautsprecher.", beide Wechsel im Protokoll
+als echte Aenderung.
+
+**Zur Lautstaerke des Bluetooth-Lautsprechers** - gemessen am selben Tag,
+weil die Vermutung sonst in die falsche Richtung fuehrt:
+
+| Weg | Was passiert | Wirkt es? |
+|---|---|---|
+| Senken-Lautstaerke (GNOME-Regler, `pactl`) | Wert geht per AVRCP ans Geraet, das Signal bleibt unveraendert | ja |
+| Daempfung im Signal (sox, `paplay --volume`) | Signal verlaesst den Laptop korrekt gedaempft | **nein**, der AIRHUG rechnet es weg |
+
+Nachgewiesen am Monitor der Bluetooth-Senke: halbe Amplitude in der Datei
+ergibt dort 0,071559 gegen 0,143117 (Faktor 0,5000) - Senke 100 % gegen
+Senke 30 % dagegen **beide Male 0,143117**. Daraus folgt: `bluez5.enable-
+hw-volume = false` waere ein Fehler. Es wuerde DialOS zwingen, auf dem
+Weg zu daempfen, der beim AIRHUG nichts bewirkt - danach gaebe es
+ueberhaupt keine Lautstaerkeregelung mehr.
+
+**Und ein Nebenbefund, der eine ganze Funktion betrifft:** Die sox-Kette
+in `piper-generic.conf` endet auf `norm`, und das hebt jede Ausgabe
+wieder auf Vollausschlag. `GenericVolume` ist damit wirkungslos -
+speech-dispatcher kann die Lautstaerke von DialOS nicht regeln. Wer das
+braucht, muss die Daempfung **hinter** `norm` setzen (`norm vol 0.70`).
 
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 

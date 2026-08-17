@@ -107,6 +107,133 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Eingabe und Ausgabe sind festgelegt - und die Vereinfachung löst
+  gleich zwei Probleme mit, die wir sonst noch hätten lösen müssen
+  (Stephans Entscheidung, 2026-08-17).** Eingabe ist **immer** das
+  eingebaute Mikrofon, Ausgabe der Bluetooth-Lautsprecher solange er
+  wirklich abspielt, sonst die eingebauten Lautsprecher. Externe Mikrofone
+  kommen zum Schluss noch einmal dran.
+  - **Das eigentlich Wichtige daran ist nicht die Vereinfachung.** Wenn
+    DialOS nie ein Bluetooth-Mikrofon öffnet, kann das Gerät auch nie in
+    HFP rutschen - die A2DP/HFP-Zwangswahl fällt damit weg, nicht weil wir
+    sie gelöst hätten, sondern weil wir sie nicht mehr berühren. Sie hat
+    bisher die Tonqualität der Videoaufnahme gekostet und steckt in
+    mehreren offenen Punkten. Und der Totalausfall von heute wird
+    strukturell unmöglich: Die Echo-Unterdrückung braucht ihr
+    Aufnahmegerät als Taktgeber, und ein eingebautes Mikrofon kann man
+    nicht ausschalten.
+  - **Neu gebaut: `dialos-ton-ausgabe.py`** mit
+    `/etc/xdg/autostart/dialos-ton-ausgabe.desktop`. Er läuft die ganze
+    Sitzung mit, weil der Lautsprecher auch mitten in der Sitzung ein-
+    oder ausgeschaltet werden kann, und wartet über `pactl subscribe` auf
+    Ereignisse statt im Sekundentakt nachzufragen.
+  - **Er glaubt keiner Zustandsmeldung.** Statt zu prüfen, ob ein Gerät
+    „da" ist, schickt er 150 ms Stille hin und schaut mit Zeitlimit, ob
+    der Aufruf durchläuft. Genau der Fall von heute - Senke meldet
+    `RUNNING`, nimmt den Strom an, spielt nie - fällt damit auf. Stille
+    als Testton, damit der Nutzer nicht bei jedem Ereignis ein Piepen
+    hört.
+  - **Beim Anmelden wird gewählt, aber nicht angesagt.** Dieselbe Lehre
+    wie bei der Desktop-Wiederherstellung von heute: Wer sich anmeldet,
+    hat nichts umgeschaltet, und eine Ansage würde der Start-Ansage ins
+    Wort fallen.
+  - **Zwei Fehler beim Bauen, beide von mir.** Erstens hätte der eigene
+    Testton eine Endlosschleife ausgelöst: Er erzeugt selbst ein
+    `sink-input`-Ereignis, und mein Filter hörte auf „sink". Vor dem
+    ersten Lauf gefunden. Zweitens kam die Ansage im Test **nicht**,
+    obwohl der Ton korrekt wanderte - ich verglich mit der Vorgabe-Senke
+    des Systems, und die hatte WirePlumber schon umgestellt, bevor mein
+    Dienst hinsah. Beide Seiten kamen zum selben Ergebnis, also schwieg
+    er. Jetzt merkt er sich seine **eigene** letzte Wahl. Derselbe
+    Fehlertyp wie zweimal zuvor an diesem Tag: einer Zustandsmeldung
+    geglaubt, statt die eigene Sache mitzuführen.
+  - **Danach live bestätigt** (Stephan, Lautsprecher aus und wieder an):
+    beide Wechsel im Protokoll als echte Änderung, beide Ansagen als neue
+    Speicher-Dateien belegt, und „hat aber jetzt funktioniert".
+
+- **Die Sperrfrist ist ganz entfallen - und ich hatte denselben Fehler am
+  Morgen schon halb behoben (2026-08-17).** Stephan meldete, Befehl 1 und
+  2 gingen normal, Befehl 3 und 4 habe er „viel lauter" sprechen müssen.
+  Befehl 2 war ein echtes Umschalten. Danach war der Dienst **rund fünf
+  Sekunden taub:**
+
+  | Abschnitt | Dauer |
+  |---|---|
+  | Umschalt-Skript läuft und spricht dabei, blockiert den Dienst | 2,4 s |
+  | Sperrfrist danach | 2,0 s |
+  | Nachhall-Pause, dann neue Aufnahme | 0,7 s |
+  | **zusammen** | **≈ 5,1 s** |
+
+  Die Ansage endet aber nach 1,5 s. Der Nutzer hört also die Antwort,
+  spricht weiter - und redet 3,6 Sekunden gegen ein taubes System. Dann
+  wiederholt er lauter, und in dem Moment ist die Frist gerade abgelaufen.
+  **Lauter war nie die Lösung, nur das Warten.**
+  - **Der Vorwurf an mich selbst:** Genau diese Begründung hatte ich am
+    Morgen aufgeschrieben, als ich die Frist nach „Ich höre." entfernte -
+    und dann nicht auf das Umschalten angewandt, sondern die Zahl von 5 s
+    auf 2 s gekürzt. Eine halbe Behebung sieht wie eine Behebung aus und
+    kostet einen zweiten Testlauf.
+  - **Nötig war sie ohnehin nicht mehr.** Sie sollte verhindern, dass ein
+    langgezogener Satz mehrfach auslöst; das erledigt seit heute früh
+    schon das Verwerfen und Neubeginnen der Aufnahme nach jedem Sprechen.
+    Taub bleibt der Dienst jetzt nur, solange er spricht, plus 0,7 s.
+  - **Belegt:** Zwei vollständige Durchläufe mit Stephans Stimme, sieben
+    Befehle, alle erkannt, ohne lauter zu werden.
+
+- **Gemessen, wie die Lautstärke des Bluetooth-Lautsprechers wirklich
+  geregelt wird - und ich muss eine Empfehlung zurücknehmen
+  (2026-08-17).** Auslöser war Stephans Wunsch, die Ansagen 30 % leiser
+  zu machen, und seine Frage, wie man das Gerät dauerhaft auf 100 % stellt
+  und alles über das OS regelt.
+
+  | Weg | Was passiert | Wirkt es? |
+  |---|---|---|
+  | Senken-Lautstärke (GNOME-Regler, `pactl`) | Wert geht **per AVRCP ans Gerät**, das Signal bleibt unverändert | ja, hörbar |
+  | Dämpfung im Signal (Datei, sox, `paplay --volume`) | Signal verlässt den Laptop korrekt gedämpft | **nein** - der AIRHUG rechnet es weg |
+
+  Der Nachweis ist eine Messung am Monitor der Bluetooth-Senke, also an
+  dem, was den Laptop verlässt: Bei halber Amplitude in der Datei kommt
+  dort **0,071559** gegen **0,143117** an, genau Faktor 0,5000. Bei
+  Senke 100 % gegen Senke 30 % dagegen **beide Male 0,143117**, auf die
+  letzte Stelle identisch - die Senken-Lautstärke wird also gar nicht ins
+  Signal gerechnet, sondern dem Gerät befohlen. Am Laptop-Lautsprecher
+  ist die Dämpfung im Signal umgekehrt hörbar (von Stephan bestätigt).
+  - **Zurückgenommen:** Ich hatte `bluez5.enable-hw-volume = false`
+    vorgeschlagen, damit das Gerät auf 100 % bleibt und das OS in Software
+    regelt. Das wäre genau falsch gewesen - dann würde DialOS auf dem Weg
+    dämpfen, der beim AIRHUG nachweislich nichts bewirkt, und es gäbe
+    **überhaupt keine** Lautstärkeregelung mehr. Der Vorschlag beruhte auf
+    meiner Annahme, Software-Dämpfung käme an; die Messung sagt das
+    Gegenteil.
+  - **Stephans Ziel ist damit schon erfüllt:** Der GNOME-Regler *ist* das
+    OS, das den Lautsprecher steuert - er tut es, indem er dem Gerät einen
+    Wert schickt, statt am Signal zu drehen.
+  - **Nebenbefund, der eine ganze Funktion betraf:** Unsere sox-Kette
+    endet auf `norm`, und das hebt jede Ausgabe wieder auf Vollausschlag.
+    Damit ist `GenericVolume` in DialOS **wirkungslos** - speech-dispatcher
+    kann die Lautstärke gar nicht regeln, und das war nie aufgefallen,
+    weil es nie jemand gebraucht hat. Aufgefallen ist es nur, weil mein
+    erster Vorführversuch zweimal identisch laut war (RMS 0,1428 gegen
+    0,1489).
+  - **Folge für „Ansagen 30 % leiser":** Am Laptop-Lautsprecher machbar,
+    am AIRHUG nicht - dort wirkt nur die Geräte-Lautstärke, und die gilt
+    für alles. Ein AVRCP-Befehl kostet gemessen nur 19-36 ms, ein kurzes
+    Absenken während der Ansage wäre also bezahlbar. Noch nicht gebaut,
+    Entscheidung offen.
+
+- **Dreifach geprüft und bestätigt: Der AIRHUG meldet seine Lautstärke
+  nie zurück (2026-08-17).** Anlass war eine Beobachtung, die dem Befund
+  vom Mittag zu widersprechen schien - die Senke stand plötzlich auf 70 %,
+  ohne dass DialOS etwas getan hatte. Geprüft wurden drei Bedingungen:
+  Tastendruck ohne Ton, Start einer Wiedergabe, und Tastendruck **während**
+  laufender Wiedergabe. In allen drei Fällen blieb der Wert unverändert.
+  - **Die 70 % bleiben unerklärt.** Drei Erklärungsversuche sind
+    widerlegt, WirePlumbers gespeicherter Wert steht auf 100 %, und im
+    Ereignisprotokoll gab es keinen Neuaufbau der Senke im passenden
+    Zeitraum. Eine vierte Vermutung wäre geraten - festgehalten in
+    `TODO.md`, damit ein zweites Auftreten einen zweiten Datenpunkt
+    liefert statt wieder von vorn zu beginnen.
+
 - **Ein ausgeschaltetes Headset hat die komplette Tonausgabe des Systems
   mitgenommen - und die Ursache war meine Testkonfiguration
   (2026-08-17).** Nach Stephans Neustart kam bei **beiden** Konten keine

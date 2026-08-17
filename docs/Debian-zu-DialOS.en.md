@@ -934,14 +934,25 @@ synthetically spoken sentences (Piper speaks, Vosk listens):
 | **Built-in microphone** instead of Bluetooth | The AIRHUG cannot do A2DP and HFP at once. For the one-off volume question, phone-grade audio is a brief moment - with continuous listening, playback would be degraded **permanently**. Distinguishing three fixed sentences works with the built-in microphone too. |
 | **No listening while the system speaks** | Otherwise the service hears itself. Its own announcement can contain both the target *and* "umschalten" - so the sentence condition would specifically fail to catch it. It watches the marker file `dialos-say.py` sets anyway. |
 | **No confirmation prompt, but an announcement** | A "are you sure?" on every command would be tiresome. Instead the system says what it did - anyone who didn't want it just says the other sentence. A misfire is undoable in seconds, without having to look. |
-| **A 2 s lockout** after a switch | Otherwise a drawn-out sentence triggers repeatedly. It was 5 s at first and also applied after "Ich höre." - see below, that was a mistake. |
+| **No lockout** | It was 5 s at first, then 2 s, now none - see below. Double triggering is prevented by restarting the recording. |
 
 The control test that justifies the sentence condition: the spoken
 sentence "ich habe früher windows benutzt" ("I used to use Windows") was
 recognized as `auf auf windows` - containing the word "windows", but
 **without** "umschalten". It triggered nothing.
 
-**Since 2026-08-17 the lockout applies only after a real switch.**
+**Since 2026-08-17 the lockout is gone entirely** - in two steps, and the
+first was only a half fix. At first it also applied after the
+announcements "Ich hoere." and "Ich hoere nicht mehr.", then only after a
+real switch with 2 s, now not at all. The reason for the second step:
+after a switch the service was deaf for about **five seconds** - 2.4 s the
+switch script runs and speaks, 2.0 s lockout, 0.7 s reverberation pause.
+But the announcement ends after 1.5 s, so the user speaks into a deaf
+system for 3.6 seconds. It was not needed anyway: discarding and
+restarting the recording after every utterance prevents double triggering
+completely.
+
+**The old text on it, because the diagnosis is instructive:**
 Before that it also sat behind the announcements "Ich höre." and "Ich
 höre nicht mehr." - which left the service deaf for exactly the five
 seconds after "Ich höre.", precisely when the user speaks their command.
@@ -1149,6 +1160,64 @@ profile only reappears after reconnecting:
 ```bash
 bluetoothctl disconnect <MAC> && sleep 3 && bluetoothctl connect <MAC>
 ```
+
+### 11g. Choosing the audio output: Bluetooth or laptop (new 2026-08-17)
+
+**Stephan's decision of 2026-08-17:** input is always the built-in
+microphone, output is the Bluetooth speaker as long as it actually plays,
+otherwise the built-in speakers. External microphones come up again at the
+very end.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-ton-ausgabe.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/xdg/autostart/dialos-ton-ausgabe.desktop /etc/xdg/autostart/
+```
+
+**The more important half of the decision is the input.** If DialOS never
+opens a Bluetooth microphone, the device can never drop into HFP - the
+A2DP/HFP forced choice from step 11c disappears, not because it is solved
+but because it is no longer touched. And the total outage from 11f becomes
+structurally impossible: a built-in microphone cannot be switched off.
+
+**Why this needs a service of its own**, even though PipeWire makes the
+newest device the default by itself: because "present" does not mean
+"plays". On 2026-08-17 a sink that reported `RUNNING` and accepted the
+stream never played it - and thereby paralysed the entire audio output.
+The service therefore queries no status report but **tries it out**: send
+150 ms of silence and watch, with a timeout, whether `paplay` completes.
+Silence as the test tone so the user does not hear a beep on every event.
+
+Three decisions, each from a fault of the same day:
+
+| Decision | Reason |
+|---|---|
+| **Choose at login, but do not announce** | Whoever is logging in has not switched anything. That is exactly where the desktop restore failed (11d) - it spoke and talked over the login announcement. |
+| **Compare against its OWN last choice**, not the default sink | WirePlumber switches by itself when a device disappears, and it does so before the service looks. Comparing with the system state always yielded "nothing changed" and the announcement stayed away - although the audio had moved. |
+| **Filter on `" on sink #"`**, not on `"sink"` | The test tone is itself a `sink-input` event. With the broad filter every test tone would have triggered the next one. |
+
+Confirmed live on 2026-08-17: speaker off - "Ton ueber Laptop.", speaker
+on - "Ton ueber Lautsprecher.", both transitions logged as real changes.
+
+**On the Bluetooth speaker's volume** - measured the same day, because the
+intuition leads the wrong way otherwise:
+
+| Route | What happens | Does it work? |
+|---|---|---|
+| sink volume (GNOME slider, `pactl`) | the value goes to the device via AVRCP, the signal is unchanged | yes |
+| attenuation in the signal (sox, `paplay --volume`) | the signal leaves the laptop correctly attenuated | **no**, the AIRHUG undoes it |
+
+Proven on the Bluetooth sink's monitor: half amplitude in the file arrives
+as 0.071559 against 0.143117 (factor 0.5000) - whereas sink at 100 %
+against sink at 30 % gives **0.143117 both times**. It follows that
+`bluez5.enable-hw-volume = false` would be a mistake. It would force
+DialOS to attenuate on the route that does nothing on the AIRHUG, after
+which there would be no volume control at all.
+
+**And a side finding that affects a whole feature:** the sox chain in
+`piper-generic.conf` ends in `norm`, and that lifts every output back to
+full scale. `GenericVolume` is therefore ineffective - speech-dispatcher
+cannot control DialOS's volume. Anyone who needs it must put the
+attenuation **after** `norm` (`norm vol 0.70`).
 
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 

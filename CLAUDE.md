@@ -187,6 +187,27 @@ Stephans echtem Standort Seefeld in Tirol) - mit Genauigkeits-
 Schwellwert, der zu grobe Schätzungen verwirft und die Wetteransage
 dann bewusst ausfallen lässt, statt eine falsche Stadt zu nennen.
 
+**Audio-Festlegung seit 2026-08-17 (Stephan):** Eingabe ist **immer** das
+eingebaute Mikrofon, Ausgabe der Bluetooth-Lautsprecher solange er
+wirklich abspielt, sonst die eingebauten Lautsprecher - mit Ansage beim
+Wechsel waehrend der Sitzung, ohne Ansage beim Anmelden. Externe
+Mikrofone kommen erst zum Schluss wieder dran. Das ist keine
+Zwischenloesung, sondern loest zwei Probleme mit: Solange DialOS kein
+Bluetooth-Mikrofon oeffnet, kann das Geraet nicht in HFP rutschen, und
+ein eingebautes Mikrofon kann nicht ausgeschaltet werden - beides hat am
+2026-08-17 Ausfaelle verursacht. Umgesetzt in
+`dialos-ton-ausgabe.py` und `dialos-sprachbefehl-desktop.py`, beschrieben
+in `docs/Debian-zu-DialOS.md` Schritt 11f/11g.
+
+**Regel aus demselben Tag, die weit ueber Audio hinausgeht:** Keiner
+Zustandsmeldung glauben, wenn sich das Ergebnis messen laesst. An einem
+Tag dreimal derselbe Fehler: BlueZ meldete ein verbundenes Geraet, das 0
+Bytes lieferte; eine Senke meldete `RUNNING` und spielte nie ab; und
+mein eigener Dienst schwieg, weil er sich auf die Vorgabe-Senke des
+Systems statt auf seine eigene letzte Wahl verliess. Deshalb prueft
+DialOS Ausgabegeraete jetzt, indem es 150 ms Stille hinschickt und
+schaut, ob der Aufruf durchlaeuft.
+
 **Alle Sprachbefehle stehen in
 [docs/sprachbefehle.md](docs/sprachbefehle.md)** (Stephans Wunsch vom
 2026-08-17): eine Tabelle Befehl → Aktion, getrennt nach umgesetzt und
