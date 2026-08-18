@@ -239,8 +239,11 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
   Mikrofon, ein externes Funkmikrofon wird erst zum Schluss wieder
   betrachtet. Der Ausgabe-Fallback auf die eingebauten Lautsprecher ist
   belegt und läuft jetzt über `dialos-ton-ausgabe.py`.
-- Rechtschreibprüfung (hunspell/aspell) fehlt noch, siehe
-  `docs/offene-punkte.md`.
+- Rechtschreibprüfung: **`hunspell-de-de` und `aspell-de` sind entgegen
+  einer früheren Notiz installiert** (geprüft 2026-08-18). Offen ist nur
+  noch die Einbindung in die Anwendungen. Achtung: hunspell akzeptiert
+  „vertrag" und „Vertrag" gleichermaßen, taugt also NICHT zur
+  Groß-/Kleinschreibung im Diktat - siehe `docs/diktat.md`.
 - Mikrofon-Vergleich eingebaut gegen AIRHUG wiederholen, nachdem die
   60-dB-Übersteuerung behoben ist. **Nicht mehr dringend seit der
   Audio-Festlegung vom 2026-08-17** - die Bluetooth-Priorität beim

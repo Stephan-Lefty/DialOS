@@ -37,7 +37,12 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
-- [ ] **Where do the mailbox credentials live?** (open since 2026-08-18).
+- [x] **Where do the mailbox credentials live? Decided 2026-08-18:** a
+  file in `/home/nutzer`, mode 0600 - not the keyring (it does not unlock
+  reliably under autologin and adds no protection behind the same LUKS
+  door anyway) and not the stick (it carries the LUKS key, can be pulled,
+  and would be a second place for the same job). Reasoning in
+  `docs/sicherheit-datenschutz.en.md`. Originally this read:
   DialOS reads and writes mail directly over IMAP/SMTP, because from
   outside Thunderbird only knows `-compose` and allows no reading (see
   `docs/anwendungen.en.md`). So DialOS needs the credentials itself. Two

@@ -210,6 +210,59 @@ Speichern an; Stephan muss es getrennt von der Nextcloud aufbewahren
 (z. B. im eigenen Passwort-Manager), niemals zusammen mit der
 Backup-Datei selbst.
 
+## Zugangsdaten für Dienste (Mail und später mehr)
+
+Entschieden mit Stephan am 2026-08-18. Anlass: DialOS liest und schreibt
+Mail direkt über IMAP/SMTP, weil Thunderbird von außen nicht steuerbar ist
+(siehe [anwendungen.md](anwendungen.md)). Damit braucht DialOS das
+Mailbox-Passwort selbst.
+
+**Entschieden: eine Datei in `/home/nutzer`, Rechte `0600`, Besitzer
+`nutzer`.** Nicht der GNOME-Schlüsselbund, nicht der Sicherheits-Stick.
+
+Der Grund ist der Aufbau, den es schon gibt: `/home/nutzer` liegt auf der
+LUKS-Partition, die nur aufgeht, wenn der Stick beim Booten da war. **Eine
+Datei dort hat damit genau den Schutz des Sticks** - ohne Stick kein
+entschlüsseltes Home, ohne Home keine Zugangsdaten. Ohne eine Zeile
+zusätzliche Technik.
+
+**Warum nicht der Stick selbst**, obwohl er der naheliegende Ort wäre:
+
+- Er trägt den LUKS-Schlüssel. Weitere Geheimnisse dort bedeuten, dass ein
+  verlorener Stick auch den Mailzugang mitnimmt - und `dialos-rekey`
+  ersetzt nur den LUKS-Schlüssel, nichts weiter.
+- Er kann mitten in der Sitzung abgezogen werden, während das Home
+  eingehängt bleibt. Alles, was danach Zugangsdaten braucht, fiele aus.
+- Es wäre eine zweite Stelle zu pflegen, die dasselbe leistet wie die
+  erste.
+
+**Warum nicht der Schlüsselbund** - hier ist eine Empfehlung
+zurückgenommen worden, die vorher in diesem Projekt ausgesprochen war:
+
+- Er liegt selbst in `/home/nutzer`, also hinter derselben LUKS-Tür. Er
+  fügt ein Schloss hinzu, aber **keinen neuen Schutz**: Ein Prozess, der
+  als `nutzer` läuft und die Datei lesen könnte, kann genauso den
+  entsperrten Schlüsselbund fragen.
+- Dafür fügt er eine Fehlerquelle hinzu. `nutzer` wird **per Autologin**
+  angemeldet (`AutomaticLogin=nutzer` in der GDM-Konfiguration), es gibt
+  also kein Passwort, mit dem PAM den Anmelde-Schlüsselbund aufschließen
+  könnte. Bleibt er gesperrt, erscheint ein **Passwortdialog, den der
+  Nutzer nicht sehen kann** - und die Mail blockiert lautlos. Das ist für
+  diese Zielgruppe der schlechteste denkbare Ausgang.
+- **Nicht bewiesen, und die Entscheidung hängt nicht daran:** Gemessen
+  wurde in `dialosadmin`, und dort ist der Schlüsselbund entsperrt
+  (`Locked = false` über die Secret-Service-Schnittstelle) - aber dort
+  wird ein Passwort eingegeben. Für `nutzer` unter Autologin ließe sich
+  das nur durch eine Anmeldung als `nutzer` mit derselben Abfrage klären.
+  Selbst ein entsperrter Schlüsselbund brächte nach dem Punkt oben keinen
+  Zuwachs an Schutz.
+
+**Was dabei bewusst in Kauf genommen wird:** Das Passwort liegt im
+Klartext auf der Platte. Auf einer Partition, die nur mit dem Stick
+aufgeht, in einer Datei, die nur `nutzer` lesen darf. Der Schlüsselbund
+wäre in derselben Lage - sein Speicher liegt auch dort, und was ihn
+aufschließt, muss ebenfalls irgendwo herkommen.
+
 ## Versand-Sicherheit
 
 Laptop und Sicherheits-Stick sollen getrennt versendet werden

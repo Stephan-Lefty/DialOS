@@ -196,6 +196,54 @@ The tool shows the generated backup password once after saving; Stephan
 must store it separately from the Nextcloud (e.g. in his own password
 manager), never together with the backup file itself.
 
+## Credentials for services (mail, and more later)
+
+Decided with Stephan on 2026-08-18. Trigger: DialOS reads and writes mail
+directly over IMAP/SMTP, because Thunderbird cannot be controlled from
+outside (see [anwendungen.en.md](anwendungen.en.md)). So DialOS needs the
+mailbox password itself.
+
+**Decided: a file in `/home/nutzer`, mode `0600`, owned by `nutzer`.** Not
+the GNOME keyring, not the security stick.
+
+The reason is the structure that already exists: `/home/nutzer` sits on the
+LUKS partition that only opens if the stick was present at boot. **A file
+there therefore has exactly the stick's protection** - no stick, no
+decrypted home, no credentials. Without a single line of extra machinery.
+
+**Why not the stick itself**, although it would be the obvious place:
+
+- It carries the LUKS key. Further secrets there would mean that a lost
+  stick takes mail access with it - and `dialos-rekey` only replaces the
+  LUKS key, nothing else.
+- It can be pulled out mid-session while the home stays mounted.
+  Everything needing credentials after that would fail.
+- It would be a second place to maintain doing the same job as the first.
+
+**Why not the keyring** - here a recommendation previously voiced in this
+project has been retracted:
+
+- It sits in `/home/nutzer` itself, i.e. behind the same LUKS door. It adds
+  a lock but **no new protection**: a process running as `nutzer` that
+  could read the file can just as well ask the unlocked keyring.
+- In exchange it adds a failure mode. `nutzer` is logged in **by
+  autologin** (`AutomaticLogin=nutzer` in the GDM configuration), so there
+  is no password for PAM to unlock the login keyring with. If it stays
+  locked, a **password dialog the user cannot see** appears - and mail
+  blocks silently. For this target group that is the worst conceivable
+  outcome.
+- **Not proven, and the decision does not depend on it:** the measurement
+  was taken in `dialosadmin`, where the keyring is unlocked
+  (`Locked = false` via the Secret Service interface) - but there a
+  password is entered. For `nutzer` under autologin this could only be
+  settled by logging in as `nutzer` and running the same query. Even an
+  unlocked keyring would, per the point above, add no protection.
+
+**What is deliberately accepted:** the password sits in plain text on the
+disk. On a partition that only opens with the stick, in a file only
+`nutzer` may read. The keyring would be in the same position - its store
+lives there too, and whatever unlocks it must also come from somewhere.
+
 ## Shipping security
 
 Laptop and security stick should be shipped separately (different

@@ -36,7 +36,13 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
-- [ ] **Wo liegen die Mailbox-Zugangsdaten?** (offen seit 2026-08-18).
+- [x] **Wo liegen die Mailbox-Zugangsdaten? Entschieden am 2026-08-18:**
+  Datei in `/home/nutzer`, Rechte 0600 - nicht der Schlüsselbund (der
+  entsperrt sich unter Autologin nicht zuverlässig und schützt hinter
+  derselben LUKS-Tür ohnehin nicht zusätzlich) und nicht der Stick (er
+  trägt den LUKS-Schlüssel, kann abgezogen werden, und wäre eine zweite
+  Stelle für dasselbe). Begründung in `docs/sicherheit-datenschutz.md`.
+  Ursprünglich stand hier:
   DialOS liest und schreibt Mail direkt über IMAP/SMTP, weil Thunderbird
   von außen nur `-compose` kennt und kein Lesen erlaubt (siehe
   `docs/anwendungen.md`). Damit braucht DialOS die Zugangsdaten selbst.

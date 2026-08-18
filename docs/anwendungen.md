@@ -54,7 +54,8 @@ Vorhandenes aussieht.
 Die ersten zwei sind keine Anwendungen, sondern Voraussetzungen für vier
 der obigen:
 
-- **Diktat (Sprache zu Text).** Briefe, Notizen, Mail und Chat kann der
+- **Diktat (Sprache zu Text)** - Messungen und offene Punkte in
+  [diktat.md](diktat.md). Briefe, Notizen, Mail und Chat kann der
   Nutzer ohne Diktat gar nicht erzeugen. **`vosk-model-de-big` mit 3,2 GB
   liegt schon auf der Platte** - freies Diktat braucht also keine neue
   Technik, nur Arbeit. Nicht zu verwechseln mit der eingeschränkten

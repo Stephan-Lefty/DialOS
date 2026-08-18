@@ -51,7 +51,8 @@ is deliberate, so that the planned does not look like the existing.
 The first two are not applications but preconditions for four of the
 above:
 
-- **Dictation (speech to text).** The user cannot produce letters, notes,
+- **Dictation (speech to text)** - measurements and open points in
+  [diktat.en.md](diktat.en.md). The user cannot produce letters, notes,
   mail or chat messages at all without dictation. **`vosk-model-de-big`,
   3.2 GB, is already on the disk** - so free dictation needs no new
   technology, only work. Not to be confused with the restricted grammar of
