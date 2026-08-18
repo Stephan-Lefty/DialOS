@@ -14,6 +14,10 @@ Welches Programm für welchen Zweck benutzt wird, steht in
 [anwendungen.md](anwendungen.md) - diese Datei beantwortet „welcher
 Satz", jene „welches Programm".
 
+**Wie das klingt**, steht als Hörbeispiele in
+[sprachbeispiele/](sprachbeispiele/README.md) - dort liegen die Antworten
+zu den Befehlen dieser Tabelle als Tondateien.
+
 Technischer Hintergrund zur Erkennung steht in
 [sprachsteuerung.md](sprachsteuerung.md), der Einbau in
 [Debian-zu-DialOS.md](Debian-zu-DialOS.md) (Schritt 11c).

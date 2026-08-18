@@ -16,6 +16,9 @@ Which program is used for which purpose is in
 [anwendungen.en.md](anwendungen.en.md) - this file answers "which
 sentence", that one "which program".
 
+**What that sounds like** is in [sprachbeispiele/](sprachbeispiele/README.en.md)
+- the replies to the commands in this table are there as audio files.
+
 Technical background on recognition is in
 [sprachsteuerung.en.md](sprachsteuerung.en.md), the installation in
 [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md) (step 11c).
