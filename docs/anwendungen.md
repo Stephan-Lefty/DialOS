@@ -75,6 +75,39 @@ der obigen:
   Wetter ansagen** (aus Thunderbird; die Wetterabfrage steckt schon in der
   Start-Ansage).
 
+## Mail: Thunderbird ist die Oberfläche, nicht der Motor
+
+Geprüft am 2026-08-18, als Stephan die Testadresse `proband@dialos.org`
+angelegt hat. Thunderbirds Kommandozeile kennt genau **eine** Funktion:
+
+```
+thunderbird -compose "to='empfaenger@tld.org'"
+```
+
+Mails **lesen** lässt sich von außen gar nicht, und `-compose` öffnet nur
+ein vorbefülltes Fenster, das jemand anklicken muss. Nach dem Kriterium
+oben - Steuerbarkeit von außen - fällt Thunderbird damit als Motor für die
+Sprachbedienung durch, genau wie `gnome-podcasts`.
+
+**Die Folge ist keine neue Programmwahl, sondern eine Arbeitsteilung:**
+
+| Aufgabe | Wer |
+|---|---|
+| Mail vorlesen, Mail diktieren und senden | **DialOS direkt über IMAP/SMTP** (`imaplib`, `smtplib` - Pythons Standardbibliothek, kein zusätzliches Paket) |
+| Mail ansehen und bearbeiten durch einen sehenden Helfer | Thunderbird |
+| Kalender und Kontakte | Thunderbird, unangefochten |
+
+**Offen und bewusst nicht hier entschieden:** Damit braucht DialOS die
+Zugangsdaten der Mailbox selbst. Ob sie in den GNOME-Schlüsselbund
+(libsecret) gehören oder in eine Datei, die nur dem Konto gehört, ist eine
+Frage der Sicherheits-Architektur - siehe
+[sicherheit-datenschutz.md](sicherheit-datenschutz.md) und `TODO.md`.
+
+Zur Testmailbox: Der Mailserver von dialos.org ist `s111.goserver.host`.
+**Autoconfig-Einträge gibt es nicht** (`_imaps._tcp`, `_submission._tcp`,
+`_autodiscover._tcp` sind alle leer), Thunderbird muss die Einstellungen
+also raten - die IMAP-/SMTP-Daten des Hosters gehören bereitgehalten.
+
 ## Zwei Regeln, die aus dieser Liste folgen
 
 **Nur ein Player darf gleichzeitig laufen.** Sagt der Nutzer „lauter" oder

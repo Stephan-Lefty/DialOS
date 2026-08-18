@@ -70,6 +70,42 @@ above:
   appointments and weather** (from Thunderbird; the weather query is
   already in the login announcement).
 
+## Mail: Thunderbird is the interface, not the engine
+
+Checked on 2026-08-18, when Stephan created the test address
+`proband@dialos.org`. Thunderbird's command line knows exactly **one**
+function:
+
+```
+thunderbird -compose "to='recipient@tld.org'"
+```
+
+**Reading** mail from outside is not possible at all, and `-compose` only
+opens a prefilled window that somebody has to click. By the criterion
+above - controllability from outside - Thunderbird therefore fails as the
+engine for voice operation, exactly like `gnome-podcasts`.
+
+**The consequence is not a new choice of program but a division of
+labour:**
+
+| Task | Who |
+|---|---|
+| reading mail out, dictating and sending mail | **DialOS directly over IMAP/SMTP** (`imaplib`, `smtplib` - Python's standard library, no extra package) |
+| viewing and editing mail by a sighted helper | Thunderbird |
+| calendar and contacts | Thunderbird, uncontested |
+
+**Open and deliberately not decided here:** this means DialOS needs the
+mailbox credentials itself. Whether they belong in the GNOME keyring
+(libsecret) or in a file owned only by the account is a question of
+security architecture - see
+[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md) and
+`TODO.en.md`.
+
+On the test mailbox: dialos.org's mail server is `s111.goserver.host`.
+**There are no autoconfig records** (`_imaps._tcp`, `_submission._tcp`,
+`_autodiscover._tcp` are all empty), so Thunderbird has to guess the
+settings - the host's IMAP/SMTP details should be kept at hand.
+
 ## Two rules that follow from this list
 
 **Only one player may run at a time.** If the user says "louder" or "stop"

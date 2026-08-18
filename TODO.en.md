@@ -37,6 +37,16 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
+- [ ] **Where do the mailbox credentials live?** (open since 2026-08-18).
+  DialOS reads and writes mail directly over IMAP/SMTP, because from
+  outside Thunderbird only knows `-compose` and allows no reading (see
+  `docs/anwendungen.en.md`). So DialOS needs the credentials itself. Two
+  routes: the GNOME keyring via libsecret, or a file owned only by the
+  account. **This belongs to the security architecture**, not to a side
+  decision - decide it together with `docs/sicherheit-datenschutz.en.md`.
+  The address `proband@dialos.org` is ready for testing (mail server
+  `s111.goserver.host`, no autoconfig records).
+
 - [ ] **Applications: scope approved on 2026-08-18.** Full list with
   reasoning in `docs/anwendungen.en.md`. Settled are Firefox, Thunderbird
   (mail/calendar/contacts), RustDesk, Shortwave (radio), Rhythmbox

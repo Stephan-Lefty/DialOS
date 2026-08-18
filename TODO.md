@@ -36,6 +36,16 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
+- [ ] **Wo liegen die Mailbox-Zugangsdaten?** (offen seit 2026-08-18).
+  DialOS liest und schreibt Mail direkt über IMAP/SMTP, weil Thunderbird
+  von außen nur `-compose` kennt und kein Lesen erlaubt (siehe
+  `docs/anwendungen.md`). Damit braucht DialOS die Zugangsdaten selbst.
+  Zwei Wege: GNOME-Schlüsselbund über libsecret, oder eine Datei, die nur
+  dem Konto gehört. **Gehört zur Sicherheits-Architektur**, nicht in eine
+  Nebenentscheidung - `docs/sicherheit-datenschutz.md` mit entscheiden.
+  Zum Testen liegt die Adresse `proband@dialos.org` bereit
+  (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
+
 - [ ] **Anwendungen: freigegebener Umfang vom 2026-08-18.** Vollständige
   Liste mit Begründung in `docs/anwendungen.md`. Gesetzt sind Firefox,
   Thunderbird (Mail/Kalender/Kontakte), RustDesk, Shortwave (Radio),
