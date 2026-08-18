@@ -63,6 +63,7 @@ not.
 | word list `/usr/share/dict/ngerman`, capitalise only unambiguous nouns | 48/53 = **90.6 %** |
 | the same list plus "capitalise after an article/preposition" | 49/53 = 92.5 % |
 | `hunspell -d de_DE` instead of the word list, plus the same rule | 48/53 = **90.6 %** |
+| `hunspell -m`: a noun when one reading has a capitalised stem (Stephan's idea of using the spellchecker) | 49/53 = **92.5 %** |
 
 Why it stops there, and both kinds of error are instructive:
 
@@ -84,6 +85,41 @@ Why it stops there, and both kinds of error are instructive:
 need real grammatical knowledge, not a rule. At 150 words that is about 14
 misspelled words per letter.
 
+**The fourth attempt is the most instructive, because it came from the
+right idea.** Stephan suggested running the finished text through the word
+processor's spellchecker. That does not hit the mark, because it is **not a
+spelling error** - "wetter" is a correctly spelled German word, and
+LibreOffice uses the same hunspell for German. A check asking "does this
+word exist" has nothing to object to.
+
+One level deeper the idea does lead somewhere: `hunspell -m` prints the
+morphological analysis, and that contains the stem.
+
+```
+vertrag    fl:V st:tragen fl:W                        <- stem "tragen", a verb
+Vertrag    fl:V st:tragen fl:W   Vertrag st:Vertrag   <- additionally stem "Vertrag"
+```
+
+So a noun has a reading with a capitalised stem, a verb form does not. That
+fixed the four old errors - "Vertrag", "Butter", "Dank" and "Wetter" came
+out right. **Four new ones appeared:**
+
+- **"ich Meinen Vertrag" and "es Gut das Wetter".** "Das Meinen" and "das
+  Gut" are nouns as well. No dictionary can tell "es geht gut" from "das
+  Gut" - that needs syntax.
+- **"einkaufszettel" and "augenarzt" stayed lowercase.** Compound nouns are
+  not in the dictionary as stems. And those are exactly the words that
+  matter in a shopping list or a letter.
+
+**That settles it:** four methods, all between 90 and 92.5 %, and the errors
+merely move from one group of words to another. Lexically the problem is
+not solvable.
+
+**And the requirement is higher than first assumed** (Stephan, 2026-08-18):
+in mail, capitalisation matters. That rules out treating messages like
+private chat. Only the shopping list stays buildable right away; for mail
+and letters correct casing is a hard requirement.
+
 ### What Debian offers for it: nothing
 
 Checked on 2026-08-18: `languagetool`, `python3-spacy` and
@@ -101,7 +137,7 @@ matters:
 | Purpose | Requirement | State |
 |---|---|---|
 | **Notes, shopping lists** | lowercase is irrelevant | buildable now |
-| **Mail, chat** | lowercase is normal in a private message; DialOS reads the text out before sending anyway | buildable now |
+| **Mail, chat** | **correct casing required** - Stephan on 2026-08-18: in mail, capitalisation matters | waits for the decision below |
 | **Letters** | 10 % errors are not acceptable | needs a decision of its own |
 
 For letters there are two honest routes, and neither is chosen quietly:

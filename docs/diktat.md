@@ -63,6 +63,7 @@ gilt es nicht.
 | Wortliste `/usr/share/dict/ngerman`, nur eindeutige Substantive groß | 48/53 = **90,6 %** |
 | dieselbe Liste plus „nach Artikel/Präposition groß" | 49/53 = 92,5 % |
 | `hunspell -d de_DE` statt Wortliste, plus dieselbe Regel | 48/53 = **90,6 %** |
+| `hunspell -m`: Substantiv, wenn eine Lesart einen großgeschriebenen Stamm hat (Stephans Idee, die Rechtschreibkontrolle zu benutzen) | 49/53 = **92,5 %** |
 
 Warum es dort stehen bleibt, und beide Fehlerarten sind lehrreich:
 
@@ -86,6 +87,44 @@ Warum es dort stehen bleibt, und beide Fehlerarten sind lehrreich:
 10 % brauchen echtes Grammatikwissen, keine Regel. Bei 150 Wörtern sind
 das rund 14 falsch geschriebene Wörter pro Brief.
 
+**Der vierte Versuch ist der lehrreichste, weil er aus der richtigen Idee
+kam.** Stephan hat vorgeschlagen, den fertigen Text durch die
+Rechtschreibkontrolle der Textverarbeitung zu schicken. Das trifft nicht,
+weil es **kein Rechtschreibfehler** ist - „wetter" ist ein korrekt
+geschriebenes deutsches Wort, und LibreOffice benutzt für Deutsch dasselbe
+hunspell. Eine Prüfung, die fragt „existiert dieses Wort", hat nichts zu
+beanstanden.
+
+Eine Ebene tiefer trägt die Idee aber doch: `hunspell -m` gibt die
+morphologische Analyse aus, und dort steht der Stamm.
+
+```
+vertrag    fl:V st:tragen fl:W                        <- Stamm "tragen", ein Verb
+Vertrag    fl:V st:tragen fl:W   Vertrag st:Vertrag   <- zusaetzlich Stamm "Vertrag"
+```
+
+Ein Substantiv hat also eine Lesart mit großgeschriebenem Stamm, eine
+Verbform nicht. Damit waren die vier alten Fehler behoben - „Vertrag",
+„Butter", „Dank" und „Wetter" kamen richtig heraus. **Es entstanden vier
+neue:**
+
+- **„ich Meinen Vertrag" und „es Gut das Wetter".** „Das Meinen" und „das
+  Gut" sind ebenfalls Substantive. Kein Wörterbuch kann „es geht gut" von
+  „das Gut" unterscheiden - dafür braucht man den Satzbau.
+- **„einkaufszettel" und „augenarzt" blieben klein.** Zusammengesetzte
+  Substantive stehen nicht als Stamm im Wörterbuch. Und das sind genau die
+  Wörter, auf die es in einem Einkaufszettel oder einem Brief ankommt.
+
+**Damit ist die Sache entschieden:** vier Verfahren, alle zwischen 90 und
+92,5 %, und die Fehler wandern nur von einer Wortgruppe zur anderen.
+Lexikalisch ist das Problem nicht lösbar.
+
+**Und der Anspruch ist höher als zunächst angenommen** (Stephan,
+2026-08-18): In Mail ist Groß- und Kleinschreibung wichtig. Damit fällt
+die Idee, Nachrichten wie privaten Chat zu behandeln. Sofort baubar bleibt
+nur der Einkaufszettel; für Mail und Briefe ist korrekte Schreibung eine
+harte Anforderung.
+
 ### Was Debian dafür anbietet: nichts
 
 Geprüft am 2026-08-18: `languagetool`, `python3-spacy` und
@@ -103,7 +142,7 @@ zählt:
 | Zweck | Anspruch | Stand |
 |---|---|---|
 | **Notizen, Einkaufszettel** | Kleinschreibung ist belanglos | sofort baubar |
-| **Mail, Chat** | Kleinschreibung ist in privater Nachricht üblich; DialOS liest den Text ohnehin vor dem Senden vor | sofort baubar |
+| **Mail, Chat** | **korrekte Schreibung nötig** - Stephan am 2026-08-18: in Mail ist Groß- und Kleinschreibung wichtig | wartet auf die Entscheidung unten |
 | **Briefe** | 10 % Fehler sind nicht zumutbar | braucht eine eigene Entscheidung |
 
 Für Briefe gibt es zwei ehrliche Wege, und beide sind bewusst nicht
