@@ -35,7 +35,14 @@ listen?".
 | "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). Reply: "Windows Desktop." If it is already there: "Steht schon auf Windows Desktop." |
 | "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. Reply: "Linux Desktop." or "Steht schon auf Linux Desktop." |
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |
-| **"diktat beenden"** (end dictation) | Ends a running dictation, writes the note and reads it out. Recognized by a **second** recognizer with its own grammar - in the dictation's free recognition the sentence became "diktat wird erhöht" (2026-08-18). Must be the **whole** utterance so it can be mentioned inside a letter. The dictation itself is still started from the command line, not by voice. |
+| **"Diktat starten"** (start dictation) | Starts the dictation; everything spoken becomes text and lands in `~/Notizen/notizen.txt`. It says "Einen Moment, ich hole Zettel und Stift." (the big model needs about 9 s), then "Ich schreibe mit." |
+| **"Notiz aufnehmen"** (record a note) | Equivalent to "Diktat starten". |
+| **"Einkaufszettel aufnehmen"** (record a shopping list) | As above, but writes to `~/Notizen/einkaufszettel.txt` - a shopping list mixed in with appointments and thoughts would be useless. |
+| **"Diktat beenden"** (end dictation) | Ends a running dictation, writes the note and reads it out. Recognized by a **second** recognizer with its own grammar - in the dictation's free recognition the sentence became "diktat wird erhöht" (2026-08-18). Must be the **whole** utterance so it can be mentioned inside a letter. |
+| **"Einkaufszettel vorlesen"** (read the shopping list) | Says the number of entries and reads them out, with pauses in between. |
+| **"Notizen vorlesen"** (read the notes) | The same for the collective note. |
+| **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen?" Answer "ja" or "nein". The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |
+| **"Einkaufszettel wegwerfen"** (throw the shopping list away) | Equivalent to "Einkauf erledigt". Two phrasings for the same thing so the user need not memorise one - as with "auf Linux" and "auf Gnome". |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |
 
 ## Planned, not built yet
@@ -73,10 +80,26 @@ occurred:
   is a second the user has to wait. Eight seconds of explanation were too
   much, a bare "Windows." too little: a keyword that is not recognizably
   the answer to the command.
-- **Check new words against the model first.** Not every word is in the
-  vocabulary: freely recognized, "gnome" reliably became **"genug"**
-  ("enough"). Test method without speaking: Piper says the sentence, Vosk
-  listens (examples in `docs/sprachsteuerung.en.md`).
+- **During a dictation NO command applies.** The dictation creates a
+  marker and the command service keeps out while it exists. Without that a
+  dictated sentence would also be evaluated as a command - dictating "auf
+  Windows umschalten" into a letter would leave a different desktop behind.
+  Evidenced on 2026-08-18 with timestamps in both logs. The only sentence
+  that ends a dictation runs through a recognizer of its own.
+- **Check new words against the model first - in TWO ways.** Not every
+  word is in the vocabulary: freely recognized, "gnome" reliably became
+  **"genug"** ("enough").
+  - **Is the word in the vocabulary at all?** Vosk reports it itself when
+    building the grammar: `Ignoring word missing in vocabulary`. That is
+    instant, needs no speaking, and is the faster of the two routes. Found
+    on 2026-08-18, because **"löschen" (delete) is not in the
+    vocabulary** - Vosk would have dropped it from the grammar silently,
+    the command would never have fired, and the log would have shown only
+    "einkaufszettel". Also absent: "zurücksetzen", "aufräumen".
+  - **Is the whole sentence recognized correctly?** Piper says it, Vosk
+    listens - and with the **complete** command grammar, not just the new
+    sentence on its own. Only then does it show whether it gets confused
+    with an existing one. Examples in `docs/sprachsteuerung.en.md`.
 - **Restart the recording afterwards.** When the system speaks, its own
   voice ends up in the recording queue. On 2026-08-17 that made the
   service switch itself back.

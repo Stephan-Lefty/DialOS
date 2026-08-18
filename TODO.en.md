@@ -52,6 +52,18 @@ what has already been done.
   The address `proband@dialos.org` is ready for testing (mail server
   `s111.goserver.host`, no autoconfig records).
 
+- [ ] **FIRST THING TOMORROW: two dictations recorded nothing**
+  (2026-08-18, last run). In the log `~/dialos-diktat.log` there is **not a
+  single** `erkannt:` line between "grosses Modell geladen" and "Schlusssatz
+  erkannt" - on the second run across 26 seconds. The shopping list stayed
+  empty, so "Einkaufszettel vorlesen" and "Einkauf erledigt" were never
+  executed (`~/dialos-notiz.log` is empty). **Deliberately no conjecture
+  recorded** - none is evidenced. What to check: whether two simultaneous
+  `parec` on the same source interfere (the command service keeps reading
+  even while discarding), whether the stop recognizer takes the blocks from
+  the big one, and whether anything was spoken at all - clarify with Stephan
+  first what he said.
+
 - [ ] **Applications: scope approved on 2026-08-18.** Full list with
   reasoning in `docs/anwendungen.en.md`. Settled are Firefox, Thunderbird
   (mail/calendar/contacts), RustDesk, Shortwave (radio), Rhythmbox

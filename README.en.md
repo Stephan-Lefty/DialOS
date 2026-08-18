@@ -105,6 +105,73 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The shopping list can now be managed, not only filled (Stephan's
+  question, 2026-08-18).** He asked: "If I put something on the shopping
+  list today, how can I listen to it any time, add to it, and delete it once
+  the shopping is home?" That made clear that "record" alone is too little.
+  New script `dialos-notiz.py`, four new voice commands in
+  [docs/sprachbefehle.en.md](docs/sprachbefehle.en.md).
+  - **Adding needed no new program** - the dictation always appended to the
+    file rather than overwriting it.
+  - **Emptying asks for confirmation**, per the project rule for
+    irreversible commands. And there is a net behind it: the old content
+    moves to `einkaufszettel-verworfen.txt`. For the user the list is gone,
+    but a sighted helper can retrieve it - covering exactly the case a
+    confirmation does not cover, namely that the user says "ja" and regrets
+    it afterwards.
+  - **Two sentences for the same emptying** (Stephan's wish): "Einkauf
+    erledigt" describes the situation, "Einkaufszettel wegwerfen" the act.
+
+- **"löschen" is not in the model's vocabulary - and that would have failed
+  silently (2026-08-18).** The obvious command "Einkaufszettel löschen" is
+  impossible: Vosk reports
+  `Ignoring word missing in vocabulary: 'löschen'` and drops the word from
+  the grammar silently. The command would never have fired, and the log
+  would have shown only "einkaufszettel" - with no hint of the cause. The
+  same trap as "gnome" → "genug", only quieter.
+  - **A better test method came out of it**, now a rule in
+    `sprachbefehle.en.md`: Vosk reports missing words while **building the
+    grammar**. That is instant and needs no speaking - the previous route
+    via Piper takes half a minute per sentence. Also absent from the
+    vocabulary: "zurücksetzen", "aufräumen".
+  - **Words demonstrably present were chosen:** wegwerfen, leeren,
+    erledigt, streichen, entfernen, verwerfen, abhaken.
+
+- **Announcements are built grammatically, not concatenated (2026-08-18).**
+  A dry run produced "Der einkaufszettel hat 10 Einträge" - lowercase,
+  because I had built the file name into the sentence. For the other note it
+  would have become "Der notizen ist leer", wrong gender and wrong number.
+  There is now a small table with designation, verb form and pronoun: "Der
+  Einkaufszettel ist leer" versus "Die Notizen sind leer", "Soll ich ihn
+  löschen?" versus "Soll ich sie löschen?".
+  - **For a user who only listens, the announcement is the entire text**
+    they get from DialOS. A wrong article is not a blemish there but the
+    difference between a program that speaks and one that reads out
+    placeholders.
+
+- **The relaxed stop rule proved itself on the first run (2026-08-18).**
+  Evidenced: `Schlusssatz erkannt: 'diktat beenden beenden'` - exactly the
+  output the previous, exact condition would have failed on. Before that, a
+  dictation had stood open for seven minutes and recorded 42 entries of room
+  noise.
+  - **The fault behind it was no surprise**, and that is the uncomfortable
+    part: I had written the exact match down as a residual risk that same
+    morning - "that condition is the only thing standing in between" - and
+    then left it. **A recorded risk is not a handled risk.**
+  - **The new condition comes from the measured data**, not from a hunch:
+    across seven minutes of continuous speech the stop recognizer produced
+    exactly two results other than "[unk]", and both were "beenden" - each
+    time as Stephan said it. A false result never occurred. The decisive
+    part is the absence of "[unk]": it marks that something else was spoken.
+
+- **Open and unexplained: two dictations recorded nothing (2026-08-18, last
+  run of the day).** Between "model loaded" and "stop phrase recognized" the
+  log shows not a single `erkannt:` line, on the second run across 26
+  seconds. The shopping list stayed empty, and "vorlesen" and "Einkauf
+  erledigt" were therefore never executed - the note log is empty.
+  **Deliberately no conjecture recorded**, because none is evidenced. First
+  item for the next day.
+
 - **Dictation works - the first application building block finished and
   evidenced live (2026-08-18).** `dialos-diktat.py` records, recognizes
   freely with the big Vosk model, has LanguageTool fix the capitalisation

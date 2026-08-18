@@ -152,8 +152,50 @@ GRAMMATIK_AN = json.dumps([
     "auf linux umschalten",
     "auf gnome umschalten",
     "auf windows umschalten",
+    "diktat starten",
+    "einkaufszettel aufnehmen",
+    "notiz aufnehmen",
+    "einkaufszettel vorlesen",
+    "notizen vorlesen",
+    "einkauf erledigt",
+    "einkaufszettel wegwerfen",
     "[unk]",
 ])
+
+# Welcher Satz welche Notiz fuellt. "diktat starten" und "notiz aufnehmen"
+# schreiben in dieselbe Sammelnotiz; der Einkaufszettel bekommt eine eigene,
+# weil er der Fall ist, den Stephan als Beispiel genannt hat - und weil eine
+# Einkaufsliste zwischen Terminen und Gedanken unbrauchbar waere.
+#
+# Alle drei Saetze am 2026-08-18 gegen das Modell geprueft (Piper spricht,
+# Vosk hoert): woertlich richtig erkannt. Das ist Pflicht vor jedem neuen
+# Befehl, siehe docs/sprachbefehle.md - "gnome" wurde frei erkannt zu
+# "genug".
+DIKTAT_SAETZE = {
+    "diktat starten": "notizen",
+    "notiz aufnehmen": "notizen",
+    "einkaufszettel aufnehmen": "einkaufszettel",
+}
+DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
+
+# Notizen vorlesen und wegwerfen. Zwei Saetze fuer dasselbe Leeren, weil
+# Stephan beide wollte (2026-08-18) - "Einkauf erledigt" beschreibt die
+# Situation, "Einkaufszettel wegwerfen" die Handlung. Dieselbe Ueberlegung
+# wie bei "auf Linux" und "auf Gnome": Zwei Eintraege kosten nichts, und der
+# Nutzer muss sich keine Formulierung merken.
+#
+# "loeschen" waere der naheliegende Satz gewesen und ist NICHT moeglich: Das
+# Wort steht nicht im Wortschatz des Modells. Vosk wirft es beim Bauen der
+# Grammatik still hinaus, der Befehl waere nie ausgeloest worden, und im
+# Protokoll haette nur "einkaufszettel" gestanden. Geprueft am 2026-08-18 -
+# ebenso fehlen "zuruecksetzen" und "aufraeumen".
+NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
+NOTIZ_SAETZE = {
+    "einkaufszettel vorlesen": ("einkaufszettel", "vorlesen"),
+    "notizen vorlesen": ("notizen", "vorlesen"),
+    "einkauf erledigt": ("einkaufszettel", "loeschen"),
+    "einkaufszettel wegwerfen": ("einkaufszettel", "loeschen"),
+}
 
 # Nach so langer Stille schaltet sich die Erkennung von selbst ab
 # (Stephan, 2026-08-17: zwei Minuten, mit Ansage). Der Grund ist nicht
@@ -345,6 +387,70 @@ def umschalten(ziel):
     subprocess.run([UMSCHALT_SKRIPT, ziel], capture_output=True, timeout=120)
 
 
+def diktat_starten(notiz):
+    """Startet das Diktat als eigenen Prozess und kehrt sofort zurueck.
+
+    NICHT abwarten: Ein Diktat kann Minuten dauern, und dieser Dienst muss
+    in der Zwischenzeit seine Schleife weiterlaufen lassen - schon damit er
+    die Marke sieht und sich heraushaelt.
+
+    Die Marke legt das Diktat selbst an, und zwar VOR dem Laden seines
+    Modells. Das ist wesentlich: Das Laden dauert rund 9 Sekunden, und ohne
+    diese Reihenfolge waeren die ersten diktierten Saetze hier als Befehle
+    ausgewertet worden.
+    """
+    if not os.access(DIKTAT_SKRIPT, os.X_OK):
+        sprich("Ich kann das Diktat nicht finden.")
+        return
+    if diktat_laeuft():
+        # Kann vorkommen, wenn der Nutzer den Satz zweimal sagt, weil er die
+        # Ladezeit fuer einen Fehlschlag haelt. Zwei Diktate gleichzeitig
+        # wuerden sich das Mikrofon streiten.
+        sprich("Ich schreibe schon mit.")
+        return
+    try:
+        # start_new_session: Das Diktat soll weiterlaufen, auch wenn dieser
+        # Dienst neu gestartet wird.
+        #
+        # OHNE "--debug" und mit verworfener Ausgabe (Fehler vom 2026-08-18):
+        # Das Diktat schreibt sein Protokoll ohnehin selbst, mit Uhrzeit. Mit
+        # "--debug" gibt es dieselben Zeilen zusaetzlich auf die
+        # Standardausgabe - und die hier in dieselbe Datei umzuleiten liess
+        # jede Zeile doppelt erscheinen, einmal mit und einmal ohne Uhrzeit.
+        # Ein Protokoll, das jede Zeile zweimal zeigt, laedt zu falschen
+        # Schluessen ein.
+        subprocess.Popen([DIKTAT_SKRIPT, "notiz", notiz],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Diktat gestartet fuer Notiz {notiz!r}")
+    except Exception as fehler:
+        melde(f"Diktat liess sich nicht starten: {fehler}")
+        sprich("Das Diktat lässt sich nicht starten.")
+
+
+def notiz_aktion(name, was):
+    """Startet die Notiz-Verwaltung und kehrt sofort zurueck.
+
+    NICHT abwarten, aus demselben Grund wie beim Diktat: Das Vorlesen einer
+    langen Liste dauert eine Minute, und dieser Dienst muss in der Zeit
+    seine Schleife weiterlaufen lassen. Beim Leeren kommt noch die
+    Rueckfrage dazu, die selbst zuhoert.
+    """
+    if not os.access(NOTIZ_SKRIPT, os.X_OK):
+        sprich("Ich kann die Notizen nicht finden.")
+        return
+    try:
+        subprocess.Popen([NOTIZ_SKRIPT, name, was],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Notiz-Aktion {was!r} fuer {name!r} gestartet")
+    except Exception as fehler:
+        melde(f"Notiz-Aktion liess sich nicht starten: {fehler}")
+        sprich("Das lässt sich nicht ausführen.")
+
+
 def pegel_richten():
     """Setzt die Aufnahme-Verstaerkung zurueck, falls sie uebersteuert.
 
@@ -424,6 +530,13 @@ def main():
             # ein offenes Mikrofon. Mit Ansage, damit der Nutzer den Wechsel
             # hoert - ein Zustand, den man nur sehen kann, waere fuer diese
             # Zielgruppe kein Zustand.
+            # Waehrend eines Diktats laeuft die Zeitgrenze NICHT. Sonst
+            # schaltete sich die Sprachsteuerung nach zwei Minuten Diktat von
+            # selbst ab, und der Nutzer stuende nach "diktat beenden" vor
+            # einer stummen Steuerung, ohne zu wissen warum.
+            if diktat_laeuft():
+                letzte_aktivitaet = time.time()
+
             if hoert_zu and time.time() - letzte_aktivitaet > ZEITGRENZE_S:
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
@@ -438,14 +551,14 @@ def main():
             # wuerde.
             if spricht_gerade() or diktat_laeuft():
                 if diktat_laeuft() and not diktat_gemeldet:
-                    melde("Diktat laeuft - ich hoere nicht zu")
+                    melde("anderer Dienst hoert zu - ich halte mich heraus")
                     diktat_gemeldet = True
                 aufnahme_verwerfen = True
                 time.sleep(WARTEN_BEIM_SPRECHEN_S)
                 continue
 
             if diktat_gemeldet and not diktat_laeuft():
-                melde("Diktat beendet - ich hoere wieder zu")
+                melde("anderer Dienst fertig - ich hoere wieder zu")
                 diktat_gemeldet = False
 
             if aufnahme_verwerfen:
@@ -568,7 +681,24 @@ def main():
                 sprich(ANSAGE_AUS)
                 continue
 
-            # --- Befehle ---
+            # --- Befehle: Diktat ---
+            # VOR der Umschaltung geprueft, weil diese Saetze das Wort
+            # "umschalten" nicht enthalten und sonst an der
+            # Ausloeser-Bedingung unten haengen blieben.
+            if satz in DIKTAT_SAETZE:
+                diktat_starten(DIKTAT_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Notizen vorlesen und wegwerfen ---
+            if satz in NOTIZ_SAETZE:
+                notiz_aktion(*NOTIZ_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Schreibtisch ---
             if AUSLOESER not in worte:
                 continue
             for wort in worte:

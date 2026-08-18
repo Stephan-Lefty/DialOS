@@ -1240,7 +1240,27 @@ sudo cp -r /tmp/lt/LanguageTool-*/. /opt/languagetool/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-languagetool.service /etc/systemd/user/
 sudo systemctl --global enable dialos-languagetool.service
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 ```
+
+`dialos-notiz.py` reads notes out and empties them - the voice commands are
+in [sprachbefehle.en.md](sprachbefehle.en.md). Emptying asks for
+confirmation and moves the old content to `<name>-verworfen.txt` so a
+sighted helper can retrieve it.
+
+**Check words against the vocabulary before building them in, not only
+against the recognition.** The obvious command "Einkaufszettel loeschen" is
+impossible - "loeschen" is not in the small model's vocabulary, and Vosk
+drops it from the grammar SILENTLY. Vosk reports it itself:
+
+```bash
+python3 -c "import json,vosk; vosk.Model('/usr/local/share/vosk-model-de-small'); \
+  vosk.KaldiRecognizer(vosk.Model('/usr/local/share/vosk-model-de-small'),16000, \
+  json.dumps(['loeschen','[unk]']))" 2>&1 | grep -i 'missing in vocabulary'
+```
+
+Also absent: "zuruecksetzen", "aufraeumen". Present and therefore used:
+wegwerfen, leeren, erledigt.
 
 **Why a permanent service and not an invocation per sentence** (measured):
 the command-line tool needs 9.3 s per call, the first request to the running

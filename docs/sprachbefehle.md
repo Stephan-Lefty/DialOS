@@ -33,7 +33,14 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Steht schon auf Windows Desktop." |
 | „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Steht schon auf Linux Desktop." |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
-| **„diktat beenden"** | Beendet ein laufendes Diktat, schreibt die Notiz und liest sie vor. Erkannt von einem **zweiten** Erkenner mit eigener Grammatik - in der freien Erkennung des Diktats wurde der Satz zu „diktat wird erhöht" (2026-08-18). Muss die **ganze** Äußerung sein, damit man ihn in einem Brief erwähnen kann. Das Diktat selbst wird bisher von der Kommandozeile gestartet, nicht per Sprache. |
+| **„Diktat starten"** | Startet das Diktat; alles Gesprochene wird Text und landet in `~/Notizen/notizen.txt`. Es sagt „Einen Moment, ich hole Zettel und Stift." (das grosse Sprachmodell braucht rund 9 s), dann „Ich schreibe mit." |
+| **„Notiz aufnehmen"** | Gleichbedeutend mit „Diktat starten". |
+| **„Einkaufszettel aufnehmen"** | Wie oben, schreibt aber nach `~/Notizen/einkaufszettel.txt` - eine Einkaufsliste zwischen Terminen und Gedanken wäre unbrauchbar. |
+| **„Diktat beenden"** | Beendet ein laufendes Diktat, schreibt die Notiz und liest sie vor. Erkannt von einem **zweiten** Erkenner mit eigener Grammatik - in der freien Erkennung des Diktats wurde der Satz zu „diktat wird erhöht" (2026-08-18). Muss die **ganze** Äußerung sein, damit man ihn in einem Brief erwähnen kann. |
+| **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
+| **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
+| **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen?" Antwort „ja" oder „nein". Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
+| **„Einkaufszettel wegwerfen"** | Gleichbedeutend mit „Einkauf erledigt". Zwei Formulierungen für dasselbe, damit der Nutzer sich keine merken muss - wie bei „auf Linux" und „auf Gnome". |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |
 
 ## Vorgesehen, noch nicht gebaut
@@ -71,10 +78,27 @@ einmal aufgetreten ist:
   der Nutzer warten muss. Acht Sekunden Erklärung waren zu viel, ein
   einzelnes „Windows." war zu wenig: ein Stichwort, das nicht erkennbar
   zum Befehl gehört.
-- **Neue Wörter erst gegen das Modell prüfen.** Nicht jedes Wort steht im
-  Wortschatz: „gnome" wurde frei erkannt zuverlässig zu **„genug"**.
-  Prüfmethode ohne Sprechen: Piper spricht den Satz, Vosk hört zu
-  (Beispiele in `docs/sprachsteuerung.md`).
+- **Während eines Diktats gilt KEIN Befehl.** Das Diktat legt eine Marke
+  an, und der Befehlsdienst hält sich heraus, solange sie da ist. Ohne das
+  würde ein diktierter Satz auch als Befehl ausgewertet - wer „auf Windows
+  umschalten" in einen Brief diktiert, hätte danach einen anderen
+  Schreibtisch. Am 2026-08-18 mit Zeitstempeln in beiden Protokollen belegt.
+  Der einzige Satz, der ein Diktat beendet, läuft über einen eigenen
+  Erkenner.
+- **Neue Wörter erst gegen das Modell prüfen - und zwar auf ZWEI Arten.**
+  Nicht jedes Wort steht im Wortschatz: „gnome" wurde frei erkannt
+  zuverlässig zu **„genug"**.
+  - **Steht das Wort überhaupt im Wortschatz?** Vosk meldet es beim Bauen
+    der Grammatik selbst: `Ignoring word missing in vocabulary`. Das geht
+    sofort und ohne Sprechen und ist der schnellere der beiden Wege.
+    Gefunden am 2026-08-18, weil **„löschen" nicht im Wortschatz steht** -
+    Vosk hätte es still aus der Grammatik geworfen, der Befehl wäre nie
+    ausgelöst worden, und im Protokoll hätte nur „einkaufszettel"
+    gestanden. Ebenfalls nicht enthalten: „zurücksetzen", „aufräumen".
+  - **Wird der ganze Satz richtig erkannt?** Piper spricht ihn, Vosk hört
+    zu - und zwar mit der **vollständigen** Befehlsgrammatik, nicht nur mit
+    dem neuen Satz allein. Erst dann zeigt sich, ob er mit einem
+    bestehenden verwechselt wird. Beispiele in `docs/sprachsteuerung.md`.
 - **Danach neu aufnehmen.** Spricht das System selbst, steht seine eigene
   Stimme anschließend in der Aufnahme-Warteschlange. Am 2026-08-17 hat
   sich der Dienst dadurch selbst zurückgeschaltet.

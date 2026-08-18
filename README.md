@@ -107,6 +107,77 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Der Einkaufszettel lässt sich jetzt verwalten, nicht nur füllen
+  (Stephans Frage, 2026-08-18).** Er fragte: „Wenn ich heute was in den
+  Einkaufszettel schreibe, wie kann ich den jederzeit abhören, ergänzen und
+  wenn der Einkauf zuhause ist löschen?" Damit war klar, dass „aufnehmen"
+  allein zu wenig ist. Neues Skript `dialos-notiz.py`, vier neue
+  Sprachbefehle in [docs/sprachbefehle.md](docs/sprachbefehle.md).
+  - **Ergänzen brauchte kein neues Programm** - das Diktat schrieb schon
+    immer an die Datei an, nicht darüber.
+  - **Vor dem Leeren wird zurückgefragt**, nach der Projektregel für
+    unumkehrbare Befehle. Und dahinter liegt ein Netz: Der alte Inhalt
+    wandert nach `einkaufszettel-verworfen.txt`. Für den Nutzer ist der
+    Zettel weg, aber ein sehender Helfer kann ihn zurückholen - das deckt
+    genau den Fall ab, den eine Rückfrage nicht abdeckt, nämlich dass der
+    Nutzer „ja" sagt und es hinterher bedauert.
+  - **Zwei Sätze für dasselbe Leeren** (Stephans Wunsch): „Einkauf
+    erledigt" beschreibt die Situation, „Einkaufszettel wegwerfen" die
+    Handlung.
+
+- **„löschen" steht nicht im Wortschatz des Modells - und das wäre
+  lautlos schiefgegangen (2026-08-18).** Der naheliegende Befehl
+  „Einkaufszettel löschen" ist unmöglich: Vosk meldet
+  `Ignoring word missing in vocabulary: 'löschen'` und wirft das Wort still
+  aus der Grammatik. Der Befehl wäre nie ausgelöst worden, und im Protokoll
+  hätte nur „einkaufszettel" gestanden - ohne Hinweis auf die Ursache.
+  Dieselbe Falle wie „gnome" → „genug", nur leiser.
+  - **Dabei ein besseres Prüfverfahren gefunden**, das jetzt als Regel in
+    `sprachbefehle.md` steht: Vosk meldet fehlende Wörter beim **Bauen der
+    Grammatik** selbst. Das geht sofort und ohne Sprechen - der bisherige
+    Weg über Piper braucht eine halbe Minute je Satz. Ebenfalls nicht im
+    Wortschatz: „zurücksetzen", „aufräumen".
+  - **Gewählt wurden Wörter, die nachweislich drin sind:** wegwerfen,
+    leeren, erledigt, streichen, entfernen, verwerfen, abhaken.
+
+- **Ansagen werden grammatisch gebaut, nicht zusammengesetzt
+  (2026-08-18).** Beim Trockentest kam „Der einkaufszettel hat 10
+  Einträge" heraus - klein geschrieben, weil ich den Dateinamen in den Satz
+  eingebaut hatte. Bei der anderen Notiz wäre daraus „Der notizen ist leer"
+  geworden, falsches Geschlecht und falscher Numerus. Jetzt gibt es eine
+  kleine Tabelle mit Bezeichnung, Verbform und Pronomen: „Der
+  Einkaufszettel ist leer" gegen „Die Notizen sind leer", „Soll ich ihn
+  löschen?" gegen „Soll ich sie löschen?".
+  - **Für einen Nutzer, der ausschließlich zuhört, ist die Ansage der ganze
+    Text**, den er von DialOS bekommt. Ein falscher Artikel ist dort kein
+    Schönheitsfehler, sondern der Unterschied zwischen einem Programm, das
+    spricht, und einem, das Platzhalter vorliest.
+
+- **Die gelockerte Schlussregel hat sich im ersten Lauf bewährt
+  (2026-08-18).** Belegt: `Schlusssatz erkannt: 'diktat beenden beenden'` -
+  genau die Ausgabe, an der die vorherige, exakte Bedingung gescheitert
+  wäre. Vorher hatte ein Diktat deshalb sieben Minuten offen gestanden und
+  42 Einträge Raumgeräusch mitgeschrieben.
+  - **Der Fehler dahinter war keine Überraschung**, und das ist das
+    Unangenehme: Ich hatte die exakte Übereinstimmung am selben Morgen
+    selbst als Restrisiko in die Doku geschrieben - „die Bedingung ist das
+    einzige, was dazwischen steht" - und sie dann so gelassen. **Ein
+    notiertes Risiko ist kein behandeltes Risiko.**
+  - **Die neue Bedingung stammt aus den Messdaten**, nicht aus einem
+    Gefühl: Der Schluss-Erkenner lieferte in sieben Minuten Dauergerede
+    genau zwei Ergebnisse ausser „[unk]", und beide waren „beenden" -
+    jeweils, als Stephan es gesagt hat. Ein falsches Ergebnis kam nie
+    zustande. Entscheidend ist das Fehlen von „[unk]": Es kennzeichnet,
+    dass noch etwas anderes gesprochen wurde.
+
+- **Offen und ungeklärt: Zwei Diktate haben nichts aufgenommen
+  (2026-08-18, letzter Lauf des Tages).** Im Protokoll steht zwischen
+  „Modell geladen" und „Schlusssatz erkannt" keine einzige `erkannt:`-Zeile,
+  beim zweiten Lauf über 26 Sekunden hinweg. Der Einkaufszettel blieb leer,
+  und „vorlesen" und „Einkauf erledigt" wurden dadurch nie ausgeführt - das
+  Notiz-Protokoll ist leer. **Bewusst keine Vermutung festgehalten**, weil
+  keine belegt ist. Erster Punkt für den nächsten Tag.
+
 - **Das Diktat läuft - erster Anwendungs-Baustein fertig und live belegt
   (2026-08-18).** `dialos-diktat.py` nimmt auf, erkennt frei mit dem grossen
   Vosk-Modell, lässt LanguageTool die Gross- und Kleinschreibung richten und

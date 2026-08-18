@@ -52,6 +52,18 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [ ] **ZUERST MORGEN: Zwei Diktate haben nichts aufgenommen** (2026-08-18,
+  letzter Lauf). Im Protokoll `~/dialos-diktat.log` steht zwischen „grosses
+  Modell geladen" und „Schlusssatz erkannt" **keine einzige** `erkannt:`-
+  Zeile - beim zweiten Lauf über 26 Sekunden hinweg. Der Einkaufszettel
+  blieb leer, „Einkaufszettel vorlesen" und „Einkauf erledigt" wurden
+  deshalb nie ausgeführt (`~/dialos-notiz.log` ist leer). **Absichtlich
+  keine Vermutung notiert** - keine ist belegt. Was zu prüfen wäre: ob zwei
+  gleichzeitige `parec` auf derselben Quelle sich behindern (der
+  Befehlsdienst liest weiter, auch wenn er verwirft), ob der Schluss-Erkenner
+  dem grossen die Blöcke wegnimmt, und ob überhaupt gesprochen wurde -
+  vorher mit Stephan klären, was er gesagt hat.
+
 - [ ] **Anwendungen: freigegebener Umfang vom 2026-08-18.** Vollständige
   Liste mit Begründung in `docs/anwendungen.md`. Gesetzt sind Firefox,
   Thunderbird (Mail/Kalender/Kontakte), RustDesk, Shortwave (Radio),

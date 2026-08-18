@@ -1276,7 +1276,27 @@ sudo cp -r /tmp/lt/LanguageTool-*/. /opt/languagetool/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-languagetool.service /etc/systemd/user/
 sudo systemctl --global enable dialos-languagetool.service
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 ```
+
+`dialos-notiz.py` liest Notizen vor und leert sie - die Sprachbefehle dazu
+stehen in [sprachbefehle.md](sprachbefehle.md). Das Leeren fragt zurueck und
+legt den alten Inhalt nach `<name>-verworfen.txt`, damit ein sehender Helfer
+ihn zurueckholen kann.
+
+**Woerter vor dem Einbau gegen den Wortschatz pruefen, nicht nur gegen die
+Erkennung.** Der naheliegende Befehl "Einkaufszettel loeschen" ist
+unmoeglich - "loeschen" steht nicht im Wortschatz des kleinen Modells, und
+Vosk wirft es beim Bauen der Grammatik STILL hinaus. Vosk meldet das selbst:
+
+```bash
+python3 -c "import json,vosk; vosk.Model('/usr/local/share/vosk-model-de-small'); \
+  vosk.KaldiRecognizer(vosk.Model('/usr/local/share/vosk-model-de-small'),16000, \
+  json.dumps(['loeschen','[unk]']))" 2>&1 | grep -i 'missing in vocabulary'
+```
+
+Ebenfalls nicht enthalten: "zuruecksetzen", "aufraeumen". Enthalten und
+deshalb benutzt: wegwerfen, leeren, erledigt.
 
 **Warum ein dauerhafter Dienst und kein Aufruf je Satz** (gemessen): Das
 Kommandozeilenwerkzeug braucht 9,3 s je Aufruf, die erste Anfrage an den

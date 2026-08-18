@@ -84,10 +84,58 @@ PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-diktat.log")
 # erwaehnen, ohne das Diktat abzubrechen.
 SCHLUSSSATZ = "diktat beenden"
 GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, "[unk]"])
+SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
+
+
+def ist_schluss(gehoert):
+    """Beendet diese Aeusserung das Diktat?
+
+    NICHT exakte Uebereinstimmung - das war der Fehler vom 2026-08-18. Der
+    Nutzer sagte "diktat beenden", der Erkenner lieferte nur 'beenden', und
+    die exakte Bedingung wies es ab. Ergebnis: ein sieben Minuten langes
+    Diktat, das den ganzen Raum mitschrieb und nur von Hand zu stoppen war.
+
+    Die neue Bedingung ist aus den Messdaten desselben Laufs abgeleitet. Der
+    Schluss-Erkenner lieferte in sieben Minuten Dauergerede genau zwei
+    Ergebnisse ausser "[unk]", und beide waren 'beenden' - jeweils als
+    Stephan es gesagt hat. Ein falsches Ergebnis kam NIE zustande.
+
+    Deshalb: Es genuegt, wenn die Aeusserung
+      - "beenden" enthaelt,
+      - ausser Woertern des Schlusssatzes nichts weiter enthaelt, und
+      - kein "[unk]" enthaelt.
+
+    Das letzte Kriterium ist das wichtige. Beim ersten Test machte der
+    Erkenner aus "Tomaten Bananen Aepfel" ein 'beenden beenden [unk]' - mit
+    [unk] als Kennzeichen dafuer, dass da noch etwas anderes gesprochen
+    wurde. Ohne diese Bedingung waere jenes Geraeusch als Schluss
+    durchgegangen.
+    """
+    worte = gehoert.split()
+    if not worte or "[unk]" in worte:
+        return False
+    if "beenden" not in worte:
+        return False
+    return set(worte) <= SCHLUSS_WOERTER
 
 ANSAGE_BEREIT = "Ich schreibe mit."
 ANSAGE_ENDE = "Diktat beendet."
 ANSAGE_LEER = "Ich habe nichts verstanden."
+ANSAGE_ZEITGRENZE = "Ich höre auf mitzuschreiben."
+
+# Nach so langer STILLE beendet sich das Diktat von selbst (Stephan,
+# 2026-08-18, nach einem Diktat, das sieben Minuten offen blieb).
+#
+# Bewusst nach Stille und NICHT nach Laufzeit: Wer einen langen Brief
+# diktiert, darf nicht mitten im Satz unterbrochen werden. Bleibt es aber
+# zwei Minuten still, hat der Nutzer entweder das Beenden vergessen oder ist
+# gar nicht mehr da.
+#
+# Hier ist die Grenze wichtiger als bei der Befehlserkennung, obwohl sie
+# dort schon existiert: Die Befehlserkennung kennt fuenf Saetze, das Diktat
+# schreibt JEDES Wort mit - auch ein Gespraech, das gar nicht an DialOS
+# gerichtet war.
+DIKTAT_ZEITGRENZE_S = 120.0
 # "Zettel und Stift" statt "Schreibhilfe" (Stephan, 2026-08-18). Der Satz
 # deckt die rund 9 s Ladezeit des grossen Modells ab. Er erklaert dem
 # Nutzer in seiner Sprache, was gerade passiert, ohne von Modellen zu
@@ -204,6 +252,18 @@ def aufnahme_starten(quelle):
 
 # ----------------------------------------------------------------- Ablauf
 
+def aufzaehlen(zeilen):
+    """Macht aus den Eintraegen eine Aufzaehlung, die sich anhoeren laesst.
+
+    Der Punkt am Ende jedes Eintrags ist Absicht und nicht das Komma: Ein
+    Einkaufszettel ist keine Aufzaehlung in einem Satz, sondern eine Folge
+    einzelner Dinge. Piper macht am Punkt eine deutlichere Pause als am
+    Komma, und genau die braucht der Zuhoerer, um mitzuzaehlen.
+    """
+    saubern = lambda z: z.rstrip(" .,;:")
+    return " ".join(saubern(z) + "." for z in zeilen if saubern(z))
+
+
 def notiz_schreiben(name, zeilen):
     os.makedirs(NOTIZ_ORDNER, exist_ok=True)
     sicher = re.sub(r"[^\w -]", "", name).strip() or "notizen"
@@ -236,6 +296,28 @@ def main():
         melde("  (Schreibhilfe laeuft nicht - es wird klein geschrieben)")
         sprich("Die Schreibhilfe läuft nicht. Ich schreibe klein weiter.")
 
+    # DIE MARKE MUSS VOR DEM LADEN GESETZT WERDEN (Fehler vom 2026-08-18).
+    # Sie stand zuerst hinter dem Modell-Laden, und das dauert rund 9
+    # Sekunden. In dieser Zeit hoerte der Befehlsdienst noch mit - der
+    # Nutzer sagt "Diktat starten", faengt nach der Ansage an zu sprechen,
+    # und seine ersten Saetze waeren als Befehle ausgewertet worden. Genau
+    # der Fall, den die Marke verhindern soll, nur zeitversetzt.
+    #
+    # Ab hier gilt: alles bis zum Ende in try/finally, damit die Marke auch
+    # bei einem Fehler beim Laden wieder verschwindet. Eine liegengebliebene
+    # Marke wuerde die Sprachsteuerung fuer den Rest der Sitzung stumm
+    # schalten.
+    open(DIKTAT_MARKE, "w").close()
+    try:
+        return diktat_fuehren(zweck, name, quelle)
+    finally:
+        try:
+            os.unlink(DIKTAT_MARKE)
+        except OSError:
+            pass
+
+
+def diktat_fuehren(zweck, name, quelle):
     import vosk
     vosk.SetLogLevel(-1)
     # 11,6 s Ladezeit - deshalb VOR der Bereitschaftsansage laden und die
@@ -256,9 +338,9 @@ def main():
     else:
         melde("  ACHTUNG: kleines Modell fehlt - Schluss nur mit Strg+C")
 
-    open(DIKTAT_MARKE, "w").close()          # Befehlsdienst haelt sich heraus
     prozess = None
     gesammelt = []
+    letzte_aeusserung = time.time()
     try:
         erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
         schluss = (vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_SCHLUSS)
@@ -266,6 +348,13 @@ def main():
         sprich(ANSAGE_BEREIT)
         prozess = aufnahme_starten(quelle)
         while True:
+            # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
+            # bei einer, die verworfen wird - wer spricht, ist da.
+            if time.time() - letzte_aeusserung > DIKTAT_ZEITGRENZE_S:
+                melde(f"  Zeitgrenze: {DIKTAT_ZEITGRENZE_S:.0f} s ohne Aeusserung")
+                sprich(ANSAGE_ZEITGRENZE)
+                break
+
             block = prozess.stdout.read(4000)
             if not block:
                 time.sleep(0.5)
@@ -277,10 +366,11 @@ def main():
             # Erkennung muss, wo er verloren geht.
             if schluss is not None and schluss.AcceptWaveform(block):
                 gehoert = json.loads(schluss.Result()).get("text", "").strip()
-                if gehoert == SCHLUSSSATZ:
+                if ist_schluss(gehoert):
                     melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r}")
                     break
                 if gehoert:
+                    letzte_aeusserung = time.time()
                     melde(f"  (Schluss-Erkenner: {gehoert!r} - kein Schluss)")
 
             if not erkenner.AcceptWaveform(block):
@@ -288,6 +378,7 @@ def main():
             text = json.loads(erkenner.Result()).get("text", "").strip()
             if not text:
                 continue
+            letzte_aeusserung = time.time()
             melde(f"  erkannt:     {text!r}")
             if text == SCHLUSSSATZ:
                 # Kommt praktisch nie vor - die freie Erkennung trifft den
@@ -308,10 +399,6 @@ def main():
                 prozess.terminate()
             except Exception:
                 pass
-        try:
-            os.unlink(DIKTAT_MARKE)
-        except OSError:
-            pass
 
     if not gesammelt:
         sprich(ANSAGE_LEER)
@@ -320,8 +407,16 @@ def main():
     pfad = notiz_schreiben(name, gesammelt)
     melde(f"  geschrieben nach {pfad}")
     sprich(ANSAGE_ENDE)
-    # Vorlesen, was angekommen ist - der Nutzer sieht es nicht.
-    sprich("Ich habe notiert: " + " ".join(gesammelt))
+    # VORLESEN MIT SATZZEICHEN (Stephan, 2026-08-18: "Wiederholung wieder im
+    # Express"). Ohne sie hetzt Piper durch die Liste - gemessen 3,670 s
+    # gegen 4,884 s fuer denselben Text, und der Unterschied besteht
+    # ausschliesslich aus Pausen.
+    #
+    # Es war NICHT das Tempo: Speicher-Kette und speech-dispatcher-Kette
+    # liefern seit "--noise_w 0" beide 3,670 s. Vosk liefert keine
+    # Satzzeichen, aber hier braucht es keine zu erkennen - jede Aeusserung
+    # WAR ein eigener Eintrag, und genau daraus entsteht die Zeichensetzung.
+    sprich("Ich habe notiert: " + aufzaehlen(gesammelt))
     return 0
 
 
