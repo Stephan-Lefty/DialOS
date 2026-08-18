@@ -36,6 +36,35 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
   dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
   Trade-off.
+- [ ] **Anwendungen: freigegebener Umfang vom 2026-08-18.** Vollständige
+  Liste mit Begründung in `docs/anwendungen.md`. Gesetzt sind Firefox,
+  Thunderbird (Mail/Kalender/Kontakte), RustDesk, Shortwave (Radio),
+  Rhythmbox (Musik/Podcasts/Hörbücher), LibreOffice Writer (Briefe),
+  Notizen als Textdateien, Jitsi im Firefox (Videochat),
+  unattended-upgrades. Zu bauen, in dieser Reihenfolge sinnvoll:
+  - [ ] **Diktat (Sprache zu Text)** - Voraussetzung für Briefe, Notizen,
+    Mail und Chat. `vosk-model-de-big` (3,2 GB) liegt schon da; zu bauen
+    ist der Betriebsartwechsel zwischen eingeschränkter Befehlsgrammatik
+    und freiem Diktat.
+  - [ ] **Vorlesen** von Mails, Dokumenten und Webseiten.
+  - [ ] **Radio und Musik per Sprache** - Shortwave nach Stationsname,
+    Rhythmbox über `rhythmbox-client`. Dabei die Ein-Player-Regel
+    umsetzen: das eine beenden, bevor das andere startet.
+  - [ ] **Merkposition für Podcasts und Hörbücher** - Rhythmbox liefert
+    sie nicht (geprüft: kein `playback-position`, kein `bookmark`). DialOS
+    liest und setzt sie über MPRIS und muss sie ansagen können.
+  - [ ] **Post einscannen und vorlesen** - `tesseract-ocr` (5.5.0)
+    nachinstallieren, simple-scan/sane/CUPS sind da.
+  - [ ] **Wecker, Timer, Erinnerungen.**
+  - [ ] **Rechner ausschalten und sperren per Sprache**; **Termine und
+    Wetter ansagen** (Thunderbird bzw. die vorhandene Wetterabfrage).
+  - [ ] **Updates:** `unattended-upgrades` einrichten (Sicherheitsupdates
+    automatisch) und getrennt davon den Sprachbefehl mit Ja/Nein-Rückfrage
+    für alles Größere.
+  - Noch offen, nicht bauen: **Telefonie** (nach hinten gestellt, hängt an
+    der Hardware-Entscheidung), **Chat** (WhatsApp laut `telefonie.md`,
+    Bestätigung fehlt), **Videoaufnahme** (Zweck ungeklärt).
+
 - [ ] **Nächster Block: die Anwendungen** (Stephan, 2026-08-17). Bis
   hierher ging es um Grundlagen - Sprachausgabe, Erkennung, Audio-Wege,
   Desktop-Optik. Als Nächstes kommt dran, welche Programme DialOS

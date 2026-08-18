@@ -107,6 +107,97 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Der Anwendungsblock hat begonnen: festgelegt, welches Programm welchen
+  Zweck erfüllt (Stephan, 2026-08-18).** Neue Datei
+  [docs/anwendungen.md](docs/anwendungen.md) - eine Tabelle Zweck →
+  Programm mit Begründung, getrennt nach gesetzt, freigegeben-noch-nicht-
+  gebaut und offen.
+  - **Das Auswahlkriterium ist nicht Bedienbarkeit, sondern Steuerbarkeit
+    von außen.** Der Nutzer sieht den Bildschirm nicht; ein Programm, das
+    nur über seine Oberfläche zu bedienen ist, ist für DialOS wertlos -
+    auch wenn es das beste seiner Art wäre. Daran ist gleich ein
+    installiertes Programm gescheitert: `gnome-podcasts` (25.2) ist da und
+    funktioniert, hat aber keine Kommandozeile und ist damit keine Option,
+    obwohl es die naheliegende gewesen wäre.
+  - **Gesetzt:** Firefox ESR (Browser), Thunderbird (Mail, Kalender,
+    Kontakte - ein Programm für alle drei, weil jedes weitere einen
+    weiteren Satz Sprachbefehle bedeuten würde), RustDesk (Support),
+    Shortwave (Radio - wegen der Stationsdatenbank, nur damit lässt sich
+    ein gesprochener *Name* in einen Stream auflösen), Rhythmbox (Musik,
+    Podcasts, Hörbücher), LibreOffice Writer (Briefe), Jitsi im Firefox
+    (Videochat), `unattended-upgrades` plus Sprachbefehl (Updates).
+  - **Notizen bewusst ohne Programm.** Ein Einkaufszettel muss vorgelesen,
+    ergänzt und abgehakt werden, alles per Sprache - jede Oberfläche ist
+    dafür ein Umweg, den der Nutzer nie sieht. DialOS verwaltet sie als
+    `.txt` in einem Ordner: nichts zu installieren, nichts das bei einem
+    Update kaputtgeht, und der Zettel bleibt lesbar, auch wenn DialOS mal
+    nicht läuft.
+  - **Vollständig freigegeben, noch nicht gebaut** (Stephans „deine Punkte
+    müssen alle mit rein"): Diktat, Vorlesen, Post einscannen und
+    vorlesen, Hörbücher, Wecker/Timer/Erinnerungen, Ausschalten und
+    Sperren per Sprache, Termine und Wetter ansagen.
+  - **Die wichtigste Erkenntnis daraus:** Diktat und Vorlesen sind keine
+    Anwendungen, sondern Voraussetzungen für vier der obigen - Briefe,
+    Notizen, Mail und Chat kann der Nutzer ohne Diktat gar nicht erzeugen.
+    Und es ist billiger als befürchtet: **`vosk-model-de-big` mit 3,2 GB
+    liegt schon auf der Platte.** Freies Diktat braucht keine neue
+    Technik, nur den Betriebsartwechsel zwischen eingeschränkter
+    Befehlsgrammatik und freier Erkennung.
+  - **Telefonie nach hinten gestellt** (Stephans Entscheidung). Sie hängt
+    an der Hardware-Frage aus `telefonie.md`. Videochat ist davon
+    ausdrücklich **nicht** betroffen - Jitsi braucht keine zusätzliche
+    Hardware, Kamera und Mikrofon sind da und erkannt.
+  - **Offen geblieben:** Chat (WhatsApp ist in `telefonie.md` priorisiert,
+    Bestätigung für die Liste fehlt) und der Zweck der Videoaufnahme - eine
+    Videobotschaft an die Familie ist etwas anderes als „festhalten, was
+    der Handwerker gesagt hat", und davon hängt die Wahl ab.
+
+- **Zwei Regeln, die aus der Anwendungsliste folgen - beide aus einer
+  Messung, nicht aus Vorsicht (2026-08-18).**
+  - **Nur ein Player darf gleichzeitig laufen.** Sagt der Nutzer „lauter"
+    oder „stopp" und es läuft Musik in einem und ein Podcast in einem
+    anderen Programm, ist der Befehl nicht mehr eindeutig - und er kann
+    nicht nachsehen, welches Fenster vorn ist. Deshalb Rhythmbox für
+    Musik, Podcasts UND Hörbücher: Es bleiben genau zwei Player.
+  - **Die echo-bereinigte Quelle darf nie die Vorgabe-Quelle werden.**
+    Geprüft: Der Sprachdienst nimmt von `dialos_mikrofon_ohne_echo` auf,
+    Firefox von der rohen internen Quelle. Genau so muss es sein, denn
+    Firefox bringt für WebRTC seine eigene Echo-Unterdrückung mit -
+    bekäme es unsere bereinigte Quelle, liefe die Verarbeitung doppelt und
+    die Gegenseite hörte dünne, verwaschene Sprache. Es stimmt derzeit
+    nur, weil es WirePlumbers Standard ist; festgelegt hatte es niemand.
+
+- **Rhythmbox merkt die Abspielposition nicht - der Fund, der die
+  „ein Player"-Empfehlung fast gekippt hat (2026-08-18).** Stephan hat die
+  Merkposition ausdrücklich als Ausschlusskriterium genannt: Wer ein
+  achtstündiges Hörbuch nach dem Einschalten von vorn beginnen muss, hört
+  es nicht. Geprüft: Rhythmbox' Bibliothek kennt `play-count` und
+  `last-played`, aber **kein** `playback-position` und kein `bookmark`.
+  - **Die Antwort ist kein zweiter Player**, das würde die Regel oben
+    brechen, sondern: **DialOS liest die Position über MPRIS und setzt sie
+    wieder.** Die MPRIS-Erweiterung ist in Rhythmbox vorhanden, `gdbus`
+    ist installiert.
+  - **Und das ist nicht der Notbehelf, sondern die bessere Lösung.**
+    DialOS muss die Position ohnehin kennen, um sie ansagen zu können -
+    „weiter bei drei Stunden zwölf" kann kein Player für uns sprechen. Es
+    ist dieselbe Regel, die am 2026-08-17 dreimal zugeschlagen hat: nicht
+    auf den Zustand einer fremden Komponente verlassen, sondern den
+    eigenen führen.
+  - **Ein zweiter eigener Fehler beim Prüfen:** Mein erster Test war
+    `strings` auf `/usr/bin/rhythmbox` - null Treffer für „podcast", was
+    nach fehlender Unterstützung aussah. Der Test war wertlos, weil der
+    Code in der Bibliothek steckt, nicht im Startprogramm. Erst das
+    GSettings-Schema `org.gnome.rhythmbox.podcast` und die Suche in
+    `librhythmbox-core.so` haben belastbare Antworten geliefert - einmal
+    ja (Podcasts), einmal nein (Position).
+
+- **Korrektur an mir selbst: „die Paketquellen sind nicht aktuell" war
+  falsch (2026-08-18).** Ich hatte gemeldet, `apt-cache policy` liefere
+  für alles „nicht in den Quellen". Ursache war mein eigenes Suchmuster,
+  das an der deutschen Ausgabe vorbeiging. Tatsächlich verfügbar:
+  `gpodder` 3.11.3, `tesseract-ocr` 5.5.0, `playerctl` 2.4.1,
+  `unattended-upgrades` 2.12, `ffmpeg` 7.1.5.
+
 - **Eingabe und Ausgabe sind festgelegt - und die Vereinfachung löst
   gleich zwei Probleme mit, die wir sonst noch hätten lösen müssen
   (Stephans Entscheidung, 2026-08-17).** Eingabe ist **immer** das

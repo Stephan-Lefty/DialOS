@@ -105,6 +105,95 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The applications block has begun: settled which program serves which
+  purpose (Stephan, 2026-08-18).** New file
+  [docs/anwendungen.en.md](docs/anwendungen.en.md) - a table purpose →
+  program with reasoning, separated into settled, approved-not-yet-built
+  and open.
+  - **The selection criterion is not usability but controllability from
+    outside.** The user cannot see the screen; a program that can only be
+    operated through its own interface is worthless to DialOS - even if it
+    were the best of its kind. An already installed program failed on this
+    right away: `gnome-podcasts` (25.2) is present and works, but has no
+    command line and is therefore not an option, although it would have
+    been the obvious choice.
+  - **Settled:** Firefox ESR (browser), Thunderbird (mail, calendar,
+    contacts - one program for all three, because each additional one
+    would mean another set of voice commands), RustDesk (support),
+    Shortwave (radio - for the station database; only that lets a spoken
+    *name* be resolved into a stream), Rhythmbox (music, podcasts,
+    audiobooks), LibreOffice Writer (letters), Jitsi in Firefox (video
+    chat), `unattended-upgrades` plus a voice command (updates).
+  - **Notes deliberately without a program.** A shopping list must be read
+    out, added to and ticked off, all by voice - any interface is a detour
+    the user never sees. DialOS manages them as `.txt` in a folder:
+    nothing to install, nothing that breaks on an update, and the list
+    stays readable even when DialOS is not running.
+  - **Fully approved, not yet built** (Stephan's "all your points have to
+    go in"): dictation, reading out, scanning post and reading it out,
+    audiobooks, alarm/timer/reminders, shutting down and locking by voice,
+    announcing appointments and weather.
+  - **The most important insight from it:** dictation and reading out are
+    not applications but preconditions for four of the above - the user
+    cannot produce letters, notes, mail or chat messages at all without
+    dictation. And it is cheaper than feared: **`vosk-model-de-big`, 3.2
+    GB, is already on the disk.** Free dictation needs no new technology,
+    only the switch between the restricted command grammar and free
+    recognition.
+  - **Telephony deferred** (Stephan's decision). It depends on the
+    hardware question from `telefonie.en.md`. Video chat is explicitly
+    **not** affected - Jitsi needs no extra hardware, camera and
+    microphone are present and detected.
+  - **Left open:** chat (WhatsApp is prioritised in `telefonie.en.md`,
+    confirmation for the list is missing) and the purpose of video
+    recording - a video message to the family is a different thing from
+    "record what the tradesman said", and the choice depends on it.
+
+- **Two rules that follow from the application list - both from a
+  measurement, not from caution (2026-08-18).**
+  - **Only one player may run at a time.** If the user says "louder" or
+    "stop" while music plays in one program and a podcast in another, the
+    command is no longer unambiguous - and they cannot look to see which
+    window is in front. Hence Rhythmbox for music, podcasts AND
+    audiobooks: exactly two players remain.
+  - **The echo-cancelled source must never become the default source.**
+    Checked: the voice service records from `dialos_mikrofon_ohne_echo`,
+    Firefox from the raw built-in source. That is exactly how it has to
+    be, because Firefox brings its own echo cancellation for WebRTC - if
+    it got our cleaned-up source the processing would run twice and the
+    far end would hear thin, washed-out speech. It currently holds only
+    because it is WirePlumber's default; nobody had laid it down.
+
+- **Rhythmbox does not remember the playback position - the finding that
+  nearly overturned the "one player" recommendation (2026-08-18).**
+  Stephan named the resume position explicitly as disqualifying: someone
+  who has to restart an eight-hour audiobook after switching on will not
+  listen to it. Checked: Rhythmbox's library knows `play-count` and
+  `last-played`, but **no** `playback-position` and no `bookmark`.
+  - **The answer is not a second player**, that would break the rule
+    above, but: **DialOS reads the position over MPRIS and sets it
+    again.** The MPRIS extension is present in Rhythmbox, `gdbus` is
+    installed.
+  - **And that is not the workaround but the better solution.** DialOS has
+    to know the position anyway in order to announce it - "resuming at
+    three hours twelve" is not something a player can speak for us. It is
+    the same rule that struck three times on 2026-08-17: do not rely on
+    another component's state, keep your own.
+  - **A second mistake of my own while checking:** my first test was
+    `strings` on `/usr/bin/rhythmbox` - zero hits for "podcast", which
+    looked like missing support. The test was worthless, because the code
+    sits in the library, not in the launcher. Only the GSettings schema
+    `org.gnome.rhythmbox.podcast` and the search in
+    `librhythmbox-core.so` gave sound answers - once yes (podcasts), once
+    no (position).
+
+- **A correction to myself: "the package sources are not up to date" was
+  wrong (2026-08-18).** I had reported that `apt-cache policy` returned
+  "not in the sources" for everything. The cause was my own search pattern
+  missing the German output. Actually available: `gpodder` 3.11.3,
+  `tesseract-ocr` 5.5.0, `playerctl` 2.4.1, `unattended-upgrades` 2.12,
+  `ffmpeg` 7.1.5.
+
 - **Input and output are settled - and the simplification also solves two
   problems we would otherwise have had to solve (Stephan's decision,
   2026-08-17).** Input is **always** the built-in microphone, output is the

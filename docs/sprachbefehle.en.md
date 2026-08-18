@@ -12,6 +12,10 @@ translation in brackets.
 planned. Mixed together, the planned would look like the existing —
 exactly the mistake this project already had to clean up once.
 
+Which program is used for which purpose is in
+[anwendungen.en.md](anwendungen.en.md) - this file answers "which
+sentence", that one "which program".
+
 Technical background on recognition is in
 [sprachsteuerung.en.md](sprachsteuerung.en.md), the installation in
 [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md) (step 11c).

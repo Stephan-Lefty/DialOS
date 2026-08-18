@@ -39,7 +39,7 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-17)
+## Aktueller Stand (Stand: 2026-08-18)
 
 **Neu am Abend des 2026-08-16: DialOS hat seinen ersten echten
 Sprachbefehl.** `dialos-sprachbefehl-desktop.py` laeuft dauerhaft mit
@@ -208,6 +208,15 @@ Systems statt auf seine eigene letzte Wahl verliess. Deshalb prueft
 DialOS Ausgabegeraete jetzt, indem es 150 ms Stille hinschickt und
 schaut, ob der Aufruf durchlaeuft.
 
+**Welches Programm für welchen Zweck steht in
+[docs/anwendungen.md](docs/anwendungen.md)** (festgelegt mit Stephan am
+2026-08-18, als der Block „Anwendungen" begann). Dort steht auch das
+Auswahlkriterium, und das ist nicht Bedienbarkeit, sondern
+**Steuerbarkeit von außen**: Ein Programm ohne Kommandozeile oder D-Bus
+ist für DialOS wertlos, weil der Nutzer den Bildschirm nicht sieht -
+daran ist `gnome-podcasts` gescheitert, obwohl es installiert ist. Bei
+jeder neuen Anwendung gehört diese Datei mit aktualisiert.
+
 **Alle Sprachbefehle stehen in
 [docs/sprachbefehle.md](docs/sprachbefehle.md)** (Stephans Wunsch vom
 2026-08-17): eine Tabelle Befehl → Aktion, getrennt nach umgesetzt und
@@ -238,16 +247,26 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
   Mikrofon ist damit ohnehin entfallen. Interessant bleibt der Vergleich
   für die spätere Entscheidung über ein externes Mikrofon.
 
-## Nächster Schritt (Stephan, 2026-08-17)
+## Aktueller Block: die Anwendungen (seit 2026-08-18)
 
-**Morgen gehen wir an die Anwendungen.** Bis hierher ging es um die
-Grundlagen - Sprachausgabe, Spracherkennung, Audio-Wege, Desktop-Optik.
-Was DialOS an Programmen mitbringt und wie sie per Sprache bedient
-werden, ist der nächste Block. Die vorgesehenen Sprachbefehle dazu
-stehen schon in [docs/sprachbefehle.md](docs/sprachbefehle.md) in der
-Tabelle „Vorgesehen, noch nicht gebaut" (Radio/Musik, Hilfe rufen,
-Systemwartung, Telefonie) - das ist der Einstiegspunkt, nicht eine neue
-Liste.
+Bis zum 2026-08-17 ging es um die Grundlagen - Sprachausgabe,
+Spracherkennung, Audio-Wege, Desktop-Optik. Seit dem 2026-08-18 läuft der
+Anwendungsblock.
+
+**Der Umfang ist entschieden und steht in
+[docs/anwendungen.md](docs/anwendungen.md)**, die konkreten Aufgaben in
+[TODO.md](TODO.md). Nicht neu sammeln - beides ist vollständig.
+
+Sinnvolle Reihenfolge, und der erste Punkt ist kein Zufall: **Diktat und
+Vorlesen zuerst.** Sie sind keine Anwendungen, sondern Voraussetzungen für
+vier der freigegebenen - Briefe, Notizen, Mail und Chat kann der Nutzer
+ohne Diktat gar nicht erzeugen. `vosk-model-de-big` (3,2 GB) liegt schon
+auf der Platte; zu bauen ist der Wechsel zwischen eingeschränkter
+Befehlsgrammatik und freier Erkennung.
+
+**Nicht anfangen mit:** Telefonie (nach hinten gestellt, hängt an der
+Hardware-Entscheidung), Chat (WhatsApp priorisiert, Bestätigung fehlt),
+Videoaufnahme (Zweck ungeklärt).
 
 ## Arbeitsweise mit Stephan
 

@@ -10,6 +10,10 @@ versteht.
 vorgesehen ist. Vermischt sähe Geplantes wie Vorhandenes aus - genau der
 Fehler, der in diesem Projekt schon einmal aufgeräumt werden musste.
 
+Welches Programm für welchen Zweck benutzt wird, steht in
+[anwendungen.md](anwendungen.md) - diese Datei beantwortet „welcher
+Satz", jene „welches Programm".
+
 Technischer Hintergrund zur Erkennung steht in
 [sprachsteuerung.md](sprachsteuerung.md), der Einbau in
 [Debian-zu-DialOS.md](Debian-zu-DialOS.md) (Schritt 11c).

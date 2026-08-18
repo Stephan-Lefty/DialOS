@@ -37,6 +37,36 @@ what has already been done.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
+- [ ] **Applications: scope approved on 2026-08-18.** Full list with
+  reasoning in `docs/anwendungen.en.md`. Settled are Firefox, Thunderbird
+  (mail/calendar/contacts), RustDesk, Shortwave (radio), Rhythmbox
+  (music/podcasts/audiobooks), LibreOffice Writer (letters), notes as text
+  files, Jitsi in Firefox (video chat), unattended-upgrades. To build, in
+  a sensible order:
+  - [ ] **Dictation (speech to text)** - precondition for letters, notes,
+    mail and chat. `vosk-model-de-big` (3.2 GB) is already there; what has
+    to be built is switching between the restricted command grammar and
+    free dictation.
+  - [ ] **Reading out** mails, documents and web pages.
+  - [ ] **Radio and music by voice** - Shortwave by station name,
+    Rhythmbox via `rhythmbox-client`. Implement the one-player rule while
+    doing it: stop one before starting the other.
+  - [ ] **Resume position for podcasts and audiobooks** - Rhythmbox does
+    not provide it (checked: no `playback-position`, no `bookmark`). DialOS
+    reads and sets it over MPRIS and must be able to announce it.
+  - [ ] **Scanning post and reading it out** - install `tesseract-ocr`
+    (5.5.0); simple-scan/sane/CUPS are present.
+  - [ ] **Alarm, timer, reminders.**
+  - [ ] **Shutting down and locking the computer by voice**; **announcing
+    appointments and weather** (Thunderbird resp. the existing weather
+    query).
+  - [ ] **Updates:** set up `unattended-upgrades` (security updates
+    automatically) and, separately, the voice command with a yes/no
+    confirmation for anything larger.
+  - Still open, do not build: **telephony** (deferred, depends on the
+    hardware decision), **chat** (WhatsApp per `telefonie.en.md`,
+    confirmation missing), **video recording** (purpose unclear).
+
 - [ ] **Next block: the applications** (Stephan, 2026-08-17). So far it
   has been foundations - speech output, recognition, audio routing, desktop
   look. Next up is which programs DialOS ships and how they are operated
