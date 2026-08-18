@@ -105,6 +105,91 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Dictation works - the first application building block finished and
+  evidenced live (2026-08-18).** `dialos-diktat.py` records, recognizes
+  freely with the big Vosk model, has LanguageTool fix the capitalisation
+  and writes a note to `~/Notizen`. Tested in Stephan's voice: "tomaten
+  bananen äpfel" verbatim correct, turned into "Tomaten Bananen Äpfel" in
+  one second. All measurements in [docs/diktat.en.md](docs/diktat.en.md),
+  the installation in
+  [Debian-zu-DialOS.en.md](docs/Debian-zu-DialOS.en.md) step 11h.
+  - **LanguageTool built in, after measurement and with Stephan's
+    approval.** 98.1 % correct casing against 90.6 to 92.5 % for all four
+    lexical methods. It runs as a local service under systemd
+    (`Restart=on-failure`), bound to 127.0.0.1 - verified as unreachable
+    from the machine's network address. The public service at
+    languagetool.org is never used; it would send the user's letters and
+    mails to someone else's computer. Java comes as a Debian package, only
+    LanguageTool itself is a foreign package - the first in the project.
+  - **Deliberately cautious:** only pure casing corrections are applied.
+    In the test LanguageTool wanted to "improve" "milch" into "mich" - a
+    dictated text must not be altered in substance. Verified on the
+    installed script: "bitte kaufe milch" becomes "Bitte kaufe Milch".
+  - **And if the writing aid is not running**, text is still written, only
+    lowercase, with an announcement. A missing capital is a blemish, a lost
+    sentence is one too many.
+
+- **The stop phrase needed a second recognizer - my design was wrong there
+  (2026-08-18).** I had looked for "diktat beenden" in the free
+  recognition. Stephan said it; the log shows `'diktat wird erhöht'`.
+  **That was the third encounter with the same effect** - "gnome" became
+  "genug", "windows" became "sinnlose". Two would have been enough to draw
+  the rule: a *specific* sentence cannot be hit reliably in free
+  recognition.
+  - **Fixed with two recognizers over the same audio:** the big one for the
+    text, a small one with a grammar of exactly one sentence for the stop.
+    Cost 0.4 s and 229 MB against 5.5 GB - negligible. On the next run it
+    hit the sentence verbatim.
+  - **Residual risk, recorded rather than smiled away:** a grammar with
+    only one sentence tries to hear that sentence everywhere. Out of
+    "Tomaten Bananen Äpfel" the small recognizer made
+    `'beenden beenden [unk]'`. It did not stop, because an exact match is
+    required - but that condition is the only thing standing in between.
+
+- **The separation of dictation and command recognition is proven, not
+  merely intended (2026-08-18).** Stephan deliberately said "auf Windows
+  umschalten" in the middle of the dictation. The sentence landed as text in
+  the note, the desktop stayed untouched, and the command service's log
+  reads `14:55:31 Diktat laeuft - ich hoere nicht zu` through
+  `14:55:45 Diktat beendet` - with not a single recognized sentence in
+  between.
+  - **The proof took two attempts, both defeated by my own logs.** On the
+    first test the dictation wrote only to the terminal; afterwards it was
+    impossible to establish WHAT had been recognized. On the second the
+    command service had no timestamps, so it could not be shown whether its
+    recognized sentence came DURING the dictation. **A log without a clock
+    cannot evidence simultaneity** - and that was the whole point of this
+    guard. Both retrofitted.
+  - **One statement of mine was unfounded and is retracted:** after the
+    first test I reported that the separation had held. But the running
+    service had started at 13:19 while the file with the guard arrived at
+    14:32 - it did not know it at all. That nothing moved had another cause.
+
+- **Piper spoke differently every time - found because Stephan heard it
+  (2026-08-18).** His observation: the read-back note does not match the
+  tempo of the other announcements. The same text yielded 2.456 to 2.865 s
+  across five runs - **17 % spread**, without any setting having changed.
+  The cause is the random component in the VITS model's phoneme duration
+  (`--noise_w`, default 0.8). Set to 0 the output is reproducible to the
+  millisecond; Stephan decided between the variants by ear.
+  - **My first explanation was wrong and was refuted by measurement.** I had
+    suspected differing sox chains (cache versus speech-dispatcher) and
+    seemed to be right with 2.918 against 2.575 s. Passing **one** Piper
+    output through both chains yields 2.549 s either way - the difference
+    came from my having invoked Piper twice.
+  - **The announcement cache only becomes correct through this.** It freezes
+    one output; as long as Piper was rolling dice, cached sounded audibly
+    different from freshly spoken. Verified: cached file 0.939 s, freshly
+    generated 0.939 s.
+  - **And every speech-duration measurement in this project was a sample,
+    not a number.** "1.13 s for 'Ich höre.'" carried an unknown spread of up
+    to 17 %. Only now is a comparison between two settings meaningful.
+  - **Side effect: about 12 % shorter announcements** without touching the
+    tempo. "Ich höre." fell from 1.13 s to 0.939 s.
+  - **The switch is in two places** - in `piper-generic.conf` and in the
+    cache chain of `dialos-say.py`. If they diverge, cached sounds different
+    from fresh again.
+
 - **The applications block has begun: settled which program serves which
   purpose (Stephan, 2026-08-18).** New file
   [docs/anwendungen.en.md](docs/anwendungen.en.md) - a table purpose →

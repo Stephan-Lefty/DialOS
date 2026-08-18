@@ -1,0 +1,41 @@
+[Unit]
+# LanguageTool als oertlicher Dienst - er korrigiert die Gross- und
+# Kleinschreibung diktierter Texte.
+#
+# WARUM EIN DAUERHAFTER DIENST und kein Aufruf je Satz (gemessen
+# 2026-08-18): Der erste Aufruf kostet 8,8 s, das Kommandozeilenwerkzeug
+# sogar 9,3 s je Aufruf - fuer ein Diktat unbrauchbar. Laeuft er dagegen,
+# antwortet er in 0,6 bis 1,6 s je Satz.
+#
+# WARUM SYSTEMD und nicht /etc/xdg/autostart wie die uebrigen
+# DialOS-Dienste: Dieser hier ist ein Java-Server, der abstuerzen kann.
+# "Restart=on-failure" holt ihn zurueck; eine .desktop-Datei kann das
+# nicht. Fuer einen Dienst, von dem die Schreibung jedes Briefes abhaengt,
+# ist das der Unterschied zwischen einem Aussetzer und einem stillen
+# Dauerschaden.
+#
+# KEIN "--public". Ohne diesen Schalter bindet der Server auf 127.0.0.1
+# (geprueft 2026-08-18: von der Netzadresse des Rechners nicht
+# erreichbar). Mit ihm waeren die Briefe und Mails des Nutzers im ganzen
+# Netz abfragbar. Der oeffentliche Dienst von languagetool.org wird
+# ebenfalls nie benutzt - er wuerde denselben Text auf einen fremden
+# Rechner schicken.
+Description=DialOS LanguageTool (oertlich, nur 127.0.0.1)
+Documentation=file:///usr/local/share/doc/dialos/diktat.md
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/java -cp /opt/languagetool/languagetool-server.jar org.languagetool.server.HTTPServer --port 8081
+Restart=on-failure
+RestartSec=5
+# Gemessen belegt der Dienst rund 1213 MB. Die Grenze liegt bewusst
+# darueber, damit eine lange Eingabe ihn nicht faellt, aber tief genug,
+# dass ein Speicherleck nicht das ganze Geraet mitnimmt.
+MemoryMax=3G
+# Die Sprachausgabe und die Erkennung haben Vorrang - eine verzoegerte
+# Ansage merkt der Nutzer sofort, eine um 200 ms spaetere Korrektur nicht.
+Nice=5
+
+[Install]
+WantedBy=default.target

@@ -208,6 +208,135 @@ vor dem Absenden von einem sehenden Helfer prüfen lassen - die
 Fernwartung dafür ist ohnehin Teil des Systems
 ([sicherheit-datenschutz.md](sicherheit-datenschutz.md)).
 
+## Der erste Lauf mit Stephans Stimme (2026-08-18)
+
+Drei Anläufe, und jeder hat etwas anderes gezeigt. Belegt durch zwei
+Protokolle mit Zeitstempeln - `~/dialos-diktat.log` und
+`~/dialos-sprachbefehl.log`.
+
+**Die Erkennung stimmt.** „tomaten bananen äpfel" wörtlich richtig,
+inklusive Umlaut, und über LanguageTool in einer Sekunde zu „Tomaten
+Bananen Äpfel" gemacht. Das grosse Modell lädt in 8,8 bis 9,1 s statt der
+gemessenen 11,6 - beim zweiten Mal liegt die Datei im
+Dateisystem-Zwischenspeicher.
+
+**Der Schlusssatz war der eigentliche Fehler, und zwar meiner.** Ich hatte
+„diktat beenden" in der freien Erkennung gesucht. Stephan sagte es, das
+Protokoll zeigt:
+
+```
+erkannt: 'diktat wird erhöht'
+```
+
+Bei freier Erkennung hat das Modell zehntausende Möglichkeiten; ein
+BESTIMMTER Satz ist darin nicht zuverlässig zu treffen. **Das war die
+dritte Begegnung mit demselben Effekt** - „gnome" wurde zu „genug",
+„windows" zu „sinnlose", „beenden" zu „wird erhöht". Zweimal hätte es
+gereicht, um daraus die Regel zu ziehen.
+
+**Die Lösung sind zwei Erkenner über demselben Audio:** der grosse für den
+Text, ein kleiner mit einer Grammatik aus genau einem Satz für den Schluss.
+Kosten: 0,4 s Ladezeit und 229 MB - gegenüber 5,5 GB des grossen Modells
+belanglos. Im nächsten Lauf traf er den Satz wörtlich.
+
+**Restrisiko, das dabei sichtbar wurde:** Eine Grammatik mit nur einem Satz
+versucht, diesen Satz überall zu hören. Aus „Tomaten Bananen Äpfel" machte
+der kleine Erkenner `'beenden beenden [unk]'`. Gestoppt hat er nicht, weil
+exakte Übereinstimmung mit `diktat beenden` verlangt wird - aber die
+Bedingung ist das einzige, was dazwischen steht. Wer den Schlusssatz je
+ändert, muss ihn so wählen, dass er nicht aus Alltagssprache entstehen
+kann.
+
+**Die Trennung der Erkenner ist belegt, nicht nur beabsichtigt.** Stephan
+hat mitten im Diktat absichtlich „auf Windows umschalten" gesprochen. Der
+Satz landete als Text in der Notiz, der Schreibtisch blieb unberührt, und
+im Protokoll des Befehlsdienstes steht:
+
+```
+14:55:31  Diktat laeuft - ich hoere nicht zu
+14:55:45  Diktat beendet - ich hoere wieder zu
+```
+
+Zwischen diesen Zeilen kein einziger erkannter Satz.
+
+**Zwei Protokoll-Fehler von mir, beide am selben Tag und beide mit
+derselben Ursache.** Beim ersten Test schrieb das Diktat nur ins Terminal -
+hinterher war nicht mehr feststellbar, WAS erkannt worden war. Beim zweiten
+hatte der Befehlsdienst kein Zeitstempel, also liess sich nicht zeigen, ob
+sein erkannter Satz WAEHREND des Diktats kam. **Ein Protokoll ohne Uhrzeit
+kann Gleichzeitigkeit nicht belegen** - und genau darum ging es bei dieser
+Sperre die ganze Zeit. Beides ist nachgerüstet: Das Diktat protokolliert
+immer, der Befehlsdienst mit Uhrzeit.
+
+**Noch offen:** Vosk schneidet eine Äusserung erst an einer Sprechpause.
+Ohne Pause landet alles in einer Zeile - im zweiten Lauf wurde aus zwei
+Sätzen `'tomaten bananen und äpfel auf sinnlose umschalten'`. Für einen
+Einkaufszettel wäre eine Zeile je Eintrag besser. Ob sich das über die
+Pausenerkennung steuern lässt oder ob der Nutzer die Pause machen muss, ist
+nicht geprüft.
+
+## Piper sprach jedes Mal anders (gefunden 2026-08-18)
+
+Stephan hörte, dass die vorgelesene Notiz nicht zum Tempo der übrigen
+Ansagen passt. Die Ursache lag zwei Ebenen tiefer als vermutet, und meine
+erste Erklärung war falsch.
+
+**Was ich zuerst annahm:** Kurze Ansagen kommen aus dem Speicher, ein
+neuer Satz läuft über speech-dispatcher - also müssten die beiden
+sox-Ketten unterschiedliche Tempi rechnen. Die Messung schien das zu
+stützen: 2,918 s gegen 2,575 s für denselben Text.
+
+**Widerlegt durch Einzelmessung.** Mit **einer** Piper-Ausgabe durch beide
+Ketten geschickt kommt beides bei 2,549 s heraus. `pitch 1.00`, der einzige
+Unterschied, ändert die Dauer nicht. Die 13 % kamen also nicht aus den
+Ketten - sie kamen daher, dass ich Piper zweimal aufgerufen hatte.
+
+**Die eigentliche Ursache: Piper ist nicht reproduzierbar.** Derselbe Text,
+fünf Durchläufe:
+
+```
+2,575 s   2,562 s   2,865 s   2,456 s   2,628 s
+```
+
+**17 % Streuung**, ohne dass sich eine Einstellung geändert hätte. Piper
+benutzt ein VITS-Modell mit einem Zufallsanteil in der Lautdauer
+(`--noise_w`, Standard 0.8).
+
+| `--noise_w` | drei Läufe |
+|---|---|
+| 0 | 2,390 / 2,390 / **2,390 s** |
+| 0.4 | 2,470 / 2,351 / 2,430 s |
+| 0.8 (vorher) | 2,615 / 2,865 / 2,984 s |
+
+**Entschieden: `--noise_w 0`** (Stephan im Hörvergleich, jede Variante
+zweimal hintereinander gespielt, damit die Reihenfolge nicht täuscht).
+
+**Warum das mehr ist als Gleichmäßigkeit:**
+
+- **Der Ansagen-Speicher wird erst dadurch richtig.** Er friert eine
+  Ausgabe ein; solange Piper würfelte, klang eine gespeicherte Ansage
+  hörbar anders als dieselbe frisch gesprochene. Genau das hat Stephan
+  gehört. Nachgeprüft nach der Änderung: Speicher-Datei 0,939 s, frisch
+  erzeugt 0,939 s - auf die Millisekunde gleich.
+- **Alle Sprechdauer-Messungen dieses Projekts waren Stichproben, keine
+  Zahlen.** „1,13 s für ‚Ich höre.'" hatte eine unbekannte Streuung von bis
+  zu 17 %. Erst jetzt ist ein Vergleich zwischen zwei Einstellungen
+  überhaupt aussagekräftig.
+- **Nebeneffekt: rund 12 % kürzere Ansagen** ohne Eingriff ins Tempo.
+  „Ich höre." fiel von 1,13 s auf 0,939 s.
+
+**Der Schalter muss an ZWEI Stellen stehen** - in `piper-generic.conf` und
+in der Speicher-Kette von `dialos-say.py`. Stehen sie auseinander, klingt
+gespeichert wieder anders als frisch. Der Speicher entwertet sich bei einer
+Änderung von selbst, weil sein Schlüssel die Änderungszeit von
+`piper-generic.conf` enthält.
+
+**Eine Messung, die ich als untauglich verworfen habe:** Auf die Frage, ob
+es innerhalb eines Satzes schneller wird, habe ich die Wortdauern der
+ersten gegen die zweite Satzhälfte gemittelt. Das Ergebnis (zweite Hälfte
+3 bis 35 % langsamer) ist wertlos, weil die Wörter unterschiedlich lang
+sind - „ich" gegen „Kartoffeln". Es belegt weder das eine noch das andere.
+
 ## Satzzeichen
 
 Ungelöst und noch nicht gemessen. Der klassische Weg sind gesprochene

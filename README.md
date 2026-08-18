@@ -107,6 +107,96 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Das Diktat läuft - erster Anwendungs-Baustein fertig und live belegt
+  (2026-08-18).** `dialos-diktat.py` nimmt auf, erkennt frei mit dem grossen
+  Vosk-Modell, lässt LanguageTool die Gross- und Kleinschreibung richten und
+  schreibt eine Notiz nach `~/Notizen`. Mit Stephans Stimme getestet:
+  „tomaten bananen äpfel" wörtlich richtig, in einer Sekunde zu „Tomaten
+  Bananen Äpfel" gemacht. Alle Messungen in
+  [docs/diktat.md](docs/diktat.md), der Einbau in
+  [Debian-zu-DialOS.md](docs/Debian-zu-DialOS.md) Schritt 11h.
+  - **LanguageTool eingebaut, nach Messung und mit Stephans Freigabe.**
+    98,1 % richtige Schreibung gegen 90,6 bis 92,5 % aller vier
+    lexikalischen Verfahren. Es läuft als örtlicher Dienst über systemd
+    (`Restart=on-failure`), gebunden auf 127.0.0.1 - geprüft, dass es von
+    der Netzadresse des Rechners nicht erreichbar ist. Der öffentliche
+    Dienst von languagetool.org wird nie benutzt; er würde die Briefe und
+    Mails des Nutzers auf einen fremden Rechner schicken. Java kommt als
+    Debian-Paket, nur LanguageTool selbst ist ein Fremdpaket - das erste im
+    Projekt.
+  - **Bewusst vorsichtig:** Übernommen werden ausschliesslich reine
+    Schreibungs-Korrekturen. LanguageTool wollte im Test „milch" zu „mich"
+    verbessern - ein diktierter Text darf nicht inhaltlich verändert
+    werden. Gegenprobe am installierten Skript: „bitte kaufe milch" wird zu
+    „Bitte kaufe Milch".
+  - **Und wenn die Schreibhilfe nicht läuft**, wird trotzdem geschrieben,
+    nur klein, mit Ansage. Ein fehlender Grossbuchstabe ist ein
+    Schönheitsfehler, ein verlorener Satz ist einer zu viel.
+
+- **Der Schlusssatz brauchte einen zweiten Erkenner - mein Entwurf war an
+  dieser Stelle falsch gebaut (2026-08-18).** Ich hatte „diktat beenden" in
+  der freien Erkennung gesucht. Stephan sagte es, das Protokoll zeigt
+  `'diktat wird erhöht'`. **Das war die dritte Begegnung mit demselben
+  Effekt** - „gnome" wurde zu „genug", „windows" zu „sinnlose". Zweimal
+  hätte gereicht, um die Regel zu ziehen: Ein *bestimmter* Satz ist in
+  freier Erkennung nicht zuverlässig zu treffen.
+  - **Behoben mit zwei Erkennern über demselben Audio:** der grosse für den
+    Text, ein kleiner mit einer Grammatik aus genau einem Satz für den
+    Schluss. Kosten 0,4 s und 229 MB gegenüber 5,5 GB - belanglos. Im
+    nächsten Lauf traf er den Satz wörtlich.
+  - **Restrisiko, festgehalten statt weggelächelt:** Eine Grammatik mit nur
+    einem Satz versucht, diesen Satz überall zu hören. Aus „Tomaten Bananen
+    Äpfel" machte der kleine Erkenner `'beenden beenden [unk]'`. Gestoppt
+    hat er nicht, weil exakte Übereinstimmung verlangt wird - aber diese
+    Bedingung ist das einzige, was dazwischen steht.
+
+- **Die Trennung von Diktat und Befehlserkennung ist bewiesen, nicht nur
+  beabsichtigt (2026-08-18).** Stephan hat mitten im Diktat absichtlich
+  „auf Windows umschalten" gesprochen. Der Satz landete als Text in der
+  Notiz, der Schreibtisch blieb unberührt, und im Protokoll des
+  Befehlsdienstes steht `14:55:31 Diktat laeuft - ich hoere nicht zu` bis
+  `14:55:45 Diktat beendet` - dazwischen kein einziger erkannter Satz.
+  - **Der Beweis kostete zwei Anläufe, beide an meinen Protokollen
+    gescheitert.** Beim ersten Test schrieb das Diktat nur ins Terminal;
+    hinterher war nicht feststellbar, WAS erkannt worden war. Beim zweiten
+    hatte der Befehlsdienst keine Zeitstempel, also liess sich nicht
+    zeigen, ob sein erkannter Satz WÄHREND des Diktats kam. **Ein Protokoll
+    ohne Uhrzeit kann Gleichzeitigkeit nicht belegen** - und genau darum
+    ging es bei dieser Sperre. Beides nachgerüstet.
+  - **Eine Aussage von mir war dabei unbegründet und ist zurückgenommen:**
+    Ich hatte nach dem ersten Test gemeldet, die Trennung habe gehalten.
+    Der laufende Dienst startete aber um 13:19, die Datei mit der Sperre kam
+    um 14:32 - er kannte sie gar nicht. Dass sich nichts rührte, hatte einen
+    anderen Grund.
+
+- **Piper sprach jedes Mal anders - gefunden, weil Stephan es gehört hat
+  (2026-08-18).** Seine Beobachtung: Die vorgelesene Notiz passt nicht zum
+  Tempo der übrigen Ansagen. Derselbe Text ergab in fünf Durchläufen 2,456
+  bis 2,865 s - **17 % Streuung**, ohne dass sich eine Einstellung geändert
+  hatte. Ursache ist der Zufallsanteil in der Lautdauer des VITS-Modells
+  (`--noise_w`, Standard 0.8). Auf 0 gesetzt ist die Ausgabe auf die
+  Millisekunde reproduzierbar; Stephan hat die Varianten im Hörvergleich
+  entschieden.
+  - **Meine erste Erklärung war falsch und wurde durch Messung widerlegt.**
+    Ich hatte unterschiedliche sox-Ketten verdächtigt (Speicher gegen
+    speech-dispatcher) und schien mit 2,918 gegen 2,575 s recht zu haben.
+    Mit **einer** Piper-Ausgabe durch beide Ketten kommt beides bei 2,549 s
+    heraus - die Differenz kam daher, dass ich Piper zweimal aufgerufen
+    hatte.
+  - **Der Ansagen-Speicher wird erst dadurch richtig.** Er friert eine
+    Ausgabe ein; solange Piper würfelte, klang gespeichert hörbar anders als
+    frisch gesprochen. Nachgeprüft: Speicher-Datei 0,939 s, frisch erzeugt
+    0,939 s.
+  - **Und alle Sprechdauer-Messungen dieses Projekts waren Stichproben,
+    keine Zahlen.** „1,13 s für ‚Ich höre.'" hatte eine unbekannte Streuung
+    von bis zu 17 %. Erst jetzt ist ein Vergleich zwischen zwei
+    Einstellungen aussagekräftig.
+  - **Nebeneffekt: rund 12 % kürzere Ansagen** ohne Eingriff ins Tempo.
+    „Ich höre." fiel von 1,13 s auf 0,939 s.
+  - **Der Schalter steht an zwei Stellen** - in `piper-generic.conf` und in
+    der Speicher-Kette von `dialos-say.py`. Laufen sie auseinander, klingt
+    gespeichert wieder anders als frisch.
+
 - **Der Anwendungsblock hat begonnen: festgelegt, welches Programm welchen
   Zweck erfüllt (Stephan, 2026-08-18).** Neue Datei
   [docs/anwendungen.md](docs/anwendungen.md) - eine Tabelle Zweck →

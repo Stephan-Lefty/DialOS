@@ -1219,6 +1219,59 @@ full scale. `GenericVolume` is therefore ineffective - speech-dispatcher
 cannot control DialOS's volume. Anyone who needs it must put the
 attenuation **after** `norm` (`norm vol 0.70`).
 
+### 11h. Dictation and the writing aid (new 2026-08-18)
+
+The first step in the applications block. Dictation is not an application
+but the precondition for four of them - the user cannot produce letters,
+notes, mail or chat without it. All measurements and the reasoning are in
+[diktat.en.md](diktat.en.md).
+
+**Java from Debian's sources, LanguageTool by hand.** Only LanguageTool is
+a foreign package - the first in the project, and it survives no system
+update by itself.
+
+```bash
+sudo apt-get install -y openjdk-21-jre-headless
+# LanguageTool 6.6, 241 MB packed / 392 MB unpacked:
+curl -L -o /tmp/lt.zip https://languagetool.org/download/LanguageTool-stable.zip
+unzip -q /tmp/lt.zip -d /tmp/lt
+sudo mkdir -p /opt/languagetool
+sudo cp -r /tmp/lt/LanguageTool-*/. /opt/languagetool/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-languagetool.service /etc/systemd/user/
+sudo systemctl --global enable dialos-languagetool.service
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
+```
+
+**Why a permanent service and not an invocation per sentence** (measured):
+the command-line tool needs 9.3 s per call, the first request to the running
+service 8.8 s - after that 0.6 to 1.6 s. For dictation only the service is
+usable. It occupies about 1213 MB permanently.
+
+**No `--public`.** Without that switch the server binds to 127.0.0.1
+(verified: not reachable from the machine's network address). The public
+service at languagetool.org is never used - it would send the user's letters
+and mails to someone else's computer.
+
+**Two recognizers over the same audio.** The big Vosk model (5.5 GB, 8.8 s
+load time) for the text, a small one (229 MB, 0.4 s) with a grammar of
+exactly one sentence for `diktat beenden`. The reason is a fault from the
+first test: in free recognition "diktat beenden" became
+`'diktat wird erhoeht'`. A SPECIFIC sentence cannot be hit reliably in free
+recognition - the same thing that turns "gnome" into "genug" and "windows"
+into "sinnlose".
+
+**Only one may have the microphone.** `dialos-diktat.py` creates
+`$XDG_RUNTIME_DIR/dialos-diktat-aktiv`; `dialos-sprachbefehl-desktop.py`
+then keeps out and logs it. Without that a dictated sentence would also be
+evaluated as a command - dictating "auf Windows umschalten" into a letter
+would leave a different desktop behind. Evidenced live on 2026-08-18 with
+timestamps in both logs.
+
+**`--noise_w 0` in the speech chain** - see step 8 and the comment in
+`piper-generic.conf`. Without that switch Piper spoke every sentence with up
+to 17 % different duration, and a cached announcement sounded audibly
+different from the same one freshly spoken.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

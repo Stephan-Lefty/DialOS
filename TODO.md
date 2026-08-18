@@ -58,10 +58,23 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Rhythmbox (Musik/Podcasts/Hörbücher), LibreOffice Writer (Briefe),
   Notizen als Textdateien, Jitsi im Firefox (Videochat),
   unattended-upgrades. Zu bauen, in dieser Reihenfolge sinnvoll:
-  - [ ] **Diktat (Sprache zu Text)** - Voraussetzung für Briefe, Notizen,
-    Mail und Chat. `vosk-model-de-big` (3,2 GB) liegt schon da; zu bauen
-    ist der Betriebsartwechsel zwischen eingeschränkter Befehlsgrammatik
-    und freiem Diktat.
+  - [x] **Diktat (Sprache zu Text) - läuft seit 2026-08-18.**
+    `dialos-diktat.py`, live mit Stephans Stimme belegt. Details in
+    `docs/diktat.md`, Einbau in `docs/Debian-zu-DialOS.md` Schritt 11h.
+    Was daran noch fehlt:
+    - [ ] **Per Sprache startbar.** Bisher nur von der Kommandozeile. Der
+      Befehl muss aus dem Befehlsdienst heraus das Diktat starten - und
+      dabei die eigene Erkennung stilllegen, was über die Marke schon
+      funktioniert.
+    - [ ] **Satzzeichen.** Vosk liefert keine. Der klassische Weg sind
+      gesprochene Satzzeichen („Komma", „Punkt", „Absatz"); zu prüfen ist,
+      ob sie sich von gleichlautenden Wörtern im Text trennen lassen.
+    - [ ] **Eine Zeile je Eintrag.** Vosk schneidet erst an einer
+      Sprechpause; ohne Pause landet alles in einer Zeile. Für einen
+      Einkaufszettel wäre eine Zeile je Eintrag besser.
+    - [ ] **Briefe:** 98,1 % Schreibung reichen für Notizen und Mail. Für
+      einen Brief an die Krankenkasse ist zu entscheiden, ob das genügt
+      oder ob er vor dem Absenden geprüft werden muss.
   - [ ] **Vorlesen** von Mails, Dokumenten und Webseiten.
   - [ ] **Radio und Musik per Sprache** - Shortwave nach Stationsname,
     Rhythmbox über `rhythmbox-client`. Dabei die Ein-Player-Regel

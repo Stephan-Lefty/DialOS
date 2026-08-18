@@ -33,6 +33,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Steht schon auf Windows Desktop." |
 | „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Steht schon auf Linux Desktop." |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
+| **„diktat beenden"** | Beendet ein laufendes Diktat, schreibt die Notiz und liest sie vor. Erkannt von einem **zweiten** Erkenner mit eigener Grammatik - in der freien Erkennung des Diktats wurde der Satz zu „diktat wird erhöht" (2026-08-18). Muss die **ganze** Äußerung sein, damit man ihn in einem Brief erwähnen kann. Das Diktat selbst wird bisher von der Kommandozeile gestartet, nicht per Sprache. |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |
 
 ## Vorgesehen, noch nicht gebaut

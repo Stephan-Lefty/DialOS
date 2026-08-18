@@ -211,6 +211,19 @@ PEGEL_ABSTAND_S = 60.0      # hoechstens einmal pro Minute nachregeln
 DEBUG = "--debug" in sys.argv
 
 
+def melde(text):
+    """Debug-Ausgabe MIT Zeitstempel.
+
+    Der Zeitstempel ist nicht Zierde (Fehler vom 2026-08-18): Beim Test der
+    Diktat-Sperre stand im Protokoll ein erkannter Satz, und ohne Uhrzeit
+    liess sich nicht feststellen, ob er WAEHREND des Diktats kam - also ob
+    die Sperre versagt hat - oder davor. Ein Protokoll ohne Zeit kann
+    Gleichzeitigkeit nicht belegen, und genau darum ging es.
+    """
+    if DEBUG:
+        print(f"\n{time.strftime('%H:%M:%S')}  {text}", flush=True)
+
+
 def markierungsdatei():
     """Gleiche Logik wie in dialos-say.py - pro Konto privat."""
     basis = os.environ.get("XDG_RUNTIME_DIR")
@@ -221,9 +234,27 @@ def markierungsdatei():
 
 MARKIERUNG = markierungsdatei()
 
+# Marke des Diktats. Solange sie da ist, laeuft dialos-diktat.py mit freier
+# Erkennung und dem grossen Modell - dann muss DIESER Dienst schweigen.
+#
+# Der Grund ist nicht Hoeflichkeit, sondern ein echter Fehlerfall: Liefen
+# beide Erkennungen zugleich, wuerde ein diktierter Satz auch als Befehl
+# ausgewertet. Wer in einem Brief "auf windows umschalten" diktiert, haette
+# danach einen anderen Schreibtisch - und wuesste nicht, warum.
+#
+# Dasselbe Muster wie MARKIERUNG oben, und aus demselben Grund gewaehlt:
+# Eine Datei im Laufzeitverzeichnis ueberlebt keinen Neustart, kann also
+# nicht als Altlast zurueckbleiben und den Dienst dauerhaft stumm schalten.
+DIKTAT_MARKE = markierungsdatei().replace("dialos-sprachausgabe-aktiv",
+                                          "dialos-diktat-aktiv")
+
 
 def spricht_gerade():
     return os.path.exists(MARKIERUNG)
+
+
+def diktat_laeuft():
+    return os.path.exists(DIKTAT_MARKE)
 
 
 def sprich(text):
@@ -374,6 +405,9 @@ def main():
     # Merker fuer die Ansage "kein Mikrofon" - damit sie einmal kommt und
     # nicht alle fuenf Sekunden.
     mikrofon_fehlt_gemeldet = False
+    # Damit "Diktat laeuft" einmal im Protokoll steht und nicht dreimal je
+    # Sekunde. Zurueckgesetzt, sobald das Diktat vorbei ist.
+    diktat_gemeldet = False
 
     # Beim Anmelden ist die Erkennung immer AUS - vorhersagbar und sicher.
     hoert_zu = False
@@ -396,13 +430,23 @@ def main():
                 sprich(ANSAGE_ZEITGRENZE)
                 continue
 
-            # Nicht zuhoeren, solange das System selbst spricht - sonst
-            # hoert der Dienst seine eigene Ansage. Danach wird die
-            # Aufnahme verworfen und neu begonnen, siehe unten.
-            if spricht_gerade():
+            # Nicht zuhoeren, solange das System selbst spricht oder ein
+            # Diktat laeuft. Danach wird die Aufnahme verworfen und neu
+            # begonnen, siehe unten - beim Diktat ist das besonders
+            # wichtig, weil sonst der halbe diktierte Text in der
+            # Warteschlange steht und anschliessend als Befehl ausgewertet
+            # wuerde.
+            if spricht_gerade() or diktat_laeuft():
+                if diktat_laeuft() and not diktat_gemeldet:
+                    melde("Diktat laeuft - ich hoere nicht zu")
+                    diktat_gemeldet = True
                 aufnahme_verwerfen = True
                 time.sleep(WARTEN_BEIM_SPRECHEN_S)
                 continue
+
+            if diktat_gemeldet and not diktat_laeuft():
+                melde("Diktat beendet - ich hoere wieder zu")
+                diktat_gemeldet = False
 
             if aufnahme_verwerfen:
                 # Waehrend der Pause hat parec weiter aufgezeichnet - unter
@@ -430,7 +474,7 @@ def main():
                     modell, ABTASTRATE,
                     GRAMMATIK_AN if hoert_zu else GRAMMATIK_AUS)
                 if DEBUG:
-                    print("\n  (Aufnahme nach Sprechpause neu begonnen)")
+                    melde("(Aufnahme nach Sprechpause neu begonnen)")
                 continue
 
             block = prozess.stdout.read(4000)
@@ -480,7 +524,7 @@ def main():
                 if (saettigungen >= SAETTIGUNG_GRENZE
                         and time.time() - letzte_pegelkorrektur > PEGEL_ABSTAND_S):
                     if DEBUG:
-                        print("\n  (uebersteuert - Pegel wird neu gerichtet)")
+                        melde("(uebersteuert - Pegel wird neu gerichtet)")
                     pegel_richten()
                     letzte_pegelkorrektur = time.time()
                     saettigungen = 0
@@ -491,7 +535,7 @@ def main():
                 continue
             text = json.loads(erkenner.Result()).get("text", "")
             if DEBUG and text:
-                print(f"\n  erkannt: {text!r}")
+                melde(f"erkannt: {text!r}")
             if not text:
                 continue
             worte = text.split()

@@ -145,7 +145,11 @@ def speicher_fuellen(text):
         befehl = (
             f"printf %s {shlex.quote(text)} | "
             f"{shlex.quote(os.path.join(os.path.dirname(PIPER_STIMMEN), 'piper', 'piper'))} "
-            f"--model {shlex.quote(stimme)} --output_raw 2>/dev/null | "
+            # "--noise_w 0" muss hier genauso stehen wie in PIPER_CONF -
+            # sonst klingt eine gespeicherte Ansage anders als dieselbe
+            # frisch gesprochene. Genau daran ist es am 2026-08-18
+            # aufgefallen (siehe Kommentar in piper-generic.conf).
+            f"--model {shlex.quote(stimme)} --noise_w 0 --output_raw 2>/dev/null | "
             # "-t wav" ist Pflicht: sox bestimmt das Ausgabeformat sonst an
             # der Dateiendung, und die Zwischendatei heisst ".teil". Ohne
             # die Angabe bricht sox ab - der Speicher blieb dadurch beim

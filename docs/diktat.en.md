@@ -201,6 +201,128 @@ sighted helper before sending - the remote support for that is part of the
 system anyway
 ([sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)).
 
+## The first run in Stephan's voice (2026-08-18)
+
+Three attempts, each showing something different. Evidenced by two
+timestamped logs - `~/dialos-diktat.log` and `~/dialos-sprachbefehl.log`.
+
+**The recognition is right.** "tomaten bananen äpfel" verbatim correct,
+umlaut included, and turned into "Tomaten Bananen Äpfel" by LanguageTool in
+one second. The big model loads in 8.8 to 9.1 s rather than the measured
+11.6 - on the second run the file is in the filesystem cache.
+
+**The stop phrase was the real fault, and it was mine.** I had looked for
+"diktat beenden" in the free recognition. Stephan said it; the log shows:
+
+```
+erkannt: 'diktat wird erhöht'
+```
+
+In free recognition the model has tens of thousands of options; a SPECIFIC
+sentence cannot be hit reliably. **That was the third encounter with the
+same effect** - "gnome" became "genug", "windows" became "sinnlose",
+"beenden" became "wird erhöht". Two would have been enough to draw the
+rule.
+
+**The answer is two recognizers over the same audio:** the big one for the
+text, a small one with a grammar of exactly one sentence for the stop.
+Cost: 0.4 s load time and 229 MB - negligible against the big model's
+5.5 GB. On the next run it hit the sentence verbatim.
+
+**A residual risk that became visible:** a grammar with only one sentence
+tries to hear that sentence everywhere. Out of "Tomaten Bananen Äpfel" the
+small recognizer made `'beenden beenden [unk]'`. It did not stop, because
+an exact match with `diktat beenden` is required - but that condition is
+the only thing standing in between. Whoever ever changes the stop phrase
+must choose one that cannot arise from everyday speech.
+
+**The separation of the recognizers is proven, not merely intended.**
+Stephan deliberately said "auf Windows umschalten" in the middle of the
+dictation. The sentence landed as text in the note, the desktop stayed
+untouched, and the command service's log says:
+
+```
+14:55:31  Diktat laeuft - ich hoere nicht zu
+14:55:45  Diktat beendet - ich hoere wieder zu
+```
+
+Between those lines not a single recognized sentence.
+
+**Two logging mistakes of mine, both the same day and both from the same
+cause.** On the first test the dictation wrote only to the terminal -
+afterwards it was no longer possible to establish WHAT had been recognized.
+On the second the command service had no timestamps, so it could not be
+shown whether its recognized sentence came DURING the dictation. **A log
+without a clock cannot evidence simultaneity** - and that was the whole
+point of this guard. Both are retrofitted: the dictation always logs, the
+command service logs with a clock.
+
+**Still open:** Vosk only cuts an utterance at a pause in speech. Without a
+pause everything lands in one line - on the second run two sentences became
+`'tomaten bananen und äpfel auf sinnlose umschalten'`. For a shopping list
+one line per entry would be better. Whether that can be steered through
+the silence detection or whether the user has to make the pause is
+untested.
+
+## Piper spoke differently every time (found 2026-08-18)
+
+Stephan heard that the read-back note did not match the tempo of the other
+announcements. The cause lay two levels deeper than assumed, and my first
+explanation was wrong.
+
+**What I assumed first:** short announcements come from the cache, a new
+sentence goes through speech-dispatcher - so the two sox chains must
+compute different tempos. The measurement seemed to support it: 2.918 s
+against 2.575 s for the same text.
+
+**Refuted by a single measurement.** Passing **one** Piper output through
+both chains yields 2.549 s either way. `pitch 1.00`, the only difference,
+does not change the duration. So the 13 % did not come from the chains -
+they came from my having invoked Piper twice.
+
+**The real cause: Piper is not reproducible.** The same text, five runs:
+
+```
+2.575 s   2.562 s   2.865 s   2.456 s   2.628 s
+```
+
+**17 % spread**, without any setting having changed. Piper uses a VITS
+model with a random component in phoneme duration (`--noise_w`, default
+0.8).
+
+| `--noise_w` | three runs |
+|---|---|
+| 0 | 2.390 / 2.390 / **2.390 s** |
+| 0.4 | 2.470 / 2.351 / 2.430 s |
+| 0.8 (before) | 2.615 / 2.865 / 2.984 s |
+
+**Decided: `--noise_w 0`** (Stephan by ear, each variant played twice in a
+row so the order could not mislead).
+
+**Why this is more than uniformity:**
+
+- **The announcement cache only becomes correct through it.** It freezes
+  one output; as long as Piper was rolling dice, a cached announcement
+  sounded audibly different from the same one freshly spoken. That is
+  exactly what Stephan heard. Verified after the change: cached file
+  0.939 s, freshly generated 0.939 s - identical to the millisecond.
+- **Every speech-duration measurement in this project was a sample, not a
+  number.** "1.13 s for 'Ich höre.'" carried an unknown spread of up to
+  17 %. Only now is a comparison between two settings meaningful at all.
+- **Side effect: about 12 % shorter announcements** without touching the
+  tempo. "Ich höre." fell from 1.13 s to 0.939 s.
+
+**The switch must be in TWO places** - in `piper-generic.conf` and in the
+cache chain of `dialos-say.py`. If they diverge, cached sounds different
+from fresh again. The cache invalidates itself on a change, because its key
+contains the modification time of `piper-generic.conf`.
+
+**A measurement I discarded as unfit:** asked whether it speeds up within a
+sentence, I averaged word durations of the first against the second half.
+The result (second half 3 to 35 % slower) is worthless, because the words
+have different lengths - "ich" against "Kartoffeln". It evidences neither
+way.
+
 ## Punctuation
 
 Unsolved and not yet measured. The classic route is spoken punctuation

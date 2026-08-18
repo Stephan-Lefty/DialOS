@@ -58,10 +58,22 @@ what has already been done.
   (music/podcasts/audiobooks), LibreOffice Writer (letters), notes as text
   files, Jitsi in Firefox (video chat), unattended-upgrades. To build, in
   a sensible order:
-  - [ ] **Dictation (speech to text)** - precondition for letters, notes,
-    mail and chat. `vosk-model-de-big` (3.2 GB) is already there; what has
-    to be built is switching between the restricted command grammar and
-    free dictation.
+  - [x] **Dictation (speech to text) - working since 2026-08-18.**
+    `dialos-diktat.py`, evidenced live in Stephan's voice. Details in
+    `docs/diktat.en.md`, installation in `docs/Debian-zu-DialOS.en.md` step
+    11h. What is still missing:
+    - [ ] **Startable by voice.** So far only from the command line. The
+      command has to start the dictation from within the command service -
+      and silence its own recognition, which the marker already handles.
+    - [ ] **Punctuation.** Vosk delivers none. The classic route is spoken
+      punctuation ("Komma", "Punkt", "Absatz"); what needs checking is
+      whether they can be told apart from identical words in the text.
+    - [ ] **One line per entry.** Vosk only cuts at a pause in speech;
+      without a pause everything lands in one line. For a shopping list one
+      line per entry would be better.
+    - [ ] **Letters:** 98.1 % casing is enough for notes and mail. For a
+      letter to the health insurer it must be decided whether that suffices
+      or whether it has to be checked before sending.
   - [ ] **Reading out** mails, documents and web pages.
   - [ ] **Radio and music by voice** - Shortwave by station name,
     Rhythmbox via `rhythmbox-client`. Implement the one-player rule while

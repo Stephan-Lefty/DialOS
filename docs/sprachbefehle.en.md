@@ -35,6 +35,7 @@ listen?".
 | "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). Reply: "Windows Desktop." If it is already there: "Steht schon auf Windows Desktop." |
 | "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. Reply: "Linux Desktop." or "Steht schon auf Linux Desktop." |
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |
+| **"diktat beenden"** (end dictation) | Ends a running dictation, writes the note and reads it out. Recognized by a **second** recognizer with its own grammar - in the dictation's free recognition the sentence became "diktat wird erhöht" (2026-08-18). Must be the **whole** utterance so it can be mentioned inside a letter. The dictation itself is still started from the command line, not by voice. |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |
 
 ## Planned, not built yet

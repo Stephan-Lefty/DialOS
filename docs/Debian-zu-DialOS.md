@@ -1255,6 +1255,59 @@ wieder auf Vollausschlag. `GenericVolume` ist damit wirkungslos -
 speech-dispatcher kann die Lautstaerke von DialOS nicht regeln. Wer das
 braucht, muss die Daempfung **hinter** `norm` setzen (`norm vol 0.70`).
 
+### 11h. Diktat und Schreibhilfe (neu 2026-08-18)
+
+Der erste Schritt im Anwendungsblock. Diktat ist keine Anwendung, sondern
+die Voraussetzung fuer vier davon - Briefe, Notizen, Mail und Chat kann der
+Nutzer ohne es nicht erzeugen. Alle Messungen und die Begruendungen stehen
+in [diktat.md](diktat.md).
+
+**Java aus Debians Quellen, LanguageTool von Hand.** Nur LanguageTool ist
+ein Fremdpaket - das erste im Projekt, und es ueberlebt keine
+Systemaktualisierung von sich aus.
+
+```bash
+sudo apt-get install -y openjdk-21-jre-headless
+# LanguageTool 6.6, 241 MB gepackt / 392 MB entpackt:
+curl -L -o /tmp/lt.zip https://languagetool.org/download/LanguageTool-stable.zip
+unzip -q /tmp/lt.zip -d /tmp/lt
+sudo mkdir -p /opt/languagetool
+sudo cp -r /tmp/lt/LanguageTool-*/. /opt/languagetool/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-languagetool.service /etc/systemd/user/
+sudo systemctl --global enable dialos-languagetool.service
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
+```
+
+**Warum ein dauerhafter Dienst und kein Aufruf je Satz** (gemessen): Das
+Kommandozeilenwerkzeug braucht 9,3 s je Aufruf, die erste Anfrage an den
+laufenden Dienst 8,8 s - danach 0,6 bis 1,6 s. Fuer ein Diktat ist nur der
+Dienst brauchbar. Er belegt dauerhaft rund 1213 MB.
+
+**Kein `--public`.** Ohne diesen Schalter bindet der Server auf 127.0.0.1
+(geprueft: von der Netzadresse des Rechners nicht erreichbar). Der
+oeffentliche Dienst von languagetool.org wird nie benutzt - er wuerde die
+Briefe und Mails des Nutzers auf einen fremden Rechner schicken.
+
+**Zwei Erkenner ueber demselben Audio.** Das grosse Vosk-Modell (5,5 GB,
+8,8 s Ladezeit) fuer den Text, ein kleines (229 MB, 0,4 s) mit einer
+Grammatik aus genau einem Satz fuer `diktat beenden`. Der Grund ist ein
+Fehler aus dem ersten Test: In der freien Erkennung wurde "diktat beenden"
+zu `'diktat wird erhoeht'`. Ein BESTIMMTER Satz ist in freier Erkennung
+nicht zuverlaessig zu treffen - dasselbe, was "gnome" zu "genug" und
+"windows" zu "sinnlose" macht.
+
+**Nur einer darf das Mikrofon haben.** `dialos-diktat.py` legt
+`$XDG_RUNTIME_DIR/dialos-diktat-aktiv` an; `dialos-sprachbefehl-desktop.py`
+haelt sich dann heraus und schreibt es ins Protokoll. Ohne das wuerde ein
+diktierter Satz auch als Befehl ausgewertet - wer "auf Windows umschalten"
+in einen Brief diktiert, haette danach einen anderen Schreibtisch. Live
+belegt am 2026-08-18 mit Zeitstempeln in beiden Protokollen.
+
+**`--noise_w 0` in der Sprechkette** - siehe Schritt 8 und den Kommentar in
+`piper-generic.conf`. Ohne den Schalter sprach Piper jeden Satz mit bis zu
+17 % anderer Dauer, und eine gespeicherte Ansage klang hoerbar anders als
+dieselbe frisch gesprochene.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-
