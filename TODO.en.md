@@ -52,6 +52,31 @@ what has already been done.
   The address `proband@dialos.org` is ready for testing (mail server
   `s111.goserver.host`, no autoconfig records).
 
+- [ ] **Add a second voice early, the selection only at the end**
+  (Stephan's question, 2026-08-18: "When do we want to add the other voices,
+  e.g. a woman's?"). Split, because these are two different things:
+  - [ ] **Early (about an hour):** install ONE female voice
+    (`de_DE-eva_k-x_low`, `kerstin-low` or `ramona-low` - the configuration
+    already knows them, only `thorsten-high` is installed) and check exactly
+    three things that could change the architecture:
+    - **`stimmen[0]` in `dialos-say.py` line 129 is a bug** as soon as there
+      are two voices: the announcement cache takes the first file in the
+      directory, not the configured voice. It must read the configured one.
+    - **Tempo per voice?** 0.88 was chosen for Thorsten by ear. If it does
+      not fit a female voice, the tempo has to become per-voice - which
+      changes the structure of `piper-generic.conf`.
+    - **Check the pronunciation rules:** "Tas tatur" instead of "Tastatur"
+      is tuned to Thorsten. Another voice may not need the split.
+    - **Side finding:** in `piper-generic.conf` all ten German voices are
+      registered as `MALE1`, including the female ones. Selection by voice
+      type therefore does not work.
+  - [ ] **At the end:** the selection for the user - speakable by voice,
+    remembered across a restart. Needs a settings mechanism that does not
+    exist yet, and all announcements in their final state.
+  - **The justification for this split is line 129 itself:** such
+    assumptions accumulate while there is only one voice. Finding them all
+    at once at the end is the expensive way.
+
 - [ ] **FIRST THING TOMORROW: two dictations recorded nothing**
   (2026-08-18, last run). In the log `~/dialos-diktat.log` there is **not a
   single** `erkannt:` line between "grosses Modell geladen" and "Schlusssatz

@@ -52,6 +52,33 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [ ] **Zweite Stimme früh dazulegen, Auswahl erst zum Schluss**
+  (Stephans Frage, 2026-08-18: „Wann wollen wir die anderen Stimmen z.B.
+  einer Frau hinzunehmen?"). Aufgeteilt, weil beides verschiedene Dinge sind:
+  - [ ] **Früh (rund eine Stunde):** EINE weibliche Stimme installieren
+    (`de_DE-eva_k-x_low`, `kerstin-low` oder `ramona-low` - die
+    Konfiguration kennt sie schon, installiert ist nur `thorsten-high`) und
+    genau drei Dinge prüfen, die den Aufbau ändern könnten:
+    - **`stimmen[0]` in `dialos-say.py` Zeile 129 ist ein Fehler**, sobald es
+      zwei Stimmen gibt: Der Ansagen-Speicher nimmt die erste Datei im
+      Ordner, nicht die eingestellte Stimme. Muss die konfigurierte lesen.
+    - **Tempo pro Stimme?** 0,88 ist für Thorsten im Hörvergleich gewählt.
+      Passt es für eine Frauenstimme nicht, muss das Tempo pro Stimme
+      einstellbar werden - das ändert die Struktur von
+      `piper-generic.conf`.
+    - **Aussprache-Regeln prüfen:** „Tas tatur" statt „Tastatur" ist auf
+      Thorsten abgestimmt. Eine andere Stimme braucht die Trennung
+      vielleicht nicht.
+    - **Nebenbefund:** In `piper-generic.conf` sind alle zehn deutschen
+      Stimmen als `MALE1` eingetragen, auch die weiblichen. Eine Auswahl
+      über den Stimmtyp funktioniert dadurch nicht.
+  - [ ] **Zum Schluss:** die Auswahl für den Nutzer - per Sprache ansagbar,
+    über den Neustart hinweg gemerkt. Braucht eine Einstellungs-Mechanik,
+    die es noch nicht gibt, und alle Ansagen im Endzustand.
+  - **Die Begründung für diese Aufteilung ist Zeile 129 selbst:** Solche
+    Annahmen sammeln sich an, solange es nur eine Stimme gibt. Sie alle am
+    Ende gleichzeitig zu finden ist der teure Weg.
+
 - [ ] **ZUERST MORGEN: Zwei Diktate haben nichts aufgenommen** (2026-08-18,
   letzter Lauf). Im Protokoll `~/dialos-diktat.log` steht zwischen „grosses
   Modell geladen" und „Schlusssatz erkannt" **keine einzige** `erkannt:`-

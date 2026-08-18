@@ -29,6 +29,21 @@ scripts/dialos-sprachbeispiele.py
 Zusammen 63 s und rund 380 kB. OGG Vorbis, weil `sox` das ohne
 Zusatzpaket kann und WAV das Repo unnötig aufblähen würde.
 
+## Die Entwicklungsgeschichte steckt in Git
+
+Stephans Gedanke vom 2026-08-18: nachvollziehbar halten, wie sich „Michaels
+Stimme" entwickelt hat. Dafür braucht es **keinen** Ordner pro Datum - jede
+Neuerzeugung ist ein Commit, und die vorige Fassung bleibt abrufbar:
+
+```bash
+git log --oneline -- docs/sprachbeispiele/
+git show <commit>:docs/sprachbeispiele/03-sprachsteuerung-an.ogg > /tmp/alt.ogg
+```
+
+Datierte Ordner würden nur verdoppeln, was die Versionsverwaltung ohnehin
+tut - und das Repo bei jeder Änderung dauerhaft wachsen lassen statt nur um
+den Unterschied.
+
 ## Was an diesen Dateien echt ist und was nicht
 
 **Echt:** Stimme (Piper, `de_DE-thorsten-high`), Tempo (0,88), die

@@ -29,6 +29,21 @@ scripts/dialos-sprachbeispiele.py
 63 s and about 380 kB in total. OGG Vorbis, because `sox` can write it
 without an extra package and WAV would bloat the repository needlessly.
 
+## The history lives in Git
+
+Stephan's thought of 2026-08-18: keep it traceable how "Michael's voice"
+developed. That needs **no** folder per date - every regeneration is a
+commit, and the previous version stays retrievable:
+
+```bash
+git log --oneline -- docs/sprachbeispiele/
+git show <commit>:docs/sprachbeispiele/03-sprachsteuerung-an.ogg > /tmp/old.ogg
+```
+
+Dated folders would merely duplicate what version control already does - and
+grow the repository permanently on every change instead of only by the
+difference.
+
 ## What is real about these files and what is not
 
 **Real:** the voice (Piper, `de_DE-thorsten-high`), the tempo (0.88), the
