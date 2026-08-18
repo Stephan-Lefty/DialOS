@@ -108,6 +108,47 @@ Zur Testmailbox: Der Mailserver von dialos.org ist `s111.goserver.host`.
 `_autodiscover._tcp` sind alle leer), Thunderbird muss die Einstellungen
 also raten - die IMAP-/SMTP-Daten des Hosters gehören bereitgehalten.
 
+### Welchen Servernamen DialOS benutzt - und warum nicht den offensichtlichen
+
+Gemessen am 2026-08-18 an der Testmailbox. Das Zertifikat des Hosters
+lautet `CN=*.goserver.host`, die Alternativnamen sind nur
+`*.goserver.host` und `goserver.host`. **`imap.dialos.org` steht nicht
+darin.** Ergebnis mit strenger Prüfung (`ssl.create_default_context()`):
+
+| Verbindung | Ergebnis |
+|---|---|
+| `imap.dialos.org:993` | abgelehnt, Hostname passt nicht |
+| `imap.dialos.org:143` + STARTTLS | abgelehnt, derselbe Grund |
+| `s111.goserver.host:993` | **OK** |
+| `smtp.dialos.org:587` | abgelehnt |
+| `s111.goserver.host:587` + STARTTLS | **OK** |
+
+**DialOS benutzt deshalb `s111.goserver.host`.** Thunderbird läuft nur,
+weil beim Einrichten eine Zertifikats-Ausnahme bestätigt wurde - in der
+Profildatei `cert_override.txt` steht `imap.dialos.org:143`. Für eine
+Oberfläche, an der ein Mensch bewusst zustimmt, ist das in Ordnung;
+**DialOS darf diesen Weg nicht kopieren.** Eine stillschweigend
+ungeprüfte Verbindung ist für einen blinden Nutzer unsichtbar - er könnte
+nie merken, dass jemand dazwischensitzt.
+
+**Nicht fest einbauen:** `s111` ist der Name eines gemeinsam genutzten
+Servers beim Hoster und ändert sich, wenn die Mailbox umzieht. Der Name
+gehört in die Konfiguration. Er lässt sich auch aus dem MX-Eintrag der
+Domain ableiten - heute zeigt `dialos.org` MX genau auf
+`s111.goserver.host`.
+
+**Ein Gewinn nebenbei: der Server kann IDLE.** DialOS muss also nicht im
+Minutentakt nachfragen, sondern kann sich benachrichtigen lassen. „Du hast
+eine neue Mail von..." kommt dann, wenn sie ankommt, und kostet dazwischen
+keine Akkulaufzeit.
+
+**Ein eigener Fehler beim Prüfen, weil er sich wiederholen kann:** Mein
+erster Test meldete `imap.dialos.org` als in Ordnung. Ursache war, dass
+`imaplib.IMAP4_SSL` ohne ausdrücklichen `ssl_context` aufgerufen wurde -
+dann steht nicht fest, ob überhaupt geprüft wird. Bei SMTP hatte ich den
+Kontext gesetzt, und genau dort schlug es fehl; der Vergleich war also
+wertlos. **Wer TLS prüft, muss den Prüfkontext ausdrücklich übergeben.**
+
 ## Zwei Regeln, die aus dieser Liste folgen
 
 **Nur ein Player darf gleichzeitig laufen.** Sagt der Nutzer „lauter" oder

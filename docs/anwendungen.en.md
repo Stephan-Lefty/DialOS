@@ -106,6 +106,45 @@ On the test mailbox: dialos.org's mail server is `s111.goserver.host`.
 `_autodiscover._tcp` are all empty), so Thunderbird has to guess the
 settings - the host's IMAP/SMTP details should be kept at hand.
 
+### Which server name DialOS uses - and why not the obvious one
+
+Measured on 2026-08-18 against the test mailbox. The host's certificate is
+`CN=*.goserver.host`, with alternative names only `*.goserver.host` and
+`goserver.host`. **`imap.dialos.org` is not among them.** Result with
+strict verification (`ssl.create_default_context()`):
+
+| Connection | Result |
+|---|---|
+| `imap.dialos.org:993` | rejected, hostname mismatch |
+| `imap.dialos.org:143` + STARTTLS | rejected, same reason |
+| `s111.goserver.host:993` | **OK** |
+| `smtp.dialos.org:587` | rejected |
+| `s111.goserver.host:587` + STARTTLS | **OK** |
+
+**DialOS therefore uses `s111.goserver.host`.** Thunderbird only works
+because a certificate exception was confirmed during setup - the profile
+file `cert_override.txt` contains `imap.dialos.org:143`. For an interface
+where a human consciously agrees, that is fine; **DialOS must not copy
+that route.** A silently unverified connection is invisible to a blind
+user - they could never notice someone sitting in between.
+
+**Do not hardcode it:** `s111` is the name of a shared server at the host
+and changes if the mailbox is migrated. The name belongs in the
+configuration. It can also be derived from the domain's MX record - today
+`dialos.org` MX points exactly at `s111.goserver.host`.
+
+**A side benefit: the server supports IDLE.** So DialOS does not have to
+poll every minute but can be notified. "You have a new mail from..."
+arrives when it arrives, and costs no battery in between.
+
+**A mistake of my own while checking, because it can recur:** my first
+test reported `imap.dialos.org` as fine. The cause was calling
+`imaplib.IMAP4_SSL` without an explicit `ssl_context` - then it is not
+established whether verification happens at all. For SMTP I had set the
+context, and that is exactly where it failed; so the comparison was
+worthless. **Whoever tests TLS must pass the verification context
+explicitly.**
+
 ## Two rules that follow from this list
 
 **Only one player may run at a time.** If the user says "louder" or "stop"
