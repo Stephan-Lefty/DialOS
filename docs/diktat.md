@@ -134,6 +134,63 @@ Werkzeug dafür wäre also ein Fremdpaket - gegen die Linie des Projekts,
 bei Debian-Paketen zu bleiben, und deshalb eine eigene Entscheidung und
 kein Nebenschritt.
 
+### LanguageTool gemessen (2026-08-18)
+
+Auf Stephans Freigabe heruntergeladen und geprüft. LanguageTool 6.6, dazu
+`openjdk-21-jre-headless` 21.0.12 aus **Debians** Quellen - nur
+LanguageTool selbst ist ein Fremdpaket.
+
+| Verfahren | Trefferquote |
+|---|---|
+| Wortliste, nur eindeutige Substantive | 90,6 % |
+| Wortliste plus Begleiter-Regel | 92,5 % |
+| hunspell statt Wortliste | 90,6 % |
+| hunspell -m, Stamm entscheidet | 92,5 % |
+| **LanguageTool** | **52/53 = 98,1 %** |
+
+Es trifft genau die Wörter, an denen alle vier lexikalischen Verfahren
+gescheitert sind: `einkaufszettel` und `augenarzt` (zusammengesetzt) sowie
+`vertrag`, `dank` und `wetter` über eigene Regeln (`VERTRAG_SUBST`,
+`DANK_SUBST`, `ART_KLEINES_NOMEN`). Und es lässt „geehrte", „meinen",
+„gut", „nächsten" korrekt klein - die vier Wörter, die meine Regeln falsch
+großgeschrieben hatten.
+
+**Der einzige Fehler ist „butter".** In „milch butter und" steht kein
+Artikel davor, also greift `ART_KLEINES_NOMEN` nicht, und „butter" ist eine
+gültige Verbform. **Die Verfahren zu kombinieren würde es
+verschlechtern:** Die Stamm-Regel hätte „Butter" richtig, aber „meinen" und
+„gut" falsch - 52 − 2 + 1 = 51.
+
+**Ein Messfehler von mir, der die Zahl erst verfälscht hat:** Beim ersten
+Durchlauf habe ich alle vier Sätze als **einen** Text ohne Punkte
+übergeben. Damit war nur das allererste Wort ein Satzanfang, und
+„bitte"/„lieber"/„ich" konnte LanguageTool nicht großschreiben - Ergebnis
+92,5 %, also scheinbar kein Fortschritt. Die anderen vier Verfahren hatten
+die Satzanfänge selbst erledigt. Satz für Satz übergeben und den
+Satzanfang wie überall selbst gesetzt: 98,1 %. **Wer Verfahren vergleicht,
+muss ihnen dieselbe Vorarbeit geben.**
+
+**Betriebskosten, gemessen:**
+
+| | |
+|---|---|
+| Antwortzeit als Dienst | **0,6 bis 1,6 s** je Satz |
+| erste Anfrage nach dem Start | 8,8 s - der Dienst muss also laufen, nicht je Satz starten |
+| Aufruf ohne Dienst (`languagetool-commandline.jar`) | 9,3 s - für ein Diktat unbrauchbar |
+| Arbeitsspeicher des Dienstes | **1213 MB** dauerhaft |
+| Platte | 391 MB LanguageTool + 193 MB Java |
+
+**Alles lief örtlich.** Jede Anfrage ging an `http://localhost:8081`; der
+öffentliche Dienst von languagetool.org wurde nicht benutzt und darf auch
+nie benutzt werden - das wären die Briefe und Mails des Nutzers auf einem
+fremden Rechner.
+
+**Was es kostet, ehrlich benannt:** LanguageTool ist das erste Fremdpaket
+im Projekt. Es kommt nicht über `apt`, überlebt also keine
+Systemaktualisierung von sich aus und muss bei jedem Neuaufbau eines
+Geräts mitgedacht werden. 1,2 GB Arbeitsspeicher sind auf dem T490 mit
+46 GB unerheblich, auf einem kleineren Gerät nicht.
+
 ## Vorschlag: nach Verwendungszweck trennen
 
 Nicht ein Diktat für alles, sondern die Anforderung dort stellen, wo sie

@@ -129,6 +129,61 @@ would therefore be a foreign package - against the project's line of
 staying with Debian packages, and therefore a decision of its own rather
 than a side step.
 
+### LanguageTool measured (2026-08-18)
+
+Downloaded and checked on Stephan's approval. LanguageTool 6.6, plus
+`openjdk-21-jre-headless` 21.0.12 from **Debian's** sources - only
+LanguageTool itself is a foreign package.
+
+| Method | Hit rate |
+|---|---|
+| word list, unambiguous nouns only | 90.6 % |
+| word list plus determiner rule | 92.5 % |
+| hunspell instead of the word list | 90.6 % |
+| hunspell -m, stem decides | 92.5 % |
+| **LanguageTool** | **52/53 = 98.1 %** |
+
+It catches exactly the words all four lexical methods failed on:
+`einkaufszettel` and `augenarzt` (compounds) plus `vertrag`, `dank` and
+`wetter` through dedicated rules (`VERTRAG_SUBST`, `DANK_SUBST`,
+`ART_KLEINES_NOMEN`). And it correctly leaves "geehrte", "meinen", "gut",
+"nächsten" lowercase - the four words my rules capitalised wrongly.
+
+**The only error is "butter".** In "milch butter und" there is no article
+before it, so `ART_KLEINES_NOMEN` does not fire, and "butter" is a valid
+verb form. **Combining the methods would make it worse:** the stem rule
+would get "Butter" right but "meinen" and "gut" wrong - 52 − 2 + 1 = 51.
+
+**A measurement error of mine that distorted the figure at first:** on the
+first run I passed all four sentences as **one** text without full stops.
+That left only the very first word as a sentence start, so LanguageTool
+could not capitalise "bitte"/"lieber"/"ich" - result 92.5 %, apparently no
+progress at all. The other four methods had handled sentence starts
+themselves. Passed sentence by sentence with the sentence start set by us
+as everywhere else: 98.1 %. **Whoever compares methods must give them the
+same preparation.**
+
+**Operating cost, measured:**
+
+| | |
+|---|---|
+| response time as a service | **0.6 to 1.6 s** per sentence |
+| first request after start | 8.8 s - so the service must run, not start per sentence |
+| invocation without a service (`languagetool-commandline.jar`) | 9.3 s - unusable for dictation |
+| service memory | **1213 MB** resident |
+| disk | 391 MB LanguageTool + 193 MB Java |
+
+**Everything ran locally.** Every request went to
+`http://localhost:8081`; the public service at languagetool.org was not
+used and must never be - that would put the user's letters and mails on
+someone else's computer.
+
+**What it costs, named honestly:** LanguageTool is the project's first
+foreign package. It does not come through `apt`, so it survives no system
+update by itself and has to be remembered whenever a device is rebuilt.
+1.2 GB of memory is negligible on the T490 with 46 GB, but not on a smaller
+machine.
+
 ## Proposal: separate by purpose
 
 Not one dictation for everything, but the requirement placed where it
