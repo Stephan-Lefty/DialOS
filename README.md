@@ -99,6 +99,13 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 - **Android-Testgerät** für die Handy-Anbindung (USB-Tethering +
   GSConnect)
 
+## Entstehungsgeschichte
+
+Wie dieses Projekt in dreizehn Tagen entstanden ist - und welche sechs Fehler
+es dabei gelehrt hat: [docs/entstehungsgeschichte.md](docs/entstehungsgeschichte.md).
+Erzählt als Thriller, weil das Material einen Gegenspieler hat: ein System,
+das Erfolg meldet, während es versagt.
+
 ## Änderungsprotokoll
 
 ### 0.5.1
