@@ -15,18 +15,28 @@
 #          scripts/dialos-installstand.sh --befehl    (gibt den install-Befehl aus)
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
-BIN="$REPO/iso-build/config/includes.chroot/usr/local/bin"
+CHROOT="$REPO/iso-build/config/includes.chroot"
+# MEHRERE ORTE, nicht nur usr/local/bin (ergaenzt 2026-08-19). Das Skript sagte
+# "alles identisch", waehrend zwei neue Dateien in usr/local/sbin und
+# etc/sudoers.d gar nicht geprueft wurden - ein blinder Fleck in genau dem
+# Werkzeug, das blinde Flecken verhindern soll. Wer einen neuen Ort im Repo
+# anlegt, ergaenzt ihn hier.
+ORTE="usr/local/bin usr/local/sbin etc/sudoers.d etc/systemd/user usr/local/share/applications"
 abweichend=()
 fehlend=()
 
-for pfad in "$BIN"/*; do
-    datei="$(basename "$pfad")"
-    [ -f "$pfad" ] || continue
-    if [ ! -e "/usr/local/bin/$datei" ]; then
-        fehlend+=("$datei")
-    elif ! cmp -s "$pfad" "/usr/local/bin/$datei"; then
-        abweichend+=("$datei")
-    fi
+for ort in $ORTE; do
+    [ -d "$CHROOT/$ort" ] || continue
+    for pfad in "$CHROOT/$ort"/*; do
+        [ -f "$pfad" ] || continue
+        datei="$(basename "$pfad")"
+        ziel="/$ort/$datei"
+        if [ ! -e "$ziel" ]; then
+            fehlend+=("$ziel")
+        elif ! cmp -s "$pfad" "$ziel"; then
+            abweichend+=("$ziel")
+        fi
+    done
 done
 
 if [ ${#abweichend[@]} -eq 0 ] && [ ${#fehlend[@]} -eq 0 ]; then
@@ -34,21 +44,24 @@ if [ ${#abweichend[@]} -eq 0 ] && [ ${#fehlend[@]} -eq 0 ]; then
     exit 0
 fi
 
-for datei in "${abweichend[@]}"; do
-    printf '%-36s abweichend  (Repo %s, installiert %s)\n' "$datei" \
-        "$(stat -c %y "$BIN/$datei" | cut -d. -f1)" \
-        "$(stat -c %y "/usr/local/bin/$datei" | cut -d. -f1)"
+for ziel in "${abweichend[@]}"; do
+    printf '%-44s abweichend  (installiert %s)\n' "$ziel" \
+        "$(stat -c %y "$ziel" | cut -d. -f1)"
 done
-for datei in "${fehlend[@]}"; do
-    printf '%-36s NICHT installiert\n' "$datei"
+for ziel in "${fehlend[@]}"; do
+    printf '%-44s NICHT installiert\n' "$ziel"
 done
 
 if [ "$1" = "--befehl" ]; then
     echo
-    echo "sudo install -m 0755 \\"
-    for datei in "${abweichend[@]}" "${fehlend[@]}"; do
-        echo "  $BIN/$datei \\"
+    for ziel in "${abweichend[@]}" "${fehlend[@]}"; do
+        # sudoers-Dateien brauchen 0440, alles andere 0755 bzw. 0644.
+        case "$ziel" in
+            /etc/sudoers.d/*) rechte=0440 ;;
+            /etc/*)           rechte=0644 ;;
+            *)                rechte=0755 ;;
+        esac
+        echo "sudo install -m $rechte $CHROOT${ziel} $ziel"
     done
-    echo "  /usr/local/bin/"
 fi
 exit 1
