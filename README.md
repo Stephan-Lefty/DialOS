@@ -114,6 +114,36 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Die erste Korrektur jeder Sitzung war ein Muenzwurf - und die Schreibung ist
+  besser als gedacht (2026-08-19).** Der Ausfall vom Morgen ("LanguageTool nicht
+  erreichbar: timed out", 10:03:03) war kein Zufall, sondern systematisch.
+    - **Gemessen nach einem Neustart des Dienstes:** `/v2/languages` - der
+      Endpunkt, den `lt_lebt()` als "laeuft" prueft - antwortet nach **1,3 s** und
+      laedt keine Regeln. Die **erste** `/v2/check`-Anfrage kostet **9,2 s**, weil
+      dort die deutschen Regeln laden; jede weitere 1,0 s. Die Zeitgrenze im
+      Diktat liegt bei 10,0 s. **0,8 Sekunden Luft** - und an diesem Morgen hat
+      sie verloren.
+    - **Der fruehere Schluss war unvollstaendig, nicht falsch.** Die Unit
+      dokumentiert seit dem 2026-08-18 "der erste Aufruf kostet 8,8 s" und zog
+      daraus "dann eben ein Dauerdienst". Ein Dauerdienst **verschiebt** die
+      Ladezeit aber nur auf die erste Pruefanfrage.
+    - **Behoben an der Wurzel:** `dialos-schreibhilfe-warmlaufen.py` laeuft als
+      `ExecStartPost` der Unit. Belegt im Journal: `Handled request in 9096ms`
+      direkt beim Start, danach `985ms` fuer die erste echte Korrektur des
+      Diktats. Das `-` vor dem `ExecStartPost` macht ein Scheitern unschaedlich -
+      ein nicht warmgelaufener Dienst ist besser als keiner, und
+      `Restart=on-failure` darf deswegen nicht in eine Schleife geraten.
+    - **Eine Bereitschaftsmeldung, die das Falsche prueft**, war der Grund, dass
+      es niemandem auffiel: `lt_lebt()` meldet "laeuft", waehrend der Dienst fuer
+      die erste echte Anfrage noch neun Sekunden braucht.
+    - **Dazu die Schreibung selbst gemessen** - mit `schreibung_richten()` selbst,
+      nicht mit einer Nachbildung: **10 von 11** Faellen richtig. Der einzige
+      Fehlschlag ist die Wortliste ohne Grammatik; einzeln geht jedes Wort
+      richtig, und einzeln kommen sie seit dem Umbau desselben Tages. Bei Briefen
+      und Mails ist die Schreibung damit belastbar, und meine Einschaetzung vom
+      Morgen, sie sei der dringendste offene Punkt, ist zurueckgenommen: der
+      dringendere war die Ladezeit darueber.
+
 - **Der Ton-Beobachter protokollierte im Normalbetrieb nichts (2026-08-19).**
   Stephan schaltete nach dem Neustart den Bluetooth-Lautsprecher ein und meldete
   „hat funktioniert" - nachweisen konnte ich es nicht: `melde()` in

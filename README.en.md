@@ -105,6 +105,35 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The first correction of every session was a coin toss - and capitalization
+  is better than assumed (2026-08-19).** The morning failure ("LanguageTool nicht
+  erreichbar: timed out", 10:03:03) was not chance but systematic.
+    - **Measured after restarting the service:** `/v2/languages` - the endpoint
+      `lt_lebt()` checks as "running" - answers in **1.3 s** and loads no rules.
+      The **first** `/v2/check` request costs **9.2 s**, because the German rules
+      load there; every later one 1.0 s. The dictation timeout is 10.0 s. **0.8
+      seconds of headroom** - and that morning it lost.
+    - **The earlier conclusion was incomplete, not wrong.** The unit has
+      documented "the first call costs 8.8 s" since 2026-08-18 and concluded
+      "then make it a long-running service". But a long-running service only
+      **defers** the load time to the first check request.
+    - **Fixed at the root:** `dialos-schreibhilfe-warmlaufen.py` runs as the
+      unit's `ExecStartPost`. Proven in the journal: `Handled request in 9096ms`
+      right at startup, then `985ms` for the dictation's first real correction.
+      The `-` before `ExecStartPost` makes a failure harmless - a service that has
+      not warmed up is better than none, and `Restart=on-failure` must not loop
+      because of it.
+    - **A readiness check that tests the wrong thing** was why nobody noticed:
+      `lt_lebt()` reports "running" while the service still needs nine seconds for
+      the first real request.
+    - **Capitalization itself measured too** - with `schreibung_richten()` itself,
+      not a reimplementation: **10 out of 11** cases correct. The only failure is
+      the word list without grammar; individually each word comes out right, and
+      individually is how they arrive since the rebuild the same day. So
+      capitalization is dependable for letters and mails, and my morning
+      assessment that it was the most urgent open point is withdrawn: the more
+      urgent one was the load time above it.
+
 - **The audio watcher logged nothing in normal operation (2026-08-19).** After
   the reboot Stephan switched the Bluetooth speaker on and reported "it worked" -
   but I could not prove it: `melde()` in `dialos-ton-ausgabe.py` printed only

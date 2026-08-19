@@ -52,6 +52,25 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [x] **Gross-/Kleinschreibung im Diktat gemessen statt vermutet** - erledigt
+  2026-08-19. **10 von 11** Faellen richtig, gemessen mit `schreibung_richten()`
+  selbst. Der einzige Fehlschlag ist eine Wortliste ohne Grammatik
+  ("milch sechs eier butter") - dort fehlt LanguageTool der Satz, um Substantive
+  zu erkennen. Einzeln geht jedes Wort richtig, und einzeln kommen sie seit
+  demselben Tag. Bei Briefen und Mails, also ganzen Saetzen, ist die Schreibung
+  belastbar. Die fruehere Einschaetzung "dringendster offener Punkt" ist damit
+  zurueckgenommen.
+
+- [x] **Die erste Korrektur jeder Sitzung war ein Muenzwurf** - erledigt
+  2026-08-19. LanguageTools deutsche Regeln laden bei der ersten
+  **Pruefanfrage**, nicht beim Serverstart: 9,2 s gegen eine Zeitgrenze von
+  10,0 s. Am 2026-08-19 um 10:03:03 hat sie verloren. Behoben durch
+  `dialos-schreibhilfe-warmlaufen.py` als `ExecStartPost` der Unit - belegt im
+  Journal: 9096 ms beim Start, danach 985 ms fuer die erste echte Korrektur.
+  Nebenbefund: `lt_lebt()` prueft `/v2/languages` und meldet damit "laeuft",
+  waehrend der Dienst neun Sekunden braucht - eine Bereitschaftsmeldung, die
+  etwas anderes prueft als das, worauf es ankommt.
+
 - [ ] **Eintraege trennen, wenn der Nutzer ohne „und" in einem Zug spricht**
   (offen seit 2026-08-19). „Milch sechs Eier Butter" in einem Atemzug bleibt ein
   Eintrag: Vosk liefert eine Aeusserung, eine Aeusserung ist ein Eintrag.
