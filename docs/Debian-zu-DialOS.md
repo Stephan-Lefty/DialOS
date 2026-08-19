@@ -1893,6 +1893,15 @@ Entscheidung einem Menschen mit Bildschirm.
 | | `gnome-sound-recorder` | Aufnahme macht DialOS |
 | | `simple-scan` | kein Scanner im Aufbau |
 | | `shotwell` | der Bildbetrachter genügt |
+| C - entschieden 2026-08-19 | `libreoffice-calc`, `libreoffice-impress`, `libreoffice-draw`, `libreoffice-math` | festgelegt ist nur **Writer** (Briefe). Writer, `libreoffice-core` und `libreoffice-common` bleiben nachweislich unberührt - simuliert, bevor entschieden wurde. |
+
+**Bewusst NICHT entfernt**, obwohl für `nutzer` ausgeblendet: `obs-studio` und
+`gnome-snapshot` (Videoaufnahme - der Zweck ist laut
+[anwendungen.md](anwendungen.md) ungeklärt, und was nicht entschieden ist, wird
+nicht vorab weggeworfen), `yelp`, `baobab`, `gnome-software`, `seahorse` (können
+im Support helfen). `libreoffice-startcenter` bleibt ebenfalls - mit der Folge,
+dass es danach Kacheln für Programme zeigt, die es nicht mehr gibt. Für
+`dialosadmin` ein Schönheitsfehler, für `nutzer` unsichtbar.
 
 **Drei „Doppelungen" lassen sich NICHT per Paket entfernen** - aufgefallen am
 2026-08-19, weil `dpkg -S` auf die Doppelung dasselbe Paket nennt wie das
@@ -1950,6 +1959,14 @@ DialOS-Werkzeuge und RustDesk. Alles Administrative läuft auf `dialosadmin`.
 **Das hat eine Konsequenz, die bedacht sein muss:** Ein Helfer beim Kunden kann
 ohne Kontowechsel keinen Bluetooth-Lautsprecher koppeln. Die Kopplung geschieht
 im Büro (Schritt 14); für den Ausnahmefall bleibt der Wechsel zu `dialosadmin`.
+
+**Stephan hat das am 2026-08-19 so entschieden**, nachdem die Konsequenz
+benannt war - und der Grund wiegt schwerer als die Bequemlichkeit: Die
+Einstellungen sind das gefährlichste Fenster des Systems für ein Gerät, dessen
+Nutzer den Bildschirm nicht sieht. Ein Fehlklick in der Tonausgabe oder beim
+Mikrofon macht DialOS stumm oder taub, und der Nutzer hätte keine Möglichkeit,
+den Grund zu finden. Verworfen wurde auch die Zwischenlösung, nur die
+Bluetooth-Seite über einen eigenen Menüeintrag erreichbar zu machen.
 
 **Überlagerung statt Löschen:** Die Dateien in
 `~/.local/share/applications/*.desktop` mit `NoDisplay=true` überschreiben die

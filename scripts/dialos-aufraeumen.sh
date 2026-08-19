@@ -58,12 +58,27 @@ WEG_B="gnome-music gnome-podcasts totem totem-plugins gnome-contacts \
 gnome-clocks gnome-weather gnome-maps gnome-connections gnome-sound-recorder \
 simple-scan shotwell"
 
-# STUFE C: Grenzfaelle. Stephan entscheidet, ob sie dazukommen - bis dahin
-# stehen sie hier bewusst leer, damit niemand sie versehentlich mitnimmt.
-# Kandidaten: baobab gnome-snapshot gnome-software libreoffice-calc
-# libreoffice-draw libreoffice-impress libreoffice-math obs-studio seahorse
-# yelp gnome-shell-extension-prefs
-WEG_C=""
+# STUFE C: Grenzfaelle, entschieden von Stephan am 2026-08-19, nachdem die
+# Auswirkungen simuliert waren. Nur die vier LibreOffice-Teile gehen mit -
+# festgelegt ist in docs/anwendungen.md ausschliesslich WRITER (Briefe), und
+# Writer, libreoffice-core und libreoffice-common bleiben nachweislich
+# unberuehrt (simuliert am 2026-08-19: 5 Pakete, davon 4 diese und das
+# Meta-Paket "gnome").
+WEG_C="libreoffice-calc libreoffice-impress libreoffice-draw libreoffice-math"
+
+# BEWUSST NICHT ENTFERNT, obwohl sie fuer nutzer ausgeblendet sind:
+#   obs-studio, gnome-snapshot  Videoaufnahme - der Zweck ist ungeklaert
+#                               (docs/anwendungen.md). Was noch nicht
+#                               entschieden ist, wird nicht vorab weggeworfen.
+#   yelp, baobab                Admin-Werkzeuge, die im Support helfen koennen.
+#   gnome-software, seahorse    dito. gnome-keyring selbst bleibt ohnehin - es
+#                               haengt an der Anmeldung, nur die Oberflaeche
+#                               waere entbehrlich.
+#   libreoffice-startcenter     Stephan hat nur die vier Anwendungen benannt.
+#                               Folge: Das Startzentrum zeigt danach Kacheln fuer
+#                               Programme, die es nicht mehr gibt - fuer
+#                               dialosadmin ein Schoenheitsfehler, fuer nutzer
+#                               unsichtbar.
 
 # --- Was NICHT per Paket geht ----------------------------------------------
 # Drei Menue-Doppelungen stecken in Paketen, die bleiben MUESSEN:

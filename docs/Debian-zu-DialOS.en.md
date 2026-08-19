@@ -1823,6 +1823,15 @@ blind user operates alone, that decision belongs to a human with a screen.
 | | `gnome-sound-recorder` | recording is DialOS's job |
 | | `simple-scan` | no scanner in the build |
 | | `shotwell` | the image viewer is enough |
+| C - decided 2026-08-19 | `libreoffice-calc`, `libreoffice-impress`, `libreoffice-draw`, `libreoffice-math` | only **Writer** is specified (letters). Writer, `libreoffice-core` and `libreoffice-common` are demonstrably untouched - simulated before the decision. |
+
+**Deliberately NOT removed**, although hidden for `nutzer`: `obs-studio` and
+`gnome-snapshot` (video recording - the purpose is unresolved per
+[anwendungen.en.md](anwendungen.en.md), and what is not decided is not thrown
+away in advance), `yelp`, `baobab`, `gnome-software`, `seahorse` (can help during
+support). `libreoffice-startcenter` also stays - with the consequence that it
+then shows tiles for programs that no longer exist. A blemish for `dialosadmin`,
+invisible for `nutzer`.
 
 **Three "duplicates" canNOT be removed by package** - found on 2026-08-19,
 because `dpkg -S` on the duplicate names the same package as the original:
@@ -1878,6 +1887,13 @@ administrative happens on `dialosadmin`. **That has a consequence which must be
 understood:** a helper at the customer's home cannot pair a Bluetooth speaker
 without switching accounts. Pairing happens in the office (step 14); for the
 exceptional case, switching to `dialosadmin` remains.
+
+**Stephan decided this on 2026-08-19** after the consequence had been named -
+and the reason outweighs the convenience: Settings is the most dangerous window
+in the system on a device whose user cannot see the screen. One wrong click in
+audio output or the microphone leaves DialOS mute or deaf, and the user would
+have no way of finding out why. A middle option - exposing only the Bluetooth
+page through a menu entry of its own - was rejected as well.
 
 **Override instead of deletion:** files in
 `~/.local/share/applications/*.desktop` with `NoDisplay=true` override the
