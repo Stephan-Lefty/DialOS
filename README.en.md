@@ -105,6 +105,32 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The audio watcher logged nothing in normal operation (2026-08-19).** After
+  the reboot Stephan switched the Bluetooth speaker on and reported "it worked" -
+  but I could not prove it: `melde()` in `dialos-ton-ausgabe.py` printed only
+  under `--debug` and **never** wrote a file. The lines in
+  `~/dialos-ton-ausgabe.log` came from a manual run on 2026-08-17.
+    - **That hit exactly the wrong service.** Its failures were the hardest to
+      track down on 2026-08-17 ("no info came, neither on switching off nor on"),
+      and the only way to prove anything was to restart it with `--debug` - by
+      which point the state you wanted to measure was already a different one.
+    - **Fixed as with the command service that morning:** `melde()` now always
+      writes to `~/dialos-ton-ausgabe.log` with a timestamp, `--debug` prints in
+      addition. Plus a startup line, so "no line" is not indistinguishable from
+      "service not running".
+    - **And it is now the transcript's fifth source** - a change of output device
+      is the one change the user hears immediately without having caused it. Only
+      the real switch appears in the window; the raw PipeWire events and "Ausgabe
+      bleibt" stay in the log (where they proved the fault on 2026-08-17) but are
+      filtered out - PipeWire fires a dozen of them on a Bluetooth connect.
+    - **Device names are translated:** `bluez_output.41_42_AF_06_24_5C.1` becomes
+      "Bluetooth-Lautsprecher", `alsa_output.pci-...` becomes
+      "Laptop-Lautsprecher". The transcript exists to translate logs into
+      language - so that too.
+    - **A false alarm of mine, retracted:** I took a second
+      `dialos-ton-ausgabe.py` process for a duplicate watcher. It was gone
+      seconds later - a short-lived one-shot invocation that picks the sink.
+
 - **Two login announcements were running at once - the lock file sat in shared
   `/tmp` (2026-08-19).** While comparing the installed state it turned out that
   `dialos-start-ansage.py` was running **twice** (PID 5526 since 08:14, PID 19451

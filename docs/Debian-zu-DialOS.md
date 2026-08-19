@@ -1462,8 +1462,8 @@ Pegelanzeige weg und uebersetzt die Protokollzeilen in Saetze:
 17:52:41  Diktat    geschrieben: "Marisa"
 ```
 
-Sie liest **vier** Protokolle zusammen (Befehlsdienst, Diktat, Auskunft,
-Notizen) und mischt sie nach Uhrzeit. Genau dieses Zusammenfuehren hat am
+Sie liest **fünf** Protokolle zusammen (Befehlsdienst, Diktat, Auskunft,
+Notizen, Ton-Beobachter - der fünfte seit dem 2026-08-19, siehe unten) und mischt sie nach Uhrzeit. Genau dieses Zusammenfuehren hat am
 2026-08-18 den Beweis gebracht, dass Diktat und Befehlserkennung sich nicht
 ins Gehege kommen - von Hand war es muehsam. **Eigener Fehler dabei:** Erst
 gab sie Quelle fuer Quelle aus, sah dadurch chronologisch aus und war es

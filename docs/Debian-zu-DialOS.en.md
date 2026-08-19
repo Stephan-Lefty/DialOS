@@ -1420,8 +1420,8 @@ display and translates the log lines into sentences:
 17:52:41  Diktat    geschrieben: "Marisa"
 ```
 
-It reads **four** logs together (command service, dictation, information,
-notes) and merges them by time. Exactly this merging produced the proof on
+It reads **five** logs together (command service, dictation, information,
+notes, audio watcher - the fifth since 2026-08-19, see below) and merges them by time. Exactly this merging produced the proof on
 2026-08-18 that dictation and command recognition do not interfere - by hand
 it was laborious. **A mistake of my own:** at first it printed source by
 source, which looked chronological and was not. For a tool whose purpose is

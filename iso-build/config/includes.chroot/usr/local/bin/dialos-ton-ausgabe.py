@@ -64,9 +64,28 @@ ANSAGE_BLUETOOTH = "Ton über Lautsprecher."
 ANSAGE_INTERN = "Ton über Laptop."
 
 
+# PROTOKOLL IMMER SCHREIBEN, nicht nur mit --debug (2026-08-19). Bis dahin gab
+# melde() nur bei --debug etwas aus und schrieb nie eine Datei. Die Folge:
+# Genau der Dienst, dessen Ausfaelle am 2026-08-17 am schwersten zu finden waren
+# ("es kam keine Info weder beim Aus- noch beim Einschalten"), hinterliess im
+# Normalbetrieb keine Spur. Nachweisen liess sich etwas nur, indem man ihn von
+# Hand mit --debug neu startete - und damit war der Zustand, den man messen
+# wollte, schon wieder ein anderer.
+#
+# Dieselbe Umstellung wie am Morgen des 2026-08-19 beim Befehlsdienst, aus
+# demselben Grund: Ein Protokoll, das erst auf Zuruf entsteht, ist beim
+# unerwarteten Fehler nicht da - und nur den gibt es.
+PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-ton-ausgabe.log")
+
+
 def melde(text):
     if DEBUG:
         print(text, flush=True)
+    try:
+        with open(PROTOKOLL, "a", encoding="utf-8") as f:
+            f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")
+    except OSError:
+        pass          # ein fehlendes Protokoll darf den Ton nicht aufhalten
 
 
 def sprich(text):
@@ -196,6 +215,10 @@ def vorgabe():
 
 def main():
     testton_anlegen()
+
+    # Startzeile, damit ein leeres Protokoll nicht zweideutig ist: sonst ist
+    # "keine Zeile" ununterscheidbar von "Dienst laeuft nicht".
+    melde("=== Ton-Beobachter gestartet ===")
 
     # Erste Wahl STUMM - beim Anmelden hat niemand etwas umgeschaltet.
     melde("Erste Wahl beim Anmelden (ohne Ansage):")

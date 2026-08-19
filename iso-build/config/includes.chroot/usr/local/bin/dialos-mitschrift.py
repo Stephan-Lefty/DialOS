@@ -72,13 +72,25 @@ QUELLEN = {
     "Diktat":   os.path.join(HEIM, "dialos-diktat.log"),
     "Auskunft": os.path.join(HEIM, "dialos-auskunft.log"),
     "Notiz":    os.path.join(HEIM, "dialos-notiz.log"),
+    # Fuenfte Quelle seit dem 2026-08-19: der Ton-Beobachter. Er schreibt erst
+    # seit diesem Tag ueberhaupt ein Protokoll - und er gehoert hierher, weil
+    # ein Wechsel des Ausgabegeraets die eine Aenderung ist, die der Nutzer
+    # sofort hoert, ohne sie ausgeloest zu haben.
+    "Ausgabe":  os.path.join(HEIM, "dialos-ton-ausgabe.log"),
 }
 
 # Zeilen, die niemanden interessieren. Die Pegelanzeige ist eine laufende
 # Messung fuers Entwickeln. Und "=== vorlesen einkaufszettel ===" ist die
 # Kopfzeile von dialos-notiz.py: dieselbe Aussage wie die uebersetzte Zeile des
 # Befehlsdienstes unmittelbar davor, nur unuebersetzt (2026-08-19).
-VERWERFEN = re.compile(r'^\s*(Pegel\s|=== (vorlesen|loeschen) \w+ ===|$)')
+VERWERFEN = re.compile(
+    r'^\s*(Pegel\s'
+    r'|=== (vorlesen|loeschen) \w+ ==='
+    # Rohe PipeWire-Ereignisse und "nichts geaendert" - im Protokoll wertvoll
+    # (sie haben am 2026-08-17 den Fehler bewiesen), im Fenster nur Rauschen.
+    r"|Ereignis: Event "
+    r'|Ausgabe bleibt: '
+    r'|$)')
 
 # Uebersetzungen. Links steht, was im Protokoll steht, rechts, was ein
 # Zuschauer lesen soll - in dieser Reihenfolge geprueft.
@@ -98,6 +110,13 @@ UEBERSETZUNG = [
     (re.compile(r"Zeitgrenze: (\d+) s ohne Befehl"),
      "Zeitgrenze: {} s ohne Befehl - Sprachsteuerung schaltet ab"),
     (re.compile(r"Mitschrift wird geschlossen.*"), "Mitschrift wird geschlossen"),
+    # Ton-Beobachter. Nur der echte Wechsel gehoert ins Fenster; "Ausgabe
+    # bleibt" und die rohen PipeWire-Ereignisse stehen im Protokoll und werden
+    # unten verworfen - bei einem Bluetooth-Verbindungsaufbau feuert PipeWire
+    # ein Dutzend davon.
+    (re.compile(r"Ausgabe: (\S+) -> (\S+)"), "Ton wechselt: {0} -> {1}"),
+    (re.compile(r"=== Ton-Beobachter gestartet ==="), "Ton-Beobachter gestartet"),
+    (re.compile(r"Erste Wahl beim Anmelden.*"), "Erste Wahl beim Anmelden"),
     (re.compile(r"grosses Modell geladen in (.+)"),     "Sprachmodell geladen ({})"),
     (re.compile(r"kleines Modell fuer den Schlusssatz in (.+)"), "Schluss-Erkenner bereit ({})"),
     (re.compile(r"=== Diktat gestartet \((.+?),\s*(.+?)\).*"), "Diktat läuft ({1})"),
@@ -109,6 +128,18 @@ UEBERSETZUNG = [
     (re.compile(r"vorlesen: (\d+) Eintraege.*"),        "liest {} Einträge vor"),
     (re.compile(r"geleert: (.+?),.*"),                  "geleert: {}"),
     (re.compile(r"Antwort gehoert: '(.+)'"),            "Antwort gehört: \u201e{}\u201c"),
+]
+
+# Geraetenamen von PipeWire sind fuer einen Zuschauer unlesbar
+# ("bluez_output.41_42_AF_06_24_5C.1"). Die Mitschrift ist dazu da, Protokoll in
+# Sprache zu uebersetzen - dann auch das. Ersetzt wird VOR der
+# Uebersetzungstabelle, damit jede Zeile davon profitiert und nicht nur die eine.
+GERAETENAMEN = [
+    (re.compile(r'bluez_output\.\S+'), "Bluetooth-Lautsprecher"),
+    (re.compile(r'bluez_input\.\S+'), "Bluetooth-Mikrofon"),
+    (re.compile(r'alsa_output\.\S+'), "Laptop-Lautsprecher"),
+    (re.compile(r'alsa_input\.\S+'), "eingebautes Mikrofon"),
+    (re.compile(r'dialos_mikrofon_ohne_echo'), "eingebautes Mikrofon (ohne Echo)"),
 ]
 
 ZEIT = re.compile(r'^(\d\d:\d\d:\d\d)\s+(.*)$')
@@ -174,6 +205,8 @@ STAND = {"zusammenhang": ZUSAMMENHANG_GRUND, "inhalte": 0}
 
 
 def uebersetzen(rohtext):
+    for muster, name in GERAETENAMEN:
+        rohtext = muster.sub(name, rohtext)
     for muster, form in UEBERSETZUNG:
         m = muster.search(rohtext)
         if m:

@@ -114,6 +114,35 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Der Ton-Beobachter protokollierte im Normalbetrieb nichts (2026-08-19).**
+  Stephan schaltete nach dem Neustart den Bluetooth-Lautsprecher ein und meldete
+  „hat funktioniert" - nachweisen konnte ich es nicht: `melde()` in
+  `dialos-ton-ausgabe.py` gab nur bei `--debug` etwas aus und schrieb **nie** eine
+  Datei. Die Zeilen in `~/dialos-ton-ausgabe.log` stammten von einem Handlauf am
+  2026-08-17.
+    - **Das traf genau den falschen Dienst.** Seine Ausfälle waren am 2026-08-17
+      die am schwersten zu findenden („es kam keine Info weder beim Aus- noch beim
+      Einschalten"), und nachweisen ließ sich etwas nur, indem man ihn mit
+      `--debug` neu startete - womit der Zustand, den man messen wollte, schon
+      ein anderer war.
+    - **Behoben wie am Morgen beim Befehlsdienst:** `melde()` schreibt jetzt
+      immer mit Zeitstempel nach `~/dialos-ton-ausgabe.log`, `--debug` gibt
+      zusätzlich aus. Dazu eine Startzeile, damit „keine Zeile" nicht
+      ununterscheidbar von „Dienst läuft nicht" ist.
+    - **Und er ist jetzt die fünfte Quelle der Mitschrift** - ein Wechsel des
+      Ausgabegeräts ist die eine Änderung, die der Nutzer sofort hört, ohne sie
+      ausgelöst zu haben. Im Fenster erscheint nur der echte Wechsel; die rohen
+      PipeWire-Ereignisse und „Ausgabe bleibt" bleiben im Protokoll (dort haben
+      sie am 2026-08-17 den Fehler bewiesen), werden aber ausgefiltert - bei
+      einem Bluetooth-Verbindungsaufbau feuert PipeWire ein Dutzend davon.
+    - **Gerätenamen werden übersetzt:** aus
+      `bluez_output.41_42_AF_06_24_5C.1` wird „Bluetooth-Lautsprecher", aus
+      `alsa_output.pci-...` „Laptop-Lautsprecher". Die Mitschrift ist dazu da,
+      Protokoll in Sprache zu übersetzen - dann auch das.
+    - **Falscher Alarm dabei, den ich zurückziehe:** Ich hielt einen zweiten
+      `dialos-ton-ausgabe.py`-Prozess für einen doppelten Beobachter. Er war
+      Sekunden später weg - ein kurzlebiger Einzelaufruf, der die Senke wählt.
+
 - **Zwei Start-Ansagen liefen gleichzeitig - die Sperrdatei lag im geteilten
   `/tmp` (2026-08-19).** Beim Vergleich des Installationsstands fiel auf, dass
   `dialos-start-ansage.py` **zweimal** lief (PID 5526 seit 08:14, PID 19451 seit
