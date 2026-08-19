@@ -106,16 +106,6 @@ es dabei gelehrt hat: [docs/entstehungsgeschichte.md](docs/entstehungsgeschichte
 Erzählt als Thriller, weil das Material einen Gegenspieler hat: ein System,
 das Erfolg meldet, während es versagt.
 
-## Lizenz
-
-[Apache-Lizenz 2.0](LICENSE) – Copyright 2026 Stephan Rösner.
-
-Betrifft die Skripte, Konfigurationen und die Dokumentation dieses
-Projekts. Die eingesetzten Fremdbestandteile – Debian, GNOME, Piper,
-Vosk und jedes weitere installierte Paket – behalten ihre jeweils
-eigene Lizenz. Dieselbe Lizenz gilt für den Handy-Ableger
-[DialOS Mobil](https://github.com/Stephan-Lefty/DialOS-Mobil).
-
 ## Änderungsprotokoll
 
 ### 0.5.1
@@ -123,17 +113,6 @@ eigene Lizenz. Dieselbe Lizenz gilt für den Handy-Ableger
 *In Arbeit seit 2026-08-17. Alles, was ab jetzt entsteht, wird hier
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
-
-- **Lizenz festgelegt: Apache 2.0 (2026-08-19).** DialOS lag bis dahin ohne
-  Lizenz öffentlich auf GitHub - damit galt volles Urheberrecht und niemand
-  hätte die Skripte offiziell nachnutzen dürfen, was dem Zweck des Projekts
-  widerspricht. Apache 2.0 statt MIT, weil sie eine ausdrückliche
-  Patenterteilung enthält und weil es dieselbe Lizenz ist wie die von Vosk,
-  das hier die Spracherkennung stellt. Betroffen sind die eigenen Skripte,
-  Konfigurationen und die Dokumentation; Debian, GNOME, Piper und die
-  übrigen installierten Pakete behalten ihre eigenen Lizenzen. Dieselbe
-  Lizenz gilt für den Handy-Ableger
-  [DialOS Mobil](https://github.com/Stephan-Lefty/DialOS-Mobil).
 
 - **Die erste Korrektur jeder Sitzung war ein Muenzwurf - und die Schreibung ist
   besser als gedacht (2026-08-19).** Der Ausfall vom Morgen ("LanguageTool nicht
