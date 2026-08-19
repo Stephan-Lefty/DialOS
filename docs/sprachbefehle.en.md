@@ -33,8 +33,8 @@ listen?".
 
 | Voice command | Action |
 |---|---|
-| **"Sprachsteuerung starten"** (start voice control) | Switches command recognition on, reply: "Ich höre." If already running: "Ich höre schon." |
-| **"Sprachsteuerung stoppen"** (stop voice control) | Switches it off again, reply: "Ich höre nicht mehr." After two minutes without a command this happens by itself, with an announcement. |
+| **"Sprachsteuerung starten"** (start voice control) | Switches command recognition on, reply: "Ich höre Dir zu." If already running: "Ich höre Dir schon zu." |
+| **"Sprachsteuerung stoppen"** (stop voice control) | Switches it off again, reply: "Ich höre Dir nicht mehr zu." After two minutes without a command this happens by itself, with an announcement. |
 | "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). Reply: "Windows Desktop." If it is already there: "Steht schon auf Windows Desktop." |
 | "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. Reply: "Linux Desktop." or "Steht schon auf Linux Desktop." |
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |

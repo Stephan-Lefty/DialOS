@@ -32,7 +32,28 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BIN = os.path.join(REPO, "iso-build/config/includes.chroot/usr/local/bin")
 PIPER_DIR = "/usr/local/share/dialos-piper"
 STIMME = "voices/de_DE-thorsten-high.onnx"
-TEMPO = "0.88"          # wie GenericRateMultiply in piper-generic.conf
+PIPER_CONF = "/etc/speech-dispatcher/modules/piper-generic.conf"
+
+
+def tempo():
+    """Liest das Sprechtempo aus der Sprechkette, statt es zu wiederholen.
+
+    Fest eingetragen war hier "0.88" - derselbe Wert, der in
+    piper-generic.conf steht. Das ist genau die Doppelung, die
+    auseinanderlaeuft: Wer das Tempo dort aendert (wie am 2026-08-17 von 0.85
+    auf 0.88), haette danach Hoerbeispiele in der alten Geschwindigkeit, und
+    zwar ohne dass es jemandem auffaellt - denn sie klingen fuer sich genommen
+    richtig. "Michael" soll immer gleich klingen (Stephan, 2026-08-19), und
+    das geht nur mit einer Quelle.
+    """
+    try:
+        with open(PIPER_CONF, encoding="utf-8") as f:
+            for zeile in f:
+                if zeile.startswith("GenericRateMultiply"):
+                    return zeile.split()[1]
+    except OSError:
+        pass
+    return "1.0"
 ZIEL = os.path.join(REPO, "docs/sprachbeispiele")
 
 
@@ -51,7 +72,7 @@ def erzeugen(datei, text, aussprache):
         f"printf %s {shlex.quote(fuer_piper)} | "
         f"./piper/piper --model {shlex.quote(STIMME)} --noise_w 0 --output_raw 2>/dev/null | "
         f"sox -r 22050 -c 1 -b 16 -e signed-integer -t raw - "
-        f"-C 3 {shlex.quote(datei)} tempo {TEMPO} norm 2>/dev/null"
+        f"-C 3 {shlex.quote(datei)} tempo {tempo()} norm 2>/dev/null"
     )
     subprocess.run(["sh", "-c", befehl], check=False)
     if not os.path.exists(datei) or os.path.getsize(datei) == 0:
@@ -103,8 +124,8 @@ def main():
         ("02-lautstaerke-frage",
          "War das angenehm laut? Du kannst es einmalig festlegen. "
          "Sage 100, 75, 50, 25 oder aus. Und jetzt bitte."),
-        ("03-sprachsteuerung-an", "Ich höre."),
-        ("04-sprachsteuerung-aus", "Ich höre nicht mehr."),
+        ("03-sprachsteuerung-an", "Ich höre Dir zu."),
+        ("04-sprachsteuerung-aus", "Ich höre Dir nicht mehr zu."),
         ("05-desktop-windows", "Windows Desktop."),
         ("06-desktop-steht-schon", "Steht schon auf Linux Desktop."),
         ("07-diktat-beginn",

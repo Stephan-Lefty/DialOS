@@ -1344,6 +1344,101 @@ belegt am 2026-08-18 mit Zeitstempeln in beiden Protokollen.
 17 % anderer Dauer, und eine gespeicherte Ansage klang hoerbar anders als
 dieselbe frisch gesprochene.
 
+### 11i. Fusszeile, Mitschrift und halbtransparente Leisten (neu 2026-08-19)
+
+Drei Wuensche von Stephan, die nichts miteinander zu tun haben ausser dem
+Tag.
+
+**Fusszeile fuer Dokumente, Mails und Ausdrucke.**
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-fusszeile.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/fusszeile.txt /usr/local/share/dialos/
+```
+
+Der Text steht in `/usr/local/share/dialos/fusszeile.txt` und **nur dort** -
+Briefe, Mails und Ausdrucke lesen ihn von da. Waere er an drei Stellen im
+Code, wuerden zwei davon veralten, ohne dass es auffaellt, weil kaum jemand
+alle drei Wege am selben Tag benutzt.
+
+Rechtsbuendig wird im reinen Text durch Leerzeichen erreicht (Breite 76).
+Ist der Satz laenger als die Breite, bleibt er ungekuerzt linksbuendig
+stehen - ein abgeschnittener Herkunftshinweis waere schlechter als ein nicht
+ausgerichteter.
+
+**Notizen bekommen sie NICHT** (Stephans Entscheidung). Der Einkaufszettel
+wird bei jedem Diktat ergaenzt; eine Fusszeile landete dort bei jedem
+Durchgang mitten im Text. Notizen sind Arbeitszettel, keine Dokumente. Wird
+ein Zettel gedruckt, kommt die Zeile beim Drucken dazu:
+`dialos-fusszeile.py drucken DATEI`.
+
+In einer Mail wird aus "Dieses Dokument" ein "Diese Nachricht" (`--art mail`)
+- eine Mail ist kein Dokument.
+
+**Mitschrift fuer sehende Zuschauer.**
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mitschrift.py /usr/local/bin/
+```
+
+Ein Fenster, das man einmal oeffnet und stehen laesst; jedes Ereignis
+erscheint darin, sobald es passiert. Bewusst KEIN Fenster, das bei jedem
+Befehl in den Vordergrund springt - das wuerde beim Diktieren den Fokus
+stehlen, und wer diktiert, sieht den Bildschirm ohnehin nicht.
+
+**Warum ein Filter und kein `tail -f`:** Das Befehlsprotokoll bestand am
+2026-08-19 aus **4132 Pegel-Zeilen gegen 13 echte**. Die Mitschrift wirft die
+Pegelanzeige weg und uebersetzt die Protokollzeilen in Saetze:
+
+```
+08:47:51  Sprache   gehoert: "wie viel uhr ist es"
+08:47:51  Sprache   Auskunft: uhrzeit
+17:52:41  Diktat    geschrieben: "Marisa"
+```
+
+Sie liest **vier** Protokolle zusammen (Befehlsdienst, Diktat, Auskunft,
+Notizen) und mischt sie nach Uhrzeit. Genau dieses Zusammenfuehren hat am
+2026-08-18 den Beweis gebracht, dass Diktat und Befehlserkennung sich nicht
+ins Gehege kommen - von Hand war es muehsam. **Eigener Fehler dabei:** Erst
+gab sie Quelle fuer Quelle aus, sah dadurch chronologisch aus und war es
+nicht. Bei einem Werkzeug, dessen Zweck es ist, Gleichzeitigkeit zu zeigen,
+waere das die falsche Eigenschaft gewesen.
+
+**Halbtransparente Leisten - zwei Leisten, zwei Wege.**
+
+| Leiste | Wie | Paket |
+|---|---|---|
+| unten (Windows-Optik) | dash-to-panel, `trans-panel-opacity 0.5` | keines, bringt es mit |
+| oben (GNOME-Optik) | blur-my-shell, `color` mit Alpha 0.5 | `gnome-shell-extension-blur-my-shell` |
+
+Die Werte stehen in `01-dialos-defaults` bzw. setzt `dialos-desktop-stil.sh`
+beim Umschalten. **In der Windows-Optik gibt es oben keine Leiste** -
+dash-to-panel ersetzt sie. blur-my-shell hat dort nichts zu tun und muss
+beim Umschalten weder ein- noch ausgeschaltet werden.
+
+**Zweimal dieselbe Falle bei beiden Erweiterungen:** Ein gesetzter Wert
+allein tut nichts. dash-to-panel hatte `trans-panel-opacity` ab Werk auf
+0.4, wirkungslos weil `trans-use-custom-opacity` auf false stand; bei
+blur-my-shell braucht es `customize=true`, sonst gelten die allgemeinen
+Werte statt der eigenen.
+
+**Und: `color` mit Alpha statt Weichzeichnung.** Die Voreinstellung der
+Erweiterung ist `sigma 30`, also kraeftig verwaschen. Gefordert war
+"halbtransparent" - das ist halb deckendes Schwarz ueber dem Hintergrund und
+entspricht mit Alpha 0.5 genau dem Wert der unteren Leiste.
+
+**Alle uebrigen Wirkungen der Erweiterung sind ausdruecklich abgeschaltet**
+(Uebersicht, Dash, Anwendungsfenster, Sperrbildschirm und vier weitere). Sie
+kann viel mehr als gebraucht wird, und jede zusaetzliche Wirkung ist eine
+mehr, die beim naechsten GNOME-Sprung brechen kann - bei drei Erweiterungen
+sind in diesem Projekt schon zwei Debian-Paketfehler gefunden worden. Auf
+Standardwerten zu lassen waere das Gegenteil einer Entscheidung.
+
+**Beim Nachbauen zu wissen:** Eine frisch installierte Shell-Erweiterung ist
+fuer die LAUFENDE Shell unsichtbar - sie durchsucht das Verzeichnis nur beim
+Start, und unter Wayland laesst sie sich nicht neu starten. Es hilft nur
+abmelden und wieder anmelden.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

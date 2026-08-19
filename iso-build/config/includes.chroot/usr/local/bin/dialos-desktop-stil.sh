@@ -292,6 +292,15 @@ auf_windows() {
   setze "$s" show-running-apps true
   setze "$s" appicon-margin 4
   setze "$s" animate-appicon-hover true
+  # HALBTRANSPARENTE LEISTE (Stephan, 2026-08-19). dash-to-panel bringt das
+  # von Haus aus mit, es braucht kein zusaetzliches Paket:
+  #   trans-use-custom-opacity  schaltet die Themenfarbe ab
+  #   trans-panel-opacity       0.0 = ganz durchsichtig, 1.0 = ganz deckend
+  # 0.5 ist "halbtransparent" im Wortsinn. Der Wert stand ab Werk auf 0.4,
+  # war aber unwirksam, weil der Schalter darueber auf false stand - ein
+  # gesetzter Wert ohne den Schalter tut nichts.
+  setze "$s" trans-use-custom-opacity true
+  setze "$s" trans-panel-opacity 0.5
   setze "$s" intellihide false
   setze "$s" stockgs-keep-dash false
 
@@ -367,7 +376,8 @@ auf_gnome() {
   # echte Standard auseinanderentwickeln koennen.
   local s="org.gnome.shell.extensions.dash-to-panel"
   local k
-  for k in panel-positions panel-sizes panel-element-positions dot-position \
+  for k in trans-use-custom-opacity trans-panel-opacity \
+           panel-positions panel-sizes panel-element-positions dot-position \
            group-apps show-favorites show-running-apps appicon-margin \
            animate-appicon-hover intellihide stockgs-keep-dash; do
     zuruecksetzen "$s" "$k"

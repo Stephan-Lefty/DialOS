@@ -17,8 +17,69 @@ accent-color='blue'
 color-scheme='default'
 show-battery-percentage=true
 [org/gnome/shell]
-enabled-extensions=['bluetooth-battery-monitor@v8v88v8v88.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com']
+enabled-extensions=['bluetooth-battery-monitor@v8v88v8v88.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com', 'blur-my-shell@aunetx']
 [org/gnome/shell/extensions/ding]
 show-home=false
 show-trash=false
 show-volumes=false
+
+# ---------------------------------------------------------------------------
+# Halbtransparente Leisten (Stephan, 2026-08-19)
+#
+# ZWEI Leisten, zwei Wege - weil es zwei verschiedene Dinge sind:
+#
+#   oben, GNOME-Optik:   die echte GNOME-Leiste, transparent gemacht mit
+#                        blur-my-shell (Debian-Paket, kein Fremdpaket)
+#   unten, Windows-Optik: dash-to-panel bringt eigene Regler mit und
+#                        ERSETZT die obere Leiste - dort gibt es oben also
+#                        gar keine mehr, und blur-my-shell hat nichts zu tun.
+#                        Deshalb muss beim Umschalten nichts ein- oder
+#                        ausgeschaltet werden.
+#
+# Warum "color" mit Alpha statt starker Weichzeichnung: Die Voreinstellung
+# der Erweiterung ist sigma 30, also kraeftig verwaschen. Gefordert war
+# "halbtransparent" - das ist halb deckendes Schwarz ueber dem Hintergrund,
+# und mit Alpha 0.5 entspricht es genau dem Wert der unteren Leiste.
+#
+# "customize=true" ist Pflicht: Ohne diesen Schalter benutzt die Erweiterung
+# ihre allgemeinen Werte, und sigma/brightness hier bleiben wirkungslos.
+# Genau dieselbe Falle wie bei dash-to-panel, wo trans-panel-opacity ab Werk
+# auf 0.4 stand und nichts tat, weil trans-use-custom-opacity false war.
+[org/gnome/shell/extensions/blur-my-shell/panel]
+blur=true
+customize=true
+sigma=2
+brightness=1.0
+color=(0.0, 0.0, 0.0, 0.5)
+style-panel=0
+override-background=true
+
+# Alle uebrigen Bereiche der Erweiterung AUSDRUECKLICH aus. Sie kann viel
+# mehr als wir brauchen - Uebersicht, Dash, Anwendungsfenster, Sperrbildschirm.
+# Jede zusaetzliche Wirkung ist eine mehr, die beim naechsten GNOME-Sprung
+# brechen kann; bei drei Erweiterungen haben wir schon zwei Debian-Paketfehler
+# gefunden. Auf Standardwerten zu lassen waere das Gegenteil einer
+# Entscheidung.
+[org/gnome/shell/extensions/blur-my-shell/overview]
+blur=false
+
+[org/gnome/shell/extensions/blur-my-shell/applications]
+blur=false
+
+[org/gnome/shell/extensions/blur-my-shell/dash-to-dock]
+blur=false
+
+[org/gnome/shell/extensions/blur-my-shell/lockscreen]
+blur=false
+
+[org/gnome/shell/extensions/blur-my-shell/screenshot]
+blur=false
+
+[org/gnome/shell/extensions/blur-my-shell/window-list]
+blur=false
+
+[org/gnome/shell/extensions/blur-my-shell/appfolder]
+blur=false
+
+[org/gnome/shell/extensions/blur-my-shell/coverflow-alt-tab]
+blur=false

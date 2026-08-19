@@ -114,6 +114,89 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Fußzeile für Dokumente, Mails und Ausdrucke (Stephans Vorgabe,
+  2026-08-19).** Text wörtlich: „Dieses Dokument wurde per Spracheingabe
+  powered by DialOS.org erstellt!", dezent und rechtsbündig. Neues Skript
+  `dialos-fusszeile.py`, der Text in einer **einzigen** Datei unter
+  `/usr/local/share/dialos/fusszeile.txt`.
+  - **Notizen bleiben frei davon** (Stephans Entscheidung). Der
+    Einkaufszettel wird bei jedem Diktat ergänzt; eine Fußzeile landete dort
+    bei jedem Durchgang mitten im Text. Notizen sind Arbeitszettel, keine
+    Dokumente - beim Drucken kommt die Zeile dazu.
+  - **In Mails „Diese Nachricht"** statt „Dieses Dokument" - eine Mail ist
+    kein Dokument. Der Rest bleibt wörtlich wie vorgegeben.
+  - Rechtsbündig geht im reinen Text nur über Leerzeichen. Ist der Satz
+    länger als die Breite, bleibt er linksbündig und ungekürzt: Ein
+    abgeschnittener Herkunftshinweis wäre schlechter als ein nicht
+    ausgerichteter.
+
+- **Mitschrift: was gerade passiert, für sehende Zuschauer (Stephans Wunsch,
+  2026-08-19).** Ein Fenster, das man einmal öffnet und stehen lässt.
+  `dialos-mitschrift.py` liest **vier** Protokolle zusammen und mischt sie
+  nach Uhrzeit.
+  - **Ein `tail -f` wäre unbrauchbar gewesen:** Das Befehlsprotokoll bestand
+    aus **4132 Pegel-Zeilen gegen 13 echte**. Die Mitschrift wirft die
+    Pegelanzeige weg und übersetzt die Protokollzeilen in Sätze, die auch
+    jemand versteht, der den Quelltext nicht kennt.
+  - **Bewusst kein Fenster, das bei jedem Befehl aufgeht** - Stephans
+    ursprüngliche Beschreibung. Es würde beim Diktieren den Fokus stehlen,
+    und wer diktiert, sieht den Bildschirm ohnehin nicht.
+  - **Eigener Fehler, vor der Auslieferung gefunden:** Sie gab Quelle für
+    Quelle aus, sah dadurch chronologisch aus und war es nicht - erst alles
+    vom Befehlsdienst, dann alles vom Diktat. Bei einem Werkzeug, dessen
+    Zweck es ist, **Gleichzeitigkeit** zu zeigen, wäre das die falsche
+    Eigenschaft gewesen.
+
+- **Halbtransparente Leisten - und zweimal dieselbe Falle (Stephans Wunsch,
+  2026-08-19).** Oben und unten sind zwei verschiedene Leisten und brauchen
+  zwei Wege: unten dash-to-panel mit `trans-panel-opacity 0.5` (kein
+  zusätzliches Paket), oben `gnome-shell-extension-blur-my-shell` aus
+  **Debians** Quellen mit `color` und Alpha 0,5.
+  - **Ein gesetzter Wert allein tut nichts.** dash-to-panel hatte
+    `trans-panel-opacity` ab Werk auf 0,4 - wirkungslos, weil der Schalter
+    `trans-use-custom-opacity` darüber auf `false` stand. Bei blur-my-shell
+    braucht es `customize=true`, sonst gelten die allgemeinen statt der
+    eigenen Werte. Zwei Erweiterungen, dieselbe Bauart.
+  - **`color` mit Alpha statt Weichzeichnung.** Die Voreinstellung ist
+    `sigma 30`, also kräftig verwaschen - ein anderer Effekt als
+    „halbtransparent". Mit Alpha 0,5 entspricht die obere Leiste genau dem
+    Wert der unteren.
+  - **Alle acht übrigen Wirkungen der Erweiterung sind ausdrücklich
+    abgeschaltet.** Sie kann viel mehr als gebraucht wird, und jede
+    zusätzliche Wirkung ist eine mehr, die beim nächsten GNOME-Sprung
+    brechen kann - bei drei Erweiterungen sind hier schon zwei
+    Debian-Paketfehler gefunden worden. Auf Standardwerten zu lassen wäre
+    das Gegenteil einer Entscheidung.
+  - **In der Windows-Optik gibt es oben keine Leiste** - dash-to-panel
+    ersetzt sie. blur-my-shell muss beim Umschalten deshalb weder ein- noch
+    ausgeschaltet werden.
+
+- **Die Ansagen sprechen den Nutzer jetzt an (Stephan, 2026-08-19: „Das
+  System soll ja persönlich klingen").** Aus „Ich höre." wurde „Ich höre Dir
+  zu.", aus „Ich höre nicht mehr." wurde „Ich höre Dir nicht mehr zu.", aus
+  „Ich höre schon." wurde „Ich höre Dir schon zu."
+  - **Stephans Begründung für den Stopp-Satz geht über die Formulierung
+    hinaus:** „Ich höre nicht mehr" ist zweideutig - es kann auch heißen,
+    dass das Gerät nichts mehr hört, also kaputt ist. Mit „Dir" ist klar,
+    dass es eine Entscheidung war und kein Defekt. Für jemanden, der den
+    Bildschirm nicht sieht, ist das nicht Kosmetik.
+  - **Nachgezogen wurde nur die Gegenwart**, nicht die Geschichte: Im
+    Änderungsprotokoll und in den Fehlerbeschreibungen bleibt „Ich höre."
+    stehen, weil es das ist, was damals gesagt wurde. Eine rückwirkend
+    umgeschriebene Doku wäre unwahr.
+  - **Gemessen, dass „Michael" gleich klingt:** Speicher und frische
+    Erzeugung liefern für alle drei neuen Sätze denselben Wert auf die
+    Millisekunde (1,217 / 1,309 / 1,599 s).
+
+- **Und ein Fund aus Stephans Erinnerung an das Sprechtempo (2026-08-19):**
+  In `scripts/dialos-sprachbeispiele.py` stand `TEMPO = "0.88"` **fest
+  eingetragen**, mit dem Kommentar „wie in piper-generic.conf". Genau die
+  Doppelung, die auseinanderläuft: Nach einer Tempoänderung - wie am
+  2026-08-17 von 0,85 auf 0,88 - wären die Hörbeispiele in der alten
+  Geschwindigkeit geblieben, **ohne dass es auffällt**, denn für sich
+  genommen klingen sie richtig. Das Skript liest das Tempo jetzt aus der
+  Sprechkette.
+
 - **Uhrzeit und Datum auf Zuruf - und ein Wort, das es unmöglich machte
   (Stephans Wunsch, 2026-08-19).** Vier neue Sprachbefehle, live mit
   Stephans Stimme belegt: „Wie viel Uhr ist es?", „Wie ist die Uhrzeit?",

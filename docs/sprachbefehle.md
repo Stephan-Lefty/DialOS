@@ -32,8 +32,8 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 
 | Sprachbefehl | Aktion |
 |---|---|
-| **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre." Läuft sie schon: „Ich höre schon." |
-| **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre nicht mehr." Nach zwei Minuten ohne Befehl geschieht das von selbst, mit Ansage. |
+| **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre Dir zu." Läuft sie schon: „Ich höre Dir schon zu." |
+| **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre Dir nicht mehr zu." Nach zwei Minuten ohne Befehl geschieht das von selbst, mit Ansage. |
 | „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Steht schon auf Windows Desktop." |
 | „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Steht schon auf Linux Desktop." |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |

@@ -105,6 +105,83 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Footer for documents, mails and printouts (Stephan's requirement,
+  2026-08-19).** Text verbatim: "Dieses Dokument wurde per Spracheingabe
+  powered by DialOS.org erstellt!", discreet and right-aligned. New script
+  `dialos-fusszeile.py`, the text in a **single** file at
+  `/usr/local/share/dialos/fusszeile.txt`.
+  - **Notes stay free of it** (Stephan's decision). The shopping list is
+    appended to on every dictation; a footer would land in the middle of the
+    text each time. Notes are working lists, not documents - when printed,
+    the line is added.
+  - **In mails "Diese Nachricht"** instead of "Dieses Dokument" - a mail is
+    not a document. The rest stays verbatim as specified.
+  - Right alignment in plain text only works with spaces. If the sentence is
+    longer than the width it stays left-aligned and unshortened: a truncated
+    provenance note would be worse than an unaligned one.
+
+- **Live transcript: what is happening, for sighted onlookers (Stephan's
+  wish, 2026-08-19).** A window you open once and leave standing.
+  `dialos-mitschrift.py` reads **four** logs together and merges them by
+  time.
+  - **A `tail -f` would have been useless:** the command log consisted of
+    **4132 level lines against 13 real ones**. The transcript discards the
+    level display and translates the log lines into sentences that someone
+    who does not know the source can understand.
+  - **Deliberately not a window that opens on every command** - Stephan's
+    original description. It would steal focus during dictation, and whoever
+    is dictating cannot see the screen anyway.
+  - **A mistake of my own, found before delivery:** it printed source by
+    source, which looked chronological and was not - first everything from
+    the command service, then everything from the dictation. For a tool
+    whose purpose is to show **simultaneity** that would have been the wrong
+    property.
+
+- **Half-transparent bars - and the same trap twice (Stephan's wish,
+  2026-08-19).** Top and bottom are two different bars and need two routes:
+  at the bottom dash-to-panel with `trans-panel-opacity 0.5` (no extra
+  package), at the top `gnome-shell-extension-blur-my-shell` from **Debian's**
+  sources with `color` and alpha 0.5.
+  - **A value on its own does nothing.** dash-to-panel had
+    `trans-panel-opacity` at 0.4 from the factory - ineffective, because the
+    switch `trans-use-custom-opacity` above it was `false`. blur-my-shell
+    needs `customize=true`, otherwise its general values apply instead of the
+    specific ones. Two extensions, the same construction.
+  - **`color` with alpha instead of blur.** The default is `sigma 30`, i.e.
+    heavily blurred - a different effect from "half-transparent". With alpha
+    0.5 the top bar matches the bottom one exactly.
+  - **All eight other effects of the extension are explicitly switched
+    off.** It can do much more than is needed, and every additional effect is
+    one more that can break at the next GNOME jump - with three extensions
+    this project has already found two Debian packaging bugs. Leaving them at
+    defaults would be the opposite of a decision.
+  - **In the Windows look there is no top bar** - dash-to-panel replaces it.
+    blur-my-shell therefore needs no switching on or off.
+
+- **The announcements now address the user (Stephan, 2026-08-19: "the system
+  should sound personal").** "Ich höre." became "Ich höre Dir zu.", "Ich höre
+  nicht mehr." became "Ich höre Dir nicht mehr zu.", "Ich höre schon." became
+  "Ich höre Dir schon zu."
+  - **Stephan's reasoning for the stop sentence goes beyond the wording:**
+    "Ich höre nicht mehr" is ambiguous - it can also mean the device hears
+    nothing any more, i.e. is broken. With "Dir" it is clear that it was a
+    decision and not a defect. For someone who cannot see the screen that is
+    not cosmetics.
+  - **Only the present was updated**, not the history: in the changelog and
+    in the fault descriptions "Ich höre." stays, because that is what was
+    said at the time. Documentation rewritten retroactively would be untrue.
+  - **Measured that "Michael" sounds the same:** cache and fresh generation
+    yield the same value to the millisecond for all three new sentences
+    (1.217 / 1.309 / 1.599 s).
+
+- **And a finding from Stephan's reminder about the speech tempo
+  (2026-08-19):** `scripts/dialos-sprachbeispiele.py` had `TEMPO = "0.88"`
+  **hardcoded**, with the comment "as in piper-generic.conf". Exactly the
+  duplication that drifts apart: after a tempo change - as on 2026-08-17 from
+  0.85 to 0.88 - the speech samples would have stayed at the old speed
+  **without anyone noticing**, because taken on their own they sound right.
+  The script now reads the tempo from the speech chain.
+
 - **Time and date on request - and one word that made it impossible
   (Stephan's wish, 2026-08-19).** Four new voice commands, evidenced live in
   Stephan's voice: "Wie viel Uhr ist es?", "Wie ist die Uhrzeit?", "Welchen

@@ -137,9 +137,9 @@ hören, dass die Frage vorbei ist - sonst spricht er womöglich ins Leere.
 
 Hier kann das System nicht ahnen, dass es gemeint ist. Deshalb:
 
-> „Sprachsteuerung starten" → **„Ich höre."**
+> „Sprachsteuerung starten" → **„Ich höre Dir zu."**
 > … Befehle …
-> „Sprachsteuerung stoppen" → **„Ich höre nicht mehr."**
+> „Sprachsteuerung stoppen" → **„Ich höre Dir nicht mehr zu."**
 
 Die Bestätigungen sind kurz und immer gleich - der Nutzer hört sie
 täglich, da zählt Wiedererkennbarkeit mehr als Abwechslung. Sie sind aus

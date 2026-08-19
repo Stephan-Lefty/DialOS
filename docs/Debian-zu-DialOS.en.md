@@ -1307,6 +1307,96 @@ timestamps in both logs.
 to 17 % different duration, and a cached announcement sounded audibly
 different from the same one freshly spoken.
 
+### 11i. Footer, live transcript and half-transparent bars (new 2026-08-19)
+
+Three wishes of Stephan's that have nothing in common except the day.
+
+**Footer for documents, mails and printouts.**
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-fusszeile.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/fusszeile.txt /usr/local/share/dialos/
+```
+
+The text lives in `/usr/local/share/dialos/fusszeile.txt` and **only there** -
+letters, mails and printouts read it from that one place. Were it in three
+places in the code, two of them would go stale unnoticed, because hardly
+anyone uses all three routes on the same day.
+
+Right alignment in plain text is done with spaces (width 76). If the sentence
+is longer than the width it stays unshortened and left-aligned - a truncated
+provenance note would be worse than an unaligned one.
+
+**Notes deliberately do NOT get it** (Stephan's decision). The shopping list
+is appended to on every dictation; a footer would land in the middle of the
+text each time. Notes are working lists, not documents. When a list is
+printed, the line is added at print time: `dialos-fusszeile.py drucken FILE`.
+
+In a mail "Dieses Dokument" becomes "Diese Nachricht" (`--art mail`) - a mail
+is not a document.
+
+**Live transcript for sighted onlookers.**
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mitschrift.py /usr/local/bin/
+```
+
+A window you open once and leave standing; every event appears in it as it
+happens. Deliberately NOT a window that jumps to the front on every command -
+that would steal focus during dictation, and whoever is dictating cannot see
+the screen anyway.
+
+**Why a filter and not `tail -f`:** on 2026-08-19 the command log consisted of
+**4132 level lines against 13 real ones**. The transcript discards the level
+display and translates the log lines into sentences:
+
+```
+08:47:51  Sprache   gehoert: "wie viel uhr ist es"
+08:47:51  Sprache   Auskunft: uhrzeit
+17:52:41  Diktat    geschrieben: "Marisa"
+```
+
+It reads **four** logs together (command service, dictation, information,
+notes) and merges them by time. Exactly this merging produced the proof on
+2026-08-18 that dictation and command recognition do not interfere - by hand
+it was laborious. **A mistake of my own:** at first it printed source by
+source, which looked chronological and was not. For a tool whose purpose is
+to show simultaneity that would have been the wrong property.
+
+**Half-transparent bars - two bars, two routes.**
+
+| Bar | How | Package |
+|---|---|---|
+| bottom (Windows look) | dash-to-panel, `trans-panel-opacity 0.5` | none, it ships with it |
+| top (GNOME look) | blur-my-shell, `color` with alpha 0.5 | `gnome-shell-extension-blur-my-shell` |
+
+The values are in `01-dialos-defaults` and set by `dialos-desktop-stil.sh`
+when switching. **In the Windows look there is no top bar** - dash-to-panel
+replaces it. blur-my-shell has nothing to do there and needs no switching on
+or off.
+
+**The same trap twice, in both extensions:** a value on its own does nothing.
+dash-to-panel had `trans-panel-opacity` at 0.4 from the factory, ineffective
+because `trans-use-custom-opacity` was false; blur-my-shell needs
+`customize=true`, otherwise its general values apply instead of the specific
+ones.
+
+**And: `color` with alpha instead of blur.** The extension's default is
+`sigma 30`, i.e. heavily blurred. What was asked for was "half-transparent" -
+that is half-opaque black over the background, and with alpha 0.5 it matches
+the bottom bar exactly.
+
+**All other effects of the extension are explicitly switched off** (overview,
+dash, application windows, lock screen and four more). It can do much more
+than is needed, and every additional effect is one more that can break at the
+next GNOME jump - with three extensions this project has already found two
+Debian packaging bugs. Leaving them at defaults would be the opposite of a
+decision.
+
+**Worth knowing when rebuilding:** a freshly installed shell extension is
+invisible to the RUNNING shell - it scans the directory only at startup, and
+under Wayland it cannot be restarted. Only logging out and back in helps.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

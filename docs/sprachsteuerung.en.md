@@ -107,9 +107,9 @@ they may be speaking into the void.
 
 Here the system cannot guess that it is being addressed. Hence:
 
-> "Sprachsteuerung starten" → **"Ich höre."** (I'm listening.)
+> "Sprachsteuerung starten" → **"Ich höre Dir zu."** (I'm listening to you.)
 > … commands …
-> "Sprachsteuerung stoppen" → **"Ich höre nicht mehr."** (I'm no longer listening.)
+> "Sprachsteuerung stoppen" → **"Ich höre Dir nicht mehr zu."** (I'm not listening to you any more.)
 
 The confirmations are short and always identical - the user hears them
 daily, so recognizability matters more than variety. They are phrased

@@ -236,10 +236,18 @@ ZIELE = {"linux": "gnome", "gnome": "gnome", "windows": "windows"}
 # Wiedererkennbarkeit mehr als Abwechslung. Aus Michaels Sicht
 # formuliert, nicht als Statusmeldung ("Sprachsteuerung ist
 # eingeschaltet").
-ANSAGE_AN = "Ich höre."
-ANSAGE_AUS = "Ich höre nicht mehr."
+# Die Ansagen sprechen den Nutzer AN (Stephan, 2026-08-19: "Das System soll
+# ja persoenlich klingen"). "Ich hoere." ist eine Zustandsmeldung, "Ich hoere
+# Dir zu." ist eine Zusage. Fuer jemanden, der das Geraet nur hoert, ist das
+# der Unterschied zwischen einem Apparat und einem Gegenueber.
+ANSAGE_AN = "Ich höre Dir zu."
+# "Ich höre Dir nicht mehr zu." statt "Ich höre nicht mehr." (Stephan,
+# 2026-08-19). Der kuerzere Satz ist zweideutig: Er kann auch heissen,
+# dass das Geraet nichts mehr hoert - also kaputt ist. Mit "Dir" ist klar,
+# dass es eine Entscheidung ist und kein Defekt.
+ANSAGE_AUS = "Ich höre Dir nicht mehr zu."
 ANSAGE_ZEITGRENZE = "Ich schalte die Sprachsteuerung wieder aus."
-ANSAGE_LAEUFT_SCHON = "Ich höre schon."
+ANSAGE_LAEUFT_SCHON = "Ich höre Dir schon zu."
 
 # KEINE Sperrfrist mehr - zweimal am 2026-08-17 als Ursache derselben
 # Fehlermeldung entlarvt, und beim ersten Mal habe ich nur die Haelfte
