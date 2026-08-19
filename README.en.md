@@ -98,12 +98,32 @@ background) and `splash.png` (boot/login screen).
   `DIALOS-DATA` (exFAT, also readable on Windows/macOS)
 - **Android test device** for phone tethering (USB tethering + GSConnect)
 
+## Licence
+
+[Apache License 2.0](LICENSE) – Copyright 2026 Stephan Rösner.
+
+Covers the scripts, configuration and documentation of this project. The
+third-party components in use – Debian, GNOME, Piper, Vosk and every other
+installed package – keep their own respective licences. The same licence
+applies to the phone companion
+[DialOS Mobil](https://github.com/Stephan-Lefty/DialOS-Mobil).
+
 ## Changelog
 
 ### 0.5.1
 
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
+
+- **Licence chosen: Apache 2.0 (2026-08-19).** Until then DialOS sat on GitHub
+  publicly without a licence - meaning full copyright reserved, so nobody could
+  legitimately reuse the scripts, the opposite of what this project is for.
+  Apache 2.0 rather than MIT because it carries an explicit patent grant, and
+  because it is the same licence as Vosk, which provides the speech recognition
+  here. It covers this project's own scripts, configuration and documentation;
+  Debian, GNOME, Piper and the other installed packages keep their own
+  licences. The same licence applies to the phone companion
+  [DialOS Mobil](https://github.com/Stephan-Lefty/DialOS-Mobil).
 
 - **The first correction of every session was a coin toss - and capitalization
   is better than assumed (2026-08-19).** The morning failure ("LanguageTool nicht
