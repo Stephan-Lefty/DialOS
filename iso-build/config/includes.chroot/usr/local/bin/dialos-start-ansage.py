@@ -44,7 +44,33 @@ WETTER_SLOTS = [
     ("1800", "Abends"),
 ]
 BLUETOOTH_DEBUG_LOG = "/tmp/dialos-bluetooth-debug.log"
-LOCK_DATEI = "/tmp/dialos-start-ansage.pid"
+def _sperr_pfad():
+    """Pfad der Sperrdatei - PRO NUTZER, nicht geteilt.
+
+    Fehler vom 2026-08-19, live gefunden: Die Datei lag fest auf
+    "/tmp/dialos-start-ansage.pid" und damit fuer alle Nutzer an derselben
+    Stelle. `nutzer` legte sie beim Anmelden um 08:12 an; `dialosadmin` konnte
+    sie danach nicht mehr ueberschreiben (falscher Eigentuemer, 0664). Also
+    konnte sich keine seiner Instanzen registrieren, keine sah die andere - und
+    es liefen ZWEI Start-Ansagen gleichzeitig, jede mit ihrer eigenen
+    Netzwerk-Ueberwachung. Das Risiko stand seit Tagen in TODO.md; notiert ist
+    nicht behandelt.
+
+    Zweitens haette die geteilte Datei einen Prozess des ANDEREN Nutzers zum
+    Abschuss angeboten - dass das an den Rechten scheitert, ist Glueck und kein
+    Entwurf.
+
+    XDG_RUNTIME_DIR ist der richtige Ort: pro Nutzer, nur fuer ihn lesbar (0700),
+    und beim Abmelden raeumt systemd ihn selbst weg. Dasselbe Muster wie
+    marke_pfad() in dialos-diktat.py und dialos-notiz.py.
+    """
+    basis = os.environ.get("XDG_RUNTIME_DIR")
+    if basis and os.path.isdir(basis):
+        return os.path.join(basis, "dialos-start-ansage.pid")
+    return f"/tmp/dialos-start-ansage-{os.getuid()}.pid"
+
+
+LOCK_DATEI = _sperr_pfad()
 LAUTSTAERKE_OPTIONEN = {
     "hundert": 100, "100": 100,
     "fünfundsiebzig": 75, "75": 75,
@@ -380,6 +406,13 @@ def alte_instanz_beenden():
             pass
     except (FileNotFoundError, ValueError, ProcessLookupError):
         pass
+    except PermissionError:
+        # Fremder Nutzer - kann seit der Umstellung auf XDG_RUNTIME_DIR nicht
+        # mehr vorkommen. Wenn doch, dann NICHT die eigene PID hineinschreiben:
+        # eine Datei, in die man nicht schreiben darf, ist keine Sperre, und die
+        # naechste Instanz wuerde sich wieder auf einen fremden Eintrag
+        # verlassen.
+        return
     except Exception:
         pass
     try:

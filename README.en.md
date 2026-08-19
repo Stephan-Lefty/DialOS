@@ -105,6 +105,29 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Two login announcements were running at once - the lock file sat in shared
+  `/tmp` (2026-08-19).** While comparing the installed state it turned out that
+  `dialos-start-ansage.py` was running **twice** (PID 5526 since 08:14, PID 19451
+  since 09:26). The script does not exit but goes on to monitor the network - so
+  two network watchers were running, either of which can speak.
+    - **Cause:** `LOCK_DATEI = "/tmp/dialos-start-ansage.pid"` - one fixed path
+      for **all** users. `nutzer` created the file at login at 08:12
+      (`-rw-rw-r-- nutzer nutzer`), after which `dialosadmin` could no longer
+      overwrite it. So none of its instances could register, and none saw the
+      other.
+    - **And in the failure case the lock would have pointed at another user's
+      process.** `alte_instanz_beenden()` reads the PID and sends it SIGTERM;
+      that this fails across user boundaries on permissions is luck, not design.
+    - **Fixed:** the file now lives in `$XDG_RUNTIME_DIR` (`/run/user/1000/`) -
+      per user, 0700, and systemd clears it away on logout. The same pattern as
+      `marke_pfad()` in `dialos-diktat.py` and `dialos-notiz.py`.
+      `PermissionError` is now handled explicitly: a file you may not write to is
+      no lock, so the own PID is not written into it either.
+    - **The risk had been in `TODO.md` for days** ("move the lock file out of
+      /tmp"). A noted risk is not a handled one - the same lesson as on
+      2026-08-18, when the documented danger of an unrecognized stop phrase
+      caused a seven-minute dictation that same day.
+
 - **"It should feel like a dialogue between the user and Michael" (Stephan's
   principle, 2026-08-19)** - now a rule in `docs/sprachbefehle.en.md`, and as
   the rule the other wording rules follow from. The practical reason: whoever

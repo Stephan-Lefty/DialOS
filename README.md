@@ -114,6 +114,30 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Zwei Start-Ansagen liefen gleichzeitig - die Sperrdatei lag im geteilten
+  `/tmp` (2026-08-19).** Beim Vergleich des Installationsstands fiel auf, dass
+  `dialos-start-ansage.py` **zweimal** lief (PID 5526 seit 08:14, PID 19451 seit
+  09:26). Das Skript beendet sich nicht, sondern überwacht danach das Netz - es
+  liefen also zwei Netzwerk-Beobachter, die beide ansagen können.
+    - **Ursache:** `LOCK_DATEI = "/tmp/dialos-start-ansage.pid"` - ein fester
+      Pfad für **alle** Nutzer. `nutzer` legte die Datei beim Anmelden um 08:12
+      an (`-rw-rw-r-- nutzer nutzer`), `dialosadmin` konnte sie danach nicht mehr
+      überschreiben. Also konnte sich keine seiner Instanzen registrieren, und
+      keine sah die andere.
+    - **Und die Sperre hätte im Fehlerfall auf einen fremden Prozess gezeigt.**
+      `alte_instanz_beenden()` liest die PID und schickt ihr SIGTERM; dass das
+      über Nutzergrenzen an den Rechten scheitert, ist Glück und kein Entwurf.
+    - **Behoben:** Die Datei liegt jetzt in `$XDG_RUNTIME_DIR` (`/run/user/1000/`)
+      - pro Nutzer, 0700, und beim Abmelden räumt systemd sie selbst weg.
+      Dasselbe Muster wie `marke_pfad()` in `dialos-diktat.py` und
+      `dialos-notiz.py`. `PermissionError` wird jetzt ausdrücklich behandelt:
+      eine Datei, in die man nicht schreiben darf, ist keine Sperre - dann wird
+      die eigene PID auch nicht hineingeschrieben.
+    - **Das Risiko stand seit Tagen in `TODO.md`** („Lock-Datei aus /tmp
+      holen"). Ein notiertes Risiko ist kein behandeltes - dieselbe Lehre wie am
+      2026-08-18, als die dokumentierte Gefahr eines nicht erkannten
+      Schlusssatzes am selben Tag ein siebenminütiges Diktat verursachte.
+
 - **„Es soll sich wie ein Dialog zwischen dem Nutzer und Michael anfühlen"
   (Stephans Grundsatz, 2026-08-19)** - jetzt als Regel in
   `docs/sprachbefehle.md`, und zwar als die Regel, aus der die anderen

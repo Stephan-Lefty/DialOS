@@ -461,7 +461,7 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   einem laufenden System per `apt` installiert, wo das Problem nicht
   auftritt. Gehört in `iso-build/config/package-lists/desktop.list.chroot`.
 
-- [ ] **Lock-Datei von `dialos-start-ansage.py` aus `/tmp` holen.**
+- [x] **Lock-Datei von `dialos-start-ansage.py` aus `/tmp` holen** - erledigt 2026-08-19, nachdem der Fall live eingetreten war: Zwei Start-Ansagen liefen gleichzeitig, weil `nutzer` die geteilte Datei besaß und `dialosadmin` sie nicht überschreiben konnte. Liegt jetzt in `$XDG_RUNTIME_DIR`.
   `/tmp/dialos-start-ansage.pid` ist ein fester Pfad im geteilten `/tmp` -
   dieselbe Bauart, die am 2026-08-16 bei der Sprechen-Markierung zu einem
   stillen Fehlschlag geführt hat (Sticky-Bit: ein Konto kann die Datei
