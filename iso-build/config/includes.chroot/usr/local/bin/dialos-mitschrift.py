@@ -57,6 +57,7 @@ Hand war es muehsam.
 Aufruf:  dialos-mitschrift.py             (folgt laufend)
          dialos-mitschrift.py --alles     (zeigt auch, was vorher schon da war)
          dialos-mitschrift.py --kein-protokoll  (nichts fuer den Support schreiben)
+         dialos-mitschrift.py --rueckblick 15   (die letzten 15 Sekunden mitnehmen)
 """
 
 import datetime
@@ -115,6 +116,15 @@ SUPPORT_ORDNER = os.path.join(
     "dialos", "support")
 SUPPORT_TAGE = 7
 SUPPORT_NAME = re.compile(r'^befehle-(\d{4})-(\d{2})-(\d{2})\.log$')
+
+# RUECKBLICK: Wieviele Sekunden Vorgeschichte beim Start mitgenommen werden.
+# Grund (Stephans Test vom 2026-08-19): Das Fenster wird von "Sprachsteuerung
+# starten" geoeffnet - dieser Satz steht also schon im Protokoll, bevor die
+# Mitschrift zu lesen beginnt, und fehlte damit IMMER. Fuer den Support waere
+# das die erste Frage gewesen ("hat er ueberhaupt eingeschaltet?").
+# Der Befehlsdienst ruft mit --rueckblick auf; von Hand gestartet bleibt es bei
+# 0, damit ein Fenster, das man selbst oeffnet, nicht mit alten Zeilen anfaengt.
+RUECKBLICK_VORGABE = 0
 
 # Inhalt des Nutzers - im Fenster ja, im Support-Protokoll nur die erste Zeile.
 # "diktiert:" ist die rohe Erkennung, "geschrieben:" der Text nach der
@@ -333,6 +343,76 @@ def support_schreiben(pfad, eintrag):
         pass          # ein volles Dateisystem darf das Fenster nicht anhalten
 
 
+def zuletzt_protokolliert(pfad):
+    """Uhrzeit der letzten Zeile im Support-Protokoll - oder "" wenn keine.
+
+    Das ist die Dopplungssperre fuer den Rueckblick: Wer die Sprachsteuerung
+    zweimal kurz hintereinander einschaltet, wuerde dieselben Zeilen sonst
+    zweimal ins Protokoll schreiben. Die Datei selbst ist der Merker - es
+    braucht keinen zusaetzlichen Zustand, der auch noch veralten koennte.
+    """
+    letzte = ""
+    try:
+        with open(pfad, encoding="utf-8", errors="replace") as f:
+            for zeile in f:
+                m = ZEIT.match(zeile)
+                if m:
+                    letzte = m.group(1)
+    except OSError:
+        pass
+    return letzte
+
+
+def rueckblick_sekunden(argumente):
+    """--rueckblick N auswerten, tolerant gegen Unsinn."""
+    try:
+        i = argumente.index("--rueckblick")
+        return max(0, int(argumente[i + 1]))
+    except (ValueError, IndexError):
+        return RUECKBLICK_VORGABE
+
+
+def vorgeschichte(sekunden):
+    """Eintraege der letzten 'sekunden' aus allen Quellen, nach Zeit sortiert.
+
+    RUECKWAERTS GELESEN, und das aus einem Grund, der beim ersten Versuch
+    Inhalte von GESTERN ins Protokoll geholt haette: Die vier Protokolle
+    schreiben nur "HH:MM:SS" und werden nicht gedreht (siehe TODO.md). Vorwaerts
+    verglichen sieht ein Eintrag von gestern 17:52 wie "spaeter heute" aus und
+    kaeme bei einem Rueckblick am Abend mit - samt diktiertem Text aus einer
+    fremden Sitzung. Rueckwaerts gelesen laeuft die Uhrzeit fallend; springt sie
+    nach oben, ist das der Tageswechsel, und dort wird abgebrochen.
+    """
+    if sekunden <= 0:
+        return []
+    jetzt = time.strftime("%H:%M:%S")
+    grenze = time.strftime("%H:%M:%S", time.localtime(time.time() - sekunden))
+    if grenze > jetzt:                 # Rueckblick reicht ueber Mitternacht
+        grenze = "00:00:00"
+    gesammelt = []
+    for name, pfad in QUELLEN.items():
+        try:
+            with open(pfad, encoding="utf-8", errors="replace") as f:
+                f.seek(0, os.SEEK_END)
+                f.seek(max(0, f.tell() - 65536))   # mehr braucht es nie
+                roh = f.read()
+        except OSError:
+            continue
+        vorige = jetzt
+        for zeile in reversed(roh.replace("\r", "\n").split("\n")):
+            m = ZEIT.match(zeile.strip())
+            if not m:
+                continue
+            zeit = m.group(1)
+            if zeit > vorige or zeit < grenze:
+                break                  # Tageswechsel bzw. alt genug
+            vorige = zeit
+            eintrag = aufbereiten(name, zeile)
+            if eintrag:
+                gesammelt.append(eintrag)
+    return sorted(gesammelt, key=lambda e: e[0])
+
+
 def ausgeben(eintrag):
     zeit, quelle, satz = eintrag
     print(f"  {zeit}  {quelle:9s} {satz}", flush=True)
@@ -348,6 +428,7 @@ def main():
 
     heute = datetime.date.today()
     support = None if "--kein-protokoll" in sys.argv else support_datei(heute)
+    grenze_protokoll = zuletzt_protokolliert(support) if support else ""
     if support:
         weg = support_aufraeumen(heute)
         print(f"  Support-Protokoll: {support}")
@@ -356,6 +437,11 @@ def main():
               + (f" geloescht - {weg} alte gerade entfernt)" if weg
                  else " geloescht)"))
         print()
+
+    for eintrag in vorgeschichte(rueckblick_sekunden(sys.argv)):
+        ausgeben(eintrag)
+        if support and eintrag[0] > grenze_protokoll:
+            support_schreiben(support, eintrag)
 
     stand = {}
     for name, pfad in QUELLEN.items():

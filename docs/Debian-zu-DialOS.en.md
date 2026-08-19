@@ -1363,6 +1363,29 @@ Two traps learned in the process:
   server's belongs to every window. End the script, however, and the window's
   command ends - so the window closes by itself.
 
+**Backlog on opening - found by Stephan's test.** The window is opened by
+"Sprachsteuerung starten", so that sentence is already in the log before the
+transcript starts reading, and was therefore **always** missing - from the
+window and from the support log alike. For support that would have been the
+first question ("did they switch it on at all?"). The service therefore invokes
+it with `--rueckblick 20`: 20 seconds of history, which also picks up the
+unrecognized attempts before it - often the more revealing half for support.
+Started by hand it stays at 0, so a window you open yourself does not begin with
+old lines.
+
+Two traps in it that would have broken both:
+
+- **Duplication.** Switching on twice in quick succession would write the same
+  lines to the support log twice. The file itself is the marker: the timestamp
+  of its last line is the cut-off. No extra state that could go stale.
+- **The day boundary.** The four logs write only `HH:MM:SS` and are not rotated
+  (see `TODO.md`). Compared forwards, an entry from **yesterday** at 17:52 looks
+  like "later today" - a backlog in the evening would have picked up dictated
+  text from someone else's session. Testing with a wide backlog put exactly such
+  lines in the list. So the end of the file is read **backwards**: the timestamps
+  run downwards, and where one jumps up, that is the day boundary and reading
+  stops.
+
 Anyone who wants the screen free creates `~/.config/dialos/mitschrift`
 containing `aus`. The default is **on**, because of the support log (right
 below): were the window off by default, there would be nothing to read back

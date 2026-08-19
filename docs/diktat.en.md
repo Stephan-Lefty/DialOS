@@ -329,3 +329,38 @@ Unsolved and not yet measured. The classic route is spoken punctuation
 ("Komma", "Punkt", "Absatz") which the user has to learn. What needs
 checking is whether they can be reliably told apart from identical words
 inside the text - "Punkt" can also be a word in a sentence.
+
+## After the dictation: a hint instead of a read-back (Stephan, 2026-08-19)
+
+Until 2026-08-19 "Diktat beenden" read the finished note out in full. That
+sounded conscientious but was a mistake in two directions:
+
+1. **It made "Einkaufszettel vorlesen" redundant.** Nobody needs a command for
+   something that happens by itself anyway.
+2. **It took the choice away from the user.** Whoever notes three items does not
+   want to hear them three times. Whoever dictated twenty might well want to.
+
+Since then DialOS confirms and says **how** to get the read-back:
+
+> "Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel
+> vorgelesen haben, dann sage: Einkaufszettel vorlesen."
+
+**Why the count stays in.** It replaces the read-back: it is the only thing by
+which a blind user notices that anything arrived at all - and how much. A bare
+"Diktat beendet." would leave them in the dark.
+
+**Why a hint and not a prompt.** A prompt ("shall I read it out?") demands an
+answer and holds the device up until it comes. A hint costs nothing when it is
+not needed.
+
+**Why the hint comes from a table.** Only targets for which the read-out command
+actually exists are named (`einkaufszettel`, `notizen` - see
+`docs/sprachbefehle.en.md`). A later target such as "brief" gets the
+confirmation only for now. Naming a sentence the grammar does not know would be
+worse for a blind user than no hint at all: they would say it, nothing would
+happen, and they would have no way of finding out why.
+
+The read-back **with punctuation** lives on unchanged in `dialos-notiz.py`,
+where it happens on request. The measurement behind it still holds: 3.670 s
+without against 4.884 s with punctuation, and the difference consists entirely
+of pauses.

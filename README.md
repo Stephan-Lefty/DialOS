@@ -114,6 +114,27 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **„Diktat beenden" liest nicht mehr vor, sondern sagt, wie man es bekommt
+  (Stephan, 2026-08-19).** Bisher las der Befehl die fertige Notiz komplett vor.
+  Das machte „Einkaufszettel vorlesen" überflüssig - und nahm dem Nutzer die
+  Wahl: wer drei Waren aufschreibt, will sie nicht dreimal hören. Jetzt: „Diktat
+  beendet, 3 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen
+  haben, dann sage: Einkaufszettel vorlesen."
+    - **Die Anzahl bleibt drin, weil sie das Vorlesen ersetzt** - sie ist das
+      einzige, woran ein blinder Nutzer merkt, dass etwas angekommen ist und wie
+      viel. Ein bloßes „Diktat beendet." ließe ihn im Dunkeln.
+    - **Hinweis statt Rückfrage:** Eine Rückfrage verlangt eine Antwort und hält
+      das Gerät auf, bis sie kommt. Ein Hinweis kostet nichts, wenn man ihn
+      nicht braucht.
+    - **Der Hinweis kommt aus einer Tabelle mit genau den Zielen, für die es
+      den Vorlese-Befehl wirklich gibt.** Ein späteres Ziel wie „brief" bekommt
+      vorerst nur die Bestätigung: einem blinden Nutzer einen Satz zu nennen,
+      den die Grammatik nicht kennt, wäre schlimmer als kein Hinweis - er würde
+      ihn sagen, nichts würde passieren, und er hätte keine Möglichkeit
+      herauszufinden warum.
+    - Das Vorlesen mit Satzzeichen lebt unverändert in `dialos-notiz.py`
+      weiter, wo es auf Ansage geschieht.
+
 - **Mitschrift geht mit der Sprachsteuerung auf und zu - und schreibt ein
   Support-Protokoll (Stephans Präzisierung, 2026-08-19).** Bisher musste das
   Fenster von Hand geöffnet werden; jetzt öffnet es
@@ -157,6 +178,21 @@ abgeschlossen.*
       installierten Fassung, nur meine eigenen Änderungen waren verloren).
       Seitdem: wörtlich ersetzen, Treffer auf Eindeutigkeit prüfen und nach
       jedem Schreiben prüfen, dass die Datei noch auf `sys.exit(main())` endet.
+    - **Rückblick beim Öffnen, gefunden durch Stephans Test:** Das Fenster
+      wird von „Sprachsteuerung starten" geöffnet - dieser Satz stand also
+      schon im Protokoll, bevor die Mitschrift zu lesen begann, und fehlte
+      damit **immer**. Für den Support wäre das die erste Frage gewesen („hat er
+      überhaupt eingeschaltet?"). Der Dienst ruft jetzt mit `--rueckblick 20`
+      auf, was auch die nicht erkannten Versuche davor mitnimmt.
+    - **Zwei Fallen darin, beide gelöst:** Dopplung beim zweimaligen
+      Einschalten - Merker ist die Uhrzeit der letzten Zeile im Protokoll
+      selbst, kein zusätzlicher Zustand, der veralten könnte. Und der
+      **Tageswechsel**: Die Protokolle schreiben nur `HH:MM:SS` und werden nicht
+      gedreht, ein Eintrag von **gestern** 17:52 sieht vorwärts verglichen wie
+      „später heute" aus. Beim Testen mit weitem Rückblick stand genau solcher
+      Diktattext aus einer fremden Sitzung in der Liste. Das Dateiende wird
+      deshalb **rückwärts** gelesen: wo die Uhrzeit nach oben springt, ist der
+      Tageswechsel.
     - Neu dokumentiert: `docs/sicherheit-datenschutz.md` hat jetzt einen
       Abschnitt **„Protokolle: was DialOS über den Nutzer mitschreibt"** mit
       Tabelle über alle fünf Dateien, Rechten und Aufbewahrung. Dabei

@@ -1403,6 +1403,30 @@ Zwei Fallen, die dabei gelernt wurden:
   des Servers gehoert allen Fenstern. Endet dagegen das Skript, endet der
   Befehl des Fensters - und das Fenster schliesst sich von selbst.
 
+**Rueckblick beim Oeffnen - gefunden durch Stephans Test.** Das Fenster wird
+von "Sprachsteuerung starten" geoeffnet; dieser Satz steht also schon im
+Protokoll, bevor die Mitschrift zu lesen beginnt, und fehlte damit **immer** -
+im Fenster wie im Support-Protokoll. Fuer den Support waere das die erste Frage
+gewesen ("hat er ueberhaupt eingeschaltet?"). Der Dienst ruft deshalb mit
+`--rueckblick 20` auf: 20 Sekunden Vorgeschichte, was auch die nicht erkannten
+Versuche davor mitnimmt - fuer den Support oft die aufschlussreichere Haelfte.
+Von Hand gestartet bleibt es bei 0, damit ein selbst geoeffnetes Fenster nicht
+mit alten Zeilen anfaengt.
+
+Zwei Fallen darin, die beides kaputt gemacht haetten:
+
+- **Dopplung.** Zweimal kurz hintereinander einschalten wuerde dieselben Zeilen
+  zweimal ins Support-Protokoll schreiben. Merker ist die Datei selbst: die
+  Uhrzeit ihrer letzten Zeile ist die Grenze. Kein zusaetzlicher Zustand, der
+  veralten koennte.
+- **Der Tageswechsel.** Die vier Protokolle schreiben nur `HH:MM:SS` und werden
+  nicht gedreht (siehe `TODO.md`). Vorwaerts verglichen sieht ein Eintrag von
+  **gestern** 17:52 wie "spaeter heute" aus - ein Rueckblick am Abend haette
+  diktierten Text aus einer fremden Sitzung mitgenommen. Beim Testen mit einem
+  weiten Rueckblick standen genau solche Zeilen in der Liste. Deshalb wird das
+  Dateiende **rueckwaerts** gelesen: die Uhrzeit laeuft dabei fallend, und wo
+  sie nach oben springt, ist der Tageswechsel und wird abgebrochen.
+
 Wer den Bildschirm frei haben will, legt `~/.config/dialos/mitschrift` mit dem
 Inhalt `aus` an. Vorgabe ist **an**, und zwar wegen des Support-Protokolls
 (gleich darunter): waere das Fenster ab Werk aus, gaebe es beim Anruf auch

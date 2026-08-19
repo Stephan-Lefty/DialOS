@@ -105,6 +105,25 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **"Diktat beenden" no longer reads back, it says how to get the read-back
+  (Stephan, 2026-08-19).** Until now the command read the finished note out in
+  full. That made "Einkaufszettel vorlesen" redundant - and took the choice away
+  from the user: whoever notes three items does not want to hear them three
+  times. Now: "Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deinen
+  Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen."
+    - **The count stays in because it replaces the read-back** - it is the only
+      thing by which a blind user notices that something arrived and how much. A
+      bare "Diktat beendet." would leave them in the dark.
+    - **A hint, not a prompt:** a prompt demands an answer and holds the device
+      up until it comes. A hint costs nothing when it is not needed.
+    - **The hint comes from a table holding exactly those targets for which the
+      read-out command really exists.** A later target such as "brief" gets the
+      confirmation only for now: naming a sentence the grammar does not know
+      would be worse for a blind user than no hint - they would say it, nothing
+      would happen, and they would have no way of finding out why.
+    - The read-back with punctuation lives on unchanged in `dialos-notiz.py`,
+      where it happens on request.
+
 - **The transcript opens and closes with the voice control - and writes a
   support log (Stephan's clarification, 2026-08-19).** Until now the window had
   to be opened by hand; now `dialos-sprachbefehl-desktop.py` opens it on
@@ -147,6 +166,20 @@ background) and `splash.png` (boot/login screen).
       changes were lost). Since then: replace literally, assert the match is
       unique, and after every write assert the file still ends on
       `sys.exit(main())`.
+    - **Backlog on opening, found by Stephan's test:** the window is opened by
+      "Sprachsteuerung starten" - so that sentence was already in the log before
+      the transcript began reading, and was therefore **always** missing. For
+      support that would have been the first question ("did they switch it on at
+      all?"). The service now invokes it with `--rueckblick 20`, which also picks
+      up the unrecognized attempts before it.
+    - **Two traps in it, both solved:** duplication when switching on twice -
+      the marker is the timestamp of the last line in the log itself, no extra
+      state that could go stale. And the **day boundary**: the logs write only
+      `HH:MM:SS` and are not rotated, so an entry from **yesterday** at 17:52
+      looks like "later today" when compared forwards. Testing with a wide
+      backlog put exactly such dictated text from someone else's session in the
+      list. The end of the file is therefore read **backwards**: where the
+      timestamp jumps up, that is the day boundary.
     - Newly documented: `docs/sicherheit-datenschutz.en.md` now has a section
       **"Logs: what DialOS records about the user"** with a table of all five
       files, their modes and retention. Noticed while writing it and recorded in

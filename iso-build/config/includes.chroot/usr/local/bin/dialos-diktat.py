@@ -120,6 +120,38 @@ def ist_schluss(gehoert):
 
 ANSAGE_BEREIT = "Ich schreibe mit."
 ANSAGE_ENDE = "Diktat beendet."
+
+# Nach dem Diktat: HINWEIS statt Vorlesen (Stephan, 2026-08-19). Bis dahin las
+# "Diktat beenden" den ganzen Zettel vor - und machte damit den Befehl
+# "Einkaufszettel vorlesen" ueberfluessig, ohne dem Nutzer die Wahl zu lassen.
+# Wer nur drei Waren aufschreibt, will sie nicht dreimal hoeren; wer zwanzig
+# diktiert hat, will es vielleicht doch. Also fragt DialOS nicht nach, sondern
+# sagt, wie man es bekommt - eine Rueckfrage waere eine Pflicht zum Antworten.
+#
+# Nur Ziele, fuer die es den Vorlese-Befehl WIRKLICH gibt (siehe
+# docs/sprachbefehle.md): einem blinden Nutzer einen Satz nennen, den die
+# Grammatik nicht kennt, waere schlimmer als gar kein Hinweis. Ein unbekanntes
+# Ziel bekommt deshalb nur die Bestaetigung ohne Hinweis.
+VORLESEN_HINWEIS = {
+    "einkaufszettel": ("Deinen Einkaufszettel", "Einkaufszettel vorlesen"),
+    "notizen": ("Deine Notizen", "Notizen vorlesen"),
+}
+
+
+def ansage_ende(name, anzahl):
+    """Bestaetigung nach dem Diktat, mit Hinweis aufs Vorlesen.
+
+    Die Anzahl gehoert hinein, weil sie das Vorlesen ersetzt: Sie ist das
+    einzige, woran ein blinder Nutzer merkt, dass ueberhaupt etwas angekommen
+    ist - und wieviel. "Diktat beendet." allein liesse ihn im Dunkeln.
+    """
+    satz = ("Diktat beendet, ein Eintrag geschrieben." if anzahl == 1
+            else f"Diktat beendet, {anzahl} Einträge geschrieben.")
+    hinweis = VORLESEN_HINWEIS.get(name)
+    if hinweis:
+        besitz, befehl = hinweis
+        satz += f" Möchtest Du {besitz} vorgelesen haben, dann sage: {befehl}."
+    return satz
 ANSAGE_LEER = "Ich habe nichts verstanden."
 ANSAGE_ZEITGRENZE = "Ich höre auf mitzuschreiben."
 
@@ -406,17 +438,13 @@ def diktat_fuehren(zweck, name, quelle):
 
     pfad = notiz_schreiben(name, gesammelt)
     melde(f"  geschrieben nach {pfad}")
-    sprich(ANSAGE_ENDE)
-    # VORLESEN MIT SATZZEICHEN (Stephan, 2026-08-18: "Wiederholung wieder im
-    # Express"). Ohne sie hetzt Piper durch die Liste - gemessen 3,670 s
-    # gegen 4,884 s fuer denselben Text, und der Unterschied besteht
-    # ausschliesslich aus Pausen.
-    #
-    # Es war NICHT das Tempo: Speicher-Kette und speech-dispatcher-Kette
-    # liefern seit "--noise_w 0" beide 3,670 s. Vosk liefert keine
-    # Satzzeichen, aber hier braucht es keine zu erkennen - jede Aeusserung
-    # WAR ein eigener Eintrag, und genau daraus entsteht die Zeichensetzung.
-    sprich("Ich habe notiert: " + aufzaehlen(gesammelt))
+    sprich(ansage_ende(name, len(gesammelt)))
+    # KEIN Vorlesen mehr an dieser Stelle (Stephan, 2026-08-19) - siehe
+    # VORLESEN_HINWEIS oben. Das Vorlesen mit Satzzeichen lebt unveraendert in
+    # dialos-notiz.py weiter, wo es auf Ansage geschieht; die dort gemessene
+    # Begruendung (3,670 s ohne gegen 4,884 s mit Satzzeichen, der Unterschied
+    # besteht ausschliesslich aus Pausen) gilt weiter und steht in
+    # docs/diktat.md.
     return 0
 
 

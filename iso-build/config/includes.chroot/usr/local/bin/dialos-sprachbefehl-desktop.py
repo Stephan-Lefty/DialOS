@@ -464,11 +464,19 @@ def mitschrift_oeffnen():
     else:
         melde("  kein Terminal gefunden - keine Mitschrift")
         return
+    # RUECKBLICK: Der Satz, der das Fenster oeffnet, steht schon im Protokoll,
+    # bevor die Mitschrift zu lesen beginnt - "sprachsteuerung starten" fehlte
+    # deshalb IMMER, im Fenster wie im Support-Protokoll (Stephans Test vom
+    # 2026-08-19). 20 Sekunden nehmen ihn mit und dazu die Versuche davor, die
+    # nicht erkannt wurden - fuer den Support die aufschlussreichere Haelfte.
+    RUECKBLICK = "20"
     if terminal.endswith("gnome-terminal"):
         befehl = [terminal, "--title=DialOS - Mitschrift",
-                  "--geometry=100x30", "--", MITSCHRIFT]
+                  "--geometry=100x30", "--",
+                  MITSCHRIFT, "--rueckblick", RUECKBLICK]
     else:
-        befehl = [terminal, "-e", MITSCHRIFT]
+        # -e nimmt bei den meisten Terminals nur EINE Zeichenkette.
+        befehl = [terminal, "-e", f"{MITSCHRIFT} --rueckblick {RUECKBLICK}"]
     try:
         subprocess.Popen(befehl, start_new_session=True,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -887,15 +895,21 @@ def main():
             # ein nicht erkannter Satz.
             if (ist_phrase(satz, STARTSATZ, "starten") if not hoert_zu
                     else STARTSATZ in satz):
+                # In BEIDEN Faellen, und VOR der Ansage. Vor der Ansage, weil
+                # das Fenster einen Moment braucht und die Ansage ohnehin gut
+                # eine Sekunde dauert - so steht es, wenn der Nutzer den ersten
+                # Befehl sagt. In beiden Faellen wegen Stephans Test vom
+                # 2026-08-19: Die Sprachsteuerung lief schon, also lief der
+                # Aufruf nur im else-Zweig und kein Fenster ging auf. Wer
+                # "Sprachsteuerung starten" sagt, will, dass etwas passiert -
+                # und ein von Hand geschlossenes Fenster kaeme sonst nie
+                # zurueck, ohne die Steuerung erst auszuschalten.
+                mitschrift_oeffnen()
                 if hoert_zu:
                     sprich(ANSAGE_LAEUFT_SCHON)
                 else:
                     hoert_zu = True
                     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AN)
-                    # VOR der Ansage: das Fenster braucht einen Moment, und die
-                    # Ansage dauert ohnehin gut eine Sekunde. So steht es, wenn
-                    # der Nutzer den ersten Befehl sagt.
-                    mitschrift_oeffnen()
                     sprich(ANSAGE_AN)
                 # KEINE Sperrfrist hier - siehe Kommentar bei
                 # SPERRFRIST_S. Direkt nach "Ich hoere." erwartet der

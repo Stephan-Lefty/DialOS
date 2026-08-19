@@ -343,3 +343,38 @@ Ungelöst und noch nicht gemessen. Der klassische Weg sind gesprochene
 Satzzeichen („Komma", „Punkt", „Absatz"), die der Nutzer lernen muss. Zu
 prüfen ist, ob sie sich zuverlässig von gleichlautenden Wörtern im Text
 trennen lassen - „Punkt" kann auch ein Wort im Satz sein.
+
+## Nach dem Diktat: Hinweis statt Vorlesen (Stephan, 2026-08-19)
+
+Bis zum 2026-08-19 las „Diktat beenden" die fertige Notiz komplett vor. Das
+klang nach Sorgfalt, war aber ein Fehler in zwei Richtungen:
+
+1. **Es machte „Einkaufszettel vorlesen" überflüssig.** Ein Befehl, der schon
+   von selbst passiert, braucht niemand.
+2. **Es nahm dem Nutzer die Wahl.** Wer drei Waren aufschreibt, will sie nicht
+   dreimal hören. Wer zwanzig diktiert hat, will es vielleicht doch.
+
+Seitdem bestätigt DialOS und sagt, **wie** man das Vorlesen bekommt:
+
+> „Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel
+> vorgelesen haben, dann sage: Einkaufszettel vorlesen."
+
+**Warum die Anzahl drin bleibt.** Sie ersetzt das Vorlesen: Sie ist das
+einzige, woran ein blinder Nutzer merkt, dass überhaupt etwas angekommen ist -
+und wie viel. Ein bloßes „Diktat beendet." ließe ihn im Dunkeln.
+
+**Warum ein Hinweis und keine Rückfrage.** Eine Rückfrage („Soll ich
+vorlesen?") verlangt eine Antwort und hält das Gerät auf, bis sie kommt. Ein
+Hinweis kostet nichts, wenn man ihn nicht braucht.
+
+**Warum der Hinweis aus einer Tabelle kommt.** Genannt werden nur Ziele, für
+die es den Vorlese-Befehl wirklich gibt (`einkaufszettel`, `notizen` - siehe
+`docs/sprachbefehle.md`). Ein späteres Ziel wie „brief" bekommt vorerst nur
+die Bestätigung. Einem blinden Nutzer einen Satz zu nennen, den die Grammatik
+nicht kennt, wäre schlimmer als kein Hinweis: er würde ihn sagen, nichts
+würde passieren, und er hätte keine Möglichkeit herauszufinden warum.
+
+Das Vorlesen **mit Satzzeichen** lebt unverändert in `dialos-notiz.py` weiter,
+wo es auf Ansage geschieht. Die dort gemessene Begründung gilt weiter: 3,670 s
+ohne gegen 4,884 s mit Satzzeichen, und der Unterschied besteht ausschließlich
+aus Pausen.
