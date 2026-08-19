@@ -114,6 +114,10 @@ UEBERSETZUNG = [
     # bleibt" und die rohen PipeWire-Ereignisse stehen im Protokoll und werden
     # unten verworfen - bei einem Bluetooth-Verbindungsaufbau feuert PipeWire
     # ein Dutzend davon.
+    # "None" als Ausgangspunkt heisst: der Beobachter hatte noch keine eigene
+    # Wahl - das ist die erste Zeile jeder Sitzung und kein Wechsel. VOR dem
+    # allgemeinen Muster geprueft, sonst stuende dort "Ton wechselt: None -> ...".
+    (re.compile(r"Ausgabe: None -> (\S+)"), "Ton geht auf {}"),
     (re.compile(r"Ausgabe: (\S+) -> (\S+)"), "Ton wechselt: {0} -> {1}"),
     (re.compile(r"=== Ton-Beobachter gestartet ==="), "Ton-Beobachter gestartet"),
     (re.compile(r"Erste Wahl beim Anmelden.*"), "Erste Wahl beim Anmelden"),

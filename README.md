@@ -139,6 +139,13 @@ abgeschlossen.*
       `bluez_output.41_42_AF_06_24_5C.1` wird „Bluetooth-Lautsprecher", aus
       `alsa_output.pci-...` „Laptop-Lautsprecher". Die Mitschrift ist dazu da,
       Protokoll in Sprache zu übersetzen - dann auch das.
+    - **Damit ist der `letzte_wahl`-Fix vom 2026-08-17 erstmals belegt** - er
+      war zwei Tage lang committet und nicht installiert. Stephans Test am
+      2026-08-19: Bluetooth aus um 11:51:58, ein um 11:52:08, und fünf Sekunden
+      später ein Folge-`change`-Ereignis von PipeWire, das richtig als „Ausgabe
+      bleibt" erkannt wurde - **keine** doppelte Ansage. Am 2026-08-17 war es
+      umgekehrt: „Vorgabe bleibt" kam immer, auch beim echten Wechsel, und genau
+      deshalb blieb die Ansage aus.
     - **Falscher Alarm dabei, den ich zurückziehe:** Ich hielt einen zweiten
       `dialos-ton-ausgabe.py`-Prozess für einen doppelten Beobachter. Er war
       Sekunden später weg - ein kurzlebiger Einzelaufruf, der die Senke wählt.

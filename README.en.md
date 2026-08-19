@@ -127,6 +127,13 @@ background) and `splash.png` (boot/login screen).
       "Bluetooth-Lautsprecher", `alsa_output.pci-...` becomes
       "Laptop-Lautsprecher". The transcript exists to translate logs into
       language - so that too.
+    - **This finally proves the `letzte_wahl` fix of 2026-08-17** - it had been
+      committed and not installed for two days. Stephan's test on 2026-08-19:
+      Bluetooth off at 11:51:58, on at 11:52:08, and five seconds later a
+      follow-up `change` event from PipeWire correctly recognized as "Ausgabe
+      bleibt" - **no** duplicate announcement. On 2026-08-17 it was the other way
+      round: "Vorgabe bleibt" came every time, including on a real switch, and
+      that is exactly why the announcement stayed silent.
     - **A false alarm of mine, retracted:** I took a second
       `dialos-ton-ausgabe.py` process for a duplicate watcher. It was gone
       seconds later - a short-lived one-shot invocation that picks the sink.
