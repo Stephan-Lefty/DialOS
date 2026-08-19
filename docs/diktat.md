@@ -435,3 +435,74 @@ Wort-Zeitstempel, die Vosk mit `SetWords(True)` mitliefert - eine Lücke von
 mehr als etwa 0,4 s zwischen zwei Wörtern wäre eine Trennstelle, auch wenn sie
 für das Ende einer Äußerung zu kurz ist. Ungemessen und deshalb in `TODO.md`,
 nicht hier als gelöst.
+
+## Die erste Korrektur jeder Sitzung war ein Münzwurf (2026-08-19)
+
+Am 2026-08-19 stand im Diktat-Protokoll:
+
+```
+10:02:53    erkannt:     'milch sechs eier butter'
+10:03:03    (LanguageTool nicht erreichbar: timed out)
+10:03:03    geschrieben: 'Milch sechs eier butter'
+```
+
+Zehn Sekunden zwischen Erkennung und Ausgabe - genau die Zeitgrenze. Gemessen,
+nachdem der Dienst neu gestartet wurde:
+
+| Anfrage | Dauer |
+|---|---|
+| `/v2/languages` - **das** prüft `lt_lebt()` als „läuft" | **1,3 s** |
+| erste `/v2/check`-Anfrage - hier laden die deutschen Regeln | **9,2 s** |
+| zweite `/v2/check`-Anfrage | 1,0 s |
+| Zeitgrenze im Diktat (`LT_ZEITGRENZE_S`) | 10,0 s |
+
+**9,2 s gegen 10,0 s.** Die erste Korrektur jeder Sitzung hing an 0,8 Sekunden,
+und an diesem Morgen hat sie verloren. Danach lief alles - jede weitere Anfrage
+kostet rund eine Sekunde, und im Protokoll blieb ein einmaliger Ausfall zurück,
+der wie ein Zufall aussah.
+
+**Warum das niemandem auffiel:** `lt_lebt()` fragt `/v2/languages`. Der
+Endpunkt antwortet nach 1,3 s und lädt keine Regeln - der Dienst meldet also
+„läuft", während er auf die erste echte Anfrage noch neun Sekunden braucht. Eine
+Bereitschaftsmeldung, die etwas anderes prüft als das, worauf es ankommt.
+
+**Der frühere Schluss war unvollständig, nicht falsch.** Die Unit dokumentiert
+seit dem 2026-08-18 „der erste Aufruf kostet 8,8 s" und zog daraus „dann eben
+ein Dauerdienst". Ein Dauerdienst **verschiebt** die Ladezeit aber nur auf die
+erste Prüfanfrage, statt sie zu beseitigen.
+
+**Behoben an der Wurzel:** `dialos-schreibhilfe-warmlaufen.py` läuft als
+`ExecStartPost` der Unit und schickt einmal einen echten Satz durch. Die neun
+Sekunden fallen damit beim Anmelden an, wo niemand darauf wartet. Das `-` vor
+dem `ExecStartPost` macht ein Scheitern unschädlich: Ein nicht warmgelaufener
+Dienst ist besser als keiner, und `Restart=on-failure` darf deswegen nicht in
+eine Schleife geraten.
+
+## Wie gut die Groß-/Kleinschreibung wirklich ist (gemessen 2026-08-19)
+
+Gemessen mit `schreibung_richten()` selbst, nicht mit einer Nachbildung -
+**10 von 11** Fällen richtig:
+
+| Diktiert | DialOS schreibt |
+|---|---|
+| `milch` | Milch |
+| `butter` | Butter |
+| `sechs eier` | Sechs Eier |
+| `zwei liter milch` | Zwei Liter Milch |
+| `kaffee und brot` | Kaffee und Brot |
+| `sehr geehrte damen und herren` | Sehr geehrte Damen und Herren |
+| `hiermit kündige ich meine mitgliedschaft zum nächstmöglichen termin` | Hiermit kündige ich meine Mitgliedschaft zum nächstmöglichen Termin |
+| `ich rufe morgen den arzt an` | Ich rufe morgen den Arzt an |
+| `der termin ist am dienstag` | Der Termin ist am Dienstag |
+| `bitte den vertrag mitbringen` | Bitte den Vertrag mitbringen |
+| `milch sechs eier butter` | Milch sechs **e**ier butter ← **falsch** |
+
+**Der einzige Fehlschlag ist eine Wortliste ohne Grammatik.** LanguageTool kann
+dort nicht entscheiden, was Substantiv ist - es fehlt der Satz drumherum.
+Einzeln geht jedes dieser Wörter richtig, und einzeln kommen sie seit dem
+2026-08-19, weil beim Einkaufszettel jede Ware ein eigener Eintrag ist.
+
+**Damit ist die Schreibung bei Briefen und Mails belastbar** - dort sind es
+ganze Sätze. Eine frühere Einschätzung, die Schreibung sei der dringendste
+offene Punkt, ist damit zurückgenommen: Der dringendere war die Ladezeit
+darüber.

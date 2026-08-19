@@ -421,3 +421,72 @@ timestamps Vosk supplies with `SetWords(True)` - a gap of more than roughly
 0.4 s between two words would be a split point, even when it is too short to end
 an utterance. Unmeasured, and therefore in `TODO.md` rather than presented here
 as solved.
+
+## The first correction of every session was a coin toss (2026-08-19)
+
+On 2026-08-19 the dictation log held:
+
+```
+10:02:53    erkannt:     'milch sechs eier butter'
+10:03:03    (LanguageTool nicht erreichbar: timed out)
+10:03:03    geschrieben: 'Milch sechs eier butter'
+```
+
+Ten seconds between recognition and output - exactly the timeout. Measured after
+restarting the service:
+
+| Request | Duration |
+|---|---|
+| `/v2/languages` - **this** is what `lt_lebt()` checks as "running" | **1.3 s** |
+| first `/v2/check` request - the German rules load here | **9.2 s** |
+| second `/v2/check` request | 1.0 s |
+| dictation timeout (`LT_ZEITGRENZE_S`) | 10.0 s |
+
+**9.2 s against 10.0 s.** The first correction of every session hung on 0.8
+seconds, and that morning it lost. Everything after that worked - each further
+request costs about a second - leaving a one-off failure in the log that looked
+like chance.
+
+**Why nobody noticed:** `lt_lebt()` asks `/v2/languages`. That endpoint answers
+in 1.3 s and loads no rules - so the service reports "running" while it still
+needs nine seconds for the first real request. A readiness check that tests
+something other than what matters.
+
+**The earlier conclusion was incomplete, not wrong.** The unit has documented
+"the first call costs 8.8 s" since 2026-08-18 and concluded "then make it a
+long-running service". But a long-running service only **defers** the load time
+to the first check request instead of removing it.
+
+**Fixed at the root:** `dialos-schreibhilfe-warmlaufen.py` runs as the unit's
+`ExecStartPost` and pushes one real sentence through. The nine seconds now fall
+at login, where nobody is waiting for them. The `-` before `ExecStartPost` makes
+a failure harmless: a service that has not warmed up is still better than none,
+and `Restart=on-failure` must not loop because of it.
+
+## How good the capitalization actually is (measured 2026-08-19)
+
+Measured with `schreibung_richten()` itself, not with a reimplementation -
+**10 out of 11** cases correct:
+
+| Dictated | DialOS writes |
+|---|---|
+| `milch` | Milch |
+| `butter` | Butter |
+| `sechs eier` | Sechs Eier |
+| `zwei liter milch` | Zwei Liter Milch |
+| `kaffee und brot` | Kaffee und Brot |
+| `sehr geehrte damen und herren` | Sehr geehrte Damen und Herren |
+| `hiermit kündige ich meine mitgliedschaft zum nächstmöglichen termin` | Hiermit kündige ich meine Mitgliedschaft zum nächstmöglichen Termin |
+| `ich rufe morgen den arzt an` | Ich rufe morgen den Arzt an |
+| `der termin ist am dienstag` | Der Termin ist am Dienstag |
+| `bitte den vertrag mitbringen` | Bitte den Vertrag mitbringen |
+| `milch sechs eier butter` | Milch sechs **e**ier butter ← **wrong** |
+
+**The only failure is a word list without grammar.** LanguageTool cannot decide
+what is a noun there - the surrounding sentence is missing. Individually each of
+those words comes out right, and individually is how they arrive since
+2026-08-19, because each shopping-list item is its own entry.
+
+**So capitalization is dependable for letters and mails** - those are whole
+sentences. An earlier assessment that capitalization was the most urgent open
+point is hereby withdrawn: the more urgent one was the load time above it.

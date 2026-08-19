@@ -7,6 +7,20 @@
 # sogar 9,3 s je Aufruf - fuer ein Diktat unbrauchbar. Laeuft er dagegen,
 # antwortet er in 0,6 bis 1,6 s je Satz.
 #
+# ERGAENZUNG VOM 2026-08-19 - der obige Schluss war unvollstaendig: Die
+# deutschen Regeln laden nicht beim Serverstart, sondern bei der ersten
+# PRUEFANFRAGE. Ein Dauerdienst verschiebt die Ladezeit also nur, statt sie zu
+# beseitigen. Gemessen nach einem Neustart dieses Dienstes:
+#
+#     /v2/languages antwortet nach   1,3 s   <- das prueft lt_lebt() als "laeuft"
+#     erste /v2/check-Anfrage        9,2 s   <- hier laden die Regeln
+#     zweite /v2/check-Anfrage       1,0 s
+#
+# Die Zeitgrenze im Diktat liegt bei 10,0 s. Die erste Korrektur jeder Sitzung
+# war damit ein Muenzwurf mit 0,8 s Luft - und am 2026-08-19 um 10:03:03 hat
+# sie verloren. Deshalb der ExecStartPost unten: Die 9 s fallen einmal beim
+# Anmelden an, wo niemand darauf wartet.
+#
 # WARUM SYSTEMD und nicht /etc/xdg/autostart wie die uebrigen
 # DialOS-Dienste: Dieser hier ist ein Java-Server, der abstuerzen kann.
 # "Restart=on-failure" holt ihn zurueck; eine .desktop-Datei kann das
@@ -27,6 +41,11 @@ After=graphical-session.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/java -cp /opt/languagetool/languagetool-server.jar org.languagetool.server.HTTPServer --port 8081
+# Warmlaufen, damit die erste echte Korrektur nicht die Regelladezeit traegt.
+# Das "-" davor macht ein Scheitern unschaedlich: Ein nicht warmgelaufener
+# Dienst ist besser als keiner, und Restart=on-failure duerfte deswegen nicht
+# in eine Schleife geraten.
+ExecStartPost=-/usr/local/bin/dialos-schreibhilfe-warmlaufen.py
 Restart=on-failure
 RestartSec=5
 # Gemessen belegt der Dienst rund 1213 MB. Die Grenze liegt bewusst
