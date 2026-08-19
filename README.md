@@ -114,6 +114,45 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **„Hilfe rufen" - DialOS kann jetzt um Hilfe rufen (2026-08-19).** Bis dahin
+  hatte ein Nutzer, bei dem etwas nicht funktioniert, **keinen Weg**, den Support
+  zu erreichen; alles, was an Nachvollziehbarkeit gebaut wurde, setzte voraus,
+  dass überhaupt jemand an das Gerät kommt.
+    - **„Hilfe rufen"** fragt mit einer Rückfrage nach, die erklärt, was passiert
+      („Dein Betreuer kann dann sehen, was auf dem Bildschirm steht"), startet
+      RustDesk und liest die Nummer **ziffernweise in Vierergruppen und zweimal**
+      vor. Als Zahl gelesen wäre sie unbrauchbar, und mitschreiben kann der
+      Nutzer nicht. **„Fernwartung beenden"** beendet sie wieder.
+    - **Ein Einmalpasswort ist mit RustDesk 1.4.9 nicht zu haben** - fünf Wege
+      geprüft, alle zu (Details in `docs/sicherheit-datenschutz.md`). Es steht in
+      keiner Datei, `rustdesk --password` ist wirkungslos selbst als root, und
+      [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074) ist offen.
+    - **Deshalb garantiert die LAUFZEIT die Begrenzung, nicht das Passwort** - der
+      härtere Hebel: Solange RustDesk nicht läuft, ist keine Verbindung möglich,
+      egal wer das Passwort kennt. Es startet nie von selbst und endet nach
+      **einer Stunde** von selbst, mit Vorwarnung drei Minuten vorher; ein
+      erneutes „Hilfe rufen" verlängert.
+    - **Und die Ansage sagt das, statt etwas Falsches zu behaupten.** „Das
+      Passwort gilt nur für diesen Einsatz" wäre eine Lüge, solange es dauerhaft
+      ist - einem Nutzer, der den Bildschirm nicht sieht, eine falsche Sicherheit
+      zu erzählen ist schlimmer, als ihm die richtige zu erklären.
+    - **Absolut statt im Leerlauf, und warum:** Stephans Frage war richtig -
+      Leerlauf wäre die bessere Semantik. Nur hat sich auf diesem Gerät noch nie
+      jemand verbunden, die Signatur einer aktiven Verbindung ist unbekannt, und
+      eine Grenze, die eine aktive Sitzung für Leerlauf hält, schneidet den
+      Betreuer bei der Arbeit ab. `spur_notieren()` sammelt deshalb die
+      Anhaltspunkte mit; nach dem ersten echten Verbindungsversuch lässt sich die
+      Erkennung **belegt** bauen.
+    - **Zwei Funde am Rand:** `rustdesk --help` **startet die Oberfläche** statt
+      Hilfe auszugeben - der Aufruf lief in die Zeitgrenze und ließ ein RustDesk
+      laufen, das ich beendet habe. Und RustDesk kontaktiert beim Start
+      `api.rustdesk.com`; das steht jetzt in der Datenschutz-Doku.
+    - **Neues Werkzeug:** `scripts/dialos-grammatik-pruefen.py` - Piper spricht
+      jeden Satz der Grammatik, Vosk hört zu. Eine Pflichtprüfung, die davon
+      abhängt, dass sich jemand an den Piper-Aufruf erinnert, findet irgendwann
+      nicht mehr statt. **Alle 18 Sätze wörtlich erkannt**, auch die 16
+      bestehenden.
+
 - **Die erste Korrektur jeder Sitzung war ein Muenzwurf - und die Schreibung ist
   besser als gedacht (2026-08-19).** Der Ausfall vom Morgen ("LanguageTool nicht
   erreichbar: timed out", 10:03:03) war kein Zufall, sondern systematisch.

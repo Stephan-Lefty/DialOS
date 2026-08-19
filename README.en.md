@@ -105,6 +105,43 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **"Hilfe rufen" - DialOS can now call for help (2026-08-19).** Until then a
+  user for whom something did not work had **no way** to reach support;
+  everything built for traceability presupposed that somebody gets to the device
+  at all.
+    - **"Hilfe rufen"** asks with a confirmation that explains what happens
+      ("your supporter can then see what is on the screen"), starts RustDesk and
+      reads the number out **digit by digit in groups of four and twice**. Spoken
+      as a number it would be useless, and the user cannot write it down.
+      **"Fernwartung beenden"** ends it again.
+    - **A one-time password is not obtainable with RustDesk 1.4.9** - five routes
+      tested, all closed (details in `docs/sicherheit-datenschutz.en.md`). It is
+      in no file, `rustdesk --password` has no effect even as root, and
+      [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074) is open.
+    - **So RUNTIME guarantees the limit, not the password** - the harder lever: as
+      long as RustDesk is not running, no connection is possible, whoever knows
+      the password. It never starts by itself and ends by itself after **one
+      hour**, with a warning three minutes before; another "Hilfe rufen" extends
+      it.
+    - **And the announcement says so, instead of claiming something false.** "The
+      password is only valid for this session" would be a lie while it is
+      permanent - telling a user who cannot see the screen a false sense of
+      security is worse than explaining the real one.
+    - **Absolute rather than idle-based, and why:** Stephan's question was right -
+      idle would be the better semantics. But nobody has ever connected to this
+      device, the signature of an active connection is unknown, and a limit that
+      mistakes an active session for idle cuts the supporter off mid-work.
+      `spur_notieren()` therefore collects the evidence; after the first real
+      connection attempt the detection can be built from **evidence**.
+    - **Two findings on the way:** `rustdesk --help` **starts the UI** instead of
+      printing help - the call ran into the timeout and left a RustDesk running,
+      which I stopped. And RustDesk contacts `api.rustdesk.com` on startup; that
+      is now in the privacy documentation.
+    - **New tool:** `scripts/dialos-grammatik-pruefen.py` - Piper speaks every
+      sentence of the grammar, Vosk listens. A mandatory check that depends on
+      somebody remembering the Piper invocation eventually stops happening. **All
+      18 sentences recognized verbatim**, including the 16 existing ones.
+
 - **The first correction of every session was a coin toss - and capitalization
   is better than assumed (2026-08-19).** The morning failure ("LanguageTool nicht
   erreichbar: timed out", 10:03:03) was not chance but systematic.
