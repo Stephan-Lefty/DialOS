@@ -93,6 +93,11 @@ UEBERSETZUNG = [
     (re.compile(r"anderer Dienst hoert zu.*"),          "Befehle sind still - ein anderer Dienst hört zu"),
     (re.compile(r"anderer Dienst fertig.*"),            "Befehle hören wieder zu"),
     (re.compile(r"\(Aufnahme nach Sprechpause neu begonnen\)"), "Aufnahme neu begonnen"),
+    # Warum die Sitzung endet, ist die wichtigste Zeile fuer den Support - und
+    # stand bis zum 2026-08-19 gar nicht im Protokoll.
+    (re.compile(r"Zeitgrenze: (\d+) s ohne Befehl"),
+     "Zeitgrenze: {} s ohne Befehl - Sprachsteuerung schaltet ab"),
+    (re.compile(r"Mitschrift wird geschlossen.*"), "Mitschrift wird geschlossen"),
     (re.compile(r"grosses Modell geladen in (.+)"),     "Sprachmodell geladen ({})"),
     (re.compile(r"kleines Modell fuer den Schlusssatz in (.+)"), "Schluss-Erkenner bereit ({})"),
     (re.compile(r"=== Diktat gestartet \((.+?),\s*(.+?)\).*"), "Diktat läuft ({1})"),

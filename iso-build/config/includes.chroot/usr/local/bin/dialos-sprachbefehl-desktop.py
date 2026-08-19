@@ -399,6 +399,13 @@ def sprich(text):
 # am Anmelden: wo nicht gesprochen wird, gibt es auch nichts mitzuschreiben.
 MITSCHRIFT = "/usr/local/bin/dialos-mitschrift.py"
 
+# Wartezeit zwischen der letzten Protokollzeile und dem Schliessen des Fensters.
+# Die Mitschrift sieht alle 0,4 s nach; wird sofort geschlossen, liest sie ihre
+# eigenen letzten Zeilen nie - im Protokoll vom 2026-08-19 fehlte deshalb, WARUM
+# die Sprachsteuerung aufgehoert hatte. Eine Sekunde ist reichlich Abstand und
+# faellt beim Abschalten nicht auf, weil davor ohnehin eine Ansage laeuft.
+NACHLAUF_S = 1.0
+
 
 def mitschrift_gewuenscht():
     """Soll das Fenster mit der Sprachsteuerung aufgehen?
@@ -486,11 +493,23 @@ def mitschrift_oeffnen():
 
 
 def mitschrift_schliessen():
-    """Alle laufenden Mitschriften beenden; die Fenster gehen mit."""
-    for pid in mitschrift_pids():
+    """Alle laufenden Mitschriften beenden; die Fenster gehen mit.
+
+    ERST MELDEN, DANN WARTEN, DANN SCHLIESSEN. Vorher stand die Meldung hinter
+    dem Beenden - das Fenster war beim Schreiben schon tot und konnte die Zeile
+    nicht mehr lesen. Fuer den Zweck des Fensters ist das die falsche
+    Reihenfolge: gerade die letzten Zeilen einer Sitzung sagen, warum sie zu
+    Ende ging.
+    """
+    pids = mitschrift_pids()
+    if not pids:
+        return
+    for pid in pids:
+        melde(f"  Mitschrift wird geschlossen (PID {pid})")
+    time.sleep(NACHLAUF_S)
+    for pid in pids:
         try:
             os.kill(pid, signal.SIGTERM)
-            melde(f"  Mitschrift geschlossen (PID {pid})")
         except OSError:
             pass          # schon weg - dann ist das Ziel ja erreicht
 
@@ -758,6 +777,17 @@ def main():
             if hoert_zu and time.time() - letzte_aktivitaet > ZEITGRENZE_S:
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
+                # PROTOKOLLIEREN, UND ZWAR VOR DER ANSAGE (2026-08-19). Bisher
+                # stand ueber die Zeitgrenze nichts im Protokoll - nur, dass die
+                # Mitschrift geschlossen wurde. Damit stand dort die Wirkung und
+                # nicht die Ursache, und im Support-Protokoll fehlte die Antwort
+                # auf die Frage, warum die Sprachsteuerung aufgehoert hat.
+                # Dieselbe Luecke wie am Morgen bei "erkannt:", nur am anderen
+                # Ende der Sitzung.
+                #
+                # Vor der Ansage, weil die Ansage 3,5 s dauert - in dieser Zeit
+                # liest die Mitschrift die Zeile noch, bevor sie zugeht.
+                melde(f"Zeitgrenze: {ZEITGRENZE_S:.0f} s ohne Befehl")
                 sprich(ANSAGE_ZEITGRENZE)
                 mitschrift_schliessen()
                 continue

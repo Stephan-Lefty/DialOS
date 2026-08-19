@@ -1386,6 +1386,25 @@ Two traps in it that would have broken both:
   run downwards, and where one jumps up, that is the day boundary and reading
   stops.
 
+**And the same at the end of the session** (found on 2026-08-19, after the
+backlog had healed the beginning). At 10:53:27 the log held only "Mitschrift
+geschlossen" - why the voice control had stopped was nowhere. Two causes, both
+fixed:
+
+- **The timeout was not logged at all.** The service switched off after two
+  minutes, announced it and closed the window - without writing a line about it.
+  So the log held the effect and not the cause. Now `Zeitgrenze: 120 s ohne
+  Befehl` is written, and **before** the announcement: that runs 3.5 s, during
+  which the transcript still reads the line.
+- **The last line came too late to be read.** `melde()` sat behind the `kill` -
+  the window was dead before the message was written. Now it reports first,
+  waits `NACHLAUF_S = 1.0`, then closes. The transcript polls every 0.4 s; one
+  second is ample, and it goes unnoticed because an announcement is running
+  anyway.
+
+Both are the same class of fault as the missing backlog: **the log showed what
+happened but not why.** For debugging that is the useless half.
+
 Anyone who wants the screen free creates `~/.config/dialos/mitschrift`
 containing `aus`. The default is **on**, because of the support log (right
 below): were the window off by default, there would be nothing to read back

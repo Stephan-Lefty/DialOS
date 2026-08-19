@@ -114,6 +114,24 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Warum die Sitzung endete, stand nirgends (2026-08-19).** Stephan fiel im
+  Support-Protokoll eine Lücke auf: Zwischen 10:51 und 10:57 hatte sich die
+  Sprachsteuerung per Zeitgrenze abgeschaltet, aber im Protokoll stand um
+  10:53:27 nur „Mitschrift geschlossen". Zwei Ursachen:
+    - **Die Zeitgrenze wurde überhaupt nicht protokolliert.** Der Dienst
+      schaltete ab, sagte es an, schloss das Fenster - und schrieb keine Zeile
+      darüber. Damit stand im Protokoll die Wirkung und nicht die Ursache. Jetzt
+      kommt `Zeitgrenze: 120 s ohne Befehl`, und zwar **vor** der Ansage: die
+      dauert 3,5 s, in denen die Mitschrift die Zeile noch liest.
+    - **Die letzte Zeile war beim Schreiben schon zu spät:** `melde()` stand
+      hinter dem `kill`, das Fenster war tot, bevor die Meldung geschrieben war.
+      Jetzt wird erst gemeldet, dann eine Sekunde gewartet (`NACHLAUF_S`), dann
+      geschlossen - die Mitschrift sieht alle 0,4 s nach.
+    - **Dieselbe Fehlerklasse wie der fehlende Rückblick am Morgen**, nur am
+      anderen Ende der Sitzung: Das Protokoll zeigte, *was* passiert ist, aber
+      nicht *warum*. Für die Fehlersuche ist das die unbrauchbare Hälfte. Beide
+      Zeilen sind jetzt end-to-end belegt.
+
 - **Sprachbeispiele für die neuen Ansagen, und zwei Fehler in der Fußzeile
   (2026-08-19).** `docs/sprachbeispiele/` ist von 12 auf **15** Dateien
   gewachsen: der Diktatstart beim Einkaufszettel mit der Anleitung, der Hinweis

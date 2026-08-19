@@ -1427,6 +1427,26 @@ Zwei Fallen darin, die beides kaputt gemacht haetten:
   Dateiende **rueckwaerts** gelesen: die Uhrzeit laeuft dabei fallend, und wo
   sie nach oben springt, ist der Tageswechsel und wird abgebrochen.
 
+**Und dasselbe am Ende der Sitzung** (gefunden am 2026-08-19, nachdem der
+Rueckblick den Anfang geheilt hatte). Im Protokoll stand um 10:53:27 nur
+"Mitschrift geschlossen" - warum die Sprachsteuerung aufgehoert hatte, stand
+nirgends. Zwei Ursachen, beide behoben:
+
+- **Die Zeitgrenze wurde gar nicht protokolliert.** Der Dienst schaltete nach
+  zwei Minuten ab, sagte es an und schloss das Fenster - ohne eine Zeile
+  darueber zu schreiben. Damit stand im Protokoll die Wirkung und nicht die
+  Ursache. Jetzt kommt `Zeitgrenze: 120 s ohne Befehl`, und zwar **vor** der
+  Ansage: die dauert 3,5 s, in denen die Mitschrift die Zeile noch liest.
+- **Die letzte Zeile war beim Schreiben schon zu spaet.** `melde()` stand
+  hinter dem `kill` - das Fenster war tot, bevor die Meldung geschrieben war.
+  Jetzt wird erst gemeldet, dann `NACHLAUF_S = 1.0` gewartet, dann geschlossen.
+  Die Mitschrift sieht alle 0,4 s nach; eine Sekunde ist reichlich, und sie
+  faellt nicht auf, weil davor ohnehin eine Ansage laeuft.
+
+Beides ist dieselbe Fehlerklasse wie der fehlende Rueckblick: **Das Protokoll
+zeigte, was passiert ist, aber nicht, warum.** Fuer die Fehlersuche ist das die
+unbrauchbare Haelfte.
+
 Wer den Bildschirm frei haben will, legt `~/.config/dialos/mitschrift` mit dem
 Inhalt `aus` an. Vorgabe ist **an**, und zwar wegen des Support-Protokolls
 (gleich darunter): waere das Fenster ab Werk aus, gaebe es beim Anruf auch

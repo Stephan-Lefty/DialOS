@@ -105,6 +105,24 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Why the session ended was recorded nowhere (2026-08-19).** Stephan spotted a
+  gap in the support log: between 10:51 and 10:57 the voice control had switched
+  off via the timeout, but at 10:53:27 the log held only "Mitschrift
+  geschlossen". Two causes:
+    - **The timeout was not logged at all.** The service switched off, announced
+      it, closed the window - and wrote no line about it. So the log held the
+      effect and not the cause. Now `Zeitgrenze: 120 s ohne Befehl` is written,
+      and **before** the announcement: that runs 3.5 s, during which the
+      transcript still reads the line.
+    - **The last line came too late to be read:** `melde()` sat behind the
+      `kill`, so the window was dead before the message was written. Now it
+      reports first, waits one second (`NACHLAUF_S`), then closes - the
+      transcript polls every 0.4 s.
+    - **The same class of fault as the missing backlog that morning**, just at
+      the other end of the session: the log showed *what* happened but not *why*.
+      For debugging that is the useless half. Both lines are now proven
+      end-to-end.
+
 - **Speech samples for the new announcements, and two faults in the footer
   (2026-08-19).** `docs/sprachbeispiele/` has grown from 12 to **15** files: the
   dictation start for the shopping list with its instruction, the hint after
