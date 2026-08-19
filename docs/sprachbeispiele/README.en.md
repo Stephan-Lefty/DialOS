@@ -17,17 +17,41 @@ scripts/dialos-sprachbeispiele.py
 | `01-start-ansage-nutzer.ogg` | 29.3 s | The announcement at switch-on, as `nutzer` hears it. |
 | `02-lautstaerke-frage.ogg` | 10.0 s | The volume question - only on the **first** login. |
 | `03-sprachsteuerung-an.ogg` | 0.9 s | Reply to "Sprachsteuerung starten". |
-| `04-sprachsteuerung-aus.ogg` | 1.2 s | Reply to "Sprachsteuerung stoppen". |
+| `04b-sprachsteuerung-zeitgrenze.ogg` | 3.5 s | When no command arrived for two minutes. Deliberately **with** a reason - a bare "Ich höre Dir nicht mehr zu." would leave the user guessing why. |
+| `04-sprachsteuerung-aus.ogg` | 1.6 s | Reply to "Sprachsteuerung stoppen". |
 | `05-desktop-windows.ogg` | 1.4 s | After "auf Windows umschalten". |
 | `06-desktop-steht-schon.ogg` | 2.1 s | When the desktop is already in that style - a different announcement from a real switch, because a blind user could not otherwise tell them apart. |
-| `07-diktat-beginn.ogg` | 3.7 s | Both sentences at the start of a dictation. The first covers the ~9 s load time of the big speech model. |
+| `07-diktat-beginn.ogg` | 3.7 s | Both sentences at the start of dictating a note. The first covers the ~9 s load time of the big speech model. |
+| `07b-diktat-beginn-einkaufszettel.ogg` | 7.3 s | The same for the **shopping list** - with the instruction "Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." Only here, because for a note an utterance really is a sentence. In operation the 9 s load time sits between the two sentences; in the file they follow one another. |
+| `07c-diktat-ende-hinweis.ogg` | 8.1 s | After "Diktat beenden". No longer reads the note back but announces the count and how to get it read out. **The longest announcement in the system** - and thus at the limit of the project's own rule, see below. |
 | `08-einkaufszettel-vorlesen.ogg` | 5.8 s | "Einkaufszettel vorlesen". The count comes first, then the entries with pauses. |
-| `09-einkaufszettel-wegwerfen.ogg` | 3.9 s | The confirmation before emptying. |
+| `09-einkaufszettel-wegwerfen.ogg` | 5.3 s | The confirmation before emptying - now with "Sage ja oder nein.", because a blind user sees no buttons. |
+| `09b-rueckfrage-nochmal.ogg` | 3.1 s | If no usable answer arrived, DialOS asks **once** more instead of aborting. |
 | `10-ton-ueber-lautsprecher.ogg` | 1.5 s | When the Bluetooth speaker is switched on and the audio moves there. |
 | `11-kein-mikrofon.ogg` | 3.5 s | A failure case - it is **announced**, not only written to the log. |
 
-63 s and about 380 kB in total. OGG Vorbis, because `sox` can write it
+87 s and about 526 kB in total. OGG Vorbis, because `sox` can write it
 without an extra package and WAV would bloat the repository needlessly.
+
+## What the duration reveals about the announcements
+
+The "duration" column is not decoration. While DialOS speaks it **deliberately
+does not listen** - every second of announcement is a second the user has to
+wait. That is why [../sprachbefehle.en.md](../sprachbefehle.en.md) carries the
+rule "keep announcements short, but keep them sentences", and it comes from a
+fault on 2026-08-17: **eight seconds of explanation were too much.**
+
+`07c-diktat-ende-hinweis.ogg` runs **8.1 s** and therefore sits exactly at that
+limit. The wording is Stephan's requirement of 2026-08-19, so it stands as
+given - but the measurement belongs alongside it, not in the memory hole.
+Measured shortenings, in case it turns out too long:
+
+| Wording | Duration |
+|---|---|
+| "Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen." | 8.05 s |
+| "Diktat beendet, 3 Einträge geschrieben. Zum Vorlesen sage: Einkaufszettel vorlesen." | 6.07 s |
+| "3 Einträge geschrieben. Zum Vorlesen sage: Einkaufszettel vorlesen." | 4.94 s |
+| "Diktat beendet, 3 Einträge geschrieben." (no hint) | 2.88 s |
 
 ## The history lives in Git
 

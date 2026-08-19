@@ -101,8 +101,24 @@ def drucken(pfad, art="dokument"):
 
 
 def main():
-    argumente = [a for a in sys.argv[1:] if not a.startswith("--")]
-    art = "mail" if "mail" in " ".join(sys.argv) else "dokument"
+    # ZWEI FEHLER, beide am 2026-08-19 gefunden, als Stephan die Fusszeile
+    # sehen wollte:
+    #
+    # 1. Der Filter warf "--art" weg, aber nicht dessen Wert - "mail" blieb in
+    #    der Liste stehen und wurde als DATEINAME genommen. "--art mail" war
+    #    damit nicht benutzbar, genau die Form aus der Aufrufhilfe oben.
+    # 2. Die Art wurde per Textsuche in der GANZEN Befehlszeile bestimmt. Eine
+    #    Datei "mailand-reise.txt" haette damit "Diese Nachricht" bekommen -
+    #    ein Dokument, das sich als Mail ausgibt. Beim Suchen nach einem Wort
+    #    im ganzen Aufruf kann so etwas nicht ausbleiben.
+    argumente = sys.argv[1:]
+    art = "dokument"
+    if "--art" in argumente:
+        i = argumente.index("--art")
+        if i + 1 < len(argumente):
+            art = argumente[i + 1]
+        del argumente[i:i + 2]
+    argumente = [a for a in argumente if not a.startswith("--")]
     if not argumente:
         print(__doc__.strip().split("Aufruf:")[-1].strip(), file=sys.stderr)
         return 2

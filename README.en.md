@@ -105,6 +105,33 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Speech samples for the new announcements, and two faults in the footer
+  (2026-08-19).** `docs/sprachbeispiele/` has grown from 12 to **15** files: the
+  dictation start for the shopping list with its instruction, the hint after
+  "Diktat beenden", and the follow-up question after an unintelligible answer.
+  The confirmation before emptying and the read-back were regenerated because
+  their wording changed; `04b` (timeout) had been missing from the table.
+    - **The texts now come from the real scripts**, no longer from copied
+      strings: the generator imports `dialos-diktat.py` and `dialos-notiz.py` and
+      calls `ansage_ende()`, `benennen()` and `aufzaehlen()` exactly as the system
+      does. Copied by hand, the samples would drift apart at the next change of
+      wording - and unnoticed, because each sounds right on its own.
+    - **Measured and stated openly:** the hint after the dictation runs **8.05 s**
+      and is thus the longest announcement in the system. The project's own rule
+      in `docs/sprachbefehle.en.md` says "eight seconds of explanation were too
+      much" (fault of 2026-08-17). The wording is Stephan's requirement and
+      therefore stands, but three measured shortenings (6.07 s / 4.94 s / 2.88 s)
+      now sit beside it in `docs/sprachbeispiele/README.en.md`.
+    - **Two faults in `dialos-fusszeile.py`, found because Stephan wanted to see
+      the footer:** `--art mail` filtered out only `--art` and not its value -
+      "mail" ended up as the **filename**, so the documented invocation was not
+      usable at all. And the kind was determined by a substring search over the
+      whole command line: a file `mailand-reise.txt` would have got "Diese
+      Nachricht". Both fixed, both verified.
+    - **"ja" / "nein" were missing from the command list** - built in the
+      morning, recorded only now. They apply only during a confirmation, with a
+      recognizer of their own and a grammar of exactly those two words.
+
 - **The yes/no confirmation was not listening when the answer came
   (2026-08-19).** Stephan's "ja" when clearing the shopping list never arrived -
   after 15 seconds the log held only "keine verwertbare Antwort" and **not a

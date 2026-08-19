@@ -50,6 +50,7 @@ listen?".
 | **"Notizen vorlesen"** (read the notes) | The same for the collective note. |
 | **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." If no usable answer arrives, DialOS asks **a second time** ("Das habe ich nicht verstanden. Sage ja oder nein."); only then does the list stay. The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |
 | **"Einkaufszettel wegwerfen"** (throw the shopping list away) | Equivalent to "Einkauf erledigt". Two phrasings for the same thing so the user need not memorise one - as with "auf Linux" and "auf Gnome". |
+| **"ja" / "nein"** (yes/no) | Answer to a confirmation - so far only before emptying a note. Valid **only during the confirmation**: a recognizer of its own runs for it, with a grammar of exactly these two words, while the command service keeps out. If nothing usable arrives, DialOS asks once more; after that the list stays. |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |
 
 ## Planned, not built yet

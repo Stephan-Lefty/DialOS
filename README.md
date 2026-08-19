@@ -114,6 +114,34 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Sprachbeispiele für die neuen Ansagen, und zwei Fehler in der Fußzeile
+  (2026-08-19).** `docs/sprachbeispiele/` ist von 12 auf **15** Dateien
+  gewachsen: der Diktatstart beim Einkaufszettel mit der Anleitung, der Hinweis
+  nach „Diktat beenden", und die Nachfrage bei unverstandener Antwort. Die
+  Rückfrage vor dem Leeren und das Vorlesen wurden neu erzeugt, weil sich ihr
+  Wortlaut geändert hat; `04b` (Zeitgrenze) fehlte bisher in der Tabelle.
+    - **Die Texte kommen jetzt aus den echten Skripten**, nicht mehr aus
+      abgeschriebenen Zeichenketten: Das Erzeugungsskript importiert
+      `dialos-diktat.py` und `dialos-notiz.py` und ruft `ansage_ende()`,
+      `benennen()` und `aufzaehlen()` genauso auf wie das System. Von Hand
+      abgeschrieben liefen die Beispiele beim nächsten Wortlaut auseinander -
+      und zwar unbemerkt, weil sie für sich genommen richtig klingen.
+    - **Gemessen und offen benannt:** Der Hinweis nach dem Diktat dauert
+      **8,05 s** und ist damit die längste Ansage im System. Die eigene Regel in
+      `docs/sprachbefehle.md` sagt „acht Sekunden Erklärung waren zu viel"
+      (Fehler vom 2026-08-17). Der Wortlaut ist Stephans Vorgabe und bleibt
+      deshalb stehen, aber drei gemessene Kürzungen (6,07 s / 4,94 s / 2,88 s)
+      stehen jetzt in `docs/sprachbeispiele/README.md` daneben.
+    - **Zwei Fehler in `dialos-fusszeile.py`, gefunden weil Stephan die Fußzeile
+      sehen wollte:** `--art mail` filterte nur `--art` heraus und nicht dessen
+      Wert - „mail" landete als **Dateiname**, die dokumentierte Aufrufform war
+      also gar nicht benutzbar. Und die Art wurde per Textsuche in der ganzen
+      Befehlszeile bestimmt: eine Datei `mailand-reise.txt` hätte „Diese
+      Nachricht" bekommen. Beide behoben, beide gegengeprüft.
+    - **„ja" / „nein" fehlten in der Befehlsliste** - eingebaut am Vormittag,
+      eingetragen erst jetzt. Sie gelten nur während einer Rückfrage, mit einem
+      eigenen Erkenner und einer Grammatik aus genau diesen zwei Wörtern.
+
 - **Die Ja/Nein-Rückfrage hörte nicht zu, wenn geantwortet wurde
   (2026-08-19).** Stephans „ja" beim Löschen des Einkaufszettels kam nie an - im
   Protokoll stand nach 15 Sekunden nur „keine verwertbare Antwort" und **keine

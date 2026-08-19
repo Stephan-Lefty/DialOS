@@ -17,17 +17,41 @@ scripts/dialos-sprachbeispiele.py
 | `01-start-ansage-nutzer.ogg` | 29,3 s | Die Ansage beim Einschalten, wie `nutzer` sie hört. |
 | `02-lautstaerke-frage.ogg` | 10,0 s | Die Rückfrage nach der Lautstärke - kommt nur beim **ersten** Anmelden. |
 | `03-sprachsteuerung-an.ogg` | 0,9 s | Antwort auf „Sprachsteuerung starten". |
-| `04-sprachsteuerung-aus.ogg` | 1,2 s | Antwort auf „Sprachsteuerung stoppen". |
+| `04-sprachsteuerung-aus.ogg` | 1,6 s | Antwort auf „Sprachsteuerung stoppen". |
+| `04b-sprachsteuerung-zeitgrenze.ogg` | 3,5 s | Wenn zwei Minuten kein Befehl kam. Bewusst **mit** Begründung - ein blosses „Ich höre Dir nicht mehr zu." liesse den Nutzer rätseln, warum. |
 | `05-desktop-windows.ogg` | 1,4 s | Nach „auf Windows umschalten". |
 | `06-desktop-steht-schon.ogg` | 2,1 s | Wenn der Schreibtisch schon so steht - eine andere Ansage als beim echten Wechsel, weil ein blinder Nutzer beides sonst nicht unterscheiden könnte. |
-| `07-diktat-beginn.ogg` | 3,7 s | Beide Sätze beim Diktatstart. Der erste deckt die ~9 s Ladezeit des grossen Sprachmodells ab. |
+| `07-diktat-beginn.ogg` | 3,7 s | Beide Sätze beim Diktatstart einer Notiz. Der erste deckt die ~9 s Ladezeit des grossen Sprachmodells ab. |
+| `07b-diktat-beginn-einkaufszettel.ogg` | 7,3 s | Dasselbe beim **Einkaufszettel** - mit der Anleitung „Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." Nur hier, weil bei einer Notiz eine Äusserung wirklich ein Satz ist. Im Betrieb liegen zwischen den beiden Sätzen die 9 s Ladezeit; in der Datei stehen sie hintereinander. |
+| `07c-diktat-ende-hinweis.ogg` | 8,1 s | Nach „Diktat beenden". Liest **nicht** mehr vor, sondern sagt die Anzahl und wie man das Vorlesen bekommt. **Die längste Ansage im System** - und damit an der Grenze der eigenen Regel, siehe unten. |
 | `08-einkaufszettel-vorlesen.ogg` | 5,8 s | „Einkaufszettel vorlesen". Die Anzahl kommt voran, dann die Einträge mit Pausen. |
-| `09-einkaufszettel-wegwerfen.ogg` | 3,9 s | Die Rückfrage vor dem Leeren. |
+| `09-einkaufszettel-wegwerfen.ogg` | 5,3 s | Die Rückfrage vor dem Leeren - jetzt mit „Sage ja oder nein.", weil ein blinder Nutzer keine Knöpfe sieht. |
+| `09b-rueckfrage-nochmal.ogg` | 3,1 s | Kam keine verwertbare Antwort, wird **einmal** nachgefragt statt abgebrochen. |
 | `10-ton-ueber-lautsprecher.ogg` | 1,5 s | Wenn der Bluetooth-Lautsprecher eingeschaltet wird und der Ton dorthin wandert. |
 | `11-kein-mikrofon.ogg` | 3,5 s | Ein Fehlerfall - er wird **angesagt**, nicht nur ins Protokoll geschrieben. |
 
-Zusammen 63 s und rund 380 kB. OGG Vorbis, weil `sox` das ohne
+Zusammen 87 s und rund 526 kB. OGG Vorbis, weil `sox` das ohne
 Zusatzpaket kann und WAV das Repo unnötig aufblähen würde.
+
+## Was die Dauer über die Ansagen verrät
+
+Die Spalte „Dauer" ist nicht Beiwerk. Während DialOS spricht, hört es
+**bewusst nicht zu** - jede Sekunde Ansage ist eine Sekunde, in der der Nutzer
+warten muss. Deshalb steht in [../sprachbefehle.md](../sprachbefehle.md) die
+Regel „Ansagen kurz halten, aber als Satz", und sie stammt aus einem Fehler
+vom 2026-08-17: **acht Sekunden Erklärung waren zu viel.**
+
+`07c-diktat-ende-hinweis.ogg` dauert **8,1 s** und liegt damit genau an dieser
+Grenze. Der Wortlaut ist Stephans Vorgabe vom 2026-08-19, deshalb steht er so
+da - aber die Messung gehört dazu, nicht ins Vergessen. Gemessene Kürzungen für
+den Fall, dass sie zu lang bleibt:
+
+| Wortlaut | Dauer |
+|---|---|
+| „Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen." | 8,05 s |
+| „Diktat beendet, 3 Einträge geschrieben. Zum Vorlesen sage: Einkaufszettel vorlesen." | 6,07 s |
+| „3 Einträge geschrieben. Zum Vorlesen sage: Einkaufszettel vorlesen." | 4,94 s |
+| „Diktat beendet, 3 Einträge geschrieben." (ohne Hinweis) | 2,88 s |
 
 ## Die Entwicklungsgeschichte steckt in Git
 

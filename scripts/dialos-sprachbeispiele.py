@@ -117,7 +117,19 @@ def main():
 
     say = modul("dialos-say.py", "dsay")
     ansage = modul("dialos-start-ansage.py", "dansage")
+    # Diktat und Notizen kommen dazu (2026-08-19), weil ihre Ansagen jetzt
+    # zusammengesetzt werden und nicht mehr feste Saetze sind: der Hinweis nach
+    # dem Diktat haengt am Ziel, die Rueckfrage an der Bezeichnung. Von Hand
+    # abgeschrieben liefen die Beispiele beim naechsten Wortlaut auseinander.
+    diktat = modul("dialos-diktat.py", "ddiktat")
+    notiz = modul("dialos-notiz.py", "dnotiz")
     aussprache = say.fuer_sprachausgabe
+
+    # Rueckfrage genau so bauen wie _loeschen() in dialos-notiz.py
+    bez, _ist, hat, ihn = notiz.benennen("einkaufszettel")
+    waren = ["Tomaten", "Bananen", "Zwei Liter Milch", "Butter"]
+    frage_wegwerfen = (f"{bez} {hat} {len(waren)} Einträge. "
+                       f"Soll ich {ihn} löschen? Sage ja oder nein.")
 
     beispiele = [
         ("01-start-ansage-nutzer", start_ansage_text(ansage)),
@@ -131,11 +143,15 @@ def main():
         ("05-desktop-windows", "Windows Desktop."),
         ("06-desktop-steht-schon", "Steht schon auf Linux Desktop."),
         ("07-diktat-beginn",
-         "Einen Moment, ich hole Zettel und Stift. Ich schreibe mit."),
+         f"{diktat.ANSAGE_LADEN} {diktat.ANSAGE_BEREIT}"),
+        ("07b-diktat-beginn-einkaufszettel",
+         f"{diktat.ANSAGE_LADEN} {diktat.ANSAGE_BEREIT_LISTE}"),
+        ("07c-diktat-ende-hinweis",
+         diktat.ansage_ende("einkaufszettel", 3)),
         ("08-einkaufszettel-vorlesen",
-         "4 Einträge. Tomaten. Bananen. Zwei Liter Milch. Butter."),
-        ("09-einkaufszettel-wegwerfen",
-         "Der Einkaufszettel hat 4 Einträge. Soll ich ihn löschen?"),
+         f"{len(waren)} Einträge. " + notiz.aufzaehlen(waren)),
+        ("09-einkaufszettel-wegwerfen", frage_wegwerfen),
+        ("09b-rueckfrage-nochmal", notiz.ANSAGE_NOCHMAL),
         ("10-ton-ueber-lautsprecher", "Ton über Lautsprecher."),
         ("11-kein-mikrofon", "Ich finde kein Mikrofon. Die Sprachsteuerung ist aus."),
     ]
