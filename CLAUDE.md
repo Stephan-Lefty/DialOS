@@ -284,6 +284,30 @@ Befehl gelten** - ausführlich in `docs/sprachbefehle.md`:
 Hardware-Entscheidung), Chat (WhatsApp priorisiert, Bestätigung fehlt),
 Videoaufnahme (Zweck ungeklärt).
 
+## Installationsstand prüfen, nicht annehmen (Regel seit 2026-08-19)
+
+**Das Repo ist die Vorlage, nicht der Beweis.** Am 2026-08-19 kam heraus, dass
+`dialos-start-ansage.py` und `dialos-ton-ausgabe.py` auf dem Gerät **zwei Tage
+lang** in einer älteren Fassung liefen als im Repo. Beide Änderungen vom
+2026-08-17 waren committet und nie installiert: Die Repo-Datei wurde jeweils
+rund zehn Minuten **nach** dem `install` noch bearbeitet.
+
+Es fehlte nichts Kosmetisches - auf dem Gerät stand noch „Bluetooth-Mikrofon
+bevorzugt" (genau die Reihenfolge, die dreimal in HFP hängengeblieben war) und
+der Senken-Vergleich, der die Umschalt-Ansage ausfallen ließ.
+
+Aufgefallen ist es nur, weil einmal **alle** Skripte verglichen wurden statt
+nur die des Tages. Deshalb:
+
+```bash
+scripts/dialos-installstand.sh --befehl
+```
+
+vergleicht alles und gibt bei Abweichung gleich den `install`-Befehl aus. **Am
+Ende einer Arbeitssitzung ausführen** - ein Commit beweist nur, dass die
+Änderung im Repo ist, nicht dass sie auf dem Gerät wirkt. Und ein Test gegen
+eine nicht installierte Änderung testet den alten Stand, ohne es zu sagen.
+
 ## Arbeitsweise mit Stephan
 
 - Stephan ist technisch versiert, aber kein Linux-Systembau-Experte -
