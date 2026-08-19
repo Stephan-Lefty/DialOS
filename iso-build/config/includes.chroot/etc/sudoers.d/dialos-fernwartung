@@ -1,0 +1,19 @@
+# DialOS: Fernwartung per Sprachbefehl an- und abschalten.
+#
+# Beide Aufrufe stehen WOERTLICH da, ohne Platzhalter. Eine Regel mit "*" waere
+# hier gefaehrlich: "rustdesk --password *" haette den Nutzer das Passwort selbst
+# bestimmen lassen, und ein Platzhalter am Skriptaufruf haette weitere
+# Unterbefehle erlaubt, die es noch nicht gibt.
+#
+# Das Skript erzeugt das Passwort selbst aus /dev/urandom - es nimmt keine
+# Eingabe an, also gibt es auch nichts einzuschmuggeln.
+#
+# NOPASSWD ist notwendig und nicht bequem: Ein blinder Nutzer kann kein
+# Passwort eintippen, und die Fernwartung ist genau der Weg, ueber den er Hilfe
+# holt, wenn nichts mehr geht.
+#
+# Rechte: 0440, root:root - sonst weigert sich sudo, die Datei zu lesen.
+nutzer      ALL=(root) NOPASSWD: /usr/local/sbin/dialos-fernwartung starten
+nutzer      ALL=(root) NOPASSWD: /usr/local/sbin/dialos-fernwartung beenden
+dialosadmin ALL=(root) NOPASSWD: /usr/local/sbin/dialos-fernwartung starten
+dialosadmin ALL=(root) NOPASSWD: /usr/local/sbin/dialos-fernwartung beenden

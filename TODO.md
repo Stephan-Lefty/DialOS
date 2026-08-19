@@ -52,6 +52,48 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [ ] **ZUERST MORGEN: dialos-hilfe.py auf den Dienst umbauen** (2026-08-19
+  fertig vorbereitet, nicht mehr eingebaut). Der Weg ist belegt und die
+  privilegierte Seite ist geschrieben und geprueft, es fehlt die Nutzerseite.
+
+  **Was gestern herauskam:** Die RustDesk-ANWENDUNG kann keine Verbindung
+  annehmen - ohne `ipc_service` stuerzt sie nach rund 40 s ab ("Got signal 11
+  and exit", im Protokoll belegt). Verbindungen nimmt der **Dienst** an, und ihm
+  gehoert auch das Passwort. Die entscheidende Kombination ist "Dienst laeuft UND
+  sudo": `sudo rustdesk --password` wirkt dann, vier andere Kombinationen waren
+  wirkungslos.
+
+  **Schon gebaut, geprueft, NICHT installiert:**
+  - `usr/local/sbin/dialos-fernwartung` (root): `starten` schaltet den Dienst
+    an, setzt ein frisches achtstelliges Zufallspasswort, prueft per Gegenprobe
+    im Konfigurationsfeld, dass es wirklich gesetzt ist (der Aufruf gibt auch
+    bei Wirkungslosigkeit 0 zurueck), und gibt `id=` und `pw=` aus. `beenden`
+    wechselt das Passwort - erst dadurch ist das vorgelesene wirklich ein
+    Einmalpasswort - und stoppt den Dienst.
+  - `etc/sudoers.d/dialos-fernwartung`: beide Aufrufe woertlich, ohne
+    Platzhalter, `visudo -c` sagt "Analyse OK". Muss mit 0440 root:root
+    installiert werden.
+
+  **Was noch zu tun ist, in dieser Reihenfolge:**
+  1. Beide Dateien von Stephan durchsehen lassen - eine sudoers-Regel ist eine
+     Sicherheitsentscheidung und gehoert nicht ohne Blick installiert.
+  2. `dialos-hilfe.py`: `rustdesk_pids()` durch `systemctl is-active rustdesk`
+     ersetzen. Die Anwendung wird gar nicht mehr gestartet, damit faellt der
+     Absturz weg.
+  3. `starten()`: `sudo /usr/local/sbin/dialos-fernwartung starten` aufrufen,
+     `id=`/`pw=` einlesen, an `nummern_sprechen()` uebergeben. `einmalpasswort()`
+     entfaellt dann als Platzhalter.
+  4. `beenden()`: `sudo ... beenden` statt SIGTERM auf Prozesse.
+  5. Die Wache prueft dann den Dienst statt der Prozesse.
+  6. Danach: echter Verbindungsversuch von Stephans zweitem Rechner - das ist
+     zugleich der Beleg fuer die Signatur, die fuer die Leerlauf-Erkennung
+     fehlt (eigener Punkt unten).
+
+  **Loses Ende:** In `/root/.config/rustdesk/RustDesk.toml` steht seit Stephans
+  Test vom 2026-08-19 ein achtstelliges Zufallspasswort, das niemand kennt. Das
+  ist harmlos - der Dienst ist gestoppt und `disabled` -, und der erste Lauf von
+  `dialos-fernwartung starten` ueberschreibt es.
+
 - [ ] **Echtes Einmalpasswort fuer die Fernwartung, sobald RustDesk es zulaesst**
   (offen seit 2026-08-19). Fuenf Wege geprueft, alle zu - die Liste steht in
   `docs/sicherheit-datenschutz.md`, damit niemand sie noch einmal durchprobiert:

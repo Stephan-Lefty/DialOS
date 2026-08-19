@@ -1,0 +1,114 @@
+#!/bin/bash
+# DialOS: Fernwartung an- und abschalten. Laeuft als root, aufgerufen von
+# dialos-hilfe.py per sudo.
+#
+# WARUM ES DIESES SKRIPT GIBT (2026-08-19): Drei Dinge brauchen root, und keines
+# davon darf der Nutzer beeinflussen koennen:
+#
+#   1. "systemctl start rustdesk" - ohne den Dienst gibt es keinen ipc_service,
+#      die RustDesk-Anwendung kann keine Verbindung annehmen und stuerzt nach
+#      rund 40 Sekunden ab ("Got signal 11 and exit", am 2026-08-19 im Protokoll
+#      belegt).
+#   2. "rustdesk --password" - das dauerhafte Passwort gehoert dem Dienst, also
+#      root. Als Nutzer aufgerufen ist der Befehl wirkungslos: Rueckgabewert 0,
+#      Feld bleibt leer. Erst die Kombination "Dienst laeuft UND sudo" wirkt -
+#      geprueft am 2026-08-19, nachdem vier andere Kombinationen erfolglos
+#      waren.
+#   3. Das Auslesen der ID aus /root/.config/rustdesk - der Dienst nimmt die
+#      Verbindungen an, also gilt SEINE ID, nicht die des Nutzerkontos.
+#
+# WARUM KEIN sudo-PLATZHALTER: Eine Regel wie "rustdesk --password *" erlaubt
+# mehr, als sie soll - der Nutzer koennte das Passwort selbst bestimmen oder
+# weitere Schalter anhaengen. Dieses Skript nimmt deshalb NUR die zwei
+# feststehenden Unterbefehle "starten" und "beenden", erzeugt das Passwort
+# SELBST aus /dev/urandom und gibt es nur aus. Die sudoers-Regel nennt beide
+# Aufrufe woertlich, ohne Platzhalter - siehe
+# /etc/sudoers.d/dialos-fernwartung.
+#
+# WARUM DAS PASSWORT BEIM BEENDEN NEU GESETZT WIRD: Erst das macht das
+# vorgelesene zu einem echten Einmalpasswort. RustDesk kann kein
+# Einmalpasswort ausgeben, das DialOS lesen koennte (fuenf Wege geprueft, siehe
+# docs/sicherheit-datenschutz.md) - also erzeugt DialOS eines und macht es
+# hinterher wertlos. Was im Raum des Kunden vorgelesen wurde, oeffnet danach
+# nichts mehr.
+#
+# Aufruf (nur diese zwei):
+#     dialos-fernwartung starten   Dienst an, neues Passwort, gibt ID und
+#                                  Passwort aus (je eine Zeile: "id=", "pw=")
+#     dialos-fernwartung beenden   neues Passwort (niemand erfaehrt es),
+#                                  Dienst aus
+
+set -u
+
+if [ "$(id -u)" != "0" ]; then
+    echo "Dieses Skript braucht root." >&2
+    exit 1
+fi
+
+RUSTDESK=/usr/bin/rustdesk
+KONF=/root/.config/rustdesk/RustDesk.toml
+
+neues_passwort() {
+    # ZIFFERN, keine Buchstaben. Der Nutzer muss es am Telefon nachsprechen,
+    # und "b wie Berta" ist dort die haeufigste Fehlerquelle. Acht Ziffern sind
+    # 100 Millionen Moeglichkeiten - fuer ein Passwort, das nur waehrend eines
+    # Support-Einsatzes gilt, reichlich.
+    tr -dc '0-9' < /dev/urandom | head -c 8
+}
+
+setze_passwort() {
+    pw="$1"
+    "$RUSTDESK" --password "$pw" >/dev/null 2>&1
+    # GEGENPROBE: Der Aufruf gibt auch dann 0 zurueck, wenn er nichts getan hat
+    # - genau daran sind vier Versuche am 2026-08-19 unbemerkt gescheitert.
+    # Deshalb wird nachgesehen, ob das Feld jetzt gefuellt ist, statt dem
+    # Rueckgabewert zu glauben.
+    if grep -q "^password = ''" "$KONF" 2>/dev/null; then
+        return 1
+    fi
+    if ! grep -q '^password = ' "$KONF" 2>/dev/null; then
+        return 1
+    fi
+    return 0
+}
+
+case "${1:-}" in
+starten)
+    systemctl start rustdesk || { echo "Dienst startet nicht" >&2; exit 1; }
+    # Der Dienst braucht einen Moment, bis er das Passwort annimmt.
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        systemctl is-active --quiet rustdesk && break
+        sleep 1
+    done
+    sleep 3
+    pw="$(neues_passwort)"
+    if ! setze_passwort "$pw"; then
+        # Ohne Passwort keine Fernwartung: Der Dienst waere erreichbar, aber
+        # niemand koennte sich anmelden - und der Nutzer haette eine offene Tuer
+        # ohne Schluessel. Also wieder zu.
+        systemctl stop rustdesk
+        echo "Passwort liess sich nicht setzen" >&2
+        exit 1
+    fi
+    kenn="$("$RUSTDESK" --get-id 2>/dev/null | grep -m1 -E '^[0-9]{6,}$')"
+    if [ -z "$kenn" ]; then
+        systemctl stop rustdesk
+        echo "ID nicht ablesbar" >&2
+        exit 1
+    fi
+    echo "id=$kenn"
+    echo "pw=$pw"
+    ;;
+beenden)
+    # ERST das Passwort wechseln, DANN den Dienst stoppen. Umgekehrt bliebe das
+    # vorgelesene Passwort gueltig, falls der Wechsel scheitert.
+    setze_passwort "$(neues_passwort)" || \
+        echo "Achtung: Passwort liess sich nicht wechseln" >&2
+    systemctl stop rustdesk
+    echo "beendet"
+    ;;
+*)
+    echo "Aufruf: dialos-fernwartung starten|beenden" >&2
+    exit 2
+    ;;
+esac
