@@ -105,6 +105,33 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **One entry per item - and DialOS now says how (2026-08-19).** Stephan
+  dictated "Milch sechs Eier Butter" in one breath and reported that Michael had
+  "read the list out 3x" and was "too fast again". Both had the same cause and
+  neither was a fault in the read-back: the list really did hold three lines -
+  one per test - and each was the whole shopping trip. Vosk delivers a sequence
+  spoken in one breath as **one** utterance, one utterance is one entry, and the
+  pause sits between entries, not inside them.
+    - **Nothing was broken in the program.** Pause briefly between items and you
+      get three entries - that was how it was built from the start. What was
+      missing was DialOS **saying** so. For the shopping list it now says: "Ich
+      schreibe mit. Sage jede Ware einzeln, mit einer kleinen Pause dazwischen."
+      Only for the shopping list - for a note an utterance really is a sentence.
+    - **The lesson beyond dictation**, now a rule in `docs/sprachbefehle.en.md`:
+      where the user cannot see the result, an operating rule is worthless as
+      long as it goes unsaid. A sighted user would have noticed after the first
+      item that a single line was forming. A blind user finds out at the
+      read-back, a minute later.
+    - **Fallback:** "Milch **und** sechs Eier **und** Butter" is split at "und" -
+      which is how one speaks a shopping list anyway. Deliberately only for list
+      targets: in a letter "Ich habe Milch und Butter gekauft" would otherwise
+      become two lines. Every split entry starts with a capital, because the
+      spell helper saw the utterance as one sentence and a sighted helper reads
+      that list too.
+    - **Not solved, and therefore in `TODO.md`:** without "und" and without a
+      pause it stays one entry. Doing it reliably would need Vosk's word
+      timestamps (`SetWords(True)`) - unmeasured.
+
 - **"Diktat beenden" no longer reads back, it says how to get the read-back
   (Stephan, 2026-08-19).** Until now the command read the finished note out in
   full. That made "Einkaufszettel vorlesen" redundant - and took the choice away

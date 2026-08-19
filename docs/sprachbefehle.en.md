@@ -40,7 +40,7 @@ listen?".
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |
 | **"Diktat starten"** (start dictation) | Starts the dictation; everything spoken becomes text and lands in `~/Notizen/notizen.txt`. It says "Einen Moment, ich hole Zettel und Stift." (the big model needs about 9 s), then "Ich schreibe mit." |
 | **"Notiz aufnehmen"** (record a note) | Equivalent to "Diktat starten". |
-| **"Einkaufszettel aufnehmen"** (record a shopping list) | As above, but writes to `~/Notizen/einkaufszettel.txt` - a shopping list mixed in with appointments and thoughts would be useless. |
+| **"Einkaufszettel aufnehmen"** (record a shopping list) | As above, but says "Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." and writes to `~/Notizen/einkaufszettel.txt` - a shopping list mixed in with appointments and thoughts would be useless. |
 | **"Diktat beenden"** (end dictation) | Ends a running dictation, writes the note and announces how many entries it became - **without reading them out** (Stephan, 2026-08-19): "Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen." Recognized by a **second** recognizer with its own grammar - in the dictation's free recognition the sentence became "diktat wird erhöht" (2026-08-18). Must be the **whole** utterance so it can be mentioned inside a letter. |
 | **"Wie viel Uhr ist es?"** (what time is it) | "Es ist acht Uhr siebenundvierzig." On the full hour without the minutes. |
 | **"Wie ist die Uhrzeit?"** (what is the time) | Equivalent. |
@@ -85,6 +85,12 @@ occurred:
     therefore suffices only in the **off** state, where the grammar knows
     just one sentence. Anyone adding a new command with an already-used verb
     must check this.
+- **An operating rule the user cannot see has to be spoken.** A shopping list
+  only becomes a list if there is a small pause between items - that was how it
+  was built from the start, but it was never announced. On 2026-08-19 Stephan
+  dictated "Milch sechs Eier Butter" in one breath and got a single entry. A
+  sighted user would have noticed after the first item; a blind user finds out at
+  the read-back, a minute later.
 - **A command does not take a decision away from the user that they can make
   themselves.** Until 2026-08-19 "Diktat beenden" read the whole list back.
   That made "Einkaufszettel vorlesen" redundant - and anyone who had noted

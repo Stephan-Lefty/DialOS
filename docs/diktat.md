@@ -378,3 +378,60 @@ Das Vorlesen **mit Satzzeichen** lebt unverändert in `dialos-notiz.py` weiter,
 wo es auf Ansage geschieht. Die dort gemessene Begründung gilt weiter: 3,670 s
 ohne gegen 4,884 s mit Satzzeichen, und der Unterschied besteht ausschließlich
 aus Pausen.
+
+## Ein Eintrag pro Ware - und wie der Nutzer das erfahren soll (2026-08-19)
+
+**Der Fehler, wie er sich zeigte.** Stephan diktierte „Milch sechs Eier
+Butter" in einem Zug, dreimal in drei Tests. Danach klagte er über zwei Dinge:
+Michael habe „3x die Liste vorgelesen" und sei „wieder zu schnell" gewesen.
+
+Beides war dieselbe Ursache, und keines der beiden war ein Fehler im
+Vorlesen. Im Zettel standen wirklich drei Zeilen - je eine pro Test:
+
+```
+Milch sechs Eier butter
+Milch sechs Eier butter
+Milch sechs Eier butter
+```
+
+DialOS las korrekt „3 Einträge" vor. Nur war jeder Eintrag der ganze Einkauf.
+**Vosk liefert eine in einem Atemzug gesprochene Folge als EINE Äußerung, und
+eine Äußerung ist ein Eintrag.** Und weil die Pause zwischen Einträgen sitzt
+und nicht innerhalb, kam jede Zeile in einem Zug heraus - genau das, was
+Stephan als „zu schnell" hörte.
+
+**Was daran nicht kaputt war.** Der Mechanismus funktioniert: Wer zwischen den
+Waren eine kleine Pause macht, bekommt drei Äußerungen und damit drei
+Einträge. Es fehlte nichts am Programm - es fehlte, dass DialOS es **sagt**.
+
+**Die Lehre, und sie gilt über das Diktat hinaus:** Wo der Nutzer das Ergebnis
+nicht sehen kann, ist eine Bedienregel wertlos, solange sie ungesagt bleibt.
+Ein sehender Nutzer hätte nach der ersten Ware bemerkt, dass eine einzige
+Zeile entsteht, und von selbst anders gesprochen. Ein blinder erfährt es erst
+beim Vorlesen - eine Minute später und zu spät.
+
+Deshalb sagt DialOS es beim Einkaufszettel jetzt am Anfang:
+
+> „Ich schreibe mit. Sage jede Ware einzeln, mit einer kleinen Pause
+> dazwischen."
+
+Ein Satz, nicht drei - während DialOS spricht, hört es nicht zu. Und nur beim
+Einkaufszettel: bei einer Notiz oder einem Brief ist eine Äußerung tatsächlich
+ein Satz und die Anleitung wäre falsch.
+
+**Rückfallebene für den, der es trotzdem in einem Zug sagt.** „Milch **und**
+sechs Eier **und** Butter" wird an „und" getrennt - so spricht man eine
+Einkaufsliste ohnehin. Bewusst nur bei Listen-Zielen (`LISTEN_ZIELE`): in
+einem Brief würde aus „Ich habe Milch und Butter gekauft" sonst zwei Zeilen.
+
+Jeder getrennte Eintrag fängt groß an. Die Schreibhilfe hat die Äußerung als
+**einen** Satz gesehen und nur das erste Wort großgeschrieben; ohne
+Nachbesserung stünde „Milch / sechs Eier / Butter" im Zettel - und den Zettel
+liest ein sehender Helfer auch.
+
+**Was damit nicht gelöst ist:** „Milch sechs Eier Butter" ohne „und" und ohne
+Pause bleibt ein Eintrag. Zuverlässig zerlegen ließe sich das nur über die
+Wort-Zeitstempel, die Vosk mit `SetWords(True)` mitliefert - eine Lücke von
+mehr als etwa 0,4 s zwischen zwei Wörtern wäre eine Trennstelle, auch wenn sie
+für das Ende einer Äußerung zu kurz ist. Ungemessen und deshalb in `TODO.md`,
+nicht hier als gelöst.

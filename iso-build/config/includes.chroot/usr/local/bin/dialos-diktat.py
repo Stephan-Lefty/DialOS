@@ -119,6 +119,45 @@ def ist_schluss(gehoert):
     return set(worte) <= SCHLUSS_WOERTER
 
 ANSAGE_BEREIT = "Ich schreibe mit."
+
+# ZIELE, DIE EINE LISTE SIND UND KEIN TEXT (2026-08-19). Bei einem
+# Einkaufszettel ist jede Ware ein eigener Eintrag; in einem Brief ist eine
+# Aeusserung ein Satz. Das aendert zwei Dinge - die Anleitung am Anfang und die
+# Zerlegung einer Aeusserung.
+#
+# Warum ueberhaupt: Stephan sagte "Milch sechs Eier Butter" in einem Zug. Vosk
+# liefert das als EINE Aeusserung, eine Aeusserung ist ein Eintrag, und beim
+# Vorlesen kam die ganze Liste in einem Atemzug - die Pause setzt DialOS
+# zwischen Eintraege, nicht innerhalb. Nach drei Tests standen drei solche
+# Zeilen im Zettel, und "3 Eintraege" klang wie dreimal dasselbe.
+LISTEN_ZIELE = ("einkaufszettel",)
+
+# Anleitung nur bei einer Liste, und nur EIN Satz. Der Nutzer sieht nicht, dass
+# gerade ein einziger Eintrag entsteht statt drei - gesagt werden muss es
+# deshalb, aber kurz: waehrend DialOS spricht, hoert es nicht zu.
+ANSAGE_BEREIT_LISTE = ("Ich schreibe mit. Sage jede Ware einzeln, "
+                       "mit einer kleinen Pause dazwischen.")
+
+# Rueckfallebene, wenn doch alles in einem Zug kommt: an "und" trennen. Das ist
+# die Art, wie man eine Einkaufsliste ohnehin spricht ("Milch und sechs Eier
+# und Butter"). Bewusst NUR bei Listen-Zielen - in einem Brief wuerde aus "Ich
+# habe Milch und Butter gekauft" sonst zwei Zeilen.
+TRENNWORT = re.compile(r"\s+und\s+", re.IGNORECASE)
+
+
+def eintraege_aus(name, text):
+    """Eine Aeusserung in Eintraege zerlegen - bei Listen an "und"."""
+    if name not in LISTEN_ZIELE:
+        return [text]
+    teile = [t.strip(" .,;:") for t in TRENNWORT.split(text)]
+    teile = [t for t in teile if t]
+    if len(teile) < 2:
+        return teile or [text]
+    # Jeder Eintrag faengt gross an. Die Schreibhilfe hat die Aeusserung als
+    # EINEN Satz gesehen und nur das erste Wort gross gemacht - nach dem
+    # Trennen stuende sonst "Milch / sechs Eier / Butter" im Zettel, und ein
+    # sehender Helfer liest den Zettel auch.
+    return [t[0].upper() + t[1:] for t in teile]
 ANSAGE_ENDE = "Diktat beendet."
 
 # Nach dem Diktat: HINWEIS statt Vorlesen (Stephan, 2026-08-19). Bis dahin las
@@ -377,7 +416,7 @@ def diktat_fuehren(zweck, name, quelle):
         erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
         schluss = (vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_SCHLUSS)
                    if modell_klein else None)
-        sprich(ANSAGE_BEREIT)
+        sprich(ANSAGE_BEREIT_LISTE if name in LISTEN_ZIELE else ANSAGE_BEREIT)
         prozess = aufnahme_starten(quelle)
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
@@ -422,7 +461,10 @@ def diktat_fuehren(zweck, name, quelle):
             if gefasst.lower() != text.lower():
                 melde(f"  ACHTUNG: Schreibhilfe hat mehr als die Schreibung geaendert")
             melde(f"  geschrieben: {gefasst!r}")
-            gesammelt.append(gefasst)
+            neue = eintraege_aus(name, gefasst)
+            if len(neue) > 1:
+                melde(f"  in {len(neue)} Eintraege getrennt: {neue!r}")
+            gesammelt += neue
     except KeyboardInterrupt:
         pass
     finally:

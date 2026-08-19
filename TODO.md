@@ -52,6 +52,17 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [ ] **Eintraege trennen, wenn der Nutzer ohne „und" in einem Zug spricht**
+  (offen seit 2026-08-19). „Milch sechs Eier Butter" in einem Atemzug bleibt ein
+  Eintrag: Vosk liefert eine Aeusserung, eine Aeusserung ist ein Eintrag.
+  Behandelt sind bisher die zwei einfachen Wege - eine kleine Pause (wird jetzt
+  angesagt) und das Wort „und" (wird getrennt). Der zuverlaessige Weg waeren die
+  **Wort-Zeitstempel**, die Vosk mit `SetWords(True)` mitliefert: eine Luecke von
+  mehr als etwa 0,4 s zwischen zwei Woertern ist eine Trennstelle, auch wenn sie
+  zu kurz ist, um die Aeusserung zu beenden. Zu messen ist der Schwellwert -
+  0,4 s ist geraten, nicht gemessen, und zu klein gewaehlt zerlegt er „sechs
+  Eier" in zwei Eintraege. Gilt nur fuer `LISTEN_ZIELE`, nicht fuer Briefe.
+
 - [ ] **Die vier Protokolle wachsen unbegrenzt - beim Diktat ist das ein
   Datenschutzthema, keine Platzfrage** (aufgefallen 2026-08-19 beim Bau des
   Support-Protokolls). `~/dialos-diktat.log` enthält jeden je diktierten Satz

@@ -39,7 +39,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
 | **„Diktat starten"** | Startet das Diktat; alles Gesprochene wird Text und landet in `~/Notizen/notizen.txt`. Es sagt „Einen Moment, ich hole Zettel und Stift." (das grosse Sprachmodell braucht rund 9 s), dann „Ich schreibe mit." |
 | **„Notiz aufnehmen"** | Gleichbedeutend mit „Diktat starten". |
-| **„Einkaufszettel aufnehmen"** | Wie oben, schreibt aber nach `~/Notizen/einkaufszettel.txt` - eine Einkaufsliste zwischen Terminen und Gedanken wäre unbrauchbar. |
+| **„Einkaufszettel aufnehmen"** | Wie oben, sagt aber „Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." und schreibt nach `~/Notizen/einkaufszettel.txt` - eine Einkaufsliste zwischen Terminen und Gedanken wäre unbrauchbar. |
 | **„Diktat beenden"** | Beendet ein laufendes Diktat, schreibt die Notiz und sagt an, wie viele Einträge es geworden sind - **ohne vorzulesen** (Stephan, 2026-08-19): „Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen." Erkannt von einem **zweiten** Erkenner mit eigener Grammatik - in der freien Erkennung des Diktats wurde der Satz zu „diktat wird erhöht" (2026-08-18). Muss die **ganze** Äußerung sein, damit man ihn in einem Brief erwähnen kann. |
 | **„Wie viel Uhr ist es?"** | „Es ist acht Uhr siebenundvierzig." Bei voller Stunde ohne Minutenangabe. |
 | **„Wie ist die Uhrzeit?"** | Gleichbedeutend. |
@@ -85,6 +85,12 @@ einmal aufgetreten ist:
     deshalb nur im **ausgeschalteten** Zustand, wo die Grammatik nur einen
     Satz kennt. Wer einen neuen Befehl mit einem schon benutzten Verb
     anlegt, muss das prüfen.
+- **Eine Bedienregel, die der Nutzer nicht sehen kann, muss gesagt werden.**
+  Ein Einkaufszettel entsteht nur dann als Liste, wenn zwischen den Waren eine
+  kleine Pause liegt - das war von Anfang an so gebaut, aber nie angesagt. Am
+  2026-08-19 diktierte Stephan „Milch sechs Eier Butter" in einem Zug und hatte
+  einen einzigen Eintrag. Ein sehender Nutzer hätte es nach der ersten Ware
+  gemerkt; ein blinder erfährt es erst beim Vorlesen, eine Minute später.
 - **Ein Befehl nimmt dem Nutzer keine Entscheidung ab, die er selbst
   treffen kann.** „Diktat beenden" las bis zum 2026-08-19 den ganzen Zettel
   vor. Damit war „Einkaufszettel vorlesen" überflüssig - und wer drei Waren

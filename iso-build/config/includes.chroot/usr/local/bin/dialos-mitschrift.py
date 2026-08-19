@@ -75,8 +75,10 @@ QUELLEN = {
 }
 
 # Zeilen, die niemanden interessieren. Die Pegelanzeige ist eine laufende
-# Messung fuers Entwickeln, keine Aussage darueber, was passiert.
-VERWERFEN = re.compile(r'^\s*(Pegel\s|$)')
+# Messung fuers Entwickeln. Und "=== vorlesen einkaufszettel ===" ist die
+# Kopfzeile von dialos-notiz.py: dieselbe Aussage wie die uebersetzte Zeile des
+# Befehlsdienstes unmittelbar davor, nur unuebersetzt (2026-08-19).
+VERWERFEN = re.compile(r'^\s*(Pegel\s|=== (vorlesen|loeschen) \w+ ===|$)')
 
 # Uebersetzungen. Links steht, was im Protokoll steht, rechts, was ein
 # Zuschauer lesen soll - in dieser Reihenfolge geprueft.
@@ -399,6 +401,7 @@ def vorgeschichte(sekunden):
         except OSError:
             continue
         vorige = jetzt
+        je_quelle = []
         for zeile in reversed(roh.replace("\r", "\n").split("\n")):
             m = ZEIT.match(zeile.strip())
             if not m:
@@ -409,7 +412,13 @@ def vorgeschichte(sekunden):
             vorige = zeit
             eintrag = aufbereiten(name, zeile)
             if eintrag:
-                gesammelt.append(eintrag)
+                je_quelle.append(eintrag)
+        # Wieder in Leserichtung drehen, BEVOR sortiert wird: sorted() ist
+        # stabil, also entscheidet die Eingabereihenfolge bei gleicher Uhrzeit.
+        # Ohne das stand "Mitschrift geoeffnet" vor dem Satz, der sie geoeffnet
+        # hat - beide in derselben Sekunde (2026-08-19).
+        je_quelle.reverse()
+        gesammelt += je_quelle
     return sorted(gesammelt, key=lambda e: e[0])
 
 

@@ -364,3 +364,60 @@ The read-back **with punctuation** lives on unchanged in `dialos-notiz.py`,
 where it happens on request. The measurement behind it still holds: 3.670 s
 without against 4.884 s with punctuation, and the difference consists entirely
 of pauses.
+
+## One entry per item - and how the user is supposed to learn that (2026-08-19)
+
+**How the fault showed up.** Stephan dictated "Milch sechs Eier Butter" in one
+breath, three times across three tests. He then complained about two things:
+Michael had "read the list out 3x" and was "too fast again".
+
+Both had the same cause, and neither was a fault in the read-back. The list
+really did hold three lines - one per test:
+
+```
+Milch sechs Eier butter
+Milch sechs Eier butter
+Milch sechs Eier butter
+```
+
+DialOS correctly announced "3 Einträge". It is just that each entry was the
+whole shopping trip. **Vosk delivers a sequence spoken in one breath as ONE
+utterance, and one utterance is one entry.** And because the pause sits between
+entries and not inside them, each line came out in a single breath - exactly
+what Stephan heard as "too fast".
+
+**What was not broken about it.** The mechanism works: pause briefly between
+items and you get three utterances and therefore three entries. Nothing was
+missing from the program - what was missing was DialOS **saying** so.
+
+**The lesson, and it reaches beyond dictation:** where the user cannot see the
+result, an operating rule is worthless as long as it goes unsaid. A sighted user
+would have noticed after the first item that a single line was forming and would
+have spoken differently of their own accord. A blind user finds out at the
+read-back - a minute later and too late.
+
+So for the shopping list DialOS now says it up front:
+
+> "Ich schreibe mit. Sage jede Ware einzeln, mit einer kleinen Pause
+> dazwischen."
+
+One sentence, not three - while DialOS speaks it does not listen. And only for
+the shopping list: for a note or a letter an utterance really is a sentence and
+the instruction would be wrong.
+
+**A fallback for whoever says it in one breath anyway.** "Milch **und** sechs
+Eier **und** Butter" is split at "und" - which is how one speaks a shopping list
+anyway. Deliberately only for list targets (`LISTEN_ZIELE`): in a letter "Ich
+habe Milch und Butter gekauft" would otherwise become two lines.
+
+Every split entry starts with a capital. The spell helper saw the utterance as
+**one** sentence and capitalised only the first word; without the fix-up the list
+would read "Milch / sechs Eier / Butter" - and a sighted helper reads that list
+too.
+
+**What this does not solve:** "Milch sechs Eier Butter" without "und" and
+without a pause stays one entry. Splitting it reliably would need the word
+timestamps Vosk supplies with `SetWords(True)` - a gap of more than roughly
+0.4 s between two words would be a split point, even when it is too short to end
+an utterance. Unmeasured, and therefore in `TODO.md` rather than presented here
+as solved.

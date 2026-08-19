@@ -114,6 +114,35 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Ein Eintrag pro Ware - und DialOS sagt jetzt, wie das geht (2026-08-19).**
+  Stephan diktierte „Milch sechs Eier Butter" in einem Zug und meldete, Michael
+  habe „3x die Liste vorgelesen" und sei „wieder zu schnell". Beides war
+  dieselbe Ursache und keines ein Fehler im Vorlesen: Im Zettel standen wirklich
+  drei Zeilen - je eine pro Test -, und jede war der ganze Einkauf. Vosk liefert
+  eine in einem Atemzug gesprochene Folge als **eine** Äußerung, eine Äußerung
+  ist ein Eintrag, und die Pause sitzt zwischen Einträgen, nicht innerhalb.
+    - **Am Programm war nichts kaputt.** Wer zwischen den Waren eine kleine
+      Pause macht, bekommt drei Einträge - das war von Anfang an so gebaut. Es
+      fehlte, dass DialOS es **sagt**. Beim Einkaufszettel heißt es jetzt: „Ich
+      schreibe mit. Sage jede Ware einzeln, mit einer kleinen Pause dazwischen."
+      Nur beim Einkaufszettel - bei einer Notiz ist eine Äußerung wirklich ein
+      Satz.
+    - **Die Lehre, die über das Diktat hinausgeht** und jetzt als Regel in
+      `docs/sprachbefehle.md` steht: Wo der Nutzer das Ergebnis nicht sehen
+      kann, ist eine Bedienregel wertlos, solange sie ungesagt bleibt. Ein
+      sehender Nutzer hätte nach der ersten Ware bemerkt, dass eine einzige
+      Zeile entsteht. Ein blinder erfährt es erst beim Vorlesen, eine Minute
+      später.
+    - **Rückfallebene:** „Milch **und** sechs Eier **und** Butter" wird an
+      „und" getrennt - so spricht man eine Einkaufsliste ohnehin. Bewusst nur
+      bei Listen-Zielen: in einem Brief würde aus „Ich habe Milch und Butter
+      gekauft" sonst zwei Zeilen. Jeder getrennte Eintrag fängt groß an, weil
+      die Schreibhilfe die Äußerung als einen Satz gesehen hat und den Zettel
+      auch ein sehender Helfer liest.
+    - **Nicht gelöst und deshalb in `TODO.md`:** ohne „und" und ohne Pause
+      bleibt es ein Eintrag. Zuverlässig ginge das nur über die
+      Wort-Zeitstempel von Vosk (`SetWords(True)`) - ungemessen.
+
 - **„Diktat beenden" liest nicht mehr vor, sondern sagt, wie man es bekommt
   (Stephan, 2026-08-19).** Bisher las der Befehl die fertige Notiz komplett vor.
   Das machte „Einkaufszettel vorlesen" überflüssig - und nahm dem Nutzer die
