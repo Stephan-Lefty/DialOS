@@ -48,7 +48,7 @@ listen?".
 | **"Welches Datum haben wir?"** (what is the date) | Equivalent. |
 | **"Einkaufszettel vorlesen"** (read the shopping list) | Says the number of entries and reads them out, with pauses in between. |
 | **"Notizen vorlesen"** (read the notes) | The same for the collective note. |
-| **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen?" Answer "ja" or "nein". The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |
+| **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." If no usable answer arrives, DialOS asks **a second time** ("Das habe ich nicht verstanden. Sage ja oder nein."); only then does the list stay. The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |
 | **"Einkaufszettel wegwerfen"** (throw the shopping list away) | Equivalent to "Einkauf erledigt". Two phrasings for the same thing so the user need not memorise one - as with "auf Linux" and "auf Gnome". |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |
 
@@ -104,6 +104,24 @@ occurred:
 - **Safety-critical commands get a yes/no confirmation** (system
   maintenance, enabling remote support) — regardless of how confident the
   recognition was.
+  - **The expected words belong in the question.** "Soll ich ihn löschen?" on
+    its own does not tell a blind user what to answer - there are no buttons to
+    see. Since 2026-08-19: "Soll ich ihn löschen? Sage ja oder nein."
+  - **Whoever asks the question must also do the listening.** Until 2026-08-19
+    the caller spoke the question and then called the answer function - which
+    only then loaded the speech model and afterwards started recording.
+    Stephan's "ja" fell into exactly that gap; not a single "Antwort gehoert"
+    line was in the log. Since then the answer function asks the question
+    **itself**, and everything slow happens before that. The same class of fault
+    occurred on 2026-08-15 (login announcement) and 2026-08-18 (dictation
+    marker) - so the order "be ready first, then ask" is a rule, not a nicety.
+  - **Nothing is recorded while the question is spoken.** The grammar knows only
+    "ja", "nein" and "[unk]" - the system's own voice could land in it as "ja"
+    and delete the list without anyone having said a thing. Deleting without
+    consent is the worse fault.
+  - **A follow-up question instead of an abort.** If no usable answer arrives,
+    DialOS asks once more. Without that the user would have to speak the whole
+    command again although only one word was missing.
 - **Every command announces what it did.** The user cannot see the
   screen; without an announcement they do not know whether anything
   happened.

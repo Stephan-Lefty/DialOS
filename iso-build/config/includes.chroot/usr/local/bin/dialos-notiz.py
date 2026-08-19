@@ -101,6 +101,12 @@ DEBUG = "--debug" in sys.argv
 GRAMMATIK_JA_NEIN = json.dumps(["ja", "nein", "[unk]"])
 ANTWORT_ZEITGRENZE_S = 8.0
 
+# Zweiter Versuch, wenn die erste Antwort nicht ankam (Stephan, 2026-08-19: sein
+# "ja" wurde nicht verstanden). Ohne ihn muesste der Nutzer den ganzen Befehl
+# neu sprechen, obwohl nur ein Wort gefehlt hat.
+ANSAGE_NOCHMAL = "Das habe ich nicht verstanden. Sage ja oder nein."
+VERSUCHE = 2
+
 
 def melde(text):
     if DEBUG:
@@ -159,19 +165,44 @@ def waehle_mikrofon():
     return eingebaut[0] if eingebaut else None
 
 
-def ja_oder_nein():
-    """Siehe unten - die Marke wird vom Aufrufer gesetzt."""
-    return _ja_oder_nein()
-
-
-def _ja_oder_nein():
-    """Hoert einmal zu und gibt True, False oder None zurueck.
+def ja_oder_nein(frage):
+    """Frage stellen und die Antwort hoeren. True, False oder None.
 
     None heisst "nichts Passendes verstanden" und ist bewusst von False
-    getrennt: Bei None bleibt der Zettel stehen UND der Nutzer erfaehrt,
-    dass nichts verstanden wurde. Ein stilles Nichtstun waere fuer ihn nicht
-    von einem stillen Loeschen zu unterscheiden.
+    getrennt: Bei None bleibt der Zettel stehen UND der Nutzer erfaehrt, dass
+    nichts verstanden wurde. Ein stilles Nichtstun waere fuer ihn nicht von
+    einem stillen Loeschen zu unterscheiden.
+
+    DIE FRAGE WIRD HIER GESTELLT UND NICHT VOM AUFRUFER - das war der Fehler
+    vom 2026-08-19. Vorher sprach der Aufrufer die Frage und rief danach diese
+    Funktion, die erst DANN das Sprachmodell lud (rund eine Sekunde) und
+    anschliessend die Aufnahme startete. Stephans "ja" fiel genau in diese
+    Luecke: im Protokoll stand keine einzige "Antwort gehoert"-Zeile, weil zum
+    Zeitpunkt des Sprechens noch nichts aufnahm. Dieselbe Fehlerklasse wie am
+    2026-08-18 beim Diktat und am 2026-08-15 bei der Start-Ansage - deshalb
+    liegt das Vorbereiten jetzt zwingend VOR der Frage, und zwar dadurch, dass
+    die Funktion beides selbst in der Hand hat.
+
+    Aufgenommen wird bewusst NICHT waehrend der Frage. Die Grammatik kennt nur
+    "ja", "nein" und "[unk]" - die eigene Stimme des Systems koennte darin als
+    "ja" landen, und das wuerde den Zettel loeschen, ohne dass jemand etwas
+    gesagt hat. Ein Loeschen ohne Zustimmung ist der schlimmere Fehler.
     """
+    bereit = _antwort_vorbereiten()
+    if not bereit:
+        return None
+    modell, quelle = bereit
+    for versuch in range(1, VERSUCHE + 1):
+        sprich(frage if versuch == 1 else ANSAGE_NOCHMAL, frage=True)
+        antwort = _antwort_hoeren(modell, quelle)
+        if antwort is not None:
+            return antwort
+        melde(f"  Versuch {versuch} von {VERSUCHE}: keine verwertbare Antwort")
+    return None
+
+
+def _antwort_vorbereiten():
+    """Sprachmodell und Mikrofon - alles Langsame VOR der Frage."""
     try:
         import vosk
     except ImportError:
@@ -182,7 +213,15 @@ def _ja_oder_nein():
         melde("  kein Mikrofon - keine Rueckfrage moeglich")
         return None
     vosk.SetLogLevel(-1)
+    t0 = time.time()
     modell = vosk.Model(MODELL_KLEIN)
+    melde(f"  Antwort-Erkenner bereit in {time.time()-t0:.1f} s")
+    return modell, quelle
+
+
+def _antwort_hoeren(modell, quelle):
+    """Einmal zuhoeren. True, False oder None."""
+    import vosk
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_JA_NEIN)
     prozess = subprocess.Popen(
         ["parec", "-d", quelle, "--format=s16le",
@@ -212,7 +251,6 @@ def _ja_oder_nein():
             prozess.terminate()
         except Exception:
             pass
-    melde("  keine verwertbare Antwort")
     return None
 
 
@@ -253,8 +291,11 @@ def _loeschen(name):
         return 0
     zahl = len(eintraege)
     was = "einen Eintrag" if zahl == 1 else f"{zahl} Einträge"
-    sprich(f"{bez} {hat} {was}. Soll ich {ihn} löschen?", frage=True)
-    antwort = ja_oder_nein()
+    # "Sage ja oder nein." gehoert in die Frage (Stephan, 2026-08-19). Der
+    # Nutzer sieht keine Knoepfe; welche Woerter erwartet werden, muss gesagt
+    # werden - dieselbe Regel wie bei der Anleitung zum Einkaufszettel.
+    antwort = ja_oder_nein(
+        f"{bez} {hat} {was}. Soll ich {ihn} löschen? Sage ja oder nein.")
     if antwort is None:
         sprich(f"Ich habe nichts verstanden. Ich lasse {ihn} stehen.")
         return 0

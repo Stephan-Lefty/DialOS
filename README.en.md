@@ -105,6 +105,35 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The yes/no confirmation was not listening when the answer came
+  (2026-08-19).** Stephan's "ja" when clearing the shopping list never arrived -
+  after 15 seconds the log held only "keine verwertbare Antwort" and **not a
+  single** "Antwort gehoert" line. Cause: the caller spoke the question and then
+  called the answer function, which only then loaded the speech model and
+  afterwards started recording. The answer fell into exactly that gap.
+    - **First checked what the project made its own rule:** are "ja" and "nein"
+      in the vocabulary? They are - Vosk reported nothing when building the
+      grammar. That ruled the trail out before any guessing.
+    - **Fixed by having the answer function ask the question itself.**
+      Everything slow (loading the model, picking the microphone) happens before
+      that. The same class of fault occurred on 2026-08-15 (login announcement)
+      and 2026-08-18 (dictation marker); the order "be ready first, then ask" is
+      now a rule in `docs/sprachbefehle.en.md`.
+    - **The expected words belong in the question** (Stephan's requirement):
+      "Soll ich ihn löschen? **Sage ja oder nein.**" A blind user sees no
+      buttons. And if no usable answer arrives, DialOS **asks once more** instead
+      of aborting - otherwise the user would have to speak the whole command
+      again although only one word was missing.
+    - **Nothing is recorded while the question is spoken.** The grammar knows
+      only "ja", "nein" and "[unk]" - the system's own voice could land in it as
+      "ja" and delete the list without anyone having said a thing.
+    - **Proven end-to-end without Stephan's voice:** Piper says "ja", Vosk
+      listens through the microphone. Result in the log: "Antwort-Erkenner bereit
+      in 0.5 s" **before** the question, then "Antwort gehoert: 'ja'", then
+      cleared with a backup. Side finding: the echo canceller does **not** remove
+      Michael's voice - so the confirmation is as automatically testable as the
+      command grammar.
+
 - **One entry per item - and DialOS now says how (2026-08-19).** Stephan
   dictated "Milch sechs Eier Butter" in one breath and reported that Michael had
   "read the list out 3x" and was "too fast again". Both had the same cause and

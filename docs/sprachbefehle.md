@@ -47,7 +47,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Welches Datum haben wir?"** | Gleichbedeutend. |
 | **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
 | **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
-| **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen?" Antwort „ja" oder „nein". Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
+| **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." Kommt keine verwertbare Antwort, fragt DialOS **ein zweites Mal** („Das habe ich nicht verstanden. Sage ja oder nein."); erst danach bleibt der Zettel stehen. Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
 | **„Einkaufszettel wegwerfen"** | Gleichbedeutend mit „Einkauf erledigt". Zwei Formulierungen für dasselbe, damit der Nutzer sich keine merken muss - wie bei „auf Linux" und „auf Gnome". |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |
 
@@ -105,6 +105,25 @@ einmal aufgetreten ist:
 - **Sicherheitskritische Befehle bekommen eine Ja/Nein-Rückfrage**
   (Systemwartung, Fernwartung freigeben) - unabhängig davon, wie sicher
   die Erkennung war.
+  - **Die erwarteten Wörter gehören in die Frage.** „Soll ich ihn löschen?"
+    allein sagt einem blinden Nutzer nicht, was er antworten soll - es gibt
+    keine Knöpfe zu sehen. Seit dem 2026-08-19: „Soll ich ihn löschen? Sage ja
+    oder nein."
+  - **Wer die Frage stellt, muss auch zuhören.** Bis zum 2026-08-19 sprach der
+    Aufrufer die Frage und rief danach die Antwortfunktion - die erst dann das
+    Sprachmodell lud und anschließend die Aufnahme startete. Stephans „ja" fiel
+    in genau diese Lücke; im Protokoll stand keine einzige „Antwort
+    gehoert"-Zeile. Seitdem stellt die Antwortfunktion die Frage **selbst**, und
+    alles Langsame passiert davor. Dieselbe Fehlerklasse gab es schon am
+    2026-08-15 (Start-Ansage) und am 2026-08-18 (Diktat-Marke) - die Reihenfolge
+    „erst bereit sein, dann fragen" ist deshalb keine Feinheit, sondern Regel.
+  - **Während der Frage wird nicht aufgenommen.** Die Grammatik kennt nur „ja",
+    „nein" und „[unk]" - die eigene Stimme des Systems könnte darin als „ja"
+    landen und den Zettel löschen, ohne dass jemand etwas gesagt hat. Ein
+    Löschen ohne Zustimmung ist der schlimmere Fehler.
+  - **Eine Nachfrage statt eines Abbruchs.** Kommt keine verwertbare Antwort,
+    wird einmal nachgefragt. Ohne das müsste der Nutzer den ganzen Befehl neu
+    sprechen, obwohl nur ein Wort gefehlt hat.
 - **Jeder Befehl sagt an, was er getan hat.** Der Nutzer sieht den
   Bildschirm nicht; ohne Ansage weiß er nicht, ob etwas passiert ist.
 - **Und er sagt es anders, wenn sich nichts geändert hat.** „Auf Linux

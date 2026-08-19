@@ -114,6 +114,36 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Die Ja/Nein-Rückfrage hörte nicht zu, wenn geantwortet wurde
+  (2026-08-19).** Stephans „ja" beim Löschen des Einkaufszettels kam nie an - im
+  Protokoll stand nach 15 Sekunden nur „keine verwertbare Antwort" und **keine
+  einzige** „Antwort gehoert"-Zeile. Ursache: Der Aufrufer sprach die Frage und
+  rief danach die Antwortfunktion, die erst dann das Sprachmodell lud und
+  anschließend die Aufnahme startete. Die Antwort fiel in genau diese Lücke.
+    - **Erst geprüft, was das Projekt sich selbst zur Regel gemacht hat:**
+      Stehen „ja" und „nein" im Wortschatz? Ja - Vosk meldete beim Bauen der
+      Grammatik nichts. Damit war diese Spur ausgeschlossen, bevor geraten
+      wurde.
+    - **Behoben, indem die Antwortfunktion die Frage jetzt selbst stellt.** Alles
+      Langsame (Modell laden, Mikrofon wählen) passiert davor. Dieselbe
+      Fehlerklasse gab es schon am 2026-08-15 (Start-Ansage) und am 2026-08-18
+      (Diktat-Marke); die Reihenfolge „erst bereit sein, dann fragen" steht jetzt
+      als Regel in `docs/sprachbefehle.md`.
+    - **Die erwarteten Wörter gehören in die Frage** (Stephans Vorgabe): „Soll
+      ich ihn löschen? **Sage ja oder nein.**" Ein blinder Nutzer sieht keine
+      Knöpfe. Und kommt keine verwertbare Antwort, wird **einmal nachgefragt**
+      statt abgebrochen - sonst müsste er den ganzen Befehl neu sprechen,
+      obwohl nur ein Wort gefehlt hat.
+    - **Während der Frage wird bewusst nicht aufgenommen.** Die Grammatik kennt
+      nur „ja", „nein" und „[unk]" - die eigene Stimme des Systems könnte darin
+      als „ja" landen und den Zettel löschen, ohne dass jemand etwas gesagt hat.
+    - **End-to-end belegt, ohne Stephans Stimme:** Piper sagt „ja", Vosk hört
+      über das Mikrofon zu. Ergebnis im Protokoll: „Antwort-Erkenner bereit in
+      0.5 s" **vor** der Frage, dann „Antwort gehoert: 'ja'", dann geleert mit
+      Sicherung. Nebenbefund: Die Echounterdrückung rechnet Michaels Stimme
+      **nicht** weg - damit ist die Rückfrage genauso automatisch testbar wie
+      die Befehlsgrammatik.
+
 - **Ein Eintrag pro Ware - und DialOS sagt jetzt, wie das geht (2026-08-19).**
   Stephan diktierte „Milch sechs Eier Butter" in einem Zug und meldete, Michael
   habe „3x die Liste vorgelesen" und sei „wieder zu schnell". Beides war
