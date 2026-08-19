@@ -159,6 +159,10 @@ GRAMMATIK_AN = json.dumps([
     "notizen vorlesen",
     "einkauf erledigt",
     "einkaufszettel wegwerfen",
+    "wie viel uhr ist es",
+    "wie ist die uhrzeit",
+    "welchen tag haben wir",
+    "welches datum haben wir",
     "[unk]",
 ])
 
@@ -189,6 +193,25 @@ DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 # Grammatik still hinaus, der Befehl waere nie ausgeloest worden, und im
 # Protokoll haette nur "einkaufszettel" gestanden. Geprueft am 2026-08-18 -
 # ebenso fehlen "zuruecksetzen" und "aufraeumen".
+# Auskunft: Uhrzeit und Datum (Stephans Wunsch, 2026-08-19).
+#
+# "Wie spaet ist es?" waere die naheliegende Frage gewesen und ist NICHT
+# moeglich: "spaet" steht nicht im Wortschatz des Modells (geprueft, dieselbe
+# Falle wie "loeschen" am Tag vorher). Deshalb zwei Formulierungen, die beide
+# geprueft und woertlich erkannt wurden.
+#
+# "Wie wird das Wetter?" gibt es bewusst nicht - Begruendung in
+# dialos-auskunft.py: Am Einsatzort liefert die Standortbestimmung nur eine
+# IP-Schaetzung mit 26 km Ungenauigkeit, und der Befehl haette fast immer
+# geantwortet, dass er nichts abrufen kann.
+AUSKUNFT_SKRIPT = "/usr/local/bin/dialos-auskunft.py"
+AUSKUNFT_SAETZE = {
+    "wie viel uhr ist es": "uhrzeit",
+    "wie ist die uhrzeit": "uhrzeit",
+    "welchen tag haben wir": "datum",
+    "welches datum haben wir": "datum",
+}
+
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
 NOTIZ_SAETZE = {
     "einkaufszettel vorlesen": ("einkaufszettel", "vorlesen"),
@@ -289,6 +312,34 @@ MARKIERUNG = markierungsdatei()
 # nicht als Altlast zurueckbleiben und den Dienst dauerhaft stumm schalten.
 DIKTAT_MARKE = markierungsdatei().replace("dialos-sprachausgabe-aktiv",
                                           "dialos-diktat-aktiv")
+
+
+def ist_phrase(gehoert, phrase, kernwort):
+    """Beendet/beginnt diese Aeusserung die Sprachsteuerung?
+
+    NICHT der volle Satz als Teilkette - das war der Fehler vom 2026-08-19.
+    Stephan sagte "Sprachsteuerung starten", der Erkenner lieferte 'starten',
+    und die Bedingung wies es ab. Damit liess sich die Sprachsteuerung nicht
+    einschalten, und alles danach war unerreichbar - an der wichtigsten
+    Stelle, denn dieser Satz ist das Tor zu allem.
+
+    Dieselbe Lockerung wie beim Schlusssatz des Diktats einen Tag vorher, und
+    dieselben drei Bedingungen:
+      - das Kernwort muss vorkommen ("starten" bzw. "stoppen"),
+      - es darf ausser Woertern der Phrase nichts weiter vorkommen,
+      - und es darf KEIN "[unk]" dabei sein.
+
+    Die dritte ist die wichtige: "[unk]" ist Vosks Kennzeichen dafuer, dass
+    noch etwas anderes gesprochen wurde. Gemessen am 2026-08-18 ueber sieben
+    Minuten Dauergerede lieferte eine solche Kleingrammatik genau zweimal ein
+    Ergebnis ausser "[unk]" - beide Male, als der Satz wirklich gesagt wurde.
+    """
+    worte = gehoert.split()
+    if not worte or "[unk]" in worte:
+        return False
+    if kernwort not in worte:
+        return False
+    return set(worte) <= set(phrase.split())
 
 
 def spricht_gerade():
@@ -427,6 +478,27 @@ def diktat_starten(notiz):
     except Exception as fehler:
         melde(f"Diktat liess sich nicht starten: {fehler}")
         sprich("Das Diktat lässt sich nicht starten.")
+
+
+def auskunft(was):
+    """Startet die Auskunft und kehrt sofort zurueck.
+
+    Nicht abwarten, aus demselben Grund wie bei den Notizen: Der Dienst muss
+    seine Schleife weiterlaufen lassen. Uhrzeit und Datum sind zwar in
+    Millisekunden bestimmt, aber das Sprechen dauert.
+    """
+    if not os.access(AUSKUNFT_SKRIPT, os.X_OK):
+        sprich("Ich kann die Auskunft nicht finden.")
+        return
+    try:
+        subprocess.Popen([AUSKUNFT_SKRIPT, was],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Auskunft {was!r} gestartet")
+    except Exception as fehler:
+        melde(f"Auskunft liess sich nicht starten: {fehler}")
+        sprich("Das lässt sich nicht ausführen.")
 
 
 def notiz_aktion(name, was):
@@ -655,7 +727,14 @@ def main():
             satz = " ".join(worte)
 
             # --- Zustandswechsel: anmelden ---
-            if STARTSATZ in satz:
+            # "starten" ALLEIN genuegt nur im ausgeschalteten Zustand. Dort
+            # kennt die Grammatik genau einen Satz, das Wort kann also nichts
+            # anderes bedeuten. Im eingeschalteten Zustand gibt es zusaetzlich
+            # "diktat starten" - ein blosses 'starten' waere dann
+            # zweideutig, und ein falsch geratenes Diktat waere schlimmer als
+            # ein nicht erkannter Satz.
+            if (ist_phrase(satz, STARTSATZ, "starten") if not hoert_zu
+                    else STARTSATZ in satz):
                 if hoert_zu:
                     sprich(ANSAGE_LAEUFT_SCHON)
                 else:
@@ -675,7 +754,9 @@ def main():
                 continue
 
             # --- Zustandswechsel: abmelden ---
-            if STOPPSATZ in satz:
+            # "stoppen" kommt in keinem anderen Satz der Grammatik vor -
+            # allein genuegt es deshalb immer.
+            if ist_phrase(satz, STOPPSATZ, "stoppen"):
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
                 sprich(ANSAGE_AUS)
@@ -687,6 +768,13 @@ def main():
             # Ausloeser-Bedingung unten haengen blieben.
             if satz in DIKTAT_SAETZE:
                 diktat_starten(DIKTAT_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Auskunft ---
+            if satz in AUSKUNFT_SAETZE:
+                auskunft(AUSKUNFT_SAETZE[satz])
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

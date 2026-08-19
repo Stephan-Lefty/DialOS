@@ -105,6 +105,79 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Time and date on request - and one word that made it impossible
+  (Stephan's wish, 2026-08-19).** Four new voice commands, evidenced live in
+  Stephan's voice: "Wie viel Uhr ist es?", "Wie ist die Uhrzeit?", "Welchen
+  Tag haben wir?", "Welches Datum haben wir?". New script
+  `dialos-auskunft.py`.
+  - **"Wie spät ist es?" was the requested phrasing and is impossible:**
+    "spät" is not in the model's vocabulary. The same trap as "löschen" a day
+    earlier, and again Vosk would have dropped the word from the grammar
+    silently. Yesterday's test method found it in seconds. Also checked and
+    absent: "zurücksetzen", "aufräumen".
+  - **The building blocks come from `dialos-start-ansage.py`**, not rebuilt -
+    weekday, ordinal, number as words. Two places with the same job would
+    drift apart, and the user would hear the difference at once. The import
+    is safe because that script only acts under `if __name__ == "__main__"`.
+  - **Full hour without the minutes:** "Es ist acht Uhr", not "acht Uhr
+    null". Correctly computed would be wrongly spoken.
+  - **Evidenced:** six of six sentences recognized verbatim, about one second
+    between command and answer each time. Beforehand all sixteen sentences of
+    the grammar were checked against each other - no confusion, although the
+    grammar has grown.
+
+- **Voice control could no longer be switched on - the fault sat at the most
+  important place (2026-08-19).** Stephan said "Sprachsteuerung starten",
+  the log shows `erkannt: 'starten'`. The condition demanded the full
+  sentence and rejected it. So it was not one command that was broken but
+  **the gate to all of them** - the test afterwards could not happen at all.
+  - **The same relaxation as for the dictation's stop phrase a day
+    earlier**, except I had applied it only there. Now the **core word**
+    suffices, provided nothing but words of the phrase appears and no
+    `[unk]` is present.
+  - **The core word must be unambiguous, and that is the interesting
+    part.** "stoppen" appears in exactly one sentence of the grammar, so it
+    always suffices. "starten" appears in two - "Sprachsteuerung starten"
+    and "Diktat starten". On its own it therefore suffices only in the
+    **off** state, where the grammar knows just one sentence; switched on it
+    would be ambiguous, and a wrongly guessed dictation would be worse than
+    an unrecognized sentence. Checked against ten cases, including
+    `'diktat starten'`, which correctly does **not** match.
+  - **On the next run the sentence was recognized in full** - so the
+    relaxation was not needed and remains untested in real operation. It
+    stays as insurance.
+
+- **Weather on request: built, measured, removed again (2026-08-19).**
+  Stephan wanted "Wie wird das Wetter?". The command cannot work at the site
+  of use, and the measurement chain behind it is recorded so nobody has to
+  repeat it:
+  - GeoClue sees nine Wi-Fi networks, beaconDB is reachable (HTTP 200 in
+    0.4 s) - but knows **none** of them and falls back to IP geolocation
+    (`"fallback":"ipf"`). Out comes Vienna with 26 km accuracy, about 300 km
+    from the actual location.
+  - The 10 km threshold discards that **correctly**. The command would
+    almost always have answered only that it cannot fetch anything - and a
+    command that never works is worse than none for a blind user: he cannot
+    check whether it is him or the system.
+  - **Two wrong hunches of mine along the way:** first I took the GeoClue
+    permission for the cause - it applies, because the script registers
+    explicitly as `dialos-start-ansage` and the permission keys on that
+    name. Then I suspected the shut-down Mozilla service - Debian migrated
+    to beaconDB long ago. Only the query with invented network identifiers
+    showed the IP fallback.
+  - **In the login announcement the weather stays**, because there it simply
+    drops out without anyone asking. The reasoning sits at the top of
+    `dialos-auskunft.py` in place of the removed command - whoever asks in a
+    year finds the 26 kilometres there instead of finding them out again.
+
+- **Confirmed rather than changed: voice control stays on until it is
+  stopped (Stephan, 2026-08-19).** I had proposed switching it off
+  automatically after short queries - Stephan declined, and it stays: on
+  with "Sprachsteuerung starten", off by the user or after two minutes by
+  Michael, with an announcement. Two details verified: the two minutes run
+  from the **last command**, not from switching on, and during a dictation
+  they do not run at all.
+
 - **The shopping list can now be managed, not only filled (Stephan's
   question, 2026-08-18).** He asked: "If I put something on the shopping
   list today, how can I listen to it any time, add to it, and delete it once

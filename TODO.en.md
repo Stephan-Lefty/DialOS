@@ -52,6 +52,32 @@ what has already been done.
   The address `proband@dialos.org` is ready for testing (mail server
   `s111.goserver.host`, no autoconfig records).
 
+- [ ] **The timezone does not follow the location - and a blind user cannot
+  change it** (noticed 2026-08-19 on Stephan's question "does the time
+  follow the actual location?"). Measured: `Time zone: Europe/Vienna`,
+  `automatic-timezone: false`. The timezone is chosen per device at setup
+  (build recipe step 1). In Berlin or Munich the announcement is still
+  correct because the same zone applies - travel to another timezone yields
+  a wrong time.
+  - **If automatic, then with an announcement.** A silent change would shift
+    all times inexplicably for a blind user, appointments included. The
+    announcement is what makes it acceptable at all - not the change itself.
+  - **For a timezone the imprecise fix is good enough.** The 26 km that are
+    useless for weather are irrelevant here: a timezone needs country-level
+    accuracy. Near the border it might become Europe/Berlin instead of
+    Europe/Vienna - both have the same offset, the spoken time would be
+    identical.
+
+- [ ] **Weather on request would need a fallback location** (removed
+  2026-08-19, reasoning at the top of `dialos-auskunft.py`). The command
+  cannot work at the site of use, because beaconDB does not know the Wi-Fi
+  networks there and only returns an IP estimate (Vienna, 26 km). It could
+  be brought back with a configured location that steps in **only** when the
+  fix is too coarse - in mapped cities the real fix still wins. Stephan's
+  objection was justified and is answered: Berlin would stay Berlin. The
+  case that goes wrong is a holiday in the countryside - the announcement
+  would be stale, but **audibly** stale, because it names the city.
+
 - [ ] **Add a second voice early, the selection only at the end**
   (Stephan's question, 2026-08-18: "When do we want to add the other voices,
   e.g. a woman's?"). Split, because these are two different things:

@@ -52,6 +52,34 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [ ] **Zeitzone folgt dem Standort nicht - und ein blinder Nutzer kann sie
+  nicht umstellen** (aufgefallen 2026-08-19 bei Stephans Frage „richtet sich
+  die Uhrzeit nach dem tatsächlichen Ort?"). Gemessen: `Time zone:
+  Europe/Vienna`, `automatic-timezone: false`. Die Zeitzone wird pro Gerät
+  beim Aufsetzen gewählt (Bauanleitung Schritt 1). In Berlin oder München
+  stimmt die Ansage trotzdem, weil dieselbe Zone gilt - eine Reise in eine
+  andere Zeitzone ergibt eine falsche Uhrzeit.
+  - **Wenn automatisch, dann mit Ansage.** Eine stille Umstellung würde für
+    einen blinden Nutzer alle Zeiten unerklärlich verschieben, Termine
+    eingeschlossen. Die Ansage ist der Teil, der es überhaupt zumutbar
+    macht - nicht die Umstellung selbst.
+  - **Für die Zeitzone reicht die ungenaue Ortung.** Die 26 km, die fürs
+    Wetter unbrauchbar sind, sind hier belanglos: Eine Zeitzone braucht
+    Landes-Genauigkeit. Nahe der Grenze könnte es Europe/Berlin statt
+    Europe/Vienna werden - beide haben denselben Versatz, die gesprochene
+    Zeit wäre identisch.
+
+- [ ] **Wetter auf Nachfrage bräuchte einen Rückfall-Ort** (entfernt am
+  2026-08-19, Begründung im Kopf von `dialos-auskunft.py`). Der Befehl kann
+  am Einsatzort nicht funktionieren, weil beaconDB die WLAN-Netze dort nicht
+  kennt und nur eine IP-Schätzung liefert (Wien, 26 km). Zurückholen ließe
+  er sich mit einem hinterlegten Ort, der **nur** einspringt, wenn die
+  Messung zu ungenau ist - in erfassten Städten gewinnt weiterhin die echte
+  Messung. Stephans Einwand dazu war berechtigt und ist beantwortet: Berlin
+  bliebe Berlin. Der Fall, der schiefgeht, ist Urlaub auf dem Land - dann
+  wäre die Ansage veraltet, aber **hörbar** veraltet, weil sie die Stadt
+  nennt.
+
 - [ ] **Zweite Stimme früh dazulegen, Auswahl erst zum Schluss**
   (Stephans Frage, 2026-08-18: „Wann wollen wir die anderen Stimmen z.B.
   einer Frau hinzunehmen?"). Aufgeteilt, weil beides verschiedene Dinge sind:

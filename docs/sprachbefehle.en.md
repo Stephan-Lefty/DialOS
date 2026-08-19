@@ -42,6 +42,10 @@ listen?".
 | **"Notiz aufnehmen"** (record a note) | Equivalent to "Diktat starten". |
 | **"Einkaufszettel aufnehmen"** (record a shopping list) | As above, but writes to `~/Notizen/einkaufszettel.txt` - a shopping list mixed in with appointments and thoughts would be useless. |
 | **"Diktat beenden"** (end dictation) | Ends a running dictation, writes the note and reads it out. Recognized by a **second** recognizer with its own grammar - in the dictation's free recognition the sentence became "diktat wird erhöht" (2026-08-18). Must be the **whole** utterance so it can be mentioned inside a letter. |
+| **"Wie viel Uhr ist es?"** (what time is it) | "Es ist acht Uhr siebenundvierzig." On the full hour without the minutes. |
+| **"Wie ist die Uhrzeit?"** (what is the time) | Equivalent. |
+| **"Welchen Tag haben wir?"** (what day is it) | "Heute ist Mittwoch, der neunzehnte August." The same wording as the login announcement, built from the same functions. |
+| **"Welches Datum haben wir?"** (what is the date) | Equivalent. |
 | **"Einkaufszettel vorlesen"** (read the shopping list) | Says the number of entries and reads them out, with pauses in between. |
 | **"Notizen vorlesen"** (read the notes) | The same for the collective note. |
 | **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen?" Answer "ja" or "nein". The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |
@@ -68,6 +72,19 @@ occurred:
   was recognized as `auf auf windows` — with the target word but without
   "umschalten", and therefore had no effect. Every command needs a
   **trigger word** in addition to the target.
+- **A sentence counts even when the recognizer swallows a word - as long as
+  no `[unk]` is present.** On 2026-08-19 Stephan said "Sprachsteuerung
+  starten", the recognizer delivered `'starten'`, and the condition on the
+  full sentence rejected it. Voice control could not be switched on, and
+  everything beyond it was unreachable. Since then the **core word**
+  suffices, provided nothing but words of the phrase appears and no `[unk]`
+  is present - the same as a day earlier for the dictation's stop phrase.
+  - **The core word must be unambiguous.** "stoppen" appears in exactly one
+    sentence of the grammar, so it always suffices. "starten" appears in two
+    ("Sprachsteuerung starten" and "Diktat starten") - on its own it
+    therefore suffices only in the **off** state, where the grammar knows
+    just one sentence. Anyone adding a new command with an already-used verb
+    must check this.
 - **Safety-critical commands get a yes/no confirmation** (system
   maintenance, enabling remote support) — regardless of how confident the
   recognition was.
@@ -98,7 +115,9 @@ occurred:
     on 2026-08-18, because **"löschen" (delete) is not in the
     vocabulary** - Vosk would have dropped it from the grammar silently,
     the command would never have fired, and the log would have shown only
-    "einkaufszettel". Also absent: "zurücksetzen", "aufräumen".
+    "einkaufszettel". Also absent: "zurücksetzen", "aufräumen" - and **"spät"** (late), which is
+    why "Wie spät ist es?" became the tested phrasings "Wie viel Uhr ist
+    es?" and "Wie ist die Uhrzeit?" (2026-08-19).
   - **Is the whole sentence recognized correctly?** Piper says it, Vosk
     listens - and with the **complete** command grammar, not just the new
     sentence on its own. Only then does it show whether it gets confused

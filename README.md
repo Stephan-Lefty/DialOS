@@ -114,6 +114,84 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Uhrzeit und Datum auf Zuruf - und ein Wort, das es unmöglich machte
+  (Stephans Wunsch, 2026-08-19).** Vier neue Sprachbefehle, live mit
+  Stephans Stimme belegt: „Wie viel Uhr ist es?", „Wie ist die Uhrzeit?",
+  „Welchen Tag haben wir?", „Welches Datum haben wir?". Neues Skript
+  `dialos-auskunft.py`.
+  - **„Wie spät ist es?" war die gewünschte Formulierung und ist
+    unmöglich:** „spät" steht nicht im Wortschatz des Modells. Dieselbe
+    Falle wie „löschen" einen Tag vorher, und wieder hätte Vosk das Wort
+    still aus der Grammatik geworfen. Die Prüfmethode von gestern hat es in
+    Sekunden gefunden. Ebenfalls geprüft und nicht enthalten:
+    „zurücksetzen", „aufräumen".
+  - **Die Bausteine kommen aus `dialos-start-ansage.py`**, nicht neu
+    gebaut - Wochentag, Ordinalzahl, Zahl-als-Wort. Zwei Stellen mit
+    derselben Aufgabe würden auseinanderlaufen, und der Nutzer hörte den
+    Unterschied sofort. Der Import ist gefahrlos, weil jenes Skript nur
+    unter `if __name__ == "__main__"` handelt.
+  - **Volle Stunde ohne Minutenangabe:** „Es ist acht Uhr", nicht „acht Uhr
+    null". Richtig gerechnet wäre falsch gesprochen.
+  - **Belegt:** sechs von sechs Sätzen wörtlich erkannt, jeweils rund eine
+    Sekunde zwischen Befehl und Antwort. Vorher alle sechzehn Sätze der
+    Grammatik gegeneinander geprüft - keine Verwechslung, obwohl die
+    Grammatik gewachsen ist.
+
+- **Die Sprachsteuerung liess sich nicht mehr einschalten - der Fehler
+  saß an der wichtigsten Stelle (2026-08-19).** Stephan sagte
+  „Sprachsteuerung starten", das Protokoll zeigt `erkannt: 'starten'`. Die
+  Bedingung verlangte den vollen Satz und wies es ab. Damit war nicht ein
+  Befehl kaputt, sondern **das Tor zu allen** - der Test danach konnte gar
+  nicht stattfinden.
+  - **Dieselbe Lockerung wie beim Schlusssatz des Diktats einen Tag
+    vorher**, nur hatte ich sie damals nur dort angewandt. Jetzt genügt das
+    **Kernwort**, wenn ausser Wörtern der Phrase nichts weiter vorkommt und
+    kein `[unk]` dabei ist.
+  - **Das Kernwort muss eindeutig sein, und das ist der interessante
+    Teil.** „stoppen" kommt in genau einem Satz der Grammatik vor, genügt
+    also immer. „starten" kommt in zwei vor - „Sprachsteuerung starten" und
+    „Diktat starten". Allein genügt es deshalb nur im **ausgeschalteten**
+    Zustand, wo die Grammatik nur einen Satz kennt; eingeschaltet wäre es
+    zweideutig, und ein falsch geratenes Diktat wäre schlimmer als ein
+    nicht erkannter Satz. Gegen zehn Fälle geprüft, darunter
+    `'diktat starten'`, das korrekt **nicht** greift.
+  - **Im nächsten Lauf wurde der Satz vollständig erkannt** - die Lockerung
+    war also nicht nötig und ist im echten Betrieb noch ungeprüft. Sie
+    bleibt als Versicherung.
+
+- **Wetter auf Nachfrage: gebaut, gemessen, wieder entfernt
+  (2026-08-19).** Stephan wollte „Wie wird das Wetter?". Der Befehl kann am
+  Einsatzort nicht funktionieren, und die Messkette dahinter ist
+  festgehalten, damit sie niemand wiederholen muss:
+  - GeoClue sieht neun WLAN-Netze, beaconDB ist erreichbar (HTTP 200 in
+    0,4 s) - kennt aber **keines** davon und fällt auf IP-Ortung zurück
+    (`"fallback":"ipf"`). Heraus kommt Wien mit 26 km Ungenauigkeit, rund
+    300 km vom tatsächlichen Standort.
+  - Der Schwellwert von 10 km verwirft das **korrekt**. Der Befehl hätte
+    fast immer nur geantwortet, dass er nichts abrufen kann - und ein
+    Befehl, der nie funktioniert, ist für einen blinden Nutzer schlechter
+    als keiner: Er kann nicht nachsehen, ob es an ihm oder am System liegt.
+  - **Zwei eigene Fehlvermutungen auf dem Weg:** Erst hielt ich die
+    GeoClue-Freigabe für die Ursache - sie greift, weil das Skript sich
+    ausdrücklich als `dialos-start-ansage` anmeldet und die Freigabe an
+    diesem Namen hängt. Dann verdächtigte ich den abgeschalteten
+    Mozilla-Dienst - Debian hat längst auf beaconDB umgestellt. Erst die
+    Anfrage mit erfundenen Netzkennungen zeigte den IP-Rückfall.
+  - **In der Start-Ansage bleibt das Wetter**, weil es dort ohne Nachfrage
+    einfach ausfällt und niemand darauf wartet. Die Begründung steht im
+    Kopf von `dialos-auskunft.py` an der Stelle des entfernten Befehls -
+    wer in einem Jahr fragt, findet dort die 26 Kilometer statt es neu
+    herauszufinden.
+
+- **Bestätigt statt geändert: die Sprachsteuerung bleibt an, bis sie
+  gestoppt wird (Stephan, 2026-08-19).** Ich hatte vorgeschlagen, sie nach
+  kurzen Auskünften automatisch abzuschalten - Stephan hat es abgelehnt,
+  und es bleibt bei: einschalten mit „Sprachsteuerung starten", ausschalten
+  durch den Nutzer oder nach zwei Minuten durch Michael, mit Ansage. Zwei
+  Feinheiten dazu nachgeprüft: Die zwei Minuten laufen ab dem **letzten
+  Befehl**, nicht ab dem Einschalten, und während eines Diktats laufen sie
+  gar nicht.
+
 - **Der Einkaufszettel lässt sich jetzt verwalten, nicht nur füllen
   (Stephans Frage, 2026-08-18).** Er fragte: „Wenn ich heute was in den
   Einkaufszettel schreibe, wie kann ich den jederzeit abhören, ergänzen und

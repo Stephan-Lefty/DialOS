@@ -41,6 +41,10 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Notiz aufnehmen"** | Gleichbedeutend mit „Diktat starten". |
 | **„Einkaufszettel aufnehmen"** | Wie oben, schreibt aber nach `~/Notizen/einkaufszettel.txt` - eine Einkaufsliste zwischen Terminen und Gedanken wäre unbrauchbar. |
 | **„Diktat beenden"** | Beendet ein laufendes Diktat, schreibt die Notiz und liest sie vor. Erkannt von einem **zweiten** Erkenner mit eigener Grammatik - in der freien Erkennung des Diktats wurde der Satz zu „diktat wird erhöht" (2026-08-18). Muss die **ganze** Äußerung sein, damit man ihn in einem Brief erwähnen kann. |
+| **„Wie viel Uhr ist es?"** | „Es ist acht Uhr siebenundvierzig." Bei voller Stunde ohne Minutenangabe. |
+| **„Wie ist die Uhrzeit?"** | Gleichbedeutend. |
+| **„Welchen Tag haben wir?"** | „Heute ist Mittwoch, der neunzehnte August." Dieselbe Formulierung wie in der Start-Ansage, aus denselben Funktionen gebaut. |
+| **„Welches Datum haben wir?"** | Gleichbedeutend. |
 | **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
 | **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
 | **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen?" Antwort „ja" oder „nein". Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
@@ -67,6 +71,20 @@ einmal aufgetreten ist:
   `auf auf windows` erkannt - mit dem Zielwort, aber ohne „umschalten",
   und blieb damit wirkungslos. Jeder Befehl braucht deshalb ein
   **Auslösewort** zusätzlich zum Ziel.
+- **Ein Satz gilt auch, wenn der Erkenner ein Wort verschluckt - solange
+  kein `[unk]` dabei ist.** Am 2026-08-19 sagte Stephan „Sprachsteuerung
+  starten", der Erkenner lieferte `'starten'`, und die Bedingung auf den
+  vollen Satz wies es ab. Die Sprachsteuerung liess sich damit nicht
+  einschalten, und alles danach war unerreichbar. Seitdem genügt das
+  **Kernwort**, wenn ausser Wörtern der Phrase nichts weiter vorkommt und
+  kein `[unk]` dabei ist - dasselbe schon einen Tag vorher beim Schlusssatz
+  des Diktats.
+  - **Das Kernwort muss eindeutig sein.** „stoppen" kommt in genau einem
+    Satz der Grammatik vor, genügt also immer. „starten" kommt in zwei vor
+    („Sprachsteuerung starten" und „Diktat starten") - allein genügt es
+    deshalb nur im **ausgeschalteten** Zustand, wo die Grammatik nur einen
+    Satz kennt. Wer einen neuen Befehl mit einem schon benutzten Verb
+    anlegt, muss das prüfen.
 - **Sicherheitskritische Befehle bekommen eine Ja/Nein-Rückfrage**
   (Systemwartung, Fernwartung freigeben) - unabhängig davon, wie sicher
   die Erkennung war.
@@ -98,7 +116,9 @@ einmal aufgetreten ist:
     Gefunden am 2026-08-18, weil **„löschen" nicht im Wortschatz steht** -
     Vosk hätte es still aus der Grammatik geworfen, der Befehl wäre nie
     ausgelöst worden, und im Protokoll hätte nur „einkaufszettel"
-    gestanden. Ebenfalls nicht enthalten: „zurücksetzen", „aufräumen".
+    gestanden. Ebenfalls nicht enthalten: „zurücksetzen", „aufräumen" - und **„spät"**,
+    weshalb aus „Wie spät ist es?" die geprüften Formulierungen „Wie viel Uhr
+    ist es?" und „Wie ist die Uhrzeit?" wurden (2026-08-19).
   - **Wird der ganze Satz richtig erkannt?** Piper spricht ihn, Vosk hört
     zu - und zwar mit der **vollständigen** Befehlsgrammatik, nicht nur mit
     dem neuen Satz allein. Erst dann zeigt sich, ob er mit einem

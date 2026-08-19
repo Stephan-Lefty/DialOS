@@ -39,7 +39,7 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-18)
+## Aktueller Stand (Stand: 2026-08-19)
 
 **Neu am Abend des 2026-08-16: DialOS hat seinen ersten echten
 Sprachbefehl.** `dialos-sprachbefehl-desktop.py` laeuft dauerhaft mit
@@ -260,12 +260,25 @@ Anwendungsblock.
 [docs/anwendungen.md](docs/anwendungen.md)**, die konkreten Aufgaben in
 [TODO.md](TODO.md). Nicht neu sammeln - beides ist vollständig.
 
-Sinnvolle Reihenfolge, und der erste Punkt ist kein Zufall: **Diktat und
-Vorlesen zuerst.** Sie sind keine Anwendungen, sondern Voraussetzungen für
-vier der freigegebenen - Briefe, Notizen, Mail und Chat kann der Nutzer
-ohne Diktat gar nicht erzeugen. `vosk-model-de-big` (3,2 GB) liegt schon
-auf der Platte; zu bauen ist der Wechsel zwischen eingeschränkter
-Befehlsgrammatik und freier Erkennung.
+**Erledigt seit dem 2026-08-18:** Diktat (`dialos-diktat.py`, freie
+Erkennung mit dem grossen Modell, Schreibkorrektur über LanguageTool),
+Notizen vorlesen und wegwerfen (`dialos-notiz.py`), Uhrzeit und Datum
+(`dialos-auskunft.py`). Die Befehlsgrammatik ist auf **17 Sätze**
+gewachsen, alle gegeneinander geprüft.
+
+**Zwei Regeln, die sich dabei herausgebildet haben und für jeden neuen
+Befehl gelten** - ausführlich in `docs/sprachbefehle.md`:
+
+1. **Neue Wörter zweifach prüfen:** erst, ob sie überhaupt im Wortschatz
+   des Modells stehen (Vosk meldet `Ignoring word missing in vocabulary`
+   beim Bauen der Grammatik - sofort und ohne Sprechen), dann, ob der
+   ganze Satz in der **vollständigen** Grammatik richtig erkannt wird.
+   Nicht enthalten sind zum Beispiel „löschen", „spät", „zurücksetzen",
+   „aufräumen" - jedes davon hätte einen Befehl lautlos unwirksam gemacht.
+2. **Ein Satz gilt auch, wenn der Erkenner ein Wort verschluckt**, solange
+   kein `[unk]` dabei ist und das Kernwort eindeutig ist. Zweimal an zwei
+   Tagen hat die Bedingung auf den vollen Satz einen Befehl blockiert -
+   einmal den Schlusssatz des Diktats, einmal das Einschalten selbst.
 
 **Nicht anfangen mit:** Telefonie (nach hinten gestellt, hängt an der
 Hardware-Entscheidung), Chat (WhatsApp priorisiert, Bestätigung fehlt),

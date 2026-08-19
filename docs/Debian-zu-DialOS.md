@@ -1277,7 +1277,23 @@ sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-lan
 sudo systemctl --global enable dialos-languagetool.service
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-auskunft.py /usr/local/bin/
 ```
+
+`dialos-auskunft.py` sagt Uhrzeit und Datum. Es holt die Sprech-Bausteine
+per Import aus `dialos-start-ansage.py` - Wochentag, Ordinalzahl,
+Zahl-als-Wort - statt sie nachzubauen: Zwei Stellen mit derselben Aufgabe
+wuerden auseinanderlaufen, und der Nutzer hoerte den Unterschied sofort.
+Der Import ist gefahrlos, weil jenes Skript ausschliesslich unter
+`if __name__ == "__main__"` handelt.
+
+**Wetter auf Nachfrage gibt es bewusst nicht** (Stephan, 2026-08-19). Der
+Befehl war gebaut und wurde wieder entfernt: Am Einsatzort kennt beaconDB
+keines der sichtbaren WLAN-Netze und faellt auf IP-Ortung zurueck -
+gemessen Wien mit 26 km Ungenauigkeit, rund 300 km entfernt. Der
+Schwellwert von 10 km verwirft das korrekt, und der Befehl haette fast
+immer nur geantwortet, dass er nichts abrufen kann. In der Start-Ansage
+bleibt das Wetter, weil es dort ohne Nachfrage einfach ausfaellt.
 
 `dialos-notiz.py` liest Notizen vor und leert sie - die Sprachbefehle dazu
 stehen in [sprachbefehle.md](sprachbefehle.md). Das Leeren fragt zurueck und

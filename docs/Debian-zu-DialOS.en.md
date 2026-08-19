@@ -1241,7 +1241,22 @@ sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-lan
 sudo systemctl --global enable dialos-languagetool.service
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-auskunft.py /usr/local/bin/
 ```
+
+`dialos-auskunft.py` announces the time and the date. It imports the speech
+building blocks from `dialos-start-ansage.py` - weekday, ordinal, number as
+words - rather than rebuilding them: two places with the same job would
+drift apart, and the user would hear the difference at once. The import is
+safe because that script only acts under `if __name__ == "__main__"`.
+
+**Weather on request deliberately does not exist** (Stephan, 2026-08-19).
+The command was built and removed again: at the site of use beaconDB knows
+none of the visible Wi-Fi networks and falls back to IP geolocation -
+measured as Vienna with 26 km accuracy, about 300 km away. The 10 km
+threshold correctly discards that, and the command would almost always have
+answered only that it cannot fetch anything. In the login announcement the
+weather stays, because there it simply drops out without anyone asking.
 
 `dialos-notiz.py` reads notes out and empties them - the voice commands are
 in [sprachbefehle.en.md](sprachbefehle.en.md). Emptying asks for
