@@ -35,8 +35,8 @@ listen?".
 |---|---|
 | **"Sprachsteuerung starten"** (start voice control) | Switches command recognition on, reply: "Ich höre Dir zu." If already running: "Ich höre Dir schon zu." Also opens the [transcript window](Debian-zu-DialOS.en.md) for sighted onlookers - once, not on every command. |
 | **"Sprachsteuerung stoppen"** (stop voice control) | Switches it off again, reply: "Ich höre Dir nicht mehr zu." After two minutes without a command this happens by itself, with an announcement. The transcript window closes with it in both cases. |
-| "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). Reply: "Windows Desktop." If it is already there: "Steht schon auf Windows Desktop." |
-| "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. Reply: "Linux Desktop." or "Steht schon auf Linux Desktop." |
+| "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). Reply: "Windows Desktop." If it is already there: "Der Schreibtisch steht schon auf Windows Desktop." |
+| "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. Reply: "Linux Desktop." or "Der Schreibtisch steht schon auf Linux Desktop." |
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |
 | **"Diktat starten"** (start dictation) | Starts the dictation; everything spoken becomes text and lands in `~/Notizen/notizen.txt`. It says "Einen Moment, ich hole Zettel und Stift." (the big model needs about 9 s), then "Ich schreibe mit." |
 | **"Notiz aufnehmen"** (record a note) | Equivalent to "Diktat starten". |
@@ -123,6 +123,22 @@ occurred:
   - **A follow-up question instead of an abort.** If no usable answer arrives,
     DialOS asks once more. Without that the user would have to speak the whole
     command again although only one word was missing.
+- **It should feel like a dialogue between the user and Michael** (Stephan's
+  principle, 2026-08-19). This is the rule the other wording rules follow from,
+  and it has a practical reason: whoever cannot see the screen has nothing but
+  this voice. A status message leaves them alone; a sentence does not.
+  - **Michael addresses the user** ("Ich höre **Dir** zu.", "Möchtest **Du**
+    Deinen Einkaufszettel vorgelesen haben", "Sage ja oder nein.") and **speaks
+    of himself** ("**Ich** schreibe mit.", "**Ich** habe nichts verstanden.").
+  - **And the word in between can decide whether the sentence is true.** "Du
+    hast eine Weile nichts gesagt." was false when someone had been talking in
+    the room - the counter runs from the last **command**, not the last
+    utterance. Stephan's "Du hast **mir** eine Weile nichts gesagt." is true,
+    because the "mir" narrows the sentence to what was said to Michael. One word
+    of politeness became a truth condition.
+  - **The exceptions are the short acknowledgements of a switch** ("Windows
+    Desktop.", "Ton über Lautsprecher."). They are deliberately that short
+    because the user wants to carry on there - see the rule on length below.
 - **Every command announces what it did.** The user cannot see the
   screen; without an announcement they do not know whether anything
   happened.

@@ -114,6 +114,39 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **„Es soll sich wie ein Dialog zwischen dem Nutzer und Michael anfühlen"
+  (Stephans Grundsatz, 2026-08-19)** - jetzt als Regel in
+  `docs/sprachbefehle.md`, und zwar als die Regel, aus der die anderen
+  Formulierungsregeln folgen. Praktischer Grund: Wer den Bildschirm nicht sieht,
+  hat nichts als diese Stimme. Eine Zustandsmeldung lässt ihn allein, ein Satz
+  nicht.
+    - **Die Zeitgrenzen-Ansage heißt jetzt „Du hast **mir** eine Weile nichts
+      gesagt."** Das „mir" ist nicht Höflichkeit, es macht den Satz erst wahr:
+      Der Zähler läuft ab dem letzten **Befehl**, nicht ab der letzten
+      Äußerung - ein Bruchstück aus einem Gespräch im Raum setzt ihn absichtlich
+      nicht zurück, sonst hielte ein laufendes Radio die Sprachsteuerung endlos
+      wach. Im Test stand genau das im Protokoll: `erkannt: 'es'` um 11:08:18,
+      Zeitgrenze um 11:08:46. „Du hast eine Weile nichts gesagt" wäre da falsch
+      gewesen.
+    - **Alle 37 Ansagen des Systems gegen den Grundsatz geprüft** - 22 sprachen
+      den Nutzer an, 15 klangen nach Maschine. Sieben davon umgestellt: „Das
+      lässt sich nicht ausführen." → „Ich kann das nicht ausführen.", „Das
+      Mikrofon ist wieder da." → „Ich höre Dich wieder.", „Das grosse
+      Sprachmodell fehlt." → „Mir fehlt das große Sprachmodell. Ich kann nicht
+      mitschreiben.", und drei weitere.
+    - **Bewusst nicht umgestellt:** die kurzen Rückmeldungen auf eine
+      Umschaltung („Windows Desktop.", „Ton über Lautsprecher.") - dort will der
+      Nutzer weitermachen, und die Kürze war eine eigene Entscheidung vom
+      2026-08-17. Und „Der Einkaufszettel ist leer." bleibt, weil ein Mensch auf
+      diese Frage genauso antworten würde.
+    - **Zwei Fehler dabei aufgefallen:** `ANSAGE_ENDE = "Diktat beendet."` war
+      seit dem Umbau am Mittag **toter Code** - eine Konstante, die niemand mehr
+      benutzt, sieht beim Lesen wie die gültige Ansage aus. Und der Code sagte
+      „Der Schreibtisch steht schon auf **Linux**.", während
+      `docs/sprachbefehle.md` schon „Linux **Desktop**" auswies - Stephans
+      Benennung war im Code nie angekommen. Beides behoben, die Doku an den
+      vollen Satz angeglichen.
+
 - **Warum die Sitzung endete, stand nirgends (2026-08-19).** Stephan fiel im
   Support-Protokoll eine Lücke auf: Zwischen 10:51 und 10:57 hatte sich die
   Sprachsteuerung per Zeitgrenze abgeschaltet, aber im Protokoll stand um

@@ -123,6 +123,11 @@ def main():
     # abgeschrieben liefen die Beispiele beim naechsten Wortlaut auseinander.
     diktat = modul("dialos-diktat.py", "ddiktat")
     notiz = modul("dialos-notiz.py", "dnotiz")
+    # Auch der Befehlsdienst - seine drei Ansagen haben sich am 2026-08-19
+    # zweimal geaendert ("Ich hoere nicht mehr." -> "Ich hoere Dir nicht mehr
+    # zu.", dann "Du hast MIR eine Weile nichts gesagt"). Abgeschrieben waeren
+    # die Beispiele beim zweiten Mal veraltet gewesen, ohne dass es auffaellt.
+    befehl = modul("dialos-sprachbefehl-desktop.py", "dbefehl")
     aussprache = say.fuer_sprachausgabe
 
     # Rueckfrage genau so bauen wie _loeschen() in dialos-notiz.py
@@ -136,10 +141,9 @@ def main():
         ("02-lautstaerke-frage",
          "War das angenehm laut? Du kannst es einmalig festlegen. "
          "Sage 100, 75, 50, 25 oder aus. Und jetzt bitte."),
-        ("03-sprachsteuerung-an", "Ich höre Dir zu."),
-        ("04-sprachsteuerung-aus", "Ich höre Dir nicht mehr zu."),
-        ("04b-sprachsteuerung-zeitgrenze",
-         "Du hast eine Weile nichts gesagt. Ich höre Dir nicht mehr zu."),
+        ("03-sprachsteuerung-an", befehl.ANSAGE_AN),
+        ("04-sprachsteuerung-aus", befehl.ANSAGE_AUS),
+        ("04b-sprachsteuerung-zeitgrenze", befehl.ANSAGE_ZEITGRENZE),
         ("05-desktop-windows", "Windows Desktop."),
         ("06-desktop-steht-schon", "Steht schon auf Linux Desktop."),
         ("07-diktat-beginn",

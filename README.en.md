@@ -105,6 +105,36 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **"It should feel like a dialogue between the user and Michael" (Stephan's
+  principle, 2026-08-19)** - now a rule in `docs/sprachbefehle.en.md`, and as
+  the rule the other wording rules follow from. The practical reason: whoever
+  cannot see the screen has nothing but this voice. A status message leaves them
+  alone; a sentence does not.
+    - **The timeout announcement is now "Du hast **mir** eine Weile nichts
+      gesagt."** The "mir" is not politeness, it is what makes the sentence
+      true: the counter runs from the last **command**, not the last utterance -
+      a fragment from a conversation in the room deliberately does not reset it,
+      otherwise a playing radio would keep the voice control awake forever. The
+      test log showed exactly that: `erkannt: 'es'` at 11:08:18, timeout at
+      11:08:46. "Du hast eine Weile nichts gesagt" would have been false there.
+    - **All 37 announcements audited against the principle** - 22 addressed the
+      user, 15 sounded like a machine. Seven were changed: "Das lässt sich nicht
+      ausführen." → "Ich kann das nicht ausführen.", "Das Mikrofon ist wieder
+      da." → "Ich höre Dich wieder.", "Das grosse Sprachmodell fehlt." → "Mir
+      fehlt das große Sprachmodell. Ich kann nicht mitschreiben.", and three
+      more.
+    - **Deliberately not changed:** the short acknowledgements of a switch
+      ("Windows Desktop.", "Ton über Lautsprecher.") - there the user wants to
+      carry on, and the brevity was a decision of its own on 2026-08-17. And
+      "Der Einkaufszettel ist leer." stays, because a person would answer that
+      question the same way.
+    - **Two faults surfaced in the process:** `ANSAGE_ENDE = "Diktat beendet."`
+      had been **dead code** since the midday rebuild - a constant nobody uses
+      any more reads like the announcement in force. And the code said "Der
+      Schreibtisch steht schon auf **Linux**." while `docs/sprachbefehle.en.md`
+      already carried "Linux **Desktop**" - Stephan's naming had never reached
+      the code. Both fixed, the docs aligned to the full sentence.
+
 - **Why the session ended was recorded nowhere (2026-08-19).** Stephan spotted a
   gap in the support log: between 10:51 and 10:57 the voice control had switched
   off via the timeout, but at 10:53:27 the log held only "Mitschrift

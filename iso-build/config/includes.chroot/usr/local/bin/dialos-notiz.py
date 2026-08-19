@@ -314,10 +314,10 @@ def _loeschen(name):
         open(quelle, "w", encoding="utf-8").close()
     except OSError as fehler:
         melde(f"  Loeschen fehlgeschlagen: {fehler}")
-        sprich("Das hat nicht geklappt.")
+        sprich(f"Das hat nicht geklappt. Ich lasse {ihn} stehen.")
         return 1
     melde(f"  geleert: {quelle}, Sicherung in {ablage}")
-    sprich(f"{bez} {ist} gelöscht.")
+    sprich(f"Ich habe {ihn} gelöscht.")
     return 0
 
 

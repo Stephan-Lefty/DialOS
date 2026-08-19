@@ -34,8 +34,8 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 |---|---|
 | **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre Dir zu." Läuft sie schon: „Ich höre Dir schon zu." Öffnet zugleich das [Mitschrift-Fenster](Debian-zu-DialOS.md) für sehende Zuschauer - einmal, nicht bei jedem Befehl. |
 | **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre Dir nicht mehr zu." Nach zwei Minuten ohne Befehl geschieht das von selbst, mit Ansage. Das Mitschrift-Fenster geht in beiden Fällen mit zu. |
-| „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Steht schon auf Windows Desktop." |
-| „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Steht schon auf Linux Desktop." |
+| „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Der Schreibtisch steht schon auf Windows Desktop." |
+| „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Der Schreibtisch steht schon auf Linux Desktop." |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
 | **„Diktat starten"** | Startet das Diktat; alles Gesprochene wird Text und landet in `~/Notizen/notizen.txt`. Es sagt „Einen Moment, ich hole Zettel und Stift." (das grosse Sprachmodell braucht rund 9 s), dann „Ich schreibe mit." |
 | **„Notiz aufnehmen"** | Gleichbedeutend mit „Diktat starten". |
@@ -125,6 +125,23 @@ einmal aufgetreten ist:
   - **Eine Nachfrage statt eines Abbruchs.** Kommt keine verwertbare Antwort,
     wird einmal nachgefragt. Ohne das müsste der Nutzer den ganzen Befehl neu
     sprechen, obwohl nur ein Wort gefehlt hat.
+- **Es soll sich wie ein Dialog zwischen dem Nutzer und Michael anfühlen**
+  (Stephans Grundsatz, 2026-08-19). Das ist die Regel, aus der die anderen
+  Formulierungsregeln folgen, und sie hat einen praktischen Grund: Wer den
+  Bildschirm nicht sieht, hat nichts als diese Stimme. Eine Zustandsmeldung
+  lässt ihn allein, ein Satz nicht.
+  - **Michael spricht den Nutzer an** („Ich höre **Dir** zu.", „Möchtest **Du**
+    Deinen Einkaufszettel vorgelesen haben", „Sage ja oder nein.") und **von
+    sich** („**Ich** schreibe mit.", „**Ich** habe nichts verstanden.").
+  - **Und das Wort dazwischen kann entscheiden, ob der Satz stimmt.** „Du hast
+    eine Weile nichts gesagt." war falsch, wenn im Raum gesprochen wurde - der
+    Zähler läuft ab dem letzten **Befehl**, nicht ab der letzten Äußerung.
+    Stephans „Du hast **mir** eine Weile nichts gesagt." ist richtig, weil das
+    „mir" den Satz auf das begrenzt, was Michael gesagt wurde. Aus einem Wort
+    Höflichkeit wurde eine Wahrheitsbedingung.
+  - **Ausnahmen sind die kurzen Rückmeldungen auf eine Umschaltung**
+    („Windows Desktop.", „Ton über Lautsprecher."). Sie sind bewusst so kurz,
+    weil der Nutzer dort weitermachen will - siehe die Regel zur Länge unten.
 - **Jeder Befehl sagt an, was er getan hat.** Der Nutzer sieht den
   Bildschirm nicht; ohne Ansage weiß er nicht, ob etwas passiert ist.
 - **Und er sagt es anders, wenn sich nichts geändert hat.** „Auf Linux

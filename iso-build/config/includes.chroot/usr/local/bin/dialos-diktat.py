@@ -158,7 +158,10 @@ def eintraege_aus(name, text):
     # Trennen stuende sonst "Milch / sechs Eier / Butter" im Zettel, und ein
     # sehender Helfer liest den Zettel auch.
     return [t[0].upper() + t[1:] for t in teile]
-ANSAGE_ENDE = "Diktat beendet."
+# ANSAGE_ENDE ist am 2026-08-19 entfallen: Der Satz "Diktat beendet." wird
+# jetzt in ansage_ende() zusammengesetzt, zusammen mit der Anzahl und dem
+# Hinweis aufs Vorlesen. Eine Konstante, die niemand mehr benutzt, sieht beim
+# Lesen wie die gueltige Ansage aus - das ist schlimmer als eine fehlende.
 
 # Nach dem Diktat: HINWEIS statt Vorlesen (Stephan, 2026-08-19). Bis dahin las
 # "Diktat beenden" den ganzen Zettel vor - und machte damit den Befehl
@@ -351,7 +354,7 @@ def main():
     name = argumente[1] if len(argumente) > 1 else "notizen"
 
     if not os.path.isdir(MODELL_GROSS):
-        sprich("Das grosse Sprachmodell fehlt. Diktat ist nicht möglich.")
+        sprich("Mir fehlt das große Sprachmodell. Ich kann nicht mitschreiben.")
         print(f"Modell fehlt: {MODELL_GROSS}", file=sys.stderr)
         return 1
 

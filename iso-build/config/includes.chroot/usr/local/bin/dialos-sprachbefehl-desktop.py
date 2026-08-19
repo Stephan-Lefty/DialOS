@@ -252,7 +252,16 @@ ANSAGE_AUS = "Ich höre Dir nicht mehr zu."
 # raten, weshalb - wer den Bildschirm nicht sieht, kann nicht nachsehen,
 # ob er etwas falsch gemacht hat. Und sie sprach ihn nicht an, waehrend die
 # drei anderen Ansagen es tun.
-ANSAGE_ZEITGRENZE = "Du hast eine Weile nichts gesagt. Ich höre Dir nicht mehr zu."
+# "Du hast MIR eine Weile nichts gesagt" (Stephan, 2026-08-19) - das "mir" ist
+# nicht Schmuck, es macht den Satz erst richtig. Der Zaehler laeuft ab dem
+# letzten BEFEHL, nicht ab der letzten Aeusserung: ein erkanntes Bruchstueck aus
+# einem Gespraech im Raum setzt ihn absichtlich NICHT zurueck, sonst hielte ein
+# laufendes Radio die Sprachsteuerung endlos wach. Beim Test am 2026-08-19 stand
+# genau das im Protokoll - 'es' um 11:08:18, Zeitgrenze um 11:08:46. "Du hast
+# eine Weile nichts gesagt" waere in diesem Fall falsch gewesen; "mir nichts
+# gesagt" ist es nicht.
+ANSAGE_ZEITGRENZE = ("Du hast mir eine Weile nichts gesagt. "
+                     "Ich höre Dir nicht mehr zu.")
 ANSAGE_LAEUFT_SCHON = "Ich höre Dir schon zu."
 
 # KEINE Sperrfrist mehr - zweimal am 2026-08-17 als Ursache derselben
@@ -583,9 +592,16 @@ def aktueller_stil():
 
 def umschalten(ziel):
     if aktueller_stil() == ziel:
-        sprich("Der Schreibtisch steht schon auf Linux."
+        # "Linux Desktop" / "Windows Desktop", nicht "Linux" / "Windows"
+        # (Stephans Benennung vom 2026-08-19). Der Code sagte hier nur "Linux",
+        # waehrend docs/sprachbefehle.md schon die Fassung mit "Desktop"
+        # auswies - aufgefallen am 2026-08-19 beim Pruefen aller Ansagen gegen
+        # Stephans Grundsatz "es soll sich wie ein Dialog anfuehlen". Der ganze
+        # Satz bleibt: ein Dialogpartner antwortet in Saetzen, und die
+        # Kurzform stand hier ohnehin nie.
+        sprich("Der Schreibtisch steht schon auf Linux Desktop."
                if ziel == "gnome"
-               else "Der Schreibtisch steht schon auf Windows.")
+               else "Der Schreibtisch steht schon auf Windows Desktop.")
         return
     if not os.access(UMSCHALT_SKRIPT, os.X_OK):
         sprich("Ich kann die Umschaltung nicht finden.")
@@ -634,7 +650,7 @@ def diktat_starten(notiz):
         melde(f"Diktat gestartet fuer Notiz {notiz!r}")
     except Exception as fehler:
         melde(f"Diktat liess sich nicht starten: {fehler}")
-        sprich("Das Diktat lässt sich nicht starten.")
+        sprich("Ich kann das Diktat nicht starten.")
 
 
 def auskunft(was):
@@ -655,7 +671,7 @@ def auskunft(was):
         melde(f"Auskunft {was!r} gestartet")
     except Exception as fehler:
         melde(f"Auskunft liess sich nicht starten: {fehler}")
-        sprich("Das lässt sich nicht ausführen.")
+        sprich("Ich kann das nicht ausführen.")
 
 
 def notiz_aktion(name, was):
@@ -677,7 +693,7 @@ def notiz_aktion(name, was):
         melde(f"Notiz-Aktion {was!r} fuer {name!r} gestartet")
     except Exception as fehler:
         melde(f"Notiz-Aktion liess sich nicht starten: {fehler}")
-        sprich("Das lässt sich nicht ausführen.")
+        sprich("Ich kann das nicht ausführen.")
 
 
 def pegel_richten():
@@ -860,7 +876,7 @@ def main():
                     time.sleep(5)
                     continue
                 if mikrofon_fehlt_gemeldet:
-                    sprich("Das Mikrofon ist wieder da.")
+                    sprich("Ich höre Dich wieder.")
                     mikrofon_fehlt_gemeldet = False
                 quelle = neu
                 prozess = aufnahme_starten(quelle)
