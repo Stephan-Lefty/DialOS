@@ -115,6 +115,7 @@ beenden mit Strg+C.
 
 import json
 import os
+import signal
 import subprocess
 import sys
 import time
@@ -246,7 +247,12 @@ ANSAGE_AN = "Ich höre Dir zu."
 # dass das Geraet nichts mehr hoert - also kaputt ist. Mit "Dir" ist klar,
 # dass es eine Entscheidung ist und kein Defekt.
 ANSAGE_AUS = "Ich höre Dir nicht mehr zu."
-ANSAGE_ZEITGRENZE = "Ich schalte die Sprachsteuerung wieder aus."
+# Sagt AUCH, warum sie kommt (Stephan, 2026-08-19). "Ich schalte die
+# Sprachsteuerung wieder aus." war sachlich richtig und liess den Nutzer
+# raten, weshalb - wer den Bildschirm nicht sieht, kann nicht nachsehen,
+# ob er etwas falsch gemacht hat. Und sie sprach ihn nicht an, waehrend die
+# drei anderen Ansagen es tun.
+ANSAGE_ZEITGRENZE = "Du hast eine Weile nichts gesagt. Ich höre Dir nicht mehr zu."
 ANSAGE_LAEUFT_SCHON = "Ich höre Dir schon zu."
 
 # KEINE Sperrfrist mehr - zweimal am 2026-08-17 als Ursache derselben
@@ -284,8 +290,23 @@ PEGEL_ABSTAND_S = 60.0      # hoechstens einmal pro Minute nachregeln
 DEBUG = "--debug" in sys.argv
 
 
+# Das Protokoll wird IMMER geschrieben, nicht nur mit "--debug" (Fehler vom
+# 2026-08-19). Vorher musste der Dienst zum Mitschreiben von Hand mit
+# "--debug" neu gestartet werden - und weil er dazu mit "setsid" von der
+# Sitzung geloest wurde, ueberlebte er das Abmelden. Nach einem
+# Benutzerwechsel liefen dann ZWEI Befehlsdienste: jeder Befehl waere zweimal
+# ausgefuehrt worden, und beide streiten sich um das Mikrofon.
+#
+# Dieselbe Lehre wie beim Diktat einen Tag vorher, nur an der anderen Stelle:
+# Ein Protokoll, das man erst einschalten muss, ist beim Fehler nicht da.
+# Die Pegelanzeige bleibt bewusst NUR auf dem Bildschirm - sie erzeugte am
+# 2026-08-19 allein 4132 Zeilen gegen 13 echte.
+PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-sprachbefehl.log")
+
+
 def melde(text):
-    """Debug-Ausgabe MIT Zeitstempel.
+    """Meldung MIT Zeitstempel - immer ins Protokoll, mit --debug auch auf den
+    Bildschirm.
 
     Der Zeitstempel ist nicht Zierde (Fehler vom 2026-08-18): Beim Test der
     Diktat-Sperre stand im Protokoll ein erkannter Satz, und ohne Uhrzeit
@@ -293,8 +314,14 @@ def melde(text):
     die Sperre versagt hat - oder davor. Ein Protokoll ohne Zeit kann
     Gleichzeitigkeit nicht belegen, und genau darum ging es.
     """
+    zeile = f"{time.strftime('%H:%M:%S')}  {text}"
     if DEBUG:
-        print(f"\n{time.strftime('%H:%M:%S')}  {text}", flush=True)
+        print("\n" + zeile, flush=True)
+    try:
+        with open(PROTOKOLL, "a", encoding="utf-8") as f:
+            f.write(zeile + "\n")
+    except OSError:
+        pass          # ein fehlendes Protokoll darf keinen Befehl verhindern
 
 
 def markierungsdatei():
@@ -363,6 +390,101 @@ def sprich(text):
         subprocess.run([SAY, text], capture_output=True, timeout=60)
     else:
         print(text)
+
+
+# --- Mitschrift-Fenster -------------------------------------------------
+# Stephans Wunsch vom 2026-08-19: Das Fenster soll aufgehen, wenn die
+# Sprachsteuerung eingeschaltet wird, und zugehen, wenn sie ausgeht - von Hand
+# oder durch die Zeitgrenze. Es haengt damit an der Sprachsteuerung und nicht
+# am Anmelden: wo nicht gesprochen wird, gibt es auch nichts mitzuschreiben.
+MITSCHRIFT = "/usr/local/bin/dialos-mitschrift.py"
+
+
+def mitschrift_gewuenscht():
+    """Soll das Fenster mit der Sprachsteuerung aufgehen?
+
+    Vorgabe ist AN, und zwar aus einem Grund, der ueber das Fenster
+    hinausgeht: Das Support-Protokoll wird von der Mitschrift geschrieben.
+    Waere das Fenster ab Werk aus, gaebe es beim Anruf auch nichts nachzulesen
+    - genau der Fall, fuer den es gedacht ist. Wer den Bildschirm frei haben
+    will, legt eine Datei ~/.config/dialos/mitschrift mit "aus" an.
+    """
+    pfad = os.path.join(
+        os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
+        "dialos", "mitschrift")
+    try:
+        with open(pfad) as f:
+            return f.read().strip().lower() not in ("aus", "nein", "0", "off")
+    except OSError:
+        return True
+
+
+def mitschrift_pids():
+    """PIDs laufender Mitschriften.
+
+    Gesucht wird das Python-Skript, nicht das Terminal: gnome-terminal spaltet
+    sich vom Aufruf ab und uebergibt an einen schon laufenden
+    gnome-terminal-server, dessen PID nichts mit diesem Fenster zu tun hat.
+    Endet dagegen das Skript, endet der Befehl des Fensters, und das Fenster
+    schliesst sich von selbst.
+    """
+    gefunden = []
+    try:
+        eintraege = os.listdir("/proc")
+    except OSError:
+        return gefunden
+    for eintrag in eintraege:
+        if not eintrag.isdigit():
+            continue
+        try:
+            with open(f"/proc/{eintrag}/cmdline", "rb") as f:
+                zeile = f.read().replace(b"\0", b" ").decode("utf-8", "replace")
+        except OSError:
+            continue          # Prozess ist inzwischen weg - kein Fehler
+        if MITSCHRIFT in zeile:
+            gefunden.append(int(eintrag))
+    return gefunden
+
+
+def mitschrift_oeffnen():
+    """Fenster oeffnen - aber nur, wenn keines laeuft.
+
+    Ohne diese Pruefung stuenden nach zwanzig Aktivierungen zwanzig Fenster
+    uebereinander.
+    """
+    if not mitschrift_gewuenscht():
+        return
+    if mitschrift_pids():
+        melde("  Mitschrift laeuft schon")
+        return
+    for kandidat in ("/usr/bin/gnome-terminal", "/usr/bin/x-terminal-emulator"):
+        if os.access(kandidat, os.X_OK):
+            terminal = kandidat
+            break
+    else:
+        melde("  kein Terminal gefunden - keine Mitschrift")
+        return
+    if terminal.endswith("gnome-terminal"):
+        befehl = [terminal, "--title=DialOS - Mitschrift",
+                  "--geometry=100x30", "--", MITSCHRIFT]
+    else:
+        befehl = [terminal, "-e", MITSCHRIFT]
+    try:
+        subprocess.Popen(befehl, start_new_session=True,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        melde("  Mitschrift geoeffnet")
+    except OSError as fehler:
+        melde(f"  Mitschrift liess sich nicht oeffnen: {fehler}")
+
+
+def mitschrift_schliessen():
+    """Alle laufenden Mitschriften beenden; die Fenster gehen mit."""
+    for pid in mitschrift_pids():
+        try:
+            os.kill(pid, signal.SIGTERM)
+            melde(f"  Mitschrift geschlossen (PID {pid})")
+        except OSError:
+            pass          # schon weg - dann ist das Ziel ja erreicht
 
 
 ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
@@ -588,6 +710,14 @@ def main():
         sprich("Ich finde kein Mikrofon. Die Sprachsteuerung ist aus.")
         return 1
 
+    # Eine Startzeile ins Protokoll, damit "leeres Protokoll" nicht zweideutig
+    # ist (Fehler vom 2026-08-19). Ohne sie sieht "es ist nichts passiert"
+    # genauso aus wie "der Dienst laeuft gar nicht" - und beim Suchen nach
+    # einem Fehler ist das der Unterschied zwischen zwei ganz verschiedenen
+    # Vermutungen. Dieselbe Ueberlegung, die beim Diktat schon zur Meldung
+    # "Diktat laeuft - ich hoere nicht zu" gefuehrt hat.
+    melde(f"=== Befehlsdienst gestartet, Quelle {quelle} ===")
+
     # Merker fuer die Ansage "kein Mikrofon" - damit sie einmal kommt und
     # nicht alle fuenf Sekunden.
     mikrofon_fehlt_gemeldet = False
@@ -621,6 +751,7 @@ def main():
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
                 sprich(ANSAGE_ZEITGRENZE)
+                mitschrift_schliessen()
                 continue
 
             # Nicht zuhoeren, solange das System selbst spricht oder ein
@@ -666,8 +797,10 @@ def main():
                 erkenner = vosk.KaldiRecognizer(
                     modell, ABTASTRATE,
                     GRAMMATIK_AN if hoert_zu else GRAMMATIK_AUS)
-                if DEBUG:
-                    melde("(Aufnahme nach Sprechpause neu begonnen)")
+                # Immer protokollieren: Diese Zeile erklaert Luecken im
+                # Protokoll. Ohne sie sieht eine Pause zwischen zwei
+                # Befehlen aus wie ein Aussetzer.
+                melde("(Aufnahme nach Sprechpause neu begonnen)")
                 continue
 
             block = prozess.stdout.read(4000)
@@ -716,8 +849,12 @@ def main():
                 saettigungen += 1
                 if (saettigungen >= SAETTIGUNG_GRENZE
                         and time.time() - letzte_pegelkorrektur > PEGEL_ABSTAND_S):
-                    if DEBUG:
-                        melde("(uebersteuert - Pegel wird neu gerichtet)")
+                    # Immer protokollieren: Uebersteuerung ist die Ursache, an
+                    # der am 2026-08-16 die ganze Erkennung gescheitert ist
+                    # (60 dB ab Werk). Tritt sie wieder auf, muss es im
+                    # Protokoll stehen und nicht nur auf einem Bildschirm, den
+                    # niemand ansieht.
+                    melde("(uebersteuert - Pegel wird neu gerichtet)")
                     pegel_richten()
                     letzte_pegelkorrektur = time.time()
                     saettigungen = 0
@@ -727,7 +864,14 @@ def main():
             if not erkenner.AcceptWaveform(block):
                 continue
             text = json.loads(erkenner.Result()).get("text", "")
-            if DEBUG and text:
+            # KEIN "if DEBUG" davor (Fehler vom 2026-08-19). Das ist die
+            # wichtigste Zeile des ganzen Protokolls - was der Dienst gehoert
+            # hat. Beim Umbau auf "immer protokollieren" blieb der alte
+            # Vorbehalt stehen, und heraus kam ein Protokoll, in dem die
+            # AUSGEFUEHRTE Aktion stand, aber nicht der Satz, der sie
+            # ausgeloest hat. Genau das Gegenteil dessen, was man beim
+            # Fehlersuchen braucht.
+            if text:
                 melde(f"erkannt: {text!r}")
             if not text:
                 continue
@@ -748,6 +892,10 @@ def main():
                 else:
                     hoert_zu = True
                     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AN)
+                    # VOR der Ansage: das Fenster braucht einen Moment, und die
+                    # Ansage dauert ohnehin gut eine Sekunde. So steht es, wenn
+                    # der Nutzer den ersten Befehl sagt.
+                    mitschrift_oeffnen()
                     sprich(ANSAGE_AN)
                 # KEINE Sperrfrist hier - siehe Kommentar bei
                 # SPERRFRIST_S. Direkt nach "Ich hoere." erwartet der
@@ -768,6 +916,9 @@ def main():
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
                 sprich(ANSAGE_AUS)
+                # NACH der Ansage geschlossen, damit die letzte Zeile noch im
+                # Fenster steht, solange Michael spricht.
+                mitschrift_schliessen()
                 continue
 
             # --- Befehle: Diktat ---

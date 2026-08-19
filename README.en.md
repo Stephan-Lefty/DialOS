@@ -105,6 +105,53 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The transcript opens and closes with the voice control - and writes a
+  support log (Stephan's clarification, 2026-08-19).** Until now the window had
+  to be opened by hand; now `dialos-sprachbefehl-desktop.py` opens it on
+  "Sprachsteuerung starten" and closes it on "Sprachsteuerung stoppen" and at
+  the two-minute timeout. It therefore hangs off the voice control rather than
+  the login: where nothing is spoken there is nothing to transcribe.
+  Deliberately not on every single command - opening once per session is
+  unobtrusive, jumping up at every sentence would not be.
+    - **Two traps, both solved:** before opening, `/proc` is checked for an
+      already running window - without that, twenty activations would leave
+      twenty windows stacked up. And what gets closed is the **script**, not the
+      terminal: `gnome-terminal` detaches from the invocation and hands over to
+      an already running `gnome-terminal-server` whose PID belongs to every
+      window. End the script and the window's command ends - so the window
+      closes by itself.
+    - **Support log:** `~/.local/share/dialos/support/befehle-YYYY-MM-DD.log`,
+      directory 0700, file 0600, one file per day, **seven days**, clears itself
+      on startup and at midnight. Its purpose is the support call: read back what
+      the device actually heard.
+    - **The boundary on content, and why it sits there:** `~/dialos-diktat.log`
+      contains every dictated sentence verbatim - the whole letter. A file meant
+      for an outside helper must not contain the user's mail. Hence: commands in
+      full, of the dictated text the **first line** (truncated to 60
+      characters), after that only the count. The window still shows everything
+      - there it is seen only by someone sitting in front of the device anyway.
+    - **The context matters most (Stephan):** "Milch" on its own tells nobody
+      anything, "Einkaufszettel: Milch" tells the whole story. So every section
+      is preceded by what it was about - dictation, shopping list, question to
+      the system, later mail and letter. It is not guessed but carried along
+      from the lines the programs write themselves on startup.
+    - **A mistake of my own:** the first draft reset the context after every
+      line - which put "gespeichert in ..." outside its "Einkaufszettel"
+      section, and left a single command with two headings. A heard sentence is
+      the only reliable boundary; it also arrives when a dictation breaks off
+      early.
+    - **And a mistake that cost work:** while rebuilding I edited
+      `dialos-mitschrift.py` with a `re.sub` pattern `.*\n` under `re.S` - that
+      is greedy to the end of the file and replaced everything after the match.
+      Restored from `git HEAD` (identical to the installed copy; only my own
+      changes were lost). Since then: replace literally, assert the match is
+      unique, and after every write assert the file still ends on
+      `sys.exit(main())`.
+    - Newly documented: `docs/sicherheit-datenschutz.en.md` now has a section
+      **"Logs: what DialOS records about the user"** with a table of all five
+      files, their modes and retention. Noticed while writing it and recorded in
+      `TODO.md`: the four program logs grow without limit and are not rotated.
+
 - **Footer for documents, mails and printouts (Stephan's requirement,
   2026-08-19).** Text verbatim: "Dieses Dokument wurde per Spracheingabe
   powered by DialOS.org erstellt!", discreet and right-aligned. New script

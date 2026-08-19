@@ -1,0 +1,19 @@
+[Desktop Entry]
+# Mitschrift: was die Sprachsteuerung gerade tut, fuer sehende Zuschauer.
+# Stephans Wunsch vom 2026-08-19.
+#
+# BEWUSST EIN STARTER UND KEIN AUTOSTART. Das Fenster wird geoeffnet, wenn
+# jemand zusehen will - bei einer Vorfuehrung, bei der Fehlersuche, oder wenn
+# ein sehender Helfer am Geraet sitzt. Im Alltag des blinden Nutzers hat es
+# keinen Zweck: Er sieht es nicht, und ein Fenster, das er nicht sieht, kann
+# ihm den Fokus stehlen.
+Type=Application
+Name=DialOS Mitschrift
+Name[en]=DialOS live transcript
+Comment=Zeigt laufend, was die Sprachsteuerung hoert und tut
+Comment[en]=Shows live what the voice control hears and does
+Exec=gnome-terminal --title="DialOS - Mitschrift" --geometry=100x30 -- /usr/local/bin/dialos-mitschrift.py
+Icon=utilities-terminal
+Terminal=false
+Categories=System;Monitor;
+Keywords=DialOS;Sprache;Mitschrift;Protokoll;

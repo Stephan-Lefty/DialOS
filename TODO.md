@@ -52,6 +52,17 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [ ] **Die vier Protokolle wachsen unbegrenzt - beim Diktat ist das ein
+  Datenschutzthema, keine Platzfrage** (aufgefallen 2026-08-19 beim Bau des
+  Support-Protokolls). `~/dialos-diktat.log` enthält jeden je diktierten Satz
+  wörtlich, also jeden Brief, dauerhaft und im Klartext. Für die Fehlersuche
+  war genau das mehrfach unverzichtbar, deshalb nicht einfach abschalten -
+  aber eine Grenze braucht es. Das Support-Protokoll hat sie schon (7
+  Tagesdateien, räumt sich selbst); dieselbe Mechanik lässt sich auf die vier
+  übertragen. Zu entscheiden ist die Frist: für die Fehlersuche genügen wenige
+  Tage, ein Nutzer könnte aber auch „gar nicht mitschreiben" wollen. Steht in
+  `docs/sicherheit-datenschutz.md` als offener Punkt.
+
 - [ ] **Zeitzone folgt dem Standort nicht - und ein blinder Nutzer kann sie
   nicht umstellen** (aufgefallen 2026-08-19 bei Stephans Frage „richtet sich
   die Uhrzeit nach dem tatsächlichen Ort?"). Gemessen: `Time zone:

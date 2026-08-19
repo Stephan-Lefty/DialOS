@@ -6,10 +6,41 @@ Sprachsteuerung tut. Fuer einen sehenden Helfer, fuer Vorfuehrungen, und um
 einem blinden Nutzer am Telefon sagen zu koennen, was das Geraet gerade
 gehoert hat.
 
-EINMAL OEFFNEN, STEHEN LASSEN (Stephans Entscheidung). Kein Fenster, das bei
-jedem Befehl in den Vordergrund springt - das wuerde beim Diktieren stoeren
-und den Fokus stehlen, und wer diktiert, hat den Bildschirm ohnehin nicht im
-Blick.
+AUF UND ZU MIT DER SPRACHSTEUERUNG (Stephans Praezisierung vom 2026-08-19).
+Das Fenster geht auf, wenn die Sprachsteuerung eingeschaltet wird, und zu, wenn
+sie ausgeht - von Hand oder durch die Zeitgrenze. Nicht bei jedem einzelnen
+Befehl: das wuerde beim Diktieren stoeren und den Fokus stehlen, und wer
+diktiert, hat den Bildschirm ohnehin nicht im Blick. Einmal pro Sitzung
+aufgehen ist unauffaellig; bei jedem Satz aufspringen waere es nicht.
+
+Geoeffnet und geschlossen wird das Fenster von
+`dialos-sprachbefehl-desktop.py` - es haengt an der Sprachsteuerung, nicht
+umgekehrt. Geschlossen wird durch Beenden DIESES Skripts; das Terminal-Fenster
+schliesst sich dann von selbst, weil sein Befehl endet. So laesst sich ein
+Fenster schliessen, ohne dessen Fenster-ID zu kennen - gnome-terminal spaltet
+sich vom Aufruf ab, seine eigene PID hilft also nicht weiter.
+
+SUPPORT-PROTOKOLL (Stephans Wunsch vom 2026-08-19). Was hier durchlaeuft, wird
+zusaetzlich in eine Tagesdatei geschrieben - damit man beim Anruf nachlesen
+kann, was das Geraet wirklich gehoert hat, statt sich auf die Erinnerung zu
+verlassen. Eine Datei pro Tag, sieben Tage lang, dann geht die aelteste von
+selbst weg.
+
+WAS VOM INHALT HINEINKOMMT - und was nicht (Stephans Praezisierung vom
+2026-08-19): die Befehle vollstaendig, vom Diktierten die ERSTE Zeile und
+danach nur noch die Anzahl. `~/dialos-diktat.log` enthaelt jeden diktierten
+Satz woertlich, also den ganzen Brief; eine Datei fuer einen fremden Helfer
+darf die Post des Nutzers nicht enthalten. Eine Zeile genuegt aber, um im
+Support zu erkennen, dass ueberhaupt etwas erfasst wurde - und ob es Sinn
+ergab. Im Fenster steht weiter alles, denn dort sieht es nur, wer ohnehin vor
+dem Geraet sitzt.
+
+DER ZUSAMMENHANG IST DAS WICHTIGSTE (Stephan, 2026-08-19). „Milch“
+allein sagt niemandem etwas, „Einkaufszettel: Milch“ sagt alles.
+Deshalb steht vor jedem Abschnitt, worum es gerade ging - Diktat,
+Einkaufszettel, Frage an das System, spaeter Mail und Brief. Der Zusammenhang
+wird nicht geraten, sondern aus den Zeilen mitgefuehrt, die die Programme beim
+Starten selbst schreiben.
 
 WARUM EIN FILTER UND KEIN "tail -f": Das Befehlsprotokoll bestand am
 2026-08-19 aus 4132 Pegel-Zeilen gegen 13 echte. Ein rohes tail waere
@@ -23,10 +54,12 @@ Uhrzeit gemischt. Genau dieses Zusammenfuehren hat am 2026-08-18 den Beweis
 gebracht, dass sich Diktat und Befehlserkennung nicht ins Gehege kommen; von
 Hand war es muehsam.
 
-Aufruf:  dialos-mitschrift.py            (folgt laufend)
-         dialos-mitschrift.py --alles    (zeigt auch, was vorher schon da war)
+Aufruf:  dialos-mitschrift.py             (folgt laufend)
+         dialos-mitschrift.py --alles     (zeigt auch, was vorher schon da war)
+         dialos-mitschrift.py --kein-protokoll  (nichts fuer den Support schreiben)
 """
 
+import datetime
 import os
 import re
 import sys
@@ -71,6 +104,56 @@ UEBERSETZUNG = [
 ]
 
 ZEIT = re.compile(r'^(\d\d:\d\d:\d\d)\s+(.*)$')
+
+# --- Support-Protokoll --------------------------------------------------
+# Eine Datei pro Tag. Das ist der Grund fuer das Datum im Namen: aufraeumen
+# heisst dann "alte Datei loeschen" und nicht "in einer laufenden Datei nach der
+# Grenze suchen" - und eine Datei, in die gerade geschrieben wird, wird dabei
+# nie angefasst.
+SUPPORT_ORDNER = os.path.join(
+    os.environ.get("XDG_DATA_HOME", os.path.join(HEIM, ".local", "share")),
+    "dialos", "support")
+SUPPORT_TAGE = 7
+SUPPORT_NAME = re.compile(r'^befehle-(\d{4})-(\d{2})-(\d{2})\.log$')
+
+# Inhalt des Nutzers - im Fenster ja, im Support-Protokoll nur die erste Zeile.
+# "diktiert:" ist die rohe Erkennung, "geschrieben:" der Text nach der
+# Schreibhilfe. Gezaehlt und protokolliert wird nur "geschrieben:", sonst
+# stuende jeder Satz doppelt und die Anzahl waere das Doppelte.
+INHALT_ROH = re.compile(r'^diktiert:')
+INHALT = re.compile(r'^geschrieben: \u201e(.*)\u201c$')
+INHALT_KUERZE = 60
+
+# Wo die Anzahl der nicht protokollierten Zeilen hingehoert: an das Ende des
+# Diktats, nicht an den naechsten Befehl. Ohne das trug sie die Uhrzeit des
+# naechsten gesprochenen Satzes - Minuten spaeter.
+INHALT_ABSCHLUSS = re.compile(r'^gespeichert in')
+
+# Woran der Zusammenhang zu erkennen ist. Beim Diktat steht das Ziel im
+# Klammerzusatz - deshalb die Tabelle: aus "einkaufszettel" wird
+# "Einkaufszettel", und ein spaeteres Ziel wie "brief" oder "mail" landet
+# unuebersetzt, aber lesbar im Protokoll, statt zu fehlen.
+ZUSAMMENHANG_START = re.compile(r'^Diktat l\u00e4uft \((.+)\)')
+# Ein Abschnitt endet nicht nach einer Zeile, sondern beim naechsten Befehl.
+# Erster Versuch am 2026-08-19 setzte nach jeder Zeile zurueck - damit stand
+# "gespeichert in ..." nicht mehr unter "Einkaufszettel", und fuer einen
+# einzigen Befehl standen zwei Ueberschriften da. Ein gehoerter Satz ist die
+# einzige verlaessliche Grenze: er bedeutet immer, dass der Nutzer wieder mit
+# der Sprachsteuerung spricht - und er kommt auch dann, wenn ein Diktat
+# vorzeitig abbricht und die Schlusszeile fehlt.
+ZUSAMMENHANG_ZURUECK = re.compile(r'^(geh\u00f6rt: |=== Befehlsdienst gestartet)')
+ZUSAMMENHANG_FRAGE = re.compile(r'^Frage: (uhrzeit|datum)')
+ZUSAMMENHANG_NOTIZ = re.compile(r'^(\w+): (vorlesen|loeschen)')
+ZIELE = {
+    "einkaufszettel": "Einkaufszettel",
+    "notizen": "Notiz",
+}
+ZUSAMMENHANG_GRUND = "Sprachsteuerung"
+
+# Laufender Stand fuer das Support-Protokoll. Bewusst hier und nicht in main():
+# support_schreiben() muss sich zwischen zwei Zeilen erinnern koennen, welcher
+# Zusammenhang gilt und wie viele Inhaltszeilen schon gezaehlt sind.
+STAND = {"zusammenhang": ZUSAMMENHANG_GRUND, "inhalte": 0}
 
 
 def uebersetzen(rohtext):
@@ -117,6 +200,139 @@ def aufbereiten(quelle, zeile):
     return zeit, quelle, uebersetzen(rest)
 
 
+def support_aufraeumen(heute):
+    """Tagesdateien loeschen, die aelter als SUPPORT_TAGE sind."""
+    grenze = heute - datetime.timedelta(days=SUPPORT_TAGE)
+    weg = 0
+    try:
+        namen = os.listdir(SUPPORT_ORDNER)
+    except OSError:
+        return 0
+    for name in namen:
+        m = SUPPORT_NAME.match(name)
+        if not m:
+            continue          # nichts anfassen, was nicht von hier stammt
+        try:
+            tag = datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            continue
+        if tag < grenze:
+            try:
+                os.remove(os.path.join(SUPPORT_ORDNER, name))
+                weg += 1
+            except OSError:
+                pass
+    return weg
+
+
+def support_datei(heute):
+    """Pfad der heutigen Tagesdatei - oder None, wenn sie nicht anzulegen ist.
+
+    Rechte bewusst eng: 0700 auf den Ordner, 0600 auf die Datei. Es steht darin,
+    was der Nutzer gesagt hat; das ist nichts fuer andere Konten auf demselben
+    Geraet.
+    """
+    try:
+        os.makedirs(SUPPORT_ORDNER, mode=0o700, exist_ok=True)
+        os.chmod(SUPPORT_ORDNER, 0o700)
+    except OSError:
+        return None
+    pfad = os.path.join(SUPPORT_ORDNER, f"befehle-{heute.isoformat()}.log")
+    if not os.path.exists(pfad):
+        try:
+            with open(pfad, "w", encoding="utf-8") as f:
+                f.write(f"# DialOS - Befehle vom {heute.isoformat()}\n")
+                f.write("# Nur fuer den Support. Vom Diktierten steht hier "
+                        "bewusst nur die erste Zeile.\n")
+                f.write(f"# Wird nach {SUPPORT_TAGE} Tagen von selbst "
+                        "geloescht.\n")
+            os.chmod(pfad, 0o600)
+        except OSError:
+            return None
+    return pfad
+
+
+def abschluss_zeilen(zeit):
+    """Was am Ende eines Abschnitts noch zu vermerken ist: die Anzahl der
+    Inhaltszeilen, die nicht protokolliert wurden."""
+    weitere = STAND["inhalte"] - 1
+    STAND["inhalte"] = 0
+    if weitere > 0:
+        wort = "Zeile" if weitere == 1 else "Zeilen"
+        return [f"{zeit}  {'':9s} ({weitere} weitere {wort} erfasst, "
+                f"nicht protokolliert)"]
+    return []
+
+
+def zusammenhang_von(satz, jetzt):
+    """Welcher Zusammenhang gilt fuer diese Zeile, welcher danach?
+
+    Zwei Werte, weil eine Zeile den Abschnitt sowohl beenden als auch einen
+    neuen beginnen kann - ein gehoerter Befehl schliesst den vorigen ab und
+    gehoert schon zum naechsten.
+    """
+    if ZUSAMMENHANG_ZURUECK.match(satz):
+        return ZUSAMMENHANG_GRUND, ZUSAMMENHANG_GRUND
+    m = ZUSAMMENHANG_START.match(satz)
+    if m:
+        ziel = m.group(1).strip()
+        gewaehlt = ZIELE.get(ziel, ziel)
+        return gewaehlt, gewaehlt
+    if ZUSAMMENHANG_FRAGE.match(satz):
+        return "Frage an das System", "Frage an das System"
+    m = ZUSAMMENHANG_NOTIZ.match(satz)
+    if m:
+        gewaehlt = ZIELE.get(m.group(1), m.group(1))
+        return gewaehlt, gewaehlt
+    return jetzt, jetzt
+
+
+def support_schreiben(pfad, eintrag):
+    """Eine Zeile ins Support-Protokoll - mit Zusammenhang, ohne Inhalte.
+
+    Drei Regeln, alle aus Stephans Vorgabe vom 2026-08-19:
+      1. Befehle vollstaendig.
+      2. Vom Diktierten die erste Zeile, gekuerzt - damit man sieht, DASS und
+         ungefaehr WAS erfasst wurde.
+      3. Alles weitere nur als Anzahl.
+    """
+    zeit, quelle, satz = eintrag
+    if INHALT_ROH.match(satz):
+        return                     # rohe Erkennung: steht gleich nochmal da
+
+    vorher, nachher = zusammenhang_von(satz, STAND["zusammenhang"])
+    zeilen = []
+
+    if vorher != STAND["zusammenhang"]:
+        zeilen += abschluss_zeilen(zeit)
+        zeilen.append(f"{zeit}  --- {vorher} ---")
+        STAND["zusammenhang"] = vorher
+
+    m = INHALT.match(satz)
+    if m:
+        STAND["inhalte"] += 1
+        if STAND["inhalte"] == 1:
+            text = m.group(1)
+            if len(text) > INHALT_KUERZE:
+                text = text[:INHALT_KUERZE].rstrip() + " ..."
+            zeilen.append(f"{zeit}  {quelle:9s} erste Zeile: \u201e{text}\u201c")
+    else:
+        zeilen.append(f"{zeit}  {quelle:9s} {satz}")
+        if INHALT_ABSCHLUSS.match(satz):
+            zeilen += abschluss_zeilen(zeit)
+
+    if nachher != STAND["zusammenhang"]:
+        zeilen += abschluss_zeilen(zeit)
+        zeilen.append(f"{zeit}  --- {nachher} ---")
+        STAND["zusammenhang"] = nachher
+
+    try:
+        with open(pfad, "a", encoding="utf-8") as f:
+            f.write("".join(z + "\n" for z in zeilen))
+    except OSError:
+        pass          # ein volles Dateisystem darf das Fenster nicht anhalten
+
+
 def ausgeben(eintrag):
     zeit, quelle, satz = eintrag
     print(f"  {zeit}  {quelle:9s} {satz}", flush=True)
@@ -129,6 +345,17 @@ def main():
     print("  DialOS - Mitschrift")
     print("  Was die Sprachsteuerung gerade tut. Beenden mit Strg+C.")
     print("=" * breite)
+
+    heute = datetime.date.today()
+    support = None if "--kein-protokoll" in sys.argv else support_datei(heute)
+    if support:
+        weg = support_aufraeumen(heute)
+        print(f"  Support-Protokoll: {support}")
+        print(f"  (Befehle mit Zusammenhang, vom Diktierten nur die erste "
+              f"Zeile; nach {SUPPORT_TAGE} Tagen"
+              + (f" geloescht - {weg} alte gerade entfernt)" if weg
+                 else " geloescht)"))
+        print()
 
     stand = {}
     for name, pfad in QUELLEN.items():
@@ -156,8 +383,17 @@ def main():
                     eintrag = aufbereiten(name, z)
                     if eintrag:
                         gesammelt.append(eintrag)
+            if gesammelt and support and datetime.date.today() != heute:
+                # Mitternacht: neue Tagesdatei, und die aelteste geht weg. Nur
+                # bei echten Eintraegen geprueft - ein Fenster, das die Nacht
+                # ueber offen steht, soll nicht 200000-mal das Datum holen.
+                heute = datetime.date.today()
+                support = support_datei(heute)
+                support_aufraeumen(heute)
             for eintrag in sorted(gesammelt, key=lambda e: e[0]):
                 ausgeben(eintrag)
+                if support:
+                    support_schreiben(support, eintrag)
             time.sleep(0.4)
     except KeyboardInterrupt:
         print("\n  Mitschrift beendet.")

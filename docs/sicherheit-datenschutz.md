@@ -269,6 +269,52 @@ Laptop und Sicherheits-Stick sollen getrennt versendet werden
 (unterschiedlicher Tag/Paketdienst), damit ein abgefangenes Paket allein
 nutzlos ist.
 
+## Protokolle: was DialOS über den Nutzer mitschreibt
+
+Vier Programme schreiben mit - Befehlsdienst, Diktat, Auskunft und Notizen.
+Das ist für die Fehlersuche unverzichtbar und war schon mehrfach der einzige
+Weg, einen Fehler überhaupt zu finden. Es heißt aber auch: **auf dem Gerät
+liegt, was der Nutzer gesagt hat.** Deshalb gehört hierher, was wo liegt und
+wer es sehen kann.
+
+| Datei | Inhalt | Rechte | Aufbewahrung |
+|---|---|---|---|
+| `~/dialos-sprachbefehl.log` | erkannte Befehle | 0644 (Standard-umask) | wächst, wird nicht gedreht |
+| `~/dialos-diktat.log` | **jeder diktierte Satz wörtlich** | 0644 | wächst, wird nicht gedreht |
+| `~/dialos-auskunft.log` | Fragen und Antworten | 0644 | wächst, wird nicht gedreht |
+| `~/dialos-notiz.log` | Aktionen, **keine** Einträge | 0644 | wächst, wird nicht gedreht |
+| `~/.local/share/dialos/support/befehle-JJJJ-MM-TT.log` | Befehle + erste Zeile eines Diktats | **0600** | **7 Tage**, räumt sich selbst |
+
+Alle liegen in `/home/nutzer` und damit **innerhalb der verschlüsselten
+Home-Partition** - ohne Sicherheits-Stick ist keines davon lesbar. Nach außen
+geht keines: kein Programm von DialOS lädt ein Protokoll irgendwohin.
+
+**Das Support-Protokoll ist die Datei, die weitergegeben werden soll**
+(Stephans Wunsch vom 2026-08-19) - beim Anruf soll nachlesbar sein, was das
+Gerät wirklich gehört hat. Genau deshalb ist es die einzige, die **filtert**:
+
+- die Befehle vollständig,
+- vom Diktierten nur die **erste Zeile**, auf 60 Zeichen gekürzt, danach nur
+  noch die Anzahl der weiteren Zeilen,
+- dazu der Zusammenhang als Überschrift (Diktat, Einkaufszettel, Frage an das
+  System, später Mail und Brief).
+
+Der Grund für die Grenze: `~/dialos-diktat.log` enthält jeden diktierten Satz
+wörtlich, also den ganzen Brief. Eine Datei, die für einen fremden Helfer
+gedacht ist, darf die Post des Nutzers nicht enthalten. Eine Zeile genügt, um
+zu erkennen, **dass** etwas erfasst wurde und ob es Sinn ergab - und ohne den
+Zusammenhang wäre auch die wertlos: „Milch" allein sagt niemandem etwas,
+„Einkaufszettel: Milch" sagt alles.
+
+Rechte bewusst 0600 auf die Datei und 0700 auf den Ordner: es steht darin, was
+der Nutzer gesagt hat, und das ist nichts für andere Konten auf demselben
+Gerät. Sieben Tage, weil ein Support-Fall in dieser Zeit besprochen ist; die
+Mitschrift löscht ältere Tagesdateien beim Start und um Mitternacht selbst.
+
+**Offen:** Die vier Programm-Protokolle wachsen unbegrenzt und werden nicht
+gedreht - beim Diktat ist das nicht nur eine Platzfrage, sondern heißt, dass
+jeder je diktierte Brief dauerhaft im Klartext liegt. Steht in `TODO.md`.
+
 ## Fernwartung (RustDesk)
 
 - Open Source, selbst hostbar – passt zur Datenschutz-Linie des Projekts.

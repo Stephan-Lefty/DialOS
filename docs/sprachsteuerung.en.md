@@ -117,7 +117,7 @@ from Michael's perspective, not as a status report ("voice control is
 enabled").
 
 **After two minutes without a command, recognition switches itself off**,
-with an announcement: "Ich schalte die Sprachsteuerung wieder aus." The
+with an announcement: "Du hast eine Weile nichts gesagt. Ich höre Dir nicht mehr zu." The
 reason is not power saving but safety: anyone who forgets the "stoppen"
 would otherwise have a permanently open microphone - and we would be back
 to the radio switching the desktop.

@@ -249,6 +249,52 @@ lives there too, and whatever unlocks it must also come from somewhere.
 Laptop and security stick should be shipped separately (different
 day/carrier), so that an intercepted package alone is useless.
 
+## Logs: what DialOS records about the user
+
+Four programs write logs - command service, dictation, information and notes.
+That is indispensable for debugging and has more than once been the only way to
+find a fault at all. But it also means: **what the user said is on the
+device.** So this is the place to record what sits where, and who can see it.
+
+| File | Content | Mode | Retention |
+|---|---|---|---|
+| `~/dialos-sprachbefehl.log` | recognized commands | 0644 (default umask) | grows, not rotated |
+| `~/dialos-diktat.log` | **every dictated sentence verbatim** | 0644 | grows, not rotated |
+| `~/dialos-auskunft.log` | questions and answers | 0644 | grows, not rotated |
+| `~/dialos-notiz.log` | actions, **not** the entries | 0644 | grows, not rotated |
+| `~/.local/share/dialos/support/befehle-YYYY-MM-DD.log` | commands + first line of a dictation | **0600** | **7 days**, self-clearing |
+
+All of them live in `/home/nutzer` and therefore **inside the encrypted home
+partition** - without the security stick none of them is readable. None leaves
+the device: no DialOS program uploads a log anywhere.
+
+**The support log is the file meant to be handed on** (Stephan's request of
+2026-08-19) - on a support call it should be possible to read back what the
+device actually heard. That is precisely why it is the only one that
+**filters**:
+
+- the commands in full,
+- of the dictated text only the **first line**, truncated to 60 characters,
+  after that just the count of further lines,
+- plus the context as a heading (dictation, shopping list, question to the
+  system, later mail and letter).
+
+The reason for the boundary: `~/dialos-diktat.log` contains every dictated
+sentence verbatim - the whole letter. A file meant for an outside helper must
+not contain the user's mail. One line is enough to see **that** something was
+captured and whether it made sense - and without the context even that would be
+worthless: "Milch" on its own tells nobody anything, "Einkaufszettel: Milch"
+tells the whole story.
+
+Modes deliberately 0600 on the file and 0700 on the directory: it holds what the
+user said, and that is not for other accounts on the same device. Seven days,
+because a support case is settled within that time; the transcript deletes older
+daily files on startup and at midnight by itself.
+
+**Open:** the four program logs grow without limit and are not rotated - for the
+dictation that is not merely a disk-space question but means every letter ever
+dictated stays on disk in plain text permanently. Recorded in `TODO.md`.
+
 ## Remote support (RustDesk)
 
 - Open source, self-hostable — fits the project's privacy stance.

@@ -1381,10 +1381,32 @@ In einer Mail wird aus "Dieses Dokument" ein "Diese Nachricht" (`--art mail`)
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mitschrift.py /usr/local/bin/
 ```
 
-Ein Fenster, das man einmal oeffnet und stehen laesst; jedes Ereignis
-erscheint darin, sobald es passiert. Bewusst KEIN Fenster, das bei jedem
-Befehl in den Vordergrund springt - das wuerde beim Diktieren den Fokus
-stehlen, und wer diktiert, sieht den Bildschirm ohnehin nicht.
+Das Fenster geht **mit der Sprachsteuerung auf und zu** (Stephans
+Praezisierung vom 2026-08-19): auf bei "Sprachsteuerung starten", zu bei
+"Sprachsteuerung stoppen" und auch dann, wenn die Zeitgrenze von zwei Minuten
+abschaltet. Geoeffnet und geschlossen wird es von
+`dialos-sprachbefehl-desktop.py` - es haengt an der Sprachsteuerung, nicht am
+Anmelden: wo nicht gesprochen wird, gibt es auch nichts mitzuschreiben.
+
+Bewusst NICHT bei jedem einzelnen Befehl - das wuerde beim Diktieren den Fokus
+stehlen, und wer diktiert, sieht den Bildschirm ohnehin nicht. Einmal pro
+Sitzung aufgehen ist unauffaellig, bei jedem Satz aufspringen waere es nicht.
+
+Zwei Fallen, die dabei gelernt wurden:
+
+- **Vor dem Oeffnen pruefen, ob schon eines laeuft.** Ohne das stuenden nach
+  zwanzig Aktivierungen zwanzig Fenster uebereinander. Geprueft wird ueber
+  `/proc`, gesucht nach dem Python-Skript.
+- **Geschlossen wird das SKRIPT, nicht das Terminal.** `gnome-terminal`
+  spaltet sich vom Aufruf ab und uebergibt an einen schon laufenden
+  `gnome-terminal-server`; die PID des Aufrufs ist sofort wieder weg und die
+  des Servers gehoert allen Fenstern. Endet dagegen das Skript, endet der
+  Befehl des Fensters - und das Fenster schliesst sich von selbst.
+
+Wer den Bildschirm frei haben will, legt `~/.config/dialos/mitschrift` mit dem
+Inhalt `aus` an. Vorgabe ist **an**, und zwar wegen des Support-Protokolls
+(gleich darunter): waere das Fenster ab Werk aus, gaebe es beim Anruf auch
+nichts nachzulesen.
 
 **Warum ein Filter und kein `tail -f`:** Das Befehlsprotokoll bestand am
 2026-08-19 aus **4132 Pegel-Zeilen gegen 13 echte**. Die Mitschrift wirft die
@@ -1403,6 +1425,51 @@ ins Gehege kommen - von Hand war es muehsam. **Eigener Fehler dabei:** Erst
 gab sie Quelle fuer Quelle aus, sah dadurch chronologisch aus und war es
 nicht. Bei einem Werkzeug, dessen Zweck es ist, Gleichzeitigkeit zu zeigen,
 waere das die falsche Eigenschaft gewesen.
+
+**Support-Protokoll (Stephans Wunsch vom 2026-08-19).** Was durch das Fenster
+laeuft, wird zusaetzlich in eine Tagesdatei geschrieben:
+`~/.local/share/dialos/support/befehle-JJJJ-MM-TT.log`, Ordner 0700, Datei
+0600. Eine Datei pro Tag, **sieben Tage** lang; beim Start und um Mitternacht
+raeumt die Mitschrift die aelteren selbst weg. Datum im Dateinamen heisst:
+aufraeumen ist "alte Datei loeschen" und nicht "in einer laufenden Datei nach
+der Grenze suchen" - die Datei, in die gerade geschrieben wird, wird dabei nie
+angefasst. Dateien, die nicht dem Namensmuster entsprechen, bleiben unberuehrt.
+
+Zweck ist der Anruf beim Support: nachlesen, was das Geraet wirklich gehoert
+hat, statt sich auf die Erinnerung zu verlassen.
+
+**Was hineinkommt - und was nicht.** Die Befehle vollstaendig, vom Diktierten
+die **erste Zeile** (auf 60 Zeichen gekuerzt) und danach nur noch die Anzahl:
+
+```
+09:50:10  Sprache   gehoert: "einkaufszettel aufnehmen"
+09:50:12  --- Einkaufszettel ---
+09:50:12  Diktat    Diktat laeuft (einkaufszettel)
+09:50:26  Diktat    erste Zeile: "Milch"
+09:50:41  Diktat    gespeichert in /home/nutzer/Notizen/einkaufszettel.txt
+09:50:41            (2 weitere Zeilen erfasst, nicht protokolliert)
+09:53:30  --- Sprachsteuerung ---
+```
+
+`~/dialos-diktat.log` enthaelt jeden diktierten Satz woertlich, also den ganzen
+Brief - eine Datei fuer einen fremden Helfer darf die Post des Nutzers nicht
+enthalten. Eine Zeile genuegt aber, um zu erkennen, DASS etwas erfasst wurde
+und ob es Sinn ergab. Im Fenster steht weiter alles; dort sieht es nur, wer
+ohnehin vor dem Geraet sitzt.
+
+**Der Zusammenhang ist das Wichtigste** (Stephan): "Milch" allein sagt
+niemandem etwas, "Einkaufszettel: Milch" sagt alles. Deshalb steht vor jedem
+Abschnitt, worum es ging - Diktat, Einkaufszettel, Frage an das System,
+spaeter Mail und Brief. Er wird nicht geraten, sondern aus den Zeilen
+mitgefuehrt, die die Programme beim Starten selbst schreiben; ein unbekanntes
+Ziel landet unuebersetzt, aber lesbar im Protokoll statt zu fehlen.
+
+**Eigener Fehler dabei:** Der erste Entwurf setzte den Zusammenhang nach jeder
+Zeile zurueck. Damit stand "gespeichert in ..." nicht mehr unter
+"Einkaufszettel", und fuer einen einzigen Befehl standen zwei Ueberschriften
+da. Ein gehoerter Satz ist die einzige verlaessliche Grenze - er bedeutet
+immer, dass der Nutzer wieder mit der Sprachsteuerung spricht, und er kommt
+auch dann, wenn ein Diktat vorzeitig abbricht und die Schlusszeile fehlt.
 
 **Halbtransparente Leisten - zwei Leisten, zwei Wege.**
 

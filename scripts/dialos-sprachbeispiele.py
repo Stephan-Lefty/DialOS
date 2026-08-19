@@ -126,6 +126,8 @@ def main():
          "Sage 100, 75, 50, 25 oder aus. Und jetzt bitte."),
         ("03-sprachsteuerung-an", "Ich höre Dir zu."),
         ("04-sprachsteuerung-aus", "Ich höre Dir nicht mehr zu."),
+        ("04b-sprachsteuerung-zeitgrenze",
+         "Du hast eine Weile nichts gesagt. Ich höre Dir nicht mehr zu."),
         ("05-desktop-windows", "Windows Desktop."),
         ("06-desktop-steht-schon", "Steht schon auf Linux Desktop."),
         ("07-diktat-beginn",

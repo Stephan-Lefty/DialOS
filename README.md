@@ -114,6 +114,55 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Mitschrift geht mit der Sprachsteuerung auf und zu - und schreibt ein
+  Support-Protokoll (Stephans Präzisierung, 2026-08-19).** Bisher musste das
+  Fenster von Hand geöffnet werden; jetzt öffnet es
+  `dialos-sprachbefehl-desktop.py` bei „Sprachsteuerung starten" und schließt es
+  bei „Sprachsteuerung stoppen" und bei der Zwei-Minuten-Zeitgrenze. Es hängt
+  damit an der Sprachsteuerung und nicht am Anmelden: wo nicht gesprochen wird,
+  gibt es nichts mitzuschreiben. Bewusst nicht bei jedem einzelnen Befehl -
+  einmal pro Sitzung aufgehen ist unauffällig, bei jedem Satz aufspringen wäre
+  es nicht.
+    - **Zwei Fallen, beide gelöst:** Vor dem Öffnen wird über `/proc` geprüft,
+      ob schon ein Fenster läuft - ohne das stünden nach zwanzig Aktivierungen
+      zwanzig Fenster übereinander. Und geschlossen wird das **Skript**, nicht
+      das Terminal: `gnome-terminal` spaltet sich vom Aufruf ab und übergibt an
+      einen schon laufenden `gnome-terminal-server`, dessen PID allen Fenstern
+      gehört. Endet das Skript, endet der Befehl des Fensters - und das Fenster
+      schließt sich von selbst.
+    - **Support-Protokoll:** `~/.local/share/dialos/support/befehle-JJJJ-MM-TT.log`,
+      Ordner 0700, Datei 0600, eine Datei pro Tag, **sieben Tage**, räumt sich
+      beim Start und um Mitternacht selbst auf. Zweck ist der Anruf beim
+      Support: nachlesen, was das Gerät wirklich gehört hat.
+    - **Die Grenze beim Inhalt, und warum sie dort liegt:** `~/dialos-diktat.log`
+      enthält jeden diktierten Satz wörtlich, also den ganzen Brief. Eine Datei
+      für einen fremden Helfer darf die Post des Nutzers nicht enthalten.
+      Deshalb: Befehle vollständig, vom Diktierten die **erste Zeile** (auf 60
+      Zeichen gekürzt), danach nur die Anzahl. Im Fenster steht weiter alles -
+      dort sieht es nur, wer ohnehin vor dem Gerät sitzt.
+    - **Der Zusammenhang ist das Wichtigste (Stephan):** „Milch" allein sagt
+      niemandem etwas, „Einkaufszettel: Milch" sagt alles. Vor jedem Abschnitt
+      steht deshalb, worum es ging - Diktat, Einkaufszettel, Frage an das
+      System, später Mail und Brief. Er wird nicht geraten, sondern aus den
+      Zeilen mitgeführt, die die Programme beim Starten selbst schreiben.
+    - **Eigener Fehler dabei:** Der erste Entwurf setzte den Zusammenhang nach
+      jeder Zeile zurück - damit stand „gespeichert in …" nicht mehr unter
+      „Einkaufszettel", und für einen einzigen Befehl standen zwei
+      Überschriften da. Ein gehörter Satz ist die einzige verlässliche Grenze;
+      er kommt auch dann, wenn ein Diktat vorzeitig abbricht.
+    - **Und ein Fehler, der Arbeit gekostet hat:** Beim Umbau habe ich
+      `dialos-mitschrift.py` mit einem `re.sub`-Muster `.*\n` unter `re.S`
+      bearbeitet - das ist bis zum Dateiende gierig und hat alles hinter der
+      Trefferstelle ersetzt. Wiederhergestellt aus `git HEAD` (identisch zur
+      installierten Fassung, nur meine eigenen Änderungen waren verloren).
+      Seitdem: wörtlich ersetzen, Treffer auf Eindeutigkeit prüfen und nach
+      jedem Schreiben prüfen, dass die Datei noch auf `sys.exit(main())` endet.
+    - Neu dokumentiert: `docs/sicherheit-datenschutz.md` hat jetzt einen
+      Abschnitt **„Protokolle: was DialOS über den Nutzer mitschreibt"** mit
+      Tabelle über alle fünf Dateien, Rechten und Aufbewahrung. Dabei
+      aufgefallen und in `TODO.md` notiert: die vier Programm-Protokolle
+      wachsen unbegrenzt und werden nicht gedreht.
+
 - **Fußzeile für Dokumente, Mails und Ausdrucke (Stephans Vorgabe,
   2026-08-19).** Text wörtlich: „Dieses Dokument wurde per Spracheingabe
   powered by DialOS.org erstellt!", dezent und rechtsbündig. Neues Skript

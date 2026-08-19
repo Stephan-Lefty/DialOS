@@ -147,7 +147,7 @@ Michaels Sicht formuliert, nicht als Statusmeldung („Sprachsteuerung ist
 eingeschaltet").
 
 **Nach zwei Minuten ohne Befehl schaltet sich die Erkennung von selbst
-ab**, mit Ansage: „Ich schalte die Sprachsteuerung wieder aus." Der Grund
+ab**, mit Ansage: „Du hast eine Weile nichts gesagt. Ich höre Dir nicht mehr zu." Der Grund
 ist kein Stromsparen, sondern Sicherheit: Wer das „stoppen" vergisst,
 hätte sonst dauerhaft ein offenes Mikrofon - und damit wären wir zurück
 bei dem Radio, das den Schreibtisch umschaltet.

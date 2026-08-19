@@ -1341,10 +1341,32 @@ is not a document.
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mitschrift.py /usr/local/bin/
 ```
 
-A window you open once and leave standing; every event appears in it as it
-happens. Deliberately NOT a window that jumps to the front on every command -
-that would steal focus during dictation, and whoever is dictating cannot see
-the screen anyway.
+The window **opens and closes with the voice control** (Stephan's
+clarification of 2026-08-19): open on "Sprachsteuerung starten", closed on
+"Sprachsteuerung stoppen" and also when the two-minute timeout switches off.
+It is opened and closed by `dialos-sprachbefehl-desktop.py` - it hangs off the
+voice control, not off the login: where nothing is spoken there is nothing to
+transcribe.
+
+Deliberately NOT on every single command - that would steal focus during
+dictation, and whoever is dictating cannot see the screen anyway. Opening once
+per session is unobtrusive; jumping up at every sentence would not be.
+
+Two traps learned in the process:
+
+- **Check whether one is already running before opening.** Without that,
+  twenty activations would leave twenty windows stacked up. The check goes
+  through `/proc`, looking for the Python script.
+- **What gets closed is the SCRIPT, not the terminal.** `gnome-terminal`
+  detaches from the invocation and hands over to an already running
+  `gnome-terminal-server`; the invocation's PID is gone immediately and the
+  server's belongs to every window. End the script, however, and the window's
+  command ends - so the window closes by itself.
+
+Anyone who wants the screen free creates `~/.config/dialos/mitschrift`
+containing `aus`. The default is **on**, because of the support log (right
+below): were the window off by default, there would be nothing to read back
+when the phone rings.
 
 **Why a filter and not `tail -f`:** on 2026-08-19 the command log consisted of
 **4132 level lines against 13 real ones**. The transcript discards the level
@@ -1362,6 +1384,52 @@ notes) and merges them by time. Exactly this merging produced the proof on
 it was laborious. **A mistake of my own:** at first it printed source by
 source, which looked chronological and was not. For a tool whose purpose is
 to show simultaneity that would have been the wrong property.
+
+**Support log (Stephan's request of 2026-08-19).** Whatever passes through the
+window is additionally written to a daily file:
+`~/.local/share/dialos/support/befehle-YYYY-MM-DD.log`, directory 0700, file
+0600. One file per day, kept **seven days**; on startup and at midnight the
+transcript clears out the older ones itself. The date in the filename means
+that cleaning up is "delete an old file" and not "search a running file for the
+cut-off" - the file currently being written is never touched. Files that do not
+match the naming pattern are left alone.
+
+The purpose is the support call: read back what the device actually heard
+instead of relying on memory.
+
+**What goes in - and what does not.** The commands in full, of the dictated
+text the **first line** (truncated to 60 characters) and after that only the
+count:
+
+```
+09:50:10  Sprache   gehoert: "einkaufszettel aufnehmen"
+09:50:12  --- Einkaufszettel ---
+09:50:12  Diktat    Diktat laeuft (einkaufszettel)
+09:50:26  Diktat    erste Zeile: "Milch"
+09:50:41  Diktat    gespeichert in /home/nutzer/Notizen/einkaufszettel.txt
+09:50:41            (2 weitere Zeilen erfasst, nicht protokolliert)
+09:53:30  --- Sprachsteuerung ---
+```
+
+`~/dialos-diktat.log` contains every dictated sentence verbatim - the whole
+letter. A file meant for an outside helper must not contain the user's mail.
+One line is enough, though, to see THAT something was captured and whether it
+made sense. The window still shows everything; there it is seen only by someone
+sitting in front of the device anyway.
+
+**The context matters most** (Stephan): "Milch" on its own tells nobody
+anything, "Einkaufszettel: Milch" tells the whole story. So every section is
+preceded by what it was about - dictation, shopping list, question to the
+system, later mail and letter. It is not guessed but carried along from the
+lines the programs write themselves on startup; an unknown target lands
+untranslated but readable in the log instead of missing.
+
+**A mistake of my own:** the first draft reset the context after every line.
+That put "gespeichert in ..." outside its "Einkaufszettel" section, and a single
+command ended up with two headings. A heard sentence is the only reliable
+boundary - it always means the user is talking to the voice control again, and
+it also arrives when a dictation breaks off early and the closing line is
+missing.
 
 **Half-transparent bars - two bars, two routes.**
 
