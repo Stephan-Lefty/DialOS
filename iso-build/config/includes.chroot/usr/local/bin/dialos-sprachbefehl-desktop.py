@@ -164,6 +164,8 @@ GRAMMATIK_AN = json.dumps([
     "wie ist die uhrzeit",
     "welchen tag haben wir",
     "welches datum haben wir",
+    "hilfe rufen",
+    "fernwartung beenden",
     "[unk]",
 ])
 
@@ -214,11 +216,26 @@ AUSKUNFT_SAETZE = {
 }
 
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
+HILFE_SKRIPT = "/usr/local/bin/dialos-hilfe.py"
 NOTIZ_SAETZE = {
     "einkaufszettel vorlesen": ("einkaufszettel", "vorlesen"),
     "notizen vorlesen": ("notizen", "vorlesen"),
     "einkauf erledigt": ("einkaufszettel", "loeschen"),
     "einkaufszettel wegwerfen": ("einkaufszettel", "loeschen"),
+}
+
+# Fernwartung (neu 2026-08-19). Beide Woerter am selben Tag gegen den Wortschatz
+# geprueft - Vosk meldete kein "Ignoring word missing in vocabulary" -, und beide
+# Kernwoerter sind eindeutig: "rufen" und "fernwartung" kommen in keinem anderen
+# Satz der Grammatik vor.
+#
+# WARUM "fernwartung" DAS KERNWORT DES SCHLUSSSATZES IST und nicht "beenden":
+# "beenden" steht zwar in dieser Grammatik in keinem zweiten Satz, aber der
+# Nutzer kennt es als Schlusswort des Diktats. Ein Wort, das in zwei Rollen
+# vorkommt, ist beim Sprechen zweideutig, auch wenn es die Grammatik nicht ist.
+HILFE_SAETZE = {
+    "hilfe rufen": "starten",
+    "fernwartung beenden": "beenden",
 }
 
 # Nach so langer Stille schaltet sich die Erkennung von selbst ab
@@ -674,6 +691,28 @@ def auskunft(was):
         sprich("Ich kann das nicht ausführen.")
 
 
+def hilfe_aktion(was):
+    """Startet oder beendet die Fernwartung und kehrt sofort zurueck.
+
+    Nicht abwarten, wie beim Diktat und bei den Notizen: Das Starten enthaelt
+    eine Rueckfrage, die selbst zuhoert, dazu sechs Sekunden Anmeldung beim
+    Vermittlungsdienst und das zweimalige Vorlesen der Nummer. Waehrend dieser
+    Zeit muss dieser Dienst seine Schleife weiterlaufen lassen.
+    """
+    if not os.access(HILFE_SKRIPT, os.X_OK):
+        sprich("Ich kann die Fernwartung nicht finden.")
+        return
+    try:
+        subprocess.Popen([HILFE_SKRIPT, was],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Fernwartung {was!r} gestartet")
+    except OSError as fehler:
+        melde(f"Fernwartung liess sich nicht starten: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
 def notiz_aktion(name, was):
     """Startet die Notiz-Verwaltung und kehrt sofort zurueck.
 
@@ -994,6 +1033,15 @@ def main():
             # --- Befehle: Auskunft ---
             if satz in AUSKUNFT_SAETZE:
                 auskunft(AUSKUNFT_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Fernwartung ---
+            # VOR der Umschaltung, wie Diktat und Auskunft: Diese Saetze
+            # enthalten "umschalten" nicht.
+            if satz in HILFE_SAETZE:
+                hilfe_aktion(HILFE_SAETZE[satz])
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

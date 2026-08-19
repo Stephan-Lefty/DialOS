@@ -50,13 +50,14 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." Kommt keine verwertbare Antwort, fragt DialOS **ein zweites Mal** („Das habe ich nicht verstanden. Sage ja oder nein."); erst danach bleibt der Zettel stehen. Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
 | **„Einkaufszettel wegwerfen"** | Gleichbedeutend mit „Einkauf erledigt". Zwei Formulierungen für dasselbe, damit der Nutzer sich keine merken muss - wie bei „auf Linux" und „auf Gnome". |
 | **„ja" / „nein"** | Antwort auf eine Rückfrage - bisher nur vor dem Leeren einer Notiz. Gilt **nur während der Rückfrage**: dafür läuft ein eigener Erkenner mit einer Grammatik aus genau diesen zwei Wörtern, der Befehlsdienst hält sich heraus. Kommt nichts Verwertbares, wird einmal nachgefragt, danach bleibt der Zettel stehen. |
+| **„Hilfe rufen"** | Startet die Fernwartung - **mit Rückfrage**, die erklärt, was passiert: „Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." Danach wird die RustDesk-Nummer **ziffernweise und zweimal** vorgelesen. Während einer laufenden Sitzung **verlängert** derselbe Satz sie um eine Stunde. |
+| **„Fernwartung beenden"** | Beendet sie. „Niemand kann mehr zusehen." Passiert auch von selbst nach einer Stunde, mit Vorwarnung drei Minuten vorher. Kernwort ist **„fernwartung"** und nicht „beenden": Letzteres kennt der Nutzer als Schlusswort des Diktats, und ein Wort in zwei Rollen ist beim Sprechen zweideutig, auch wenn die Grammatik es nicht ist. |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |
 
 ## Vorgesehen, noch nicht gebaut
 
 | Sprachbefehl | Aktion |
 |---|---|
-| „Hilfe rufen" | Startet RustDesk für die Fernwartung. Bewusst nur auf ausdrückliche Ansage, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md). |
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |

@@ -51,13 +51,14 @@ listen?".
 | **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." If no usable answer arrives, DialOS asks **a second time** ("Das habe ich nicht verstanden. Sage ja oder nein."); only then does the list stay. The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |
 | **"Einkaufszettel wegwerfen"** (throw the shopping list away) | Equivalent to "Einkauf erledigt". Two phrasings for the same thing so the user need not memorise one - as with "auf Linux" and "auf Gnome". |
 | **"ja" / "nein"** (yes/no) | Answer to a confirmation - so far only before emptying a note. Valid **only during the confirmation**: a recognizer of its own runs for it, with a grammar of exactly these two words, while the command service keeps out. If nothing usable arrives, DialOS asks once more; after that the list stays. |
+| **"Hilfe rufen"** (call for help) | Starts remote support - **with a confirmation** that explains what happens: "Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." The RustDesk number is then read out **digit by digit and twice**. During a running session the same sentence **extends** it by an hour. |
+| **"Fernwartung beenden"** (end remote support) | Ends it. "Niemand kann mehr zusehen." Also happens by itself after an hour, with a warning three minutes before. The core word is **"fernwartung"**, not "beenden": the user knows the latter as the dictation's closing word, and a word in two roles is ambiguous when spoken even when the grammar is not. |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |
 
 ## Planned, not built yet
 
 | Voice command | Action |
 |---|---|
-| "Hilfe rufen" (call for help) | Starts RustDesk for remote support. Deliberately only on explicit request, see [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md). |
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
 | "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |
 | "Ruf {person} an" (call {person}) | Telephony via SIM or paired phone, see [telefonie.en.md](telefonie.en.md). |

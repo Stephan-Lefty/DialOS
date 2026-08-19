@@ -321,10 +321,55 @@ jeder je diktierte Brief dauerhaft im Klartext liegt. Steht in `TODO.md`.
 - **Relay**: zunächst der öffentliche rustdesk.com-Dienst, später (sobald
   das System stabil läuft) ein eigener Server (hbbs/hbbr). Migration ist
   ein bewusst offener Punkt für später.
-- **Unbeaufsichtigter Zugriff** läuft mit einem dauerhaften Passwort,
-  damit ein Helfer auch reinkommt, wenn der Nutzer gerade nicht reagieren
-  kann. Für blinde Nutzer muss die RustDesk-ID/das Passwort per TTS
-  vorgelesen werden, da sie nicht selbst ablesbar sind.
+- **Die ID wird per TTS vorgelesen**, ziffernweise in Vierergruppen und
+  zweimal - ein blinder Nutzer kann sie nicht ablesen und nichts mitschreiben.
+  Als Zahl gesprochen wäre sie unbrauchbar („achtundsechzig Millionen…").
+- **Ein Einmalpasswort ist mit RustDesk 1.4.9 nicht zu haben** (fünf Wege am
+  2026-08-19 geprüft, alle zu):
+  - Das Einmalpasswort, das RustDesk selbst erzeugt, steht in **keiner Datei** -
+    nur im Speicher und in der Oberfläche, für einen blinden Nutzer also
+    nirgends.
+  - `rustdesk --password <wert>` ist wirkungslos: als Nutzer, mit laufender
+    Anwendung, mit laufendem systemd-Dienst **und als root**. Rückgabewert 0,
+    aber das Feld bleibt leer.
+  - `rustdesk --get-temp-password` kommt auch nach 40 s nicht zurück - es
+    startet eine volle Instanz.
+  - `rustdesk-utils`, das den Wert berechnen könnte, ist im Paket nicht
+    enthalten.
+  - Den Wert selbst zu schreiben fällt aus: RustDesk legt dort keinen einfachen
+    Hash ab, sondern einen mit einem lokalen Schlüssel verschlüsselten Wert (wie
+    bei `enc_id`, 70 Zeichen). Das nachzubauen wäre geraten und bräche bei der
+    nächsten Version still.
+
+  Das ist kein Fehler dieses Projekts: [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074)
+  heißt „Permanent password not deployable without user interaction" und ist
+  offen. **Das Passwort setzt der Betreuer deshalb einmal im Büro über die
+  Oberfläche** - es steht in seinen Unterlagen und nicht im Raum des Kunden.
+- **Stattdessen garantiert DialOS die Begrenzung über die LAUFZEIT**, und das
+  ist der härtere Hebel: Solange RustDesk nicht läuft, ist keine Verbindung
+  möglich - unabhängig davon, wer das Passwort kennt.
+  - Es startet nie von selbst, nur auf „Hilfe rufen".
+  - „Fernwartung beenden" beendet es.
+  - Vergisst der Nutzer das, endet es **nach einer Stunde von selbst, mit
+    Ansage** (Stephan, 2026-08-19). Drei Minuten vorher kommt eine Vorwarnung,
+    und ein erneutes „Hilfe rufen" verlängert - damit wird ein Betreuer nicht
+    mitten in der Arbeit abgeschnitten.
+- **Die Ansage sagt genau das, statt etwas Falsches zu behaupten:** „Das
+  Passwort kennt Dein Betreuer schon. Die Fernwartung läuft nur, bis Du sagst:
+  Fernwartung beenden." Einem Nutzer, der den Bildschirm nicht sieht, eine
+  falsche Sicherheit zu erzählen („das Passwort gilt nur für diesen Einsatz")
+  wäre schlimmer, als ihm die richtige zu erklären.
+- **Offen und in `TODO.md`:** Die Zeitgrenze ist **absolut** und nicht am
+  Leerlauf orientiert, obwohl Leerlauf die richtige Semantik wäre - das Risiko
+  ist eine offene Fernwartung, an der niemand hängt. Auf diesem Gerät hat sich
+  aber noch nie jemand verbunden, die Signatur einer aktiven Verbindung ist also
+  unbekannt, und sie zu raten wäre der schlechtere Fehler. `dialos-hilfe.py`
+  notiert deshalb während jeder Sitzung Prozessanzahl und Protokollgröße; nach
+  der ersten echten Verbindung lässt sich die Leerlauf-Erkennung daraus **belegt**
+  bauen.
+- **RustDesk telefoniert nach Hause:** Beim Start werden `api.rustdesk.com` und
+  der Vermittlungsdienst kontaktiert (im Protokoll belegt). Das ist der Preis
+  des öffentlichen Relays und ein weiterer Grund für den eigenen Server später.
 - **Zusätzliche Sicherheitsschicht**: RustDesk läuft NICHT dauerhaft im
   Hintergrund/Autostart. Der Nutzer vor Ort muss RustDesk erst aktiv per
   Sprachbefehl starten (z. B. "Hilfe rufen") – erst danach ist eine

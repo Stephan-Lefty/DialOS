@@ -52,6 +52,29 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
+- [ ] **Echtes Einmalpasswort fuer die Fernwartung, sobald RustDesk es zulaesst**
+  (offen seit 2026-08-19). Fuenf Wege geprueft, alle zu - die Liste steht in
+  `docs/sicherheit-datenschutz.md`, damit niemand sie noch einmal durchprobiert:
+  Einmalpasswort steht in keiner Datei; `rustdesk --password` wirkungslos als
+  Nutzer, mit laufender Anwendung, mit laufendem Dienst und als root;
+  `--get-temp-password` kommt auch nach 40 s nicht zurueck; `rustdesk-utils`
+  fehlt im Paket; den verschluesselten Wert selbst zu schreiben waere geraten.
+  Zu beobachten ist
+  [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074). Bis dahin
+  garantiert die LAUFZEIT die Begrenzung, nicht das Passwort.
+
+- [ ] **Leerlauf-Erkennung fuer die Fernwartung** (offen seit 2026-08-19). Die
+  Zeitgrenze ist absolut (eine Stunde), obwohl Leerlauf die richtige Semantik
+  waere: Das Risiko ist eine offene Fernwartung, an der NIEMAND haengt. Eine
+  aktive Sitzung abzuschneiden waere schaedlich, etwa mitten in einem Update.
+  Warum es noch nicht gebaut ist: Auf dem Geraet hat sich nie jemand verbunden,
+  die Signatur einer aktiven Verbindung ist unbekannt, und sie zu raten waere der
+  schlechtere Fehler. `dialos-hilfe.py` notiert deshalb bei jeder Sitzung
+  Prozessanzahl und Groesse von RustDesks Protokoll (`spur_notieren`).
+  **Naechster Schritt: ein echter Verbindungsversuch von Stephans zweitem
+  Rechner** - danach steht die Signatur im Protokoll und die Erkennung laesst
+  sich belegt bauen.
+
 - [x] **Gross-/Kleinschreibung im Diktat gemessen statt vermutet** - erledigt
   2026-08-19. **10 von 11** Faellen richtig, gemessen mit `schreibung_richten()`
   selbst. Der einzige Fehlschlag ist eine Wortliste ohne Grammatik

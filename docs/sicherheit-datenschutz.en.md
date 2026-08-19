@@ -301,10 +301,52 @@ dictated stays on disk in plain text permanently. Recorded in `TODO.md`.
 - **Relay**: initially the public rustdesk.com service, later (once the
   system runs stably) a self-hosted server (hbbs/hbbr). The migration is
   a deliberately open point for later.
-- **Unattended access** runs with a permanent password, so a helper can
-  get in even if the user isn't able to respond. For blind users, the
-  RustDesk ID/password must be read aloud via TTS, since they can't read
-  it off the screen themselves.
+- **The ID is read out via TTS**, digit by digit in groups of four and twice
+  over - a blind user can neither read it nor write it down. Spoken as a number
+  it would be useless ("sixty-eight million...").
+- **A one-time password is not obtainable with RustDesk 1.4.9** (five routes
+  tested on 2026-08-19, all closed):
+  - The one-time password RustDesk generates itself is in **no file** - memory
+    and UI only, so nowhere for a blind user.
+  - `rustdesk --password <value>` has no effect: as the user, with the app
+    running, with the systemd service running **and as root**. Exit code 0, but
+    the field stays empty.
+  - `rustdesk --get-temp-password` does not return even after 40 s - it starts a
+    full instance.
+  - `rustdesk-utils`, which could compute the value, is not in the package.
+  - Writing the value directly is out: RustDesk stores no plain hash there but a
+    value encrypted with a local key (like `enc_id`, 70 characters). Recreating
+    that would be guesswork and would break silently on the next version.
+
+  This is not a fault of this project:
+  [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074) is titled
+  "Permanent password not deployable without user interaction" and is open.
+  **The supporter therefore sets the password once in the office via the UI** -
+  it lives in their records, not in the customer's room.
+- **Instead DialOS guarantees the limit through RUNTIME**, which is the harder
+  lever: as long as RustDesk is not running, no connection is possible -
+  regardless of who knows the password.
+  - It never starts by itself, only on "Hilfe rufen".
+  - "Fernwartung beenden" stops it.
+  - If the user forgets, it ends **by itself after one hour, with an
+    announcement** (Stephan, 2026-08-19). A warning comes three minutes before,
+    and another "Hilfe rufen" extends it - so a supporter is not cut off
+    mid-work.
+- **The announcement says exactly that, instead of claiming something false:**
+  "Das Passwort kennt Dein Betreuer schon. Die Fernwartung läuft nur, bis Du
+  sagst: Fernwartung beenden." Telling a user who cannot see the screen a false
+  sense of security ("the password is only valid for this session") would be
+  worse than explaining the real one.
+- **Open, and in `TODO.md`:** the timeout is **absolute**, not idle-based, even
+  though idle would be the right semantics - the risk is a remote session left
+  open with nobody attached. But nobody has ever connected to this device, so the
+  signature of an active connection is unknown, and guessing it would be the
+  worse error. `dialos-hilfe.py` therefore records process count and log size
+  during every session; after the first real connection the idle detection can be
+  built from **evidence**.
+- **RustDesk phones home:** on startup it contacts `api.rustdesk.com` and the
+  rendezvous service (shown in its log). That is the price of the public relay
+  and one more reason for our own server later.
 - **Additional safety layer**: RustDesk does NOT run permanently in the
   background/autostart. The user on site must actively start RustDesk via
   a voice command (e.g. "call for help") — only then is a remote
