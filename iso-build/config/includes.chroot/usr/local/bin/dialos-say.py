@@ -39,6 +39,24 @@ AUSSPRACHE = [
         r"Tas tatur\1",
         "Sonst 'Taschtatur' - falsche Silbengrenze.",
     ),
+    (
+        # "ID" wird von der deutschen Stimme als Wort gelesen ("id"). Gemeint
+        # ist die ENGLISCHE Aussprache - Stephan hat sie am 2026-08-19 aus vier
+        # Schreibweisen im Hoervergleich gewaehlt ("Ei Di" gegen "Ai Dieh",
+        # "Ei Dieh", "Eidieh").
+        #
+        # Warum englisch und nicht deutsch: Der Betreuer fragt am Telefon nach
+        # der "ID". Sagt das Geraet ein anderes Wort, sucht ein Nutzer, der den
+        # Bildschirm nicht sieht, zwei verschiedene Dinge - er kann nicht
+        # nachsehen, dass dasselbe gemeint ist.
+        #
+        # BEWUSST OHNE IGNORECASE, anders als die zwei Regeln darueber: Ein
+        # kleingeschriebenes "id" soll nicht getroffen werden. Die Regel gilt
+        # nur fuer die Abkuerzung.
+        re.compile(r"\bID\b"),
+        "Ei Di",
+        "Sonst als deutsches Wort gelesen; gemeint ist englisch 'eye-dee'.",
+    ),
 ]
 
 

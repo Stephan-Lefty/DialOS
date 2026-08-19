@@ -157,9 +157,38 @@ ANSAGE_SCHUTZ = ("Das Passwort kennt Dein Betreuer schon. Die Fernwartung "
                  "vergisst, beende ich sie nach einer Stunde von selbst.")
 ANSAGE_LIEF_NICHT = "Die Fernwartung lief nicht."
 ANSAGE_KEIN_RUSTDESK = "Ich finde das Fernwartungs-Programm nicht."
-ANSAGE_KEINE_ID = ("Die Fernwartung läuft, aber ich konnte die Nummer nicht "
+# "ID" und nicht "Nummer" (Stephan, 2026-08-19). Der Betreuer fragt am Telefon
+# nach der ID; sagt das Geraet ein anderes Wort, sucht ein Nutzer, der den
+# Bildschirm nicht sieht, zwei verschiedene Dinge. Die englische Aussprache
+# erledigt die Aussprache-Tabelle in dialos-say.py - hier steht sie richtig
+# geschrieben.
+ANSAGE_KEINE_ID = ("Die Fernwartung läuft, aber ich konnte die ID nicht "
                    "ablesen. Bitte ruf Deinen Betreuer an, er kommt auch ohne "
                    "sie weiter.")
+
+# Pause zwischen Nummer und Passwort (Stephan, 2026-08-19: "eine etwas groessere
+# Pause zwischen ID und Einmalpasswort"). Zwei Dinge sorgen dafuer: die
+# Wartezeit hier UND ein eigener Satz davor - eine Ansage, die neu ansetzt,
+# trennt hoerbar besser als jede Stille.
+PAUSE_ZWISCHEN_S = 1.6
+ANSAGE_PASSWORT_FOLGT = "Und jetzt das Einmalpasswort:"
+
+# NACHFRAGE, OB ES ANGEKOMMEN IST (Stephan, 2026-08-19). Der Nutzer hoert die
+# Zahlen, aber niemand weiss, ob er sie am Telefon durchgeben konnte - er kann
+# nicht nachsehen und nichts mitschreiben. Ein Betreuer, der wartet, und ein
+# Nutzer, der die Haelfte verloren hat, sind der wahrscheinlichste Fehlerfall
+# dieses ganzen Befehls.
+FRAGE_WEITERGEGEBEN = "Hast Du das Deinem Betreuer weitergegeben? Sage ja oder nein."
+FRAGE_WIEDERHOLEN = "Soll ich es wiederholen? Sage ja oder nein."
+ANSAGE_ANGEKOMMEN = "Gut. Dein Betreuer kann sich jetzt verbinden."
+ANSAGE_SPAETER = ("Wenn Du es später noch einmal brauchst, sage einfach: "
+                  "Hilfe rufen.")
+
+# Wie oft wiederholt wird. Nach der dritten Ansage wird nicht weiter gefragt,
+# sondern gesagt, wie man sie jederzeit wiederbekommt - eine Schleife, die nur
+# der Nutzer beenden kann, ist bei einem Nutzer, den der Erkenner gerade nicht
+# versteht, keine Schleife, aus der er herauskommt.
+WIEDERHOLUNGEN_MAX = 2
 
 
 def melde(text):
@@ -199,15 +228,33 @@ def notiz_bausteine():
         return None
 
 
-def ziffern_sprechen(text):
-    """"68400324" -> "sechs acht vier null. null drei zwei vier."
+# JEDE ZIFFER EINZELN, mit Punkt und Auslassungspunkten dazwischen (Stephan,
+# 2026-08-19, in drei Schritten: erst Vierergruppen, dann "langsam", dann "noch
+# langsamer"). Gemessen fuer eine zehnstellige Nummer:
+#
+#     zwei Ziffern, Punkt          3,74 s
+#     eine Ziffer,  Punkt          3,74 s   <- Punkt allein bringt NICHTS
+#     eine Ziffer,  Komma          6,09 s
+#     eine Ziffer,  ". .."         8,62 s   <- gewaehlt
+#
+# ZWEI ERKENNTNISSE DARAUS, die der frueheren Annahme widersprechen: Der Punkt
+# allein aendert bei kurzen Woertern gar nichts - Zweier- und Einzelgruppen
+# dauern gleich lang. Und das KOMMA dehnt mehr als der Punkt, obwohl im Projekt
+# bisher das Gegenteil stand (die Messung vom 2026-08-18 verglich "ohne
+# Satzzeichen" gegen "mit Punkt", nicht Punkt gegen Komma - kein Widerspruch,
+# aber eine Luecke, die jetzt geschlossen ist).
+#
+# Warum so langsam ueberhaupt: Der Nutzer sieht die Nummer nicht und kann nichts
+# mitschreiben. Er muss sie am Telefon nachsprechen, und wer eine Ziffer
+# verliert, verliert die ganze Nummer - nachfragen kann er nur, indem er von
+# vorn anfaengt.
+ZIFFERN_TRENNER = ". .. "
 
-    Vierergruppen mit Punkt dazwischen: Piper macht am Punkt eine deutliche
-    Pause, und die braucht der Nutzer, um die Nummer am Telefon nachzusprechen.
-    """
+
+def ziffern_sprechen(text):
+    """"6840" -> "sechs. .. acht. .. vier. .. null." """
     worte = [ZIFFERN.get(z, z) for z in text if z.strip()]
-    gruppen = [" ".join(worte[i:i + 4]) for i in range(0, len(worte), 4)]
-    return ". ".join(gruppen) + "."
+    return ZIFFERN_TRENNER.join(worte) + "."
 
 
 def rustdesk_pids():
@@ -338,17 +385,99 @@ def wache():
         time.sleep(WACHE_TAKT_S)
 
 
-def id_ansagen():
+def frage(notiz, text):
+    """Ja/Nein-Rueckfrage stellen. True, False oder None.
+
+    SETZT DIE MARKE, die den Befehlsdienst heraushaelt - zentral hier und nicht
+    an jeder Aufrufstelle. Vorher tat das nur starten(); mit vier Fragen im
+    Ablauf waere das Vergessen an einer Stelle eine Frage der Zeit gewesen, und
+    die Folge waeren zwei Erkenner auf demselben Mikrofon.
+    """
+    open(notiz.FREMDE_AUFNAHME_MARKE, "w").close()
+    try:
+        return notiz.ja_oder_nein(text)
+    finally:
+        try:
+            os.unlink(notiz.FREMDE_AUFNAHME_MARKE)
+        except OSError:
+            pass
+
+
+def nummern_sprechen(kenn, passwort=None):
+    """Liest ID und - sobald verfuegbar - das Einmalpasswort vor.
+
+    Zweimal die ID, dazwischen die Pause. Das Passwort kommt mit eigenem
+    Ansatzsatz, weil eine Ansage, die neu ansetzt, hoerbar besser trennt als
+    Stille (Stephans Wunsch nach einer groesseren Pause zwischen beiden).
+    """
+    g = ziffern_sprechen(kenn)
+    sprich(f"Die Fernwartung läuft. Die ID ist: {g}")
+    time.sleep(PAUSE_ZWISCHEN_S)
+    sprich(f"Noch einmal die ID: {g}")
+    if passwort:
+        time.sleep(PAUSE_ZWISCHEN_S)
+        p = ziffern_sprechen(passwort)
+        sprich(f"{ANSAGE_PASSWORT_FOLGT} {p}")
+        time.sleep(PAUSE_ZWISCHEN_S)
+        sprich(f"Noch einmal das Einmalpasswort: {p}")
+
+
+def einmalpasswort():
+    """Das Einmalpasswort - oder None, solange RustDesk keines hergibt.
+
+    NOCH IMMER None, und das ist belegt und nicht vergessen: Fuenf Wege am
+    2026-08-19 geprueft, alle zu (Liste im Kopf dieses Skripts und in
+    docs/sicherheit-datenschutz.md). Offen ist genau eine Kombination -
+    "sudo rustdesk --password" MIT laufendem systemd-Dienst; Stephans Test dazu
+    steht noch aus.
+
+    Sobald der Weg offen ist, gehoert hierher: ein frisches achtstelliges
+    Zufallspasswort erzeugen, es ueber ein root-eigenes Skript ohne Argumente
+    setzen (kein sudo-Platzhalter, keine Nutzereingabe) und zurueckgeben. Beim
+    "Fernwartung beenden" wird dann ein neues gesetzt, das niemand erfaehrt -
+    erst DAS macht das vorgelesene zu einem echten Einmalpasswort.
+
+    Alles darueber ist schon dafuer gebaut: nummern_sprechen() liest es vor,
+    sobald es da ist, und die Fragetexte sind so formuliert, dass sie mit einer
+    Zahl und mit zwei stimmen ("Hast Du das ... weitergegeben?").
+    """
+    return None
+
+
+def id_ansagen(nachfragen=True):
     kenn = kennung()
     if not kenn:
         sprich(ANSAGE_KEINE_ID)
         return 1
     melde(f"  ID angesagt ({len(kenn)} Ziffern)")   # NICHT die ID selbst
-    gesprochen = ziffern_sprechen(kenn)
-    sprich(f"Die Fernwartung läuft. Deine Nummer ist: {gesprochen}")
-    time.sleep(0.4)
-    sprich(f"Noch einmal: {gesprochen} Sage sie Deinem Betreuer am Telefon.")
-    sprich(ANSAGE_SCHUTZ)
+    passwort = einmalpasswort()
+    notiz = notiz_bausteine() if nachfragen else None
+
+    for runde in range(WIEDERHOLUNGEN_MAX + 1):
+        nummern_sprechen(kenn, passwort)
+        if notiz is None:
+            # Ohne Rueckfrage-Bausteine wird nur angesagt. Kein Grund zur
+            # Fehlmeldung: Die Zahlen sind angekommen, nur das Nachfragen faellt
+            # aus.
+            break
+        if runde == 0:
+            sprich(ANSAGE_SCHUTZ)
+        antwort = frage(notiz, FRAGE_WEITERGEGEBEN)
+        melde(f"  weitergegeben? {antwort}")
+        if antwort is True:
+            sprich(ANSAGE_ANGEKOMMEN)
+            return 0
+        if runde >= WIEDERHOLUNGEN_MAX:
+            break
+        # "nein" UND "nichts verstanden" fuehren zur selben Frage: Wer nicht
+        # antworten konnte, hat es mit hoher Wahrscheinlichkeit auch nicht
+        # weitergegeben.
+        nochmal = frage(notiz, FRAGE_WIEDERHOLEN)
+        melde(f"  wiederholen? {nochmal}")
+        if nochmal is not True:
+            break
+
+    sprich(ANSAGE_SPAETER)
     return 0
 
 
@@ -378,17 +507,7 @@ def starten():
                "deshalb nicht.")
         return 1
 
-    # Marke setzen, damit der Befehlsdienst sich waehrend der Rueckfrage
-    # heraushaelt - sonst hoerten zwei Erkenner auf dasselbe Mikrofon.
-    open(notiz.FREMDE_AUFNAHME_MARKE, "w").close()
-    try:
-        antwort = notiz.ja_oder_nein(ANSAGE_FRAGE)
-    finally:
-        try:
-            os.unlink(notiz.FREMDE_AUFNAHME_MARKE)
-        except OSError:
-            pass
-
+    antwort = frage(notiz, ANSAGE_FRAGE)
     melde(f"  Antwort: {antwort}")
     if antwort is None:
         sprich(ANSAGE_UNKLAR)
@@ -466,7 +585,8 @@ def main():
     if was == "beenden":
         return beenden()
     if was == "ansagen":
-        return id_ansagen()
+        # Von Hand aufgerufen wird nur angesagt, nicht nachgefragt.
+        return id_ansagen(nachfragen=False)
     if was == "wache":
         return wache()
     print("Aufruf: dialos-hilfe.py starten|beenden|ansagen|wache",
