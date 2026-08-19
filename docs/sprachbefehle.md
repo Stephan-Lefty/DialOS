@@ -134,7 +134,14 @@ einmal aufgetreten ist:
   Desktop."
 - **Ansagen kurz halten, aber als Satz.** Während das System spricht,
   hört es bewusst nicht zu - jede Sekunde Ansage ist eine Sekunde, in der
-  der Nutzer warten muss. Acht Sekunden Erklärung waren zu viel, ein
+  der Nutzer warten muss.
+  - **Es kommt darauf an, ob der Nutzer wartet.** Diese Regel stammt von der
+    Desktop-Umschaltung, wo er weitermachen will. Nach einem **beendeten**
+    Diktat wartet nichts - deshalb darf der Hinweis dort 8 s dauern, und
+    Stephan hat das am 2026-08-19 nach dem Vergleich von vier gemessenen
+    Varianten so entschieden. Die Sekunden sind nicht das Maß; das Maß ist,
+    was dem Nutzer im Weg steht. Messungen in
+    [sprachbeispiele/README.md](sprachbeispiele/README.md). Acht Sekunden Erklärung waren zu viel, ein
   einzelnes „Windows." war zu wenig: ein Stichwort, das nicht erkennbar
   zum Befehl gehört.
 - **Während eines Diktats gilt KEIN Befehl.** Das Diktat legt eine Marke

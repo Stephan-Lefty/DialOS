@@ -126,12 +126,18 @@ abgeschlossen.*
       `benennen()` und `aufzaehlen()` genauso auf wie das System. Von Hand
       abgeschrieben liefen die Beispiele beim nächsten Wortlaut auseinander -
       und zwar unbemerkt, weil sie für sich genommen richtig klingen.
-    - **Gemessen und offen benannt:** Der Hinweis nach dem Diktat dauert
-      **8,05 s** und ist damit die längste Ansage im System. Die eigene Regel in
-      `docs/sprachbefehle.md` sagt „acht Sekunden Erklärung waren zu viel"
-      (Fehler vom 2026-08-17). Der Wortlaut ist Stephans Vorgabe und bleibt
-      deshalb stehen, aber drei gemessene Kürzungen (6,07 s / 4,94 s / 2,88 s)
-      stehen jetzt in `docs/sprachbeispiele/README.md` daneben.
+    - **Gemessen, vorgelegt, entschieden:** Der Hinweis nach dem Diktat dauert
+      **8,05 s** und ist damit die längste Ansage im System - die eigene Regel
+      sagt „acht Sekunden Erklärung waren zu viel" (Fehler vom 2026-08-17). Drei
+      Kürzungen wurden gemessen und vorgespielt (6,07 / 4,94 / 2,88 s);
+      **Stephan hat sich für den vollen Wortlaut entschieden.**
+    - **Und dabei kam heraus, dass die Regel unvollständig war.** Sie stammt von
+      der Desktop-Umschaltung, wo der Nutzer darauf wartet, weitermachen zu
+      können. Nach einem **beendeten** Diktat wartet nichts - er hat gerade
+      abgeschlossen und hat keinen nächsten Befehl in der Warteschlange. Nicht
+      die Sekunden sind das Maß, sondern was dem Nutzer im Weg steht. Diese
+      Unterscheidung steht jetzt in der Regel selbst, damit die Entscheidung
+      nicht später als Versehen „korrigiert" wird.
     - **Zwei Fehler in `dialos-fusszeile.py`, gefunden weil Stephan die Fußzeile
       sehen wollte:** `--art mail` filterte nur `--art` heraus und nicht dessen
       Wert - „mail" landete als **Dateiname**, die dokumentierte Aufrufform war

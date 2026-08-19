@@ -116,12 +116,17 @@ background) and `splash.png` (boot/login screen).
       calls `ansage_ende()`, `benennen()` and `aufzaehlen()` exactly as the system
       does. Copied by hand, the samples would drift apart at the next change of
       wording - and unnoticed, because each sounds right on its own.
-    - **Measured and stated openly:** the hint after the dictation runs **8.05 s**
-      and is thus the longest announcement in the system. The project's own rule
-      in `docs/sprachbefehle.en.md` says "eight seconds of explanation were too
-      much" (fault of 2026-08-17). The wording is Stephan's requirement and
-      therefore stands, but three measured shortenings (6.07 s / 4.94 s / 2.88 s)
-      now sit beside it in `docs/sprachbeispiele/README.en.md`.
+    - **Measured, presented, decided:** the hint after the dictation runs
+      **8.05 s** and is thus the longest announcement in the system - the
+      project's own rule says "eight seconds of explanation were too much"
+      (fault of 2026-08-17). Three shortenings were measured and played back
+      (6.07 / 4.94 / 2.88 s); **Stephan chose the full wording.**
+    - **And that revealed the rule was incomplete.** It comes from the desktop
+      switch, where the user is waiting to carry on. After a **finished**
+      dictation nothing is waiting - they have just wrapped up and have no next
+      command queued. Seconds are not the yardstick; what stands in the user's
+      way is. That distinction now sits in the rule itself, so the decision does
+      not get "corrected" later as an oversight.
     - **Two faults in `dialos-fusszeile.py`, found because Stephan wanted to see
       the footer:** `--art mail` filtered out only `--art` and not its value -
       "mail" ended up as the **filename**, so the documented invocation was not

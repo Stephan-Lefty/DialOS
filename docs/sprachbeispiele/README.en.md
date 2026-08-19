@@ -42,9 +42,24 @@ rule "keep announcements short, but keep them sentences", and it comes from a
 fault on 2026-08-17: **eight seconds of explanation were too much.**
 
 `07c-diktat-ende-hinweis.ogg` runs **8.1 s** and therefore sits exactly at that
-limit. The wording is Stephan's requirement of 2026-08-19, so it stands as
-given - but the measurement belongs alongside it, not in the memory hole.
-Measured shortenings, in case it turns out too long:
+limit.
+
+**Decided on 2026-08-19: the wording stays** (Stephan, after listening to all
+four variants). Not against the rule, but because the rule does not apply here -
+and that is the distinction the rule itself failed to record:
+
+- It comes from the **desktop switch**. There the user is waiting to carry on;
+  every second of announcement is in their way.
+- After a **finished dictation** nothing is waiting. The user has just wrapped
+  up and has no next command queued.
+
+On top of that: the hint addresses whoever does **not** know the read-out
+command. For them those two seconds of politeness are the difference between a
+sentence they understand and a keyword they would have to memorise. And "the
+system should sound personal" is Stephan's requirement from the same day.
+
+The measured shortenings stay here regardless - should the judgement change in
+everyday use, nobody has to measure again:
 
 | Wording | Duration |
 |---|---|

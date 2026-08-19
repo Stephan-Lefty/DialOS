@@ -42,9 +42,25 @@ Regel „Ansagen kurz halten, aber als Satz", und sie stammt aus einem Fehler
 vom 2026-08-17: **acht Sekunden Erklärung waren zu viel.**
 
 `07c-diktat-ende-hinweis.ogg` dauert **8,1 s** und liegt damit genau an dieser
-Grenze. Der Wortlaut ist Stephans Vorgabe vom 2026-08-19, deshalb steht er so
-da - aber die Messung gehört dazu, nicht ins Vergessen. Gemessene Kürzungen für
-den Fall, dass sie zu lang bleibt:
+Grenze.
+
+**Entschieden am 2026-08-19: Der Wortlaut bleibt** (Stephan, nachdem er alle
+vier Varianten gehört hat). Nicht gegen die Regel, sondern weil die Regel hier
+nicht greift - und das ist der Unterschied, den die Regel selbst nicht
+festhielt:
+
+- Sie stammt aus der **Desktop-Umschaltung**. Dort wartet der Nutzer darauf,
+  weitermachen zu können; jede Sekunde Ansage steht ihm im Weg.
+- Nach einem **beendeten Diktat** wartet nichts. Der Nutzer hat gerade
+  abgeschlossen und hat keinen nächsten Befehl in der Warteschlange.
+
+Dazu kommt: Der Hinweis richtet sich an den, der den Vorlese-Befehl **nicht**
+kennt. Für ihn sind die zwei Sekunden Höflichkeit der Unterschied zwischen
+einem Satz, den er versteht, und einem Stichwort, das er sich merken müsste.
+Und „das System soll persönlich klingen" ist Stephans Vorgabe vom selben Tag.
+
+Die gemessenen Kürzungen bleiben trotzdem hier stehen - falls sich die
+Einschätzung im Alltag ändert, muss niemand neu messen:
 
 | Wortlaut | Dauer |
 |---|---|

@@ -132,7 +132,13 @@ occurred:
   (reported 2026-08-17). Since then: "Steht schon auf Linux Desktop."
 - **Keep announcements short, but keep them sentences.** While the system
   speaks it deliberately does not listen - every second of announcement
-  is a second the user has to wait. Eight seconds of explanation were too
+  is a second the user has to wait.
+  - **What matters is whether the user is waiting.** This rule comes from the
+    desktop switch, where they want to carry on. After a **finished** dictation
+    nothing is waiting - so the hint there may run 8 s, and Stephan decided so
+    on 2026-08-19 after comparing four measured variants. Seconds are not the
+    yardstick; the yardstick is what stands in the user's way. Measurements in
+    [sprachbeispiele/README.en.md](sprachbeispiele/README.en.md). Eight seconds of explanation were too
   much, a bare "Windows." too little: a keyword that is not recognizably
   the answer to the command.
 - **During a dictation NO command applies.** The dictation creates a
