@@ -36,7 +36,9 @@ points back to the file/commit/doc it comes from.
 This guide describes path 2. Reference test device: Lenovo ThinkPad
 T490 (see [hardware.en.md](hardware.en.md)).
 
-> **Fast path (as of 2026-08-16): three commands from Debian to DialOS.**
+> **Fast path (as of 2026-08-19): five commands from Debian to DialOS.**
+> Three until 2026-08-19; the two new ones clear out what Debian ships and
+> DialOS does not need (Stephan's requirement, see step 13b).
 > After the base install (step 1), everything except the ISO build is
 > covered by scripts - there is no manual command left to type out of
 > this document:
@@ -1778,7 +1780,117 @@ After this step: reboot, verify that `nutzer` starts automatically with
 no login screen - and that `nutzer`'s own desktop is **empty** of admin
 tools.
 
-## 14. Bake in Bluetooth pairing data (optional, device-specific)
+## 13b. Cleanup: remove what Debian ships and DialOS does not need
+
+Stephan's requirement of 2026-08-19: once Debian + GNOME is installed on a new
+machine and the scripts have run, everything that came with Debian and is not
+needed for DialOS should go. Hence this step here and not in day-to-day
+operation - and **before** step 16, so the backup image holds the tidied system.
+
+```bash
+./scripts/dialos-aufraeumen.sh                  # shows only what would happen
+sudo ./scripts/dialos-aufraeumen.sh --wirklich   # removes
+```
+
+**Why this is not simply `apt purge` - the dangerous part.** As soon as any GNOME
+component is removed, the meta-packages `gnome`, `gnome-core` and
+`task-gnome-desktop` go with it. That is unavoidable and harmless in itself. The
+consequence is not: afterwards **49 packages** count as "automatically
+installed" that were previously held only through `gnome-core` - among them
+`gnome-shell`, `nautilus`, `gnome-settings-daemon`, `gnome-keyring` and
+`pipewire-audio`. A later `apt autoremove` would offer to remove **the whole
+desktop and the audio stack**. Measured on 2026-08-19 on the T490.
+
+The script therefore **first** marks everything that should stay as "manually
+installed" (64 packages) and only removes afterwards. It then explicitly verifies
+that `gnome-shell`, `nautilus`, `gnome-settings-daemon`, `gnome-keyring`,
+`pipewire-audio` and `gdm3` are still present, and exits with an error if not.
+
+**And it runs no `autoremove`**, it only shows what one would offer. On a device a
+blind user operates alone, that decision belongs to a human with a screen.
+
+**What gets removed** (17 packages, 20 including the meta-packages):
+
+| Tier | Packages | Reason |
+|---|---|---|
+| A - duplicates and foreign bodies | `gnome-characters`, `gnome-font-viewer`, `gnome-tour`, `malcontent-gui`, `xterm` | none of it has anything to do with DialOS |
+| B - superseded | `gnome-music`, `gnome-podcasts` | Rhythmbox is the ONE player |
+| | `totem`, `totem-plugins` | VLC stays as the only video player |
+| | `gnome-contacts` | contacts are Thunderbird's job |
+| | `gnome-clocks`, `gnome-weather` | DialOS says time and weather itself |
+| | `gnome-maps` | purely visual |
+| | `gnome-connections` | remote support is RustDesk |
+| | `gnome-sound-recorder` | recording is DialOS's job |
+| | `simple-scan` | no scanner in the build |
+| | `shotwell` | the image viewer is enough |
+
+**Three "duplicates" canNOT be removed by package** - found on 2026-08-19,
+because `dpkg -S` on the duplicate names the same package as the original:
+
+| Menu entry | lives in | consequence of removing |
+|---|---|---|
+| `gnome-system-monitor-kde.desktop` | `gnome-system-monitor` | the real system monitor would go too |
+| `mintstick-kde.desktop`, `mintstick-format-kde.desktop` | `mintstick` | both USB tools would go |
+| `vim.desktop` | `vim-common` | `vim-tiny` depends on it - no more `vi` |
+
+Those four are hidden per account in step 13c.
+
+## 13c. Menu per account: nutzer sees their applications, dialosadmin sees all
+
+Stephan's clarification of 2026-08-19: "If you are only hiding them, then tailor
+it for the user; dialosadmin may show more, what I need for support."
+
+```bash
+./scripts/dialos-menue-pro-konto.sh                 # shows only
+sudo ./scripts/dialos-menue-pro-konto.sh --wirklich
+```
+
+**Who the menu is actually for:** `nutzer` cannot see the screen - the menu is for
+the **sighted helper** sitting next to them. And for that person a short list is
+worth more than a complete one: they should find what belongs to the device at a
+glance, not hunt between a formula editor and a font viewer.
+
+**A whitelist, not a blacklist.** For `nutzer` everything not on the keep list is
+hidden - not the other way round. A blacklist goes stale silently with every
+Debian update: a newly added program would be visible at once and nobody would
+notice. With a whitelist the default is "invisible", and every exception is
+justified in the script.
+
+**`nutzer` sees 11 entries**, `dialosadmin` everything but the four duplicates:
+
+| Entry | Why |
+|---|---|
+| Firefox ESR | browser, Jitsi video chat, WhatsApp Web |
+| Thunderbird | mail, calendar, contacts - for the helper |
+| LibreOffice Writer | letters |
+| Rhythmbox | music, podcasts, audiobooks |
+| Shortwave | radio |
+| VLC | videos |
+| Files | the helper needs to reach `~/Notizen` |
+| Text Editor | shopping list and notes are `.txt` files |
+| Document Viewer | reading letters as PDF |
+| Image Viewer | pictures from the family |
+| Calculator | harmless, and a helper does the odd sum |
+
+**Deliberately NOT visible for `nutzer`:** Settings, Terminal, Disks, Logs, System
+Monitor, Tweaks, Extension Manager, the DialOS tools and RustDesk. Everything
+administrative happens on `dialosadmin`. **That has a consequence which must be
+understood:** a helper at the customer's home cannot pair a Bluetooth speaker
+without switching accounts. Pairing happens in the office (step 14); for the
+exceptional case, switching to `dialosadmin` remains.
+
+**Override instead of deletion:** files in
+`~/.local/share/applications/*.desktop` with `NoDisplay=true` override the
+system-wide ones without `apt`/`dpkg` ever touching them - that survives Debian
+updates and is undone by deleting one file. What gets copied is the **original**
+including `Exec` and `MimeType`, not a minimal file: an override replaces the
+original entirely, and were `MimeType` missing, the program would also be gone as
+the default application for its file types. The same pattern as the existing
+overrides for Evolution and Calendar. It is additionally written to `/etc/skel`
+so a later account gets the same view - with `chown` to the respective account,
+because a file owned by `root` can no longer be changed by the user.
+
+ (optional, device-specific)
 
 Only relevant if you stay on the **same** test device (the built-in
 Bluetooth adapter has to stay the same, since the pairing data is tied

@@ -146,7 +146,7 @@ lassen) → [`scripts/dialos-full-office-setup.sh`](scripts/dialos-full-office-s
 Sicherheits-Stick im freigelassenen Platz ein) →
 `scripts/dialos-buero-setup-abschliessen.sh` (`nutzer` anlegen +
 Admin-Werkzeuge auf die Arbeitsfläche). **Seit 2026-08-16 besteht der
-Aufbau nach der Basis-Installation aus genau drei Befehlen** - die letzte
+Aufbau nach der Basis-Installation aus genau fünf Befehlen** (drei bis zum 2026-08-19, dann kamen `dialos-aufraeumen.sh` und `dialos-menue-pro-konto.sh` dazu - Schritt 13b/13c) - die letzte
 Handarbeit aus Doku-Schritt 13 steckt jetzt im dritten Skript. Achtung
 bei den Aufrufen: Skript 1 und 2 werden **ohne** `sudo` gestartet (Skript
 1 richtet Benutzer-Dateien in `~` ein, Skript 2 hebt sich selbst per

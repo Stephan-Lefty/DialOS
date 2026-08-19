@@ -40,7 +40,9 @@ Datei/den Commit/die Doku, aus der es stammt.
 Diese Anleitung beschreibt Weg 2. Referenz-Testgerät: Lenovo ThinkPad
 T490 (siehe [hardware.md](hardware.md)).
 
-> **Schnellweg (Stand 2026-08-16): drei Befehle von Debian zu DialOS.**
+> **Schnellweg (Stand 2026-08-19): fünf Befehle von Debian zu DialOS.**
+> Bis zum 2026-08-19 waren es drei; die beiden neuen räumen auf, was Debian
+> mitbringt und DialOS nicht braucht (Stephans Vorgabe, siehe Schritt 13b).
 > Nach der Basis-Installation (Schritt 1) ist der gesamte Rest bis auf den
 > ISO-Bau in Skripten abgebildet - es bleibt keine Handarbeit mehr aus
 > dieser Doku abzutippen:
@@ -55,6 +57,16 @@ T490 (siehe [hardware.md](hardware.md)).
 >
 > # 3) Schritt 13 - Stick stecken lassen:
 > sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
+>
+> # 4) Schritt 13b - entfernt, was Debian mitbringt und DialOS nicht braucht.
+> #    ERST ohne --wirklich aufrufen und die Liste ansehen:
+> ./scripts/dialos-aufraeumen.sh
+> sudo ./scripts/dialos-aufraeumen.sh --wirklich
+>
+> # 5) Schritt 13c - Menue pro Konto: nutzer sieht nur seine Anwendungen,
+> #    dialosadmin alles. Ebenfalls erst ohne --wirklich:
+> ./scripts/dialos-menue-pro-konto.sh
+> sudo ./scripts/dialos-menue-pro-konto.sh --wirklich
 > ```
 >
 > Danach neu starten, dann Schritt 16 (ISO bauen). Die Einzelschritte
@@ -1834,6 +1846,123 @@ gibt.
 Nach diesem Schritt: neu starten, verifizieren dass `nutzer` automatisch
 ohne Anmeldebildschirm startet - und dass `nutzer`s eigener Desktop
 **leer** von Admin-Werkzeugen ist.
+
+## 13b. Aufräumen: entfernen, was Debian mitbringt und DialOS nicht braucht
+
+Stephans Vorgabe vom 2026-08-19: Nachdem Debian + GNOME auf einem neuen Rechner
+installiert ist und die Skripte durchgelaufen sind, soll alles weg, was mit
+Debian kam und für DialOS nicht benötigt wird. Deshalb steht dieser Schritt hier
+und nicht im laufenden Betrieb - und **vor** Schritt 16, damit das
+Sicherungs-Abbild das aufgeräumte System enthält.
+
+```bash
+./scripts/dialos-aufraeumen.sh                 # zeigt nur, was passieren würde
+sudo ./scripts/dialos-aufraeumen.sh --wirklich  # entfernt
+```
+
+**Warum das nicht einfach `apt purge` ist - der gefährliche Teil.** Sobald ein
+Bestandteil von GNOME entfernt wird, gehen die Meta-Pakete `gnome`, `gnome-core`
+und `task-gnome-desktop` mit. Das ist unvermeidlich und für sich harmlos. Die
+Folge ist es nicht: Danach gelten **49 Pakete** als „automatisch installiert",
+die vorher nur über `gnome-core` gehalten wurden - darunter `gnome-shell`,
+`nautilus`, `gnome-settings-daemon`, `gnome-keyring` und `pipewire-audio`. Ein
+späteres `apt autoremove` würde anbieten, **den ganzen Desktop und den
+Ton-Unterbau** zu entfernen. Gemessen am 2026-08-19 auf dem T490.
+
+Das Skript markiert deshalb **zuerst** alles, was bleiben soll, als „manuell
+installiert" (64 Pakete), und entfernt erst danach. Anschließend prüft es
+ausdrücklich nach, dass `gnome-shell`, `nautilus`, `gnome-settings-daemon`,
+`gnome-keyring`, `pipewire-audio` und `gdm3` noch da sind, und bricht mit
+Fehler ab, wenn nicht.
+
+**Und es ruft kein `autoremove` auf**, sondern zeigt nur, was eines anbieten
+würde. Bei einem Gerät, das ein blinder Nutzer allein bedient, gehört diese
+Entscheidung einem Menschen mit Bildschirm.
+
+**Was entfernt wird** (17 Pakete, 20 mit den Meta-Paketen):
+
+| Stufe | Pakete | Begründung |
+|---|---|---|
+| A - Doppelungen und Fremdkörper | `gnome-characters`, `gnome-font-viewer`, `gnome-tour`, `malcontent-gui`, `xterm` | nichts davon hat mit DialOS zu tun |
+| B - ersetzt | `gnome-music`, `gnome-podcasts` | Rhythmbox ist der EINE Player |
+| | `totem`, `totem-plugins` | VLC bleibt der einzige Videoplayer |
+| | `gnome-contacts` | Kontakte macht Thunderbird |
+| | `gnome-clocks`, `gnome-weather` | Uhrzeit und Wetter sagt DialOS selbst |
+| | `gnome-maps` | rein visuell |
+| | `gnome-connections` | Fernwartung ist RustDesk |
+| | `gnome-sound-recorder` | Aufnahme macht DialOS |
+| | `simple-scan` | kein Scanner im Aufbau |
+| | `shotwell` | der Bildbetrachter genügt |
+
+**Drei „Doppelungen" lassen sich NICHT per Paket entfernen** - aufgefallen am
+2026-08-19, weil `dpkg -S` auf die Doppelung dasselbe Paket nennt wie das
+Original:
+
+| Menüeintrag | steckt in | Folge beim Entfernen |
+|---|---|---|
+| `gnome-system-monitor-kde.desktop` | `gnome-system-monitor` | die echte Systemüberwachung wäre auch weg |
+| `mintstick-kde.desktop`, `mintstick-format-kde.desktop` | `mintstick` | beide USB-Werkzeuge wären weg |
+| `vim.desktop` | `vim-common` | daran hängt `vim-tiny` - kein `vi` mehr |
+
+Diese vier werden in Schritt 13c pro Konto ausgeblendet.
+
+## 13c. Menü pro Konto: nutzer sieht seine Anwendungen, dialosadmin alles
+
+Stephans Präzisierung vom 2026-08-19: „Wenn du das nur ausblendest, dann passe
+das für den Nutzer an, bei dialosadmin kann mehr sichtbar sein, was ich z.B. für
+den Support benötige."
+
+```bash
+./scripts/dialos-menue-pro-konto.sh                 # zeigt nur
+sudo ./scripts/dialos-menue-pro-konto.sh --wirklich
+```
+
+**Für wen das Menü überhaupt da ist:** `nutzer` sieht den Bildschirm nicht - das
+Menü ist für den **sehenden Helfer**, der neben ihm sitzt. Und für den ist eine
+kurze Liste mehr wert als eine vollständige: Er soll auf Anhieb finden, was zum
+Gerät gehört, und nicht zwischen Formeleditor und Schriftvorschau suchen.
+
+**Weiße Liste, keine schwarze.** Für `nutzer` wird alles ausgeblendet, was nicht
+auf der Behalten-Liste steht - nicht umgekehrt. Eine schwarze Liste veraltet mit
+jedem Debian-Update still: Käme ein neues Programm dazu, wäre es sofort sichtbar
+und niemandem fiele es auf. Bei einer weißen Liste ist der Standard
+„unsichtbar", und jede Ausnahme steht im Skript begründet.
+
+**`nutzer` sieht 11 Einträge**, `dialosadmin` alles außer den vier Doppelungen:
+
+| Eintrag | Warum |
+|---|---|
+| Firefox ESR | Browser, Jitsi-Videochat, WhatsApp Web |
+| Thunderbird | Mail, Kalender, Kontakte - für den Helfer |
+| LibreOffice Writer | Briefe |
+| Rhythmbox | Musik, Podcasts, Hörbücher |
+| Shortwave | Radio |
+| VLC | Videos |
+| Dateien | der Helfer muss an `~/Notizen` kommen |
+| Texteditor | Einkaufszettel und Notizen sind `.txt`-Dateien |
+| Dokumentenbetrachter | Briefe als PDF lesen |
+| Bildbetrachter | Bilder von der Familie |
+| Taschenrechner | harmlos, und ein Helfer rechnet mal etwas |
+
+**Bewusst NICHT für `nutzer` sichtbar:** Einstellungen, Terminal, Laufwerke,
+Protokolle, Systemüberwachung, Optimierungen, Erweiterungs-Manager, die
+DialOS-Werkzeuge und RustDesk. Alles Administrative läuft auf `dialosadmin`.
+**Das hat eine Konsequenz, die bedacht sein muss:** Ein Helfer beim Kunden kann
+ohne Kontowechsel keinen Bluetooth-Lautsprecher koppeln. Die Kopplung geschieht
+im Büro (Schritt 14); für den Ausnahmefall bleibt der Wechsel zu `dialosadmin`.
+
+**Überlagerung statt Löschen:** Die Dateien in
+`~/.local/share/applications/*.desktop` mit `NoDisplay=true` überschreiben die
+systemweiten, ohne dass `apt`/`dpkg` sie je anfasst - das übersteht
+Debian-Updates und ist durch Löschen einer Datei rückgängig zu machen. Kopiert
+wird jeweils das **Original** samt `Exec` und `MimeType`, nicht eine
+Minimaldatei: Eine Überlagerung ersetzt das Original vollständig, und fehlte
+darin `MimeType`, wäre das Programm auch als Standardanwendung für seine
+Dateitypen weg. Dasselbe Muster wie bei den vorhandenen Überlagerungen für
+Evolution und Kalender. Geschrieben wird zusätzlich nach `/etc/skel`, damit ein
+später angelegtes Konto dieselbe Sicht bekommt - mit `chown` auf das jeweilige
+Konto, weil eine Datei, die `root` gehört, vom Nutzer nicht mehr geändert werden
+kann.
 
 ## 14. Bluetooth-Kopplungsdaten fest einbauen (optional, geräte­spezifisch)
 
