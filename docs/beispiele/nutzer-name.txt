@@ -1,0 +1,19 @@
+# So heisst der Nutzer - eine Zeile, sonst nichts.
+#
+# DIESE DATEI IST NUR DAS BEISPIEL. Die echte heisst
+# /usr/local/share/dialos/nutzer-name.txt und wird beim Aufsetzen im Buero
+# angelegt, mit dem Namen des Kunden. Sie liegt bewusst NICHT im Repo: Ein
+# Kundenname gehoert nicht in die Versionsverwaltung, und ausgeliefert werden
+# soll das Geraet nicht mit einem fremden Vornamen.
+#
+# Wofuer der Name benutzt wird - und wofuer nicht - steht in
+# /usr/local/bin/dialos-namen.py. Kurz: Begruessung, Entscheidungen und
+# Fehlermeldungen ja; Bestaetigungen und die Zeitgrenze nein.
+#
+# Fehlt die Datei, bleibt es beim schlichten "Du". Alle Ansagen stimmen dann
+# trotzdem - keine haengt davon ab, dass ein Name da ist.
+#
+# Erlaubt sind Buchstaben, Bindestrich und Leerzeichen, hoechstens 31 Zeichen.
+# Alles andere wird verworfen, damit eine kaputte Datei keine Ansage
+# verunstaltet.
+Anna Beispiel

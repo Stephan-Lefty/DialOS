@@ -95,7 +95,20 @@ def start_ansage_text(ansage):
     wochentag = ansage.WOCHENTAGE[datetime.date(2026, monat, tag).weekday()]
     datum = f"{wochentag}, der {ansage.ORDINAL_TAGE[tag]} {ansage.MONATE[monat - 1]}"
     uhrzeit = f"{ansage.zahl_wort_0_99(stunde)} {ansage.zahl_wort_0_99(minute)}"
-    text = ("Hallo, ich bin Michael, ich bin Dein persönlicher Assistent. "
+    # Beide Namen aus denselben Funktionen wie das Original - seit dem
+    # 2026-08-20 steht keiner mehr fest im Text: der des Assistenten haengt an
+    # der eingestellten Stimme, der des Nutzers an nutzer-name.txt.
+    #
+    # DASS DIESER SATZ HIER UEBERHAUPT NACHGEBAUT WIRD, ist die eigentliche
+    # Schwaeche: Er steht in dialos-start-ansage.py noch einmal, und beim
+    # Einbau des Nutzernamens am 2026-08-20 wurde prompt nur die eine Fassung
+    # geaendert. Solange die Start-Ansage ihren Text nicht als Funktion
+    # herausgibt, bleibt das so - notiert in TODO.md.
+    _n = ansage.namen()
+    _nutzer = _n.nutzer_name() if _n else None
+    _gruss = f" {_nutzer}" if _nutzer else ""
+    text = (f"Hallo{_gruss}, ich bin {ansage.assistent_name()}, "
+            "ich bin Dein persönlicher Assistent. "
             f"Heute ist {datum}. Die aktuelle Uhrzeit ist {uhrzeit}.")
     # nutzer bekommt nur Laptop und Lautsprecher (KIND_REIHENFOLGE_NUTZER)
     text += (" Ich nenne Dir noch die Akku-Stände."

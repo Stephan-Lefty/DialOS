@@ -385,6 +385,26 @@ def wache():
         time.sleep(WACHE_TAKT_S)
 
 
+NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
+
+
+def anrede(satz):
+    """Stellt den Nutzernamen voran, wo es Sinn macht - siehe dialos-namen.py.
+
+    Geholt statt kopiert: Die Regel, WANN ein Name benutzt wird, gehoert an eine
+    Stelle. Faellt das Modul aus, kommt der Satz unveraendert zurueck - eine
+    Ansage darf nie davon abhaengen, dass ein Name eingetragen ist.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dialos_namen", NAMEN_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.anrede(satz)
+    except Exception:
+        return satz
+
+
 def frage(notiz, text):
     """Ja/Nein-Rueckfrage stellen. True, False oder None.
 
@@ -507,7 +527,10 @@ def starten():
                "deshalb nicht.")
         return 1
 
-    antwort = frage(notiz, ANSAGE_FRAGE)
+    # MIT Namen: Hier faellt die Entscheidung, einen fremden Blick auf
+    # den Bildschirm freizugeben. Die zwei Nachfragen danach bleiben
+    # ohne - sie kommen bis zu dreimal hintereinander.
+    antwort = frage(notiz, anrede(ANSAGE_FRAGE))
     melde(f"  Antwort: {antwort}")
     if antwort is None:
         sprich(ANSAGE_UNKLAR)

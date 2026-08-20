@@ -411,6 +411,26 @@ def diktat_laeuft():
     return os.path.exists(DIKTAT_MARKE)
 
 
+NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
+
+
+def anrede(satz):
+    """Stellt den Nutzernamen voran, wo es Sinn macht - siehe dialos-namen.py.
+
+    Geholt statt kopiert: Die Regel, WANN ein Name benutzt wird, gehoert an eine
+    Stelle. Faellt das Modul aus, kommt der Satz unveraendert zurueck - eine
+    Ansage darf nie davon abhaengen, dass ein Name eingetragen ist.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dialos_namen", NAMEN_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.anrede(satz)
+    except Exception:
+        return satz
+
+
 def sprich(text):
     if os.access(SAY, os.X_OK):
         subprocess.run([SAY, text], capture_output=True, timeout=60)
@@ -789,7 +809,8 @@ def main():
         # kein Terminal. Ohne Ansage waere die Sprachsteuerung einfach
         # stumm tot - und niemand wuesste, warum nichts reagiert.
         print("Kein Mikrofon gefunden.", file=sys.stderr)
-        sprich("Ich finde kein Mikrofon. Die Sprachsteuerung ist aus.")
+        # MIT Namen: Wenn etwas nicht geht, muss klar sein, wer gemeint ist.
+        sprich(anrede("Ich finde kein Mikrofon. Die Sprachsteuerung ist aus."))
         return 1
 
     # Eine Startzeile ins Protokoll, damit "leeres Protokoll" nicht zweideutig
@@ -910,7 +931,7 @@ def main():
                     # abgestuerzter Dienst kommt in dieser Sitzung nicht
                     # mehr wieder.
                     if not mikrofon_fehlt_gemeldet:
-                        sprich("Ich finde kein Mikrofon mehr.")
+                        sprich(anrede("Ich finde kein Mikrofon mehr."))
                         mikrofon_fehlt_gemeldet = True
                     time.sleep(5)
                     continue

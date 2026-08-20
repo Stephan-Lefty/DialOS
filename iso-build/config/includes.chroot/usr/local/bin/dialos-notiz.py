@@ -165,6 +165,26 @@ def waehle_mikrofon():
     return eingebaut[0] if eingebaut else None
 
 
+NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
+
+
+def anrede(satz):
+    """Stellt den Nutzernamen voran, wo es Sinn macht - siehe dialos-namen.py.
+
+    Geholt statt kopiert: Die Regel, WANN ein Name benutzt wird, gehoert an eine
+    Stelle. Faellt das Modul aus, kommt der Satz unveraendert zurueck - eine
+    Ansage darf nie davon abhaengen, dass ein Name eingetragen ist.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dialos_namen", NAMEN_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.anrede(satz)
+    except Exception:
+        return satz
+
+
 def ja_oder_nein(frage):
     """Frage stellen und die Antwort hoeren. True, False oder None.
 
@@ -294,8 +314,9 @@ def _loeschen(name):
     # "Sage ja oder nein." gehoert in die Frage (Stephan, 2026-08-19). Der
     # Nutzer sieht keine Knoepfe; welche Woerter erwartet werden, muss gesagt
     # werden - dieselbe Regel wie bei der Anleitung zum Einkaufszettel.
+    # MIT Namen: Hier wird etwas geloescht.
     antwort = ja_oder_nein(
-        f"{bez} {hat} {was}. Soll ich {ihn} löschen? Sage ja oder nein.")
+        anrede(f"{bez} {hat} {was}. Soll ich {ihn} löschen? Sage ja oder nein."))
     if antwort is None:
         sprich(f"Ich habe nichts verstanden. Ich lasse {ihn} stehen.")
         return 0

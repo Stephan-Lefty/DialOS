@@ -36,6 +36,52 @@ KIND_LABEL = {
 KIND_REIHENFOLGE_VOLL = ["battery", "headset", "mouse", "keyboard"]
 KIND_REIHENFOLGE_NUTZER = ["battery", "headset"]
 KUNDENKONTO_BENUTZERNAME = "nutzer"
+
+NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
+
+
+def namen():
+    """Laedt das gemeinsame Namensmodul - oder None.
+
+    Geholt statt kopiert: Die Regeln, WANN der Nutzername benutzt wird, stehen
+    dort an einer Stelle. Eine zweite Fassung hier waere beim naechsten Satz,
+    den jemand aendert, schon veraltet.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dialos_namen", NAMEN_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul
+    except Exception:
+        return None
+
+
+NAME_DATEI = "/usr/local/share/dialos/assistent-name.txt"
+
+
+def assistent_name():
+    """Wie der Assistent heisst - gelesen, nicht fest eingebaut.
+
+    Bis zum 2026-08-20 stand "Michael" woertlich in der Begruessung. Mit der
+    zweiten Stimme geht das nicht mehr: Eine Frauenstimme, die sich als Michael
+    vorstellt, waere schlicht falsch - und ein Nutzer, der den Bildschirm nicht
+    sieht, hat nur diesen Namen, um das Geraet anzusprechen. Spaeter wird das
+    Aufweckwort derselbe Name sein ("Hallo Anna", siehe docs/ersteinrichtung.md).
+
+    Geschrieben wird die Datei von dialos-stimme.py, das Stimme, Name und Tempo
+    ZUSAMMEN umschaltet - drei Dinge, die nur gemeinsam stimmen.
+
+    Faellt die Datei aus, bleibt es bei "Michael": der Name, mit dem das Geraet
+    ausgeliefert wurde. Eine namenlose Vorstellung waere schlechter als eine mit
+    dem alten Namen.
+    """
+    try:
+        with open(NAME_DATEI) as f:
+            return f.read().strip() or "Michael"
+    except OSError:
+        return "Michael"
+
 LADE_STATUS_AM_NETZ = {"charging", "fully-charged", "pending-charge"}
 WETTER_SLOTS = [
     ("600", "Morgens"),
@@ -661,8 +707,17 @@ def main():
         label = KIND_LABEL[kind]
         akku_saetze.append(f"Akku-Stand {label}: {prozent} Prozent.")
 
+    _n = namen()
+    _nutzer = _n.nutzer_name() if _n else None
+    gruss_name = f" {_nutzer}" if _nutzer else ""
+
     text = (
-        "Hallo, ich bin Michael, ich bin Dein persönlicher Assistent. "
+        # Der Nutzername gehoert HIER in den Gruss und nicht davor: "Stephan,
+        # hallo, ich bin Anna" klingt schief, "Hallo Stephan, ich bin Anna"
+        # nicht. Deshalb baut die Begruessung ihn selbst ein, statt anrede() zu
+        # benutzen.
+        f"Hallo{gruss_name}, ich bin {assistent_name()}, "
+        "ich bin Dein persönlicher Assistent. "
         f"Heute ist {datum}. Die aktuelle Uhrzeit ist {uhrzeit}."
     )
     if akku_saetze:

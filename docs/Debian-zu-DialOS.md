@@ -1859,6 +1859,63 @@ Nach diesem Schritt: neu starten, verifizieren dass `nutzer` automatisch
 ohne Anmeldebildschirm startet - und dass `nutzer`s eigener Desktop
 **leer** von Admin-Werkzeugen ist.
 
+## 12c. Zweite Stimme und die beiden Namen (neu 2026-08-20)
+
+Stephans Entscheidung: eine freundliche Damenstimme. Aus dem Hörvergleich wurde
+**`de_DE-kerstin-low`**, Tempo **1.00**, Name **Anna**.
+
+```bash
+# Stimme holen (rund 60 MB)
+BASIS=https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE
+curl -s -L -o /tmp/kerstin.onnx      "$BASIS/kerstin/low/de_DE-kerstin-low.onnx?download=true"
+curl -s -L -o /tmp/kerstin.onnx.json "$BASIS/kerstin/low/de_DE-kerstin-low.onnx.json?download=true"
+sudo install -m 0644 /tmp/kerstin.onnx      /usr/local/share/dialos-piper/voices/de_DE-kerstin-low.onnx
+sudo install -m 0644 /tmp/kerstin.onnx.json /usr/local/share/dialos-piper/voices/de_DE-kerstin-low.onnx.json
+
+# Umschalten - Stimme, Name und Tempo ZUSAMMEN
+sudo dialos-stimme.py setzen kerstin
+systemctl --user restart speech-dispatcher.service
+```
+
+**Warum drei Dinge zusammen umschalten.** Eine Frauenstimme, die sich als
+Michael vorstellt, wäre falsch - und ein Nutzer, der den Bildschirm nicht sieht,
+hat nur diesen Namen, um das Gerät anzusprechen. Das Tempo ist pro Stimme
+verschieden, und zwar messbar: derselbe Satz braucht bei Thorsten 7,75 s mit
+Tempo 0,88, bei Kerstin **8,99 s** mit demselben Wert. Erst 1.00 bringt sie auf
+7,91 s. Ein gemeinsamer Wert für alle Stimmen wäre für die eine oder andere
+immer falsch.
+
+**Die Auswahl kam per Ohr, nicht per Rechnung.** Drei weibliche Piper-Stimmen
+standen zur Wahl (`eva_k-x_low`, `kerstin-low`, `ramona-low`); bessere gibt es
+für Deutsch nicht. Alle drei laufen mit 16 000 Hz gegen Thorstens 22 050 Hz -
+das ist der hörbare Qualitätsunterschied und der Preis dieser Entscheidung.
+
+**Der Nutzername.** `/usr/local/share/dialos/nutzer-name.txt`, eine Zeile,
+Beispiel in [beispiele/nutzer-name.txt](beispiele/nutzer-name.txt). Auf dem
+Testgerät steht dort „Stephan" - **stellvertretend für den Kundennamen**, der
+beim Aufsetzen im Büro eingetragen wird. Die Datei liegt bewusst nicht im Repo:
+Ein Kundenname gehört nicht in die Versionsverwaltung.
+
+Wo der Name benutzt wird, steht in `dialos-namen.py`, und die Regel ist
+sparsam:
+
+| Stelle | Name? | Warum |
+|---|---|---|
+| Begrüßung beim Anmelden | **ja** | einmal pro Sitzung, und der Moment, in dem es am meisten bedeutet |
+| Entscheidungen (Fernwartung, Notiz löschen) | **ja** | wo eine Zustimmung fällt, holt der Name die Aufmerksamkeit zurück |
+| Fehler („Ich finde kein Mikrofon") | **ja** | wenn etwas nicht geht, muss klar sein, wer gemeint ist |
+| Bestätigungen („Diktat beendet") | nein | zwanzigmal am Tag nutzt sich ein Name ab |
+| Zeitgrenze alle zwei Minuten | nein | dito |
+
+**Warum das mehr ist als Höflichkeit:** Der Name am Satzanfang ist ein
+**Signal**. Läuft das Radio oder ist Besuch im Raum, sagt „Stephan, …"
+unmissverständlich: das gilt Dir, hör hin. Genau deshalb darf er nicht überall
+stehen - wer ihn dauernd hört, überhört ihn.
+
+**Ohne Namensdatei bleibt es beim schlichten „Du",** und jede Ansage stimmt
+trotzdem. Keine hängt davon ab, dass ein Name eingetragen ist - das war die
+Bedingung beim Bauen.
+
 ## 13a. Sicherheitsupdates unbeaufsichtigt (neu 2026-08-20)
 
 ```bash
