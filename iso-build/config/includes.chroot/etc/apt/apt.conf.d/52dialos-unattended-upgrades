@@ -1,0 +1,77 @@
+// DialOS: unbeaufsichtigte Sicherheitsupdates.
+//
+// Festgelegt in docs/anwendungen.md: Sicherheitsupdates laufen automatisch im
+// Hintergrund, weil ein blinder Nutzer sich um Sicherheitsluecken nicht
+// kuemmern koennen muss. Alles Groessere kommt nur auf Ansage mit
+// Ja/Nein-Rueckfrage - ein Upgrade, das den Desktop veraendert, darf nie
+// ungefragt kommen.
+//
+// Die Nummer 52 steht nach der 50 des Pakets: Was hier steht, gewinnt.
+
+// ---------------------------------------------------------------- Quellen
+// NUR Sicherheit. Der Rest wartet auf den Sprachbefehl "System
+// aktualisieren" (noch nicht gebaut, siehe docs/sprachbefehle.md).
+// Ausdruecklich hingeschrieben statt auf die Vorgabe des Pakets zu
+// vertrauen: Eine Vorgabe kann sich mit der naechsten Debian-Version
+// aendern, und dann faellt es niemandem auf.
+//
+// "#clear" IST HIER PFLICHT UND KEIN SCHMUCK. Eine Origins-Pattern-Zeile
+// HAENGT AN ("::"), sie ersetzt nicht. Ohne das Leeren standen am
+// 2026-08-20 fuenf Muster in der Liste - meine zwei UND Debians drei,
+// darunter "label=Debian" ohne "-Security". Das ist die normale
+// Stable-Quelle: Es waere unbeaufsichtigt alles eingespielt worden, was
+// aus Stable kommt, und nicht nur Sicherheitsupdates. Genau das, was laut
+// docs/anwendungen.md nur auf Ansage passieren darf.
+//
+// Gefunden, weil nach dem Installieren "apt-config dump" gelesen wurde
+// statt der eigenen Datei zu glauben. Die Konfigurationsdatei zu schreiben
+// ist nicht dasselbe wie die Einstellung zu setzen.
+#clear "Unattended-Upgrade::Origins-Pattern";
+Unattended-Upgrade::Origins-Pattern {
+    "origin=Debian,codename=${distro_codename},label=Debian-Security";
+    "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+};
+
+// ------------------------------------------------------ NICHT aufraeumen
+// DIE WICHTIGSTE ZEILE IN DIESER DATEI.
+//
+// Gemessen am 2026-08-19: Sobald scripts/dialos-aufraeumen.sh einen
+// GNOME-Bestandteil entfernt, gehen die Meta-Pakete gnome, gnome-core und
+// task-gnome-desktop mit. Danach gelten 49 Pakete als "automatisch
+// installiert", die vorher nur ueber gnome-core gehalten wurden - darunter
+// gnome-shell, nautilus, gnome-settings-daemon, gnome-keyring und
+// pipewire-audio.
+//
+// Ein automatisches autoremove wuerde also anbieten, den ganzen Desktop UND
+// den Ton-Unterbau zu entfernen - unbeaufsichtigt, nachts, auf einem Geraet,
+// das ein blinder Nutzer allein bedient. Das Aufraeum-Skript markiert diese
+// Pakete zwar vorher als "manuell installiert", aber darauf darf sich diese
+// Einstellung nicht verlassen: Uebersieht der Schutz dort auch nur eines,
+// waere das Geraet am naechsten Morgen unbenutzbar, und der Nutzer koennte
+// nicht einmal Hilfe rufen.
+Unattended-Upgrade::Remove-Unused-Dependencies "false";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "false";
+
+// ----------------------------------------------------- NICHT neu starten
+// Aus zwei Gruenden, und der zweite waegt schwerer als der uebliche:
+//
+// 1. Ein Geraet, das mitten in einem Diktat oder Telefonat neu startet, ist
+//    fuer jemanden, der den Bildschirm nicht sieht, ein Ausfall ohne
+//    erkennbare Ursache.
+// 2. /home/nutzer liegt auf einer LUKS-Partition, die
+//    dialos-stick-gate.service nach dem Boot mit dem Sicherheits-Stick
+//    oeffnet. Startet das Geraet nachts neu, waehrend der Stick nicht
+//    steckt, kommt der Nutzer am Morgen ueberhaupt nicht mehr in seine
+//    Sitzung - und versteht nicht, warum.
+Unattended-Upgrade::Automatic-Reboot "false";
+
+// ------------------------------------------------------------- Sonstiges
+// Paketlisten in kleinen Schritten holen, damit ein Abbruch (Deckel zu,
+// Netz weg) keinen halben Zustand hinterlaesst.
+Unattended-Upgrade::MinimalSteps "true";
+
+// Kein Mailversand: Auf dem Geraet ist kein Mailversand fuer das System
+// eingerichtet, und die Mailadresse des Nutzers ist nicht der Ort fuer
+// Paketmeldungen. Was passiert ist, steht in
+// /var/log/unattended-upgrades/ und wird ueber die Fernwartung angesehen.
+Unattended-Upgrade::Mail "";

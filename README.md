@@ -114,6 +114,39 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Sicherheitsupdates laufen jetzt unbeaufsichtigt (2026-08-20).**
+  `unattended-upgrades` 2.12 installiert und eingerichtet - in
+  `docs/anwendungen.md` war es seit dem 2026-08-18 entschieden und stand als
+  „Paket noch nicht installiert" da.
+    - **`#clear` vor `Origins-Pattern` ist Pflicht, und das habe ich erst falsch
+      gemacht.** Eine `Origins-Pattern`-Zeile **hängt an** (`::`), sie ersetzt
+      nicht. Nach dem ersten Versuch standen fünf Muster in der Liste - meine
+      zwei **und** Debians drei, darunter `label=Debian` ohne `-Security`, also
+      die normale Stable-Quelle. Ich hatte Stephan vorher „nur
+      Sicherheitsupdates" gesagt; das stimmte nicht. Aufgefallen nur, weil nach
+      dem Installieren `apt-config dump` gelesen wurde statt der eigenen Datei zu
+      glauben - **eine Konfigurationsdatei zu schreiben ist nicht dasselbe wie
+      eine Einstellung zu setzen.**
+    - **`Remove-Unused-Dependencies "false"` ist die wichtigste Zeile.** Nach dem
+      Aufräum-Schritt gelten 49 Pakete als „automatisch installiert" - darunter
+      `gnome-shell`, `nautilus`, `pipewire-audio`. Ein automatisches
+      `autoremove` würde nachts anbieten, den Desktop und den Ton-Unterbau zu
+      entfernen. Das Aufräum-Skript schützt sie, aber diese Einstellung darf sich
+      nicht darauf verlassen: Übersieht der Schutz **ein** Paket, wäre das Gerät
+      am Morgen unbenutzbar - und der Nutzer könnte nicht einmal Hilfe rufen.
+    - **`Automatic-Reboot "false"`** wiegt hier schwerer als üblich: `/home/nutzer`
+      liegt auf der LUKS-Partition, die der Sicherheits-Stick öffnet. Ein
+      nächtlicher Neustart ohne steckenden Stick sperrt den Nutzer am Morgen
+      komplett aus.
+    - **Belegt statt geglaubt:** Der Probelauf zeigt in
+      `/var/log/unattended-upgrades/unattended-upgrades.log`, dass `trixie`,
+      `trixie-updates` **und** die Anthropic-Quelle mit Pin `-32768` gesperrt
+      sind - apts „auf keinen Fall". Nur `Debian-Security` fehlt in dieser Liste.
+    - **Bewusst mit gesperrt: `trixie-updates`,** wo unter anderem `tzdata`
+      herkommt. Die Zeitzonen-Datenbank veraltet damit bis zum Sprachbefehl
+      „System aktualisieren" - erwähnenswert bei einem Gerät, dessen
+      Uhrzeit-Ansage ein Kernbefehl ist.
+
 - **Die Protokolle werden nach sieben Tagen gelöscht (2026-08-20).** Stephans
   Entscheidung, dieselbe Frist wie beim Support-Protokoll. Bis dahin wuchsen
   sechs Protokolle unbegrenzt - beim Diktat hieß das, dass jeder je diktierte

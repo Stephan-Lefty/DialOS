@@ -105,6 +105,36 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Security updates now run unattended (2026-08-20).** `unattended-upgrades`
+  2.12 installed and configured - decided in `docs/anwendungen.en.md` on
+  2026-08-18 and listed there as "package not yet installed".
+    - **`#clear` before `Origins-Pattern` is mandatory, and I got it wrong at
+      first.** An `Origins-Pattern` line **appends** (`::`), it does not replace.
+      After the first attempt five patterns were in the list - my two **and**
+      Debian's three, including `label=Debian` without `-Security`, i.e. the
+      ordinary stable suite. I had told Stephan "security updates only"; that was
+      not true. Noticed only because `apt-config dump` was read after installing
+      instead of believing my own file - **writing a configuration file is not
+      the same as setting a setting.**
+    - **`Remove-Unused-Dependencies "false"` is the most important line.** After
+      the cleanup step 49 packages count as "automatically installed" - among
+      them `gnome-shell`, `nautilus`, `pipewire-audio`. An automatic `autoremove`
+      would offer overnight to remove the desktop and the audio stack. The
+      cleanup script protects them, but this setting must not rely on that: if
+      the protection misses **one** package, the device would be unusable in the
+      morning - and the user could not even call for help.
+    - **`Automatic-Reboot "false"`** weighs more here than usual: `/home/nutzer`
+      sits on the LUKS partition the security stick opens. A nightly reboot
+      without the stick plugged in locks the user out completely.
+    - **Proven, not assumed:** the dry run shows in
+      `/var/log/unattended-upgrades/unattended-upgrades.log` that `trixie`,
+      `trixie-updates` **and** the Anthropic repository are pinned at `-32768` -
+      apt's "never". Only `Debian-Security` is absent from that list.
+    - **Deliberately blocked too: `trixie-updates`,** where `tzdata` comes from
+      among others. The timezone database therefore ages until the voice command
+      "System aktualisieren" - worth noting on a device whose time announcement
+      is a core command.
+
 - **Logs are deleted after seven days (2026-08-20).** Stephan's decision, the
   same period as the support log. Until then six logs grew without limit - for
   the dictation that meant every letter ever dictated stayed on the device in

@@ -1859,6 +1859,60 @@ Nach diesem Schritt: neu starten, verifizieren dass `nutzer` automatisch
 ohne Anmeldebildschirm startet - und dass `nutzer`s eigener Desktop
 **leer** von Admin-Werkzeugen ist.
 
+## 13a. Sicherheitsupdates unbeaufsichtigt (neu 2026-08-20)
+
+```bash
+sudo apt-get install -y unattended-upgrades
+sudo install -m 0644 iso-build/config/includes.chroot/etc/apt/apt.conf.d/52dialos-unattended-upgrades /etc/apt/apt.conf.d/
+sudo install -m 0644 iso-build/config/includes.chroot/etc/apt/apt.conf.d/20auto-upgrades /etc/apt/apt.conf.d/
+```
+
+Festgelegt in [anwendungen.md](anwendungen.md): Sicherheitsupdates laufen
+automatisch, alles Größere nur auf Ansage. Drei Einstellungen tragen das, und
+jede hat einen Grund, der über den Normalfall hinausgeht:
+
+**`#clear` vor `Origins-Pattern` ist Pflicht.** Eine `Origins-Pattern`-Zeile
+**hängt an** (`::`), sie ersetzt nicht. Ohne das Leeren standen nach dem ersten
+Versuch fünf Muster in der Liste - die eigenen zwei **und** Debians drei,
+darunter `label=Debian` ohne `-Security`. Das ist die normale Stable-Quelle: Es
+wäre unbeaufsichtigt alles eingespielt worden, was aus Stable kommt. Aufgefallen
+nur, weil nach dem Installieren `apt-config dump` gelesen wurde statt der eigenen
+Datei zu glauben - **eine Konfigurationsdatei zu schreiben ist nicht dasselbe wie
+eine Einstellung zu setzen.**
+
+**`Remove-Unused-Dependencies "false"` ist die wichtigste Zeile.** Nach
+Schritt 13b gelten 49 Pakete als „automatisch installiert", die vorher nur über
+`gnome-core` gehalten wurden - darunter `gnome-shell`, `nautilus` und
+`pipewire-audio`. Ein automatisches `autoremove` würde also nachts anbieten, den
+Desktop und den Ton-Unterbau zu entfernen. Das Aufräum-Skript schützt sie zwar,
+aber diese Einstellung darf sich nicht darauf verlassen: Übersieht der Schutz
+dort **ein** Paket, wäre das Gerät am Morgen unbenutzbar - und der Nutzer könnte
+nicht einmal Hilfe rufen.
+
+**`Automatic-Reboot "false"`,** und zwar aus einem Grund, der schwerer wiegt als
+der übliche: `/home/nutzer` liegt auf der LUKS-Partition, die
+`dialos-stick-gate.service` mit dem Sicherheits-Stick öffnet. Startet das Gerät
+nachts neu, während der Stick nicht steckt, kommt der Nutzer am Morgen überhaupt
+nicht mehr in seine Sitzung - und versteht nicht, warum.
+
+**Gegenprobe, nicht Vertrauen.** Der Probelauf zeigt in
+`/var/log/unattended-upgrades/unattended-upgrades.log`, was wirklich gilt:
+
+```
+Marking not allowed <... trixie ... l=Debian ...> with -32768 pin
+Applying pin -32768 to ... trixie-updates ... l=Debian
+Applying pin -32768 to ... downloads.claude.ai ... l=Anthropic
+left to upgrade set()
+```
+
+`-32768` ist apts „auf keinen Fall". Nur `Debian-Security` fehlt in dieser
+Liste, ist also erlaubt.
+
+**Bewusst mit gesperrt: `trixie-updates`.** Dort kommt unter anderem `tzdata`
+her. Die Zeitzonen-Datenbank veraltet damit, bis jemand „System aktualisieren"
+sagt - erwähnenswert bei einem Gerät, dessen Uhrzeit-Ansage ein Kernbefehl ist.
+Bleibt gesperrt, weil „nur Sicherheit" die Festlegung war.
+
 ## 13b. Aufräumen: entfernen, was Debian mitbringt und DialOS nicht braucht
 
 Stephans Vorgabe vom 2026-08-19: Nachdem Debian + GNOME auf einem neuen Rechner
