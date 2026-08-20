@@ -45,13 +45,37 @@ Stimmenauswahl, existiert noch nicht.
 Vor Ort per Sprache erfragt werden nur:
 - **Name** des Nutzers, mit Rückbestätigung ("Ich habe verstanden: Anna
   Schmidt. Stimmt das?") und Korrekturmöglichkeit.
-- **Begrüßungsstimme**: Auswahl aus 4 Piper-Stimmen (2 männlich, 2
-  weiblich, jeweils höchste verfügbare Sprachqualität) per Hörprobe,
-  mit Namen statt "Stimme 1/2" ansprechbar. Männlich: **Michael**,
-  **Daniel** (Reserve für spätere Erweiterung: Christian, Andreas,
-  Stefan). Weiblich: **Anna**, **Julia** (Reserve: Sarah, Katharina,
-  Christina). Später jederzeit änderbar, nicht nur bei der
+- **Begrüßungsstimme**: Auswahl aus **zwei** Stimmen per Hörprobe -
+  **Michael** (`de_DE-thorsten-high`) und **Anna**
+  (`de_DE-kerstin-low`). Später jederzeit änderbar, nicht nur bei der
   Ersteinrichtung.
+
+  **Zwei statt vier, und das ist eine Verschärfung, keine Sparmaßnahme**
+  (Stephan, 2026-08-20: „lieber 2 Stimmen optimiert als 8 Stimmen na es
+  geht gerade so"). Der Grund liegt in dem, was am selben Tag gemessen
+  wurde:
+
+  - **Jede Stimme braucht ihre eigene Einstellung.** Das Sprechtempo ist
+    nicht übertragbar: derselbe Satz braucht bei Thorsten 7,75 s mit
+    Tempo 0,88, bei Kerstin **8,99 s** mit demselben Wert. Und die
+    Aussprache-Regeln („Tas tatur", „Ei Di", „Dial OS") sind auf Thorsten
+    abgestimmt - ob Anna sie braucht, ist noch offen. Acht Stimmen hießen
+    achtmal diese Arbeit, und ohne sie klingt jede einzelne schlechter als
+    nötig.
+  - **Für einen blinden Nutzer ist die Stimme nicht ein Merkmal, sondern
+    die ganze Oberfläche.** Eine mittelmäßige Stimme ist deshalb kein
+    Schönheitsfehler, den man mit Auswahl ausgleicht - eine große Auswahl
+    mittelmäßiger Stimmen ist schlechter als zwei gute.
+  - **Zwei decken die eigentliche Präferenz ab:** männlich oder weiblich.
+    Alles darüber ist Geschmack, den man später ergänzen kann, wenn er
+    verlangt wird.
+
+  **Korrektur einer früheren Annahme:** Hier stand „jeweils höchste
+  verfügbare Sprachqualität". Das ist bei den weiblichen Stimmen nicht
+  erreichbar - Piper bietet für Deutsch nur `eva_k-x_low`, `kerstin-low`
+  und `ramona-low`, alle mit **16 000 Hz** gegen Thorstens 22 050 Hz.
+  Anna klingt hörbar rauher als Michael, und das ist keine
+  Einstellungssache, sondern der Stand der verfügbaren Modelle.
 - Ggf. Bestätigung vorbereiteter Konten (siehe Datenschutz-Varianten
   unten) – reine Ja/Nein-Antwort, kein Diktat.
 

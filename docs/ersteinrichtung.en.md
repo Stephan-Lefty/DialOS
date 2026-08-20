@@ -43,13 +43,33 @@ yet.
 Only the following is asked for on site, via voice:
 - The user's **name**, with confirmation back ("I understood: Anna
   Schmidt. Is that correct?") and an option to correct it.
-- **Greeting voice**: choosing from 4 Piper voices (2 male, 2 female,
-  each at the highest available speech quality) via audio samples,
-  addressable by name instead of "voice 1/2". Male: **Michael**,
-  **Daniel** (reserve names for later expansion: Christian, Andreas,
-  Stefan). Female: **Anna**, **Julia** (reserve: Sarah, Katharina,
-  Christina). Changeable again at any time later, not just during
-  initial setup.
+- **Greeting voice**: choosing between **two** voices via audio samples -
+  **Michael** (`de_DE-thorsten-high`) and **Anna** (`de_DE-kerstin-low`).
+  Changeable again at any time later, not just during initial setup.
+
+  **Two instead of four, and that is a tightening rather than a saving**
+  (Stephan, 2026-08-20: "rather 2 optimised voices than 8 that are merely
+  OK"). The reason lies in what was measured the same day:
+
+  - **Every voice needs settings of its own.** The speaking rate does not
+    carry over: the same sentence takes 7.75 s for Thorsten at rate 0.88
+    and **8.99 s** for Kerstin at the same value. And the pronunciation
+    rules ("Tas tatur", "Ei Di", "Dial OS") are tuned to Thorsten - whether
+    Anna needs them is still open. Eight voices would mean eight times that
+    work, and without it each one sounds worse than it needs to.
+  - **For a blind user the voice is not a feature but the entire
+    interface.** A mediocre voice is therefore not a blemish to be offset
+    by choice - a wide choice of mediocre voices is worse than two good
+    ones.
+  - **Two cover the actual preference:** male or female. Anything beyond
+    that is taste, and taste can be added later when it is asked for.
+
+  **Correction of an earlier assumption:** this used to say "each at the
+  highest available speech quality". That is unreachable for the female
+  voices - Piper offers only `eva_k-x_low`, `kerstin-low` and `ramona-low`
+  for German, all at **16 000 Hz** against Thorsten's 22 050 Hz. Anna
+  sounds audibly rougher than Michael, and that is not a settings question
+  but the state of the available models.
 - Possibly confirming pre-prepared accounts (see privacy variants below)
   — a plain yes/no answer, no dictation.
 

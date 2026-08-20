@@ -113,7 +113,14 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   die Signatur einer aktiven Verbindung ist unbekannt, und sie zu raten waere der
   schlechtere Fehler. `dialos-hilfe.py` notiert deshalb bei jeder Sitzung
   Prozessanzahl und Groesse von RustDesks Protokoll (`spur_notieren`).
-  **Naechster Schritt: ein echter Verbindungsversuch von Stephans zweitem
+  **Naechster Schritt: KEIN eigener Test noetig** (Stephan, 2026-08-20:
+  "da ich an anderer Stelle Rustdesk taeglich benutze, brauchen wir da
+  nicht wirklich einen Test machen"). Richtig - was fehlt, ist nicht der
+  Nachweis, DASS RustDesk funktioniert, sondern die Signatur einer aktiven
+  Verbindung AUF DIESEM Geraet. Die faellt beim naechsten normalen
+  Support-Einsatz von selbst an: spur_notieren() schreibt bei jeder
+  Sitzung Prozessanzahl und Protokollgroesse mit. Danach steht sie im
+  Protokoll und die Erkennung laesst sich belegt bauen -
   Rechner** - danach steht die Signatur im Protokoll und die Erkennung laesst
   sich belegt bauen.
 
