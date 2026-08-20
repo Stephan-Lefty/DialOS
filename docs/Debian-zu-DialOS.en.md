@@ -423,7 +423,7 @@ logo and the login/desktop).
 ## 4. Set up autologin
 
 **Key gotcha:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`, see
-[the file in the repo](../iso-build/config/includes.chroot/etc/gdm3/custom.conf))
+[the file in the repo](beispiele/gdm3-custom.conf))
 is **not** the effective switch on this Debian 13/GDM 48 combination -
 the actual mechanism is a per-user property in the running
 AccountsService, set via D-Bus:

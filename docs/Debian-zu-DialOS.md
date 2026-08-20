@@ -447,10 +447,22 @@ Firmware-Logo und Anmeldung/Desktop).
 ## 4. Autologin einrichten
 
 **Zentrale Falle:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`,
-siehe [Datei im Repo](../iso-build/config/includes.chroot/etc/gdm3/custom.conf))
-ist bei dieser Debian-13/GDM-48-Kombination **nicht** der wirksame
-Schalter - der eigentliche Mechanismus ist eine Pro-Benutzer-Eigenschaft
-im laufenden AccountsService, per D-Bus gesetzt:
+siehe [Beispiel](beispiele/gdm3-custom.conf)) ist bei dieser
+Debian-13/GDM-48-Kombination **nicht** der wirksame Schalter - der eigentliche Mechanismus ist eine Pro-Benutzer-Eigenschaft
+im laufenden AccountsService, per D-Bus gesetzt.
+
+> Die Beispieldatei liegt bewusst unter `docs/beispiele/` und **nicht** in
+> `iso-build/config/includes.chroot/` (verschoben am 2026-08-20). Alles dort
+> heißt „installiere mich" - und eine Datei zu installieren, deren ganze
+> Aussage ist, dass sie nichts bewirkt, verwirrt nur. Aufgefallen ist es, weil
+> `scripts/dialos-installstand.sh` sie dauerhaft als „nicht installiert"
+> meldete. Ein Prüfwerkzeug, das ständig bekannte Einträge zeigt, erzieht dazu,
+> es zu ignorieren; dann findet es beim nächsten echten Fund auch niemand mehr.
+>
+> `custom.conf` ist übrigens der **Ubuntu**-Dateiname. Debian benutzt
+> `daemon.conf` - dort steht auf dem Testgerät tatsächlich ein
+> `AutomaticLogin`, gesetzt vom Debian-Installer. Wirksam ist trotzdem die
+> AccountsService-Eigenschaft, siehe unten.
 
 ```bash
 # Objekt-Pfad des Zielbenutzers ermitteln
