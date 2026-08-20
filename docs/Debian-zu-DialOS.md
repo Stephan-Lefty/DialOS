@@ -1445,6 +1445,17 @@ intern ein Datei-Typ (`datatype="nsIFile"` in `am-main.xhtml`), dessen
 gespeicherte Form unter Linux der absolute Pfad ist - ein Pfad als Text
 genuegt also.
 
+**Der Name ist anklickbar (Stephans Nachfrage, 2026-08-20).** In der
+HTML-Fassung wird "DialOS.org" zu einem Verweis auf `https://dialos.org` -
+kanonisch ohne "www", denn `www.dialos.org` leitet mit 301 dorthin um
+(geprueft am selben Tag). Er erbt die Farbe der Zeile (`color:inherit`) und
+ist nur unterstrichen: Das uebliche Linkblau waere in einer Zeile, die "ganz
+dezent" sein soll, das Lauteste auf der Seite - ohne Unterstreichung saehe
+umgekehrt niemand, dass es ein Verweis ist. **Die `.txt` bleibt ohne Adresse.**
+Im reinen Text waere eine ausgeschriebene Adresse eine zweite Fassung
+desselben Satzes, und der Empfaenger muesste sie abtippen; sein Mailprogramm
+macht aus "DialOS.org" ohnehin meist selbst einen Verweis.
+
 **Das deckt einen von zwei Mailwegen.** Laut `docs/anwendungen.md` ist
 Thunderbird die Oberflaeche, nicht der Motor: DialOS soll spaeter selbst ueber
 IMAP/SMTP versenden, weil Thunderbird von aussen nicht steuerbar ist. Die

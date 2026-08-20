@@ -1380,6 +1380,17 @@ The `sig_file` entry is internally a file type (`datatype="nsIFile"` in
 `am-main.xhtml`), whose stored form on Linux is the absolute path - so a path
 as text is enough.
 
+**The name is clickable (Stephan's follow-up, 2026-08-20).** In the HTML
+version "DialOS.org" becomes a link to `https://dialos.org` - canonical
+without "www", since `www.dialos.org` redirects there with a 301 (checked the
+same day). It inherits the line's colour (`color:inherit`) and is only
+underlined: the usual link blue would be the loudest thing on the page in a
+line that is meant to be "discreet" - without the underline, conversely,
+nobody would see it is a link. **The `.txt` stays without an address.** In
+plain text a spelled-out address would be a second version of the same
+sentence, and the recipient would have to retype it; their mail client
+usually turns "DialOS.org" into a link by itself anyway.
+
 **This covers one of two mail paths.** According to `docs/anwendungen.md`
 Thunderbird is the interface, not the engine: DialOS is to send via IMAP/SMTP
 itself later, because Thunderbird cannot be driven from outside. The signature

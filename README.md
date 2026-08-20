@@ -143,6 +143,14 @@ abgeschlossen.*
       und rechtsbündig" sauber - im reinen Text ginge es nur über Leerzeichen,
       die auf einem Telefon umbrechen. Die `.txt` liegt daneben, falls ein
       Konto in reinem Text schreibt; dann wird umgestellt statt gebaut.
+    - **Der Name ist anklickbar** (Stephans Nachfrage am selben Tag). In der
+      HTML-Fassung führt „DialOS.org“ auf `https://dialos.org` - kanonisch
+      ohne „www“, denn `www.dialos.org` leitet mit 301 dorthin um. Der
+      Verweis erbt die Farbe der Zeile und ist nur unterstrichen: Das übliche
+      Linkblau wäre in einer Zeile, die „ganz dezent“ sein soll, das Lauteste
+      auf der Seite - ohne Unterstreichung sähe umgekehrt niemand, dass es
+      ein Verweis ist. Die `.txt` bleibt ohne Adresse; im reinen Text wäre sie
+      eine zweite Fassung desselben Satzes, die niemand anklicken kann.
     - **Was das *nicht* löst:** Laut `docs/anwendungen.md` ist Thunderbird die
       Oberfläche, nicht der Motor - DialOS soll später selbst über IMAP/SMTP
       versenden. Die Signatur greift nur bei Mails, die durch Thunderbird

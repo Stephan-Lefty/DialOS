@@ -132,6 +132,14 @@ background) and `splash.png` (boot/login screen).
       "discreet and right-aligned" work cleanly - in plain text it would need
       spaces that wrap on a phone. The `.txt` sits alongside in case an account
       composes in plain text; then it is switched over, not built.
+    - **The name is clickable** (Stephan's follow-up the same day). In the
+      HTML version “DialOS.org” leads to `https://dialos.org` - canonical
+      without “www”, since `www.dialos.org` redirects there with a 301. The
+      link inherits the line's colour and is only underlined: the usual link
+      blue would be the loudest thing on the page in a line meant to be
+      “discreet” - without the underline, conversely, nobody would see it is
+      a link. The `.txt` stays without an address; in plain text it would be a
+      second version of the same sentence that nobody can click.
     - **What this does *not* solve:** according to `docs/anwendungen.en.md`
       Thunderbird is the interface, not the engine - DialOS is to send via
       IMAP/SMTP itself later. The signature only applies to mail going through

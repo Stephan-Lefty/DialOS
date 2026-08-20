@@ -37,6 +37,13 @@ import sys
 
 QUELLE = "/usr/local/share/dialos/fusszeile.txt"
 SIGNATUR_ORT = "/usr/local/share/dialos"
+
+# Der anklickbare Verweis in der Mail-Signatur. Nur in HTML - im reinen Text
+# waere eine ausgeschriebene Adresse eine zweite Fassung desselben Satzes.
+# Die kanonische Form ist ohne "www": www.dialos.org leitet mit 301 dorthin
+# um (geprueft 2026-08-20).
+NETZNAME = "DialOS.org"
+NETZADRESSE = "https://dialos.org"
 ERSATZ = "Dieses Dokument wurde per Spracheingabe powered by DialOS.org erstellt!"
 
 # Breite fuer den rechtsbuendigen Satz im reinen Text. 76 Zeichen passen in
@@ -125,6 +132,16 @@ def signatur(verzeichnis=SIGNATUR_ORT):
     # Die Auszeichnung bewusst sparsam: kleiner, grau, rechts. Keine Trennlinie
     # und kein Logo - Stephans Vorgabe war "ganz dezent".
     roh = (satz.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    # Der Name wird anklickbar - aber in der Farbe der Zeile und nur
+    # unterstrichen. Das uebliche Linkblau waere in einer Zeile, die "ganz
+    # dezent" sein soll, das Lauteste auf der Seite. Ohne Unterstreichung
+    # wiederum sieht niemand, dass es ein Verweis ist.
+    if NETZNAME in roh:
+        roh = roh.replace(
+            NETZNAME,
+            f'<a href="{NETZADRESSE}" '
+            f'style="color:inherit; text-decoration:underline;">'
+            f'{NETZNAME}</a>', 1)
     html = ('<div style="text-align:right; font-size:85%; color:#777777;">'
             f'{roh}</div>\n')
     geschrieben = []
