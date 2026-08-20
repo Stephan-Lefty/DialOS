@@ -114,6 +114,41 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Anna ist die neue Stimme von DialOS (2026-08-20).** Stephans Entscheidung:
+  eine freundliche Damenstimme. Aus dem Hörvergleich dreier Piper-Stimmen wurde
+  **`de_DE-kerstin-low`** mit Tempo **1,00**, Name **Anna** - und seit dieser
+  Änderung auch die **Auslieferungsstimme** in der Vorlage, nicht nur auf dem
+  Testgerät.
+    - **Drei Dinge schalten zusammen um** (`dialos-stimme.py setzen kerstin`):
+      Stimme, Name und Tempo. Einzeln wäre jedes falsch - eine Frauenstimme, die
+      sich als Michael vorstellt, ebenso wie ein Tempo, das zur vorigen Stimme
+      gehört.
+    - **Das Tempo ist pro Stimme verschieden, und zwar messbar:** derselbe Satz
+      braucht bei Thorsten 7,75 s mit Tempo 0,88, bei Kerstin **8,99 s** mit
+      demselben Wert. Erst 1,00 bringt sie auf 7,91 s. Damit ist der zweite der
+      drei Punkte vor der zweiten Stimme beantwortet - mit ja.
+    - **Der Name stand längst fest** und wurde nicht neu erfunden:
+      `docs/ersteinrichtung.md` nennt seit Langem männlich Michael und Daniel,
+      weiblich Anna und Julia. Stephan hat mich darauf hingewiesen, bevor ich
+      danach gefragt hatte.
+    - **Und Anna kennt den Namen des Nutzers.** Auf Stephans Frage hin
+      („können wir auch den Benutzernamen einbauen … eher da wo es Sinn macht
+      als Ersatz zu Du/Dir") spricht DialOS ihn jetzt an - bei der Begrüßung,
+      bei Entscheidungen und bei Fehlern, **nicht** bei Bestätigungen und nicht
+      bei der Zeitgrenze. Der Grund wiegt hier schwerer als Höflichkeit: Der
+      Name am Satzanfang ist ein **Signal** - läuft das Radio oder ist Besuch im
+      Raum, sagt „Stephan, …" unmissverständlich, dass es ihn betrifft. Wer ihn
+      dauernd hört, überhört ihn.
+    - **Ohne Namensdatei bleibt es beim schlichten „Du",** und jede Ansage stimmt
+      trotzdem. Keine hängt davon ab, dass ein Name eingetragen ist.
+    - **Vier eigene Fehler dabei:** „Stephan, **I**ch finde kein Mikrofon" (nach
+      dem Komma gehört es klein); „Stephan, hallo, ich bin Anna" (die Begrüßung
+      baut den Namen selbst ein); der Begrüßungssatz steht an **zwei** Stellen
+      und ich änderte nur eine; und ich legte eine Beispieldatei nach
+      `includes.chroot` - genau das, was ich eine Stunde vorher beim
+      `gdm3/custom.conf` als falsch erkannt hatte. Beide letzten fand das
+      Prüfskript, nicht ich.
+
 - **Sicherheitsupdates laufen jetzt unbeaufsichtigt (2026-08-20).**
   `unattended-upgrades` 2.12 installiert und eingerichtet - in
   `docs/anwendungen.md` war es seit dem 2026-08-18 entschieden und stand als
