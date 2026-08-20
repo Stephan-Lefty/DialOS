@@ -114,6 +114,42 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Die Sprachsteuerung hat sich selbst eingeschaltet - und dabei fast die
+  Fernwartung angefordert (2026-08-20).** Stephan ließ DialOS über Nacht laufen:
+  „immer mal wieder meldete sich Michael. Und eben beim dialosadmin fragte er
+  mich, ob er die Fernwartung einschalten soll."
+    - **Das Protokoll erklärt beides auf einmal:** `14:04:07 erkannt: 'starten'`
+      schaltet die Sprachsteuerung ein, `14:04:43 erkannt: 'hilfe rufen'` fordert
+      die Fernwartung an - **niemand hat gesprochen.** Nur die Ja/Nein-Rückfrage
+      hat es verhindert.
+    - **Gemessen über 157 aufgezeichnete Äußerungen:** `'starten'` allein **18×**
+      gegen den vollen Satz 4×. Die Sprachsteuerung hat sich also 18-mal
+      unaufgefordert eingeschaltet, jedes Mal für zwei Minuten offenes Mikrofon -
+      rund 26 Minuten, die niemand wollte.
+    - **Kernwort ist jetzt „sprachsteuerung"** statt „starten": lang, markant, in
+      nur 16 von 157 Äußerungen vorgekommen. Gegen dieselben Daten geprüft: aus
+      22 Einschaltungen werden 9. Der Preis ist, dass ein verschlucktes
+      „sprachsteuerung" den Satz wiederholen lässt - eine Unbequemlichkeit, im
+      Gegensatz zu einem Mikrofon, das sich von selbst einschaltet.
+    - **Die Lockerung von gestern hat einen Fehler behoben und einen größeren
+      geschaffen.** Als Regel eingetragen: Ein Kernwort muss nicht nur eindeutig,
+      sondern auch **lang genug** sein.
+    - **Bestätigt hat sich dabei die Rückfrage.** Sie war die einzige Schicht,
+      die gehalten hat - genau dafür steht in `docs/sprachbefehle.md`, dass
+      sicherheitskritische Befehle eine Rückfrage bekommen, „unabhängig davon,
+      wie sicher die Erkennung war".
+
+- **Der Ansagen-Speicher nahm die falsche Stimme (2026-08-20).**
+  `speicher_fuellen()` in `dialos-say.py` griff die **erste** `.onnx`-Datei im
+  Ordner statt der eingestellten. Solange nur Thorsten installiert ist, fällt das
+  nicht auf; mit einer zweiten Stimme spräche der Speicher je nach Sortierung
+  eine andere als das System - und zwar unbemerkt, weil beide Wege für sich
+  richtig klingen. Gelesen wird jetzt `DefaultVoice` aus `piper-generic.conf`,
+  dieselbe Datei wie beim Tempo. Ist die eingestellte Stimme nicht installiert
+  und liegen mehrere im Ordner, wird **nicht geraten**, sondern nichts
+  gespeichert. Fünf Fälle gegengeprüft. (Die Code-Änderung ist versehentlich in
+  den Commit davor gerutscht - `git add -A` nimmt mit, was da ist.)
+
 - **„Hilfe rufen" - DialOS kann jetzt um Hilfe rufen (2026-08-19).** Bis dahin
   hatte ein Nutzer, bei dem etwas nicht funktioniert, **keinen Weg**, den Support
   zu erreichen; alles, was an Nachvollziehbarkeit gebaut wurde, setzte voraus,

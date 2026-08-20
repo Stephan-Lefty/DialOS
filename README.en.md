@@ -105,6 +105,41 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The voice control switched itself on - and nearly requested remote support
+  (2026-08-20).** Stephan left DialOS running overnight: "every now and then
+  Michael spoke up. And just now on dialosadmin he asked me whether he should
+  switch remote support on."
+    - **The log explains both at once:** `14:04:07 erkannt: 'starten'` switches
+      the voice control on, `14:04:43 erkannt: 'hilfe rufen'` requests remote
+      support - **nobody spoke.** Only the yes/no confirmation prevented it.
+    - **Measured over 157 recorded utterances:** `'starten'` alone **18×**
+      against the full sentence 4×. So the voice control switched itself on 18
+      times, each time two minutes of open microphone - about 26 minutes nobody
+      wanted.
+    - **The core word is now "sprachsteuerung"** instead of "starten": long,
+      distinctive, present in only 16 of 157 utterances. Checked against the same
+      data: 22 activations become 9. The price is that a swallowed
+      "sprachsteuerung" makes the user repeat the sentence - an inconvenience,
+      unlike a microphone that switches itself on.
+    - **Yesterday's relaxation fixed one fault and created a bigger one.**
+      Recorded as a rule: a core word must be not only unambiguous but also
+      **long enough**.
+    - **What this confirmed is the confirmation prompt.** It was the only layer
+      that held - which is exactly why `docs/sprachbefehle.en.md` says
+      safety-critical commands get one "regardless of how confident the
+      recognition was".
+
+- **The announcement cache used the wrong voice (2026-08-20).**
+  `speicher_fuellen()` in `dialos-say.py` took the **first** `.onnx` file in the
+  directory instead of the configured one. While only Thorsten is installed that
+  goes unnoticed; with a second voice the cache would speak a different one than
+  the system, depending on sort order - and unnoticed, because both paths sound
+  right on their own. It now reads `DefaultVoice` from `piper-generic.conf`, the
+  same file as the tempo. If the configured voice is not installed and several
+  are present, it does **not** guess but stores nothing. Five cases verified.
+  (The code change slipped into the previous commit - `git add -A` takes what is
+  there.)
+
 - **"Hilfe rufen" - DialOS can now call for help (2026-08-19).** Until then a
   user for whom something did not work had **no way** to reach support;
   everything built for traceability presupposed that somebody gets to the device
