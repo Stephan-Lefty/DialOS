@@ -282,7 +282,23 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
     - [ ] **Briefe:** 98,1 % Schreibung reichen für Notizen und Mail. Für
       einen Brief an die Krankenkasse ist zu entscheiden, ob das genügt
       oder ob er vor dem Absenden geprüft werden muss.
+    - [ ] **Fußzeile in den Brief mitnehmen.** Die Herkunftszeile
+      erreicht seit 2026-08-20 nur Mails (Thunderbird-Signatur). „Jedes
+      Dokument" und „jeder Ausdruck" aus Stephans Vorgabe haben noch
+      keinen Erzeuger: `~/Dokumente` ist leer, alles Gesprochene landet
+      als Notiz in `~/Notizen`, und Notizen bekommen bewusst keine
+      Fußzeile. Wer den Brief-Weg baut, hängt sie mit
+      `dialos-fusszeile.py anhaengen DATEI` an oder legt eine
+      Writer-Vorlage in `~/Vorlagen` mit der Zeile in der Seitenfußzeile.
+      **Vorher gebaut wäre die Vorlage wieder ein Werkzeug ohne
+      Benutzer** - genau der Fehler, der die Zeile aus der Mail vom
+      2026-08-19 hat verschwinden lassen.
   - [ ] **Vorlesen** von Mails, Dokumenten und Webseiten.
+  - [ ] **Drucken per Sprache.** Die Grammatik kennt keinen
+    Druckbefehl. `dialos-fusszeile.py drucken DATEI` liegt bereit und
+    hängt die Herkunftszeile beim Drucken an - auch an Notizen, die im
+    Bildschirm bewusst keine bekommen (Stephans Entscheidung vom
+    2026-08-19).
   - [ ] **Radio und Musik per Sprache** - Shortwave nach Stationsname,
     Rhythmbox über `rhythmbox-client`. Dabei die Ein-Player-Regel
     umsetzen: das eine beenden, bevor das andere startet.
