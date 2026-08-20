@@ -82,11 +82,20 @@ occurred:
   suffices, provided nothing but words of the phrase appears and no `[unk]`
   is present - the same as a day earlier for the dictation's stop phrase.
   - **The core word must be unambiguous.** "stoppen" appears in exactly one
-    sentence of the grammar, so it always suffices. "starten" appears in two
-    ("Sprachsteuerung starten" and "Diktat starten") - on its own it
-    therefore suffices only in the **off** state, where the grammar knows
-    just one sentence. Anyone adding a new command with an already-used verb
-    must check this.
+    sentence of the grammar, so it always suffices.
+  - **And it must be LONG enough - the more expensive lesson** (2026-08-20).
+    Until then "starten" was the core word for switching on. Measured over 157
+    recorded utterances: **18 times `'starten'` alone against 4 times the full
+    sentence.** Short, common words arise from ambient noise, and the voice
+    control switched itself on 18 times because of it - each time two minutes
+    of open microphone. On 2026-08-20 at 14:04, during one of those phases,
+    pure noise produced `'hilfe rufen'` and remote support was requested
+    without anyone having said a thing. Only the yes/no confirmation prevented
+    it. Since then the core word is **"sprachsteuerung"**: long, distinctive,
+    present in only 16 of 157 utterances. That turns 22 activations into 9. The
+    price: if the recognizer swallows exactly that word, the user has to repeat
+    the sentence. An inconvenience - a microphone that switches itself on is
+    not.
 - **An operating rule the user cannot see has to be spoken.** A shopping list
   only becomes a list if there is a small pause between items - that was how it
   was built from the start, but it was never announced. On 2026-08-19 Stephan

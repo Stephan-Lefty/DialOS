@@ -978,7 +978,33 @@ def main():
             # "diktat starten" - ein blosses 'starten' waere dann
             # zweideutig, und ein falsch geratenes Diktat waere schlimmer als
             # ein nicht erkannter Satz.
-            if (ist_phrase(satz, STARTSATZ, "starten") if not hoert_zu
+            # KERNWORT IST "sprachsteuerung", NICHT "starten" (2026-08-20).
+            #
+            # Gestern galt "starten" als Kernwort, weil der Erkenner am
+            # 2026-08-19 einmal nur dieses Wort geliefert hatte und die
+            # Sprachsteuerung sich dadurch nicht einschalten liess. Die
+            # Lockerung hat den Fehler behoben und einen groesseren geschaffen.
+            #
+            # GEMESSEN am 2026-08-20 ueber 157 aufgezeichnete Aeusserungen:
+            #
+            #     'starten' allein            18x   <- fast alles Geraeusch
+            #     'sprachsteuerung starten'    4x   <- die echten Male
+            #     'sprachsteuerung' allein     5x
+            #
+            # Die Sprachsteuerung hat sich also 18-mal von selbst eingeschaltet,
+            # weil "starten" kurz ist und aus Umgebungsgeraeusch entsteht. Und
+            # weil danach die volle Grammatik gilt, kam am 2026-08-20 um
+            # 14:04:43 aus reinem Geraeusch der vollstaendige Satz
+            # 'hilfe rufen' - die Fernwartung wurde angefordert, ohne dass
+            # jemand etwas gesagt hatte. Nur die Ja/Nein-Rueckfrage hat es
+            # verhindert.
+            #
+            # "sprachsteuerung" ist lang und markant und kam in nur 16 von 157
+            # Aeusserungen ueberhaupt vor. Es zu verlangen kostet den Fall, dass
+            # der Erkenner GENAU dieses Wort verschluckt - dann muss der Nutzer
+            # den Satz wiederholen. Das ist eine Unbequemlichkeit; ein
+            # Mikrofon, das sich unaufgefordert einschaltet, ist es nicht.
+            if (ist_phrase(satz, STARTSATZ, "sprachsteuerung") if not hoert_zu
                     else STARTSATZ in satz):
                 # In BEIDEN Faellen, und VOR der Ansage. Vor der Ansage, weil
                 # das Fenster einen Moment braucht und die Ansage ohnehin gut

@@ -82,11 +82,21 @@ einmal aufgetreten ist:
   kein `[unk]` dabei ist - dasselbe schon einen Tag vorher beim Schlusssatz
   des Diktats.
   - **Das Kernwort muss eindeutig sein.** „stoppen" kommt in genau einem
-    Satz der Grammatik vor, genügt also immer. „starten" kommt in zwei vor
-    („Sprachsteuerung starten" und „Diktat starten") - allein genügt es
-    deshalb nur im **ausgeschalteten** Zustand, wo die Grammatik nur einen
-    Satz kennt. Wer einen neuen Befehl mit einem schon benutzten Verb
-    anlegt, muss das prüfen.
+    Satz der Grammatik vor, genügt also immer.
+  - **Und es muss LANG genug sein - das ist die teurere Lehre**
+    (2026-08-20). Bis dahin galt beim Einschalten „starten" als Kernwort. Über
+    157 aufgezeichnete Äußerungen gemessen: **18-mal `'starten'` allein gegen
+    4-mal den vollen Satz.** Kurze, häufige Wörter entstehen aus
+    Umgebungsgeräusch, und die Sprachsteuerung hat sich dadurch 18-mal von
+    selbst eingeschaltet - jedes Mal für zwei Minuten offenes Mikrofon.
+    Am 2026-08-20 um 14:04 kam in einer dieser Phasen aus reinem Geräusch
+    `'hilfe rufen'`, und die Fernwartung wurde angefordert, ohne dass jemand
+    etwas gesagt hatte. Nur die Ja/Nein-Rückfrage hat es verhindert.
+    Seitdem ist das Kernwort **„sprachsteuerung"**: lang, markant, in nur 16
+    von 157 Äußerungen überhaupt vorgekommen. Damit werden aus 22
+    Einschaltungen 9. Der Preis: Verschluckt der Erkenner genau dieses Wort,
+    muss der Nutzer den Satz wiederholen. Eine Unbequemlichkeit - ein Mikrofon,
+    das sich unaufgefordert einschaltet, ist keine.
 - **Eine Bedienregel, die der Nutzer nicht sehen kann, muss gesagt werden.**
   Ein Einkaufszettel entsteht nur dann als Liste, wenn zwischen den Waren eine
   kleine Pause liegt - das war von Anfang an so gebaut, aber nie angesagt. Am

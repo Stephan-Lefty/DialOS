@@ -115,6 +115,54 @@ PIPER_CONF = "/etc/speech-dispatcher/modules/piper-generic.conf"
 PIPER_STIMMEN = "/usr/local/share/dialos-piper/voices"
 
 
+def eingestellte_stimme():
+    """Pfad der Stimme, die speech-dispatcher wirklich benutzt - oder None.
+
+    GELESEN, NICHT GERATEN (Fehler behoben am 2026-08-20). Vorher nahm
+    speicher_fuellen() die ERSTE .onnx-Datei im Ordner. Solange nur eine
+    installiert ist, faellt das nicht auf; sobald eine zweite dazukommt, spraeche
+    der Ansagen-Speicher je nach Sortierung mit einer anderen Stimme als das
+    System - und zwar unbemerkt, weil beide Wege fuer sich richtig klingen. Der
+    Nutzer haette dieselbe Ansage mal mit der einen, mal mit der anderen Stimme
+    gehoert, je nachdem ob sie schon im Speicher lag.
+
+    Die Quelle ist "DefaultVoice" in piper-generic.conf - dieselbe Datei, aus
+    der auch das Tempo gelesen wird, und damit dieselbe Regel: eine Einstellung,
+    eine Quelle.
+
+    Gibt None zurueck, wenn die eingestellte Stimme nicht installiert ist und
+    auch nicht eindeutig zu erraten waere. Dann wird NICHT gespeichert - eine
+    Ansage mit der falschen Stimme im Speicher waere schlimmer als gar keine.
+    """
+    name = None
+    try:
+        with open(PIPER_CONF) as f:
+            for zeile in f:
+                if zeile.startswith("DefaultVoice"):
+                    teile = shlex.split(zeile)
+                    if len(teile) > 1:
+                        name = teile[1]
+                    break
+    except OSError:
+        pass
+
+    if name:
+        pfad = os.path.join(PIPER_STIMMEN, name + ".onnx")
+        if os.path.exists(pfad):
+            return pfad
+
+    # Rueckfall nur, wenn es genau eine Stimme gibt - dann ist sie es
+    # zwangslaeufig. Bei mehreren waere jede Wahl geraten.
+    try:
+        stimmen = sorted(d for d in os.listdir(PIPER_STIMMEN)
+                         if d.endswith(".onnx"))
+    except OSError:
+        return None
+    if len(stimmen) == 1:
+        return os.path.join(PIPER_STIMMEN, stimmen[0])
+    return None
+
+
 def speicher_schluessel(text):
     """Eindeutiger Name fuer eine Ansage, inkl. Stimme und Tempo."""
     teile = [text]
@@ -141,10 +189,9 @@ def speicher_fuellen(text):
     """
     try:
         os.makedirs(SPEICHER, exist_ok=True)
-        stimmen = [d for d in os.listdir(PIPER_STIMMEN) if d.endswith(".onnx")]
-        if not stimmen:
+        stimme = eingestellte_stimme()
+        if not stimme:
             return
-        stimme = os.path.join(PIPER_STIMMEN, stimmen[0])
         tempo = "1.0"
         try:
             with open(PIPER_CONF) as f:
