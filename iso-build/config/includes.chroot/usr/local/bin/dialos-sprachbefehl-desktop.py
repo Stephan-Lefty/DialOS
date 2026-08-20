@@ -164,8 +164,25 @@ GRAMMATIK_AN = json.dumps([
     "wie ist die uhrzeit",
     "welchen tag haben wir",
     "welches datum haben wir",
-    "hilfe rufen",
-    "fernwartung beenden",
+    # "hilfe rufen" und "fernwartung beenden" sind ZURUECKGESTELLT
+    # (Stephan, 2026-08-20: "können den Rustdesk ganz nach hinten schieben,
+    # wenn alles andere läuft"). Sie stehen bewusst NICHT in der Grammatik,
+    # solange der Umbau auf den systemd-Dienst offen ist - der Befehl wuerde
+    # heute die RustDesk-ANWENDUNG starten, und die stuerzt ohne ipc_service
+    # nach rund 40 Sekunden ab ("Got signal 11 and exit", am 2026-08-19 im
+    # Protokoll belegt). Der Nutzer bekaeme die ID vorgelesen, sein Betreuer
+    # koennte sich nicht verbinden, und beim naechsten Mal glaubt er dem
+    # Geraet nicht mehr.
+    #
+    # Ein Sprachbefehl, der halb funktioniert, ist schlimmer als einer, der
+    # nicht existiert - und ausgerechnet bei dem, mit dem Hilfe geholt wird,
+    # wenn nichts mehr geht.
+    #
+    # Der Code bleibt vollstaendig liegen: dialos-hilfe.py, die Wache, die
+    # Zeitgrenze, die Nachfragen. Wieder freigeben heisst, diese zwei Zeilen
+    # wieder einzukommentieren - siehe TODO.md, erster Punkt.
+    #   "hilfe rufen",
+    #   "fernwartung beenden",
     "[unk]",
 ])
 
@@ -233,9 +250,13 @@ NOTIZ_SAETZE = {
 # "beenden" steht zwar in dieser Grammatik in keinem zweiten Satz, aber der
 # Nutzer kennt es als Schlusswort des Diktats. Ein Wort, das in zwei Rollen
 # vorkommt, ist beim Sprechen zweideutig, auch wenn es die Grammatik nicht ist.
+# Leer, solange die Saetze nicht in der Grammatik stehen (siehe dort). Die
+# Zuordnung bleibt STEHEN und wird nicht geloescht: Sie ist der Ort, an dem der
+# Zusammenhang dokumentiert ist, und beim Wiederfreigeben soll niemand sie neu
+# erfinden muessen.
 HILFE_SAETZE = {
-    "hilfe rufen": "starten",
-    "fernwartung beenden": "beenden",
+    # "hilfe rufen": "starten",
+    # "fernwartung beenden": "beenden",
 }
 
 # Nach so langer Stille schaltet sich die Erkennung von selbst ab

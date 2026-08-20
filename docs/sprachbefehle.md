@@ -50,9 +50,27 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." Kommt keine verwertbare Antwort, fragt DialOS **ein zweites Mal** („Das habe ich nicht verstanden. Sage ja oder nein."); erst danach bleibt der Zettel stehen. Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
 | **„Einkaufszettel wegwerfen"** | Gleichbedeutend mit „Einkauf erledigt". Zwei Formulierungen für dasselbe, damit der Nutzer sich keine merken muss - wie bei „auf Linux" und „auf Gnome". |
 | **„ja" / „nein"** | Antwort auf eine Rückfrage - bisher nur vor dem Leeren einer Notiz. Gilt **nur während der Rückfrage**: dafür läuft ein eigener Erkenner mit einer Grammatik aus genau diesen zwei Wörtern, der Befehlsdienst hält sich heraus. Kommt nichts Verwertbares, wird einmal nachgefragt, danach bleibt der Zettel stehen. |
-| **„Hilfe rufen"** | Startet die Fernwartung - **mit Rückfrage**, die erklärt, was passiert: „Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." Danach wird die RustDesk-Nummer **ziffernweise und zweimal** vorgelesen. Während einer laufenden Sitzung **verlängert** derselbe Satz sie um eine Stunde. Danach fragt DialOS nach: „Hast Du das Deinem Betreuer weitergegeben?" - bei „nein" oder wenn nichts verstanden wurde: „Soll ich es wiederholen?" Höchstens zwei Wiederholungen, danach der Hinweis, dass „Hilfe rufen" die Zahlen jederzeit wiederholt. Der Nutzer sieht die Zahlen nicht und kann nichts mitschreiben; ein wartender Betreuer und ein Nutzer, der die Hälfte verloren hat, sind der wahrscheinlichste Fehlerfall dieses Befehls. |
-| **„Fernwartung beenden"** | Beendet sie. „Niemand kann mehr zusehen." Passiert auch von selbst nach einer Stunde, mit Vorwarnung drei Minuten vorher. Kernwort ist **„fernwartung"** und nicht „beenden": Letzteres kennt der Nutzer als Schlusswort des Diktats, und ein Wort in zwei Rollen ist beim Sprechen zweideutig, auch wenn die Grammatik es nicht ist. |
+| **„Hilfe rufen"** ⏸ **zurückgestellt** | *Nicht in der Grammatik, siehe unten.* Startet die Fernwartung - **mit Rückfrage**, die erklärt, was passiert: „Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." Danach wird die RustDesk-Nummer **ziffernweise und zweimal** vorgelesen. Während einer laufenden Sitzung **verlängert** derselbe Satz sie um eine Stunde. Danach fragt DialOS nach: „Hast Du das Deinem Betreuer weitergegeben?" - bei „nein" oder wenn nichts verstanden wurde: „Soll ich es wiederholen?" Höchstens zwei Wiederholungen, danach der Hinweis, dass „Hilfe rufen" die Zahlen jederzeit wiederholt. Der Nutzer sieht die Zahlen nicht und kann nichts mitschreiben; ein wartender Betreuer und ein Nutzer, der die Hälfte verloren hat, sind der wahrscheinlichste Fehlerfall dieses Befehls. |
+| **„Fernwartung beenden"** ⏸ **zurückgestellt** | Beendet sie. „Niemand kann mehr zusehen." Passiert auch von selbst nach einer Stunde, mit Vorwarnung drei Minuten vorher. Kernwort ist **„fernwartung"** und nicht „beenden": Letzteres kennt der Nutzer als Schlusswort des Diktats, und ein Wort in zwei Rollen ist beim Sprechen zweideutig, auch wenn die Grammatik es nicht ist. |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |
+
+> **⏸ Zurückgestellt am 2026-08-20** (Stephan: „können den Rustdesk ganz nach
+> hinten schieben, wenn alles andere läuft"). „Hilfe rufen" und „Fernwartung
+> beenden" stehen **nicht** in der Grammatik und sind damit nicht auslösbar.
+>
+> **Nicht nur verschoben, sondern abgeschaltet - und das ist der Punkt:** Der
+> Befehl war halb gebaut und installiert. Er startet die RustDesk-**Anwendung**,
+> und die stürzt ohne den systemd-Dienst nach rund 40 Sekunden ab („Got signal 11
+> and exit", am 2026-08-19 im Protokoll belegt). Der Nutzer bekäme die ID
+> vorgelesen, sein Betreuer könnte sich nicht verbinden - und beim nächsten Mal
+> glaubt er dem Gerät nicht mehr. **Ein Sprachbefehl, der halb funktioniert, ist
+> schlimmer als einer, der nicht existiert**, und ausgerechnet bei dem, mit dem
+> Hilfe geholt wird, wenn nichts mehr geht.
+>
+> Der Code bleibt vollständig liegen - `dialos-hilfe.py` mit Rückfrage, Wache,
+> Zeitgrenze und Nachfragen. Wieder freigeben heißt: zwei Zeilen in
+> `GRAMMATIK_AN` und zwei in `HILFE_SAETZE` einkommentieren. Was vorher fehlt,
+> steht als erster Punkt in `TODO.md`.
 
 ## Vorgesehen, noch nicht gebaut
 

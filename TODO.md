@@ -52,7 +52,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
 
-- [ ] **ZUERST MORGEN: dialos-hilfe.py auf den Dienst umbauen** (2026-08-19
+- [ ] **ZURUECKGESTELLT: dialos-hilfe.py auf den Dienst umbauen** (Stephan,
+  2026-08-20: "können den Rustdesk ganz nach hinten schieben, wenn alles
+  andere läuft"). Die zwei Sprachbefehle sind deshalb aus der Grammatik
+  GENOMMEN und nicht nur unfertig gelassen: Der Befehl startete die
+  RustDesk-Anwendung, die ohne den Dienst nach 40 s abstuerzt - ein
+  Sprachbefehl, der halb funktioniert, ist schlimmer als einer, der nicht
+  existiert. Wieder freigeben: zwei Zeilen in GRAMMATIK_AN und zwei in
+  HILFE_SAETZE einkommentieren.
+  (2026-08-19 fertig vorbereitet, nicht mehr eingebaut.)
   fertig vorbereitet, nicht mehr eingebaut). Der Weg ist belegt und die
   privilegierte Seite ist geschrieben und geprueft, es fehlt die Nutzerseite.
 
