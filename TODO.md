@@ -185,6 +185,20 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   wäre die Ansage veraltet, aber **hörbar** veraltet, weil sie die Stadt
   nennt.
 
+- [ ] **Anna im Alltag beurteilen** (offen seit 2026-08-20, Stephan: "das werde
+  ich aber erst mit der Zeit mitbekommen"). Zwei Dinge sind gemessen, aber nicht
+  im Alltag erprobt:
+  - **Tempo 1.00.** Gewaehlt an EINEM Satz. Thorstens 0,88 hat Stephan seinerzeit
+    nach Gehoer gewaehlt, nicht gerechnet - dieselbe Pruefung fehlt fuer Anna
+    noch. Umstellen geht in einer Zeile: STIMMEN["kerstin"]["tempo"] in
+    dialos-stimme.py, danach `setzen kerstin` erneut.
+  - **Die drei Aussprache-Regeln** ("Tas tatur", "Ei Di", "Dial OS") sind auf
+    Thorsten abgestimmt und gelten derzeit fuer alle Stimmen. Vorgespielt wurde
+    jede mit und ohne; Stephans Urteil steht aus. Braucht Anna eine davon nicht,
+    klingt sie damit falsch getrennt - dann muessen die Regeln pro Stimme
+    gelten, und das aendert die Struktur der Tabelle in dialos-say.py. Die drei
+    Woerter kommen selten vor, deshalb ist Warten hier vertretbar.
+
 - [ ] **Zweite Stimme früh dazulegen, Auswahl erst zum Schluss**
   (Stephans Frage, 2026-08-18: „Wann wollen wir die anderen Stimmen z.B.
   einer Frau hinzunehmen?"). Aufgeteilt, weil beides verschiedene Dinge sind:
