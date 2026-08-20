@@ -193,9 +193,11 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
     (`de_DE-eva_k-x_low`, `kerstin-low` oder `ramona-low` - die
     Konfiguration kennt sie schon, installiert ist nur `thorsten-high`) und
     genau drei Dinge prüfen, die den Aufbau ändern könnten:
-    - **`stimmen[0]` in `dialos-say.py` Zeile 129 ist ein Fehler**, sobald es
-      zwei Stimmen gibt: Der Ansagen-Speicher nimmt die erste Datei im
-      Ordner, nicht die eingestellte Stimme. Muss die konfigurierte lesen.
+    - [x] **`stimmen[0]` in `dialos-say.py`** - erledigt 2026-08-20,
+      und zwar VOR der zweiten Stimme statt danach: Der Ansagen-Speicher nahm
+      die erste Datei im Ordner. Liest jetzt `DefaultVoice` aus
+      `piper-generic.conf` und speichert lieber gar nichts, als bei mehreren
+      Stimmen zu raten. Fünf Fälle gegengeprüft.
     - **Tempo pro Stimme?** 0,88 ist für Thorsten im Hörvergleich gewählt.
       Passt es für eine Frauenstimme nicht, muss das Tempo pro Stimme
       einstellbar werden - das ändert die Struktur von
