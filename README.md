@@ -114,6 +114,27 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Der Name des Nutzers klang falsch - und die Aussprache gehört in die
+  Namensdatei, nicht in die Regeltabelle (2026-08-20).** Stephans Beobachtung:
+  „Michael sagt Stefffan". Der Name wird bei **jeder** Begrüßung, jeder
+  Rückfrage und jedem Fehler gesagt - falsch ausgesprochen stört er mehr als
+  jedes andere Wort.
+    - **`nutzer-name.txt` hat jetzt zwei Felder:** `Stephan | Stefan`.
+      Geschrieben bleibt „Stephan" - für Briefe und Ausdrucke, wo „Stefan"
+      schlicht falsch wäre. Gesprochen wird das zweite Feld. Fehlt es, gilt das
+      erste für beides.
+    - **Warum nicht in die Aussprache-Tabelle** von `dialos-say.py`, wo
+      „Tastatur" und „ID" stehen: Dort gelten Regeln für **alle** Geräte. Ein
+      Kundenname gilt für **eines**. Eine Regel pro Kunde wäre in einem Jahr
+      eine Liste von Namen fremder Leute im Repo - und beim nächsten Kunden
+      wieder falsch. Die Aussprache gehört dorthin, wo der Name steht.
+    - **Das hätte ich allein nicht gefunden.** Ich hatte die Namensanrede an
+      drei Ansagen geprüft und für fertig erklärt; dass der Name selbst falsch
+      klingt, hört nur, wer ihn kennt.
+    - Randfälle gegengeprüft: Unsinn im zweiten Feld fällt auf den geschriebenen
+      Namen zurück, Kommentarzeilen in der Datei sind erlaubt, leere Datei
+      ergibt weiter das schlichte „Du".
+
 - **30 → 7 → 3: das Einschalten verlangt jetzt beide Wörter, und ohne Befehl
   ist nach 30 Sekunden Schluss (2026-08-20 abends).** Zwei kleine Änderungen
   anstelle des Aufweckworts - beide an denselben zwei Stunden Betriebsdaten

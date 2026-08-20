@@ -1,10 +1,30 @@
-# So heisst der Nutzer - eine Zeile, sonst nichts.
+# So heisst der Nutzer. Eine Zeile, zwei Felder, getrennt durch "|":
+#
+#     Geschrieben | Gesprochen
+#
+# Das zweite Feld ist optional. Fehlt es, gilt das erste fuer beides.
+#
+# WOFUER DAS ZWEITE FELD (Stephans Beobachtung vom 2026-08-20): Michael sprach
+# "Stephan" als "Stefffan" aus. Der Name des Nutzers wird bei JEDER
+# Begruessung, jeder Rueckfrage und jedem Fehler gesagt - falsch ausgesprochen
+# stoert er mehr als jedes andere Wort. Im zweiten Feld steht deshalb die
+# Schreibweise, die richtig KLINGT:
+#
+#     Stephan | Stefan
+#
+# Geschrieben bleibt "Stephan" - fuer Briefe und Ausdrucke, wo "Stefan" schlicht
+# falsch waere.
+#
+# WARUM NICHT IN DIE AUSSPRACHE-TABELLE von dialos-say.py: Dort stehen Regeln,
+# die fuer ALLE Geraete gelten ("Tastatur", "ID", "DialOS"). Ein Kundenname gilt
+# fuer EIN Geraet. Eine Regel pro Kunde in einer globalen Tabelle waere in einem
+# Jahr eine Liste von Namen fremder Leute im Repo - und beim naechsten Kunden
+# wieder falsch.
 #
 # DIESE DATEI IST NUR DAS BEISPIEL. Die echte heisst
 # /usr/local/share/dialos/nutzer-name.txt und wird beim Aufsetzen im Buero
-# angelegt, mit dem Namen des Kunden. Sie liegt bewusst NICHT im Repo: Ein
-# Kundenname gehoert nicht in die Versionsverwaltung, und ausgeliefert werden
-# soll das Geraet nicht mit einem fremden Vornamen.
+# angelegt. Sie liegt bewusst NICHT im Repo: Ein Kundenname gehoert nicht in die
+# Versionsverwaltung.
 #
 # Wofuer der Name benutzt wird - und wofuer nicht - steht in
 # /usr/local/bin/dialos-namen.py. Kurz: Begruessung, Entscheidungen und
@@ -13,7 +33,7 @@
 # Fehlt die Datei, bleibt es beim schlichten "Du". Alle Ansagen stimmen dann
 # trotzdem - keine haengt davon ab, dass ein Name da ist.
 #
-# Erlaubt sind Buchstaben, Bindestrich und Leerzeichen, hoechstens 31 Zeichen.
-# Alles andere wird verworfen, damit eine kaputte Datei keine Ansage
+# Erlaubt sind je Feld Buchstaben, Bindestrich und Leerzeichen, hoechstens 31
+# Zeichen. Alles andere wird verworfen, damit eine kaputte Datei keine Ansage
 # verunstaltet.
-Anna Beispiel
+Anna Beispiel | Anna Beischpiel

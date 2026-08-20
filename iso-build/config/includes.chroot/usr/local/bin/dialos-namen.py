@@ -51,22 +51,67 @@ ERLAUBT = re.compile(r"^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß \-]{0,30}$")
 
 
 def _lesen(pfad):
+    """Erste nicht-leere, nicht-kommentierte Zeile - geprueft.
+
+    Kommentarzeilen sind erlaubt, damit die Datei sich selbst erklaeren kann.
+    """
     try:
         with open(pfad, encoding="utf-8") as f:
-            wert = f.read().strip()
+            for zeile in f:
+                zeile = zeile.strip()
+                if zeile and not zeile.startswith("#"):
+                    return zeile
     except OSError:
-        return None
+        pass
+    return None
+
+
+def _geprueft(wert):
     return wert if wert and ERLAUBT.match(wert) else None
+
+
+def _nutzer_felder():
+    """(geschrieben, gesprochen) aus nutzer-name.txt.
+
+    ZWEI FELDER, getrennt durch "|" - und der Grund ist Stephans Beobachtung
+    vom 2026-08-20: Michael sprach "Stephan" als "Stefffan". Der Name des
+    Nutzers wird bei JEDER Begruessung, jeder Rueckfrage und jedem Fehler
+    gesagt; falsch ausgesprochen ist er stoerender als jedes andere Wort.
+
+    WARUM NICHT IN DIE AUSSPRACHE-TABELLE von dialos-say.py: Dort stehen
+    Regeln, die fuer alle Geraete gelten ("Tastatur", "ID", "DialOS"). Ein
+    Kundenname gilt fuer EIN Geraet. Eine Regel pro Kunde in einer globalen
+    Tabelle waere in einem Jahr eine Liste von Namen fremder Leute im Repo -
+    und sie wuerde beim naechsten Kunden wieder nicht passen. Die Aussprache
+    gehoert dorthin, wo der Name steht.
+
+    Beide Felder getrennt, weil sie verschiedene Zwecke haben: Gesprochen wird
+    das zweite, geschrieben das erste - fuer Briefe und Ausdrucke, wo "Stefan"
+    statt "Stephan" schlicht falsch waere. Fehlt das zweite, gilt das erste
+    fuer beides.
+    """
+    roh = _lesen(NUTZER_DATEI)
+    if not roh:
+        return None, None
+    teile = [t.strip() for t in roh.split("|", 1)]
+    geschrieben = _geprueft(teile[0])
+    gesprochen = _geprueft(teile[1]) if len(teile) > 1 else None
+    return geschrieben, (gesprochen or geschrieben)
 
 
 def assistent_name():
     """Wie der Assistent heisst. Ohne Datei: "Michael"."""
-    return _lesen(ASSISTENT_DATEI) or "Michael"
+    return _geprueft(_lesen(ASSISTENT_DATEI)) or "Michael"
 
 
 def nutzer_name():
-    """Wie der Nutzer heisst - oder None, wenn niemand ihn eingetragen hat."""
-    return _lesen(NUTZER_DATEI)
+    """Wie der Nutzer heisst - zum SPRECHEN. Oder None."""
+    return _nutzer_felder()[1]
+
+
+def nutzer_name_geschrieben():
+    """Wie der Nutzer heisst - zum SCHREIBEN (Briefe, Ausdrucke). Oder None."""
+    return _nutzer_felder()[0]
 
 
 def anrede(satz):
@@ -100,8 +145,9 @@ def anrede(satz):
 
 
 if __name__ == "__main__":
-    print(f"Assistent: {assistent_name()}")
-    print(f"Nutzer:    {nutzer_name() or '(keiner eingetragen)'}")
+    print(f"Assistent:  {assistent_name()}")
+    print(f"Nutzer, geschrieben: {nutzer_name_geschrieben() or '(keiner eingetragen)'}")
+    print(f"Nutzer, gesprochen:  {nutzer_name() or '(keiner eingetragen)'}")
     print()
     for probe in ("Soll ich ihn löschen? Sage ja oder nein.",
                   "Ich finde kein Mikrofon.",
