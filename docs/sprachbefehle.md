@@ -33,7 +33,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | Sprachbefehl | Aktion |
 |---|---|
 | **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre Dir zu." Läuft sie schon: „Ich höre Dir schon zu." Öffnet zugleich das [Mitschrift-Fenster](Debian-zu-DialOS.md) für sehende Zuschauer - einmal, nicht bei jedem Befehl. |
-| **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre Dir nicht mehr zu." Nach zwei Minuten ohne Befehl geschieht das von selbst, mit Ansage. Das Mitschrift-Fenster geht in beiden Fällen mit zu. |
+| **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre Dir nicht mehr zu." Von selbst geschieht das nach **30 Sekunden**, wenn überhaupt kein Befehl kam, und nach **zwei Minuten** im laufenden Gespräch - mit unterschiedlicher Ansage: die lange Begründung nur dann, wenn wirklich ein Gespräch lief. Das Mitschrift-Fenster geht in beiden Fällen mit zu. |
 | „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Der Schreibtisch steht schon auf Windows Desktop." |
 | „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Der Schreibtisch steht schon auf Linux Desktop." |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
@@ -110,11 +110,33 @@ einmal aufgetreten ist:
     Am 2026-08-20 um 14:04 kam in einer dieser Phasen aus reinem Geräusch
     `'hilfe rufen'`, und die Fernwartung wurde angefordert, ohne dass jemand
     etwas gesagt hatte. Nur die Ja/Nein-Rückfrage hat es verhindert.
-    Seitdem ist das Kernwort **„sprachsteuerung"**: lang, markant, in nur 16
-    von 157 Äußerungen überhaupt vorgekommen. Damit werden aus 22
-    Einschaltungen 9. Der Preis: Verschluckt der Erkenner genau dieses Wort,
-    muss der Nutzer den Satz wiederholen. Eine Unbequemlichkeit - ein Mikrofon,
-    das sich unaufgefordert einschaltet, ist keine.
+    Zuerst wurde das Kernwort auf **„sprachsteuerung"** umgestellt: lang,
+    markant, in nur 16 von 157 Äußerungen vorgekommen.
+  - **Und am selben Abend weiter auf BEIDE Wörter**, weil auch das noch nicht
+    reichte. Zwei Stunden Betrieb, dieselben Daten durch alle drei Regeln
+    gerechnet:
+
+    | verlangt | Einschaltungen in 2 Std. |
+    |---|---|
+    | Kernwort „starten" | **30** |
+    | Kernwort „sprachsteuerung" | 7 |
+    | **beide Wörter** | **3** |
+
+    Die 27 Fehlstarts der ersten Regel kamen aus `'starten'` allein, vier der
+    sieben aus `'sprachsteuerung'` allein - und auf **keine** der sieben folgte
+    ein Befehl. Zwei bestimmte Wörter hintereinander fallen im Gespräch
+    praktisch nicht; eines schon.
+
+    Der Preis ist bewusst in Kauf genommen: Verschluckt der Erkenner eines der
+    beiden, muss der Nutzer den Satz wiederholen. Genau dieser Fehler hatte am
+    2026-08-19 zur Lockerung geführt - nur liegt die Gegenrechnung inzwischen
+    gemessen vor. Wiederholen ist eine Unbequemlichkeit; ein Mikrofon, das sich
+    von selbst scharf schaltet, ist es nicht.
+  - **Vertauschte oder doppelte Wörter zählen weiter.** Geprüft wird als
+    **Menge**, nicht als Zeichenkette - der Erkenner liefert Wörter auch
+    doppelt oder in anderer Reihenfolge („sprachsteuerung sprachsteuerung
+    stoppen" kam vor). Nur `[unk]` schließt aus: dann war noch etwas anderes
+    dabei.
 - **Eine Bedienregel, die der Nutzer nicht sehen kann, muss gesagt werden.**
   Ein Einkaufszettel entsteht nur dann als Liste, wenn zwischen den Waren eine
   kleine Pause liegt - das war von Anfang an so gebaut, aber nie angesagt. Am

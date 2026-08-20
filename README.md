@@ -114,6 +114,32 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **30 → 7 → 3: das Einschalten verlangt jetzt beide Wörter, und ohne Befehl
+  ist nach 30 Sekunden Schluss (2026-08-20 abends).** Zwei kleine Änderungen
+  anstelle des Aufweckworts - beide an denselben zwei Stunden Betriebsdaten
+  gerechnet.
+    - **„Sprachsteuerung starten" braucht beide Wörter.** `'starten'` allein
+      hatte 27-mal ausgelöst, `'sprachsteuerung'` allein viermal - und auf
+      **keine** der sieben Einschaltungen folgte ein Befehl. Aus 30 möglichen
+      Fehlstarts werden **3**, und die drei sind genau die echten Versuche. Zwei
+      bestimmte Wörter hintereinander fallen im Gespräch praktisch nicht.
+    - **Zwei Fristen statt einer:** 30 Sekunden, solange **kein** Befehl kam,
+      danach die vollen zwei Minuten. Heute liefen alle 7 Einschaltungen in die
+      120 s - zusammen 14 Minuten scharfe Befehlsgrammatik, die niemand wollte;
+      mit der kurzen Frist wären es 3,5 gewesen.
+    - **Und zwei verschiedene Ansagen dazu.** Nach einem Gespräch die
+      Begründung („Du hast mir eine Weile nichts gesagt"), sonst nur das kurze
+      „Ich höre Dir nicht mehr zu." Eine lange Erklärung für etwas, das der
+      Nutzer nie ausgelöst hat, ist selbst nur Lärm.
+    - **Warum das statt des Aufweckworts:** openWakeWords fertige Modelle sind
+      **CC BY-NC-SA** - nicht kommerziell, und DialOS wird verkauft. Ein eigenes
+      Modell ist möglich (Code und Googles Einbettung sind Apache 2.0), aber die
+      Trainingsdaten entscheiden über die Verkäuflichkeit: Genau daran sind die
+      mitgelieferten Modelle gescheitert. Das ist ein Projekt von Tagen, nicht
+      von Stunden - und **ein Aufweckwort schließt das Mikrofon ohnehin nicht**,
+      es muss zuhören, um das Weckwort zu hören. Diese zwei Änderungen bringen
+      heute mehr und machen die Messung für später besser.
+
 - **Die Kernwort-Umstellung ist im Betrieb gemessen - 30 gegen 7 (2026-08-20).**
   Zwei Stunden Protokoll aus dem laufenden Gerät, **dieselben Daten durch beide
   Regeln** gerechnet:

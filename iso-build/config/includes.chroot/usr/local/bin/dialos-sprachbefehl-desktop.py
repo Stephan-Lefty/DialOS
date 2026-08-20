@@ -265,6 +265,22 @@ HILFE_SAETZE = {
 # sonst dauerhaft ein offenes Mikrofon.
 ZEITGRENZE_S = 120.0
 
+# KURZE FRIST, SOLANGE KEIN BEFEHL KAM (neu 2026-08-20). Wer wirklich
+# "Sprachsteuerung starten" sagt, sagt binnen Sekunden auch den Befehl - dafuer
+# hat er ja eingeschaltet. Eine Einschaltung, auf die nichts folgt, war mit
+# hoher Wahrscheinlichkeit keine.
+#
+# Gemessen an zwei Stunden vom 2026-08-20: Alle 7 Einschaltungen liefen in die
+# Zwei-Minuten-Grenze, auf KEINE folgte ein Befehl - zusammen 14 Minuten scharfe
+# Befehlsgrammatik, die niemand wollte. Mit 30 Sekunden waeren daraus 3,5
+# Minuten geworden.
+#
+# 30 und nicht 20: Wer den Bildschirm nicht sieht, formuliert manchmal
+# langsamer, und ihn mitten im Nachdenken abzuschalten waere aergerlich fuer
+# nichts. Sobald EIN Befehl gekommen ist, gilt wieder die volle
+# Zwei-Minuten-Grenze - dann ist ein Gespraech im Gange.
+ERSTE_BEFEHL_FRIST_S = 30.0
+
 # Erkannt wird nur, was BEIDES enthaelt: ein Ziel und das Wort
 # "umschalten". Siehe Kopf der Datei - ohne die zweite Bedingung reicht
 # ein beilaeufiges "windows" im Gespraech.
@@ -419,8 +435,15 @@ def ist_phrase(gehoert, phrase, kernwort):
     worte = gehoert.split()
     if not worte or "[unk]" in worte:
         return False
-    if kernwort not in worte:
+    # Ein Wort oder mehrere. Beim Einschalten sind es seit dem 2026-08-20 BEIDE
+    # ("sprachsteuerung" UND "starten"), siehe die Begruendung dort.
+    pflicht = (kernwort,) if isinstance(kernwort, str) else tuple(kernwort)
+    if any(w not in worte for w in pflicht):
         return False
+    # Bewusst als MENGE geprueft und nicht als Zeichenkette: Der Erkenner
+    # liefert Woerter auch doppelt oder vertauscht ("sprachsteuerung
+    # sprachsteuerung stoppen" kam am 2026-08-19 vor). Solange nichts
+    # Fremdes dabei ist, zaehlt es.
     return set(worte) <= set(phrase.split())
 
 
@@ -854,6 +877,10 @@ def main():
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
     prozess = aufnahme_starten(quelle)
     letzte_aktivitaet = time.time()
+    # Gleich gesetzt: Es kam noch kein Befehl. Bewegt sich
+    # letzte_aktivitaet spaeter darueber hinaus, war einer dabei - daran
+    # haengt, welche der beiden Fristen gilt.
+    an_seit = letzte_aktivitaet
     aufnahme_verwerfen = False
     saettigungen = 0
     letzte_pegelkorrektur = 0.0
@@ -871,7 +898,13 @@ def main():
             if diktat_laeuft():
                 letzte_aktivitaet = time.time()
 
-            if hoert_zu and time.time() - letzte_aktivitaet > ZEITGRENZE_S:
+            # Welche Frist gilt: die kurze, solange seit dem Einschalten kein
+            # Befehl kam, sonst die lange. Erkennbar daran, ob letzte_aktivitaet
+            # sich seit dem Einschalten bewegt hat - jeder ausgefuehrte Befehl
+            # setzt sie neu.
+            frist = (ZEITGRENZE_S if letzte_aktivitaet > an_seit
+                     else ERSTE_BEFEHL_FRIST_S)
+            if hoert_zu and time.time() - letzte_aktivitaet > frist:
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
                 # PROTOKOLLIEREN, UND ZWAR VOR DER ANSAGE (2026-08-19). Bisher
@@ -884,8 +917,14 @@ def main():
                 #
                 # Vor der Ansage, weil die Ansage 3,5 s dauert - in dieser Zeit
                 # liest die Mitschrift die Zeile noch, bevor sie zugeht.
-                melde(f"Zeitgrenze: {ZEITGRENZE_S:.0f} s ohne Befehl")
-                sprich(ANSAGE_ZEITGRENZE)
+                melde(f"Zeitgrenze: {frist:.0f} s ohne Befehl")
+                # Zwei Ansagen fuer zwei Lagen. Nach einem Gespraech gehoert die
+                # Begruendung dazu. War dagegen ueberhaupt kein Befehl dabei, war
+                # das Einschalten vermutlich Geraeusch - dann ist die kurze
+                # Ansage richtig: Eine lange Erklaerung fuer etwas, das der
+                # Nutzer nie ausgeloest hat, ist selbst nur Laerm.
+                sprich(ANSAGE_ZEITGRENZE if letzte_aktivitaet > an_seit
+                       else ANSAGE_AUS)
                 mitschrift_schliessen()
                 continue
 
@@ -1046,8 +1085,21 @@ def main():
             # der Erkenner GENAU dieses Wort verschluckt - dann muss der Nutzer
             # den Satz wiederholen. Das ist eine Unbequemlichkeit; ein
             # Mikrofon, das sich unaufgefordert einschaltet, ist es nicht.
-            if (ist_phrase(satz, STARTSATZ, "sprachsteuerung") if not hoert_zu
-                    else STARTSATZ in satz):
+            # BEIDE WOERTER, seit 2026-08-20 nachmittags. Die Umstellung vom
+            # Kernwort "starten" auf "sprachsteuerung" am selben Vormittag hat
+            # die Fehlstarts von 30 auf 7 in zwei Stunden gedrueckt - aber vier
+            # der sieben kamen aus 'sprachsteuerung' ALLEIN, und auf keinen
+            # einzigen der sieben folgte ein Befehl. Zwei bestimmte Woerter
+            # hintereinander fallen im Gespraech praktisch nicht; eines schon.
+            #
+            # Preis: Verschluckt der Erkenner eines der beiden, muss der Nutzer
+            # den Satz wiederholen. Das ist genau der Fehler vom 2026-08-19, der
+            # zur Lockerung gefuehrt hat - er ist jetzt bewusst in Kauf genommen,
+            # weil die Gegenrechnung inzwischen gemessen vorliegt. Wiederholen
+            # ist eine Unbequemlichkeit; ein Mikrofon, das sich von selbst
+            # scharf schaltet, ist es nicht.
+            if (ist_phrase(satz, STARTSATZ, ("sprachsteuerung", "starten"))
+                    if not hoert_zu else STARTSATZ in satz):
                 # In BEIDEN Faellen, und VOR der Ansage. Vor der Ansage, weil
                 # das Fenster einen Moment braucht und die Ansage ohnehin gut
                 # eine Sekunde dauert - so steht es, wenn der Nutzer den ersten
@@ -1063,6 +1115,7 @@ def main():
                 else:
                     hoert_zu = True
                     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AN)
+                    an_seit = time.time()
                     sprich(ANSAGE_AN)
                 # KEINE Sperrfrist hier - siehe Kommentar bei
                 # SPERRFRIST_S. Direkt nach "Ich hoere." erwartet der
