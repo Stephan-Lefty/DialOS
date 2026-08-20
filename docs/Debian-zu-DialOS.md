@@ -1422,7 +1422,9 @@ einer **Datei** lesen, nicht aus einem Programm - diese Datei ist damit eine
 zweite Stelle, an der der Satz steht, also genau die Kopie, die dieser
 Abschnitt vermeiden will. Sie wird deshalb nie von Hand gepflegt: Die
 `.path`-Einheit beobachtet `fusszeile.txt` und erzeugt sie neu, sobald sich
-der Satz aendert. Damit kann sie nicht still veralten.
+der Satz aendert. Damit kann sie nicht still veralten. **Belegt am 2026-08-20:** `touch` auf
+`fusszeile.txt` um 18:34:07, beide Signaturdateien 80 ms spaeter neu
+geschrieben (`journalctl -u dialos-fusszeile.service`).
 
 `dialos-mail-signatur.py` schreibt die Eintraege in die **`user.js`** des
 Profils, nicht in `prefs.js`: Thunderbird schreibt `prefs.js` beim Beenden neu

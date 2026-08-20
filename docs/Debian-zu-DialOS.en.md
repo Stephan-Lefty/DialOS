@@ -1359,7 +1359,9 @@ from a **file**, not from a program - so that file is a second place holding
 the sentence, exactly the copy this section is meant to avoid. It is therefore
 never maintained by hand: the `.path` unit watches `fusszeile.txt` and
 regenerates it as soon as the sentence changes. That way it cannot go stale
-unnoticed.
+unnoticed. **Measured 2026-08-20:** `touch` on
+`fusszeile.txt` at 18:34:07, both signature files rewritten 80 ms later
+(`journalctl -u dialos-fusszeile.service`).
 
 `dialos-mail-signatur.py` writes the entries into the profile's **`user.js`**,
 not into `prefs.js`: Thunderbird rewrites `prefs.js` on exit and would lose a
