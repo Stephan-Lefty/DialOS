@@ -1115,13 +1115,24 @@ def main():
                 else:
                     hoert_zu = True
                     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AN)
-                    an_seit = time.time()
                     sprich(ANSAGE_AN)
                 # KEINE Sperrfrist hier - siehe Kommentar bei
                 # SPERRFRIST_S. Direkt nach "Ich hoere." erwartet der
                 # Nutzer, dass er sprechen kann. Gegen die eigene Ansage
                 # schuetzt das Neubeginnen der Aufnahme.
-                letzte_aktivitaet = time.time()
+                #
+                # BEIDE GEMEINSAM UND GLEICH, und zwar HIER. Der erste Versuch
+                # setzte an_seit vor sprich(ANSAGE_AN) - die Ansage dauert gut
+                # eine Sekunde, danach war letzte_aktivitaet groesser als
+                # an_seit, und die Bedingung "es kam schon ein Befehl" war von
+                # Anfang an wahr. Ergebnis: Die kurze Frist griff nie, im Test
+                # vom 2026-08-20 um 17:42 lief es in die vollen 120 s.
+                #
+                # Der eigene Test hatte das nicht gefunden, weil er die
+                # ENTSCHEIDUNGSFUNKTION geprueft hat und nicht die REIHENFOLGE.
+                # Zwei Werte, die gleich sein muessen, gehoeren in eine
+                # Zuweisung - dann kann keine Ansage dazwischenrutschen.
+                letzte_aktivitaet = an_seit = time.time()
                 continue
 
             # Ist die Erkennung aus, kann hier nichts anderes mehr kommen -
