@@ -28,6 +28,7 @@ Aufruf:
     dialos-fusszeile.py text --art mail       mit "Diese Nachricht"
     dialos-fusszeile.py anhaengen DATEI       Inhalt + rechtsbuendige Fusszeile
     dialos-fusszeile.py drucken DATEI         dasselbe direkt an den Drucker
+    dialos-fusszeile.py signatur              Mail-Signatur fuer Thunderbird
 """
 
 import os
@@ -35,6 +36,7 @@ import subprocess
 import sys
 
 QUELLE = "/usr/local/share/dialos/fusszeile.txt"
+SIGNATUR_ORT = "/usr/local/share/dialos"
 ERSATZ = "Dieses Dokument wurde per Spracheingabe powered by DialOS.org erstellt!"
 
 # Breite fuer den rechtsbuendigen Satz im reinen Text. 76 Zeichen passen in
@@ -100,6 +102,41 @@ def drucken(pfad, art="dokument"):
     return 0
 
 
+def signatur(verzeichnis=SIGNATUR_ORT):
+    """Schreibt die Mail-Signatur fuer Thunderbird - erzeugt, nie getippt.
+
+    Thunderbird kann eine Signatur nur aus einer DATEI lesen, nicht aus einem
+    Programm. Diese Datei ist damit eine zweite Stelle, an der der Satz steht -
+    genau das, was der Kopf dieses Skripts vermeiden will. Die Loesung ist
+    nicht, es zu lassen, sondern die Datei ERZEUGEN zu lassen: Sie wird aus
+    fusszeile.txt geschrieben, und eine systemd-Pfadeinheit erzeugt sie neu,
+    sobald sich die Quelle aendert. Von Hand aendert sie niemand.
+
+    ZWEI FORMATE, mit Absicht. Thunderbird verfasst hier in HTML, und nur in
+    HTML laesst sich "dezent und rechtsbuendig" sauber umsetzen - im reinen
+    Text ginge das nur ueber Leerzeichen, die auf einem Telefon umbrechen.
+    Die .txt liegt trotzdem daneben: Verfasst ein Konto in reinem Text, waere
+    die HTML-Datei dort als roher Quelltext sichtbar. Dann wird in der
+    Kontoeinstellung auf die .txt umgestellt, ohne dass etwas gebaut werden
+    muss.
+    """
+    satz = text("mail")
+    os.makedirs(verzeichnis, exist_ok=True)
+    # Die Auszeichnung bewusst sparsam: kleiner, grau, rechts. Keine Trennlinie
+    # und kein Logo - Stephans Vorgabe war "ganz dezent".
+    roh = (satz.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    html = ('<div style="text-align:right; font-size:85%; color:#777777;">'
+            f'{roh}</div>\n')
+    geschrieben = []
+    for name, inhalt in (("mail-signatur.html", html),
+                         ("mail-signatur.txt", rechtsbuendig(satz) + "\n")):
+        ziel = os.path.join(verzeichnis, name)
+        with open(ziel, "w", encoding="utf-8") as f:
+            f.write(inhalt)
+        geschrieben.append(ziel)
+    return geschrieben
+
+
 def main():
     # ZWEI FEHLER, beide am 2026-08-19 gefunden, als Stephan die Fusszeile
     # sehen wollte:
@@ -125,6 +162,10 @@ def main():
     was = argumente[0]
     if was == "text":
         print(text(art))
+        return 0
+    if was == "signatur":
+        for ziel in signatur():
+            print(ziel)
         return 0
     if was in ("anhaengen", "drucken"):
         if len(argumente) < 2:

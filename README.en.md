@@ -105,6 +105,40 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The footer was built, but nobody called it (2026-08-20).** Stephan: "I
+  sent a mail yesterday and the line was not in it!" It **could not** have
+  been. `dialos-fusszeile.py` had been built the day before, documented, and
+  cleanly designed around a single source of text - only no program ever
+  called it. A tool without users. The Thunderbird profile held zero signature
+  entries. **A requirement is not met because the tool for it exists, only
+  once something uses it** - and exactly that last connection was missing,
+  without it showing up while building or while documenting.
+    - **`dialos-fusszeile.py signatur`** generates `mail-signatur.html` and
+      `mail-signatur.txt` from `fusszeile.txt`. Thunderbird can only read a
+      signature from a **file**, not from a program - so that file is a second
+      place holding the sentence, exactly the copy the design set out to avoid.
+    - **That is why it is never maintained by hand.** `dialos-fusszeile.path`
+      watches the source and has it regenerated as soon as the sentence
+      changes. Change the sentence and letters, printouts **and** mail switch
+      over at once. Without that the copy would eventually go stale unnoticed -
+      the same trap the design had already avoided for the code.
+    - **`dialos-mail-signatur.py` writes to `user.js`, not `prefs.js`.**
+      Thunderbird rewrites `prefs.js` on exit and would lose a foreign entry;
+      `user.js` is layered on top at every start. The price: it cannot be
+      switched off permanently in the account settings - for an origin notice
+      required in **every** mail that is the right way round. It is set for
+      every identity the profile knows.
+    - **Two formats.** The profile composes in HTML, and only there does
+      "discreet and right-aligned" work cleanly - in plain text it would need
+      spaces that wrap on a phone. The `.txt` sits alongside in case an account
+      composes in plain text; then it is switched over, not built.
+    - **What this does *not* solve:** according to `docs/anwendungen.en.md`
+      Thunderbird is the interface, not the engine - DialOS is to send via
+      IMAP/SMTP itself later. The signature only applies to mail going through
+      Thunderbird, i.e. the sighted helper's. The own sending path has to fetch
+      the line itself; the note now sits in `TODO.md` at exactly the place
+      where that path gets built.
+
 - **Security updates now run unattended (2026-08-20).** `unattended-upgrades`
   2.12 installed and configured - decided in `docs/anwendungen.en.md` on
   2026-08-18 and listed there as "package not yet installed".

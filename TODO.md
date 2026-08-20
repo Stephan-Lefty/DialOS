@@ -51,6 +51,10 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Nebenentscheidung - `docs/sicherheit-datenschutz.md` mit entscheiden.
   Zum Testen liegt die Adresse `proband@dialos.org` bereit
   (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
+  **Fußzeile nicht vergessen:** Dieser Versandweg muss sich die
+  Herkunftszeile selbst holen (`dialos-fusszeile.py text --art mail`).
+  Die Thunderbird-Signatur vom 2026-08-20 greift nur bei Mails, die
+  durch Thunderbird gehen - also bei denen des sehenden Helfers.
 
 - [ ] **ZURUECKGESTELLT: dialos-hilfe.py auf den Dienst umbauen** (Stephan,
   2026-08-20: "können den Rustdesk ganz nach hinten schieben, wenn alles

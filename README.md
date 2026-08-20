@@ -114,6 +114,42 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Die Fußzeile war gebaut, aber niemand rief sie auf (2026-08-20).**
+  Stephan: „ich habe gestern mal eine Mail geschickt und da ist die Zeile
+  nicht drin gewesen!" Sie **konnte** nicht drin sein. `dialos-fusszeile.py`
+  war einen Tag zuvor gebaut, dokumentiert und mit einer einzigen Textquelle
+  sauber entworfen - nur rief kein einziges Programm es auf. Ein Werkzeug ohne
+  Benutzer. Im Thunderbird-Profil standen null Signatur-Einträge. **Eine
+  Vorgabe ist nicht erfüllt, weil das Werkzeug dafür existiert, sondern erst,
+  wenn etwas es benutzt** - und genau diese letzte Verbindung fehlte, ohne
+  dass es beim Bauen oder beim Dokumentieren aufgefallen wäre.
+    - **`dialos-fusszeile.py signatur`** erzeugt `mail-signatur.html` und
+      `mail-signatur.txt` aus `fusszeile.txt`. Thunderbird kann eine Signatur
+      nur aus einer **Datei** lesen, nicht aus einem Programm - diese Datei ist
+      damit eine zweite Stelle, an der der Satz steht, also genau die Kopie,
+      die der Entwurf vermeiden wollte.
+    - **Deshalb wird sie nie von Hand gepflegt.** `dialos-fusszeile.path`
+      beobachtet die Textquelle und lässt sie neu erzeugen, sobald sich der
+      Satz ändert. Änderst du den Satz, sind Briefe, Ausdrucke **und** Mails
+      sofort umgestellt. Ohne das wäre die Kopie irgendwann still veraltet -
+      dieselbe Falle, die der Entwurf für den Code schon vermieden hatte.
+    - **`dialos-mail-signatur.py` schreibt in `user.js`, nicht in `prefs.js`.**
+      Thunderbird schreibt `prefs.js` beim Beenden neu und verlöre einen
+      Fremdeintrag; `user.js` wird bei jedem Start darüber gelegt. Preis: In
+      den Kontoeinstellungen lässt sie sich nicht dauerhaft abschalten - für
+      eine Herkunftsangabe, die in **jeder** Mail stehen soll, ist das richtig
+      herum. Gesetzt wird sie für jede Identität, die das Profil kennt.
+    - **Zwei Formate.** Das Profil verfasst in HTML, und nur dort geht „dezent
+      und rechtsbündig" sauber - im reinen Text ginge es nur über Leerzeichen,
+      die auf einem Telefon umbrechen. Die `.txt` liegt daneben, falls ein
+      Konto in reinem Text schreibt; dann wird umgestellt statt gebaut.
+    - **Was das *nicht* löst:** Laut `docs/anwendungen.md` ist Thunderbird die
+      Oberfläche, nicht der Motor - DialOS soll später selbst über IMAP/SMTP
+      versenden. Die Signatur greift nur bei Mails, die durch Thunderbird
+      gehen, also bei denen des sehenden Helfers. Der eigene Versandweg muss
+      sich die Zeile selbst holen; der Hinweis steht jetzt in `TODO.md` an
+      genau der Stelle, an der dieser Weg gebaut wird.
+
 - **Der Name des Nutzers klang falsch - und die Aussprache gehört in die
   Namensdatei, nicht in die Regeltabelle (2026-08-20).** Stephans Beobachtung:
   „Michael sagt Stefffan". Der Name wird bei **jeder** Begrüßung, jeder

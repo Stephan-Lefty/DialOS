@@ -104,6 +104,23 @@ zur Verfügung stellen. Zwei Varianten:
   iCloud eingeschränkter (ggf. App-spezifisches Passwort nötig, das der
   Nutzer selbst erzeugt).
 
+## Fußzeile in die Mail eintragen (Pflichtschritt nach der Konto-Einrichtung)
+
+Sobald das Mailkonto steht - egal ob nach Variante 1 oder 2 - fehlt noch
+ein Schritt, und er lässt sich nicht vorziehen: Erst mit dem Konto gibt es
+eine Identität, für die eine Signatur gesetzt werden kann. Bei geschlossenem
+Thunderbird als der angemeldete Nutzer:
+
+```bash
+dialos-mail-signatur.py
+```
+
+Damit trägt jede Mail die Herkunftszeile aus
+`/usr/local/share/dialos/fusszeile.txt`. Ohne diesen Aufruf geht das Gerät
+ohne Fußzeile in Mails raus - am 2026-08-20 genau so passiert, weil das
+Werkzeug zwar gebaut war, aber niemand es aufrief. Ohne Konto bricht das
+Skript mit einem Hinweis ab, statt stillschweigend nichts zu tun.
+
 ## Kontaktdaten: laufende Synchronisation
 
 Kontakte sollen **laufend** synchronisiert werden, nicht nur einmalig

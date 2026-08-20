@@ -1399,6 +1399,65 @@ ein Zettel gedruckt, kommt die Zeile beim Drucken dazu:
 In einer Mail wird aus "Dieses Dokument" ein "Diese Nachricht" (`--art mail`)
 - eine Mail ist kein Dokument.
 
+**Die Fusszeile in JEDE Mail (nachgezogen 2026-08-20).** Am Tag darauf hat
+Stephan eine Mail verschickt, und die Zeile war nicht darin. Sie konnte nicht
+darin sein: `dialos-fusszeile.py` war gebaut und dokumentiert, aber **kein
+einziges Programm rief es auf** - ein Werkzeug ohne Benutzer. Im
+Thunderbird-Profil standen null Signatur-Eintraege. Eine Vorgabe ist nicht
+erfuellt, weil das Werkzeug dafuer existiert, sondern erst, wenn etwas es
+benutzt.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mail-signatur.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/system/dialos-fusszeile.service /etc/systemd/system/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/system/dialos-fusszeile.path /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now dialos-fusszeile.path dialos-fusszeile.service
+dialos-mail-signatur.py          # als der angemeldete Benutzer, Thunderbird geschlossen
+```
+
+`dialos-fusszeile.py signatur` erzeugt `mail-signatur.html` und
+`mail-signatur.txt` neben der Quelle. Thunderbird kann eine Signatur nur aus
+einer **Datei** lesen, nicht aus einem Programm - diese Datei ist damit eine
+zweite Stelle, an der der Satz steht, also genau die Kopie, die dieser
+Abschnitt vermeiden will. Sie wird deshalb nie von Hand gepflegt: Die
+`.path`-Einheit beobachtet `fusszeile.txt` und erzeugt sie neu, sobald sich
+der Satz aendert. Damit kann sie nicht still veralten.
+
+`dialos-mail-signatur.py` schreibt die Eintraege in die **`user.js`** des
+Profils, nicht in `prefs.js`: Thunderbird schreibt `prefs.js` beim Beenden neu
+und wuerde einen Fremdeintrag verlieren. `user.js` wird bei jedem Start
+darueber gelegt. Preis: In den Kontoeinstellungen laesst sich die Signatur
+nicht dauerhaft abschalten - fuer eine Herkunftsangabe, die laut Vorgabe in
+JEDER Mail steht, ist das richtig herum. Gesetzt wird sie fuer **jede**
+Identitaet, die die `prefs.js` kennt, und `sig_bottom=false` stellt sie beim
+Antworten direkt unter den eigenen Text statt unter das ganze Zitat (das
+Profil antwortet oberhalb des Zitats).
+
+Zwei Formate mit Absicht: Thunderbird verfasst hier in HTML, und nur dort geht
+"dezent und rechtsbuendig" sauber - im reinen Text ginge es nur ueber
+Leerzeichen, die auf einem Telefon umbrechen. Die `.txt` liegt daneben, falls
+ein Konto in reinem Text schreibt; dann wird in der Kontoeinstellung
+umgestellt, ohne dass etwas gebaut werden muss. Der Eintrag `sig_file` ist
+intern ein Datei-Typ (`datatype="nsIFile"` in `am-main.xhtml`), dessen
+gespeicherte Form unter Linux der absolute Pfad ist - ein Pfad als Text
+genuegt also.
+
+**Das deckt einen von zwei Mailwegen.** Laut `docs/anwendungen.md` ist
+Thunderbird die Oberflaeche, nicht der Motor: DialOS soll spaeter selbst ueber
+IMAP/SMTP versenden, weil Thunderbird von aussen nicht steuerbar ist. Die
+Signatur greift nur bei Mails, die durch Thunderbird gehen - also bei allem,
+was der sehende Helfer schreibt. Der eigene Versandweg muss sich die Zeile
+selbst holen (`dialos-fusszeile.py text --art mail`); der Hinweis steht in
+`TODO.md` bei diesem Punkt.
+
+**Das Konto ist nicht Teil des Abbilds.** Es wird bei der Ersteinrichtung von
+Hand angelegt (Formular `thunderbird-angaben-formular.md`), und erst danach
+gibt es eine Identitaet, fuer die eine Signatur gesetzt werden kann. Deshalb
+gehoert `dialos-mail-signatur.py` an das **Ende** der Ersteinrichtung, nach dem
+Einrichten des Kontos. Ohne Konto bricht es mit einem Hinweis ab, statt
+stillschweigend nichts zu tun.
+
 **Mitschrift fuer sehende Zuschauer.**
 
 ```bash

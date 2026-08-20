@@ -1337,6 +1337,61 @@ printed, the line is added at print time: `dialos-fusszeile.py drucken FILE`.
 In a mail "Dieses Dokument" becomes "Diese Nachricht" (`--art mail`) - a mail
 is not a document.
 
+**The footer in EVERY mail (added 2026-08-20).** The next day Stephan sent a
+mail and the line was not in it. It could not have been:
+`dialos-fusszeile.py` was built and documented, but **not a single program
+called it** - a tool without users. The Thunderbird profile held zero
+signature entries. A requirement is not met because the tool for it exists,
+only once something uses it.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mail-signatur.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/system/dialos-fusszeile.service /etc/systemd/system/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/system/dialos-fusszeile.path /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now dialos-fusszeile.path dialos-fusszeile.service
+dialos-mail-signatur.py          # as the logged-in user, with Thunderbird closed
+```
+
+`dialos-fusszeile.py signatur` generates `mail-signatur.html` and
+`mail-signatur.txt` next to the source. Thunderbird can only read a signature
+from a **file**, not from a program - so that file is a second place holding
+the sentence, exactly the copy this section is meant to avoid. It is therefore
+never maintained by hand: the `.path` unit watches `fusszeile.txt` and
+regenerates it as soon as the sentence changes. That way it cannot go stale
+unnoticed.
+
+`dialos-mail-signatur.py` writes the entries into the profile's **`user.js`**,
+not into `prefs.js`: Thunderbird rewrites `prefs.js` on exit and would lose a
+foreign entry. `user.js` is layered on top at every start. The price: the
+signature cannot be switched off permanently in the account settings - for an
+origin notice that is required in EVERY mail, that is the right way round. It
+is set for **every** identity the `prefs.js` knows, and `sig_bottom=false`
+places it directly below the user's own text when replying instead of below
+the whole quote (the profile replies above the quote).
+
+Two formats on purpose: Thunderbird composes in HTML here, and only there does
+"discreet and right-aligned" work cleanly - in plain text it would need spaces
+that wrap on a phone. The `.txt` sits alongside in case an account composes in
+plain text; then the account setting is switched over, with nothing to build.
+The `sig_file` entry is internally a file type (`datatype="nsIFile"` in
+`am-main.xhtml`), whose stored form on Linux is the absolute path - so a path
+as text is enough.
+
+**This covers one of two mail paths.** According to `docs/anwendungen.md`
+Thunderbird is the interface, not the engine: DialOS is to send via IMAP/SMTP
+itself later, because Thunderbird cannot be driven from outside. The signature
+only applies to mail going through Thunderbird - that is, to everything the
+sighted helper writes. The own sending path has to fetch the line itself
+(`dialos-fusszeile.py text --art mail`); the note sits in `TODO.md` at that
+point.
+
+**The account is not part of the image.** It is created by hand during initial
+setup (form `thunderbird-angaben-formular.md`), and only after that is there an
+identity a signature can be set for. `dialos-mail-signatur.py` therefore
+belongs at the **end** of initial setup, after the account has been set up.
+Without an account it stops with a message instead of silently doing nothing.
+
 **Live transcript for sighted onlookers.**
 
 ```bash
