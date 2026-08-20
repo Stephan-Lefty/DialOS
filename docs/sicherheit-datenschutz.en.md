@@ -258,10 +258,12 @@ device.** So this is the place to record what sits where, and who can see it.
 
 | File | Content | Mode | Retention |
 |---|---|---|---|
-| `~/dialos-sprachbefehl.log` | recognized commands | 0644 (default umask) | grows, not rotated |
-| `~/dialos-diktat.log` | **every dictated sentence verbatim** | 0644 | grows, not rotated |
-| `~/dialos-auskunft.log` | questions and answers | 0644 | grows, not rotated |
-| `~/dialos-notiz.log` | actions, **not** the entries | 0644 | grows, not rotated |
+| `~/dialos-sprachbefehl.log` | recognized commands | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-diktat.log` | **every dictated sentence verbatim** | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-auskunft.log` | questions and answers | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-notiz.log` | actions, **not** the entries | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-ton-ausgabe.log` | output device changes | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-hilfe.log` | remote support on/off, **no** ID, **no** password | 0600 from the first rotation | **7 days** (logrotate) |
 | `~/.local/share/dialos/support/befehle-YYYY-MM-DD.log` | commands + first line of a dictation | **0600** | **7 days**, self-clearing |
 
 All of them live in `/home/nutzer` and therefore **inside the encrypted home
@@ -291,9 +293,30 @@ user said, and that is not for other accounts on the same device. Seven days,
 because a support case is settled within that time; the transcript deletes older
 daily files on startup and at midnight by itself.
 
-**Open:** the four program logs grow without limit and are not rotated - for the
-dictation that is not merely a disk-space question but means every letter ever
-dictated stays on disk in plain text permanently. Recorded in `TODO.md`.
+**Retention: seven days** (Stephan's decision of 2026-08-20, the same period as
+the support log). Until then the logs grew without limit - for the dictation that
+meant every letter ever dictated stayed on disk in plain text.
+
+Done via `/etc/logrotate.d/dialos`, not inside the programs. Three decisions
+behind that:
+
+- **logrotate instead of self-clearing.** The support log clears itself because
+  `dialos-mitschrift.py` runs anyway while it is written. For six programs that
+  would be the same code six times - and a service running for a week would never
+  get round to clearing, because it only looks on startup. logrotate runs daily
+  via the systemd timer.
+- **No `copytruncate`.** Verified on 2026-08-20: the programs do **not** hold
+  their file open, they open to write and close again. Plain renaming is
+  therefore safe. `copytruncate` would answer a problem that does not exist here,
+  and it can lose lines written between the copy and the truncate.
+- **`dateext`,** i.e. `dialos-diktat.log-2026-08-20` instead of `.1`. Whoever
+  looks during support searches for a day, not a sequence number - the same
+  reasoning as for the support log.
+
+**Remaining gap, stated honestly:** the programs create a *missing* file with
+0644 (default umask). Only the first rotation sets 0600. Closing that means
+touching `melde()` in six scripts; as long as the logs live inside the encrypted
+home partition, the gain is small.
 
 ## Remote support (RustDesk)
 

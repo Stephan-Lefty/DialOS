@@ -279,10 +279,12 @@ wer es sehen kann.
 
 | Datei | Inhalt | Rechte | Aufbewahrung |
 |---|---|---|---|
-| `~/dialos-sprachbefehl.log` | erkannte Befehle | 0644 (Standard-umask) | wächst, wird nicht gedreht |
-| `~/dialos-diktat.log` | **jeder diktierte Satz wörtlich** | 0644 | wächst, wird nicht gedreht |
-| `~/dialos-auskunft.log` | Fragen und Antworten | 0644 | wächst, wird nicht gedreht |
-| `~/dialos-notiz.log` | Aktionen, **keine** Einträge | 0644 | wächst, wird nicht gedreht |
+| `~/dialos-sprachbefehl.log` | erkannte Befehle | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-diktat.log` | **jeder diktierte Satz wörtlich** | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-auskunft.log` | Fragen und Antworten | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-notiz.log` | Aktionen, **keine** Einträge | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-ton-ausgabe.log` | Wechsel des Ausgabegeräts | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-hilfe.log` | Fernwartung an/aus, **keine** ID, **kein** Passwort | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
 | `~/.local/share/dialos/support/befehle-JJJJ-MM-TT.log` | Befehle + erste Zeile eines Diktats | **0600** | **7 Tage**, räumt sich selbst |
 
 Alle liegen in `/home/nutzer` und damit **innerhalb der verschlüsselten
@@ -311,9 +313,32 @@ der Nutzer gesagt hat, und das ist nichts für andere Konten auf demselben
 Gerät. Sieben Tage, weil ein Support-Fall in dieser Zeit besprochen ist; die
 Mitschrift löscht ältere Tagesdateien beim Start und um Mitternacht selbst.
 
-**Offen:** Die vier Programm-Protokolle wachsen unbegrenzt und werden nicht
-gedreht - beim Diktat ist das nicht nur eine Platzfrage, sondern heißt, dass
-jeder je diktierte Brief dauerhaft im Klartext liegt. Steht in `TODO.md`.
+**Aufbewahrung: sieben Tage** (Stephans Entscheidung vom 2026-08-20, dieselbe
+Frist wie beim Support-Protokoll). Bis dahin wuchsen die Protokolle unbegrenzt -
+beim Diktat hieß das, dass jeder je diktierte Brief dauerhaft im Klartext lag.
+
+Erledigt über `/etc/logrotate.d/dialos`, nicht in den Programmen selbst. Drei
+Entscheidungen dahinter:
+
+- **logrotate statt Selbstaufräumen.** Das Support-Protokoll räumt sich selbst
+  auf, weil `dialos-mitschrift.py` ohnehin läuft, während es geschrieben wird.
+  Bei sechs Programmen wäre dasselbe sechsmal derselbe Code - und ein Dienst,
+  der eine Woche durchläuft, käme nie zum Aufräumen, weil er nur beim Start
+  nachsähe. logrotate läuft täglich per systemd-Timer.
+- **Kein `copytruncate`.** Geprüft am 2026-08-20: Die Programme halten ihre
+  Datei **nicht** offen, sie öffnen zum Schreiben und schließen wieder. Damit
+  ist normales Umbenennen gefahrlos. `copytruncate` wäre die Antwort auf ein
+  Problem, das hier nicht besteht, und es kann Zeilen verlieren, die zwischen
+  Kopieren und Abschneiden geschrieben werden.
+- **`dateext`,** also `dialos-diktat.log-2026-08-20` statt `.1`. Wer im Support
+  nachsieht, sucht einen Tag und keine laufende Nummer - dieselbe Überlegung wie
+  beim Support-Protokoll.
+
+**Rest-Lücke, ehrlich benannt:** Die Programme legen eine *fehlende* Datei mit
+0644 an (Standard-umask). Erst die erste Rotation setzt 0600. Wer das schließen
+will, muss die `melde()`-Funktion in sechs Skripten anfassen; solange die
+Protokolle innerhalb der verschlüsselten Home-Partition liegen, ist der Gewinn
+gering.
 
 ## Fernwartung (RustDesk)
 

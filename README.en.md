@@ -105,6 +105,29 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Logs are deleted after seven days (2026-08-20).** Stephan's decision, the
+  same period as the support log. Until then six logs grew without limit - for
+  the dictation that meant every letter ever dictated stayed on the device in
+  plain text.
+    - **Via `/etc/logrotate.d/dialos`, not inside the programs.** The support log
+      clears itself because `dialos-mitschrift.py` runs anyway while it is
+      written. For six programs that would be the same code six times - and a
+      service running for a week would never get round to it, because it only
+      looks on startup.
+    - **No `copytruncate`, and that is verified:** the programs do **not** hold
+      their file open, they open to write and close again (checked via
+      `/proc/*/fd`). Plain renaming is therefore safe. `copytruncate` would
+      answer a problem that does not exist here, and it can lose lines.
+    - **`dateext`** instead of a sequence number:
+      `dialos-diktat.log-2026-08-20`. Whoever looks during support searches for a
+      day - the same reasoning as for the support log.
+    - **Proven, not assumed:** forced run, all six rotated, new files with
+      **0600** instead of 0644. The two measurement backups were left alone
+      because they do not end in `.log`.
+    - **Remaining gap, stated:** a *newly* created file gets 0644 (the programs'
+      default umask); only rotation sets 0600. And the files rotated away today
+      still carry the old permissions - that corrects itself from tomorrow.
+
 - **The voice control switched itself on - and nearly requested remote support
   (2026-08-20).** Stephan left DialOS running overnight: "every now and then
   Michael spoke up. And just now on dialosadmin he asked me whether he should

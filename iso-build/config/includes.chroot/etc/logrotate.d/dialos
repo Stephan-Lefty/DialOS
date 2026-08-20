@@ -1,0 +1,60 @@
+# DialOS: Aufbewahrung der Programm-Protokolle.
+#
+# Stephans Entscheidung vom 2026-08-20: sieben Tage, wie beim Support-Protokoll.
+#
+# WARUM ES DAS BRAUCHT: Die sechs Protokolle wuchsen unbegrenzt. Beim Diktat ist
+# das keine Platzfrage, sondern heisst, dass jeder je diktierte Brief dauerhaft
+# im Klartext auf dem Geraet liegt - dialos-diktat.log enthaelt jeden Satz
+# woertlich. Aufgefallen am 2026-08-19 beim Bau des Support-Protokolls, dort
+# notiert, hier behoben.
+#
+# WARUM logrotate UND NICHT DIE PROGRAMME SELBST: Das Support-Protokoll raeumt
+# sich selbst auf, weil dialos-mitschrift.py ohnehin laeuft, waehrend es
+# geschrieben wird. Bei den sechs Programm-Protokollen waere dasselbe sechsmal
+# derselbe Code - und ein Dienst, der eine Woche durchlaeuft, kaeme nie zum
+# Aufraeumen, weil er nur beim Start nachsaehe. logrotate laeuft taeglich per
+# systemd-Timer, unabhaengig davon, ob ein Programm gerade startet.
+#
+# WARUM KEIN copytruncate: Geprueft am 2026-08-20 - die Programme halten ihre
+# Datei NICHT offen, sie oeffnen zum Schreiben und schliessen wieder. Damit ist
+# normales Umbenennen gefahrlos und verliert keine Zeile. copytruncate waere die
+# Antwort auf ein Problem, das hier nicht besteht, und es kann Zeilen verlieren,
+# die zwischen Kopieren und Abschneiden geschrieben werden.
+#
+# WARUM dateext: "dialos-diktat.log-2026-08-20" statt "dialos-diktat.log.1".
+# Wer im Support nachsieht, sucht nach einem Tag und nicht nach einer laufenden
+# Nummer - dieselbe Ueberlegung wie beim Support-Protokoll, das aus demselben
+# Grund das Datum im Namen traegt.
+#
+# WARUM NICHT KOMPRIMIERT: Ein sehender Helfer soll die Datei oeffnen und lesen
+# koennen, ohne sie vorher auspacken zu muessen. Bei wenigen Kilobyte am Tag
+# spart Komprimieren ohnehin nichts, was ins Gewicht faellt.
+#
+# ZWEI BLOECKE, weil "su" genau einen Nutzer nennt und die Protokolle im
+# jeweiligen Heimatverzeichnis liegen.
+
+/home/nutzer/dialos-*.log {
+    su nutzer nutzer
+    daily
+    rotate 7
+    missingok
+    notifempty
+    dateext
+    dateformat -%Y-%m-%d
+    # 0600: Es steht darin, was der Nutzer gesagt hat - beim Diktat woertlich.
+    # Das ist nichts fuer andere Konten auf demselben Geraet. Die Programme
+    # legen eine fehlende Datei zwar mit 0644 an (offener Punkt in
+    # docs/sicherheit-datenschutz.md), aber ab der ersten Rotation gilt 0600.
+    create 0600 nutzer nutzer
+}
+
+/home/dialosadmin/dialos-*.log {
+    su dialosadmin dialosadmin
+    daily
+    rotate 7
+    missingok
+    notifempty
+    dateext
+    dateformat -%Y-%m-%d
+    create 0600 dialosadmin dialosadmin
+}

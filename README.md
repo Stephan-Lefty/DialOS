@@ -114,6 +114,31 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Die Protokolle werden nach sieben Tagen gelöscht (2026-08-20).** Stephans
+  Entscheidung, dieselbe Frist wie beim Support-Protokoll. Bis dahin wuchsen
+  sechs Protokolle unbegrenzt - beim Diktat hieß das, dass jeder je diktierte
+  Brief dauerhaft im Klartext auf dem Gerät lag.
+    - **Über `/etc/logrotate.d/dialos`, nicht in den Programmen.** Das
+      Support-Protokoll räumt sich selbst auf, weil `dialos-mitschrift.py`
+      ohnehin läuft, während es geschrieben wird. Bei sechs Programmen wäre das
+      sechsmal derselbe Code - und ein Dienst, der eine Woche durchläuft, käme
+      nie zum Aufräumen, weil er nur beim Start nachsähe.
+    - **Kein `copytruncate`, und das ist geprüft:** Die Programme halten ihre
+      Datei **nicht** offen, sie öffnen zum Schreiben und schließen wieder
+      (über `/proc/*/fd` nachgesehen). Damit ist normales Umbenennen gefahrlos.
+      `copytruncate` wäre die Antwort auf ein Problem, das hier nicht besteht,
+      und es kann Zeilen verlieren.
+    - **`dateext`** statt laufender Nummer: `dialos-diktat.log-2026-08-20`. Wer
+      im Support nachsieht, sucht einen Tag - dieselbe Überlegung wie beim
+      Support-Protokoll.
+    - **Belegt statt geglaubt:** erzwungener Lauf, alle sechs rotiert, neue
+      Dateien mit **0600** statt 0644. Die beiden Messsicherungen blieben
+      unangetastet, weil sie nicht auf `.log` enden.
+    - **Rest-Lücke, benannt:** Eine *neu* angelegte Datei bekommt 0644 (Standard-
+      umask der Programme), erst die Rotation setzt 0600. Und die heute
+      weggerotierten Dateien tragen noch die alten Rechte - das korrigiert sich
+      ab morgen von selbst.
+
 - **Die Sprachsteuerung hat sich selbst eingeschaltet - und dabei fast die
   Fernwartung angefordert (2026-08-20).** Stephan ließ DialOS über Nacht laufen:
   „immer mal wieder meldete sich Michael. Und eben beim dialosadmin fragte er

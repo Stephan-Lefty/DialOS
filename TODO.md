@@ -147,16 +147,15 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   0,4 s ist geraten, nicht gemessen, und zu klein gewaehlt zerlegt er „sechs
   Eier" in zwei Eintraege. Gilt nur fuer `LISTEN_ZIELE`, nicht fuer Briefe.
 
-- [ ] **Die vier Protokolle wachsen unbegrenzt - beim Diktat ist das ein
-  Datenschutzthema, keine Platzfrage** (aufgefallen 2026-08-19 beim Bau des
-  Support-Protokolls). `~/dialos-diktat.log` enthält jeden je diktierten Satz
-  wörtlich, also jeden Brief, dauerhaft und im Klartext. Für die Fehlersuche
-  war genau das mehrfach unverzichtbar, deshalb nicht einfach abschalten -
-  aber eine Grenze braucht es. Das Support-Protokoll hat sie schon (7
-  Tagesdateien, räumt sich selbst); dieselbe Mechanik lässt sich auf die vier
-  übertragen. Zu entscheiden ist die Frist: für die Fehlersuche genügen wenige
-  Tage, ein Nutzer könnte aber auch „gar nicht mitschreiben" wollen. Steht in
-  `docs/sicherheit-datenschutz.md` als offener Punkt.
+- [x] **Die Protokolle wachsen unbegrenzt** - erledigt 2026-08-20. Stephans
+  Entscheidung: sieben Tage, dieselbe Frist wie beim Support-Protokoll.
+  Umgesetzt ueber `/etc/logrotate.d/dialos` statt in den sechs Programmen -
+  logrotate laeuft taeglich per systemd-Timer, waehrend ein Dienst, der eine
+  Woche durchlaeuft, nie zum Aufraeumen kaeme. Ohne `copytruncate`, weil die
+  Programme ihre Datei nicht offen halten (geprueft), mit `dateext`, weil im
+  Support nach einem Tag gesucht wird und nicht nach einer Nummer. Offen bleibt
+  nur, dass eine NEU angelegte Datei 0644 bekommt - ab der ersten Rotation gilt
+  0600.
 
 - [ ] **Zeitzone folgt dem Standort nicht - und ein blinder Nutzer kann sie
   nicht umstellen** (aufgefallen 2026-08-19 bei Stephans Frage „richtet sich
