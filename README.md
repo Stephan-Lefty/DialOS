@@ -114,6 +114,28 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Die Kernwort-Umstellung ist im Betrieb gemessen - 30 gegen 7 (2026-08-20).**
+  Zwei Stunden Protokoll aus dem laufenden Gerät, **dieselben Daten durch beide
+  Regeln** gerechnet:
+    - `'starten'` allein wurde **27-mal** erkannt - reines Umgebungsgeräusch.
+    - Die alte Regel hätte **30-mal** eingeschaltet, die neue hat **7-mal**
+      eingeschaltet. Ersparnis: **23 Einschaltungen à zwei Minuten = 46 Minuten
+      offenes Mikrofon** in gut zwei Stunden.
+    - Das ist eine bessere Messung als die vom Vormittag, weil sie nicht zwei
+      Zeiträume vergleicht, sondern eine Datenbasis durch beide Regeln schickt.
+    - **Und sie zeigt die Grenze:** 7 Einschaltungen, 7 Zeitgrenzen-Abschaltungen
+      - auf keine einzige folgte ein Befehl. Auch die 7 waren also überwiegend
+      Geräusch, vor allem die vier mit `'sprachsteuerung'` allein. Die Umstellung
+      drückt das Problem um gut drei Viertel, sie löst es nicht. Der eigentliche
+      Weg bleibt das Aufweckwort (`TODO.md`).
+    - **Eigener Fehler dabei:** Mein Neustart-Werkzeug legte das Protokoll immer
+      unter demselben Namen beiseite und hat beim zweiten Lauf die erste
+      Sicherung überschrieben - die Rohdaten der 157 Äußerungen vom Vormittag
+      sind weg. Das Ergebnis steht in den Commits, die Daten nicht. Das Werkzeug
+      legt jetzt gar nichts mehr beiseite: Seit heute räumt logrotate die
+      Protokolle auf, und ein zweiter Mechanismus daneben schafft nur
+      Namenskollisionen.
+
 - **Anna ist die neue Stimme von DialOS (2026-08-20).** Stephans Entscheidung:
   eine freundliche Damenstimme. Aus dem Hörvergleich dreier Piper-Stimmen wurde
   **`de_DE-kerstin-low`** mit Tempo **1,00**, Name **Anna** - und seit dieser
