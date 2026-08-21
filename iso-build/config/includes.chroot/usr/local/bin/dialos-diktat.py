@@ -109,6 +109,11 @@ SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 # sofort abbrechen will).
 SCHLUSS_SPERRFRIST_S = 3.0
 
+# Wie oft der Hinweis "Sage bitte: Diktat beenden." hoechstens kommt. Ohne
+# Abstand liefe er bei jedem Bruchstueck erneut - und selbst wieder ins
+# Mikrofon.
+HINWEIS_ABSTAND_S = 15.0
+
 # PEGEL-TOR (gemessen am 2026-08-21, Stephans Stimme, 120 s).
 #
 # DAS PROBLEM: Das grosse Modell erfindet in Stille Woerter. Gemessen wurden
@@ -148,35 +153,54 @@ def pegel(block):
 
 
 def ist_schluss(gehoert):
-    """Beendet diese Aeusserung das Diktat?
+    """Beendet diese Aeusserung das Diktat? Nur der VOLLE Satz zaehlt.
 
-    NICHT exakte Uebereinstimmung - das war der Fehler vom 2026-08-18. Der
-    Nutzer sagte "diktat beenden", der Erkenner lieferte nur 'beenden', und
-    die exakte Bedingung wies es ab. Ergebnis: ein sieben Minuten langes
-    Diktat, das den ganzen Raum mitschrieb und nur von Hand zu stoppen war.
+    GEZAEHLT AM 2026-08-21, alle Schluss-Ereignisse eines Testtages:
 
-    Die neue Bedingung ist aus den Messdaten desselben Laufs abgeleitet. Der
-    Schluss-Erkenner lieferte in sieben Minuten Dauergerede genau zwei
-    Ergebnisse ausser "[unk]", und beide waren 'beenden' - jeweils als
-    Stephan es gesagt hat. Ein falsches Ergebnis kam NIE zustande.
+        nacktes 'beenden'        6 x falsch ausgeloest, 3 x echt
+        volles 'diktat beenden'  0 x falsch,            2 x echt
 
-    Deshalb: Es genuegt, wenn die Aeusserung
-      - "beenden" enthaelt,
-      - ausser Woertern des Schlusssatzes nichts weiter enthaelt, und
-      - kein "[unk]" enthaelt.
+    Jeder einzelne Fehlauslöser war ein nacktes 'beenden'. Zweimal beendete
+    sich ein Diktat dadurch, bevor ueberhaupt etwas gesprochen war; einmal
+    machte der Erkenner aus einem Bruchstueck von Stephans Diktat ein
+    'beenden', waehrend er gerade den Brief sprach. Beim naechsten Mal haette
+    dasselbe Bruchstueck ihn mitten im Satz gestoppt.
 
-    Das letzte Kriterium ist das wichtige. Beim ersten Test machte der
-    Erkenner aus "Tomaten Bananen Aepfel" ein 'beenden beenden [unk]' - mit
-    [unk] als Kennzeichen dafuer, dass da noch etwas anderes gesprochen
-    wurde. Ohne diese Bedingung waere jenes Geraeusch als Schluss
-    durchgegangen.
+    WARUM DAS FRUEHER ANDERS ENTSCHIEDEN WAR: Am 2026-08-18 lieferte der
+    Schluss-Erkenner in sieben Minuten Dauergerede nur zweimal etwas anderes
+    als '[unk]', und beide Male war es ein echtes 'beenden'. Daraus wurde die
+    Regel "es genuegt das Wort". Diese Messung hat aber nie geprueft, was beim
+    normalen DIKTIEREN passiert - und genau dort entstehen die Bruchstuecke.
+
+    Der Preis ist gering: Der volle Satz wurde an demselben Tag zweimal sauber
+    erkannt, und wird er einmal nicht erkannt, sagt DialOS es (siehe
+    ANSAGE_SCHLUSS_UNKLAR). Der Nutzer spricht also nie ins Leere, ohne es zu
+    merken - das war der eigentliche Schaden der alten Regel.
+
+    Die Bedingungen im Einzelnen:
+      - kein "[unk]" (da wurde noch etwas anderes gesprochen),
+      - BEIDE Woerter des Schlusssatzes kommen vor,
+      - und ausser Woertern des Schlusssatzes nichts weiter.
     """
     worte = gehoert.split()
     if not worte or "[unk]" in worte:
         return False
-    if "beenden" not in worte:
+    if not SCHLUSS_WOERTER <= set(worte):
         return False
     return set(worte) <= SCHLUSS_WOERTER
+
+
+def ist_halber_schluss(gehoert):
+    """Klingt nach Schluss, ist aber nicht der volle Satz.
+
+    Dafuer gibt es die Ansage: Wer "beenden" sagt und nichts passiert, wuerde
+    sonst dasselbe Wort wiederholen, bis er aufgibt.
+    """
+    worte = gehoert.split()
+    if not worte or "[unk]" in worte:
+        return False
+    return "beenden" in worte and set(worte) <= SCHLUSS_WOERTER
+
 
 ANSAGE_BEREIT = "Ich schreibe mit."
 
@@ -820,7 +844,7 @@ def diktat_fuehren(zweck, name, quelle):
         aufnahme_seit = time.time()
         anzahl_aeusserungen = 0
         pegel_puffer = []
-        hinweis_gegeben = False
+        hinweis_zuletzt = 0.0
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -842,41 +866,20 @@ def diktat_fuehren(zweck, name, quelle):
             # Erkennung muss, wo er verloren geht.
             if schluss is not None and schluss.AcceptWaveform(block):
                 gehoert = json.loads(schluss.Result()).get("text", "").strip()
+                mittel = ((sum(pegel_puffer) / len(pegel_puffer))
+                          if pegel_puffer else 0.0)
                 if ist_schluss(gehoert):
-                    # ZU LEISE IST KEIN SCHLUSS. Dieselbe Schwelle wie unten - ein
-                    # Stoergeraeusch, das der eingeschraenkten Grammatik als 'beenden'
-                    # erscheint, hat nicht den Pegel einer Stimme. Das ist zugleich der
-                    # beste Verdacht fuer die ungeklaerte Selbstbeendigung vom selben Tag.
-                    mittel = (sum(pegel_puffer) / len(pegel_puffer)) if pegel_puffer else 0.0
+                    # ZU LEISE IST KEIN SCHLUSS - ein Stoergeraeusch hat nicht den
+                    # Pegel einer Stimme. Dieselbe Schwelle wie bei der freien
+                    # Erkennung weiter unten.
                     if mittel < PEGEL_SCHWELLE:
                         melde(f"  Schluss {gehoert!r} verworfen - zu leise "
                               f"(Pegel {mittel:.0f} unter {PEGEL_SCHWELLE:.0f})")
                         continue
-                    # EIN NACKTES 'beenden' VOR DER ERSTEN AEUSSERUNG IST KEIN SCHLUSS.
-                    #
-                    # Zweimal am 2026-08-21 beendete sich ein Diktat von selbst, beide Male
-                    # mit 0 Aeusserungen davor - einmal nach 6 s, einmal nach 4,2 s. Beim
-                    # zweiten Mal griffen weder die Sperrfrist (3 s) noch das Pegel-Tor: Das
-                    # Geraeusch war laut genug. Die freie Erkennung lieferte in derselben
-                    # Zeit NICHTS, der Schluss-Erkenner aber 'beenden' - dieselbe Audiospur,
-                    # zwei Ergebnisse. Das ist die eingeschraenkte Grammatik, die jedes
-                    # Geraeusch auf ihre naechste Phrase abbilden MUSS; der '[unk]'-Auffang
-                    # gewinnt nicht immer.
-                    #
-                    # Niemand startet ein Diktat und beendet es sofort mit einem einzelnen
-                    # Wort. Wer wirklich abbrechen will, sagt den vollen Satz - der wird
-                    # jederzeit angenommen, auch als allererste Aeusserung.
-                    if anzahl_aeusserungen == 0 and gehoert.split() == ["beenden"]:
-                        melde(f"  Schluss {gehoert!r} verworfen - noch nichts diktiert "
-                              f"(Pegel {mittel:.0f}); der volle Satz waere angenommen worden")
-                        if not hinweis_gegeben:
-                            sprich(ANSAGE_SCHLUSS_UNKLAR)
-                            hinweis_gegeben = True
-                        continue
                     seit_start = time.time() - aufnahme_seit
                     if seit_start < SCHLUSS_SPERRFRIST_S:
-                        # Mitprotokolliert und NICHT verschwiegen: Wenn das
-                        # haeufiger vorkommt, ist es die Spur zur Ursache.
+                        # Niemand beendet drei Sekunden nach dem Start; wer
+                        # diktieren will, diktiert.
                         melde(f"  Schluss {gehoert!r} nach nur {seit_start:.1f} s "
                               f"- Sperrfrist, wird verworfen")
                         continue
@@ -884,6 +887,22 @@ def diktat_fuehren(zweck, name, quelle):
                           f"nach {seit_start:.1f} s, "
                           f"{anzahl_aeusserungen} Aeusserungen, Pegel {mittel:.0f}")
                     break
+                if ist_halber_schluss(gehoert):
+                    # NUR DAS HALBE WORT - kein Schluss, aber der Nutzer muss es
+                    # HOEREN. Wer 'beenden' sagt und nichts passiert, wiederholt
+                    # dasselbe Wort, bis er aufgibt; wer den Bildschirm nicht sieht,
+                    # hat keine andere Moeglichkeit, den Grund zu erfahren. Genau so
+                    # ist am 2026-08-21 'Brief vorlesen' im Brieftext gelandet:
+                    # Stephan hielt das Diktat fuer beendet.
+                    #
+                    # Nicht bei jedem Mal - die Ansage liefe sonst selbst wieder ins
+                    # Mikrofon und wuerde zum Geraeusch.
+                    melde(f"  {gehoert!r} ist kein Schluss - der volle Satz zaehlt "
+                          f"(Pegel {mittel:.0f})")
+                    if time.time() - hinweis_zuletzt > HINWEIS_ABSTAND_S:
+                        sprich(ANSAGE_SCHLUSS_UNKLAR)
+                        hinweis_zuletzt = time.time()
+                    continue
                 if gehoert:
                     letzte_aeusserung = time.time()
                     melde(f"  (Schluss-Erkenner: {gehoert!r} - kein Schluss)")

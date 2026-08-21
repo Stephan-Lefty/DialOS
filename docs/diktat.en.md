@@ -593,11 +593,40 @@ recogniser delivered "beenden". The same audio, two recognisers, two results.
 That is the restricted grammar: it **must** map every noise onto one of its
 phrases, and the `[unk]` catch-all does not always win.
 
-From that follows a rule that is not guesswork: nobody starts a dictation and
-stops it immediately with a single word. A bare "beenden" before the first
-utterance is therefore discarded and logged. **The full sentence "Diktat
-beenden" is still accepted at any time**, including as the very first
-utterance - anyone who really wants to abort can.
+The first answer to that was a special case: discard a bare "beenden" **before
+the first utterance**. It lasted one day.
+
+### Counted - and that is why the stop now requires both words
+
+All stop events of 2026-08-21:
+
+| | bare "beenden" | full "diktat beenden" |
+|---|---|---|
+| **false** triggers | **6×** | 0× |
+| **genuine** from the user | 3× | 2× |
+
+**Every single false trigger was a bare "beenden".** Once the recogniser turned
+a fragment of Stephan's dictation into "beenden" **while he was speaking the
+letter**. The special case saved him there by chance - nothing had been
+finalised yet. Once one sentence has arrived, the same fragment would have
+stopped him mid-letter.
+
+The consequential damage was visible: Stephan believed the dictation had
+ended, said "Brief vorlesen" - and **that landed in the letter text**.
+
+**Why it was decided differently before:** on 2026-08-18 the stop recogniser
+produced something other than `[unk]` only twice in seven minutes of continuous
+talking, both times a genuine "beenden". From that came "the word is enough".
+But that measurement never checked what happens while **dictating** - and that
+is exactly where the fragments arise.
+
+The price is small: the full sentence was recognised cleanly twice on the same
+day. And if it is not recognised, **DialOS says so**: "Sage bitte: Diktat
+beenden.", at most every 15 seconds so the announcement does not itself become
+noise and run back into the microphone. The user never again speaks into the
+void without noticing - that was the real damage of the old rule.
+
+This also removes the "nothing dictated yet" special case - one patch fewer.
 
 **Every discarded utterance is logged.** If genuine speech ends up there, it
 shows immediately, and the threshold belongs lower.

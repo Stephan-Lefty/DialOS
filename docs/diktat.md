@@ -611,11 +611,41 @@ Schluss-Erkenner aber „beenden". Dieselbe Audiospur, zwei Erkenner, zwei
 Ergebnisse. Das ist die eingeschränkte Grammatik: Sie **muss** jedes Geräusch
 auf eine ihrer Phrasen abbilden, und der `[unk]`-Auffang gewinnt nicht immer.
 
-Daraus folgt eine Regel, die kein Raten ist: Niemand startet ein Diktat und
-beendet es sofort mit einem einzelnen Wort. Ein nacktes „beenden" vor der
-ersten Äußerung wird deshalb verworfen und protokolliert. **Der volle Satz
-„Diktat beenden" wird weiterhin jederzeit angenommen**, auch als allererste
-Äußerung - wer wirklich abbrechen will, kann das.
+Die erste Antwort darauf war eine Sonderregel: ein nacktes „beenden" **vor der
+ersten Äußerung** verwerfen. Sie hat einen Tag gehalten.
+
+### Ausgezählt - und deshalb verlangt der Schluss jetzt beide Wörter
+
+Alle Schluss-Ereignisse des 2026-08-21:
+
+| | nacktes „beenden" | volles „diktat beenden" |
+|---|---|---|
+| **falsch** ausgelöst | **6×** | 0× |
+| **echt** vom Nutzer | 3× | 2× |
+
+**Jeder einzelne Fehlauslöser war ein nacktes „beenden".** Einmal machte der
+Erkenner aus einem Bruchstück von Stephans Diktat ein „beenden", **während er
+den Brief sprach**. Die Sonderregel rettete ihn dort zufällig - es war noch
+nichts abgeschlossen. Sobald ein Satz angekommen ist, hätte dasselbe
+Bruchstück ihn mitten im Brief gestoppt.
+
+Der Folgeschaden war sichtbar: Stephan hielt das Diktat für beendet, sagte
+„Brief vorlesen" - und **das landete im Brieftext**.
+
+**Warum es vorher anders entschieden war:** Am 2026-08-18 lieferte der
+Schluss-Erkenner in sieben Minuten Dauergerede nur zweimal etwas anderes als
+`[unk]`, beide Male ein echtes „beenden". Daraus wurde „es genügt das Wort".
+Diese Messung hat aber nie geprüft, was beim **Diktieren** passiert - und
+genau dort entstehen die Bruchstücke.
+
+Der Preis ist gering: Der volle Satz wurde am selben Tag zweimal sauber
+erkannt. Und wird er einmal nicht erkannt, **sagt DialOS es**: „Sage bitte:
+Diktat beenden.", höchstens alle 15 Sekunden, damit die Ansage nicht selbst
+zum Geräusch wird und ins Mikrofon läuft. Der Nutzer spricht nie wieder ins
+Leere, ohne es zu merken - das war der eigentliche Schaden der alten Regel.
+
+Damit entfällt auch die Sonderregel „noch nichts diktiert" - ein Flickwerk
+weniger.
 
 **Jede verworfene Äußerung wird protokolliert.** Fällt dort echte Sprache
 hinein, sieht man es sofort, und die Schwelle gehört nach unten.
