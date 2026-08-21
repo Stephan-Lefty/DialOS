@@ -108,6 +108,14 @@ background) and `splash.png` (boot/login screen).
 - **Three battery warnings - and the speech samples still used the old voice
   (2026-08-21).** Stephan's requirement: warnings at 25 %, 15 % and 5 %, "the
   last one with an announcement that the device must go to the mains socket".
+    - **And the interval was too slow - not for the battery, for the**
+      **confirmation.** Stephan pulled the cable and plugged it back in within
+      a minute: at a 60 s interval no check fell in the window where it was
+      disconnected - **no log line at all in 130 s**. For the warnings that
+      would not matter (hours pass between 25 % and 15 %), for "Der Computer
+      hängt am Netz und lädt." it does: someone who cannot see whether the
+      plug is seated waited up to a minute. Now 10 s, and the two earlier
+      intervals are gone without replacement - one special case fewer.
     - **Reconnecting was not logged** - found because Stephan pulled the cable
       to try it and plugged it back in. The log read "Netz getrennt bei 77 %"
       with no end to it: the line for plugging in was only written if a

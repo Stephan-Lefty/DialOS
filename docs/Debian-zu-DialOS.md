@@ -1721,6 +1721,17 @@ Ladeschwelle haelt den Akku bei 78 % an. Wer "nicht am Laden" mit "am Akku"
 gleichsetzt, warnt bei gestecktem Kabel. Gelesen wird deshalb `online` der
 Quelle vom Typ `Mains`.
 
+**Nachgesehen wird alle 10 Sekunden, und der Grund ist nicht der Akku.** Fuer
+die Warnungen reichten 60 s bequem - von 25 % auf 15 % vergehen Stunden. Zu
+langsam war das nur fuer die Bestaetigung beim Anstecken: Wer nicht sieht, ob
+der Stecker sitzt, wartete bis zu einer Minute auf die Antwort. Gemessen am
+2026-08-21: Stephan zog das Kabel und steckte es in unter einer Minute wieder
+ein - bei 60 s Takt lag zwischen zwei Blicken kein einziger, bei dem es
+getrennt war, und in 130 s kam keine einzige Protokollzeile. Was seltener
+nachgesehen wird, als es passiert, wird uebersehen. Der Preis sind zwei winzige
+Dateien mehr je Blick; die frueheren zwei Takte (60 s, darunter 20 s unter
+10 %) sind ersatzlos entfallen.
+
 **Jeder Wechsel steht im Protokoll, in beide Richtungen.** Die erste Fassung
 schrieb nur "Netz getrennt"; das Wiedereinstecken landete nur dann im
 Protokoll, wenn vorher gewarnt worden war. Gefunden am 2026-08-21, als Stephan

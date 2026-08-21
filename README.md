@@ -117,6 +117,15 @@ abgeschlossen.*
 - **Drei Akkuwarnungen - und die Hörbeispiele sprachen noch mit der alten
   Stimme (2026-08-21).** Stephans Vorgabe: Warnungen bei 25 %, 15 % und 5 %,
   „bei der letzten mit einer Ansage, das Gerät muss an die Netzdose".
+    - **Und der Takt war zu langsam - nicht für den Akku, für die**
+      **Bestätigung.** Stephan zog das Kabel und steckte es in unter einer
+      Minute wieder ein: Bei 60 s Takt lag zwischen zwei Blicken kein
+      einziger, bei dem es getrennt war - **in 130 s kam keine einzige
+      Protokollzeile**. Für die Warnungen wäre das egal (von 25 % auf 15 %
+      vergehen Stunden), für „Der Computer hängt am Netz und lädt." nicht:
+      Wer nicht sieht, ob der Stecker sitzt, wartete bis zu einer Minute.
+      Jetzt 10 s, und die beiden früheren Takte sind ersatzlos entfallen -
+      ein Sonderfall weniger.
     - **Das Wiedereinstecken stand nicht im Protokoll** - gefunden, weil
       Stephan das Kabel zum Ausprobieren zog und wieder einsteckte. Da stand
       „Netz getrennt bei 77 %" und kein Ende dazu: Die Zeile fürs Einstecken

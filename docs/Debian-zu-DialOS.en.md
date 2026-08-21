@@ -1649,6 +1649,16 @@ threshold holds the battery at 78 %. Equating "not charging" with "on battery"
 warns with the cable connected. What is read is therefore `online` of the source
 of type `Mains`.
 
+**The check runs every 10 seconds, and the reason is not the battery.** For
+the warnings 60 s was ample - hours pass between 25 % and 15 %. It was too slow
+only for the confirmation when plugging in: someone who cannot see whether the
+plug is seated waited up to a minute for the answer. Measured on 2026-08-21:
+Stephan pulled the cable and plugged it back in within a minute - at a 60 s
+interval not a single check fell in the window where it was disconnected, and
+no log line appeared in 130 s. What is checked less often than it happens gets
+missed. The price is two tiny files more per check; the earlier two intervals
+(60 s, dropping to 20 s below 10 %) are gone without replacement.
+
 **Every change is logged, in both directions.** The first version only wrote
 "Netz getrennt"; reconnecting was only logged if a warning had been given
 before. Found on 2026-08-21 when Stephan pulled the cable to try it out and

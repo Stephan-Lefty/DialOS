@@ -55,12 +55,22 @@ STUFEN = [
 
 ANSAGE_AM_NETZ = "Der Computer hängt am Netz und lädt."
 
-# Alle 60 s reicht: Von 25 % auf 15 % vergehen auf diesem Geraet Stunden.
-# Unter 10 % wird schneller nachgesehen - dort zaehlt jede Minute, und der
-# Abstand zwischen 5 % und "aus" ist kurz.
-TAKT_S = 60.0
-TAKT_KNAPP_S = 20.0
-KNAPP_AB = 10
+# ALLE 10 SEKUNDEN, und der Grund ist nicht der Akku. Fuer die Warnungen
+# reichten 60 s bequem: Von 25 % auf 15 % vergehen Stunden. Zu langsam ist das
+# nur fuer die BESTAETIGUNG beim Anstecken - wer nicht sieht, ob der Stecker
+# sitzt, wartete bis zu einer Minute auf die Antwort, und genau diese
+# Rueckmeldung muss zuegig kommen.
+#
+# Gemessen am 2026-08-21: Stephan zog das Kabel und steckte es wieder ein, in
+# weniger als einer Minute. Bei 60 s Takt lag zwischen zwei Blicken kein
+# einziger, bei dem es getrennt war - der Dienst hat den Wechsel NIE gesehen,
+# in 130 s kam keine Protokollzeile. Was seltener nachgesehen wird als es
+# passiert, wird uebersehen.
+#
+# Der Preis sind zwei winzige Dateien mehr je Blick, ein paar hundert
+# Mikrosekunden. Die frueheren zwei Takte (60 s, darunter 20 s unter 10 %)
+# sind damit hinfaellig und ersatzlos entfallen - ein Sonderfall weniger.
+TAKT_S = 10.0
 
 # Wieder scharf, wenn der Stand um diesen Abstand ueber die Stufe steigt. Ohne
 # Abstand wuerde eine Stufe bei einem Stand, der um einen Punkt schwankt,
@@ -224,15 +234,12 @@ def main():
                         gewarnt = True
                         melde(f"{stand} % - Stufe {grenze} angesagt")
             netz_vorher = netz
-            takt = TAKT_KNAPP_S if (stand is not None and stand <= KNAPP_AB
-                                    and not netz) else TAKT_S
         except Exception as fehler:
             # Ein Aussetzer darf den Dienst nicht beenden. Ein stiller Ausfall
             # der Akkuwarnung faellt erst auf, wenn das Geraet ausgeht - und
             # dann ist es zu spaet, ihn zu bemerken.
             melde(f"Fehler im Durchlauf: {fehler}")
-            takt = TAKT_S
-        time.sleep(takt)
+        time.sleep(TAKT_S)
 
 
 if __name__ == "__main__":
