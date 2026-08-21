@@ -385,3 +385,26 @@ Fedora Atomic/Silverblue or openSUSE Aeon) — Stephan prioritizes Debian's
 stability, hardware support, and the mature live-build tooling over
 built-in atomic rollback. A rollback safety net would need to be added
 separately via Btrfs snapshots if needed.
+
+## Screenshots show everything that is open (open, 2026-08-21)
+
+The command "Bildschirmfoto erstellen" saves a picture of the whole screen to
+`~/Bilder/Bildschirmfotos/`. That is intended - it exists for support, and a
+crop would not help there.
+
+**The consequence is not yet decided.** If a mail, a letter or a web page is
+open when it fires, its content is in the picture. If the user later sends it
+to support, that goes along. DialOS' own display window is already excluded
+(it is closed before the shot), but that only solves the part belonging to
+DialOS.
+
+Stephan saw this on 2026-08-21 and **deliberately changed nothing** - the
+function stays as it is. What remains to be decided:
+
+- Does DialOS announce, when triggering, that everything visible goes into the
+  picture?
+- Are the pictures deleted after seven days like the logs?
+- Should there be a confirmation before sending to support?
+
+The same question arises for the planned PDF archive of every mail and letter
+(`TODO.md`) - both belong together.

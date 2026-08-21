@@ -414,3 +414,25 @@ eingebautem Atomic-Rollback. (Der ursprünglich mitgenannte Grund
 [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 16.)
 Eine Rollback-Absicherung müsste bei Bedarf separat über Btrfs-Snapshots
 nachgerüstet werden.
+
+## Bildschirmfotos zeigen alles, was offen ist (offen, 2026-08-21)
+
+Der Befehl „Bildschirmfoto erstellen" legt ein Bild des ganzen Schirms unter
+`~/Bilder/Bildschirmfotos/` ab. Das ist gewollt - er existiert für den
+Support, und ein Ausschnitt hülfe dort nicht.
+
+**Die Folge ist noch nicht entschieden.** Steht beim Auslösen eine Mail, ein
+Brief oder eine Webseite offen, ist deren Inhalt auf dem Bild. Schickt der
+Nutzer es später an den Support, geht das mit. Das eigene Anzeigefenster von
+DialOS ist bereits ausgenommen (es wird vor dem Foto geschlossen), aber das
+löst nur den Teil, der DialOS gehört.
+
+Stephan hat das am 2026-08-21 gesehen und **bewusst nichts geändert** - die
+Funktion bleibt, wie sie ist. Zu entscheiden bleibt:
+
+- Sagt DialOS beim Auslösen an, dass alles Sichtbare mit aufs Bild kommt?
+- Werden die Bilder wie die Protokolle nach sieben Tagen gelöscht?
+- Gehört vor dem Versand an den Support eine Rückfrage?
+
+Dieselbe Frage stellt sich beim geplanten PDF-Archiv jeder Mail und jedes
+Briefes (`TODO.md`) - beides gehört zusammen entschieden.

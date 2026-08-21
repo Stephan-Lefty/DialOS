@@ -339,6 +339,14 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
     LUKS-Schluessel traegt.
     
     Werkzeuge vorhanden: `libreoffice --headless` und `ps2pdf`.
+
+    **Zusammen zu entscheiden mit den Bildschirmfotos** (Stephan hat sie am
+    2026-08-21 gesehen und bewusst nichts geändert): Beide zeigen bzw.
+    enthalten Inhalte, die der Nutzer nicht mehr im Blick hat, wenn er sie
+    später an den Support gibt. Offen ist, ob es eine Ansage beim Auslösen
+    braucht, ob die Dateien wie die Protokolle nach sieben Tagen verfallen
+    und ob vor dem Versand eine Rückfrage kommt. Ausgeführt in
+    `docs/sicherheit-datenschutz.md`.
   - [ ] **Vorlesen** von Mails, Dokumenten und Webseiten.
   - [ ] **Drucken per Sprache - Stephans Wunsch vom 2026-08-21:**
     „der Brief muss dann, wenn er fertig ist, gedruckt werden". Der Brother
