@@ -498,14 +498,18 @@ usability for a letter. So the user speaks them:
 
 | spoken | becomes |
 |---|---|
-| Komma | `,` |
-| Punkt | `.` |
-| Fragezeichen | `?` |
-| Ausrufezeichen | `!` |
-| Doppelpunkt | `:` |
-| Gedankenstrich | ` - ` |
-| Absatz, neuer Absatz | blank line |
-| neue Zeile | line break |
+| **Komma setzen** | `,` |
+| **Punkt setzen** | `.` |
+| **Fragezeichen setzen** | `?` |
+| **Ausrufezeichen setzen** | `!` |
+| **Doppelpunkt setzen** | `:` |
+| **Gedankenstrich setzen** | ` - ` |
+| **neuer Absatz** | blank line |
+| **neue Zeile** | line break |
+
+*The first draft used the bare words ("Komma", "Punkt"). Why they became
+two-word markers is below under "Spoken punctuation only partly works" - in
+short: measured, the short words were not recognised reliably.*
 
 **All nine are in the vocabulary** of the big model - checked in
 `graph/words.txt` with 822,389 entries. That check was mandatory: it was exactly
@@ -623,3 +627,25 @@ This is the same lesson as for switching the voice control on: a marker word
 must be **unambiguous and long enough**. "Komma" and "Punkt" collide with
 "komme", "kommt", "Koffer", "das", "ja" - all words that occur in a letter.
 **Open:** whether longer markers ("Komma setzen", "neuer Satz") solve it.
+
+### Solved with two-word markers (second measurement, 2026-08-21)
+
+Same voice, same chain, the longer forms:
+
+| spoken | heard | |
+|---|---|---|
+| "…Rößner **Komma setzen**" | `komma setzen` | ✅ |
+| "…Vertrag **Punkt setzen**" | `punkt setzen` | ✅ |
+| "…helfen **Fragezeichen setzen**" | `fragezeichen setzen` | ✅ |
+| "**neuer Satz**" | `neuer ersatz` | ✗ |
+| "…Rößner **Komma**" *(control)* | `komma` | ✅ **this time** |
+
+**Three out of three.** "neuer Satz" was therefore not adopted.
+
+The bare "Komma" hit here after failing twice - and that is the worst case:
+the user learns that it works, and then it does not.
+
+**The bare forms were therefore removed**, and that is a double win: the
+recognition becomes reliable **and** the price accepted at the outset
+disappears. "In diesem Punkt", "drei Punkte" and "ein Komma an dieser Stelle"
+stay untouched, because only "Punkt **setzen**" produces a mark.

@@ -514,14 +514,19 @@ einen Brief das Ende der Brauchbarkeit. Der Nutzer spricht sie deshalb aus:
 
 | gesagt | wird zu |
 |---|---|
-| Komma | `,` |
-| Punkt | `.` |
-| Fragezeichen | `?` |
-| Ausrufezeichen | `!` |
-| Doppelpunkt | `:` |
-| Gedankenstrich | ` - ` |
-| Absatz, neuer Absatz | Leerzeile |
-| neue Zeile | Zeilenumbruch |
+| **Komma setzen** | `,` |
+| **Punkt setzen** | `.` |
+| **Fragezeichen setzen** | `?` |
+| **Ausrufezeichen setzen** | `!` |
+| **Doppelpunkt setzen** | `:` |
+| **Gedankenstrich setzen** | ` - ` |
+| **neuer Absatz** | Leerzeile |
+| **neue Zeile** | Zeilenumbruch |
+
+*Der erste Entwurf benutzte die nackten Wörter („Komma", „Punkt"). Warum daraus
+zweiwortige Merkwörter wurden, steht weiter unten unter „Gesprochene
+Satzzeichen tragen nur zum Teil" - kurz: gemessen wurden die kurzen Wörter
+nicht zuverlässig erkannt.*
 
 **Alle neun stehen im Wortschatz** des grossen Modells - geprüft in
 `graph/words.txt` mit 822 389 Einträgen. Diese Prüfung war Pflicht: Bei
@@ -641,3 +646,26 @@ Merkwort muss **eindeutig und lang genug** sein. „Komma" und „Punkt"
 kollidieren mit „komme", „kommt", „Koffer", „das", „ja" - allesamt Wörter, die
 in einem Brief vorkommen. **Offen** ist damit, ob längere Merkwörter („Komma
 setzen", „neuer Satz") den Fall lösen.
+
+### Gelöst mit zweiwortigen Merkwörtern (zweite Messung, 2026-08-21)
+
+Dieselbe Stimme, dieselbe Kette, die längeren Formen:
+
+| gesagt | gehört | |
+|---|---|---|
+| „…Rößner **Komma setzen**" | `komma setzen` | ✅ |
+| „…Vertrag **Punkt setzen**" | `punkt setzen` | ✅ |
+| „…helfen **Fragezeichen setzen**" | `fragezeichen setzen` | ✅ |
+| „**neuer Satz**" | `neuer ersatz` | ✗ |
+| „…Rößner **Komma**" *(Vergleich)* | `komma` | ✅ **diesmal** |
+
+**Dreimal von drei.** „neuer Satz" wurde deshalb nicht aufgenommen.
+
+Das nackte „Komma" traf hier, nachdem es zweimal gescheitert war - und genau
+das ist der schlechteste Fall: Der Nutzer merkt sich, dass es geht, und dann
+geht es doch nicht.
+
+**Die nackten Formen sind deshalb entfernt**, und das ist ein doppelter
+Gewinn: Die Erkennung wird zuverlässig, **und** der anfangs akzeptierte Preis
+entfällt. „In diesem Punkt", „drei Punkte" und „ein Komma an dieser Stelle"
+bleiben unangetastet, weil nur „Punkt **setzen**" ein Zeichen erzeugt.

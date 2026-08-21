@@ -383,36 +383,50 @@ def lt_lebt():
         return False
 
 
-# GESPROCHENE SATZZEICHEN (Stephans Entscheidung, 2026-08-21: "immer als
-# Satzzeichen"). Vosk liefert Woerter, keine Zeichen - fuer einen
-# Einkaufszettel belanglos, fuer einen Brief das Ende der Brauchbarkeit.
+# GESPROCHENE SATZZEICHEN - ZWEIWORTIGE MERKWOERTER (gemessen 2026-08-21).
 #
-# ALLE NEUN WOERTER STEHEN IM WORTSCHATZ des grossen Modells (geprueft am
-# 2026-08-21 in graph/words.txt, 822 389 Eintraege). Das musste geprueft
-# werden - bei "loeschen" hatte genau das gefehlt, und der Befehl waere still
-# nie ausgeloest worden. Vorsicht bei der Pruefmethode: Das grosse Modell nimmt
-# KEINE eingeschraenkte Grammatik an ("Runtime graphs are not supported by
-# this model") und meldet deshalb auch kein fehlendes Wort. Der Grammatik-Weg,
-# der beim kleinen Modell funktioniert, liefert hier ein leeres Versprechen -
-# neun Woerter sahen "vorhanden" aus, geprueft worden war nichts.
+# ERSTER ENTWURF WAREN DIE NACKTEN WOERTER "komma", "punkt", "absatz".
+# Stephans Entscheidung dazu lautete "immer als Satzzeichen werten", mit dem
+# bewussten Preis, dass "in diesem Punkt" zu "in diesem." wird. GEMESSEN hat
+# sich das nicht gehalten - die kurzen Woerter werden gar nicht zuverlaessig
+# erkannt:
 #
-# DER PREIS DER ENTSCHEIDUNG: "in diesem Punkt" wird zu "in diesem." Das faellt
-# beim Vorlesen auf, und der Nutzer diktiert die Stelle neu. Die Alternative
-# waere gewesen, nur bei einer Sprechpause zu trennen (Vosk liefert
-# Wortzeitstempel) - dann bekaeme aber, wer fluessig diktiert, gar keine
-# Satzzeichen.
+#     gesagt                       Piper            Stephans Stimme
+#     "...Herren komma"            komma  ok        komme        falsch
+#     "...Herren (Pause) komma"    komme  falsch    komma        ok
+#     "komma" allein               ja     falsch    einen koffer falsch
+#     "punkt" allein               das    falsch    kommt        falsch
+#     "doppelpunkt" allein         doerte depots    -
+#
+# Drei von sechs. Es liegt weder an der Aussprache noch an der Pause - bei
+# Piper klappte das Gegenteil. Es ist das Sprachmodell: Es raet aus dem
+# Zusammenhang, und nach "Roessner" ist "komme" wahrscheinlicher als "Komma".
+#
+# DIE ZWEITE MESSUNG hat die Loesung gezeigt - dieselbe Stimme, dieselbe Kette:
+#
+#     "...Roessner komma setzen"        komma setzen        ok
+#     "...Vertrag punkt setzen"         punkt setzen        ok
+#     "...helfen fragezeichen setzen"   fragezeichen setzen ok
+#     "neuer satz"                      neuer ersatz        falsch
+#
+# Dreimal von drei. Dieselbe Lektion wie beim Einschalten der
+# Sprachsteuerung: Ein Merkwort muss eindeutig UND lang genug sein.
+#
+# DIE NACKTEN FORMEN SIND DESHALB RAUS, und das ist ein doppelter Gewinn: Die
+# Erkennung wird zuverlaessig, UND der eingangs akzeptierte Preis entfaellt -
+# "in diesem Punkt" bleibt stehen, weil nur "Punkt setzen" ein Zeichen macht.
+# "neuer satz" wurde nicht aufgenommen, weil es gemessen scheitert.
 #
 # Laengere Wendungen zuerst, sonst frisst "absatz" den "neuen absatz".
 SATZZEICHEN = [
     ("neuer absatz", "\n\n"),
     ("neue zeile", "\n"),
-    ("absatz", "\n\n"),
-    ("gedankenstrich", " - "),
-    ("ausrufezeichen", "!"),
-    ("fragezeichen", "?"),
-    ("doppelpunkt", ":"),
-    ("komma", ","),
-    ("punkt", "."),
+    ("komma setzen", ","),
+    ("punkt setzen", "."),
+    ("fragezeichen setzen", "?"),
+    ("ausrufezeichen setzen", "!"),
+    ("doppelpunkt setzen", ":"),
+    ("gedankenstrich setzen", " - "),
 ]
 
 
