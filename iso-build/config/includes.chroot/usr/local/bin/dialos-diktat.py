@@ -87,6 +87,26 @@ SCHLUSSSATZ = "diktat beenden"
 GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, "[unk]"])
 SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 
+# SPERRFRIST FUER DEN SCHLUSS (2026-08-21). Am selben Tag endete ein Diktat
+# sechs Sekunden nach dem Start von selbst: Der Schluss-Erkenner lieferte das
+# nackte 'beenden', obwohl Stephan nach eigener Aussage nichts gesagt hatte.
+# Der Brief blieb leer, und seine Saetze liefen danach in die
+# Befehlserkennung, die sie in Unsinn presste ('gnome gnome welchen tag linux').
+#
+# DIE URSACHE IST NICHT GEFUNDEN, und das steht hier bewusst so. Zwei
+# Messungen haben sie NICHT bestaetigt:
+#   - 180 s Stille im selben Raum, dieselbe Grammatik: 0 Ergebnisse.
+#   - Dreimal die Bereit-Ansage gesprochen und sofort zugehoert: nichts.
+# Weder Umgebungsgeraeusch noch die eigene Ansage reichen also als Erklaerung.
+#
+# DIESE SPERRE IST DESHALB KEINE BEHEBUNG, SONDERN EINE ABSICHERUNG: Niemand
+# sagt drei Sekunden nach dem Start "Diktat beenden" - wer diktieren will,
+# diktiert. Ein Schluss in diesem Fenster ist mit hoher Wahrscheinlichkeit
+# keiner, und der Schaden davon ist gross (leeres Ergebnis), waehrend der
+# Schaden der Sperre klein ist (drei Sekunden warten, falls jemand es doch
+# sofort abbrechen will).
+SCHLUSS_SPERRFRIST_S = 3.0
+
 
 def ist_schluss(gehoert):
     """Beendet diese Aeusserung das Diktat?
@@ -695,6 +715,10 @@ def diktat_fuehren(zweck, name, quelle):
                    if modell_klein else None)
         sprich(ANSAGE_BEREIT_LISTE if name in LISTEN_ZIELE else ANSAGE_BEREIT)
         prozess = aufnahme_starten(quelle)
+        # Beginn der AUFNAHME, nicht der Funktion: Davor liegen rund neun
+        # Sekunden Modellladezeit, in denen niemand sprechen kann.
+        aufnahme_seit = time.time()
+        anzahl_aeusserungen = 0
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -715,7 +739,16 @@ def diktat_fuehren(zweck, name, quelle):
             if schluss is not None and schluss.AcceptWaveform(block):
                 gehoert = json.loads(schluss.Result()).get("text", "").strip()
                 if ist_schluss(gehoert):
-                    melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r}")
+                    seit_start = time.time() - aufnahme_seit
+                    if seit_start < SCHLUSS_SPERRFRIST_S:
+                        # Mitprotokolliert und NICHT verschwiegen: Wenn das
+                        # haeufiger vorkommt, ist es die Spur zur Ursache.
+                        melde(f"  Schluss {gehoert!r} nach nur {seit_start:.1f} s "
+                              f"- Sperrfrist, wird verworfen")
+                        continue
+                    melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r} "
+                          f"nach {seit_start:.1f} s, "
+                          f"{anzahl_aeusserungen} Aeusserungen bis dahin")
                     break
                 if gehoert:
                     letzte_aeusserung = time.time()
@@ -727,6 +760,7 @@ def diktat_fuehren(zweck, name, quelle):
             if not text:
                 continue
             letzte_aeusserung = time.time()
+            anzahl_aeusserungen += 1
             melde(f"  erkannt:     {text!r}")
             if text == SCHLUSSSATZ:
                 # Kommt praktisch nie vor - die freie Erkennung trifft den
