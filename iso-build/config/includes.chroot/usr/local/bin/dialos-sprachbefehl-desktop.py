@@ -172,6 +172,11 @@ GRAMMATIK_AN = json.dumps([
     "wie ist die uhrzeit",
     "welchen tag haben wir",
     "welches datum haben wir",
+    # Bildschirmfoto (Stephan, 2026-08-21). Zwei Formulierungen wie ueberall.
+    # Das Foto ist nicht fuer den Nutzer - er sieht es nicht -, sondern fuer
+    # den sehenden Helfer und den Support: "Was steht da gerade?"
+    "bildschirmfoto erstellen",
+    "bildschirmfoto machen",
     # "hilfe rufen" und "fernwartung beenden" sind ZURUECKGESTELLT
     # (Stephan, 2026-08-20: "können den Rustdesk ganz nach hinten schieben,
     # wenn alles andere läuft"). Sie stehen bewusst NICHT in der Grammatik,
@@ -234,6 +239,8 @@ DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 # dialos-auskunft.py: Am Einsatzort liefert die Standortbestimmung nur eine
 # IP-Schaetzung mit 26 km Ungenauigkeit, und der Befehl haette fast immer
 # geantwortet, dass er nichts abrufen kann.
+FOTO_SKRIPT = "/usr/local/bin/dialos-bildschirmfoto.py"
+FOTO_SAETZE = ("bildschirmfoto erstellen", "bildschirmfoto machen")
 AUSKUNFT_SKRIPT = "/usr/local/bin/dialos-auskunft.py"
 AUSKUNFT_SAETZE = {
     "wie viel uhr ist es": "uhrzeit",
@@ -745,6 +752,27 @@ def diktat_starten(notiz):
         sprich("Ich kann das Diktat nicht starten.")
 
 
+def bildschirmfoto():
+    """Startet das Bildschirmfoto und wartet NICHT darauf.
+
+    Dieselbe Ueberlegung wie bei der Auskunft: Der Dienst muss seine Schleife
+    weiterlaufen lassen. Das Portal antwortet in Sekundenbruchteilen, aber die
+    Ansage danach dauert - und waehrend der darf hier nichts stehenbleiben.
+    """
+    if not os.access(FOTO_SKRIPT, os.X_OK):
+        sprich("Ich kann das Bildschirmfoto nicht finden.")
+        return
+    try:
+        subprocess.Popen([FOTO_SKRIPT],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde("Bildschirmfoto gestartet")
+    except Exception as fehler:
+        melde(f"Bildschirmfoto liess sich nicht starten: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
 def auskunft(was):
     """Startet die Auskunft und kehrt sofort zurueck.
 
@@ -1169,6 +1197,13 @@ def main():
             # Ausloeser-Bedingung unten haengen blieben.
             if satz in DIKTAT_SAETZE:
                 diktat_starten(DIKTAT_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehl: Bildschirmfoto ---
+            if satz in FOTO_SAETZE:
+                bildschirmfoto()
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

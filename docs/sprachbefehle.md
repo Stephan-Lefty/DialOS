@@ -45,6 +45,8 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Wie ist die Uhrzeit?"** | Gleichbedeutend. |
 | **„Welchen Tag haben wir?"** | „Heute ist Mittwoch, der neunzehnte August." Dieselbe Formulierung wie in der Start-Ansage, aus denselben Funktionen gebaut. |
 | **„Welches Datum haben wir?"** | Gleichbedeutend. |
+| **„Bildschirmfoto erstellen"** | Legt ein Foto des Bildschirms unter `~/Bilder/Bildschirmfotos/` ab, mit Datum und Uhrzeit im Namen, und sagt „Das Bildschirmfoto ist gespeichert." **Nicht für den Nutzer** - er sieht es nicht -, sondern für den sehenden Helfer und den Support: „Was steht da gerade?" lässt sich sonst nicht beantworten. Das Gerät hat kein Screenshot-Werkzeug installiert und die GNOME-Schnittstelle ist gesperrt; DialOS geht deshalb über das XDG-Portal - **ohne Rückfrage**, denn ein Dialog wäre hier dasselbe wie keine Funktion. |
+| **„Bildschirmfoto machen"** | Gleichbedeutend. |
 | **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
 | **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
 | **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." Kommt keine verwertbare Antwort, fragt DialOS **ein zweites Mal** („Das habe ich nicht verstanden. Sage ja oder nein."); erst danach bleibt der Zettel stehen. Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |

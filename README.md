@@ -114,6 +114,30 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Bildschirmfoto auf Zuruf (Stephan, 2026-08-21).** „Bildschirmfoto
+  erstellen" oder „Bildschirmfoto machen". Alle 21 Grammatiksätze danach von
+  Piper gesprochen und von Vosk wörtlich erkannt.
+    - **Nicht für den Nutzer, sondern für den Support.** Er sieht das Bild
+      nicht. Aber „was steht da gerade?" lässt sich ohne ein Foto nicht
+      beantworten, wenn niemand danebensitzt.
+    - **Das Gerät konnte gar keine Bildschirmfotos.** Geprüft: weder
+      `gnome-screenshot` noch `grim`, `scrot`, `spectacle` oder `flameshot`
+      sind installiert; `xwd` ist X11 und unter Wayland nutzlos.
+    - **Und die naheliegende Schnittstelle ist gesperrt.**
+      `org.gnome.Shell.Screenshot` antwortet mit
+      `AccessDenied: Screenshot is not allowed` - GNOME 48 behält sie der
+      Shell selbst vor.
+    - **Der Weg ist das XDG-Portal, und die entscheidende Eigenschaft ist
+      `interactive: false`:** Es liefert das Bild **ohne Rückfrage**. Ein
+      Dialog, den der Nutzer bestätigen müsste, wäre auf diesem Gerät dasselbe
+      wie gar keine Funktion. Geprüft, Antwortcode 0, echtes PNG mit
+      1920 × 1080.
+    - **Den Namen vergibt DialOS, nicht das Portal.** Das Portal legt
+      `Screenshot.png` an und zählt hoch. Wer im Support drei Bilder bekommt,
+      will wissen, welches wann entstand - deshalb
+      `bildschirmfoto-2026-08-21-144048.png` im Ordner `Bildschirmfotos`, den
+      GNOME dafür ohnehin vorsieht.
+
 - **Der Brief-Weg: gebaut, gemessen - und an einer Stelle noch offen
   (2026-08-21).** Stephans Wunsch, den Brief anzugehen. Entstanden ist ein
   vollständiger Weg von der Sprache zum fertigen Briefbogen; **nicht gelöst**

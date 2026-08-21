@@ -105,6 +105,29 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Screenshot on request (Stephan, 2026-08-21).** "Bildschirmfoto erstellen"
+  or "Bildschirmfoto machen". All 21 grammar sentences afterwards spoken by
+  Piper and recognised verbatim by Vosk.
+    - **Not for the user but for support.** He cannot see the picture. But
+      "what does it say right now?" cannot be answered without one when nobody
+      is sitting next to him.
+    - **The device could not take screenshots at all.** Checked: neither
+      `gnome-screenshot` nor `grim`, `scrot`, `spectacle` or `flameshot` are
+      installed; `xwd` is X11 and useless under Wayland.
+    - **And the obvious interface is blocked.** `org.gnome.Shell.Screenshot`
+      answers with `AccessDenied: Screenshot is not allowed` - GNOME 48
+      reserves it for the shell itself.
+    - **The route is the XDG portal, and the decisive property is
+      `interactive: false`:** it delivers the picture **without a prompt**. A
+      dialog the user would have to confirm would, on this device, be the same
+      as no function at all. Checked, response code 0, a real PNG at
+      1920 × 1080.
+    - **DialOS assigns the name, not the portal.** The portal writes
+      `Screenshot.png` and counts up. Someone receiving three pictures in
+      support wants to know which was taken when - hence
+      `bildschirmfoto-2026-08-21-144048.png` in the `Bildschirmfotos` folder
+      that GNOME provides for it anyway.
+
 - **The letter path: built, measured - and still open in one place
   (2026-08-21).** Stephan's request to tackle the letter. What emerged is a
   complete path from speech to a finished letterhead; **not solved** is that
