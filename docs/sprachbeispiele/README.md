@@ -5,6 +5,13 @@
 Wie DialOS klingt, ohne dass man das Gerät vor sich hat. Erzeugt am
 2026-08-18 auf Stephans Wunsch.
 
+**Das ist Anna** (`de_DE-kerstin-low`, Tempo 1,00), die Auslieferungsstimme
+seit dem 2026-08-20. Bis zum 2026-08-21 zeigten diese Dateien noch Michael:
+Im Erzeuger stand die Stimme **fest eingetragen**, während das System längst
+die andere sprach - dieselbe Falle wie beim Tempo eine Zeile darunter, nur
+unbemerkt, weil die Dateien für sich genommen richtig klangen. Stimme und
+Tempo kommen jetzt beide aus `piper-generic.conf`.
+
 **Neu erzeugen** nach jeder Änderung an Stimme oder Tempo - sonst zeigen
 die Dateien einen Stand, den es nicht mehr gibt:
 
@@ -14,23 +21,27 @@ scripts/dialos-sprachbeispiele.py
 
 | Datei | Dauer | Was es ist |
 |---|---|---|
-| `01-start-ansage-nutzer.ogg` | 29,3 s | Die Ansage beim Einschalten, wie `nutzer` sie hört. |
-| `02-lautstaerke-frage.ogg` | 10,0 s | Die Rückfrage nach der Lautstärke - kommt nur beim **ersten** Anmelden. |
-| `03-sprachsteuerung-an.ogg` | 0,9 s | Antwort auf „Sprachsteuerung starten". |
-| `04-sprachsteuerung-aus.ogg` | 1,6 s | Antwort auf „Sprachsteuerung stoppen". |
-| `04b-sprachsteuerung-zeitgrenze.ogg` | 3,5 s | Wenn zwei Minuten kein Befehl kam. Bewusst **mit** Begründung - ein blosses „Ich höre Dir nicht mehr zu." liesse den Nutzer rätseln, warum. |
-| `05-desktop-windows.ogg` | 1,4 s | Nach „auf Windows umschalten". |
-| `06-desktop-steht-schon.ogg` | 2,1 s | Wenn der Schreibtisch schon so steht - eine andere Ansage als beim echten Wechsel, weil ein blinder Nutzer beides sonst nicht unterscheiden könnte. |
-| `07-diktat-beginn.ogg` | 3,7 s | Beide Sätze beim Diktatstart einer Notiz. Der erste deckt die ~9 s Ladezeit des grossen Sprachmodells ab. |
-| `07b-diktat-beginn-einkaufszettel.ogg` | 7,3 s | Dasselbe beim **Einkaufszettel** - mit der Anleitung „Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." Nur hier, weil bei einer Notiz eine Äusserung wirklich ein Satz ist. Im Betrieb liegen zwischen den beiden Sätzen die 9 s Ladezeit; in der Datei stehen sie hintereinander. |
-| `07c-diktat-ende-hinweis.ogg` | 8,1 s | Nach „Diktat beenden". Liest **nicht** mehr vor, sondern sagt die Anzahl und wie man das Vorlesen bekommt. **Die längste Ansage im System** - und damit an der Grenze der eigenen Regel, siehe unten. |
-| `08-einkaufszettel-vorlesen.ogg` | 5,8 s | „Einkaufszettel vorlesen". Die Anzahl kommt voran, dann die Einträge mit Pausen. |
-| `09-einkaufszettel-wegwerfen.ogg` | 5,3 s | Die Rückfrage vor dem Leeren - jetzt mit „Sage ja oder nein.", weil ein blinder Nutzer keine Knöpfe sieht. |
-| `09b-rueckfrage-nochmal.ogg` | 3,1 s | Kam keine verwertbare Antwort, wird **einmal** nachgefragt statt abgebrochen. |
-| `10-ton-ueber-lautsprecher.ogg` | 1,5 s | Wenn der Bluetooth-Lautsprecher eingeschaltet wird und der Ton dorthin wandert. |
-| `11-kein-mikrofon.ogg` | 3,5 s | Ein Fehlerfall - er wird **angesagt**, nicht nur ins Protokoll geschrieben. |
+| `01-start-ansage-nutzer.ogg` | 23,2 s | Die Ansage beim Einschalten, wie `nutzer` sie hört. |
+| `02-lautstaerke-frage.ogg` | 7,5 s | Die Rückfrage nach der Lautstärke - kommt nur beim **ersten** Anmelden. |
+| `03-sprachsteuerung-an.ogg` | 0,8 s | Antwort auf „Sprachsteuerung starten". |
+| `04-sprachsteuerung-aus.ogg` | 1,4 s | Antwort auf „Sprachsteuerung stoppen". |
+| `04b-sprachsteuerung-zeitgrenze.ogg` | 2,9 s | Wenn zwei Minuten kein Befehl kam. Bewusst **mit** Begründung - ein blosses „Ich höre Dir nicht mehr zu." liesse den Nutzer rätseln, warum. |
+| `05-desktop-windows.ogg` | 1,2 s | Nach „auf Windows umschalten". |
+| `06-desktop-steht-schon.ogg` | 1,7 s | Wenn der Schreibtisch schon so steht - eine andere Ansage als beim echten Wechsel, weil ein blinder Nutzer beides sonst nicht unterscheiden könnte. |
+| `07-diktat-beginn.ogg` | 2,6 s | Beide Sätze beim Diktatstart einer Notiz. Der erste deckt die ~9 s Ladezeit des grossen Sprachmodells ab. |
+| `07b-diktat-beginn-einkaufszettel.ogg` | 5,3 s | Dasselbe beim **Einkaufszettel** - mit der Anleitung „Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." Nur hier, weil bei einer Notiz eine Äusserung wirklich ein Satz ist. Im Betrieb liegen zwischen den beiden Sätzen die 9 s Ladezeit; in der Datei stehen sie hintereinander. |
+| `07c-diktat-ende-hinweis.ogg` | 6,1 s | Nach „Diktat beenden". Liest **nicht** mehr vor, sondern sagt die Anzahl und wie man das Vorlesen bekommt. **Die längste Ansage im System** - und damit an der Grenze der eigenen Regel, siehe unten. |
+| `08-einkaufszettel-vorlesen.ogg` | 3,0 s | „Einkaufszettel vorlesen". Die Anzahl kommt voran, dann die Einträge mit Pausen. |
+| `09-einkaufszettel-wegwerfen.ogg` | 4,0 s | Die Rückfrage vor dem Leeren - jetzt mit „Sage ja oder nein.", weil ein blinder Nutzer keine Knöpfe sieht. |
+| `09b-rueckfrage-nochmal.ogg` | 2,5 s | Kam keine verwertbare Antwort, wird **einmal** nachgefragt statt abgebrochen. |
+| `10-ton-ueber-lautsprecher.ogg` | 1,1 s | Wenn der Bluetooth-Lautsprecher eingeschaltet wird und der Ton dorthin wandert. |
+| `11-kein-mikrofon.ogg` | 2,7 s | Ein Fehlerfall - er wird **angesagt**, nicht nur ins Protokoll geschrieben. |
+| `12-akku-25.ogg` | 2,1 s | Erste Akkuwarnung bei 25 %. Eine schlichte Feststellung - hier ist noch nichts zu tun. |
+| `12b-akku-15.ogg` | 3,9 s | Zweite Warnung bei 15 %, jetzt mit einem Rat. |
+| `12c-akku-5.ogg` | 3,6 s | Dritte Warnung bei 5 % - **mit Namen** und als Aufforderung. Der Name steht nur hier: Wer ihn dauernd hört, überhört ihn. |
+| `12d-akku-am-netz.ogg` | 1,6 s | Bestätigung nach dem Anstecken. Wer nicht sieht, ob der Stecker sitzt, braucht diese Rückmeldung. |
 
-Zusammen 87 s und rund 526 kB. OGG Vorbis, weil `sox` das ohne
+Zusammen 77 s und rund 499 kB. OGG Vorbis, weil `sox` das ohne
 Zusatzpaket kann und WAV das Repo unnötig aufblähen würde.
 
 ## Was die Dauer über die Ansagen verrät

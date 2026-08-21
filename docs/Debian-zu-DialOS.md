@@ -1646,6 +1646,87 @@ fuer die LAUFENDE Shell unsichtbar - sie durchsucht das Verzeichnis nur beim
 Start, und unter Wayland laesst sie sich nicht neu starten. Es hilft nur
 abmelden und wieder anmelden.
 
+### 11j. Energie: kein Standby, keine Sperre, drei Akkuwarnungen (neu 2026-08-21)
+
+Drei Dinge, die zusammengehoeren: Das Geraet darf nicht einschlafen, es darf
+den Nutzer nicht aussperren, und es muss sagen, wenn der Akku zur Neige geht.
+
+**Gefunden wurden die ersten beiden beilaeufig.** Stephan wollte DialOS eine
+Nacht durchlaufen lassen, um die Selbstaktivierung ohne Menschen im Raum zu
+messen. Beim Vorbereiten fiel auf, dass daraus nichts geworden waere - und
+warum das nicht nur den Test betrifft.
+
+```bash
+sudo install -m 644 iso-build/config/includes.chroot_before_packages/etc/dconf/db/local.d/01-dialos-defaults /etc/dconf/db/local.d/
+sudo dconf update
+# Nur fuer das Support-Konto die Sperre wieder einschalten:
+gsettings set org.gnome.desktop.screensaver lock-enabled true
+```
+
+**Kein Standby am Netz.** Ab Werk schlaeft GNOME nach 900 Sekunden ohne
+Tastatur- oder Mauseingabe ein, am Netz genauso wie im Akkubetrieb. Belegt im
+Systemprotokoll dieses Geraets am 2026-08-20: zweimal
+`Starting systemd-suspend.service`, waehrend DialOS lief (16:26 und 18:20).
+Sprache setzt GNOMEs Untaetigkeits-Zaehler **nicht** zurueck - das tun nur
+Eingabegeraete, und keiner der zehn Inhibitoren blockiert (alle sind "delay").
+Ein blinder Nutzer, der eine Viertelstunde nichts anfasst und dann
+"Sprachsteuerung starten" sagt, bekaeme keine Reaktion und saehe nicht, warum.
+Am Netz also `'nothing'`; im Akkubetrieb bleibt Standby als Schutz vor dem
+leeren Akku, aber erst nach 30 Minuten (Stephans Entscheidung).
+
+**Keine Bildschirmsperre fuer den Nutzer.** `lock-enabled=true` bei
+`lock-delay=0` heisst: Sperre in dem Moment, in dem der Bildschirm dunkel wird,
+also nach fuenf Minuten. Zusammen mit dem Autologin waere der Nutzer damit nach
+fuenf Minuten aus seinem eigenen Geraet ausgesperrt - fuer einen motorisch
+eingeschraenkten Menschen ist genau das der Grund, warum es DialOS gibt. Die
+Tuer ist die LUKS-Vollverschluesselung (siehe `docs/sicherheit-datenschutz.md`),
+nicht der Sperrbildschirm. Fuer `dialosadmin` wird die Sperre einzeln wieder
+eingeschaltet, weil dort die Support-Werkzeuge liegen und dort ein Mensch
+sitzt, der ein Passwort tippen kann. Der **Bildschirm** darf weiter dunkel
+werden - das stoppt die Sprachsteuerung nicht.
+
+**Drei Akkuwarnungen** (Stephans Vorgabe vom selben Tag: 25 %, 15 %, 5 %, "bei
+der letzten mit einer Ansage, das Geraet muss an die Netzdose"):
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-akku-warnung.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-akku-warnung.service /etc/systemd/user/
+sudo systemctl --global enable dialos-akku-warnung.service
+systemctl --user daemon-reload && systemctl --user start dialos-akku-warnung.service
+```
+
+GNOME warnt zwar selbst bei niedrigem Akku - mit einer Bildschirmmeldung, die
+der Nutzer nicht sieht. Fuer ihn faehrt das Geraet ohne Vorwarnung herunter,
+mitten im Satz, und ein leerer Akku ist fuer ihn schwerer zu deuten als fast
+jeder andere Fehler: Das Geraet antwortet einfach nicht mehr.
+
+Drei Stufen, drei Tonfaelle - bei 25 % eine Feststellung, bei 15 % ein Rat, bei
+5 % eine Aufforderung **mit Namen**. Dreimal derselbe Satz waere dreimal
+dasselbe Gewicht, und fuer den Ernstfall bliebe keine Steigerung. Gesprochen
+wird "Steckdose" statt Stephans "Netzdose", weil das jeder ohne Nachdenken
+versteht - die Ansage kommt in dem Moment, in dem wenig Zeit bleibt.
+
+**Ueber die Netzteil-Anzeige, nicht ueber den Akkustatus.** `BAT0/status`
+meldete auf diesem Geraet `Not charging`, waehrend das Netzteil steckte - eine
+Ladeschwelle haelt den Akku bei 78 % an. Wer "nicht am Laden" mit "am Akku"
+gleichsetzt, warnt bei gestecktem Kabel. Gelesen wird deshalb `online` der
+Quelle vom Typ `Mains`.
+
+**Einmal je Entladung**, und uebersprungene Stufen gelten als erledigt: Faellt
+das Geraet im Ruhezustand von 30 % auf 4 %, ist "fast leer" die richtige Ansage
+und nicht "25 Prozent". Waehrend eines Diktats warten 25 % und 15 %; die 5 %
+sprechen trotzdem, denn ein unterbrochener Satz ist besser als ein Geraet, das
+mitten im Brief ausgeht. Und wer nicht sieht, ob der Stecker sitzt, bekommt
+nach dem Anstecken eine kurze Bestaetigung.
+
+Als **systemd-Nutzerdienst** mit `Restart=always`, nicht ueber
+`/etc/xdg/autostart` wie die uebrigen DialOS-Dienste - dieselbe Ueberlegung wie
+beim LanguageTool-Dienst: Faellt er aus, merkt es niemand, bis das Geraet
+ausgeht, und dann ist der Ausfall von einem leeren Akku nicht mehr zu
+unterscheiden. Nutzerdienst und nicht Systemdienst, weil er spricht und die
+Sprachausgabe an der Sitzung haengt. Die Warnung ist zugleich die **sechste
+Quelle** der Mitschrift (`dialos-akku.log`).
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

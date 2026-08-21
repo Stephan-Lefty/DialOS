@@ -31,8 +31,36 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BIN = os.path.join(REPO, "iso-build/config/includes.chroot/usr/local/bin")
 PIPER_DIR = "/usr/local/share/dialos-piper"
-STIMME = "voices/de_DE-thorsten-high.onnx"
 PIPER_CONF = "/etc/speech-dispatcher/modules/piper-generic.conf"
+
+
+def stimme():
+    """Die EINGESTELLTE Stimme, gelesen statt eingetragen.
+
+    Hier stand fest "voices/de_DE-thorsten-high.onnx". Am 2026-08-20 wurde Anna
+    (de_DE-kerstin-low) zur Auslieferungsstimme - die Hoerbeispiele im Repo
+    blieben trotzdem Michael, und zwar unbemerkt, weil sie fuer sich genommen
+    richtig klingen. Genau der Fehler, den der Kommentar bei tempo() unten fuer
+    das Tempo beschreibt, nur eine Zeile weiter oben. Beide Werte kommen jetzt
+    aus piper-generic.conf, also aus derselben Quelle wie im Betrieb.
+    """
+    name = None
+    try:
+        with open(PIPER_CONF, encoding="utf-8") as f:
+            for zeile in f:
+                if zeile.startswith("DefaultVoice"):
+                    teile = shlex.split(zeile)
+                    if len(teile) > 1:
+                        name = teile[1]
+                    break
+    except OSError:
+        pass
+    if not name:
+        return None
+    pfad = os.path.join("voices", name + ".onnx")
+    # Lieber gar keine Beispiele als welche mit der falschen Stimme: Wer sie
+    # anhoert, glaubt sonst, so klinge das Geraet.
+    return pfad if os.path.exists(os.path.join(PIPER_DIR, pfad)) else None
 
 
 def tempo():
@@ -70,7 +98,7 @@ def erzeugen(datei, text, aussprache):
     befehl = (
         f"cd {shlex.quote(PIPER_DIR)} && "
         f"printf %s {shlex.quote(fuer_piper)} | "
-        f"./piper/piper --model {shlex.quote(STIMME)} --noise_w 0 --output_raw 2>/dev/null | "
+        f"./piper/piper --model {shlex.quote(stimme())} --noise_w 0 --output_raw 2>/dev/null | "
         f"sox -r 22050 -c 1 -b 16 -e signed-integer -t raw - "
         f"-C 3 {shlex.quote(datei)} tempo {tempo()} norm 2>/dev/null"
     )
@@ -141,6 +169,7 @@ def main():
     # zu.", dann "Du hast MIR eine Weile nichts gesagt"). Abgeschrieben waeren
     # die Beispiele beim zweiten Mal veraltet gewesen, ohne dass es auffaellt.
     befehl = modul("dialos-sprachbefehl-desktop.py", "dbefehl")
+    akku = modul("dialos-akku-warnung.py", "dakku")
     aussprache = say.fuer_sprachausgabe
 
     # Rueckfrage genau so bauen wie _loeschen() in dialos-notiz.py
@@ -171,6 +200,13 @@ def main():
         ("09b-rueckfrage-nochmal", notiz.ANSAGE_NOCHMAL),
         ("10-ton-ueber-lautsprecher", "Ton über Lautsprecher."),
         ("11-kein-mikrofon", "Ich finde kein Mikrofon. Die Sprachsteuerung ist aus."),
+        # Die drei Akku-Stufen und die Bestaetigung beim Anstecken (Stephans
+        # Vorgabe vom 2026-08-21). Texte aus dem echten Skript, und die letzte
+        # MIT Anrede - genau so kommt sie im Betrieb.
+        ("12-akku-25", akku.STUFEN[0][1]),
+        ("12b-akku-15", akku.STUFEN[1][1]),
+        ("12c-akku-5", akku.anrede(akku.STUFEN[2][1])),
+        ("12d-akku-am-netz", akku.ANSAGE_AM_NETZ),
     ]
 
     print(f"Ziel: {ziel}")

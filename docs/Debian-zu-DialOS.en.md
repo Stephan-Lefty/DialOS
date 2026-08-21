@@ -1577,6 +1577,85 @@ decision.
 invisible to the RUNNING shell - it scans the directory only at startup, and
 under Wayland it cannot be restarted. Only logging out and back in helps.
 
+### 11j. Power: no standby, no lock screen, three battery warnings (new 2026-08-21)
+
+Three things that belong together: the device must not fall asleep, it must not
+lock the user out, and it must say when the battery is running low.
+
+**The first two were found in passing.** Stephan wanted to let DialOS run
+through a night in order to measure self-activation with nobody in the room.
+While preparing that it turned out nothing would have come of it - and why that
+concerns more than the test.
+
+```bash
+sudo install -m 644 iso-build/config/includes.chroot_before_packages/etc/dconf/db/local.d/01-dialos-defaults /etc/dconf/db/local.d/
+sudo dconf update
+# Switch the lock back on for the support account only:
+gsettings set org.gnome.desktop.screensaver lock-enabled true
+```
+
+**No standby on mains.** Out of the box GNOME sleeps after 900 seconds without
+keyboard or mouse input, on mains just as on battery. Proven in this device's
+system log on 2026-08-20: twice `Starting systemd-suspend.service` while DialOS
+was running (16:26 and 18:20). Speech does **not** reset GNOME's idle counter -
+only input devices do, and none of the ten inhibitors blocks (all are "delay").
+A blind user who touches nothing for a quarter of an hour and then says
+"Sprachsteuerung starten" would get no reaction and would not see why. On mains
+therefore `'nothing'`; on battery standby stays as protection against a flat
+battery, but only after 30 minutes (Stephan's decision).
+
+**No screen lock for the user.** `lock-enabled=true` with `lock-delay=0` means
+locking the moment the screen goes dark, i.e. after five minutes. Together with
+the autologin the user would be locked out of their own device after five
+minutes - for someone with impaired motor control that is precisely the reason
+DialOS exists. The door is the LUKS full-disk encryption (see
+`docs/sicherheit-datenschutz.md`), not the lock screen. For `dialosadmin` the
+lock is switched back on individually, because that is where the support tools
+live and where a person sits who can type a password. The **screen** may still
+go dark - that does not stop the voice control.
+
+**Three battery warnings** (Stephan's requirement the same day: 25 %, 15 %, 5 %,
+"the last one with an announcement that the device must go to the mains socket"):
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-akku-warnung.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-akku-warnung.service /etc/systemd/user/
+sudo systemctl --global enable dialos-akku-warnung.service
+systemctl --user daemon-reload && systemctl --user start dialos-akku-warnung.service
+```
+
+GNOME does warn about a low battery itself - with an on-screen message the user
+cannot see. For them the device shuts down without warning, mid-sentence, and a
+flat battery is harder for them to interpret than almost any other fault: the
+device simply stops answering.
+
+Three levels, three tones - at 25 % a statement, at 15 % advice, at 5 % a demand
+**with the name**. The same sentence three times would carry the same weight
+three times, leaving no escalation for the serious case. Spoken is "Steckdose"
+rather than Stephan's "Netzdose", because everyone understands that without
+thinking - the announcement comes at a moment when little time is left.
+
+**Via the mains indicator, not the battery status.** `BAT0/status` on this
+device reported `Not charging` while the power supply was plugged in - a charge
+threshold holds the battery at 78 %. Equating "not charging" with "on battery"
+warns with the cable connected. What is read is therefore `online` of the source
+of type `Mains`.
+
+**Once per discharge**, and skipped levels count as done: if the device drops
+from 30 % to 4 % while suspended, "almost empty" is the right announcement, not
+"25 percent". During a dictation 25 % and 15 % wait; the 5 % speaks anyway,
+because an interrupted sentence is better than a device that dies mid-letter.
+And someone who cannot see whether the plug is seated gets a short confirmation
+after plugging in.
+
+As a **systemd user service** with `Restart=always`, not via
+`/etc/xdg/autostart` like the other DialOS services - the same reasoning as for
+the LanguageTool service: if it fails, nobody notices until the device goes off,
+and then the failure is indistinguishable from a flat battery. A user service
+and not a system service, because it speaks and speech output hangs off the
+session. The warning is also the **sixth source** of the live transcript
+(`dialos-akku.log`).
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

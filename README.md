@@ -114,6 +114,66 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Drei Akkuwarnungen - und die Hörbeispiele sprachen noch mit der alten
+  Stimme (2026-08-21).** Stephans Vorgabe: Warnungen bei 25 %, 15 % und 5 %,
+  „bei der letzten mit einer Ansage, das Gerät muss an die Netzdose".
+    - **Warum GNOME das nicht schon erledigt:** Es warnt mit einer
+      Bildschirmmeldung. Der Nutzer sieht sie nicht. Für ihn fährt das Gerät
+      ohne Vorwarnung herunter, mitten im Satz - und ein leerer Akku ist für
+      ihn schwerer zu deuten als fast jeder andere Fehler, weil das Gerät
+      einfach nicht mehr antwortet.
+    - **Drei Stufen, drei Tonfälle:** bei 25 % eine Feststellung, bei 15 % ein
+      Rat, bei 5 % eine Aufforderung **mit Namen**. Dreimal derselbe Satz wäre
+      dreimal dasselbe Gewicht, und für den Ernstfall bliebe keine Steigerung.
+      Gesprochen wird „Steckdose" statt „Netzdose" - die Ansage kommt in dem
+      Moment, in dem wenig Zeit bleibt, und muss auf Anhieb sitzen.
+    - **Über die Netzteil-Anzeige, nicht über den Akkustatus.** `BAT0/status`
+      meldete `Not charging`, während das Netzteil steckte: Eine Ladeschwelle
+      hält den Akku bei 78 %. Wer „nicht am Laden" mit „am Akku" gleichsetzt,
+      warnt bei gestecktem Kabel.
+    - **Übersprungene Stufen gelten als erledigt.** Fällt das Gerät im
+      Ruhezustand von 30 % auf 4 %, ist „fast leer" die richtige Ansage und
+      nicht „25 Prozent". Während eines Diktats warten 25 % und 15 %; die 5 %
+      sprechen trotzdem - ein unterbrochener Satz ist besser als ein Gerät, das
+      mitten im Brief ausgeht.
+    - **Ein Fehler, den ich beim Schreiben der Ansagen fast gemacht hätte:**
+      „Das Geraet muss an die Steckdose" - im Projekt sind Bezeichner und
+      Kommentare ASCII, **gesprochene Texte tragen echte Umlaute**. Piper hätte
+      „Ge-ra-et" gesagt, ausgerechnet in der dringendsten Ansage. Gefunden beim
+      Vergleich mit den vorhandenen Ansagen, vor dem ersten Sprechen.
+    - **Und ein Fehler, der schon einen Tag alt war:** Im Erzeuger der
+      Hörbeispiele stand die Stimme **fest eingetragen**
+      (`de_DE-thorsten-high`), während seit dem 2026-08-20 Anna ausgeliefert
+      wird. Alle 15 Beispiele im Repo waren also noch Michael - unbemerkt, weil
+      sie für sich genommen richtig klingen. Exakt die Falle, die der Kommentar
+      bei `tempo()` **eine Zeile darunter** beschreibt und die dort schon
+      behoben war. Stimme und Tempo kommen jetzt beide aus
+      `piper-generic.conf`; alle 19 Beispiele sind neu erzeugt, und die Dauern
+      in der Tabelle wurden aus den Dateien gelesen statt abgeschrieben.
+
+- **Das Gerät schlief von allein ein - und sperrte den Nutzer aus
+  (2026-08-21).** Beide Funde kamen beim Vorbereiten der Nachtmessung, und
+  beide betreffen das Produkt, nicht den Test.
+    - **Standby:** Ab Werk schläft GNOME nach 900 s ohne Tastatur- oder
+      Mauseingabe ein, am Netz wie im Akkubetrieb. Belegt im Systemprotokoll:
+      zweimal `Starting systemd-suspend.service`, während DialOS lief (16:26
+      und 18:20 am 2026-08-20). **Sprache setzt GNOMEs Untätigkeits-Zähler
+      nicht zurück** - das tun nur Eingabegeräte, und keiner der zehn
+      Inhibitoren blockiert. Ein blinder Nutzer, der eine Viertelstunde nichts
+      anfasst und dann „Sprachsteuerung starten" sagt, bekäme keine Reaktion
+      und sähe nicht, warum. Am Netz jetzt `'nothing'`, im Akku Standby nach 30
+      statt 15 Minuten.
+    - **Sperre:** `lock-enabled=true` bei `lock-delay=0` - Sperre in dem
+      Moment, in dem der Bildschirm dunkel wird. Mit Autologin wäre der Nutzer
+      nach fünf Minuten aus seinem eigenen Gerät ausgesperrt. Für einen
+      motorisch eingeschränkten Menschen ist genau das der Grund, warum es
+      DialOS gibt. Die Tür ist die LUKS-Vollverschlüsselung, nicht der
+      Sperrbildschirm; für `dialosadmin` bleibt sie einzeln eingeschaltet.
+    - **Der Bildschirm darf weiter dunkel werden** (Stephans Entscheidung) - er
+      stoppt nichts und spart Strom. Ausdrücklich gesetzt statt geerbt: Ein
+      geerbter Wert ist keine Entscheidung und kann beim nächsten
+      GNOME-Sprung anders lauten.
+
 - **Die Fußzeile war gebaut, aber niemand rief sie auf (2026-08-20).**
   Stephan: „ich habe gestern mal eine Mail geschickt und da ist die Zeile
   nicht drin gewesen!" Sie **konnte** nicht drin sein. `dialos-fusszeile.py`

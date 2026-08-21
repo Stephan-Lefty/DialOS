@@ -1,0 +1,28 @@
+[Unit]
+# Warnt hoerbar bei 25 %, 15 % und 5 % Akku (Stephans Vorgabe, 2026-08-21).
+#
+# WARUM systemd UND NICHT /etc/xdg/autostart wie die uebrigen DialOS-Dienste:
+# Genau dieselbe Ueberlegung wie beim LanguageTool-Dienst. Faellt dieser hier
+# aus, merkt es niemand - bis das Geraet mitten im Satz ausgeht, und dann ist
+# der Ausfall nicht mehr von einem leeren Akku zu unterscheiden. Eine
+# .desktop-Datei kann einen abgestuerzten Dienst nicht zurueckholen,
+# "Restart=always" kann es.
+#
+# WARUM EIN NUTZERDIENST und kein Systemdienst: Er spricht. Die Sprachausgabe
+# haengt an der Sitzung des angemeldeten Nutzers - ein Systemdienst haette
+# keinen Zugang zu deren Tonausgabe.
+Description=DialOS Akku-Warnung (25 %, 15 %, 5 %)
+Documentation=file:///usr/local/bin/dialos-akku-warnung.py
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/dialos-akku-warnung.py
+Restart=always
+RestartSec=10
+# Der Dienst schlaeft die meiste Zeit. Er darf der Erkennung und der
+# Sprachausgabe nie im Weg stehen.
+Nice=10
+
+[Install]
+WantedBy=default.target

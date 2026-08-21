@@ -105,6 +105,62 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **Three battery warnings - and the speech samples still used the old voice
+  (2026-08-21).** Stephan's requirement: warnings at 25 %, 15 % and 5 %, "the
+  last one with an announcement that the device must go to the mains socket".
+    - **Why GNOME does not already handle this:** it warns with an on-screen
+      message. The user cannot see it. For them the device shuts down without
+      warning, mid-sentence - and a flat battery is harder for them to
+      interpret than almost any other fault, because the device simply stops
+      answering.
+    - **Three levels, three tones:** at 25 % a statement, at 15 % advice, at
+      5 % a demand **with the name**. The same sentence three times would carry
+      the same weight three times, leaving no escalation for the serious case.
+      Spoken is "Steckdose" rather than "Netzdose" - the announcement comes at a
+      moment when little time is left and has to land first time.
+    - **Via the mains indicator, not the battery status.** `BAT0/status`
+      reported `Not charging` while the power supply was plugged in: a charge
+      threshold holds the battery at 78 %. Equating "not charging" with "on
+      battery" warns with the cable connected.
+    - **Skipped levels count as done.** If the device drops from 30 % to 4 %
+      while suspended, "almost empty" is the right announcement, not "25
+      percent". During a dictation 25 % and 15 % wait; the 5 % speaks anyway -
+      an interrupted sentence is better than a device that dies mid-letter.
+    - **A mistake I nearly made while writing the announcements:** "Das Geraet
+      muss an die Steckdose" - in this project identifiers and comments are
+      ASCII, but **spoken texts carry real umlauts**. Piper would have said
+      "Ge-ra-et", in the most urgent announcement of all. Found by comparing
+      with the existing announcements, before anything was spoken.
+    - **And a mistake that was already a day old:** the speech-sample generator
+      had the voice **hard-coded** (`de_DE-thorsten-high`), while Anna has been
+      the delivery voice since 2026-08-20. So all 15 samples in the repo were
+      still Michael - unnoticed, because they sound right on their own. Exactly
+      the trap the comment at `tempo()` **one line below** describes and which
+      had already been fixed there. Voice and tempo now both come from
+      `piper-generic.conf`; all 19 samples were regenerated, and the durations
+      in the table were read from the files instead of copied.
+
+- **The device fell asleep on its own - and locked the user out (2026-08-21).**
+  Both findings came up while preparing the overnight measurement, and both
+  concern the product, not the test.
+    - **Standby:** out of the box GNOME sleeps after 900 s without keyboard or
+      mouse input, on mains as on battery. Proven in the system log: twice
+      `Starting systemd-suspend.service` while DialOS was running (16:26 and
+      18:20 on 2026-08-20). **Speech does not reset GNOME's idle counter** -
+      only input devices do, and none of the ten inhibitors blocks. A blind user
+      who touches nothing for a quarter of an hour and then says
+      "Sprachsteuerung starten" would get no reaction and would not see why. On
+      mains now `'nothing'`, on battery standby after 30 instead of 15 minutes.
+    - **Lock:** `lock-enabled=true` with `lock-delay=0` - locking the moment the
+      screen goes dark. With the autologin the user would be locked out of their
+      own device after five minutes. For someone with impaired motor control
+      that is precisely the reason DialOS exists. The door is the LUKS full-disk
+      encryption, not the lock screen; for `dialosadmin` it stays switched on
+      individually.
+    - **The screen may still go dark** (Stephan's decision) - it stops nothing
+      and saves power. Set explicitly rather than inherited: an inherited value
+      is not a decision, and it can read differently after the next GNOME jump.
+
 - **The footer was built, but nobody called it (2026-08-20).** Stephan: "I
   sent a mail yesterday and the line was not in it!" It **could not** have
   been. `dialos-fusszeile.py` had been built the day before, documented, and
