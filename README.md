@@ -117,6 +117,16 @@ abgeschlossen.*
 - **Bildschirmfoto auf Zuruf (Stephan, 2026-08-21).** „Bildschirmfoto
   erstellen" oder „Bildschirmfoto machen". Alle 21 Grammatiksätze danach von
   Piper gesprochen und von Vosk wörtlich erkannt.
+    - **Das Mitschrift-Fenster ist nicht mit auf dem Bild** (Stephans
+      Nachtrag). Es ist DialOS' eigene Anzeige - ein Terminal mit hundert
+      Spalten mitten auf dem Schirm - und verdeckt auf einem Support-Foto
+      genau das, was der Helfer sehen will. Der Dienst schließt es deshalb
+      **vor** dem Foto und öffnet es danach wieder; das kostet rund vier
+      Sekunden, in denen die Erkennung steht. Vertretbar, weil der Nutzer
+      gerade selbst einen Befehl gesprochen hat und ohnehin auf die Ansage
+      wartet. Wieder geöffnet wird nur, wenn vorher eines lief - wer die
+      Mitschrift abgeschaltet hat, bekommt sie nicht durch ein
+      Bildschirmfoto zurück.
     - **Nicht für den Nutzer, sondern für den Support.** Er sieht das Bild
       nicht. Aber „was steht da gerade?" lässt sich ohne ein Foto nicht
       beantworten, wenn niemand danebensitzt.

@@ -752,25 +752,47 @@ def diktat_starten(notiz):
         sprich("Ich kann das Diktat nicht starten.")
 
 
-def bildschirmfoto():
-    """Startet das Bildschirmfoto und wartet NICHT darauf.
+# Wie lange das Fenster braucht, um wirklich vom Bildschirm zu verschwinden.
+# Ohne diese Pause steht es noch auf dem Foto - der Fenstermanager raeumt es
+# nicht in dem Augenblick weg, in dem der Prozess endet.
+FOTO_NACHLAUF_S = 0.8
 
-    Dieselbe Ueberlegung wie bei der Auskunft: Der Dienst muss seine Schleife
-    weiterlaufen lassen. Das Portal antwortet in Sekundenbruchteilen, aber die
-    Ansage danach dauert - und waehrend der darf hier nichts stehenbleiben.
+
+def bildschirmfoto():
+    """Bildschirmfoto - OHNE das Mitschrift-Fenster (Stephan, 2026-08-21).
+
+    WARUM DAS FENSTER WEG MUSS: Die Mitschrift ist DialOS' eigene Anzeige, ein
+    Terminal mit hundert Spalten mitten auf dem Schirm. Auf einem Foto fuer den
+    Support verdeckt sie genau das, was der Helfer sehen will - und zeigt ihm
+    dafuer Zeilen, die er im Support-Protokoll ohnehin lesen kann.
+
+    DESHALB SYNCHRON, anders als bei der Auskunft: schliessen, fotografieren,
+    wieder oeffnen. Das haelt die Schleife rund vier Sekunden auf. Das ist
+    vertretbar, weil der Nutzer gerade selbst einen Befehl gesprochen hat und
+    ohnehin auf die Ansage wartet - und die Alternative waere ein Foto, auf dem
+    das Wichtigste verdeckt ist.
+
+    WIEDER GEOEFFNET WIRD NUR, WENN VORHER EINES LIEF. Wer die Mitschrift
+    abgeschaltet hat, bekommt sie nicht durch ein Bildschirmfoto zurueck.
     """
     if not os.access(FOTO_SKRIPT, os.X_OK):
         sprich("Ich kann das Bildschirmfoto nicht finden.")
         return
+    lief = bool(mitschrift_pids())
+    if lief:
+        melde("  Mitschrift wird fuers Foto geschlossen")
+        mitschrift_schliessen()
+        time.sleep(FOTO_NACHLAUF_S)
     try:
-        subprocess.Popen([FOTO_SKRIPT],
-                         stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL,
-                         start_new_session=True)
-        melde("Bildschirmfoto gestartet")
+        subprocess.run([FOTO_SKRIPT], stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, timeout=60)
+        melde("Bildschirmfoto erstellt")
     except Exception as fehler:
-        melde(f"Bildschirmfoto liess sich nicht starten: {fehler}")
+        melde(f"Bildschirmfoto liess sich nicht erstellen: {fehler}")
         sprich("Ich kann das nicht ausführen.")
+    finally:
+        if lief:
+            mitschrift_oeffnen()
 
 
 def auskunft(was):

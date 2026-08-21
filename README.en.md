@@ -108,6 +108,15 @@ background) and `splash.png` (boot/login screen).
 - **Screenshot on request (Stephan, 2026-08-21).** "Bildschirmfoto erstellen"
   or "Bildschirmfoto machen". All 21 grammar sentences afterwards spoken by
   Piper and recognised verbatim by Vosk.
+    - **The transcript window is not in the picture** (Stephan's addition).
+      It is DialOS' own display - a terminal a hundred columns wide in the
+      middle of the screen - and on a support photo it covers exactly what
+      the helper wants to see. The service therefore closes it **before** the
+      shot and reopens it afterwards; that costs about four seconds during
+      which recognition is paused. Acceptable, because the user has just
+      spoken a command and is waiting for the announcement anyway. It is only
+      reopened if one was running before - switching the transcript off is
+      not undone by taking a screenshot.
     - **Not for the user but for support.** He cannot see the picture. But
       "what does it say right now?" cannot be answered without one when nobody
       is sitting next to him.
