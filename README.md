@@ -204,6 +204,19 @@ abgeschlossen.*
       von Stunden - und **ein Aufweckwort schließt das Mikrofon ohnehin nicht**,
       es muss zuhören, um das Weckwort zu hören. Diese zwei Änderungen bringen
       heute mehr und machen die Messung für später besser.
+    - **Im Betrieb bestätigt (2026-08-21 früh).** Die Zahlen oben waren
+      *gerechnet* - dieselben zwei Stunden Daten durch beide Regeln geschickt.
+      Jetzt liegen sie *gemessen* vor: Protokoll von 16:45 bis 09:39 des
+      Folgetags, fünf Dienststarts dazwischen. **46-mal** `'starten'` allein,
+      **7-mal** `'sprachsteuerung'` allein, **7-mal** `'[unk] starten'` - also
+      **60 Beinahe-Treffer und null Fehlstarts**. Alle sieben Einschaltungen
+      kamen mit dem vollen Satz und waren Stephans Tests. Die Vorhersage „zwei
+      bestimmte Wörter hintereinander fallen im Gespräch praktisch nicht" hat
+      im Feld gehalten.
+    - **Auch die kurze Frist greift.** Am Vortag liefen **alle** sieben
+      Einschaltungen in die 120 s. Jetzt endeten **6 von 8** nach 30 Sekunden
+      und nur 2 nach 120 - das sind 9 Minuten weniger scharfe
+      Befehlsgrammatik an einem einzigen Testtag.
 
 - **Die Kernwort-Umstellung ist im Betrieb gemessen - 30 gegen 7 (2026-08-20).**
   Zwei Stunden Protokoll aus dem laufenden Gerät, **dieselben Daten durch beide

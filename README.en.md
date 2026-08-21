@@ -147,6 +147,116 @@ background) and `splash.png` (boot/login screen).
       the line itself; the note now sits in `TODO.md` at exactly the place
       where that path gets built.
 
+- **The user's name sounded wrong - and pronunciation belongs in the name
+  file, not in the rule table (2026-08-20).** Stephan's observation: "Michael
+  says Stefffan". The name is spoken in **every** greeting, every question and
+  every error - mispronounced it grates more than any other word.
+    - **`nutzer-name.txt` now has two fields:** `Stephan | Stefan`. The written
+      form stays "Stephan" - for letters and printouts, where "Stefan" would
+      simply be wrong. The second field is what gets spoken. If it is missing,
+      the first counts for both.
+    - **Why not in the pronunciation table** of `dialos-say.py`, where
+      "Tastatur" and "ID" live: rules there apply to **all** devices. A
+      customer's name applies to **one**. One rule per customer would be a list
+      of strangers' names in the repo within a year - and wrong again for the
+      next customer. Pronunciation belongs where the name is.
+    - **I would not have found this alone.** I had checked the name form of
+      address against three announcements and declared it done; that the name
+      itself sounds wrong is only audible to someone who knows it.
+    - Edge cases checked: nonsense in the second field falls back to the written
+      name, comment lines in the file are allowed, an empty file still yields the
+      plain "Du".
+
+- **30 -> 7 -> 3: switching on now requires both words, and without a command
+  it ends after 30 seconds (evening of 2026-08-20).** Two small changes instead
+  of the wake word - both calculated on the same two hours of operating data.
+    - **"Sprachsteuerung starten" needs both words.** `'starten'` alone had
+      fired 27 times, `'sprachsteuerung'` alone four times - and **none** of the
+      seven activations was followed by a command. 30 possible false starts
+      become **3**, and those three are exactly the real attempts. Two specific
+      words in a row practically do not occur in conversation.
+    - **Two deadlines instead of one:** 30 seconds as long as **no** command has
+      come, the full two minutes afterwards. That day all 7 activations ran into
+      the 120 s - 14 minutes of live command grammar nobody wanted; with the
+      short deadline it would have been 3.5.
+    - **And two different announcements for it.** After a conversation the
+      reason ("you haven't said anything for a while"), otherwise only the short
+      "I am no longer listening to you." A long explanation for something the
+      user never triggered is itself just noise.
+    - **Why this instead of the wake word:** openWakeWord's ready-made models
+      are **CC BY-NC-SA** - non-commercial, and DialOS is sold. An own model is
+      possible (code and Google's embedding are Apache 2.0), but the training
+      data decides sellability: that is exactly where the shipped models failed.
+      That is a project of days, not hours - and **a wake word does not close
+      the microphone anyway**, it has to listen in order to hear the wake word.
+      These two changes deliver more today and make the later measurement better.
+    - **Confirmed in operation (morning of 2026-08-21).** The numbers above were
+      *calculated* - the same two hours of data run through both rules. Now they
+      are *measured*: log from 16:45 to 09:39 the next day, five service starts
+      in between. **46 times** `'starten'` alone, **7 times** `'sprachsteuerung'`
+      alone, **7 times** `'[unk] starten'` - that is **60 near misses and zero
+      false starts**. All seven activations came with the full sentence and were
+      Stephan's tests. The prediction "two specific words in a row practically do
+      not occur in conversation" held up in the field.
+    - **The short deadline works too.** The day before, **all** seven activations
+      ran into the 120 s. Now **6 of 8** ended after 30 seconds and only 2 after
+      120 - that is 9 minutes less live command grammar on a single test day.
+
+- **The core-word change is measured in operation - 30 against 7 (2026-08-20).**
+  Two hours of log from the running device, **the same data run through both
+  rules**:
+    - `'starten'` alone was recognized **27 times** - pure ambient noise.
+    - The old rule would have switched on **30 times**, the new one switched on
+      **7 times**. Saving: **23 activations of two minutes each = 46 minutes of
+      open microphone** in a good two hours.
+    - This is a better measurement than the morning's, because it does not
+      compare two periods but sends one body of data through both rules.
+    - **And it shows the limit:** 7 activations, 7 deadline shutdowns - not a
+      single one was followed by a command. So those 7 were largely noise too,
+      above all the four with `'sprachsteuerung'` alone. The change pushes the
+      problem down by a good three quarters, it does not solve it. The real road
+      remains the wake word (`TODO.md`).
+    - **My own mistake along the way:** my restart helper always set the log
+      aside under the same name and overwrote the first backup on the second run
+      - the raw data of the 157 utterances from that morning is gone. The result
+      is in the commits, the data is not. The helper now sets nothing aside at
+      all: since that day logrotate cleans up the logs, and a second mechanism
+      next to it only creates name collisions.
+
+- **Anna is the new voice of DialOS (2026-08-20).** Stephan's decision: a
+  friendly female voice. The listening comparison of three Piper voices produced
+  **`de_DE-kerstin-low`** at tempo **1.00**, name **Anna** - and since this
+  change also the **delivery voice** in the template, not only on the test
+  device.
+    - **Three things switch together** (`dialos-stimme.py setzen kerstin`):
+      voice, name and tempo. Individually each would be wrong - a female voice
+      introducing itself as Michael just as much as a tempo belonging to the
+      previous voice.
+    - **Tempo differs per voice, measurably so:** the same sentence takes
+      Thorsten 7.75 s at tempo 0.88, Kerstin **8.99 s** at the same value. Only
+      1.00 brings her to 7.91 s. That answers the second of the three points
+      before the second voice - with yes.
+    - **The name was settled long ago** and was not reinvented:
+      `docs/ersteinrichtung.md` has long listed Michael and Daniel for male,
+      Anna and Julia for female. Stephan pointed me to it before I had asked.
+    - **And Anna knows the user's name.** Following Stephan's question ("can we
+      build in the user name too ... rather where it makes sense, as a
+      replacement for Du/Dir") DialOS now addresses him - in the greeting, at
+      decisions and at errors, **not** at confirmations and not at the deadline.
+      The reason weighs more here than politeness: the name at the start of a
+      sentence is a **signal** - with the radio on or a visitor in the room,
+      "Stephan, ..." says unmistakably that this concerns him. Someone who hears
+      it constantly stops hearing it.
+    - **Without a name file it stays the plain "Du",** and every announcement
+      still reads correctly. None of them depends on a name being entered.
+    - **Four mistakes of my own on the way:** "Stephan, **I**ch finde kein
+      Mikrofon" (after a comma it is lower case in German); "Stephan, hallo, ich
+      bin Anna" (the greeting builds the name in itself); the greeting sentence
+      exists in **two** places and I changed only one; and I put an example file
+      into `includes.chroot` - exactly what I had identified as wrong an hour
+      earlier with `gdm3/custom.conf`. The check script found the last two, not
+      me.
+
 - **Security updates now run unattended (2026-08-20).** `unattended-upgrades`
   2.12 installed and configured - decided in `docs/anwendungen.en.md` on
   2026-08-18 and listed there as "package not yet installed".
