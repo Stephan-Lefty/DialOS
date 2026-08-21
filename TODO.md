@@ -281,25 +281,73 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
       Sprechpause. Preis: „in diesem Punkt" wird zu „in diesem." - fällt
       beim Vorlesen auf. Ersetzt wird **wortweise**, damit „Punkte" und
       „Kommando" unangetastet bleiben. Listen bekommen keine Satzzeichen.
+    - [ ] **NÄCHSTER SCHRITT: Der Schluss braucht eine Sprechpause.**
+      Der Schluss-Erkenner macht aus laufender Rede ein „diktat beenden" -
+      gemessen mit Piper entstehen aus 30 s Brieftext im Sekundentakt
+      Bruchstücke (`'beenden'` bei 8,4 s, `'diktat'` bei 4,8 s,
+      `'beenden [unk]'` bei 18,2 s). Am 2026-08-21 brach Stephans Diktat
+      deshalb nach 12,1 s mitten im Satz ab. Sein Urteil ist das Maß:
+      **„Diesen Text kann ich nie zu Ende bringen."**
+
+      Vier Reparaturen haben nicht gereicht: Sperrfrist von 3 s, Pegel-Tor,
+      beide Wörter verlangen, Ansage bei halbem Schluss. Der **Aufbau** ist
+      das Problem, nicht die Regel: Ein zweiter Erkenner mit eingeschränkter
+      Grammatik muss jedes Geräusch auf eine seiner Phrasen abbilden.
+
+      **Der Weg:** Ein echtes „Diktat beenden" folgt auf eine Sprechpause,
+      ein Bruchstück entsteht mitten im Redefluss. Also einen Verlauf der
+      Blockpegel führen und den Schluss nur annehmen, wenn davor eine
+      Ruhephase lag. Dieselbe Bedingung bringt auch die Ansage zurück, die
+      am 2026-08-21 zurückgebaut werden musste, weil sie mitten im Diktat
+      störte.
+
+      **Pflicht: offline gegen Piper prüfen, bevor Stephan testet.** Zwei
+      Fälle, beide ohne ihn messbar - Dauerrede darf nicht stoppen, Text mit
+      Pause und Schlusssatz muss stoppen. Der Aufbau dafür steht: Piper
+      spricht, beide Erkenner hören mit, jedes Ergebnis mit Zeitstempel.
     - [ ] **Eine Zeile je Eintrag.** Vosk schneidet erst an einer
       Sprechpause; ohne Pause landet alles in einer Zeile. Für einen
       Einkaufszettel wäre eine Zeile je Eintrag besser.
     - [ ] **Briefe:** 98,1 % Schreibung reichen für Notizen und Mail. Für
       einen Brief an die Krankenkasse ist zu entscheiden, ob das genügt
       oder ob er vor dem Absenden geprüft werden muss.
-    - [ ] **Fußzeile in den Brief mitnehmen.** Die Herkunftszeile
-      erreicht seit 2026-08-20 nur Mails (Thunderbird-Signatur). „Jedes
-      Dokument" und „jeder Ausdruck" aus Stephans Vorgabe haben noch
-      keinen Erzeuger: `~/Dokumente` ist leer, alles Gesprochene landet
-      als Notiz in `~/Notizen`, und Notizen bekommen bewusst keine
-      Fußzeile. Wer den Brief-Weg baut, hängt sie mit
-      `dialos-fusszeile.py anhaengen DATEI` an oder legt eine
-      Writer-Vorlage in `~/Vorlagen` mit der Zeile in der Seitenfußzeile.
-      **Vorher gebaut wäre die Vorlage wieder ein Werkzeug ohne
-      Benutzer** - genau der Fehler, der die Zeile aus der Mail vom
-      2026-08-19 hat verschwinden lassen.
+    - [x] **Fußzeile im Brief - erledigt 2026-08-21.**
+      `dialos-diktat.py` setzt den diktierten Text in einen Briefbogen aus
+      reinem Text: Absender und Datum rechtsbündig, Text auf Breite 76
+      umgebrochen, darunter der Hinweis auf die fehlende Unterschrift und
+      unten rechts die Herkunftszeile. Den Satz holt es aus
+      `dialos-fusszeile.py`, die Monatsnamen aus `dialos-start-ansage.py` -
+      geholt, nicht abgeschrieben.
+      
+      Offen bleibt „**jeder Ausdruck**" aus Stephans ursprünglicher Vorgabe:
+      siehe den Punkt „Drucken per Sprache" weiter unten. Eine Writer-Vorlage
+      in `~/Vorlagen` braucht es dafür nicht mehr - der Briefbogen entsteht
+      im Text selbst.
+  - [ ] **PDF-Archiv jeder Mail und jedes Briefes** (Stephan,
+    2026-08-21). Ziel: `~/Dokumente/DialOS-DATA/`. Der Ordnername ist
+    Stephans Wahl, damit das Archiv spaeter unveraendert auf den Stick
+    wandern kann.
+    
+    **Auf dem Stick liegt es bewusst NICHT.** Zwei Gruende, beide aus
+    `docs/sicherheit-datenschutz.md`: Die Partition `DIALOS-DATA` ist
+    unverschluesseltes exFAT - absichtlich, damit der Nutzer sie an Windows
+    lesen kann -, und der Stick soll **getrennt vom Laptop** aufbewahrt
+    werden. Ein Archiv, das meistens nicht steckt, kann nicht automatisch
+    beschrieben werden; und Briefe an die Krankenkasse sind
+    Gesundheitsdaten, die nicht von der LUKS-Platte auf einen offenen Stick
+    gehoeren - schon gar nicht auf denselben Gegenstand, der den
+    LUKS-Schluessel traegt.
+    
+    Werkzeuge vorhanden: `libreoffice --headless` und `ps2pdf`.
   - [ ] **Vorlesen** von Mails, Dokumenten und Webseiten.
-  - [ ] **Drucken per Sprache.** Die Grammatik kennt keinen
+  - [ ] **Drucken per Sprache - Stephans Wunsch vom 2026-08-21:**
+    „der Brief muss dann, wenn er fertig ist, gedruckt werden". Der Brother
+    HL-L2350DW ist eingerichtet und im Leerlauf, aber es gibt **keinen
+    Standarddrucker** - `dialos-fusszeile.py drucken` ruft `lp -` ohne Ziel
+    auf und liefe ins Leere. Zwei Dinge also: Standardziel setzen und einen
+    Sprachbefehl. Zu entscheiden ist noch, ob automatisch beim „Diktat
+    beenden" gedruckt wird oder auf eigenen Befehl - automatisch spart einen
+    Schritt, druckt aber auch jeden Probelauf.
     Druckbefehl. `dialos-fusszeile.py drucken DATEI` liegt bereit und
     hängt die Herkunftszeile beim Drucken an - auch an Notizen, die im
     Bildschirm bewusst keine bekommen (Stephans Entscheidung vom

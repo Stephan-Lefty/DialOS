@@ -105,6 +105,70 @@ background) and `splash.png` (boot/login screen).
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 
+- **The letter path: built, measured - and still open in one place
+  (2026-08-21).** Stephan's request to tackle the letter. What emerged is a
+  complete path from speech to a finished letterhead; **not solved** is that
+  the dictation terminates itself mid-sentence.
+    - **Three new voice commands:** "Brief aufnehmen", "Brief schreiben"
+      (Stephan wanted both wordings) and "Brief vorlesen". All 19 grammar
+      sentences spoken by Piper and recognised verbatim by Vosk.
+    - **The letter goes to `~/Dokumente/brief.txt`,** not into the notes
+      folder: a note is appended to at every dictation, a letter is a finished
+      piece. An existing letter is set aside with date and time in the name,
+      not overwritten.
+    - **A letterhead in plain text** - sender and date right-aligned, body
+      wrapped to the same width of 76, footer bottom right. Month names and
+      the footer sentence are **fetched from the existing scripts, not copied**.
+      The address deliberately is not in the image; without `absender.txt` the
+      block is omitted.
+    - **A note about the missing signature** (Stephan's wish), where the
+      recipient looks for it. **Not** "valid without signature" - that would be
+      a legal statement, and where written form is required it is wrong.
+    - **Everything is read back**, with the parts named ("Absender:", "Datum:",
+      "Fußzeile:"). My first draft left out header and footer; Stephan's
+      objection: "shouldn't everything always be read out?" He is right - what
+      the user does not hear does not exist for them.
+    - **Spoken punctuation, measured twice and revised once.** The bare words
+      ("Komma", "Punkt") scored **three out of six** with Stephan's voice:
+      `komma` → `komme`, `punkt` → `kommt`, `doppelpunkt` → `dörte depots`. The
+      two-word forms ("Komma setzen", "Punkt setzen") scored **three out of
+      three**. That also removed the price Stephan had accepted beforehand:
+      "in diesem Punkt" now stays intact.
+    - **Silence produced text.** In 80 seconds of quiet the big model invented
+      **seven words** - "köln", "einen gefunden", "vom". Those landed in the
+      letter. A level gate at mean 150 separates cleanly: noise sits at 47-84,
+      speech at 3475-4196. Proven live: "köln" at level 37 and "ln" at 33 were
+      discarded.
+    - **The gravest fault had been there from the start: `FinalResult()` was
+      missing.** Vosk only delivers at a speech pause. Anyone speaking the
+      letter in one go and then saying "Diktat beenden" has both in **the
+      same** pause - the stop broke the loop and the buffered text was gone.
+      The log said "0 utterances" although a whole letter had been spoken. It
+      never showed up because on a shopping list you pause between items.
+    - **And the emergency exit was broken too.** The two-minute timeout could
+      never fire: every `[unk]` from room noise reset the silence clock. One
+      dictation ran on for nine minutes, held the "another service is
+      listening" marker - and Stephan could no longer start the voice control.
+      The very phantom words the new level gate discards when writing were what
+      kept it alive.
+    - **OPEN, and the reason the path is not yet usable:** the stop recogniser
+      turns ongoing speech into "diktat beenden". Measured with Piper: 30
+      seconds of letter text produce fragments by the second - `'beenden'` at
+      8.4 s, `'diktat'` at 4.8 s, `'beenden [unk]'` at 18.2 s. Counted across
+      the day: **six false triggers, all from a bare "beenden"** - which is why
+      the stop now requires both words. That is not enough: on the same day a
+      clean "diktat beenden" arose twice from plain speech, and Stephan's
+      verdict is the measure: **"I can never get to the end of this text."**
+    - **On the working method, because it belongs to the result:** I patched
+      the stop detection **four times** in one afternoon - guard period, level
+      gate, both words, announcement - and each time the next test found the
+      next gap. Two of my explanations (ambient noise, our own announcement)
+      were measured to be **wrong**, and one of the repairs - the announcement
+      "Sage bitte: Diktat beenden." - interrupted Stephan mid-dictation and had
+      to be removed the same day. The next step is therefore fixed: **a speech
+      pause as the condition, tested offline against Piper before Stephan tests
+      again.**
+
 - **Three battery warnings - and the speech samples still used the old voice
   (2026-08-21).** Stephan's requirement: warnings at 25 %, 15 % and 5 %, "the
   last one with an announcement that the device must go to the mains socket".

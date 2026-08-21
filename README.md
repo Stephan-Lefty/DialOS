@@ -114,6 +114,72 @@ das Erfolg meldet, während es versagt.
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
 
+- **Der Brief-Weg: gebaut, gemessen - und an einer Stelle noch offen
+  (2026-08-21).** Stephans Wunsch, den Brief anzugehen. Entstanden ist ein
+  vollständiger Weg von der Sprache zum fertigen Briefbogen; **nicht gelöst**
+  ist, dass sich das Diktat mitten im Satz selbst beendet.
+    - **Drei neue Sprachbefehle:** „Brief aufnehmen", „Brief schreiben"
+      (Stephan wollte beide Formulierungen) und „Brief vorlesen". Alle 19
+      Sätze der Grammatik von Piper gesprochen und von Vosk wörtlich erkannt.
+    - **Der Brief geht nach `~/Dokumente/brief.txt`,** nicht in den
+      Notizordner: Eine Notiz wird bei jedem Diktat ergänzt, ein Brief ist ein
+      fertiges Stück. Ein vorhandener Brief wird mit Datum und Uhrzeit im
+      Namen beiseitegelegt, nicht überschrieben.
+    - **Briefbogen aus reinem Text** - Absender und Datum rechtsbündig, Text
+      auf dieselbe Breite 76 umgebrochen, Fußzeile unten rechts. Monatsnamen
+      und Fußzeilensatz werden aus den vorhandenen Skripten **geholt, nicht
+      abgeschrieben**. Die Anschrift steht bewusst nicht im Abbild; fehlt
+      `absender.txt`, fällt der Block weg.
+    - **Hinweis auf die fehlende Unterschrift** (Stephans Wunsch), dort wo der
+      Empfänger sie sucht. **Nicht** „ohne Unterschrift gültig" - das wäre eine
+      rechtliche Aussage, und bei Schriftform-Erfordernis ist sie falsch.
+    - **Vorgelesen wird alles**, mit benannten Teilen („Absender:", „Datum:",
+      „Fußzeile:"). Mein erster Entwurf ließ Kopf und Fußzeile weg; Stephans
+      Einwand: „Es sollte immer alles vorgelesen werden oder?" Er hat recht -
+      was der Nutzer nicht hört, existiert für ihn nicht.
+    - **Gesprochene Satzzeichen, zweimal gemessen und einmal verworfen.** Die
+      nackten Wörter („Komma", „Punkt") kamen bei Stephans Stimme auf **drei
+      von sechs**: `komma` → `komme`, `punkt` → `kommt`, `doppelpunkt` →
+      `dörte depots`. Die zweiwortigen Formen („Komma setzen", „Punkt setzen")
+      trafen **dreimal von drei**. Damit entfiel auch der Preis, den Stephan
+      vorher akzeptiert hatte: „in diesem Punkt" bleibt jetzt stehen.
+    - **Stille erzeugte Text.** In 80 Sekunden Ruhe erfand das große Modell
+      **sieben Wörter** - „köln", „einen gefunden", „vom". Die landeten im
+      Brief. Ein Pegel-Tor bei Mittelwert 150 trennt sauber: Rauschen liegt bei
+      47-84, Sprache bei 3475-4196. Live belegt: „köln" mit Pegel 37 und „ln"
+      mit 33 wurden aussortiert.
+    - **Der schwerste Fehler war von Anfang an da: `FinalResult()` fehlte.**
+      Vosk liefert erst an einer Sprechpause ab. Wer den Brief in einem Zug
+      spricht und dann „Diktat beenden" sagt, hat beides in **derselben**
+      Pause - der Schluss brach die Schleife ab, und der gesammelte Text war
+      weg. Im Protokoll stand „0 Äußerungen", obwohl ein ganzer Brief
+      gesprochen worden war. Aufgefallen ist es nie, weil man beim
+      Einkaufszettel zwischen den Waren Pausen macht.
+    - **Und der Notausgang war ebenfalls defekt.** Die Zwei-Minuten-Zeitgrenze
+      konnte nie greifen: Jedes `[unk]` aus Raumgeräusch setzte die Stille-Uhr
+      zurück. Ein Diktat lief neun Minuten weiter, hielt die Marke „ein anderer
+      Dienst hört zu" - und Stephan konnte die Sprachsteuerung nicht mehr
+      starten. Ausgerechnet die Geisterwörter, die das neue Pegel-Tor beim
+      Schreiben aussortiert, hielten es am Leben.
+    - **OFFEN und der Grund, warum der Weg noch nicht benutzbar ist:** Der
+      Schluss-Erkenner macht aus laufender Rede ein „diktat beenden".
+      Gemessen mit Piper: aus 30 Sekunden Brieftext entstehen im Sekundentakt
+      Bruchstücke - `'beenden'` bei 8,4 s, `'diktat'` bei 4,8 s,
+      `'beenden [unk]'` bei 18,2 s. Ausgezählt über den Tag: **sechs
+      Fehlauslöser, alle aus nacktem „beenden"** - deshalb verlangt der Schluss
+      jetzt beide Wörter. Das reicht nicht: Am selben Tag entstand zweimal ein
+      sauberes „diktat beenden" aus reiner Rede, und Stephans Urteil dazu ist
+      das Maß: **„Diesen Text kann ich nie zu Ende bringen."**
+    - **Zur Arbeitsweise, weil es zum Ergebnis gehört:** Ich habe die
+      Schlusserkennung an einem Nachmittag **viermal** geflickt - Sperrfrist,
+      Pegel-Tor, beide Wörter, Ansage - und jedes Mal hat der nächste Test die
+      nächste Lücke gefunden. Zwei meiner Erklärungen (Umgebungsgeräusch, die
+      eigene Ansage) waren gemessen **falsch**, und eine der Reparaturen - die
+      Ansage „Sage bitte: Diktat beenden." - unterbrach Stephan mitten im
+      Diktieren und musste noch am selben Tag zurückgebaut werden. Der nächste
+      Schritt ist deshalb festgelegt: **Sprechpause als Bedingung, offline
+      gegen Piper geprüft, bevor Stephan wieder testet.**
+
 - **Drei Akkuwarnungen - und die Hörbeispiele sprachen noch mit der alten
   Stimme (2026-08-21).** Stephans Vorgabe: Warnungen bei 25 %, 15 % und 5 %,
   „bei der letzten mit einer Ansage, das Gerät muss an die Netzdose".

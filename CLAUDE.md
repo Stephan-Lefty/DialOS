@@ -39,7 +39,50 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-19)
+## Aktueller Stand (Stand: 2026-08-21)
+
+**Wo das Projekt am Abend des 2026-08-21 steht.** Der ausfuehrliche Verlauf
+steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
+
+**Laeuft und ist belegt:**
+
+- Sprachsteuerung mit 19 Grammatiksaetzen, alle von Piper gesprochen und von
+  Vosk woertlich erkannt. Das Einschalten verlangt beide Woerter
+  ("Sprachsteuerung starten") - im Betrieb gemessen: 60 Beinahe-Treffer, null
+  Fehlstarts.
+- Anna (`de_DE-kerstin-low`, Tempo 1,00) ist Auslieferungsstimme und spricht
+  den Nutzer mit Namen an, wo es Sinn hat.
+- Diktat in Notizen und Einkaufszettel, Schreibhilfe ueber LanguageTool
+  (98,1 % Schreibung).
+- Fusszeile in jeder Thunderbird-Mail, mit anklickbarem Verweis. Die
+  Textquelle ist `/usr/local/share/dialos/fusszeile.txt` und nur die.
+- Akkuwarnung bei 25/15/5 %, Ansagen von Stephan abgenommen.
+- Kein Standby am Netz, keine Bildschirmsperre fuer `nutzer`.
+- Unattended-upgrades, Protokoll-Aufbewahrung sieben Tage.
+
+**Gebaut, aber noch nicht benutzbar - der Brief.** Der ganze Weg steht:
+"Brief schreiben" nimmt auf, gesprochene Satzzeichen ("Komma setzen", "neuer
+Absatz") werden umgesetzt, der Text landet als Briefbogen in
+`~/Dokumente/brief.txt` mit Datum, Unterschriftshinweis und Fusszeile, und
+"Brief vorlesen" liest alles vor. **Unbrauchbar macht ihn ein einziger
+Punkt:** Der Schluss-Erkenner macht aus laufender Rede ein "diktat beenden"
+und bricht das Diktat mitten im Satz ab. Vier Reparaturen haben nicht
+gereicht; der naechste Schritt (Sprechpause als Bedingung) steht in `TODO.md`
+ganz oben im Diktat-Block.
+
+**Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, nicht installiert),
+Aufweckwort (Lizenz der fertigen Modelle ist nicht kommerziell).
+
+**Von Stephan gewuenscht, noch nicht gebaut:** Drucken des fertigen Briefes
+(der Brother HL-L2350DW ist eingerichtet, aber es gibt keinen
+Standarddrucker - `lp -` liefe ins Leere) und ein PDF-Archiv jeder Mail und
+jedes Briefes in `~/Dokumente/DialOS-DATA/`. Der Ordnername ist Stephans
+Wahl, damit er spaeter unveraendert auf den Stick wandern kann; auf dem Stick
+selbst liegt er bewusst NICHT, weil `DIALOS-DATA` unverschluesseltes exFAT ist
+und der Stick laut `docs/sicherheit-datenschutz.md` getrennt vom Geraet
+aufbewahrt werden soll.
+
+## Frueherer Stand (2026-08-19)
 
 **Neu am Abend des 2026-08-16: DialOS hat seinen ersten echten
 Sprachbefehl.** `dialos-sprachbefehl-desktop.py` laeuft dauerhaft mit
@@ -309,6 +352,34 @@ Ende einer Arbeitssitzung ausführen** - ein Commit beweist nur, dass die
 eine nicht installierte Änderung testet den alten Stand, ohne es zu sagen.
 
 ## Arbeitsweise mit Stephan
+
+**Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,
+weil sie den Tag gekostet haben:**
+
+1. **Nur EIN Befehlsblock je Nachricht.** Mehrere Bloecke landen in Stephans
+   Oberflaeche ohne Zeilenumbruch in derselben Eingabezeile - aus zwei
+   Befehlen wird ein dritter, der nicht existiert
+   (`dialos-akku-warnung.servicesudo.service`: "Unit not found"). Es laeuft
+   dann WEDER der erste NOCH der zweite, und es sieht aus, als sei nichts
+   passiert. Braucht ein Schritt mehrere Befehle: mit `&&` in einen Block
+   oder ueber mehrere Nachrichten verteilen.
+2. **Nach "Befehl ist durch" erst kurz warten, dann pruefen.** Zweimal an
+   diesem Tag habe ich zu frueh nachgesehen und daraus geschlossen, es sei
+   nichts ausgefuehrt worden - und Stephan denselben Befehl mehrfach
+   ausfuehren lassen.
+3. **Keine Regel bauen, die Stephan ungeprueft testen muss.** Ich habe die
+   Schlusserkennung des Diktats an einem Nachmittag viermal geflickt, und
+   jedes Mal hat der naechste Test die naechste Luecke gefunden - eine der
+   "Reparaturen" unterbrach ihn sogar mitten im Diktieren. Was gegen Piper
+   offline pruefbar ist, wird VORHER offline geprueft. Der Aufbau dafuer
+   steht: Piper spricht, beide Erkenner hoeren mit, jedes Ergebnis mit
+   Zeitstempel.
+4. **Eine Erklaerung, die zu allen Beobachtungen passt, ist noch keine
+   Ursache.** Zwei meiner Diagnosen an diesem Tag waren in sich schluessig
+   und gemessen falsch (Umgebungsgeraeusch, die eigene Ansage). Erst messen,
+   dann behaupten - und wenn die Messung die eigene Behauptung widerlegt,
+   gehoert das in den Quelltext, damit es niemand ein zweites Mal prueft.
+
 
 - Stephan ist technisch versiert, aber kein Linux-Systembau-Experte -
   Erklärungen gerne kompakt, aber nicht zu knapp weglassen warum etwas
