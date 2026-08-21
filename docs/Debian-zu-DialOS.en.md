@@ -1649,6 +1649,18 @@ threshold holds the battery at 78 %. Equating "not charging" with "on battery"
 warns with the cable connected. What is read is therefore `online` of the source
 of type `Mains`.
 
+**Every change is logged, in both directions.** The first version only wrote
+"Netz getrennt"; reconnecting was only logged if a warning had been given
+before. Found on 2026-08-21 when Stephan pulled the cable to try it out and
+plugged it back in - the log read "Netz getrennt bei 77 %" with no end to it.
+For a sighted helper looking later, that is half the story.
+
+The whole chain was tested against a **simulated power supply** (a `/sys` tree
+in scratch space) rather than waiting for a genuinely flat battery:
+unplugging, 24 %, 20 % with no second message, 14 %, 4 %, plugging in with
+confirmation, and a jump from 60 % straight to 3 % that says "almost empty"
+and not "25 percent".
+
 **Once per discharge**, and skipped levels count as done: if the device drops
 from 30 % to 4 % while suspended, "almost empty" is the right announcement, not
 "25 percent". During a dictation 25 % and 15 % wait; the 5 % speaks anyway,

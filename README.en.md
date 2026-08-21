@@ -108,6 +108,13 @@ background) and `splash.png` (boot/login screen).
 - **Three battery warnings - and the speech samples still used the old voice
   (2026-08-21).** Stephan's requirement: warnings at 25 %, 15 % and 5 %, "the
   last one with an announcement that the device must go to the mains socket".
+    - **Reconnecting was not logged** - found because Stephan pulled the cable
+      to try it and plugged it back in. The log read "Netz getrennt bei 77 %"
+      with no end to it: the line for plugging in was only written if a
+      warning had been given before. Now **every** change is logged, in both
+      directions. The chain was tested against a **simulated power supply**
+      rather than a genuinely flat battery - including a jump from 60 %
+      straight to 3 %.
     - **"Computer" instead of "Gerät"** (Stephan's addition the same day:
       "when we say Gerät we mean the laptop, the computer"). Applies
       everywhere DialOS speaks - five announcements, three for the battery and

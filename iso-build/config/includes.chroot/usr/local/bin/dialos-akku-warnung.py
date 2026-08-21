@@ -182,21 +182,29 @@ def main():
             stand = int(stand_roh) if stand_roh.isdigit() else None
             netz = am_netz()
 
+            # JEDER Wechsel wird protokolliert, in beide Richtungen. Die erste
+            # Fassung schrieb nur "Netz getrennt" - das Wiedereinstecken landete
+            # nur dann im Protokoll, wenn vorher gewarnt worden war. Wer spaeter
+            # nachsieht, las damit ein Abziehen ohne Ende dazu. Gefunden am
+            # 2026-08-21, als Stephan das Kabel zum Ausprobieren zog und wieder
+            # einsteckte: im Protokoll stand nur die halbe Geschichte.
+            if netz_vorher is not None and netz != netz_vorher:
+                melde(f"{'wieder am Netz' if netz else 'Netz getrennt'} "
+                      f"bei {stand} %")
+
             if stand is None:
                 melde(f"Ladestand nicht lesbar: {stand_roh!r}")
             elif netz:
                 # Am Netz: alles zuruecksetzen, und einmal bestaetigen, falls
                 # vorher gewarnt wurde.
                 if erledigt:
-                    melde(f"am Netz bei {stand} % - Stufen wieder scharf")
+                    melde("Stufen wieder scharf")
                 erledigt.clear()
                 if gewarnt:
                     sprich(ANSAGE_AM_NETZ)
                     melde("Ansage: am Netz")
                     gewarnt = False
             else:
-                if netz_vorher:
-                    melde(f"Netz getrennt bei {stand} %")
                 # Stufen, die der Stand wieder deutlich ueberschritten hat,
                 # werden erneut scharf.
                 for grenze, _, _ in STUFEN:

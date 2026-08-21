@@ -117,6 +117,13 @@ abgeschlossen.*
 - **Drei Akkuwarnungen - und die Hörbeispiele sprachen noch mit der alten
   Stimme (2026-08-21).** Stephans Vorgabe: Warnungen bei 25 %, 15 % und 5 %,
   „bei der letzten mit einer Ansage, das Gerät muss an die Netzdose".
+    - **Das Wiedereinstecken stand nicht im Protokoll** - gefunden, weil
+      Stephan das Kabel zum Ausprobieren zog und wieder einsteckte. Da stand
+      „Netz getrennt bei 77 %" und kein Ende dazu: Die Zeile fürs Einstecken
+      schrieb ich nur, wenn vorher gewarnt worden war. Jetzt wird **jeder**
+      Wechsel protokolliert, in beide Richtungen. Geprüft wurde die Kette
+      gegen eine **nachgebaute Stromversorgung** statt gegen einen echten
+      leeren Akku - inklusive Sprung von 60 % direkt auf 3 %.
     - **„Computer" statt „Gerät"** (Stephans Nachtrag am selben Tag: „Wir
       meinen bei Gerät ja das Laptop bzw. den Computer"). Gilt überall, wo
       DialOS spricht - fünf Ansagen, drei beim Akku und zwei in der

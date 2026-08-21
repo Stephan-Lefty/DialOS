@@ -1721,6 +1721,19 @@ Ladeschwelle haelt den Akku bei 78 % an. Wer "nicht am Laden" mit "am Akku"
 gleichsetzt, warnt bei gestecktem Kabel. Gelesen wird deshalb `online` der
 Quelle vom Typ `Mains`.
 
+**Jeder Wechsel steht im Protokoll, in beide Richtungen.** Die erste Fassung
+schrieb nur "Netz getrennt"; das Wiedereinstecken landete nur dann im
+Protokoll, wenn vorher gewarnt worden war. Gefunden am 2026-08-21, als Stephan
+das Kabel zum Ausprobieren zog und wieder einsteckte - im Protokoll stand
+"Netz getrennt bei 77 %" und kein Ende dazu. Fuer einen sehenden Helfer, der
+spaeter nachsieht, ist das die halbe Geschichte.
+
+Geprueft wurde die ganze Kette gegen eine **nachgebaute Stromversorgung**
+(`/sys`-Baum im Zwischenspeicher), statt auf einen echten leeren Akku zu
+warten: Abziehen, 24 %, 20 % ohne zweite Meldung, 14 %, 4 %, Einstecken mit
+Bestaetigung, und ein Sprung von 60 % direkt auf 3 %, der "fast leer" sagt und
+nicht "25 Prozent".
+
 **Einmal je Entladung**, und uebersprungene Stufen gelten als erledigt: Faellt
 das Geraet im Ruhezustand von 30 % auf 4 %, ist "fast leer" die richtige Ansage
 und nicht "25 Prozent". Waehrend eines Diktats warten 25 % und 15 %; die 5 %
