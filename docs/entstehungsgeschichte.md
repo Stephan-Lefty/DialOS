@@ -1,6 +1,6 @@
 [Deutsch](entstehungsgeschichte.md) | [English](entstehungsgeschichte.en.md)
 
-# Sechzehn Tage
+# Dreizehn Tage und mehr …
 
 *Die Entstehung von DialOS, vom 6. bis 21. August 2026. 261 Commits.
 Erzählt als das, was es war.*
@@ -18,8 +18,8 @@ Fehler. Es ist ein Prinzip:
 
 **Ein System, das Erfolg meldet, während es versagt.**
 
-Es tritt in sechzehn Tagen siebenmal auf, jedes Mal in anderer Verkleidung,
-und jedes Mal glaubt ihm jemand. Meistens ich.
+Er tritt bisher siebenmal auf, jedes Mal in anderer Verkleidung, und jedes
+Mal glaubt ihm jemand. Meistens ich.
 
 Am letzten Tag trägt er meine eigene.
 
@@ -319,9 +319,9 @@ Aufnahme startet, die Echo-Unterdrückung braucht einen Moment. Auch schlüssig.
 
 Ich messe es: dreimal Ansage, dreimal sofort zuhören. **Nichts.** Auch falsch.
 
-Zwei Diagnosen, beide in sich stimmig, beide widerlegt. Der Gegenspieler hat
-sechzehn Tage lang Systeme benutzt, die Erfolg melden. An diesem Tag benutzt
-er mich.
+Zwei Diagnosen, beide in sich stimmig, beide widerlegt. Bisher hat der
+Gegenspieler Systeme benutzt, die Erfolg melden. An diesem Tag benutzt er
+mich.
 
 ### Vier Reparaturen an einem Nachmittag
 
@@ -436,6 +436,6 @@ Tag 16 hat dem einen Satz hinzugefügt: Das gilt auch für den, der misst.
 
 *Für die Zahlen und Belege: [../README.md](../README.md) hat das
 vollständige Änderungsprotokoll, [../TODO.md](../TODO.md) die offenen
-Punkte, [../CLAUDE.md](../CLAUDE.md) die Regeln, die aus diesen dreizehn
+Punkte, [../CLAUDE.md](../CLAUDE.md) die Regeln, die aus diesen
 Tagen entstanden sind. Wie DialOS klingt, steht als Hörbeispiele in
 [sprachbeispiele/](sprachbeispiele/README.md).*

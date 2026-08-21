@@ -1,6 +1,6 @@
 [Deutsch](entstehungsgeschichte.md) | [English](entstehungsgeschichte.en.md)
 
-# Sixteen Days
+# Thirteen Days and Counting …
 
 *How DialOS came to exist, 6 to 21 August 2026. 261 commits. Told as what
 it was.*
@@ -18,8 +18,8 @@ is a principle:
 
 **A system that reports success while it fails.**
 
-It appears seven times in sixteen days, in a different disguise each time,
-and each time somebody believes it. Usually me.
+So far it appears seven times, in a different disguise each time, and each
+time somebody believes it. Usually me.
 
 On the last day it wears mine.
 
@@ -313,7 +313,7 @@ recording starts, echo cancellation needs a moment. Also plausible.
 I measure it: three times announcement, three times listening immediately.
 **Nothing.** Also wrong.
 
-Two diagnoses, both internally consistent, both refuted. For sixteen days the
+Two diagnoses, both internally consistent, both refuted. Until now the
 antagonist has used systems that report success. On this day he uses me.
 
 ### Four repairs in one afternoon
@@ -426,6 +426,6 @@ Day 16 added one sentence to that: the same goes for whoever is measuring.
 
 *For the figures and the evidence: [../README.en.md](../README.en.md) has
 the full changelog, [../TODO.en.md](../TODO.en.md) the open items,
-[../CLAUDE.md](../CLAUDE.md) the rules that came out of these sixteen days.
+[../CLAUDE.md](../CLAUDE.md) the rules that came out of these days.
 What DialOS sounds like is in
 [sprachbeispiele/](sprachbeispiele/README.en.md).*
