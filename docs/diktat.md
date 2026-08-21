@@ -587,11 +587,30 @@ Rauschens und weniger als die Hälfte der leisesten echten Äußerung.
 gar nicht erst durchlässt, zerschneidet Wörter: Zwischen zwei Silben ist es
 still. Am fertigen Ergebnis zu prüfen kostet nichts und kann nichts zerteilen.
 
-**Dieselbe Prüfung schützt den Schlusssatz.** Ein Störgeräusch, das der
-eingeschränkten Grammatik als „beenden" erscheint, hat nicht den Pegel einer
-Stimme. Das ist zugleich der beste Verdacht für die ungeklärte
-Selbstbeendigung vom selben Tag - ein Diktat, das sich sechs Sekunden nach dem
-Start beendete, während niemand sprach.
+**Dieselbe Prüfung schützt den Schlusssatz** - allerdings nicht so weit, wie
+ich zunächst annahm. Ich hatte sie für den besten Verdacht bei der ungeklärten
+Selbstbeendigung gehalten. **Der nächste Test hat das widerlegt:** Ein Diktat
+beendete sich erneut von selbst, nach 4,2 s, und das Pegel-Tor griff nicht -
+das Geräusch war laut genug. Was die neue Protokollzeile dabei verriet, steht
+im nächsten Abschnitt.
+
+## Ein nacktes „beenden" vor der ersten Äußerung ist kein Schluss
+
+Zweimal am 2026-08-21 beendete sich ein Diktat von selbst, beide Male mit
+**0 Äußerungen davor** - einmal nach 6 s, einmal nach 4,2 s. Beim zweiten Mal
+griffen weder die Sperrfrist von 3 s noch das Pegel-Tor.
+
+Der Hinweis steckte in der Zeile, die für genau diesen Zweck eingebaut worden
+war: Die **freie Erkennung lieferte in derselben Zeit nichts**, der
+Schluss-Erkenner aber „beenden". Dieselbe Audiospur, zwei Erkenner, zwei
+Ergebnisse. Das ist die eingeschränkte Grammatik: Sie **muss** jedes Geräusch
+auf eine ihrer Phrasen abbilden, und der `[unk]`-Auffang gewinnt nicht immer.
+
+Daraus folgt eine Regel, die kein Raten ist: Niemand startet ein Diktat und
+beendet es sofort mit einem einzelnen Wort. Ein nacktes „beenden" vor der
+ersten Äußerung wird deshalb verworfen und protokolliert. **Der volle Satz
+„Diktat beenden" wird weiterhin jederzeit angenommen**, auch als allererste
+Äußerung - wer wirklich abbrechen will, kann das.
 
 **Jede verworfene Äußerung wird protokolliert.** Fällt dort echte Sprache
 hinein, sieht man es sofort, und die Schwelle gehört nach unten.

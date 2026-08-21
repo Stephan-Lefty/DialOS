@@ -790,6 +790,24 @@ def diktat_fuehren(zweck, name, quelle):
                         melde(f"  Schluss {gehoert!r} verworfen - zu leise "
                               f"(Pegel {mittel:.0f} unter {PEGEL_SCHWELLE:.0f})")
                         continue
+                    # EIN NACKTES 'beenden' VOR DER ERSTEN AEUSSERUNG IST KEIN SCHLUSS.
+                    #
+                    # Zweimal am 2026-08-21 beendete sich ein Diktat von selbst, beide Male
+                    # mit 0 Aeusserungen davor - einmal nach 6 s, einmal nach 4,2 s. Beim
+                    # zweiten Mal griffen weder die Sperrfrist (3 s) noch das Pegel-Tor: Das
+                    # Geraeusch war laut genug. Die freie Erkennung lieferte in derselben
+                    # Zeit NICHTS, der Schluss-Erkenner aber 'beenden' - dieselbe Audiospur,
+                    # zwei Ergebnisse. Das ist die eingeschraenkte Grammatik, die jedes
+                    # Geraeusch auf ihre naechste Phrase abbilden MUSS; der '[unk]'-Auffang
+                    # gewinnt nicht immer.
+                    #
+                    # Niemand startet ein Diktat und beendet es sofort mit einem einzelnen
+                    # Wort. Wer wirklich abbrechen will, sagt den vollen Satz - der wird
+                    # jederzeit angenommen, auch als allererste Aeusserung.
+                    if anzahl_aeusserungen == 0 and gehoert.split() == ["beenden"]:
+                        melde(f"  Schluss {gehoert!r} verworfen - noch nichts diktiert "
+                              f"(Pegel {mittel:.0f}); der volle Satz waere angenommen worden")
+                        continue
                     seit_start = time.time() - aufnahme_seit
                     if seit_start < SCHLUSS_SPERRFRIST_S:
                         # Mitprotokolliert und NICHT verschwiegen: Wenn das
@@ -799,7 +817,7 @@ def diktat_fuehren(zweck, name, quelle):
                         continue
                     melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r} "
                           f"nach {seit_start:.1f} s, "
-                          f"{anzahl_aeusserungen} Aeusserungen bis dahin")
+                          f"{anzahl_aeusserungen} Aeusserungen, Pegel {mittel:.0f}")
                     break
                 if gehoert:
                     letzte_aeusserung = time.time()

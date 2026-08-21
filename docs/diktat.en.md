@@ -571,10 +571,29 @@ the quietest genuine utterance.
 never lets quiet blocks through cuts words apart: between two syllables it is
 silent. Checking the finished result costs nothing and can sever nothing.
 
-**The same check protects the stop phrase.** A noise that appears to the
-restricted grammar as "beenden" does not have the level of a voice. That is
-also the best suspect for the unexplained self-termination on the same day - a
-dictation that ended six seconds after starting while nobody was speaking.
+**The same check protects the stop phrase** - though not as far as I first
+assumed. I had thought it the best suspect for the unexplained
+self-termination. **The next test disproved that:** a dictation terminated
+itself again, after 4.2 s, and the level gate did not catch it - the noise was
+loud enough. What the new log line revealed is in the next section.
+
+## A bare "beenden" before the first utterance is not a stop
+
+Twice on 2026-08-21 a dictation terminated itself, both times with **0
+utterances beforehand** - once after 6 s, once after 4.2 s. The second time
+neither the 3 s guard period nor the level gate caught it.
+
+The clue sat in the line that had been added for exactly this purpose: the
+**free recognition delivered nothing** in the same span, while the stop
+recogniser delivered "beenden". The same audio, two recognisers, two results.
+That is the restricted grammar: it **must** map every noise onto one of its
+phrases, and the `[unk]` catch-all does not always win.
+
+From that follows a rule that is not guesswork: nobody starts a dictation and
+stops it immediately with a single word. A bare "beenden" before the first
+utterance is therefore discarded and logged. **The full sentence "Diktat
+beenden" is still accepted at any time**, including as the very first
+utterance - anyone who really wants to abort can.
 
 **Every discarded utterance is logged.** If genuine speech ends up there, it
 shows immediately, and the threshold belongs lower.
