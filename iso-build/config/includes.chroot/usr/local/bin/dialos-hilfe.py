@@ -138,7 +138,7 @@ ZIFFERN = {"0": "null", "1": "eins", "2": "zwei", "3": "drei", "4": "vier",
            "5": "fünf", "6": "sechs", "7": "sieben", "8": "acht", "9": "neun"}
 
 ANSAGE_FRAGE = ("Ich kann die Fernwartung starten. Dein Betreuer kann dann "
-                "sehen, was auf dem Bildschirm steht, und das Gerät bedienen. "
+                "sehen, was auf dem Bildschirm steht, und den Computer bedienen. "
                 "Soll ich sie starten? Sage ja oder nein.")
 ANSAGE_NEIN = "Gut, ich lasse die Fernwartung aus."
 ANSAGE_UNKLAR = "Ich habe nichts verstanden. Ich lasse die Fernwartung aus."
@@ -591,7 +591,7 @@ def beenden(ansage=None):
     if uebrig:
         melde(f"  ACHTUNG: laeuft noch: {uebrig}")
         sprich("Ich konnte die Fernwartung nicht sicher beenden. Bitte sag "
-               "Deinem Betreuer, dass er das Gerät neu starten soll.")
+               "Deinem Betreuer, dass er den Computer neu starten soll.")
         return 1
     melde("=== Fernwartung beendet ===")
     frist_loeschen()

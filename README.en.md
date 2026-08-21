@@ -108,6 +108,13 @@ background) and `splash.png` (boot/login screen).
 - **Three battery warnings - and the speech samples still used the old voice
   (2026-08-21).** Stephan's requirement: warnings at 25 %, 15 % and 5 %, "the
   last one with an announcement that the device must go to the mains socket".
+    - **"Computer" instead of "Gerät"** (Stephan's addition the same day:
+      "when we say Gerät we mean the laptop, the computer"). Applies
+      everywhere DialOS speaks - five announcements, three for the battery and
+      two in remote support. "Gerät" is a technician's word; someone who
+      cannot see what is being talked about needs the word they use
+      themselves. The grammatical gender changes with it: "das Gerät" becomes
+      "der Computer". A plain word swap would have left wrong articles behind.
     - **Why GNOME does not already handle this:** it warns with an on-screen
       message. The user cannot see it. For them the device shuts down without
       warning, mid-sentence - and a flat battery is harder for them to

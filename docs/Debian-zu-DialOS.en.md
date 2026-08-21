@@ -1635,6 +1635,14 @@ three times, leaving no escalation for the serious case. Spoken is "Steckdose"
 rather than Stephan's "Netzdose", because everyone understands that without
 thinking - the announcement comes at a moment when little time is left.
 
+**"Computer" and not "Gerät"** (Stephan, 2026-08-21: "when we say Gerät we
+mean the laptop, the computer - so let us call it Computer"). This applies
+everywhere DialOS speaks, not only to the battery - five announcements
+affected, three in the battery warning and two in remote support. "Gerät" is a
+technician's word; someone who cannot see what is being talked about needs the
+word they use themselves. Note the grammatical gender: "das Gerät" becomes "der
+Computer" - a plain word swap would have left wrong articles behind.
+
 **Via the mains indicator, not the battery status.** `BAT0/status` on this
 device reported `Not charging` while the power supply was plugged in - a charge
 threshold holds the battery at 78 %. Equating "not charging" with "on battery"

@@ -48,12 +48,12 @@ STROMVERSORGUNG = "/sys/class/power_supply"
 # im Ablauf - wer die Formulierung aendern will, findet sie an einer Stelle.
 STUFEN = [
     (25, "Der Akku ist bei 25 Prozent.", False),
-    (15, "Der Akku ist bei 15 Prozent. Du solltest das Gerät bald "
+    (15, "Der Akku ist bei 15 Prozent. Du solltest den Computer bald "
          "an die Steckdose hängen.", False),
-    (5,  "Der Akku ist fast leer. Das Gerät muss jetzt an die Steckdose.", True),
+    (5,  "Der Akku ist fast leer. Der Computer muss jetzt an die Steckdose.", True),
 ]
 
-ANSAGE_AM_NETZ = "Das Gerät hängt am Netz und lädt."
+ANSAGE_AM_NETZ = "Der Computer hängt am Netz und lädt."
 
 # Alle 60 s reicht: Von 25 % auf 15 % vergehen auf diesem Geraet Stunden.
 # Unter 10 % wird schneller nachgesehen - dort zaehlt jede Minute, und der

@@ -1706,6 +1706,15 @@ dasselbe Gewicht, und fuer den Ernstfall bliebe keine Steigerung. Gesprochen
 wird "Steckdose" statt Stephans "Netzdose", weil das jeder ohne Nachdenken
 versteht - die Ansage kommt in dem Moment, in dem wenig Zeit bleibt.
 
+**"Computer" und nicht "Geraet"** (Stephan, 2026-08-21: "Wir meinen bei Gerät
+ja das Laptop bzw. den Computer. Dann lass es uns Computer nennen."). Gilt
+ueberall, wo DialOS spricht, nicht nur beim Akku - fuenf Ansagen betroffen, drei
+in der Akkuwarnung und zwei in der Fernwartung. "Geraet" ist das Wort eines
+Technikers; wer nicht sieht, worueber gesprochen wird, braucht das Wort, das er
+selbst benutzt. Zu beachten ist dabei das Geschlecht: Aus "das Gerät" wird "der
+Computer" und aus "das Gerät bedienen" ein "den Computer bedienen" - eine reine
+Wortersetzung haette falsche Artikel hinterlassen.
+
 **Ueber die Netzteil-Anzeige, nicht ueber den Akkustatus.** `BAT0/status`
 meldete auf diesem Geraet `Not charging`, waehrend das Netzteil steckte - eine
 Ladeschwelle haelt den Akku bei 78 % an. Wer "nicht am Laden" mit "am Akku"

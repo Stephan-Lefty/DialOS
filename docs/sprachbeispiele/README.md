@@ -37,11 +37,11 @@ scripts/dialos-sprachbeispiele.py
 | `10-ton-ueber-lautsprecher.ogg` | 1,1 s | Wenn der Bluetooth-Lautsprecher eingeschaltet wird und der Ton dorthin wandert. |
 | `11-kein-mikrofon.ogg` | 2,7 s | Ein Fehlerfall - er wird **angesagt**, nicht nur ins Protokoll geschrieben. |
 | `12-akku-25.ogg` | 2,1 s | Erste Akkuwarnung bei 25 %. Eine schlichte Feststellung - hier ist noch nichts zu tun. |
-| `12b-akku-15.ogg` | 3,9 s | Zweite Warnung bei 15 %, jetzt mit einem Rat. |
-| `12c-akku-5.ogg` | 3,6 s | Dritte Warnung bei 5 % - **mit Namen** und als Aufforderung. Der Name steht nur hier: Wer ihn dauernd hört, überhört ihn. |
-| `12d-akku-am-netz.ogg` | 1,6 s | Bestätigung nach dem Anstecken. Wer nicht sieht, ob der Stecker sitzt, braucht diese Rückmeldung. |
+| `12b-akku-15.ogg` | 4,0 s | Zweite Warnung bei 15 %, jetzt mit einem Rat. |
+| `12c-akku-5.ogg` | 3,8 s | Dritte Warnung bei 5 % - **mit Namen** und als Aufforderung. Der Name steht nur hier: Wer ihn dauernd hört, überhört ihn. |
+| `12d-akku-am-netz.ogg` | 1,7 s | Bestätigung nach dem Anstecken. Wer nicht sieht, ob der Stecker sitzt, braucht diese Rückmeldung. |
 
-Zusammen 77 s und rund 499 kB. OGG Vorbis, weil `sox` das ohne
+Zusammen 77 s und rund 501 kB. OGG Vorbis, weil `sox` das ohne
 Zusatzpaket kann und WAV das Repo unnötig aufblähen würde.
 
 ## Was die Dauer über die Ansagen verrät

@@ -37,11 +37,11 @@ scripts/dialos-sprachbeispiele.py
 | `10-ton-ueber-lautsprecher.ogg` | 1.1 s | When the Bluetooth speaker is switched on and the audio moves there. |
 | `11-kein-mikrofon.ogg` | 2.7 s | A failure case - it is **announced**, not only written to the log. |
 | `12-akku-25.ogg` | 2.1 s | First battery warning at 25 %. A plain statement - nothing to do yet. |
-| `12b-akku-15.ogg` | 3.9 s | Second warning at 15 %, now with advice. |
-| `12c-akku-5.ogg` | 3.6 s | Third warning at 5 % - **with the name** and phrased as a demand. The name appears only here: someone who hears it constantly stops hearing it. |
-| `12d-akku-am-netz.ogg` | 1.6 s | Confirmation after plugging in. Someone who cannot see whether the plug is seated needs this feedback. |
+| `12b-akku-15.ogg` | 4.0 s | Second warning at 15 %, now with advice. |
+| `12c-akku-5.ogg` | 3.8 s | Third warning at 5 % - **with the name** and phrased as a demand. The name appears only here: someone who hears it constantly stops hearing it. |
+| `12d-akku-am-netz.ogg` | 1.7 s | Confirmation after plugging in. Someone who cannot see whether the plug is seated needs this feedback. |
 
-77 s and about 499 kB in total. OGG Vorbis, because `sox` can write it
+77 s and about 501 kB in total. OGG Vorbis, because `sox` can write it
 without an extra package and WAV would bloat the repository needlessly.
 
 ## What the duration reveals about the announcements

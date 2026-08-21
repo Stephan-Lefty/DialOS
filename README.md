@@ -117,6 +117,14 @@ abgeschlossen.*
 - **Drei Akkuwarnungen - und die Hörbeispiele sprachen noch mit der alten
   Stimme (2026-08-21).** Stephans Vorgabe: Warnungen bei 25 %, 15 % und 5 %,
   „bei der letzten mit einer Ansage, das Gerät muss an die Netzdose".
+    - **„Computer" statt „Gerät"** (Stephans Nachtrag am selben Tag: „Wir
+      meinen bei Gerät ja das Laptop bzw. den Computer"). Gilt überall, wo
+      DialOS spricht - fünf Ansagen, drei beim Akku und zwei in der
+      Fernwartung. „Gerät" ist das Wort eines Technikers; wer nicht sieht,
+      worüber gesprochen wird, braucht das Wort, das er selbst benutzt. Dabei
+      ändert sich das Geschlecht mit: aus „das Gerät" wird „der Computer",
+      aus „das Gerät bedienen" ein „den Computer bedienen". Eine reine
+      Wortersetzung hätte falsche Artikel hinterlassen.
     - **Warum GNOME das nicht schon erledigt:** Es warnt mit einer
       Bildschirmmeldung. Der Nutzer sieht sie nicht. Für ihn fährt das Gerät
       ohne Vorwarnung herunter, mitten im Satz - und ein leerer Akku ist für
