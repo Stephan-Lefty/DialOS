@@ -192,12 +192,14 @@ background) and `splash.png` (boot/login screen).
       These two changes deliver more today and make the later measurement better.
     - **Confirmed in operation (morning of 2026-08-21).** The numbers above were
       *calculated* - the same two hours of data run through both rules. Now they
-      are *measured*: log from 16:45 to 09:39 the next day, five service starts
-      in between. **46 times** `'starten'` alone, **7 times** `'sprachsteuerung'`
+      are *measured*: **2 h 19 min** of listening time on the evening of
+      2026-08-20 (service start 16:45:06 to shutdown at 19:04:39; the device did
+      **not** run overnight). **46 times** `'starten'` alone, **7 times** `'sprachsteuerung'`
       alone, **7 times** `'[unk] starten'` - that is **60 near misses and zero
       false starts**. All seven activations came with the full sentence and were
       Stephan's tests. The prediction "two specific words in a row practically do
-      not occur in conversation" held up in the field.
+      not occur in conversation" held up in the field. That is roughly **26
+      near misses per hour** - ambient noise the old rule would have switched on.
     - **The short deadline works too.** The day before, **all** seven activations
       ran into the 120 s. Now **6 of 8** ended after 30 seconds and only 2 after
       120 - that is 9 minutes less live command grammar on a single test day.
