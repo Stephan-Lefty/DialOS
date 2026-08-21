@@ -48,6 +48,9 @@ ABTASTRATE = 16000
 SAY = "/usr/local/bin/dialos-say.py"
 ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
 NOTIZ_ORDNER = os.path.join(os.path.expanduser("~"), "Notizen")
+DOKUMENT_ORDNER = os.path.join(os.path.expanduser("~"), "Dokumente")
+BRIEF_ZIELE = ("brief",)
+FUSSZEILE_SKRIPT = "/usr/local/bin/dialos-fusszeile.py"
 
 # Wie die Notiz in einem Satz heisst. Ohne diese Tabelle entstehen falsche
 # Saetze, weil der Dateiname in den Satz eingebaut wird: "Der einkaufszettel
@@ -63,6 +66,7 @@ NOTIZ_ORDNER = os.path.join(os.path.expanduser("~"), "Notizen")
 BEZEICHNUNG = {
     "einkaufszettel": ("Der Einkaufszettel", "ist", "hat", "ihn"),
     "notizen": ("Die Notizen", "sind", "haben", "sie"),
+    "brief": ("Der Brief", "ist", "hat", "ihn"),
 }
 
 
@@ -128,6 +132,11 @@ def sprich(text, frage=False):
 
 def pfad_fuer(name):
     sicher = re.sub(r"[^\w -]", "", name).strip() or "notizen"
+    # Der Brief liegt bei den Dokumenten, nicht bei den Notizen - er ist ein
+    # fertiges Stueck und kein Arbeitszettel. Geschrieben wird er von
+    # dialos-diktat.py, gelesen hier; beide muessen denselben Ort meinen.
+    if sicher in BRIEF_ZIELE:
+        return os.path.join(DOKUMENT_ORDNER, sicher + ".txt")
     return os.path.join(NOTIZ_ORDNER, sicher + ".txt")
 
 
@@ -276,7 +285,81 @@ def _antwort_hoeren(modell, quelle):
 
 # ------------------------------------------------------------ Unterbefehle
 
+def briefteile(pfad):
+    """Zerlegt den Briefbogen in Kopf, Text und Fusszeile.
+
+    WIE UNTERSCHIEDEN WIRD: Kopf und Fusszeile sind rechtsbuendig, stehen also
+    mit Leerzeichen am Zeilenanfang; der diktierte Text ist linksbuendig und
+    auf dieselbe Breite umgebrochen. Das ist keine Schaetzung, sondern die
+    Regel, nach der dialos-diktat.py die Datei BAUT - wer dort etwas aendert,
+    muss hier mitaendern. Der Hinweis steht deshalb an beiden Stellen.
+    """
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            zeilen = f.read().split("\n")
+    except OSError:
+        return [], [], []
+    eingerueckt = [bool(z) and z.startswith(" ") for z in zeilen]
+    kopf, text, fuss = [], [], []
+    gesehen_text = False
+    for zeile, rechts in zip(zeilen, eingerueckt):
+        if rechts:
+            (fuss if gesehen_text else kopf).append(zeile.strip())
+        elif zeile.strip():
+            gesehen_text = True
+            text.append(zeile.strip())
+        elif gesehen_text:
+            text.append("")
+    while text and not text[-1]:
+        text.pop()
+    return kopf, text, fuss
+
+
 def vorlesen(name):
+    """Weiche: ein Brief wird anders vorgelesen als ein Zettel."""
+    if name in BRIEF_ZIELE:
+        return brief_vorlesen(name)
+    return _vorlesen_liste(name)
+
+
+def brief_vorlesen(name):
+    """Liest den Brief am Stueck vor - alles, mit benannten Teilen.
+
+    ALLES, auf Stephans Einwand vom 2026-08-21: "Es sollte immer alles
+    vorgelesen werden oder?" Der erste Entwurf liess Kopf und Fusszeile weg,
+    weil sie sich bei jedem Hoeren wiederholen. Das war zu kurz gedacht - was
+    der Nutzer nicht hoert, existiert fuer ihn nicht. Steht im Absender ein
+    falscher Name oder ein falsches Datum, faellt es sonst nie auf.
+
+    BENANNT, damit das Datum nicht wie ein Satz im Brief klingt. Ein Brief ist
+    kein Zettel: "Vier Eintraege" waere hier eine falsche Auskunft, und Pausen
+    zwischen den Saetzen wie beim Einkaufszettel zerhackten den Text.
+    """
+    pfad = pfad_fuer(name)
+    kopf, text, fuss = briefteile(pfad)
+    bez, ist, _hat, _ihn = benennen(name)
+    if not text:
+        sprich(f"{bez} {ist} leer.")
+        return 0
+    fliesstext = " ".join(z for z in text if z)
+    saetze = [s for s in re.split(r"(?<=[.!?])\s+", fliesstext) if s.strip()]
+
+    teile = ["Ein Satz." if len(saetze) == 1 else f"{len(saetze)} Sätze."]
+    if kopf:
+        # Die letzte Kopfzeile ist das Datum (so baut dialos-diktat.py sie),
+        # alles davor der Absender.
+        if len(kopf) > 1:
+            teile.append("Absender: " + ", ".join(kopf[:-1]) + ".")
+        teile.append("Datum: " + kopf[-1] + ".")
+    teile.append(fliesstext)
+    if fuss:
+        teile.append("Fußzeile: " + " ".join(fuss))
+    melde(f"  vorlesen: Brief mit {len(saetze)} Saetzen aus {pfad}")
+    sprich(" ".join(teile))
+    return 0
+
+
+def _vorlesen_liste(name):
     eintraege = eintraege_lesen(name)
     bez, ist, _hat, _ihn = benennen(name)
     if not eintraege:

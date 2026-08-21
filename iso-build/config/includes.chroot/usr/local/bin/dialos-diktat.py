@@ -57,6 +57,7 @@ import os
 import re
 import subprocess
 import sys
+import textwrap
 import time
 import urllib.parse
 import urllib.request
@@ -132,6 +133,12 @@ ANSAGE_BEREIT = "Ich schreibe mit."
 # Zeilen im Zettel, und "3 Eintraege" klang wie dreimal dasselbe.
 LISTEN_ZIELE = ("einkaufszettel",)
 
+# BRIEFE GEHEN NICHT IN DEN NOTIZORDNER (Stephan, 2026-08-21). Eine Notiz ist
+# ein Arbeitszettel, der bei jedem Diktat ERGAENZT wird; ein Brief ist ein
+# fertiges Stueck, das einen Kopf, ein Datum und eine Fusszeile hat. Wuerde er
+# angehaengt, staende der zweite Brief unter der Fusszeile des ersten.
+BRIEF_ZIELE = ("brief",)
+
 # Anleitung nur bei einer Liste, und nur EIN Satz. Der Nutzer sieht nicht, dass
 # gerade ein einziger Eintrag entsteht statt drei - gesagt werden muss es
 # deshalb, aber kurz: waehrend DialOS spricht, hoert es nicht zu.
@@ -177,6 +184,10 @@ def eintraege_aus(name, text):
 VORLESEN_HINWEIS = {
     "einkaufszettel": ("Deinen Einkaufszettel", "Einkaufszettel vorlesen"),
     "notizen": ("Deine Notizen", "Notizen vorlesen"),
+    # Beim Brief ist das Vorlesen keine Bequemlichkeit, sondern die einzige
+    # Kontrolle: Vosk liefert rund 2 % falsch geschriebene Woerter, und wer
+    # den Bildschirm nicht sieht, findet sie nur beim Hoeren.
+    "brief": ("Deinen Brief", "Brief vorlesen"),
 }
 
 
@@ -187,8 +198,16 @@ def ansage_ende(name, anzahl):
     einzige, woran ein blinder Nutzer merkt, dass ueberhaupt etwas angekommen
     ist - und wieviel. "Diktat beendet." allein liesse ihn im Dunkeln.
     """
-    satz = ("Diktat beendet, ein Eintrag geschrieben." if anzahl == 1
-            else f"Diktat beendet, {anzahl} Einträge geschrieben.")
+    # EIN BRIEF HAT KEINE EINTRAEGE (2026-08-21). "Diktat beendet, 4 Einträge
+    # geschrieben" beschreibt einen Zettel, keinen Brief - und die Anzahl sagt
+    # dem Nutzer hier nichts, weil ein Brief nicht aus Posten besteht. Was ihm
+    # etwas sagt, ist die Anzahl der SAETZE, denn danach hat er diktiert.
+    if name in BRIEF_ZIELE:
+        satz = ("Der Brief ist geschrieben, ein Satz." if anzahl == 1
+                else f"Der Brief ist geschrieben, {anzahl} Sätze.")
+    else:
+        satz = ("Diktat beendet, ein Eintrag geschrieben." if anzahl == 1
+                else f"Diktat beendet, {anzahl} Einträge geschrieben.")
     hinweis = VORLESEN_HINWEIS.get(name)
     if hinweis:
         besitz, befehl = hinweis
@@ -218,6 +237,10 @@ DIKTAT_ZEITGRENZE_S = 120.0
 ANSAGE_LADEN = "Einen Moment, ich hole Zettel und Stift."
 
 NOTIZ_ORDNER = os.path.join(os.path.expanduser("~"), "Notizen")
+DOKUMENT_ORDNER = os.path.join(os.path.expanduser("~"), "Dokumente")
+FUSSZEILE_SKRIPT = "/usr/local/bin/dialos-fusszeile.py"
+NAMEN_SKRIPT_PFAD = "/usr/local/bin/dialos-namen.py"
+ABSENDER = "/usr/local/share/dialos/absender.txt"
 
 
 def marke_pfad(name):
@@ -435,6 +458,132 @@ def aufzaehlen(zeilen):
     return " ".join(saubern(z) + "." for z in zeilen if saubern(z))
 
 
+def holen(pfad, name, ersatz=None):
+    """Holt eine Funktion oder einen Wert aus einem anderen DialOS-Skript.
+
+    Geholt statt kopiert - dieselbe Regel wie bei anrede(). Faellt das Skript
+    aus, kommt der Ersatz zurueck: Ein Brief ohne Fusszeile ist besser als kein
+    Brief.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("geholt_" + name, pfad)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul
+    except Exception:
+        return ersatz
+
+
+def datum_ausgeschrieben(heute=None):
+    """"21. August 2026" - Monatsnamen aus dialos-start-ansage.py.
+
+    Nicht abgeschrieben: Die Liste steht dort schon, und zwei Listen mit
+    Monatsnamen laufen irgendwann auseinander.
+    """
+    import datetime
+    heute = heute or datetime.date.today()
+    ansage = holen("/usr/local/bin/dialos-start-ansage.py", "ansage")
+    monate = getattr(ansage, "MONATE", None) if ansage else None
+    if not monate:
+        return heute.strftime("%d.%m.%Y")
+    return f"{heute.day}. {monate[heute.month - 1]} {heute.year}"
+
+
+def absenderzeilen():
+    """Der Absenderblock, falls er erfasst ist - sonst nichts.
+
+    Die Anschrift steht bewusst NICHT im Abbild: Sie gehoert dem Nutzer und
+    wird bei der Ersteinrichtung eingetragen. Fehlt sie, faellt der Block
+    ersatzlos weg - ein Brief mit leeren Platzhalterzeilen waere schlimmer als
+    einer ohne Kopf, weil ein blinder Nutzer die Luecke nicht sieht.
+    """
+    zeilen = []
+    namen = holen(NAMEN_SKRIPT_PFAD, "namen")
+    if namen:
+        try:
+            geschrieben = namen.nutzer_name_geschrieben()
+            if geschrieben:
+                zeilen.append(geschrieben)
+        except Exception:
+            pass
+    try:
+        with open(ABSENDER, encoding="utf-8") as f:
+            for zeile in f:
+                zeile = zeile.strip()
+                if zeile and not zeile.startswith("#"):
+                    zeilen.append(zeile)
+    except OSError:
+        pass
+    return zeilen
+
+
+def briefbogen(text):
+    """Setzt den diktierten Text in einen Briefbogen aus reinem Text.
+
+    Absender und Datum rechtsbuendig, der Text linksbuendig, die Fusszeile
+    unten rechts - dieselbe Breite und dasselbe Verfahren wie in
+    dialos-fusszeile.py, weil es dieselbe Seite ist.
+    """
+    fuss = holen(FUSSZEILE_SKRIPT, "fusszeile")
+    breite = getattr(fuss, "BREITE", 76) if fuss else 76
+
+    def rechts(zeile):
+        if fuss:
+            return fuss.rechtsbuendig(zeile, breite)
+        return zeile.rjust(breite) if len(zeile) < breite else zeile
+
+    teile = []
+    absender = absenderzeilen()
+    if absender:
+        teile += [rechts(z) for z in absender]
+        teile.append("")
+    teile.append(rechts(datum_ausgeschrieben()))
+    teile.append("")
+    teile.append("")
+    # UMBRUCH AUF DIESELBE BREITE. Ohne ihn stuende der Fliesstext in einer
+    # einzigen 118 Zeichen langen Zeile, waehrend Datum und Fusszeile bei 76
+    # ausgerichtet sind - ein Briefbogen mit zwei Breiten ist keiner. Absaetze
+    # bleiben Absaetze: umgebrochen wird je Absatz, nicht ueber den ganzen Text.
+    absaetze = []
+    for absatz in text.rstrip().split("\n\n"):
+        einzeln = " ".join(absatz.split())
+        absaetze.append(textwrap.fill(einzeln, breite) if einzeln else "")
+    teile.append("\n\n".join(absaetze))
+    teile.append("")
+    teile.append("")
+    satz = fuss.text("dokument") if fuss else \
+        "Dieses Dokument wurde per Spracheingabe powered by DialOS.org erstellt!"
+    teile.append(rechts(satz))
+    return "\n".join(teile) + "\n"
+
+
+def brief_schreiben(zeilen):
+    """Schreibt den Brief - und legt einen vorhandenen zur Seite, statt ihn
+    zu ueberschreiben.
+
+    "brief.txt" bleibt der eine Brief, den der Nutzer meint, wenn er "Brief
+    vorlesen" sagt. Der vorige wandert mit Datum und Uhrzeit im Namen daneben.
+    Ueberschreiben waere hier schlimmer als bei einer Notiz: Ein Brief ist
+    Arbeit von Minuten, und wer ihn verliert, merkt es erst, wenn er ihn
+    braucht.
+    """
+    os.makedirs(DOKUMENT_ORDNER, exist_ok=True)
+    pfad = os.path.join(DOKUMENT_ORDNER, "brief.txt")
+    if os.path.exists(pfad) and os.path.getsize(pfad) > 0:
+        beiseite = os.path.join(
+            DOKUMENT_ORDNER,
+            "brief-" + time.strftime("%Y-%m-%d-%H%M%S") + ".txt")
+        try:
+            os.replace(pfad, beiseite)
+            melde(f"  vorigen Brief beiseitegelegt: {beiseite}")
+        except OSError as fehler:
+            melde(f"  konnte den vorigen Brief nicht beiseitelegen: {fehler}")
+    with open(pfad, "w", encoding="utf-8") as f:
+        f.write(briefbogen("\n".join(zeilen)))
+    return pfad
+
+
 def notiz_schreiben(name, zeilen):
     os.makedirs(NOTIZ_ORDNER, exist_ok=True)
     sicher = re.sub(r"[^\w -]", "", name).strip() or "notizen"
@@ -595,7 +744,8 @@ def diktat_fuehren(zweck, name, quelle):
         sprich(ANSAGE_LEER)
         return 0
 
-    pfad = notiz_schreiben(name, gesammelt)
+    pfad = (brief_schreiben(gesammelt) if name in BRIEF_ZIELE
+            else notiz_schreiben(name, gesammelt))
     melde(f"  geschrieben nach {pfad}")
     sprich(ansage_ende(name, len(gesammelt)))
     # KEIN Vorlesen mehr an dieser Stelle (Stephan, 2026-08-19) - siehe

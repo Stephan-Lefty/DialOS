@@ -156,8 +156,16 @@ GRAMMATIK_AN = json.dumps([
     "diktat starten",
     "einkaufszettel aufnehmen",
     "notiz aufnehmen",
+    # Zwei Formulierungen fuer dasselbe (Stephan, 2026-08-21: "und vielleicht
+    # optional Brief schreiben") - dieselbe Ueberlegung wie bei "auf Linux" und
+    # "auf Gnome": Zwei Eintraege kosten nichts, und der Nutzer muss sich keine
+    # Formulierung merken. Beide Saetze sind im Wortschatz des kleinen Modells
+    # geprueft, ebenso "brief vorlesen" und "brief wegwerfen" fuer spaeter.
+    "brief aufnehmen",
+    "brief schreiben",
     "einkaufszettel vorlesen",
     "notizen vorlesen",
+    "brief vorlesen",
     "einkauf erledigt",
     "einkaufszettel wegwerfen",
     "wie viel uhr ist es",
@@ -199,6 +207,8 @@ DIKTAT_SAETZE = {
     "diktat starten": "notizen",
     "notiz aufnehmen": "notizen",
     "einkaufszettel aufnehmen": "einkaufszettel",
+    "brief aufnehmen": "brief",
+    "brief schreiben": "brief",
 }
 DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 
@@ -237,6 +247,7 @@ HILFE_SKRIPT = "/usr/local/bin/dialos-hilfe.py"
 NOTIZ_SAETZE = {
     "einkaufszettel vorlesen": ("einkaufszettel", "vorlesen"),
     "notizen vorlesen": ("notizen", "vorlesen"),
+    "brief vorlesen": ("brief", "vorlesen"),
     "einkauf erledigt": ("einkaufszettel", "loeschen"),
     "einkaufszettel wegwerfen": ("einkaufszettel", "loeschen"),
 }
