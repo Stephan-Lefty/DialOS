@@ -1,8 +1,8 @@
 [Deutsch](entstehungsgeschichte.md) | [English](entstehungsgeschichte.en.md)
 
-# Dreizehn Tage
+# Sechzehn Tage
 
-*Die Entstehung von DialOS, vom 6. bis 18. August 2026. 194 Commits.
+*Die Entstehung von DialOS, vom 6. bis 21. August 2026. 261 Commits.
 Erzählt als das, was es war.*
 
 Alles hier ist belegt - im Änderungsprotokoll in [../README.md](../README.md),
@@ -18,8 +18,10 @@ Fehler. Es ist ein Prinzip:
 
 **Ein System, das Erfolg meldet, während es versagt.**
 
-Es tritt in dreizehn Tagen sechsmal auf, jedes Mal in anderer Verkleidung,
+Es tritt in sechzehn Tagen siebenmal auf, jedes Mal in anderer Verkleidung,
 und jedes Mal glaubt ihm jemand. Meistens ich.
+
+Am letzten Tag trägt er meine eigene.
 
 ---
 
@@ -287,9 +289,124 @@ kein behandeltes Risiko.**
 
 ---
 
+## Tag 16: Die Reparatur von Tag 13 schlägt zurück
+
+**21. August.** Stephan will den Brief. Alles dafür ist da: Diktat,
+Schreibhilfe, Fußzeile. Es fehlen Satzzeichen, ein Ablageort und ein
+Briefkopf. Ein Tagewerk, denkt man.
+
+Am Vormittag läuft es. Gesprochene Satzzeichen, gemessen statt geraten: Die
+nackten Wörter treffen bei Stephans Stimme **drei von sechs** - „Komma" wird
+zu „komme", „Punkt" zu „kommt", „Doppelpunkt" zu „dörte depots". Die
+zweiwortigen Formen treffen **drei von drei**. Also „Komma setzen". Nebenbei
+fällt damit ein Preis weg, den Stephan vorher akzeptiert hatte: „in diesem
+Punkt" bleibt jetzt stehen.
+
+Dann diktiert er den ersten Brief. Das Diktat endet nach sechs Sekunden. Von
+selbst.
+
+### Der unzuverlässige Erzähler bin diesmal ich
+
+Ich habe eine Erklärung: Umgebungsgeräusch. Der Schluss-Erkenner kennt nur
+„diktat beenden" und `[unk]`, er muss jedes Geräusch auf eines von beidem
+abbilden. Klingt schlüssig.
+
+Ich messe es: 180 Sekunden Stille im selben Raum, dieselbe Grammatik. **Null
+Ergebnisse.** Die Erklärung ist falsch.
+
+Ich habe eine zweite: Anna hört sich selbst. Die Bereit-Ansage läuft, die
+Aufnahme startet, die Echo-Unterdrückung braucht einen Moment. Auch schlüssig.
+
+Ich messe es: dreimal Ansage, dreimal sofort zuhören. **Nichts.** Auch falsch.
+
+Zwei Diagnosen, beide in sich stimmig, beide widerlegt. Der Gegenspieler hat
+sechzehn Tage lang Systeme benutzt, die Erfolg melden. An diesem Tag benutzt
+er mich.
+
+### Vier Reparaturen an einem Nachmittag
+
+Ich baue eine Sperrfrist: kein Schluss in den ersten drei Sekunden. Der
+nächste Test bricht nach 4,2 ab.
+
+Ich baue ein Pegel-Tor: zu leise ist kein Schluss. Das Geräusch ist laut
+genug.
+
+Ich zähle aus - alle Schluss-Ereignisse des Tages: **sechs Fehlauslöser, jeder
+einzelne ein nacktes „beenden"**, null bei „diktat beenden". Also verlangt der
+Schluss beide Wörter. Damit fällt die Regel von **Tag 13**, die genau
+umgekehrt entstanden war: Damals hatte exakte Übereinstimmung ein Diktat
+sieben Minuten laufen lassen, und die Lehre hieß, das Wort genüge. Sie stammte
+aus sieben Minuten Dauergerede - und hatte nie geprüft, was beim *Diktieren*
+passiert.
+
+Ich baue eine Ansage: Wenn nur „beenden" ankommt, soll DialOS es sagen, damit
+niemand ins Leere spricht. Sie unterbricht Stephan nach vier Sekunden mitten
+im Brief. Sein Urteil ist der Satz des Tages:
+
+> **„Diesen Text kann ich nie zu Ende bringen."**
+
+Die Ansage kommt noch am selben Tag wieder raus. Eine Hilfe, die häufiger
+stört als sie hilft, ist keine.
+
+### Zwei Fehler, die seit Wochen dort lagen
+
+Zwischen den Reparaturen kommen zwei Dinge ans Licht, die nichts mit dem
+Schlusssatz zu tun haben und älter sind als er.
+
+**Vosk liefert erst an einer Sprechpause ab.** Wer den Brief in einem Zug
+spricht und dann „Diktat beenden" sagt, hat beides in *derselben* Pause: Der
+Schluss bricht die Schleife ab, bevor die Erkennung ihren gesammelten Text
+abliefern konnte. `FinalResult()` wurde nie aufgerufen. Im Protokoll steht
+„0 Äußerungen", während ein ganzer Brief gesprochen wurde.
+
+**Und der Notausgang war selbst kaputt.** Zwei Minuten Stille sollten jedes
+Diktat beenden. Sie konnten nie greifen: Jedes `[unk]` aus Raumgeräusch setzte
+die Uhr zurück. Ein Diktat läuft neun Minuten weiter, hält die Marke „ein
+anderer Dienst hört zu" - und Stephan kann die Sprachsteuerung nicht mehr
+starten. Ausgerechnet die Geisterwörter, die das neue Pegel-Tor beim Schreiben
+aussortiert, halten es am Leben.
+
+Beide Fehler sind so alt wie das Diktat. Beide fallen erst auf, als jemand
+einen *Brief* diktiert statt eines Einkaufszettels.
+
+### Die beste Frage des Tages
+
+Am Abend fragt Stephan: Warum funktioniert der Einkaufszettel dann sauber?
+
+Die Antwort steht in der Messung, die schon dalag. Dreißig Sekunden
+zusammenhängender Brieftext durch den Schluss-Erkenner:
+
+```
+bei  4,8 s  'diktat'
+bei  8,4 s  'beenden'
+bei 12,2 s  'diktat [unk] beenden'
+bei 15,1 s  'beenden'
+```
+
+Bruchstücke im Sekundentakt - aus *durchgehender* Rede. Ein Einkaufszettel
+klingt anders: „Milch." Pause. „Butter." Pause. Und 180 Sekunden Stille hatten
+**null** Ergebnisse geliefert. Die Pausen zwischen den Waren schützen den
+Einkaufszettel, ohne dass es jemand so geplant hätte.
+
+Damit ist auch klar, wo der Hebel liegt: Ein echtes „Diktat beenden" folgt auf
+eine Pause. Jedes Bruchstück entsteht mittendrin.
+
+### Was der Tag gekostet hat
+
+Sechs Testläufe von Stephan, jeder mit einem Fehler darin, den ich vorher
+hätte finden können. Vier Regeln stehen seitdem ganz oben in
+[../CLAUDE.md](../CLAUDE.md), und die wichtigste lautet: **Was gegen Piper
+offline prüfbar ist, wird vorher offline geprüft.** Nicht Stephan ist der
+Testlauf.
+
+Die zweite: **Eine Erklärung, die zu allen Beobachtungen passt, ist noch keine
+Ursache.**
+
+---
+
 ## Wie es ausgeht
 
-Es geht nicht aus. Am 18. August, 16:03 Uhr, steht der 194. Commit.
+Es geht nicht aus. Am 21. August, 14:19 Uhr, steht der 261. Commit.
 
 Was existiert: eine Sprachsteuerung, die nur auf Ansage zuhört und das
 ansagt. Ein Diktat, das Notizen schreibt, mit 98,1 % richtiger Groß- und
@@ -299,13 +416,21 @@ Eine Tonausgabe, die keinem Gerät glaubt, sondern es ausprobiert. Und eine
 Dokumentation, die jeden dieser Fehler mitträgt, weil sie sonst wieder
 gemacht werden.
 
-Was nicht existiert: Telefonie, Vorlesen von Mails, das Einscannen von
-Post. Und ein ungeklärter Punkt vom letzten Abend - zwei Diktate haben
-nichts aufgenommen, und es steht bewusst ohne Vermutung in der Liste.
+Dazu, seit den letzten drei Tagen: eine Herkunftszeile in jeder Mail, drei
+Akkuwarnungen, ein Gerät das nicht mehr einschläft und den Nutzer nicht
+aussperrt - und ein Brief, der als Briefbogen entsteht, mit Datum, Fußzeile
+und dem Hinweis, warum er nicht unterschrieben ist.
+
+Was nicht existiert: Telefonie, Vorlesen von Mails, das Einscannen von Post.
+Und der Brief lässt sich nicht zu Ende diktieren, weil der Schluss-Erkenner
+aus laufender Rede ein „diktat beenden" macht. Das ist der einzige Punkt, der
+zwischen dem fertigen Weg und einem brauchbaren Brief steht.
 
 Der Gegenspieler ist nicht besiegt. Er ist erkannt. Das ist bei diesem
 Gegenspieler der ganze Unterschied: **Ein System, das lügt, ist harmlos,
 sobald man aufhört, ihm zu glauben, und anfängt zu messen.**
+
+Tag 16 hat dem einen Satz hinzugefügt: Das gilt auch für den, der misst.
 
 ---
 

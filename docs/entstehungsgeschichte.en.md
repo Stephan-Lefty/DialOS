@@ -1,8 +1,8 @@
 [Deutsch](entstehungsgeschichte.md) | [English](entstehungsgeschichte.en.md)
 
-# Thirteen Days
+# Sixteen Days
 
-*How DialOS came to exist, 6 to 18 August 2026. 194 commits. Told as what
+*How DialOS came to exist, 6 to 21 August 2026. 261 commits. Told as what
 it was.*
 
 Everything here is on the record - in the changelog in
@@ -18,8 +18,10 @@ is a principle:
 
 **A system that reports success while it fails.**
 
-It appears six times in thirteen days, in a different disguise each time,
+It appears seven times in sixteen days, in a different disguise each time,
 and each time somebody believes it. Usually me.
+
+On the last day it wears mine.
 
 ---
 
@@ -280,9 +282,122 @@ risk is not a handled risk.**
 
 ---
 
+## Day 16: The repair from day 13 turns on us
+
+**21 August.** Stephan wants the letter. Everything for it exists: dictation,
+writing aid, footer. What is missing is punctuation, a place to put it and a
+letterhead. A day's work, one would think.
+
+The morning goes well. Spoken punctuation, measured rather than guessed: the
+bare words score **three out of six** with Stephan's voice - "Komma" becomes
+"komme", "Punkt" becomes "kommt", "Doppelpunkt" becomes "dörte depots". The
+two-word forms score **three out of three**. So "Komma setzen". In passing
+that removes a price Stephan had accepted beforehand: "in diesem Punkt" now
+stays intact.
+
+Then he dictates the first letter. The dictation ends after six seconds. By
+itself.
+
+### This time the unreliable narrator is me
+
+I have an explanation: ambient noise. The stop recogniser knows only "diktat
+beenden" and `[unk]`; it has to map every sound onto one of the two. Sounds
+plausible.
+
+I measure it: 180 seconds of silence in the same room, same grammar. **Zero
+results.** The explanation is wrong.
+
+I have a second one: Anna hears herself. The ready announcement plays, the
+recording starts, echo cancellation needs a moment. Also plausible.
+
+I measure it: three times announcement, three times listening immediately.
+**Nothing.** Also wrong.
+
+Two diagnoses, both internally consistent, both refuted. For sixteen days the
+antagonist has used systems that report success. On this day he uses me.
+
+### Four repairs in one afternoon
+
+I build a guard period: no stop in the first three seconds. The next test
+breaks off after 4.2.
+
+I build a level gate: too quiet is no stop. The noise is loud enough.
+
+I count them - all stop events of the day: **six false triggers, every single
+one a bare "beenden"**, none from "diktat beenden". So the stop requires both
+words. That overturns the rule from **day 13**, which had been created the
+other way round: back then exact matching had let a dictation run for seven
+minutes, and the lesson was that the word alone suffices. It came from seven
+minutes of continuous talking - and had never checked what happens while
+*dictating*.
+
+I build an announcement: if only "beenden" arrives, DialOS should say so, so
+nobody speaks into the void. It interrupts Stephan after four seconds in the
+middle of his letter. His verdict is the sentence of the day:
+
+> **"I can never get to the end of this text."**
+
+The announcement is removed the same day. A help that disturbs more often than
+it helps is not one.
+
+### Two faults that had been sitting there for weeks
+
+Between the repairs two things come to light that have nothing to do with the
+stop phrase and are older than it.
+
+**Vosk only delivers at a speech pause.** Anyone who speaks the letter in one
+go and then says "Diktat beenden" has both in *the same* pause: the stop
+breaks the loop before the recognition could deliver its buffered text.
+`FinalResult()` was never called. The log says "0 utterances" while a whole
+letter was spoken.
+
+**And the emergency exit was broken itself.** Two minutes of silence were
+meant to end any dictation. They could never take effect: every `[unk]` from
+room noise reset the clock. One dictation runs on for nine minutes, holds the
+"another service is listening" marker - and Stephan can no longer start the
+voice control. The very phantom words the new level gate discards when writing
+are what keep it alive.
+
+Both faults are as old as the dictation. Both only show up when somebody
+dictates a *letter* instead of a shopping list.
+
+### The best question of the day
+
+In the evening Stephan asks: then why does the shopping list work cleanly?
+
+The answer is in a measurement that was already there. Thirty seconds of
+continuous letter text through the stop recogniser:
+
+```
+at  4.8 s  'diktat'
+at  8.4 s  'beenden'
+at 12.2 s  'diktat [unk] beenden'
+at 15.1 s  'beenden'
+```
+
+Fragments by the second - out of *continuous* speech. A shopping list sounds
+different: "Milch." Pause. "Butter." Pause. And 180 seconds of silence had
+produced **zero** results. The pauses between the items protect the shopping
+list, without anyone having planned it that way.
+
+That also makes clear where the lever is: a genuine "Diktat beenden" follows a
+pause. Every fragment arises in the middle of the flow.
+
+### What the day cost
+
+Six test runs by Stephan, each containing a fault I could have found
+beforehand. Four rules have sat at the top of [../CLAUDE.md](../CLAUDE.md)
+since then, and the most important one is: **whatever can be checked offline
+against Piper gets checked offline first.** Stephan is not the test run.
+
+The second: **an explanation that fits all the observations is not yet a
+cause.**
+
+---
+
 ## How it ends
 
-It does not end. On 18 August at 16:03 the 194th commit is in place.
+It does not end. On 21 August at 14:19 the 261st commit is in place.
 
 What exists: a voice control that listens only when told to, and says so. A
 dictation that writes notes, with 98.1 % correct capitalisation. A shopping
@@ -291,18 +406,26 @@ because it came into being by speaking alone. An audio output that believes
 no device but tries it. And documentation that carries every one of these
 faults, because otherwise they get made again.
 
-What does not exist: telephony, reading out mail, scanning post. And one
-unexplained item from the last evening - two dictations recorded nothing,
-and it sits in the list deliberately without a conjecture.
+Added over the last three days: an origin line in every mail, three battery
+warnings, a machine that no longer falls asleep and no longer locks its user
+out - and a letter that comes into being as a letterhead, with date, footer
+and the note explaining why it is not signed.
+
+What does not exist: telephony, reading out mail, scanning post. And the
+letter cannot be dictated to the end, because the stop recogniser turns
+ongoing speech into "diktat beenden". That is the single point standing
+between a finished path and a usable letter.
 
 The antagonist is not defeated. He is recognized. With this antagonist that
 is the whole difference: **a system that lies is harmless the moment you
 stop believing it and start measuring.**
 
+Day 16 added one sentence to that: the same goes for whoever is measuring.
+
 ---
 
 *For the figures and the evidence: [../README.en.md](../README.en.md) has
 the full changelog, [../TODO.en.md](../TODO.en.md) the open items,
-[../CLAUDE.md](../CLAUDE.md) the rules that came out of these thirteen days.
+[../CLAUDE.md](../CLAUDE.md) the rules that came out of these sixteen days.
 What DialOS sounds like is in
 [sprachbeispiele/](sprachbeispiele/README.en.md).*
