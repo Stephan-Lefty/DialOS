@@ -256,6 +256,13 @@ ABSENDER = "/usr/local/share/dialos/absender.txt"
 # Fusszeile steht unten rechts als Herkunftsangabe und gehoert zum Blatt. Der
 # Unterschriftshinweis steht dort, wo der Empfaenger die Unterschrift SUCHT.
 # Zwei Stellen, zwei Aufgaben.
+#
+# DASS "per Spracheingabe" DAMIT ZWEIMAL AUF DEM BLATT STEHT, ist gesehen und
+# so entschieden (Stephan, 2026-08-21, nach Vorlage der drei Moeglichkeiten:
+# so lassen, Hinweis kuerzen, Fusszeile im Brief weglassen). Wer das spaeter
+# fuer eine Doppelung haelt und eine der beiden Zeilen streicht, nimmt dem
+# Brief entweder die Herkunftsangabe oder die Erklaerung der fehlenden
+# Unterschrift - es ist keine Nachlaessigkeit, sondern eine Wahl.
 UNTERSCHRIFT_HINWEIS = ("Dieser Brief wurde per Spracheingabe erstellt und "
                         "ist deshalb nicht unterschrieben.")
 
