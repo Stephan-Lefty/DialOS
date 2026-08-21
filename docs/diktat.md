@@ -560,3 +560,65 @@ mit:   ... schriftlich. Mit freundlichen Grüßen
 In einem Brief ist das kein Schönheitsfehler, sondern falsch. Deshalb laufen
 die Satzzeichen **vor** LanguageTool. Listen bleiben aussen vor - auf einem
 Einkaufszettel wäre „Butter." keine Verbesserung.
+
+## Stille erzeugt Text - das Pegel-Tor (gemessen 2026-08-21)
+
+Das große Modell **erfindet in Stille Wörter**. Gemessen mit Stephans Mikrofon
+in 80 Sekunden Ruhe: sieben Stück - `köln`, `einen gefunden`, `vom`, `ln`,
+`einen`, `nun`, `schon`. Im Diktat landen die im Text. Wer beim Diktieren
+nachdenkt, bekommt „köln" mitten in seine Kündigung geschrieben. Das betrifft
+**jedes** Diktat; beim Einkaufszettel dürfte es bisher als falsch verstandene
+Ware durchgegangen sein.
+
+Die Messung des Mittelpegels je erkannter Äußerung trennt sauber:
+
+| Äußerung | Spitze | Mittel |
+|---|---|---|
+| `'köln'` (Rauschen) | 601 | **71** |
+| `'nun'` (Rauschen) | 1265 | **84** |
+| `'einen'` (Rauschen) | 528 | **47** |
+| `'sechsundzwanzig'` (leise gesprochen) | 2383 | **350** |
+| ganze Sätze | 11606-13447 | **3475-4196** |
+
+**Die Schwelle liegt bei 150** - das Doppelte des lautesten gemessenen
+Rauschens und weniger als die Hälfte der leisesten echten Äußerung.
+
+**Geprüft wird am Ergebnis, nicht am Audiostrom.** Ein Tor, das leise Blöcke
+gar nicht erst durchlässt, zerschneidet Wörter: Zwischen zwei Silben ist es
+still. Am fertigen Ergebnis zu prüfen kostet nichts und kann nichts zerteilen.
+
+**Dieselbe Prüfung schützt den Schlusssatz.** Ein Störgeräusch, das der
+eingeschränkten Grammatik als „beenden" erscheint, hat nicht den Pegel einer
+Stimme. Das ist zugleich der beste Verdacht für die ungeklärte
+Selbstbeendigung vom selben Tag - ein Diktat, das sich sechs Sekunden nach dem
+Start beendete, während niemand sprach.
+
+**Jede verworfene Äußerung wird protokolliert.** Fällt dort echte Sprache
+hinein, sieht man es sofort, und die Schwelle gehört nach unten.
+
+## Gesprochene Satzzeichen tragen nur zum Teil (gemessen 2026-08-21)
+
+Nach dem Einbau gemessen, erst mit Piper, dann mit Stephans Stimme:
+
+| gesagt | Piper hört | Stephan spricht, Vosk hört |
+|---|---|---|
+| „…Herren **Komma**" | ✅ | `komme` ✗ |
+| „…Herren *(Pause)* **Komma**" | `komme` ✗ | ✅ |
+| **„Komma"** allein | `ja` ✗ | `einen koffer` ✗ |
+| „…Vertrag **Punkt**" | ✅ | ✅ |
+| **„Punkt"** allein | `das` ✗ | `kommt` ✗ |
+| **„neuer Absatz"** | ✅ | ✅ |
+| **„Doppelpunkt"** allein | `dörte depots` ✗ | - |
+
+**Drei von sechs bei Stephans Stimme.** Das Muster ist nicht die Aussprache
+und nicht die Pause - bei Piper klappte genau das Gegenteil. Es ist das
+Sprachmodell: Es rät aus dem Zusammenhang, und bei kurzen Wörtern rät es
+falsch. Durchgehend scheitern die **allein stehenden kurzen Wörter**;
+durchgehend trägt **„neuer Absatz"**, zwei Silben mehr und ohne
+Verwechslungsmöglichkeit.
+
+Das ist dieselbe Lektion wie beim Einschalten der Sprachsteuerung: Ein
+Merkwort muss **eindeutig und lang genug** sein. „Komma" und „Punkt"
+kollidieren mit „komme", „kommt", „Koffer", „das", „ja" - allesamt Wörter, die
+in einem Brief vorkommen. **Offen** ist damit, ob längere Merkwörter („Komma
+setzen", „neuer Satz") den Fall lösen.

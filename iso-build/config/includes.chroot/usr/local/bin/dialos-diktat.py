@@ -52,7 +52,9 @@ Aufruf:
 Beenden durch den Satz "diktat beenden" oder mit Strg+C.
 """
 
+import array
 import json
+import math
 import os
 import re
 import subprocess
@@ -106,6 +108,43 @@ SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 # Schaden der Sperre klein ist (drei Sekunden warten, falls jemand es doch
 # sofort abbrechen will).
 SCHLUSS_SPERRFRIST_S = 3.0
+
+# PEGEL-TOR (gemessen am 2026-08-21, Stephans Stimme, 120 s).
+#
+# DAS PROBLEM: Das grosse Modell erfindet in Stille Woerter. Gemessen wurden
+# in 80 s Ruhe sieben Stueck - 'koeln', 'einen gefunden', 'vom', 'ln'. Im
+# Diktat landen die im Brief: Wer beim Diktieren nachdenkt, bekommt "koeln"
+# mitten in seine Kuendigung geschrieben. Das betrifft JEDES Diktat, nicht nur
+# Briefe; beim Einkaufszettel duerfte es bisher als falsch verstandene Ware
+# durchgegangen sein.
+#
+# DIE MESSUNG trennt sauber - Mittelpegel je Aeusserung:
+#
+#     'koeln'   (Rauschen)          71
+#     'nun'     (Rauschen)          84
+#     'einen'   (Rauschen)          47
+#     Stephans Saetze         3475 - 4196
+#     'sechsundzwanzig'            350   <- echte Sprache, aber leise
+#
+# WARUM AM ERGEBNIS UND NICHT AM AUDIOSTROM: Ein Tor, das leise Bloecke gar
+# nicht erst durchlaesst, zerschneidet Woerter - zwischen zwei Silben ist es
+# still. Am fertigen Ergebnis zu pruefen kostet nichts und kann nichts
+# zerteilen.
+#
+# DIE SCHWELLE liegt bewusst naeher am Rauschen als an der Sprache: 150 ist
+# das Doppelte des lautesten gemessenen Rauschens und weniger als die Haelfte
+# der leisesten echten Aeusserung. Jede verworfene Aeusserung wird
+# protokolliert - faellt dort echte Sprache hinein, sieht man es sofort.
+PEGEL_SCHWELLE = 150.0
+
+
+def pegel(block):
+    """Effektivwert eines Audioblocks (16 Bit, mono)."""
+    werte = array.array("h")
+    werte.frombytes(block[:len(block) // 2 * 2])
+    if not werte:
+        return 0.0
+    return math.sqrt(sum(w * w for w in werte) / len(werte))
 
 
 def ist_schluss(gehoert):
@@ -719,6 +758,7 @@ def diktat_fuehren(zweck, name, quelle):
         # Sekunden Modellladezeit, in denen niemand sprechen kann.
         aufnahme_seit = time.time()
         anzahl_aeusserungen = 0
+        pegel_puffer = []
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -732,6 +772,8 @@ def diktat_fuehren(zweck, name, quelle):
                 time.sleep(0.5)
                 prozess = aufnahme_starten(quelle)
                 continue
+            pegel_puffer.append(pegel(block))
+
             # ZUERST den Schluss-Erkenner fragen. Er bekommt denselben
             # Block; wer zuerst fertig ist, ist unerheblich - entscheidend
             # ist, dass der Schlusssatz nicht erst durch die freie
@@ -739,6 +781,15 @@ def diktat_fuehren(zweck, name, quelle):
             if schluss is not None and schluss.AcceptWaveform(block):
                 gehoert = json.loads(schluss.Result()).get("text", "").strip()
                 if ist_schluss(gehoert):
+                    # ZU LEISE IST KEIN SCHLUSS. Dieselbe Schwelle wie unten - ein
+                    # Stoergeraeusch, das der eingeschraenkten Grammatik als 'beenden'
+                    # erscheint, hat nicht den Pegel einer Stimme. Das ist zugleich der
+                    # beste Verdacht fuer die ungeklaerte Selbstbeendigung vom selben Tag.
+                    mittel = (sum(pegel_puffer) / len(pegel_puffer)) if pegel_puffer else 0.0
+                    if mittel < PEGEL_SCHWELLE:
+                        melde(f"  Schluss {gehoert!r} verworfen - zu leise "
+                              f"(Pegel {mittel:.0f} unter {PEGEL_SCHWELLE:.0f})")
+                        continue
                     seit_start = time.time() - aufnahme_seit
                     if seit_start < SCHLUSS_SPERRFRIST_S:
                         # Mitprotokolliert und NICHT verschwiegen: Wenn das
@@ -757,7 +808,16 @@ def diktat_fuehren(zweck, name, quelle):
             if not erkenner.AcceptWaveform(block):
                 continue
             text = json.loads(erkenner.Result()).get("text", "").strip()
+            mittel = ((sum(pegel_puffer) / len(pegel_puffer))
+                      if pegel_puffer else 0.0)
+            pegel_puffer = []
             if not text:
+                continue
+            if mittel < PEGEL_SCHWELLE:
+                # Protokolliert und nicht stillschweigend verworfen: Faellt hier
+                # echte Sprache hinein, sieht man es sofort - und die Schwelle
+                # gehoert dann nach unten.
+                melde(f"  verworfen, zu leise (Pegel {mittel:.0f}): {text!r}")
                 continue
             letzte_aeusserung = time.time()
             anzahl_aeusserungen += 1

@@ -544,3 +544,63 @@ with:     ... schriftlich. Mit freundlichen Grüßen
 In a letter that is not a cosmetic flaw but wrong. That is why punctuation runs
 **before** LanguageTool. Lists are left out - on a shopping list "Butter." would
 be no improvement.
+
+## Silence produces text - the level gate (measured 2026-08-21)
+
+The big model **invents words in silence**. Measured with Stephan's microphone
+over 80 seconds of quiet: seven of them - `köln`, `einen gefunden`, `vom`,
+`ln`, `einen`, `nun`, `schon`. In a dictation those land in the text. Someone
+who pauses to think gets "köln" written into the middle of their termination
+letter. This affects **every** dictation; on a shopping list it will so far
+have passed as a misheard item.
+
+Measuring the mean level per recognised utterance separates them cleanly:
+
+| utterance | peak | mean |
+|---|---|---|
+| `'köln'` (noise) | 601 | **71** |
+| `'nun'` (noise) | 1265 | **84** |
+| `'einen'` (noise) | 528 | **47** |
+| `'sechsundzwanzig'` (spoken quietly) | 2383 | **350** |
+| whole sentences | 11606-13447 | **3475-4196** |
+
+**The threshold is 150** - twice the loudest measured noise and less than half
+the quietest genuine utterance.
+
+**The check happens on the result, not on the audio stream.** A gate that
+never lets quiet blocks through cuts words apart: between two syllables it is
+silent. Checking the finished result costs nothing and can sever nothing.
+
+**The same check protects the stop phrase.** A noise that appears to the
+restricted grammar as "beenden" does not have the level of a voice. That is
+also the best suspect for the unexplained self-termination on the same day - a
+dictation that ended six seconds after starting while nobody was speaking.
+
+**Every discarded utterance is logged.** If genuine speech ends up there, it
+shows immediately, and the threshold belongs lower.
+
+## Spoken punctuation only partly works (measured 2026-08-21)
+
+Measured after building it, first with Piper, then with Stephan's voice:
+
+| spoken | Piper is heard as | Stephan speaks, Vosk hears |
+|---|---|---|
+| "…Herren **Komma**" | ✅ | `komme` ✗ |
+| "…Herren *(pause)* **Komma**" | `komme` ✗ | ✅ |
+| **"Komma"** alone | `ja` ✗ | `einen koffer` ✗ |
+| "…Vertrag **Punkt**" | ✅ | ✅ |
+| **"Punkt"** alone | `das` ✗ | `kommt` ✗ |
+| **"neuer Absatz"** | ✅ | ✅ |
+| **"Doppelpunkt"** alone | `dörte depots` ✗ | - |
+
+**Three out of six with Stephan's voice.** The pattern is neither the
+pronunciation nor the pause - with Piper the exact opposite worked. It is the
+language model: it guesses from context, and with short words it guesses
+wrong. What consistently fails are the **isolated short words**; what
+consistently works is **"neuer Absatz"**, two syllables longer and with
+nothing to confuse it with.
+
+This is the same lesson as for switching the voice control on: a marker word
+must be **unambiguous and long enough**. "Komma" and "Punkt" collide with
+"komme", "kommt", "Koffer", "das", "ja" - all words that occur in a letter.
+**Open:** whether longer markers ("Komma setzen", "neuer Satz") solve it.
