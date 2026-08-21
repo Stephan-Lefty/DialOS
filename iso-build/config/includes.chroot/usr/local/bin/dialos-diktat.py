@@ -180,6 +180,18 @@ def ist_schluss(gehoert):
 
 ANSAGE_BEREIT = "Ich schreibe mit."
 
+# WENN EIN SCHLUSS VERWORFEN WIRD, MUSS DER NUTZER DAS HOEREN (2026-08-21).
+#
+# Stephan sagte dreimal "Diktat beenden", zweimal wurde es verworfen
+# (nacktes 'beenden' ohne vorherige Aeusserung), und er bekam kein Wort
+# zurueck. Am Bildschirm ist das aergerlich; wer den Bildschirm nicht sieht,
+# hat keine Moeglichkeit herauszufinden, warum nichts passiert - er
+# wiederholt dasselbe Wort, und es passiert wieder nichts.
+#
+# EINMAL je Diktat, nicht bei jedem Verwerfen: Eine Ansage, die sich
+# wiederholt, wird zum Geraeusch - und sie liefe selbst wieder ins Mikrofon.
+ANSAGE_SCHLUSS_UNKLAR = "Sage bitte: Diktat beenden."
+
 # ZIELE, DIE EINE LISTE SIND UND KEIN TEXT (2026-08-19). Bei einem
 # Einkaufszettel ist jede Ware ein eigener Eintrag; in einem Brief ist eine
 # Aeusserung ein Satz. Das aendert zwei Dinge - die Anleitung am Anfang und die
@@ -773,6 +785,7 @@ def diktat_fuehren(zweck, name, quelle):
         aufnahme_seit = time.time()
         anzahl_aeusserungen = 0
         pegel_puffer = []
+        hinweis_gegeben = False
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -821,6 +834,9 @@ def diktat_fuehren(zweck, name, quelle):
                     if anzahl_aeusserungen == 0 and gehoert.split() == ["beenden"]:
                         melde(f"  Schluss {gehoert!r} verworfen - noch nichts diktiert "
                               f"(Pegel {mittel:.0f}); der volle Satz waere angenommen worden")
+                        if not hinweis_gegeben:
+                            sprich(ANSAGE_SCHLUSS_UNKLAR)
+                            hinweis_gegeben = True
                         continue
                     seit_start = time.time() - aufnahme_seit
                     if seit_start < SCHLUSS_SPERRFRIST_S:
