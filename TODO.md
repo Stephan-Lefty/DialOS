@@ -273,9 +273,14 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
       Befehl muss aus dem Befehlsdienst heraus das Diktat starten - und
       dabei die eigene Erkennung stilllegen, was über die Marke schon
       funktioniert.
-    - [ ] **Satzzeichen.** Vosk liefert keine. Der klassische Weg sind
-      gesprochene Satzzeichen („Komma", „Punkt", „Absatz"); zu prüfen ist,
-      ob sie sich von gleichlautenden Wörtern im Text trennen lassen.
+    - [x] **Satzzeichen - gebaut am 2026-08-21.** Gesprochene Satzzeichen:
+      Komma, Punkt, Fragezeichen, Ausrufezeichen, Doppelpunkt,
+      Gedankenstrich, Absatz, neuer Absatz, neue Zeile. Alle neun stehen im
+      Wortschatz des grossen Modells (`graph/words.txt`, 822 389 Einträge).
+      Stephans Entscheidung: **immer** als Satzzeichen werten, nicht nur bei
+      Sprechpause. Preis: „in diesem Punkt" wird zu „in diesem." - fällt
+      beim Vorlesen auf. Ersetzt wird **wortweise**, damit „Punkte" und
+      „Kommando" unangetastet bleiben. Listen bekommen keine Satzzeichen.
     - [ ] **Eine Zeile je Eintrag.** Vosk schneidet erst an einer
       Sprechpause; ohne Pause landet alles in einer Zeile. Für einen
       Einkaufszettel wäre eine Zeile je Eintrag besser.

@@ -506,3 +506,57 @@ Einzeln geht jedes dieser Wörter richtig, und einzeln kommen sie seit dem
 ganze Sätze. Eine frühere Einschätzung, die Schreibung sei der dringendste
 offene Punkt, ist damit zurückgenommen: Der dringendere war die Ladezeit
 darüber.
+
+## Gesprochene Satzzeichen (2026-08-21)
+
+Vosk liefert Wörter, keine Zeichen. Für einen Einkaufszettel belanglos, für
+einen Brief das Ende der Brauchbarkeit. Der Nutzer spricht sie deshalb aus:
+
+| gesagt | wird zu |
+|---|---|
+| Komma | `,` |
+| Punkt | `.` |
+| Fragezeichen | `?` |
+| Ausrufezeichen | `!` |
+| Doppelpunkt | `:` |
+| Gedankenstrich | ` - ` |
+| Absatz, neuer Absatz | Leerzeile |
+| neue Zeile | Zeilenumbruch |
+
+**Alle neun stehen im Wortschatz** des grossen Modells - geprüft in
+`graph/words.txt` mit 822 389 Einträgen. Diese Prüfung war Pflicht: Bei
+„löschen" hatte genau das gefehlt, und der Befehl wäre still nie ausgelöst
+worden.
+
+**Und die naheliegende Prüfmethode trägt hier nicht.** Der Weg über eine
+eingeschränkte Grammatik, der beim kleinen Modell fehlende Wörter meldet,
+liefert beim grossen ein leeres Versprechen: Es nimmt gar keine Grammatik an
+(`Runtime graphs are not supported by this model`) und meldet deshalb auch
+nichts. Neun Wörter sahen „vorhanden" aus, geprüft worden war nichts. Erst die
+Wortliste des Modells gibt eine Antwort.
+
+**Immer als Satzzeichen** (Stephans Entscheidung). Der Preis: „in diesem Punkt"
+wird zu „in diesem." Das fällt beim Vorlesen auf, und die Stelle wird neu
+diktiert. Die Alternative wäre gewesen, nur bei einer Sprechpause zu trennen -
+Vosk liefert Wortzeitstempel -, aber dann bekäme, wer flüssig diktiert, gar
+keine Satzzeichen.
+
+**Ersetzt wird wortweise, nicht per Textsuche.** Sonst hätte es „Punkte",
+„Kommando" und „Absatzweise" mitgetroffen, und der Text zerfiele an Stellen,
+an denen niemand ein Satzzeichen gesagt hat.
+
+### Was Satzzeichen für die Schreibung bringen - gemessen
+
+Die Vermutung war, LanguageTool entscheide mit Satzzeichen die Grossschreibung
+besser. **Für die Substantive stimmt das nicht:** „Damen", „Herren",
+„Vertrag", „Termin", „Kündigung", „Grüßen" kamen mit und ohne Zeichen gleich
+heraus. Was Satzzeichen bringen, sind die **Satzanfänge**:
+
+```
+ohne:  ... schriftlich mit freundlichen Grüßen
+mit:   ... schriftlich. Mit freundlichen Grüßen
+```
+
+In einem Brief ist das kein Schönheitsfehler, sondern falsch. Deshalb laufen
+die Satzzeichen **vor** LanguageTool. Listen bleiben aussen vor - auf einem
+Einkaufszettel wäre „Butter." keine Verbesserung.

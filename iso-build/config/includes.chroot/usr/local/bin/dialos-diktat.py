@@ -277,6 +277,83 @@ def lt_lebt():
         return False
 
 
+# GESPROCHENE SATZZEICHEN (Stephans Entscheidung, 2026-08-21: "immer als
+# Satzzeichen"). Vosk liefert Woerter, keine Zeichen - fuer einen
+# Einkaufszettel belanglos, fuer einen Brief das Ende der Brauchbarkeit.
+#
+# ALLE NEUN WOERTER STEHEN IM WORTSCHATZ des grossen Modells (geprueft am
+# 2026-08-21 in graph/words.txt, 822 389 Eintraege). Das musste geprueft
+# werden - bei "loeschen" hatte genau das gefehlt, und der Befehl waere still
+# nie ausgeloest worden. Vorsicht bei der Pruefmethode: Das grosse Modell nimmt
+# KEINE eingeschraenkte Grammatik an ("Runtime graphs are not supported by
+# this model") und meldet deshalb auch kein fehlendes Wort. Der Grammatik-Weg,
+# der beim kleinen Modell funktioniert, liefert hier ein leeres Versprechen -
+# neun Woerter sahen "vorhanden" aus, geprueft worden war nichts.
+#
+# DER PREIS DER ENTSCHEIDUNG: "in diesem Punkt" wird zu "in diesem." Das faellt
+# beim Vorlesen auf, und der Nutzer diktiert die Stelle neu. Die Alternative
+# waere gewesen, nur bei einer Sprechpause zu trennen (Vosk liefert
+# Wortzeitstempel) - dann bekaeme aber, wer fluessig diktiert, gar keine
+# Satzzeichen.
+#
+# Laengere Wendungen zuerst, sonst frisst "absatz" den "neuen absatz".
+SATZZEICHEN = [
+    ("neuer absatz", "\n\n"),
+    ("neue zeile", "\n"),
+    ("absatz", "\n\n"),
+    ("gedankenstrich", " - "),
+    ("ausrufezeichen", "!"),
+    ("fragezeichen", "?"),
+    ("doppelpunkt", ":"),
+    ("komma", ","),
+    ("punkt", "."),
+]
+
+
+def satzzeichen_setzen(satz):
+    """Ersetzt gesprochene Satzzeichen durch die Zeichen selbst.
+
+    WORTWEISE UND NICHT PER TEXTSUCHE. Eine Ersetzung im Fliesstext haette
+    "Punkte", "Kommando" und "Absatzweise" mitgetroffen - der Text zerfiele an
+    Stellen, an denen der Nutzer nie ein Satzzeichen gesagt hat.
+
+    Das Zeichen haengt am Wort davor, ohne Leerzeichen; danach kommt eines.
+    Absaetze raeumen die Leerzeichen davor weg, damit keine Zeile mit einem
+    Leerzeichen endet.
+    """
+    tabelle = dict(SATZZEICHEN)
+    worte = satz.split()
+    teile = []
+    i = 0
+    while i < len(worte):
+        zwei = " ".join(worte[i:i + 2]).lower()
+        if len(worte) - i >= 2 and zwei in tabelle:
+            teile.append(("zeichen", tabelle[zwei]))
+            i += 2
+            continue
+        eins = worte[i].lower()
+        if eins in tabelle:
+            teile.append(("zeichen", tabelle[eins]))
+            i += 1
+            continue
+        teile.append(("wort", worte[i]))
+        i += 1
+
+    text = ""
+    for art, wert in teile:
+        if art == "wort":
+            if text and not text.endswith(("\n", " ")):
+                text += " "
+            text += wert
+        elif wert.startswith("\n"):
+            text = text.rstrip() + wert
+        elif wert == " - ":
+            text = text.rstrip() + wert
+        else:
+            text = text.rstrip() + wert + " "
+    return text.strip()
+
+
 def schreibung_richten(satz):
     """Gross- und Kleinschreibung ueber LanguageTool, Satzanfang selbst.
 
@@ -480,8 +557,25 @@ def diktat_fuehren(zweck, name, quelle):
                 # das kleine Modell fehlt.
                 melde("  -> Schlusssatz in der freien Erkennung, Diktat endet")
                 break
-            gefasst = schreibung_richten(text)
-            if gefasst.lower() != text.lower():
+            # VOR LanguageTool, und der Grund ist GEMESSEN, nicht vermutet
+            # (2026-08-21). Ich hatte behauptet, mit Satzzeichen entscheide
+            # LanguageTool die Grossschreibung besser. Fuer die SUBSTANTIVE
+            # stimmt das nicht - "Damen", "Herren", "Vertrag", "Termin",
+            # "Kuendigung", "Gruessen" kamen mit und ohne Zeichen gleich
+            # heraus. Was Satzzeichen bringen, sind die SATZANFAENGE:
+            #
+            #   ohne:  ... schriftlich mit freundlichen Gruessen
+            #   mit:   ... schriftlich. Mit freundlichen Gruessen
+            #
+            # In einem Brief ist das kein Schoenheitsfehler, sondern falsch.
+            # Listen bleiben aussen vor - auf einem Einkaufszettel waere
+            # "Butter." keine Verbesserung.
+            mit_zeichen = (text if name in LISTEN_ZIELE
+                           else satzzeichen_setzen(text))
+            if mit_zeichen != text:
+                melde(f"  Satzzeichen:  {mit_zeichen!r}")
+            gefasst = schreibung_richten(mit_zeichen)
+            if gefasst.lower() != mit_zeichen.lower():
                 melde(f"  ACHTUNG: Schreibhilfe hat mehr als die Schreibung geaendert")
             melde(f"  geschrieben: {gefasst!r}")
             neue = eintraege_aus(name, gefasst)

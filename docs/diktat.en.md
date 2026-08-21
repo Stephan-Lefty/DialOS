@@ -490,3 +490,57 @@ those words comes out right, and individually is how they arrive since
 **So capitalization is dependable for letters and mails** - those are whole
 sentences. An earlier assessment that capitalization was the most urgent open
 point is hereby withdrawn: the more urgent one was the load time above it.
+
+## Spoken punctuation (2026-08-21)
+
+Vosk delivers words, not characters. Irrelevant for a shopping list, the end of
+usability for a letter. So the user speaks them:
+
+| spoken | becomes |
+|---|---|
+| Komma | `,` |
+| Punkt | `.` |
+| Fragezeichen | `?` |
+| Ausrufezeichen | `!` |
+| Doppelpunkt | `:` |
+| Gedankenstrich | ` - ` |
+| Absatz, neuer Absatz | blank line |
+| neue Zeile | line break |
+
+**All nine are in the vocabulary** of the big model - checked in
+`graph/words.txt` with 822,389 entries. That check was mandatory: it was exactly
+what had been missing for "löschen", where the command would silently never have
+fired.
+
+**And the obvious checking method does not work here.** The route via a
+restricted grammar, which reports missing words on the small model, gives an
+empty promise on the big one: it accepts no grammar at all (`Runtime graphs are
+not supported by this model`) and therefore reports nothing either. Nine words
+looked "present"; nothing had been checked. Only the model's word list answers
+the question.
+
+**Always punctuation** (Stephan's decision). The price: "in diesem Punkt"
+becomes "in diesem." That shows up during read-back, and the passage gets
+dictated again. The alternative would have been to split only at a speech pause -
+Vosk provides word timestamps - but then anyone dictating fluently would get no
+punctuation at all.
+
+**Replacement is word-wise, not by text search.** Otherwise it would have hit
+"Punkte", "Kommando" and "Absatzweise", and the text would fall apart at places
+where nobody spoke a punctuation mark.
+
+### What punctuation does for capitalisation - measured
+
+The assumption was that LanguageTool decides capitalisation better with
+punctuation. **For the nouns that is not true:** "Damen", "Herren", "Vertrag",
+"Termin", "Kündigung", "Grüßen" came out the same with and without. What
+punctuation delivers is the **sentence beginnings**:
+
+```
+without:  ... schriftlich mit freundlichen Grüßen
+with:     ... schriftlich. Mit freundlichen Grüßen
+```
+
+In a letter that is not a cosmetic flaw but wrong. That is why punctuation runs
+**before** LanguageTool. Lists are left out - on a shopping list "Butter." would
+be no improvement.
