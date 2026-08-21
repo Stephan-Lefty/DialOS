@@ -242,6 +242,23 @@ FUSSZEILE_SKRIPT = "/usr/local/bin/dialos-fusszeile.py"
 NAMEN_SKRIPT_PFAD = "/usr/local/bin/dialos-namen.py"
 ABSENDER = "/usr/local/share/dialos/absender.txt"
 
+# DER HINWEIS AN DER STELLE DER UNTERSCHRIFT (Stephan, 2026-08-21). Ein Brief
+# ohne Unterschrift wirft beim Empfaenger die Frage auf, ob jemand etwas
+# vergessen hat - der Hinweis beantwortet sie, bevor sie entsteht.
+#
+# WARUM NICHT "ohne Unterschrift gueltig", die uebliche Formel: Das ist eine
+# rechtliche Aussage. Bei Schriftform-Erfordernis - und Kuendigungen sind
+# genau der Fall, den wir als Beispiel benutzen - ist ein Brief ohne
+# eigenhaendige Unterschrift eben NICHT gueltig. Der Hinweis erklaert die
+# fehlende Unterschrift, er ersetzt sie nicht.
+#
+# WARUM ER TROTZ DER FUSSZEILE NOETIG IST, die dasselbe Verfahren nennt: Die
+# Fusszeile steht unten rechts als Herkunftsangabe und gehoert zum Blatt. Der
+# Unterschriftshinweis steht dort, wo der Empfaenger die Unterschrift SUCHT.
+# Zwei Stellen, zwei Aufgaben.
+UNTERSCHRIFT_HINWEIS = ("Dieser Brief wurde per Spracheingabe erstellt und "
+                        "ist deshalb nicht unterschrieben.")
+
 
 def marke_pfad(name):
     basis = os.environ.get("XDG_RUNTIME_DIR")
@@ -550,6 +567,10 @@ def briefbogen(text):
         einzeln = " ".join(absatz.split())
         absaetze.append(textwrap.fill(einzeln, breite) if einzeln else "")
     teile.append("\n\n".join(absaetze))
+    teile.append("")
+    # Linksbuendig und nicht rechts: Er gehoert zum Brief, nicht zum Briefkopf -
+    # und beim Vorlesen zaehlt er deshalb zum Text, wird also mitgelesen.
+    teile.append(textwrap.fill(UNTERSCHRIFT_HINWEIS, breite))
     teile.append("")
     teile.append("")
     satz = fuss.text("dokument") if fuss else \
