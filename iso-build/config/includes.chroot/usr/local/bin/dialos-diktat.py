@@ -750,6 +750,41 @@ def main():
             pass
 
 
+def aeusserung_verarbeiten(name, text):
+    """Der Weg jeder Aeusserung: Satzzeichen, Schreibung, Zerlegung.
+
+    Herausgeloest, damit der Resttext nach dem Schluss GENAU denselben Weg
+    nimmt wie jede andere Aeusserung. Zwei Kopien dieses Ablaufs waeren zwei
+    Stellen, an denen kuenftig eine Aenderung vergessen wird.
+
+    SATZZEICHEN VOR LanguageTool, und der Grund ist GEMESSEN, nicht vermutet
+    (2026-08-21). Ich hatte behauptet, mit Satzzeichen entscheide LanguageTool
+    die Grossschreibung besser. Fuer die SUBSTANTIVE stimmt das nicht -
+    "Damen", "Herren", "Vertrag", "Termin", "Kuendigung", "Gruessen" kamen mit
+    und ohne Zeichen gleich heraus. Was Satzzeichen bringen, sind die
+    SATZANFAENGE:
+
+        ohne:  ... schriftlich mit freundlichen Gruessen
+        mit:   ... schriftlich. Mit freundlichen Gruessen
+
+    In einem Brief ist das kein Schoenheitsfehler, sondern falsch. Listen
+    bleiben aussen vor - auf einem Einkaufszettel waere "Butter." keine
+    Verbesserung.
+    """
+    mit_zeichen = text if name in LISTEN_ZIELE else satzzeichen_setzen(text)
+    if mit_zeichen != text:
+        melde(f"  Satzzeichen:  {mit_zeichen!r}")
+    gefasst = schreibung_richten(mit_zeichen)
+    if gefasst.lower() != mit_zeichen.lower():
+        melde("  ACHTUNG: Schreibhilfe hat mehr als die Schreibung geaendert")
+    melde(f"  geschrieben: {gefasst!r}")
+    neue = eintraege_aus(name, gefasst)
+    if len(neue) > 1:
+        melde(f"  in {len(neue)} Eintraege getrennt: {neue!r}")
+    return neue
+
+
+
 def diktat_fuehren(zweck, name, quelle):
     import vosk
     vosk.SetLogLevel(-1)
@@ -876,31 +911,7 @@ def diktat_fuehren(zweck, name, quelle):
                 # das kleine Modell fehlt.
                 melde("  -> Schlusssatz in der freien Erkennung, Diktat endet")
                 break
-            # VOR LanguageTool, und der Grund ist GEMESSEN, nicht vermutet
-            # (2026-08-21). Ich hatte behauptet, mit Satzzeichen entscheide
-            # LanguageTool die Grossschreibung besser. Fuer die SUBSTANTIVE
-            # stimmt das nicht - "Damen", "Herren", "Vertrag", "Termin",
-            # "Kuendigung", "Gruessen" kamen mit und ohne Zeichen gleich
-            # heraus. Was Satzzeichen bringen, sind die SATZANFAENGE:
-            #
-            #   ohne:  ... schriftlich mit freundlichen Gruessen
-            #   mit:   ... schriftlich. Mit freundlichen Gruessen
-            #
-            # In einem Brief ist das kein Schoenheitsfehler, sondern falsch.
-            # Listen bleiben aussen vor - auf einem Einkaufszettel waere
-            # "Butter." keine Verbesserung.
-            mit_zeichen = (text if name in LISTEN_ZIELE
-                           else satzzeichen_setzen(text))
-            if mit_zeichen != text:
-                melde(f"  Satzzeichen:  {mit_zeichen!r}")
-            gefasst = schreibung_richten(mit_zeichen)
-            if gefasst.lower() != mit_zeichen.lower():
-                melde(f"  ACHTUNG: Schreibhilfe hat mehr als die Schreibung geaendert")
-            melde(f"  geschrieben: {gefasst!r}")
-            neue = eintraege_aus(name, gefasst)
-            if len(neue) > 1:
-                melde(f"  in {len(neue)} Eintraege getrennt: {neue!r}")
-            gesammelt += neue
+            gesammelt += aeusserung_verarbeiten(name, text)
     except KeyboardInterrupt:
         pass
     finally:
@@ -910,6 +921,35 @@ def diktat_fuehren(zweck, name, quelle):
             except Exception:
                 pass
 
+    # DER REST IM ERKENNER - gefunden am 2026-08-21 durch Stephans Test.
+    #
+    # Vosk sammelt Audio und liefert erst an einer Sprechpause ab. Wer den
+    # Brief in einem Zug spricht und dann "Diktat beenden" sagt, hat beides in
+    # DERSELBEN Pause: Der Schluss-Erkenner bricht die Schleife ab, bevor die
+    # freie Erkennung ihren angesammelten Text abliefern konnte - und der war
+    # damit weg. Im Protokoll stand '0 Aeusserungen', obwohl ein ganzer Brief
+    # gesprochen worden war.
+    #
+    # DER FEHLER WAR VON ANFANG AN DA und ist nur nie aufgefallen: Beim
+    # Einkaufszettel macht man zwischen den Waren Pausen, jede Ware wird fuer
+    # sich abgeschlossen, und was nach der letzten Pause kam, war meist nichts.
+    #
+    # Die Schlussworte muessen weg: Die freie Erkennung hoert "diktat beenden"
+    # mit, und es gehoert nicht in den Brief.
+    rest = ""
+    try:
+        rest = json.loads(erkenner.FinalResult()).get("text", "").strip()
+    except Exception as fehler:
+        melde(f"  Resttext nicht lesbar: {fehler}")
+    if rest:
+        worte = rest.split()
+        while worte and worte[-1] in SCHLUSS_WOERTER:
+            worte.pop()
+        rest = " ".join(worte).strip()
+    if rest:
+        melde(f"  Resttext aus dem Erkenner: {rest!r}")
+        gesammelt += aeusserung_verarbeiten(name, rest)
+    
     if not gesammelt:
         sprich(ANSAGE_LEER)
         return 0

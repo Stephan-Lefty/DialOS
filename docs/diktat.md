@@ -669,3 +669,26 @@ geht es doch nicht.
 Gewinn: Die Erkennung wird zuverlässig, **und** der anfangs akzeptierte Preis
 entfällt. „In diesem Punkt", „drei Punkte" und „ein Komma an dieser Stelle"
 bleiben unangetastet, weil nur „Punkt **setzen**" ein Zeichen erzeugt.
+
+## Was nach der letzten Sprechpause kam, ging verloren (2026-08-21)
+
+**Der schwerste Fehler des Tages, und er war von Anfang an da.** Vosk sammelt
+Audio und liefert erst an einer Sprechpause ab. Wer einen Brief **in einem
+Zug** spricht und danach „Diktat beenden" sagt, hat beides in **derselben**
+Pause: Der Schluss-Erkenner bricht die Schleife ab, bevor die freie Erkennung
+ihren angesammelten Text abliefern konnte. `FinalResult()` wurde nie
+aufgerufen - der Text war weg.
+
+Im Protokoll stand `0 Aeusserungen`, obwohl ein ganzer Brief gesprochen worden
+war. Zweimal habe ich daraus die falschen Schlüsse gezogen und an anderen
+Stellen gesucht.
+
+**Warum es nie aufgefallen ist:** Beim Einkaufszettel macht man zwischen den
+Waren Pausen. Jede Ware wird für sich abgeschlossen, und nach der letzten
+Pause kam meist nichts mehr. Erst der Brief, den man am Stück spricht, macht
+den Fehler sichtbar.
+
+Behoben: Nach der Schleife wird `FinalResult()` geholt und **denselben Weg**
+geschickt wie jede andere Äußerung - Satzzeichen, Schreibung, Zerlegung. Die
+Schlussworte werden dabei abgeschnitten, denn die freie Erkennung hört „Diktat
+beenden" mit, und das gehört nicht in den Brief.

@@ -649,3 +649,24 @@ the user learns that it works, and then it does not.
 recognition becomes reliable **and** the price accepted at the outset
 disappears. "In diesem Punkt", "drei Punkte" and "ein Komma an dieser Stelle"
 stay untouched, because only "Punkt **setzen**" produces a mark.
+
+## Whatever came after the last pause was lost (2026-08-21)
+
+**The most serious fault of the day, and it had been there from the start.**
+Vosk buffers audio and only delivers at a speech pause. Anyone who speaks a
+letter **in one go** and then says "Diktat beenden" has both in the **same**
+pause: the stop recogniser breaks the loop before the free recognition could
+deliver its buffered text. `FinalResult()` was never called - the text was
+gone.
+
+The log said `0 Aeusserungen` although a whole letter had been spoken. Twice I
+drew the wrong conclusions from that and searched elsewhere.
+
+**Why it never showed:** on a shopping list you pause between items. Each item
+is finalised on its own, and after the last pause there was usually nothing
+left. Only the letter, spoken in one go, makes the fault visible.
+
+Fixed: after the loop `FinalResult()` is fetched and sent down **the same
+path** as every other utterance - punctuation, capitalisation, splitting. The
+stop words are trimmed off, because the free recognition hears "Diktat
+beenden" too, and that does not belong in the letter.
