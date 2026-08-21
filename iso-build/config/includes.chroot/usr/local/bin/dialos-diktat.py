@@ -911,8 +911,21 @@ def diktat_fuehren(zweck, name, quelle):
                     melde("  (kein Hinweis gesprochen - er wuerde das Diktat stoeren)")
                     continue
                 if gehoert:
-                    letzte_aeusserung = time.time()
                     melde(f"  (Schluss-Erkenner: {gehoert!r} - kein Schluss)")
+                    # DIE STILLE-UHR NUR BEI ECHTER SPRACHE ZURUECKSETZEN.
+                    #
+                    # Vorher stand hier ein blosses "letzte_aeusserung = time.time()":
+                    # Jedes Geraeusch im Raum erzeugt beim Schluss-Erkenner ein '[unk]',
+                    # und jedes davon hat die Uhr zurueckgesetzt. Damit konnte ein Diktat
+                    # NIE von selbst enden - am 2026-08-21 lief eines neun Minuten weiter,
+                    # hielt die Marke 'ein anderer Dienst hoert zu', und Stephan konnte die
+                    # Sprachsteuerung nicht mehr starten. Der Notausgang, auf den ich ihn
+                    # kurz zuvor verwiesen hatte, war also selbst defekt.
+                    #
+                    # Dieselbe Schwelle wie ueberall: Was zu leise fuer den Text ist, ist
+                    # auch zu leise, um als Lebenszeichen zu gelten.
+                    if mittel >= PEGEL_SCHWELLE:
+                        letzte_aeusserung = time.time()
 
             if not erkenner.AcceptWaveform(block):
                 continue
