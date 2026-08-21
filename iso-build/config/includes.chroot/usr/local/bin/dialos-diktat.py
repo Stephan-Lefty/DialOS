@@ -109,10 +109,6 @@ SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 # sofort abbrechen will).
 SCHLUSS_SPERRFRIST_S = 3.0
 
-# Wie oft der Hinweis "Sage bitte: Diktat beenden." hoechstens kommt. Ohne
-# Abstand liefe er bei jedem Bruchstueck erneut - und selbst wieder ins
-# Mikrofon.
-HINWEIS_ABSTAND_S = 15.0
 
 # PEGEL-TOR (gemessen am 2026-08-21, Stephans Stimme, 120 s).
 #
@@ -215,6 +211,9 @@ ANSAGE_BEREIT = "Ich schreibe mit."
 # EINMAL je Diktat, nicht bei jedem Verwerfen: Eine Ansage, die sich
 # wiederholt, wird zum Geraeusch - und sie liefe selbst wieder ins Mikrofon.
 ANSAGE_SCHLUSS_UNKLAR = "Sage bitte: Diktat beenden."
+# ZURZEIT UNBENUTZT - siehe die Begruendung an der Auswertung des halben
+# Schlusses. Die Ansage bleibt stehen, weil sie mit der Sprechpause-Regel
+# zurueckkommt; geloescht muesste sie dann wortgleich neu erfunden werden.
 
 # ZIELE, DIE EINE LISTE SIND UND KEIN TEXT (2026-08-19). Bei einem
 # Einkaufszettel ist jede Ware ein eigener Eintrag; in einem Brief ist eine
@@ -844,7 +843,6 @@ def diktat_fuehren(zweck, name, quelle):
         aufnahme_seit = time.time()
         anzahl_aeusserungen = 0
         pegel_puffer = []
-        hinweis_zuletzt = 0.0
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -899,9 +897,18 @@ def diktat_fuehren(zweck, name, quelle):
                     # Mikrofon und wuerde zum Geraeusch.
                     melde(f"  {gehoert!r} ist kein Schluss - der volle Satz zaehlt "
                           f"(Pegel {mittel:.0f})")
-                    if time.time() - hinweis_zuletzt > HINWEIS_ABSTAND_S:
-                        sprich(ANSAGE_SCHLUSS_UNKLAR)
-                        hinweis_zuletzt = time.time()
+                    # DIE ANSAGE IST WIEDER RAUS (2026-08-21, noch am selben Tag).
+                    #
+                    # Sie war als Hilfe gedacht: Wer 'beenden' sagt und nichts passiert,
+                    # soll erfahren, warum. Gemessen entstehen diese Bruchstuecke aber im
+                    # Sekundentakt aus ganz normaler Rede - die Ansage unterbrach Stephan
+                    # also MITTEN IM DIKTIEREN, nach rund vier Sekunden. Sein Urteil:
+                    # "Diesen Text kann ich nie zu Ende bringen."
+                    #
+                    # Eine Hilfe, die haeufiger stoert als sie hilft, ist keine. Sie kommt
+                    # erst zurueck, wenn wir sie an eine Sprechpause binden koennen - dann
+                    # trifft sie nur den Fall, fuer den sie gedacht war.
+                    melde("  (kein Hinweis gesprochen - er wuerde das Diktat stoeren)")
                     continue
                 if gehoert:
                     letzte_aeusserung = time.time()
