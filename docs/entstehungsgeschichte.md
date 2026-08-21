@@ -289,6 +289,150 @@ kein behandeltes Risiko.**
 
 ---
 
+## Tag 14: Zwei Tage lang lief etwas anderes, als im Repo stand
+
+**19. August.** 26 Commits. Der Tag beginnt mit einem Wunsch von Stephan, der
+wie eine Kleinigkeit klingt: Es soll sich wie ein **Dialog** anfühlen, nicht
+wie eine Maschine, die Zustände meldet. Daraus wird eine Regel, und jede
+einzelne Ansage wird gegen sie geprüft. „Ich höre Dir zu" statt
+„Spracherkennung aktiv".
+
+Dann kommt die Ja/Nein-Rückfrage vor dem Leeren des Einkaufszettels. Sie
+funktioniert nicht. Stephan sagt „ja", nichts passiert.
+
+Der Grund ist eine Reihenfolge: Der Aufrufer sprach die Frage - und **danach**
+lud die Funktion ihr Sprachmodell, elf Sekunden lang. Die Antwort fiel in
+genau dieses Loch. Die Frage war gestellt, aber niemand hörte zu. Seitdem
+stellt die Funktion die Frage selbst, nachdem sie bereit ist.
+
+### Der blinde Fleck des Prüfskripts
+
+Am selben Tag fällt auf, dass **zwei Skripte zwei Tage lang in einer älteren
+Fassung liefen, als im Repo stand**. Alles war committet, alles sah richtig
+aus, und das Gerät führte etwas anderes aus.
+
+Die Antwort darauf ist ein Prüfskript: Es vergleicht, was im Repo steht, mit
+dem, was installiert ist. Genau die Sorte Werkzeug, die dieses Projekt
+braucht.
+
+Das Prüfskript hat einen blinden Fleck. Es sieht **ein Verzeichnis** an.
+Dateien daneben sind für es nicht vorhanden - und „nicht vorhanden" meldet es
+als in Ordnung.
+
+Das ist derselbe Gegenspieler wie an Tag 8 und Tag 12, nur eine Ebene höher:
+Diesmal meldet nicht das System Erfolg, sondern **das Werkzeug, das den Erfolg
+prüfen soll**. Es wird zweimal nachgebessert - erst eine handgepflegte Liste
+(veraltet beim nächsten neuen Skript), dann der ganze Baum. Und es meldet
+seitdem ausdrücklich, was es **nicht** lesen darf, statt zu schweigen.
+
+### Ein Münzwurf mit 0,8 Sekunden Vorsprung
+
+Die Schreibhilfe braucht beim ersten Satz einer Sitzung **9,2 Sekunden** - die
+deutschen Regeln laden nicht beim Serverstart, sondern bei der ersten
+Prüfanfrage. Die Zeitgrenze im Diktat liegt bei 10,0 Sekunden.
+
+Acht Zehntelsekunden Luft. Die erste Korrektur jeder Sitzung war damit ein
+Münzwurf, und um 10:03:03 hat sie verloren.
+
+Die Lösung ist ein Aufwärmlauf beim Anmelden: Die neun Sekunden fallen einmal
+an, wo niemand darauf wartet. Danach antwortet die Prüfung in 1,0 Sekunden.
+
+Am Abend steht „Hilfe rufen": DialOS liest dem Nutzer eine ID und ein
+Einmalpasswort vor, langsam, mit Pause dazwischen, und fragt hinterher nach,
+ob beides angekommen ist. Der privilegierte Teil ist gebaut, geprüft - und
+**bewusst nicht installiert**, weil der Dienst dahinter noch nicht steht.
+
+---
+
+## Tag 15: Dieselben Daten durch beide Regeln
+
+**20. August.** 19 Commits. Stephan hat DialOS einen Tag lang laufen lassen
+und meldet etwas Beunruhigendes: „Immer mal wieder meldete sich Michael." Die
+Sprachsteuerung schaltet sich **von selbst** ein. Einmal fragt sie sogar, ob
+sie die Fernwartung starten soll.
+
+Das Einschalten hörte auf ein Kernwort, und das Kernwort war „starten". Im
+Protokoll steht, wie oft dieses Wort aus reinem Umgebungsgeräusch entstand:
+**27-mal in zwei Stunden.**
+
+### Die beste Messung des Projekts
+
+Die Umstellung ist schnell gemacht - das Kernwort wird „sprachsteuerung", lang
+und markant. Interessant ist, wie sie belegt wird: **Dieselben zwei Stunden
+Protokoll werden durch beide Regeln gerechnet.** Nicht zwei Zeiträume
+verglichen, bei denen jemand anders im Raum war oder das Radio lief - eine
+Datenbasis, zwei Regeln.
+
+Ergebnis: Die alte Regel hätte **30-mal** eingeschaltet, die neue **7-mal**.
+Ersparnis: 46 Minuten offenes Mikrofon in gut zwei Stunden.
+
+Und dieselbe Messung zeigt die Grenze: Auf **keine** der sieben folgte ein
+Befehl. Auch die sieben waren überwiegend Geräusch. Die Umstellung drückt das
+Problem um drei Viertel, sie löst es nicht.
+
+Daraus werden zwei kleine Änderungen statt des großen Aufweckworts, dessen
+fertige Modelle unter einer nicht-kommerziellen Lizenz stehen: Das Einschalten
+verlangt **beide** Wörter, und ohne Befehl ist nach 30 Sekunden Schluss statt
+nach zwei Minuten.
+
+Die zweite Änderung greift zunächst nicht. Der Grund ist eine Zeile in der
+falschen Reihenfolge: Der Zeitstempel wurde **vor** der Ansage gesetzt, und
+die Ansage dauert gut eine Sekunde - danach sah es aus, als sei schon ein
+Befehl gekommen. Gefunden hat es Stephans Test, nicht mein Test: Meiner hatte
+die Entscheidungsfunktion geprüft, nicht die Reihenfolge.
+
+### Anna
+
+Stephan entscheidet: eine freundliche Damenstimme. Aus dem Hörvergleich wird
+`de_DE-kerstin-low`, Tempo 1,00, Name **Anna** - und sie wird
+Auslieferungsstimme, nicht nur Testeinstellung.
+
+Das Tempo ist dabei pro Stimme verschieden, und zwar messbar: Derselbe Satz
+braucht bei Thorsten 7,75 Sekunden, bei Kerstin mit demselben Wert **8,99**.
+Erst 1,00 bringt sie auf 7,91.
+
+Auf Stephans Frage hin spricht DialOS den Nutzer jetzt mit Namen an - bei der
+Begrüßung, bei Entscheidungen, bei Fehlern. **Nicht** bei Bestätigungen und
+nicht bei der Zeitgrenze. Der Grund wiegt schwerer als Höflichkeit: Läuft das
+Radio oder ist Besuch im Raum, sagt „Stephan, …" unmissverständlich, dass es
+ihn betrifft. Wer den Namen dauernd hört, überhört ihn.
+
+Dann hört Stephan genauer hin: „Michael sagt Stefffan."
+
+Der Name wird bei jeder Begrüßung gesagt, bei jeder Rückfrage, bei jedem
+Fehler. Falsch ausgesprochen stört er mehr als jedes andere Wort. Die
+Namensdatei bekommt ein zweites Feld: `Stephan | Stefan`. Geschrieben bleibt
+„Stephan" - für Briefe, wo „Stefan" schlicht falsch wäre. Gesprochen wird das
+zweite.
+
+**Das hätte ich allein nie gefunden.** Ich hatte die Namensanrede an drei
+Ansagen geprüft und für fertig erklärt. Dass der Name selbst falsch klingt,
+hört nur, wer ihn kennt.
+
+### „Nur Sicherheitsupdates", bevor ich nachgesehen hatte
+
+`unattended-upgrades` wird eingerichtet. Ich sage Stephan, es seien nur
+Sicherheitsupdates.
+
+Dann sehe ich nach. Eine `Origins-Pattern`-Zeile **hängt an**, sie ersetzt
+nicht. Nach dem ersten Versuch standen fünf Muster in der Liste: meine zwei
+**und** Debians drei, darunter das gewöhnliche Stable ohne `-Security`. Das
+Gerät hätte nachts alles aktualisiert.
+
+Behoben mit `#clear`, belegt mit einem Probelauf, bei dem alles außer
+`Debian-Security` mit Pin `-32768` auf „auf keinen Fall" steht. Aber die
+Aussage war vor der Prüfung schon draußen. Stephans Antwort darauf ist der
+Satz, der diesen Tag zusammenfasst: **„Fehler sind menschlich."**
+
+Am selben Tag verliere ich Daten: Mein Neustart-Werkzeug legte das Protokoll
+immer unter demselben Namen beiseite und überschrieb beim zweiten Lauf die
+erste Sicherung. Die Rohdaten der 157 Äußerungen sind weg; das Ergebnis steht
+in den Commits, die Daten nicht. Das Werkzeug legt seitdem gar nichts mehr
+beiseite - seit demselben Tag räumt logrotate die Protokolle nach sieben Tagen
+auf, und ein zweiter Mechanismus daneben schafft nur Namenskollisionen.
+
+---
+
 ## Tag 16: Die Reparatur von Tag 13 schlägt zurück
 
 **21. August.** Stephan will den Brief. Alles dafür ist da: Diktat,

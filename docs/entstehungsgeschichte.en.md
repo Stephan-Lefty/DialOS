@@ -282,6 +282,143 @@ risk is not a handled risk.**
 
 ---
 
+## Day 14: For two days something else was running than the repo said
+
+**19 August.** 26 commits. The day starts with a wish from Stephan that sounds
+like a detail: it should feel like a **dialogue**, not like a machine
+reporting states. That becomes a rule, and every single announcement is
+checked against it. "Ich höre Dir zu" instead of "speech recognition active".
+
+Then comes the yes/no question before emptying the shopping list. It does not
+work. Stephan says "ja", nothing happens.
+
+The reason is an ordering: the caller spoke the question - and **then** the
+function loaded its speech model, for eleven seconds. The answer fell into
+exactly that hole. The question had been asked, but nobody was listening.
+Since then the function asks the question itself, once it is ready.
+
+### The check script's blind spot
+
+The same day it turns out that **two scripts had been running for two days in
+an older version than the repo held**. Everything was committed, everything
+looked right, and the device was executing something else.
+
+The answer to that is a check script: it compares what is in the repo with
+what is installed. Exactly the kind of tool this project needs.
+
+The check script has a blind spot. It looks at **one directory**. Files beside
+it do not exist for it - and "does not exist" it reports as fine.
+
+That is the same antagonist as on day 8 and day 12, one level up: this time it
+is not the system reporting success but **the tool meant to verify the
+success**. It is improved twice - first a hand-maintained list (out of date
+with the next new script), then the whole tree. And since then it explicitly
+reports what it is **not allowed** to read, instead of staying silent.
+
+### A coin toss with 0.8 seconds of margin
+
+The writing aid needs **9.2 seconds** for the first sentence of a session -
+the German rules do not load when the server starts but on the first check
+request. The timeout in the dictation is 10.0 seconds.
+
+Eight tenths of a second of headroom. The first correction of every session
+was a coin toss, and at 10:03:03 it lost.
+
+The fix is a warm-up at login: the nine seconds happen once, where nobody is
+waiting for them. After that the check answers in 1.0 seconds.
+
+By evening "Hilfe rufen" exists: DialOS reads an ID and a one-time password to
+the user, slowly, with a pause between them, and asks afterwards whether both
+arrived. The privileged part is built, checked - and **deliberately not
+installed**, because the service behind it is not ready.
+
+---
+
+## Day 15: The same data through both rules
+
+**20 August.** 19 commits. Stephan has let DialOS run for a day and reports
+something unsettling: "every now and then Michael spoke up." The voice control
+switches itself **on**. Once it even asks whether it should start remote
+support.
+
+Switching on listened for a core word, and the core word was "starten". The
+log records how often that word arose from pure ambient noise: **27 times in
+two hours.**
+
+### The best measurement of the project
+
+The change itself is quick - the core word becomes "sprachsteuerung", long and
+distinctive. What is interesting is how it is proven: **the same two hours of
+log are run through both rules.** Not two periods compared, where somebody
+else was in the room or the radio was on - one body of data, two rules.
+
+Result: the old rule would have switched on **30 times**, the new one **7**.
+Saving: 46 minutes of open microphone in a good two hours.
+
+And the same measurement shows the limit: **not one** of the seven was
+followed by a command. Those seven were largely noise too. The change pushes
+the problem down by three quarters; it does not solve it.
+
+From that come two small changes instead of the big wake word, whose
+ready-made models carry a non-commercial licence: switching on requires
+**both** words, and without a command it ends after 30 seconds instead of two
+minutes.
+
+The second change does not take effect at first. The reason is one line in the
+wrong order: the timestamp was set **before** the announcement, and the
+announcement takes a good second - after which it looked as though a command
+had already come. Stephan's test found it, not mine: mine had checked the
+decision function, not the ordering.
+
+### Anna
+
+Stephan decides: a friendly female voice. The listening comparison produces
+`de_DE-kerstin-low`, tempo 1.00, name **Anna** - and she becomes the delivery
+voice, not just a test setting.
+
+Tempo differs per voice, measurably so: the same sentence takes Thorsten 7.75
+seconds, Kerstin **8.99** at the same value. Only 1.00 brings her to 7.91.
+
+At Stephan's suggestion DialOS now addresses the user by name - in the
+greeting, at decisions, at errors. **Not** at confirmations and not at the
+timeout. The reason weighs more than politeness: with the radio on or a
+visitor in the room, "Stephan, …" says unmistakably that this concerns him.
+Someone who hears the name constantly stops hearing it.
+
+Then Stephan listens more closely: "Michael says Stefffan."
+
+The name is spoken in every greeting, every question, every error.
+Mispronounced it grates more than any other word. The name file gets a second
+field: `Stephan | Stefan`. The written form stays "Stephan" - for letters,
+where "Stefan" would simply be wrong. The second field is what gets spoken.
+
+**I would never have found this alone.** I had checked the name form of
+address against three announcements and declared it done. That the name itself
+sounds wrong is only audible to someone who knows it.
+
+### "Security updates only", before I had checked
+
+`unattended-upgrades` is set up. I tell Stephan it is security updates only.
+
+Then I look. An `Origins-Pattern` line **appends**, it does not replace. After
+the first attempt five patterns were in the list: my two **and** Debian's
+three, including ordinary stable without `-Security`. The device would have
+updated everything overnight.
+
+Fixed with `#clear`, proven with a dry run in which everything except
+`Debian-Security` sits at pin `-32768`, "under no circumstances". But the claim
+had gone out before the check. Stephan's reply is the sentence that sums up the
+day: **"Mistakes are human."**
+
+The same day I lose data: my restart helper always set the log aside under the
+same name and overwrote the first backup on the second run. The raw data of the
+157 utterances is gone; the result is in the commits, the data is not. The
+helper sets nothing aside at all any more - since that same day logrotate
+cleans up the logs after seven days, and a second mechanism beside it only
+creates name collisions.
+
+---
+
 ## Day 16: The repair from day 13 turns on us
 
 **21 August.** Stephan wants the letter. Everything for it exists: dictation,
