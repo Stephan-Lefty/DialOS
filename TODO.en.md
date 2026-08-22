@@ -15,6 +15,58 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Permitted word combinations that form no command fall through
+  SILENTLY** (open since 2026-08-22, found during the print test). The most
+  serious open item for the target group.
+
+  **What happens.** The restricted grammar is a list of PHRASES, but Vosk turns
+  it into a WORD NETWORK and may combine words from different phrases. When the
+  result is not a command, nothing happens - and nothing is said either.
+  Stephan said "notiz drucken", the grammar only knew "notizen drucken",
+  nothing happened, no announcement.
+
+  **Why that is worse than an error.** A sighted user sees a window that does
+  not open, or a sheet that does not arrive. A blind user has spoken, the
+  device has listened, and nothing tells him that nothing happened. He does not
+  even know whether he said it wrong or the device is broken. An error message
+  would have been better.
+
+  **Measured on 2026-08-22** across all `~/.log/dialos-sprachbefehl.log*`,
+  counting the two states separately:
+
+  | | Count |
+  |---|---|
+  | Valid commands | 98 |
+  | `[unk]` (noise) | 191 |
+  | OFF state, no match | 345 |
+  | **ON state, no match** | **382** |
+
+  The 345 in the OFF state are nearly all fragments of "sprachsteuerung
+  starten". **Silence is correct there and must stay** - that is the two-word
+  rule that produced 60 near-misses and zero false starts. Only the 382 in the
+  ON state are the fault.
+
+  **And that is where the dilemma sits:** 382 announcements would be
+  unbearable. The device would interrupt every side conversation. The question
+  is therefore not WHETHER something is said but WHEN - and a criterion for
+  that is missing, one that is measured rather than guessed.
+
+  **What already argues against simply building it:** of the 382, 159 are
+  single-word fragments ("wir", "es", "auf", "viel"). That leaves 223
+  multi-word ones without `[unk]` - still too many. Among them "haben wir"
+  (15x), "die uhrzeit", "welchen haben wir": those are scraps of conversation,
+  not attempted commands.
+
+  **Next step, in this order:**
+  1. Go through a sample of the 223 with Stephan. Only he can say which of them
+     were an attempted command - the log cannot.
+  2. Only then settle on a criterion. The level gate from the dictation
+     (`PEGEL_SCHWELLE`, speech 3475-4196 against noise 47-84) is a candidate,
+     but it distinguishes speaking from silence, not intent from incidental
+     talk.
+  3. The announcement itself must be short and must not lecture. "Das war kein
+     Befehl" is better than a sentence that reads out the whole list.
+
 - [ ] **DEFERRED: rebuild `dialos-hilfe.py` on top of the service** (Stephan,
   2026-08-20: "können den Rustdesk ganz nach hinten schieben, wenn alles
   andere läuft" - RustDesk can go right to the back once everything else

@@ -113,7 +113,9 @@ einkauf auf einkauf" - alle drei am 2026-08-22 im Protokoll), passiert
 **nichts, und es wird auch nichts gesagt**. Fuer einen blinden Nutzer ist das
 der schlechteste Ausgang: Er hat gesprochen, das Geraet hat zugehoert, und
 nichts sagt ihm, dass nichts geschah. Eine Fehlermeldung waere besser als
-Stille.
+Stille. **Eigener Punkt in TODO.md**, mit den Zahlen vom 2026-08-22: 382
+solche Aeusserungen im eingeschalteten Zustand - deshalb ist "einfach eine
+Ansage einbauen" keine Loesung, sondern der naechste Fehler.
 
 **Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, geprueft, bewusst
 nicht installiert - siehe die Ausschlussliste in `dialos-aufspielen`),

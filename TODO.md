@@ -16,6 +16,58 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Erlaubte Wortkombinationen ohne Befehl fallen LAUTLOS durch** (offen
+  seit 2026-08-22, gefunden beim Drucktest). Der schwerwiegendste offene Punkt
+  für die Zielgruppe.
+
+  **Was passiert.** Die eingeschränkte Grammatik ist eine Liste von SÄTZEN,
+  aber Vosk baut daraus ein WORTNETZ und darf Wörter aus verschiedenen Sätzen
+  kombinieren. Kommt dabei etwas heraus, das kein Befehl ist, passiert nichts -
+  und es wird auch nichts gesagt. Stephan sagte „notiz drucken", die Grammatik
+  kannte nur „notizen drucken", nichts geschah, keine Ansage.
+
+  **Warum das schlimmer ist als ein Fehler.** Ein sehender Nutzer sieht ein
+  Fenster, das sich nicht öffnet, oder ein Blatt, das nicht kommt. Ein blinder
+  Nutzer hat gesprochen, das Gerät hat zugehört, und nichts sagt ihm, dass
+  nichts geschah. Er weiß nicht einmal, ob er falsch gesprochen hat oder ob das
+  Gerät kaputt ist. Eine Fehlermeldung wäre besser gewesen.
+
+  **Gemessen am 2026-08-22** aus allen `~/.log/dialos-sprachbefehl.log*`,
+  Zustände getrennt gezählt:
+
+  | | Anzahl |
+  |---|---|
+  | Gültige Befehle | 98 |
+  | `[unk]` (Geräusch) | 191 |
+  | AUS-Zustand, kein Treffer | 345 |
+  | **AN-Zustand, kein Treffer** | **382** |
+
+  Die 345 im AUS-Zustand sind fast alle Bruchstücke von „sprachsteuerung
+  starten". **Dort ist Schweigen richtig und muss so bleiben** - das ist die
+  Zwei-Wort-Regel, die 60 Beinahe-Treffer und null Fehlstarts gebracht hat. Nur
+  die 382 im EINGESCHALTETEN Zustand sind der Fehler.
+
+  **Und da liegt das Dilemma:** 382 Ansagen wären unerträglich. Das Gerät würde
+  bei jedem Nebengespräch dazwischenreden. Die Frage ist also nicht, OB etwas
+  gesagt wird, sondern WANN - und dafür fehlt ein Kriterium, das gemessen und
+  nicht geraten ist.
+
+  **Was schon dagegen spricht, es einfach zu bauen:** Von den 382 sind 159
+  Einwort-Bruchstücke („wir", „es", „auf", „viel"). Bleiben 223 mehrwortige
+  ohne `[unk]` - immer noch zu viele. Darunter „haben wir" (15x), „die
+  uhrzeit", „welchen haben wir": Das sind Gesprächsfetzen, keine
+  Befehlsversuche.
+
+  **Nächster Schritt, in dieser Reihenfolge:**
+  1. Eine Stichprobe der 223 mit Stephan durchgehen. Nur er kann sagen, welche
+     davon ein Befehlsversuch waren - das Protokoll kann es nicht.
+  2. Erst danach ein Kriterium festlegen. Der Pegelmesser aus dem Diktat
+     (`PEGEL_SCHWELLE`, Sprache 3475-4196 gegen Rauschen 47-84) ist ein
+     Kandidat, aber er unterscheidet Sprechen von Stille, nicht Absicht von
+     Beiläufigkeit.
+  3. Die Ansage selbst muss knapp sein und darf nicht belehren. „Das war kein
+     Befehl" ist besser als ein Satz, der die ganze Liste vorliest.
+
 - [ ] **ZURUECKGESTELLT: dialos-hilfe.py auf den Dienst umbauen** (Stephan,
   2026-08-20: "können den Rustdesk ganz nach hinten schieben, wenn alles
   andere läuft"). Die zwei Sprachbefehle sind deshalb aus der Grammatik
