@@ -394,9 +394,17 @@ DEBUG = "--debug" in sys.argv
 # Ein Protokoll, das man erst einschalten muss, ist beim Fehler nicht da.
 # Die Pegelanzeige bleibt bewusst NUR auf dem Bildschirm - sie erzeugte am
 # 2026-08-19 allein 4132 Zeilen gegen 13 echte.
-PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-sprachbefehl.log")
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-sprachbefehl.log")
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
     """Meldung MIT Zeitstempel - immer ins Protokoll, mit --debug auch auf den
     Bildschirm.
@@ -410,6 +418,7 @@ def melde(text):
     zeile = f"{time.strftime('%H:%M:%S')}  {text}"
     if DEBUG:
         print("\n" + zeile, flush=True)
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(zeile + "\n")

@@ -82,7 +82,7 @@ import time
 SAY = "/usr/local/bin/dialos-say.py"
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
 RUSTDESK = "/usr/bin/rustdesk"
-PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-hilfe.log")
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-hilfe.log")
 
 DEBUG = "--debug" in sys.argv
 
@@ -191,9 +191,18 @@ ANSAGE_SPAETER = ("Wenn Du es später noch einmal brauchst, sage einfach: "
 WIEDERHOLUNGEN_MAX = 2
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
     if DEBUG:
         print(text, flush=True)
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")

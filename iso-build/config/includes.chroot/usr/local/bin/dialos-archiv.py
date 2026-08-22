@@ -50,7 +50,7 @@ HEIM = os.path.expanduser("~")
 # docs/sicherheit-datenschutz.md; Stephan kennt den Einwand und will es so.
 ARCHIV = os.path.join(HEIM, "Dokumente", "Archiv", "DialOS-DATA")
 STICK_KENNUNG = "DIALOS-DATA"
-PROTOKOLL = os.path.join(HEIM, "dialos-archiv.log")
+PROTOKOLL = os.path.join(HEIM, ".log", "dialos-archiv.log")
 
 # Seitenmasse in Punkt (1/72 Zoll). A4 = 595 x 842.
 SEITE_B, SEITE_H = 595.0, 842.0
@@ -62,7 +62,16 @@ ZEILENHOEHE = 12.5
 SCHRIFT = "monospace"
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")

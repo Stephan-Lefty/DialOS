@@ -1767,6 +1767,36 @@ has fetched. A mail never opened has no text there - then the PDF says so
 instead of producing an empty page. A complete archive only comes with the own
 IMAP path.
 
+
+## Where things live — for the sighted helper (as of 2026-08-22)
+
+Stephan's reminder the same day: "always remember, we have sighted users too."
+That applies to the logs: since today they live in `~/.log/` and are therefore
+**invisible** in the file manager. For the user that makes no difference — he
+sees nothing anyway. For the helper sitting next to him, a folder he cannot
+see is an obstacle. So here is where everything is:
+
+| What | Where | Visible |
+|---|---|---|
+| Program logs | `~/.log/` | **no** (leading dot) |
+| PDF archive, letters and mail | `~/Dokumente/Archiv/DialOS-DATA/` | yes |
+| The same on the stick | `<DIALOS-DATA>/DialOS-Archiv/` | yes, once plugged in |
+| Letters as text | `~/Dokumente/` | yes |
+| Notes and shopping list | `~/Notizen/` | yes |
+| Screenshots | `~/Bilder/Bildschirmfotos/` | yes |
+
+**Why the logs are hidden** (Stephan's wish): previously 25 files sat openly in
+the home folder — ten live and fifteen rotated — among `Notizen`, `Dokumente`
+and `Bilder`. That is exactly the clutter in which a helper fails to find what
+he is looking for.
+
+**Anyone doing support rarely needs them.** The live transcript window shows
+the same thing as it happens, and the support log summarises what occurred.
+The raw logs are the case where neither is enough.
+
+**The folder may be deleted.** Every script recreates it when writing; only the
+past would be lost. `logrotate` clears it after seven days anyway.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

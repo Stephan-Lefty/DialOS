@@ -32,8 +32,17 @@
 #
 # ZWEI BLOECKE, weil "su" genau einen Nutzer nennt und die Protokolle im
 # jeweiligen Heimatverzeichnis liegen.
+#
+# SEIT 2026-08-22 IN "~/.log" statt offen im Heimatverzeichnis (Stephans
+# Wunsch). Vorher lagen dort 25 Dateien - zehn laufende und fuenfzehn
+# gedrehte - zwischen "Notizen", "Dokumente" und "Bilder". Der Nutzer sieht
+# sie nicht, aber ein sehender Helfer sucht dazwischen.
+#
+# Der Pfad steht hier ZWEIMAL und in elf Skripten. Wer ihn aendert, aendert
+# ihn ueberall - sonst dreht logrotate ins Leere und die Protokolle wachsen
+# unbemerkt weiter. Genau dafuer gibt es scripts/dialos-installstand.sh.
 
-/home/nutzer/dialos-*.log {
+/home/nutzer/.log/dialos-*.log {
     su nutzer nutzer
     daily
     rotate 7
@@ -48,7 +57,7 @@
     create 0600 nutzer nutzer
 }
 
-/home/dialosadmin/dialos-*.log {
+/home/dialosadmin/.log/dialos-*.log {
     su dialosadmin dialosadmin
     daily
     rotate 7

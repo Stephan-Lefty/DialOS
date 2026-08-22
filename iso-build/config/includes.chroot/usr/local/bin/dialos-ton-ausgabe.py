@@ -75,12 +75,21 @@ ANSAGE_INTERN = "Ton über Laptop."
 # Dieselbe Umstellung wie am Morgen des 2026-08-19 beim Befehlsdienst, aus
 # demselben Grund: Ein Protokoll, das erst auf Zuruf entsteht, ist beim
 # unerwarteten Fehler nicht da - und nur den gibt es.
-PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-ton-ausgabe.log")
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-ton-ausgabe.log")
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
     if DEBUG:
         print(text, flush=True)
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")

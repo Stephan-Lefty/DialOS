@@ -50,14 +50,23 @@ ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
 # Mailarchiv eines Tages woanders als das Briefarchiv.
 ARCHIV = None          # wird in main() gesetzt
 MERKLISTE = None
-PROTOKOLL = os.path.join(HEIM, "dialos-mailarchiv.log")
+PROTOKOLL = os.path.join(HEIM, ".log", "dialos-mailarchiv.log")
 BREITE = 76
 
 # Welcher Ordner wird was. "Drafts" fehlt mit Absicht.
 ORDNER = {"INBOX": "eingang", "Sent": "ausgang"}
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")

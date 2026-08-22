@@ -1842,6 +1842,38 @@ geholt hat. Eine nie geöffnete Mail hat dort keinen Text — dann steht das im
 PDF, statt eine leere Seite zu erzeugen. Ein vollständiges Archiv gibt es
 erst mit dem eigenen IMAP-Weg.
 
+
+## Wo was liegt — für den sehenden Helfer (Stand 2026-08-22)
+
+Stephans Erinnerung am selben Tag: „immer dran denken, wir haben auch sehende
+User." Das trifft die Protokolle: Sie liegen seit heute in `~/.log/` und sind
+damit im Dateimanager **unsichtbar**. Für den Nutzer ist das gleichgültig — er
+sieht ohnehin nichts. Für den Helfer, der neben ihm sitzt, ist ein Ordner, den
+er nicht sieht, eine Hürde. Deshalb steht hier, wo alles liegt:
+
+| Was | Wo | Sichtbar |
+|---|---|---|
+| Programm-Protokolle | `~/.log/` | **nein** (Punkt am Anfang) |
+| PDF-Archiv, Briefe und Mails | `~/Dokumente/Archiv/DialOS-DATA/` | ja |
+| Dasselbe auf dem Stick | `<DIALOS-DATA>/DialOS-Archiv/` | ja, sobald er steckt |
+| Briefe als Text | `~/Dokumente/` | ja |
+| Notizen und Einkaufszettel | `~/Notizen/` | ja |
+| Bildschirmfotos | `~/Bilder/Bildschirmfotos/` | ja |
+
+**Warum die Protokolle versteckt sind** (Stephans Wunsch): Vorher lagen 25
+Dateien offen im Heimatverzeichnis — zehn laufende und fünfzehn gedrehte —
+zwischen `Notizen`, `Dokumente` und `Bilder`. Das ist genau der Krempel, in
+dem ein Helfer das Gesuchte nicht findet.
+
+**Wer im Support nachsieht, braucht sie meist gar nicht.** Das
+Mitschrift-Fenster zeigt dasselbe live, und das Support-Protokoll fasst
+zusammen, was passiert ist. Die Rohprotokolle sind der Fall, in dem beides
+nicht reicht.
+
+**Gelöscht werden darf der Ordner.** Jedes Skript legt ihn beim Schreiben neu
+an; verloren wäre nur die Vergangenheit. `logrotate` räumt ihn ohnehin nach
+sieben Tagen auf.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-
