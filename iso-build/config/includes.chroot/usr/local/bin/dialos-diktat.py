@@ -53,6 +53,7 @@ Beenden durch den Satz "diktat beenden" oder mit Strg+C.
 """
 
 import array
+import collections
 import json
 import math
 import os
@@ -137,6 +138,62 @@ SCHLUSS_SPERRFRIST_S = 3.0
 # der leisesten echten Aeusserung. Jede verworfene Aeusserung wird
 # protokolliert - faellt dort echte Sprache hinein, sieht man es sofort.
 PEGEL_SCHWELLE = 150.0
+
+
+# SPRECHPAUSE VOR DEM SCHLUSS (2026-08-22).
+#
+# WARUM ES DIESE REGEL BRAUCHT: Der Schluss-Erkenner arbeitet mit einer
+# eingeschraenkten Grammatik und MUSS deshalb jedes Stueck Ton auf eine seiner
+# Phrasen abbilden. Gemessen mit Piper an 30 s zusammenhaengendem Brieftext:
+#
+#     bei  4,8 s  'diktat'
+#     bei  8,4 s  'beenden'
+#     bei 12,2 s  'diktat [unk] beenden'
+#     bei 15,1 s  'beenden'
+#
+# Bruchstuecke im Sekundentakt, aus ganz normaler Rede. Vier Reparaturen haben
+# das nicht dicht bekommen - Sperrfrist, Pegel-Tor, beide Woerter verlangen,
+# Ansage. Am 2026-08-21 brach Stephans Diktat nach 12,1 s mitten im Satz ab,
+# sein Urteil: "Diesen Text kann ich nie zu Ende bringen."
+#
+# DER UNTERSCHIED, DEN ES WIRKLICH GIBT: Ein echtes "Diktat beenden" kommt,
+# NACHDEM der Nutzer mit dem Text fertig ist - davor liegt eine Pause. Jedes
+# Bruchstueck entsteht mitten im Redefluss, wo es keine gibt. Genau das
+# schuetzt den Einkaufszettel seit jeher, ohne dass es jemand geplant haette:
+# "Milch." Pause. "Butter." Pause.
+#
+# DIE REGEL: In den letzten RUHE_FENSTER_S Sekunden muss es eine
+# zusammenhaengende Ruhephase von mindestens RUHE_MINDESTENS_S gegeben haben.
+RUHE_FENSTER_S = 5.0
+RUHE_MINDESTENS_S = 0.4
+
+# Wie lange ein Block dauert: 4000 Bytes, 16 Bit, mono, 16 kHz.
+BLOCK_S = 4000 / 2 / 16000.0
+
+
+def pause_davor(verlauf, fenster_s=RUHE_FENSTER_S,
+                mindestens_s=RUHE_MINDESTENS_S, schwelle=PEGEL_SCHWELLE):
+    """Lag in den letzten Sekunden eine Sprechpause?
+
+    "verlauf" ist eine Folge von Pegeln, aeltester zuerst, je Block einer.
+    Geprueft wird nur das letzte Fenster; alles davor ist fuer die Frage
+    "kam der Satz nach einer Pause" ohne Bedeutung.
+
+    Reine Funktion ohne Uhr und ohne Mikrofon - damit ist sie gegen
+    aufgezeichnete Faelle pruefbar, und genau das ist am 2026-08-22 passiert,
+    bevor Stephan wieder testen musste.
+    """
+    bloecke_fenster = max(1, int(fenster_s / BLOCK_S))
+    noetig = max(1, int(mindestens_s / BLOCK_S))
+    lauf = 0
+    for pegel in list(verlauf)[-bloecke_fenster:]:
+        if pegel < schwelle:
+            lauf += 1
+            if lauf >= noetig:
+                return True
+        else:
+            lauf = 0
+    return False
 
 
 def pegel(block):
@@ -843,6 +900,10 @@ def diktat_fuehren(zweck, name, quelle):
         aufnahme_seit = time.time()
         anzahl_aeusserungen = 0
         pegel_puffer = []
+        # Der VERLAUF wird nie zurueckgesetzt - anders als pegel_puffer, der zu
+        # jeder Aeusserung gehoert. Er beantwortet eine andere Frage: War es
+        # kurz vorher still?
+        pegel_verlauf = collections.deque(maxlen=int(RUHE_FENSTER_S / BLOCK_S) + 8)
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -857,6 +918,7 @@ def diktat_fuehren(zweck, name, quelle):
                 prozess = aufnahme_starten(quelle)
                 continue
             pegel_puffer.append(pegel(block))
+            pegel_verlauf.append(pegel_puffer[-1])
 
             # ZUERST den Schluss-Erkenner fragen. Er bekommt denselben
             # Block; wer zuerst fertig ist, ist unerheblich - entscheidend
@@ -873,6 +935,14 @@ def diktat_fuehren(zweck, name, quelle):
                     if mittel < PEGEL_SCHWELLE:
                         melde(f"  Schluss {gehoert!r} verworfen - zu leise "
                               f"(Pegel {mittel:.0f} unter {PEGEL_SCHWELLE:.0f})")
+                        continue
+                    # KEIN SCHLUSS OHNE SPRECHPAUSE DAVOR - siehe pause_davor().
+                    # Das ist die Regel, die die vier vorherigen Reparaturen nicht
+                    # geschafft haben: Bruchstuecke entstehen MITTEN im Redefluss, ein
+                    # echtes 'Diktat beenden' folgt auf eine Pause.
+                    if not pause_davor(pegel_verlauf):
+                        melde(f"  Schluss {gehoert!r} verworfen - keine Sprechpause davor "
+                              f"(Pegel {mittel:.0f})")
                         continue
                     seit_start = time.time() - aufnahme_seit
                     if seit_start < SCHLUSS_SPERRFRIST_S:

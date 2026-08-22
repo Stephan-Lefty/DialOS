@@ -722,3 +722,51 @@ Behoben: Nach der Schleife wird `FinalResult()` geholt und **denselben Weg**
 geschickt wie jede andere Äußerung - Satzzeichen, Schreibung, Zerlegung. Die
 Schlussworte werden dabei abgeschnitten, denn die freie Erkennung hört „Diktat
 beenden" mit, und das gehört nicht in den Brief.
+
+## Der Schluss braucht eine Sprechpause (2026-08-22, offline geprüft)
+
+Vier Reparaturen an einem Nachmittag haben es nicht dicht bekommen -
+Sperrfrist, Pegel-Tor, beide Wörter verlangen, Ansage. Jedes Mal fand der
+nächste Test die nächste Lücke, und einmal brach Stephans Diktat nach
+12,1 Sekunden mitten im Satz ab. Sein Urteil war das Maß: **„Diesen Text kann
+ich nie zu Ende bringen."**
+
+**Der Unterschied, den es wirklich gibt:** Ein echtes „Diktat beenden" kommt,
+*nachdem* der Nutzer mit dem Text fertig ist - davor liegt eine Pause. Jedes
+Bruchstück entsteht mitten im Redefluss, wo es keine gibt. Genau das schützt
+den Einkaufszettel seit jeher, ohne dass es jemand geplant hätte: „Milch."
+Pause. „Butter." Pause.
+
+Die Regel: In den letzten **5 Sekunden** muss eine zusammenhängende Ruhephase
+von mindestens **0,4 Sekunden** gelegen haben. Umgesetzt als reine Funktion
+`pause_davor()` - ohne Uhr, ohne Mikrofon, damit sie gegen aufgezeichnete
+Fälle prüfbar ist.
+
+### Offline geprüft, bevor jemand sprechen musste
+
+`scripts/dialos-schlussregel-pruefen.py` lässt Piper sprechen und schickt das
+Ergebnis durch den **echten** Code - `ist_schluss()`, `pause_davor()` und die
+Pegelschwelle kommen aus `dialos-diktat.py`, nicht aus einer Nachbildung.
+
+| Fall | Ergebnis |
+|---|---|
+| **A** durchgehende Rede, kein Schlusssatz | 2 vollständige `'diktat beenden'` entstanden - **beide abgewiesen**, kein Schluss |
+| **B** dieselbe Rede, Pause, dann „Diktat beenden" | dieselben zwei abgewiesen, der echte bei 21,4 s **angenommen** |
+
+Bemerkenswert an Fall A: Aus reiner Rede entstanden **zwei vollständige**
+Schlusssätze. Die hätten die Zwei-Wort-Regel vom Vortag passiert - die
+Sprechpause weist sie ab.
+
+### Wie kurz darf die Pause sein?
+
+Gemessen mit eingefügten Pausen von 0,0 bis 1,5 Sekunden: **alle wurden
+erkannt.** Der Grund ist lehrreich - Piper macht nach einem Satzpunkt von
+selbst eine Atempause. Die Regel greift also nicht an einer künstlich
+eingefügten Stille, sondern an der **natürlichen Satzgrenze**. Für den Nutzer
+heißt das: Er muss nichts anders machen als bisher.
+
+**Was sie nicht kann:** Ein Bruchstück, das zufällig direkt nach einer
+Sprechpause entsteht, kommt weiterhin durch. Zusammen mit den drei anderen
+Bedingungen - beide Wörter, Pegel über der Schwelle, nicht in den ersten drei
+Sekunden - ist das Restrisiko klein, aber es ist nicht null. Der Beweis dafür
+steht noch aus: ein Diktat mit echter Stimme, das von Anfang bis Ende durchläuft.

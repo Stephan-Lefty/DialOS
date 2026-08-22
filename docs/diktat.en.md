@@ -699,3 +699,50 @@ Fixed: after the loop `FinalResult()` is fetched and sent down **the same
 path** as every other utterance - punctuation, capitalisation, splitting. The
 stop words are trimmed off, because the free recognition hears "Diktat
 beenden" too, and that does not belong in the letter.
+
+## The stop needs a speech pause (2026-08-22, verified offline)
+
+Four repairs in one afternoon did not close it - guard period, level gate,
+requiring both words, an announcement. Each time the next test found the next
+gap, and once Stephan's dictation broke off mid-sentence after 12.1 seconds.
+His verdict was the measure: **"I can never get to the end of this text."**
+
+**The difference that actually exists:** a genuine "Diktat beenden" comes
+*after* the user has finished the text - a pause precedes it. Every fragment
+arises in the middle of the flow, where there is none. That is exactly what
+has always protected the shopping list, without anyone planning it: "Milch."
+Pause. "Butter." Pause.
+
+The rule: within the last **5 seconds** there must have been a continuous
+quiet stretch of at least **0.4 seconds**. Implemented as a pure function
+`pause_davor()` - no clock, no microphone, so it can be checked against
+recorded cases.
+
+### Verified offline before anyone had to speak
+
+`scripts/dialos-schlussregel-pruefen.py` lets Piper speak and sends the result
+through the **real** code - `ist_schluss()`, `pause_davor()` and the level
+threshold come from `dialos-diktat.py`, not from a reimplementation.
+
+| Case | Result |
+|---|---|
+| **A** continuous speech, no stop phrase | 2 complete `'diktat beenden'` arose - **both rejected**, no stop |
+| **B** same speech, pause, then "Diktat beenden" | the same two rejected, the genuine one accepted at 21.4 s |
+
+What is remarkable about case A: plain speech produced **two complete** stop
+phrases. Those would have passed the previous day's two-word rule - the pause
+requirement rejects them.
+
+### How short may the pause be?
+
+Measured with inserted pauses from 0.0 to 1.5 seconds: **all were detected.**
+The reason is instructive - Piper takes a breath of its own after a full stop.
+So the rule keys not on an artificially inserted silence but on the **natural
+sentence boundary**. For the user that means: nothing has to be done
+differently.
+
+**What it cannot do:** a fragment that happens to arise right after a speech
+pause still gets through. Together with the three other conditions - both
+words, level above the threshold, not within the first three seconds - the
+residual risk is small, but it is not zero. The proof is still outstanding: a
+dictation with a real voice that runs from beginning to end.
