@@ -6,55 +6,15 @@ Laufende Liste offener Kleinigkeiten und nächster Schritte, die Stephan
 oder Claude im Arbeitsalltag auffallen. Anders als
 [Offene Punkte](docs/offene-punkte.md) (grundsätzliche, noch nicht
 entschiedene Architekturfragen) sind das hier konkrete, abhakbare
-Aufgaben. Erledigte Punkte werden mit einem Häkchen markiert, nicht
-gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
+Aufgaben. Oben steht, was noch offen ist. Erledigtes wird nicht gelöscht,
+sondern nach unten unter „Erledigt (zur Nachvollziehbarkeit)" verschoben -
+dort nach Thema gruppiert und innerhalb des Themas chronologisch, jeweils
+mit dem Datum, an dem es fertig wurde.
 
-- [x] Lautstärke-Abfrage bei der Start-Ansage (nur `nutzer`, 100/75/50/
-  25 Prozent/aus) umgesetzt - erledigt 2026-08-14, siehe
-  docs/Debian-zu-DialOS.md Schritt 11. Erste echte Vosk-Nutzung im
-  Betrieb, Erkennungslogik mit Piper-synthetisierten Testwörtern
-  verifiziert (alle fünf Optionen korrekt erkannt).
-- [x] Echten Test der Lautstärke-Abfrage mit tatsächlich gesprochener
-  Antwort durchgeführt (über das Bluetooth-Mikrofon, inkl.
-  `headset-head-unit`-Profilwechsel) - erledigt 2026-08-16. Dabei einen
-  echten Bug gefunden und behoben: Beim ersten Versuch fehlte ein
-  klares Startsignal, wann genau das 4-Sekunden-Aufnahmefenster
-  beginnt - Stephans gesprochene Antwort ("25") wurde verpasst, nur der
-  100 %-Sicherheits-Fallback kam an. Fix: `dialos-start-ansage.py`
-  sagt jetzt direkt vor der Aufnahme zusätzlich "Und jetzt bitte." -
-  danach im zweiten Versuch korrekt erkannt (echtes "25" → 25 %).
-- [x] Wetter-Standort auf GeoClue2 umgestellt statt IP-geraten - erledigt
-  2026-08-14, ausführlich live getestet (siehe README-Änderungsprotokoll
-  0.5.0 und docs/Debian-zu-DialOS.md, Schritt 11, für Details). Auslöser:
-  `wttr.in`s eigene IP-Standorterkennung zeigte Wien statt Stephans
-  echtem Standort (Seefeld in Tirol) - ein fest hinterlegter Ort schied
-  aus, da das Gerät auch unterwegs genutzt wird. Live-Erkenntnis dabei:
-  GeoClue2 fällt in Gegenden mit dünner Mozilla-WLAN-Datenbank-Abdeckung
-  ebenfalls auf eine grobe IP-Schätzung zurück ("ipf fallback",
-  ~25-26 km ungenau, real ~300 km daneben) - deshalb Genauigkeits-
-  Schwellwert (>10 km wird verworfen) eingebaut, Wetteransage wird dann
-  bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
-  dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
-  Trade-off.
-- [x] **Wo liegen die Mailbox-Zugangsdaten? Entschieden am 2026-08-18:**
-  Datei in `/home/nutzer`, Rechte 0600 - nicht der Schlüsselbund (der
-  entsperrt sich unter Autologin nicht zuverlässig und schützt hinter
-  derselben LUKS-Tür ohnehin nicht zusätzlich) und nicht der Stick (er
-  trägt den LUKS-Schlüssel, kann abgezogen werden, und wäre eine zweite
-  Stelle für dasselbe). Begründung in `docs/sicherheit-datenschutz.md`.
-  Ursprünglich stand hier:
-  DialOS liest und schreibt Mail direkt über IMAP/SMTP, weil Thunderbird
-  von außen nur `-compose` kennt und kein Lesen erlaubt (siehe
-  `docs/anwendungen.md`). Damit braucht DialOS die Zugangsdaten selbst.
-  Zwei Wege: GNOME-Schlüsselbund über libsecret, oder eine Datei, die nur
-  dem Konto gehört. **Gehört zur Sicherheits-Architektur**, nicht in eine
-  Nebenentscheidung - `docs/sicherheit-datenschutz.md` mit entscheiden.
-  Zum Testen liegt die Adresse `proband@dialos.org` bereit
-  (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
-  **Fußzeile nicht vergessen:** Dieser Versandweg muss sich die
-  Herkunftszeile selbst holen (`dialos-fusszeile.py text --art mail`).
-  Die Thunderbird-Signatur vom 2026-08-20 greift nur bei Mails, die
-  durch Thunderbird gehen - also bei denen des sehenden Helfers.
+**Warum oben trotzdem Häkchen stehen:** Manche erledigten Punkte gehören
+zu einem noch offenen - der offene verweist auf sie („siehe oben",
+„Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
+fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
 - [ ] **ZURUECKGESTELLT: dialos-hilfe.py auf den Dienst umbauen** (Stephan,
   2026-08-20: "können den Rustdesk ganz nach hinten schieben, wenn alles
@@ -136,25 +96,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Rechner** - danach steht die Signatur im Protokoll und die Erkennung laesst
   sich belegt bauen.
 
-- [x] **Gross-/Kleinschreibung im Diktat gemessen statt vermutet** - erledigt
-  2026-08-19. **10 von 11** Faellen richtig, gemessen mit `schreibung_richten()`
-  selbst. Der einzige Fehlschlag ist eine Wortliste ohne Grammatik
-  ("milch sechs eier butter") - dort fehlt LanguageTool der Satz, um Substantive
-  zu erkennen. Einzeln geht jedes Wort richtig, und einzeln kommen sie seit
-  demselben Tag. Bei Briefen und Mails, also ganzen Saetzen, ist die Schreibung
-  belastbar. Die fruehere Einschaetzung "dringendster offener Punkt" ist damit
-  zurueckgenommen.
-
-- [x] **Die erste Korrektur jeder Sitzung war ein Muenzwurf** - erledigt
-  2026-08-19. LanguageTools deutsche Regeln laden bei der ersten
-  **Pruefanfrage**, nicht beim Serverstart: 9,2 s gegen eine Zeitgrenze von
-  10,0 s. Am 2026-08-19 um 10:03:03 hat sie verloren. Behoben durch
-  `dialos-schreibhilfe-warmlaufen.py` als `ExecStartPost` der Unit - belegt im
-  Journal: 9096 ms beim Start, danach 985 ms fuer die erste echte Korrektur.
-  Nebenbefund: `lt_lebt()` prueft `/v2/languages` und meldet damit "laeuft",
-  waehrend der Dienst neun Sekunden braucht - eine Bereitschaftsmeldung, die
-  etwas anderes prueft als das, worauf es ankommt.
-
 - [ ] **Eintraege trennen, wenn der Nutzer ohne „und" in einem Zug spricht**
   (offen seit 2026-08-19). „Milch sechs Eier Butter" in einem Atemzug bleibt ein
   Eintrag: Vosk liefert eine Aeusserung, eine Aeusserung ist ein Eintrag.
@@ -165,16 +106,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   zu kurz ist, um die Aeusserung zu beenden. Zu messen ist der Schwellwert -
   0,4 s ist geraten, nicht gemessen, und zu klein gewaehlt zerlegt er „sechs
   Eier" in zwei Eintraege. Gilt nur fuer `LISTEN_ZIELE`, nicht fuer Briefe.
-
-- [x] **Die Protokolle wachsen unbegrenzt** - erledigt 2026-08-20. Stephans
-  Entscheidung: sieben Tage, dieselbe Frist wie beim Support-Protokoll.
-  Umgesetzt ueber `/etc/logrotate.d/dialos` statt in den sechs Programmen -
-  logrotate laeuft taeglich per systemd-Timer, waehrend ein Dienst, der eine
-  Woche durchlaeuft, nie zum Aufraeumen kaeme. Ohne `copytruncate`, weil die
-  Programme ihre Datei nicht offen halten (geprueft), mit `dateext`, weil im
-  Support nach einem Tag gesucht wird und nicht nach einer Nummer. Offen bleibt
-  nur, dass eine NEU angelegte Datei 0644 bekommt - ab der ersten Rotation gilt
-  0600.
 
 - [ ] **Zeitzone folgt dem Standort nicht - und ein blinder Nutzer kann sie
   nicht umstellen** (aufgefallen 2026-08-19 bei Stephans Frage „richtet sich
@@ -414,27 +345,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
      über eine Vosk-Grammatik statt über hassil. hassil lohnt sich erst,
      wenn es mehrere Befehle mit Varianten gibt.
 
-- [x] **Optionale Windows-11-Optik für GNOME gebaut** (Stephans Wunsch
-  vom 2026-08-16, umgesetzt am selben Tag).
-  `/usr/local/bin/dialos-desktop-stil.sh` schaltet in beide Richtungen um
-  (`windows` / `gnome` / `status`), die drei Debian-Erweiterungen
-  (`dash-to-panel`, `arc-menu`, `tiling-assistant`) stehen in der
-  Paketliste und werden mitinstalliert, aber nicht eingeschaltet.
-  Beschrieben in `docs/Debian-zu-DialOS.md`, Schritt 11b.
-
-- [x] **Windows-Umschaltung technisch getestet (2026-08-16).** Pakete
-  installiert, dreimal hin- und hergeschaltet, jeden berührten Schlüssel
-  verglichen: Rückweg stellt den Auslieferungszustand her, mehrfaches
-  Ausführen erzeugt keine Doppeleinträge. Dabei zwei Fehler gefunden und
-  behoben (GNOME Shell kennt frisch installierte Erweiterungen nicht;
-  ArcMenu-Schema liegt in Debian im falschen Ordner) - Details im
-  Änderungsprotokoll.
-
-- [x] **Sprachbefehl live getestet und läuft (2026-08-16, von Stephan
-  bestätigt).** Dabei kam heraus, dass das eingebaute Mikrofon um 60 dB
-  übersteuert war - der Dienst konnte prinzipiell nichts erkennen.
-  Behoben und dauerhaft abgesichert (`dialos-mikrofon-pegel.service`).
-
 - [ ] **Bluetooth-Profil gegen Hängenbleiben absichern** (offen seit
   2026-08-17). Nach dem Neustart stand der AIRHUG auf `headset-head-unit`
   statt `a2dp-sink` - die Wiedergabe lief dauerhaft in Telefonqualität,
@@ -445,35 +355,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   der unabhängig vom Skriptende greift - etwa eine Prüfung beim Anmelden
   oder ein `trap` auf das Skriptende.
 
-- [x] **Ursache der Mikrofon-Übersteuerung geklärt (2026-08-17).** Der
-  systemweite Dienst läuft beim Booten, WirePlumber stellt seinen Zustand
-  erst in der Sitzung wieder her und hebt den Boost dabei zurück - der
-  Dienst war strukturell zu früh dran. Der Sprachdienst richtet den Pegel
-  jetzt selbst, nachdem er die Aufnahme geöffnet hat, und regelt bei
-  anhaltender Übersteuerung nach. Getestet durch absichtliches
-  Hochdrehen.
-
-- [x] **Fehlauslösung durch abgespielte Inhalte behoben (2026-08-17).**
-  Echo-Unterdrückung über PipeWires `module-echo-cancel` eingerichtet,
-  32 dB Dämpfung gemessen, und der Fall, der vorher scheiterte (Ansage
-  per `paplay` abgespielt), löst nichts mehr aus. Details im
-  Änderungsprotokoll und in `docs/Debian-zu-DialOS.md`, Schritt 11f.
-
-- [x] **Schalter „Sprachsteuerung starten/stoppen" gebaut
-  (2026-08-17).** Zwei Zustände mit eigener Grammatik, Ansage bei jedem
-  Wechsel, Abschaltung nach zwei Minuten. Die offene Zustandsfrage ist
-  damit beantwortet: Der Nutzer hört jeden Wechsel. Live-Test mit echter
-  Stimme steht noch aus.
-
-- [x] **So stand die Aufgabe vorher da (zur Herkunft):** Bis zum „starten" hört DialOS nur auf
-  diesen einen Satz, danach nimmt es Befehle an, bis „stoppen" kommt.
-  Gemessen ist bereits, dass die Erkennung trägt und drei Störsätze ruhig
-  bleiben - offen ist der Zustand selbst: Wo wird er gemerkt (Datei wie
-  bei der Desktop-Optik?), was passiert beim Anmelden (an oder aus?), und
-  **wie erfährt ein blinder Nutzer, in welchem Zustand er ist**? Ohne
-  eine Antwort darauf ist der Schalter gefährlicher als kein Schalter:
-  Wer nicht weiß, dass die Erkennung aus ist, hält das Gerät für kaputt.
-
 - [ ] **Pausen zwischen den Sätzen der Ansage prüfen** (offen seit
   2026-08-17). Michael klang „hektisch", gewählt wurde dann aber ein
   schnelleres Tempo - das spricht dafür, dass die fehlenden Atempausen
@@ -482,26 +363,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   kurze Pause je Satzende, zentral in `dialos-say.py`, würde die Ansage
   ruhiger machen, ohne einzelne Wörter schleppen zu lassen. Vorher eine
   Hörprobe bauen: gleiches Tempo, nur mit Pausen.
-
-- [x] **Ansagen unterscheiden: Frage oder Hinweis - gebaut am
-  2026-08-17.** `dialos-say.py --frage`, Standard ist die natürliche
-  Satzmelodie aus dem Fragezeichen, der Signalton ist Option über
-  `~/.config/dialos/frageton`. Siehe `docs/Debian-zu-DialOS.md`,
-  Schritt 11a. Offen bleibt nur, das später per Sprachbefehl umschaltbar
-  zu machen („Signalton einschalten") - das braucht erst den Schalter
-  „Sprachsteuerung starten/stoppen".
-
-- [x] **Ursprüngliche Beschreibung (Stephans Frage vom 2026-08-17).** Heute weiß das System es implizit - der Code entscheidet
-  ja, was gesagt wird -, gibt es aber nirgends weiter: `dialos-say.py`
-  bekommt einen Text und spricht ihn. Wichtiger als das Wissen des
-  Systems ist, dass **der Nutzer die Frage als Frage erkennt**: Für
-  jemanden, der den Bildschirm nicht sieht, ist „wartet es auf mich?" die
-  entscheidende Information. Am 2026-08-16 ist genau daran der erste Test
-  der Lautstärke-Frage gescheitert - das System fragte, Stephan wusste
-  nicht wann. Behelf war der Satz „Und jetzt bitte.". Sauber wäre: der
-  Sprachausgabe eine Art mitgeben (Hinweis/Frage), und bei einer Frage
-  automatisch ein kurzes, immer gleiches Signal. Ein **Ton** wäre dafür
-  besser als ein Satz - schneller, unmissverständlich, nutzt sich nicht ab.
 
 - [ ] **Aufweckwort mit openWakeWord bauen** (entschieden 2026-08-17).
   Die Vosk-Grammatik scheidet aus - sie presst jede Äußerung in die
@@ -639,13 +500,6 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   einem laufenden System per `apt` installiert, wo das Problem nicht
   auftritt. Gehört in `iso-build/config/package-lists/desktop.list.chroot`.
 
-- [x] **Lock-Datei von `dialos-start-ansage.py` aus `/tmp` holen** - erledigt 2026-08-19, nachdem der Fall live eingetreten war: Zwei Start-Ansagen liefen gleichzeitig, weil `nutzer` die geteilte Datei besaß und `dialosadmin` sie nicht überschreiben konnte. Liegt jetzt in `$XDG_RUNTIME_DIR`.
-  `/tmp/dialos-start-ansage.pid` ist ein fester Pfad im geteilten `/tmp` -
-  dieselbe Bauart, die am 2026-08-16 bei der Sprechen-Markierung zu einem
-  stillen Fehlschlag geführt hat (Sticky-Bit: ein Konto kann die Datei
-  eines anderen weder überschreiben noch löschen). Die Markierung liegt
-  jetzt unter `$XDG_RUNTIME_DIR`, diese Datei noch nicht.
-
 - [ ] **Mikrofon-Fallback ohne Bluetooth testen** (offen seit
   2026-08-16). Die Ausgabeseite ist bewiesen - Headset aus, Ton kam aus
   dem eingebauten Lautsprecher. Die Eingabeseite fehlt noch: versteht das
@@ -682,6 +536,7 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   *(Die frühere Fassung dieses Punkts nannte den AIRHUG als alleiniges
   Referenzgerät. Das ist seit 2026-08-17 überholt: Es sind zwei Geräte,
   siehe oben und `docs/hardware.md`.)*
+
 - [x] **ERLEDIGT am 2026-08-16 - der komplette Ablauf ist auf echter
   Hardware durchgelaufen.** Ergebnis: Aus einem frisch installierten
   Debian 13 wurde ein laufendes DialOS. Bewiesen sind: verschlüsselter
@@ -714,52 +569,7 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   (Details im README-Änderungsprotokoll 0.5.0). Der Ablauf besteht jetzt
   aus genau drei Befehlen; die Handarbeit aus Doku-Schritt 13 steckt in
   `dialos-buero-setup-abschliessen.sh`.
-- [x] **Swap entschieden (Stephan, 2026-08-16): 8 GiB, verschlüsselt,
-  automatisch in `dialos-setup-home-partition.sh`.** Ausgangslage: eine
-  37,3-GiB-Klartext-Swap-Partition (`nvme0n1p3`), in die `nutzer`s
-  Speicherseiten - offene Dokumente, Mails, Browserinhalte - ausgelagert
-  werden konnten; ohne Sicherheits-Stick lesbar, ebenso nach Ausbau der
-  SSD, also genau am Schutz von `dialos-nutzer-home` vorbei. Umgesetzt:
-  Das Skript ersetzt einen vorgefundenen Klartext-Swap durch 8 GiB mit
-  einem bei jedem Start neu gewürfelten Schlüssel (`/etc/crypttab`,
-  `/dev/urandom`, Referenz per PARTUUID statt Dateisystem-UUID),
-  setzt `vm.swappiness=10` und `RESUME=none`, und schlägt den
-  freigewordenen Platz der Home-Partition zu (auf dem T490: 345,6 →
-  rund 375 GiB). Begründung der Größe: die Regel "Swap ≥ RAM" existiert
-  nur wegen des Ruhezustands, und der ist bei diesem Sicherheitsdesign
-  ohnehin ausgeschlossen (das Abbild bräuchte einen dauerhaften Schlüssel
-  im initramfs - der verworfene `cryptsetup-initramfs`-Ansatz). Ganz
-  weglassen kam nicht in Frage: ohne Swap beendet der OOM-Killer bei
-  Speichermangel Prozesse hart, und ein abgeschossener Screenreader
-  bedeutet für einen blinden Nutzer den völligen Verlust der Rückmeldung.
-  Suspend-to-RAM bleibt unberührt. **Noch nicht real gelaufen** - passiert
-  beim ersten Durchlauf mit auf dem echten Gerät.
-- [x] **Erledigt (2026-08-16): `dialos-install` ist ersatzlos entfallen**
-  (Weg A - jedes Gerät entsteht im Büro aus der Debian-ISO plus den drei
-  Skripten, es gibt keinen Live-Boot-Installer mehr). Damit erledigen
-  sich auch dessen Fehler. **`dialos-rekey` bleibt** und hat sie noch -
-  dort nachziehen, wenn es das nächste Mal angefasst wird: gleicher
-  `$HOME`-Startordner im Backup-Dialog (Zeile 142) und fehlende Fallbacks
-  in `ask_password`. Ursprünglicher Eintrag: **`dialos-install` und
-  `dialos-rekey` hatten dieselben Fehler wie
-  das durchgesehene `dialos-setup-home-partition.sh`** - bewusst nicht
-  mitkorrigiert, weil über den Klon-Pfad noch nicht entschieden ist (Punkt
-  weiter unten). Betroffen: gleiches zu langes ext4-Label
-  `dialos-nutzer-home` (`dialos-install` Zeile 248), gleiche
-  Klartext-Passphrase unter festem Namen `/tmp/.rp` (Zeile 199), gleicher
-  `$HOME`-Startordner im Backup-Dialog (Zeile 231, `dialos-rekey` Zeile
-  142), gleiche fehlende Fallbacks in `ask_password`/`zenity --list`.
-  Entweder mitziehen oder zusammen mit dem Klon-Pfad entfallen lassen -
-  aber nicht auseinanderlaufen lassen.
-- [x] **Zeitzone/Locale entschieden (Stephan, 2026-08-16): bleibt
-  `Europe/Vienna` + `de_AT.UTF-8`.** Nicht `Europe/Berlin`, wie die Doku
-  bis dahin vorschrieb. Folge, jetzt in Debian-zu-DialOS.md Schritt 1
-  dokumentiert: Baugerät und jede daraus gezogene ISO tragen die
-  österreichischen Einstellungen (`eggs produce --clone` klont
-  `/etc/localtime` + Locale mit). Am selben Tag durch die Entscheidung
-  für Weg A weiter vereinfacht: Jedes Gerät wird im Büro über den
-  Debian-Installer aufgesetzt, die Zeitzone wird also pro Gerät in
-  Schritt 1 gewählt.
+
 - [ ] **Zurückgestellt (Stephan, 2026-08-16):** **`dialos-claude-setup.sh`
   auf dem frisch installierten T490
   ausführen.** Geprüft am 2026-08-16: `credential.helper` ist nicht
@@ -768,14 +578,7 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Das Skript lief auf diesem System also noch nie - `git push` würde
   nach Zugangsdaten fragen und die `eggs produce`-NOPASSWD-Regel fehlt.
   Muss Stephan selbst machen (das GitHub-Token tippt kein Skript ein).
-- [x] Konsolidierungs-Skript `scripts/dialos-full-office-setup.sh` +
-  neues `dialos-setup-home-partition.sh` (führt `dialos-install`s LUKS/
-  Stick-Logik auf einem bereits installierten System aus, ohne dessen
-  Festplatten-Wipe/rsync-Kopie) erstellt, `Debian-zu-DialOS.md`/`.en.md`
-  entsprechend aktualisiert (Schritt 1: Partitionierungs-Hinweis;
-  Schritt 12: neues Werkzeug) - erledigt 2026-08-14, beide Skripte nur
-  syntaktisch geprüft (`bash -n`), noch nicht real gelaufen (siehe
-  Punkt oben).
+
 - [ ] **Zurückgestellt, nicht mehr nächster Schritt** (siehe die zwei
   neuen Punkte unten): Echten Live-Boot-Test mit
   `DialOS-Live-0.5.0-clone.iso` erneut durchführen: erster Versuch am
@@ -799,6 +602,7 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   SanDisk-Extreme-Platte vorher abstecken (sonst als Zielfestplatte
   wählbar!); neue Stick-Partitionierung (`DIALOS-KEY` 2 GiB +
   `DIALOS-DATA` ext4) verifizieren.
+
 - [x] **Hinfällig seit 2026-08-16:** `dialos-install` ist ersatzlos
   entfallen (Weg A). Die Prüfpunkte dieses Eintrags wurden stattdessen
   über den neuen Ablauf abgedeckt und sind alle bestanden - siehe den
@@ -825,27 +629,40 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   bar) wurden korrekt angelegt. **Noch offen:** `DIALOS-DATA` an einem
   echten Windows-Rechner einbinden und beschreiben testen (nur
   Linux-seitig verifiziert bisher).
+
 - [x] Grundsatzentscheidung getroffen (siehe oben, umgesetzt
   2026-08-14): Ganze-Platte-LUKS-Verschlüsselung ist komplett entfallen,
   ersetzt durch eine reine `dialos-nutzer-home`-Partition + das
   `dialos-stick-gate`-Gate. `dialos-install`/`dialos-rekey`/
   `dialos-stick-gate.sh` entsprechend umgeschrieben, tote
   `dialos-keyscript`-initramfs-Dateien entfernt.
-- [x] **Erledigt durch Wegfall (2026-08-16):** Calamares-Standort-Seite
-  schlug beim Live-Boot GeoIP-basiert oft
-  einen falschen Standort vor (z. B. Rome statt Berlin) - kein
-  dokumentierter Vendor-Override für `modules/locale.conf` gefunden (nur
-  Branding ist offiziell überschreibbar). Bleibt vorerst
-  Werkzeug-Einschränkung; installierende Person muss Standort beim
-  Durchklicken manuell prüfen/korrigieren (unkritisch bei
-  Zwei-Phasen-Provisionierung, da Endkunden den Installer nie sehen).
+
 - [ ] Sprechgeschwindigkeit der Piper-Stimme sollte vom Nutzer individuell
   einstellbar sein (aktuell fest über `GenericRateMultiply` in der
   Piper-Config verdrahtet, `0.85` als Stephans persönliche Präferenz
   gewählt) - braucht eine echte Einstellmöglichkeit (z. B. GNOME-
   Barrierefreiheitseinstellungen oder eigener Sprachbefehl), nicht nur
   einen Config-Wert.
-- [x] Vosk (0.3.45) + hassil (3.11.0) + deutsche Vosk-Modelle (groß/klein)
+
+- [ ] Echten End-to-End-Test von `dialos-vosk-test.py` durchführen
+  (tatsächlich reinsprechen, Erkennungsqualität beurteilen) - bisher nur
+  Installation + Modell-Laden technisch verifiziert, noch kein echter
+  Spracherkennungs-Test mit einer gesprochenen Aufnahme gelaufen.
+
+- [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
+  (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
+  längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`
+  bei einem erneuten Auftreten des Problems prüfen.
+
+## Erledigt (zur Nachvollziehbarkeit)
+
+Nach Thema gruppiert, innerhalb des Themas chronologisch. Das Datum ist
+der Tag, an dem der Punkt fertig wurde. Nichts hiervon wird gelöscht -
+die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
+
+### Sprachsteuerung und Erkennung
+
+- ☑️ **2026-08-14** — Vosk (0.3.45) + hassil (3.11.0) + deutsche Vosk-Modelle (groß/klein)
   als wiederholbares Rezept dokumentiert - erledigt 2026-08-14 (siehe
   docs/Debian-zu-DialOS.md, Schritt 15). Dabei bestätigt: Die
   ursprüngliche Live-Installation war zwischenzeitlich tatsächlich
@@ -860,20 +677,218 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Modell) - die
   neue Doku vermeidet den Fehler, die vorhandenen doppelten Daten auf
   dem T490 selbst sind aber noch nicht aufgeräumt.
-- [x] `pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0`
+
+- ☑️ **2026-08-14** — `pip3 install --break-system-packages vosk==0.3.45 hassil==3.11.0`
   auf dem T490 ausgeführt und verifiziert (2026-08-14) - `import vosk`/
   `hassil` funktioniert, `vosk.Model()` lädt das kleine deutsche Modell
   erfolgreich.
-- [ ] Echten End-to-End-Test von `dialos-vosk-test.py` durchführen
-  (tatsächlich reinsprechen, Erkennungsqualität beurteilen) - bisher nur
-  Installation + Modell-Laden technisch verifiziert, noch kein echter
-  Spracherkennungs-Test mit einer gesprochenen Aufnahme gelaufen.
-- [x] Erster Eintrag in `docs/iso-builds.md` erfolgt: `eggs produce
+
+- ☑️ **2026-08-16** — **Sprachbefehl live getestet und läuft (2026-08-16, von Stephan
+  bestätigt).** Dabei kam heraus, dass das eingebaute Mikrofon um 60 dB
+  übersteuert war - der Dienst konnte prinzipiell nichts erkennen.
+  Behoben und dauerhaft abgesichert (`dialos-mikrofon-pegel.service`).
+
+- ☑️ **2026-08-17** — **Schalter „Sprachsteuerung starten/stoppen" gebaut
+  (2026-08-17).** Zwei Zustände mit eigener Grammatik, Ansage bei jedem
+  Wechsel, Abschaltung nach zwei Minuten. Die offene Zustandsfrage ist
+  damit beantwortet: Der Nutzer hört jeden Wechsel. Live-Test mit echter
+  Stimme steht noch aus.
+
+  **So stand die Aufgabe vorher da (zur Herkunft):** Bis zum „starten" hört DialOS nur auf
+  diesen einen Satz, danach nimmt es Befehle an, bis „stoppen" kommt.
+  Gemessen ist bereits, dass die Erkennung trägt und drei Störsätze ruhig
+  bleiben - offen ist der Zustand selbst: Wo wird er gemerkt (Datei wie
+  bei der Desktop-Optik?), was passiert beim Anmelden (an oder aus?), und
+  **wie erfährt ein blinder Nutzer, in welchem Zustand er ist**? Ohne
+  eine Antwort darauf ist der Schalter gefährlicher als kein Schalter:
+  Wer nicht weiß, dass die Erkennung aus ist, hält das Gerät für kaputt.
+
+### Sprachausgabe und Ansagen
+
+- ☑️ **2026-08-14** — Lautstärke-Abfrage bei der Start-Ansage (nur `nutzer`, 100/75/50/
+  25 Prozent/aus) umgesetzt - erledigt 2026-08-14, siehe
+  docs/Debian-zu-DialOS.md Schritt 11. Erste echte Vosk-Nutzung im
+  Betrieb, Erkennungslogik mit Piper-synthetisierten Testwörtern
+  verifiziert (alle fünf Optionen korrekt erkannt).
+
+- ☑️ **2026-08-16** — Echten Test der Lautstärke-Abfrage mit tatsächlich gesprochener
+  Antwort durchgeführt (über das Bluetooth-Mikrofon, inkl.
+  `headset-head-unit`-Profilwechsel) - erledigt 2026-08-16. Dabei einen
+  echten Bug gefunden und behoben: Beim ersten Versuch fehlte ein
+  klares Startsignal, wann genau das 4-Sekunden-Aufnahmefenster
+  beginnt - Stephans gesprochene Antwort ("25") wurde verpasst, nur der
+  100 %-Sicherheits-Fallback kam an. Fix: `dialos-start-ansage.py`
+  sagt jetzt direkt vor der Aufnahme zusätzlich "Und jetzt bitte." -
+  danach im zweiten Versuch korrekt erkannt (echtes "25" → 25 %).
+
+- ☑️ **2026-08-17** — **Ansagen unterscheiden: Frage oder Hinweis - gebaut am
+  2026-08-17.** `dialos-say.py --frage`, Standard ist die natürliche
+  Satzmelodie aus dem Fragezeichen, der Signalton ist Option über
+  `~/.config/dialos/frageton`. Siehe `docs/Debian-zu-DialOS.md`,
+  Schritt 11a. Offen bleibt nur, das später per Sprachbefehl umschaltbar
+  zu machen („Signalton einschalten") - das braucht erst den Schalter
+  „Sprachsteuerung starten/stoppen".
+
+  **Ursprüngliche Beschreibung (Stephans Frage vom 2026-08-17).** Heute weiß das System es implizit - der Code entscheidet
+  ja, was gesagt wird -, gibt es aber nirgends weiter: `dialos-say.py`
+  bekommt einen Text und spricht ihn. Wichtiger als das Wissen des
+  Systems ist, dass **der Nutzer die Frage als Frage erkennt**: Für
+  jemanden, der den Bildschirm nicht sieht, ist „wartet es auf mich?" die
+  entscheidende Information. Am 2026-08-16 ist genau daran der erste Test
+  der Lautstärke-Frage gescheitert - das System fragte, Stephan wusste
+  nicht wann. Behelf war der Satz „Und jetzt bitte.". Sauber wäre: der
+  Sprachausgabe eine Art mitgeben (Hinweis/Frage), und bei einer Frage
+  automatisch ein kurzes, immer gleiches Signal. Ein **Ton** wäre dafür
+  besser als ein Satz - schneller, unmissverständlich, nutzt sich nicht ab.
+
+- ☑️ **2026-08-19** — **Lock-Datei von `dialos-start-ansage.py` aus `/tmp` holen** - erledigt 2026-08-19, nachdem der Fall live eingetreten war: Zwei Start-Ansagen liefen gleichzeitig, weil `nutzer` die geteilte Datei besaß und `dialosadmin` sie nicht überschreiben konnte. Liegt jetzt in `$XDG_RUNTIME_DIR`.
+  `/tmp/dialos-start-ansage.pid` ist ein fester Pfad im geteilten `/tmp` -
+  dieselbe Bauart, die am 2026-08-16 bei der Sprechen-Markierung zu einem
+  stillen Fehlschlag geführt hat (Sticky-Bit: ein Konto kann die Datei
+  eines anderen weder überschreiben noch löschen). Die Markierung liegt
+  jetzt unter `$XDG_RUNTIME_DIR`, diese Datei noch nicht.
+
+### Audio: Mikrofon und Lautsprecher
+
+- ☑️ **2026-08-17** — **Ursache der Mikrofon-Übersteuerung geklärt (2026-08-17).** Der
+  systemweite Dienst läuft beim Booten, WirePlumber stellt seinen Zustand
+  erst in der Sitzung wieder her und hebt den Boost dabei zurück - der
+  Dienst war strukturell zu früh dran. Der Sprachdienst richtet den Pegel
+  jetzt selbst, nachdem er die Aufnahme geöffnet hat, und regelt bei
+  anhaltender Übersteuerung nach. Getestet durch absichtliches
+  Hochdrehen.
+
+- ☑️ **2026-08-17** — **Fehlauslösung durch abgespielte Inhalte behoben (2026-08-17).**
+  Echo-Unterdrückung über PipeWires `module-echo-cancel` eingerichtet,
+  32 dB Dämpfung gemessen, und der Fall, der vorher scheiterte (Ansage
+  per `paplay` abgespielt), löst nichts mehr aus. Details im
+  Änderungsprotokoll und in `docs/Debian-zu-DialOS.md`, Schritt 11f.
+
+### Diktat, Auskunft und Alltagsdienste
+
+- ☑️ **2026-08-14** — Wetter-Standort auf GeoClue2 umgestellt statt IP-geraten - erledigt
+  2026-08-14, ausführlich live getestet (siehe README-Änderungsprotokoll
+  0.5.0 und docs/Debian-zu-DialOS.md, Schritt 11, für Details). Auslöser:
+  `wttr.in`s eigene IP-Standorterkennung zeigte Wien statt Stephans
+  echtem Standort (Seefeld in Tirol) - ein fest hinterlegter Ort schied
+  aus, da das Gerät auch unterwegs genutzt wird. Live-Erkenntnis dabei:
+  GeoClue2 fällt in Gegenden mit dünner Mozilla-WLAN-Datenbank-Abdeckung
+  ebenfalls auf eine grobe IP-Schätzung zurück ("ipf fallback",
+  ~25-26 km ungenau, real ~300 km daneben) - deshalb Genauigkeits-
+  Schwellwert (>10 km wird verworfen) eingebaut, Wetteransage wird dann
+  bewusst ausgelassen statt eine falsche Stadt/Region zu nennen. Kann
+  dadurch in ländlichen Gegenden öfter fehlen als vorher - gewollter
+  Trade-off.
+
+- ☑️ **2026-08-19** — **Gross-/Kleinschreibung im Diktat gemessen statt vermutet** - erledigt
+  2026-08-19. **10 von 11** Faellen richtig, gemessen mit `schreibung_richten()`
+  selbst. Der einzige Fehlschlag ist eine Wortliste ohne Grammatik
+  ("milch sechs eier butter") - dort fehlt LanguageTool der Satz, um Substantive
+  zu erkennen. Einzeln geht jedes Wort richtig, und einzeln kommen sie seit
+  demselben Tag. Bei Briefen und Mails, also ganzen Saetzen, ist die Schreibung
+  belastbar. Die fruehere Einschaetzung "dringendster offener Punkt" ist damit
+  zurueckgenommen.
+
+- ☑️ **2026-08-19** — **Die erste Korrektur jeder Sitzung war ein Muenzwurf** - erledigt
+  2026-08-19. LanguageTools deutsche Regeln laden bei der ersten
+  **Pruefanfrage**, nicht beim Serverstart: 9,2 s gegen eine Zeitgrenze von
+  10,0 s. Am 2026-08-19 um 10:03:03 hat sie verloren. Behoben durch
+  `dialos-schreibhilfe-warmlaufen.py` als `ExecStartPost` der Unit - belegt im
+  Journal: 9096 ms beim Start, danach 985 ms fuer die erste echte Korrektur.
+  Nebenbefund: `lt_lebt()` prueft `/v2/languages` und meldet damit "laeuft",
+  waehrend der Dienst neun Sekunden braucht - eine Bereitschaftsmeldung, die
+  etwas anderes prueft als das, worauf es ankommt.
+
+### Desktop und Bedienoberfläche
+
+- ☑️ **2026-08-10** — Live-Desktop-Icon für die Installation (`.desktop`-Datei mit
+  eigenem DialOS-Icon statt "Install System"/Ei-Icon auf dem
+  Live-Boot-Desktop) - erledigt 2026-08-10 (Branding via
+  skel-Überschreibung).
+
+- ☑️ **2026-08-14** — AppIndicator-Pakete für `dialos-tts-indicator.py`
+  (`gnome-shell-extension-appindicator`, `gir1.2-ayatanaappindicator3-0.1`)
+  in der Paketliste verankert - erledigt 2026-08-14, dabei zusätzlich
+  `gnome-shell-extension-desktop-icons-ng` (DING) ergänzt: GNOME zeigt
+  seit Jahren keine Desktop-Icons mehr von Haus aus, ohne diese
+  Erweiterung wären die Büro-Setup-Skripte auf `dialosadmin`s
+  Arbeitsfläche (siehe unten) unsichtbar geblieben.
+
+- ☑️ **2026-08-16** — **Optionale Windows-11-Optik für GNOME gebaut** (Stephans Wunsch
+  vom 2026-08-16, umgesetzt am selben Tag).
+  `/usr/local/bin/dialos-desktop-stil.sh` schaltet in beide Richtungen um
+  (`windows` / `gnome` / `status`), die drei Debian-Erweiterungen
+  (`dash-to-panel`, `arc-menu`, `tiling-assistant`) stehen in der
+  Paketliste und werden mitinstalliert, aber nicht eingeschaltet.
+  Beschrieben in `docs/Debian-zu-DialOS.md`, Schritt 11b.
+
+- ☑️ **2026-08-16** — **Windows-Umschaltung technisch getestet (2026-08-16).** Pakete
+  installiert, dreimal hin- und hergeschaltet, jeden berührten Schlüssel
+  verglichen: Rückweg stellt den Auslieferungszustand her, mehrfaches
+  Ausführen erzeugt keine Doppeleinträge. Dabei zwei Fehler gefunden und
+  behoben (GNOME Shell kennt frisch installierte Erweiterungen nicht;
+  ArcMenu-Schema liegt in Debian im falschen Ordner) - Details im
+  Änderungsprotokoll.
+
+### Installation, ISO und Systemaufbau
+
+- ☑️ **2026-08-10** — Neuen ISO-Build mit allen gesammelten Fixes (Bootscreen,
+  Avatar-Skript, Calamares-Branding, Piper-TTS) erstellen - erledigt
+  2026-08-10/11 (ISO vom 11.08.).
+
+- ☑️ **2026-08-14** — Konsolidierungs-Skript `scripts/dialos-full-office-setup.sh` +
+  neues `dialos-setup-home-partition.sh` (führt `dialos-install`s LUKS/
+  Stick-Logik auf einem bereits installierten System aus, ohne dessen
+  Festplatten-Wipe/rsync-Kopie) erstellt, `Debian-zu-DialOS.md`/`.en.md`
+  entsprechend aktualisiert (Schritt 1: Partitionierungs-Hinweis;
+  Schritt 12: neues Werkzeug) - erledigt 2026-08-14, beide Skripte nur
+  syntaktisch geprüft (`bash -n`), noch nicht real gelaufen (siehe
+  Punkt oben).
+
+- ☑️ **2026-08-16** — **Erledigt (2026-08-16): `dialos-install` ist ersatzlos entfallen**
+  (Weg A - jedes Gerät entsteht im Büro aus der Debian-ISO plus den drei
+  Skripten, es gibt keinen Live-Boot-Installer mehr). Damit erledigen
+  sich auch dessen Fehler. **`dialos-rekey` bleibt** und hat sie noch -
+  dort nachziehen, wenn es das nächste Mal angefasst wird: gleicher
+  `$HOME`-Startordner im Backup-Dialog (Zeile 142) und fehlende Fallbacks
+  in `ask_password`. Ursprünglicher Eintrag: **`dialos-install` und
+  `dialos-rekey` hatten dieselben Fehler wie
+  das durchgesehene `dialos-setup-home-partition.sh`** - bewusst nicht
+  mitkorrigiert, weil über den Klon-Pfad noch nicht entschieden ist (Punkt
+  weiter unten). Betroffen: gleiches zu langes ext4-Label
+  `dialos-nutzer-home` (`dialos-install` Zeile 248), gleiche
+  Klartext-Passphrase unter festem Namen `/tmp/.rp` (Zeile 199), gleicher
+  `$HOME`-Startordner im Backup-Dialog (Zeile 231, `dialos-rekey` Zeile
+  142), gleiche fehlende Fallbacks in `ask_password`/`zenity --list`.
+  Entweder mitziehen oder zusammen mit dem Klon-Pfad entfallen lassen -
+  aber nicht auseinanderlaufen lassen.
+
+- ☑️ **2026-08-16** — **Zeitzone/Locale entschieden (Stephan, 2026-08-16): bleibt
+  `Europe/Vienna` + `de_AT.UTF-8`.** Nicht `Europe/Berlin`, wie die Doku
+  bis dahin vorschrieb. Folge, jetzt in Debian-zu-DialOS.md Schritt 1
+  dokumentiert: Baugerät und jede daraus gezogene ISO tragen die
+  österreichischen Einstellungen (`eggs produce --clone` klont
+  `/etc/localtime` + Locale mit). Am selben Tag durch die Entscheidung
+  für Weg A weiter vereinfacht: Jedes Gerät wird im Büro über den
+  Debian-Installer aufgesetzt, die Zeitzone wird also pro Gerät in
+  Schritt 1 gewählt.
+
+- ☑️ **2026-08-16** — **Erledigt durch Wegfall (2026-08-16):** Calamares-Standort-Seite
+  schlug beim Live-Boot GeoIP-basiert oft
+  einen falschen Standort vor (z. B. Rome statt Berlin) - kein
+  dokumentierter Vendor-Override für `modules/locale.conf` gefunden (nur
+  Branding ist offiziell überschreibbar). Bleibt vorerst
+  Werkzeug-Einschränkung; installierende Person muss Standort beim
+  Durchklicken manuell prüfen/korrigieren (unkritisch bei
+  Zwei-Phasen-Provisionierung, da Endkunden den Installer nie sehen).
+
+- ☑️ **2026-08-16** — Erster Eintrag in `docs/iso-builds.md` erfolgt: `eggs produce
   --clone` am 16.08. gelaufen (21/21 Schritte fehlerfrei, 6,50 GiB),
   `DialOS-Live-0.5.1-clone.iso` als Backup-Snapshot vor dem geplanten
   End-to-end-Test (siehe nächster Punkt) - Version/Datum/Commit/SHA256
   eingetragen.
-- [x] **Erledigt am 2026-08-16: acht alte ISOs gelöscht (~59 GB).** Alle
+
+- ☑️ **2026-08-16** — **Erledigt am 2026-08-16: acht alte ISOs gelöscht (~59 GB).** Alle
   stammten aus der entfallenen Penguins-Eggs-Zeit. `DialOS-Live-0.5.1-
   clone.iso` bleibt bewusst liegen, bis Stephans erstes
   Rescuezilla-Abbild da ist - sie existiert nirgendwo sonst und ließe
@@ -893,11 +908,63 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   Das kann nur Stephan entscheiden - es ist seine Sicherungsstrategie.
   Ursprünglicher Eintrag: liegt bisher nur lokal, noch in die Nextcloud
   hochladen (kein Claude-Zugriff darauf).
-- [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
-  (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
-  längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`
-  bei einem erneuten Auftreten des Problems prüfen.
-- [x] **Erledigt durch den Neuaufbau (geprüft 2026-08-16):** `~/DialOS-repo`
+
+### Verschlüsselung, Konten und Sicherheit
+
+- ☑️ **2026-08-16** — **Swap entschieden (Stephan, 2026-08-16): 8 GiB, verschlüsselt,
+  automatisch in `dialos-setup-home-partition.sh`.** Ausgangslage: eine
+  37,3-GiB-Klartext-Swap-Partition (`nvme0n1p3`), in die `nutzer`s
+  Speicherseiten - offene Dokumente, Mails, Browserinhalte - ausgelagert
+  werden konnten; ohne Sicherheits-Stick lesbar, ebenso nach Ausbau der
+  SSD, also genau am Schutz von `dialos-nutzer-home` vorbei. Umgesetzt:
+  Das Skript ersetzt einen vorgefundenen Klartext-Swap durch 8 GiB mit
+  einem bei jedem Start neu gewürfelten Schlüssel (`/etc/crypttab`,
+  `/dev/urandom`, Referenz per PARTUUID statt Dateisystem-UUID),
+  setzt `vm.swappiness=10` und `RESUME=none`, und schlägt den
+  freigewordenen Platz der Home-Partition zu (auf dem T490: 345,6 →
+  rund 375 GiB). Begründung der Größe: die Regel "Swap ≥ RAM" existiert
+  nur wegen des Ruhezustands, und der ist bei diesem Sicherheitsdesign
+  ohnehin ausgeschlossen (das Abbild bräuchte einen dauerhaften Schlüssel
+  im initramfs - der verworfene `cryptsetup-initramfs`-Ansatz). Ganz
+  weglassen kam nicht in Frage: ohne Swap beendet der OOM-Killer bei
+  Speichermangel Prozesse hart, und ein abgeschossener Screenreader
+  bedeutet für einen blinden Nutzer den völligen Verlust der Rückmeldung.
+  Suspend-to-RAM bleibt unberührt. **Noch nicht real gelaufen** - passiert
+  beim ersten Durchlauf mit auf dem echten Gerät.
+
+- ☑️ **2026-08-18** — **Wo liegen die Mailbox-Zugangsdaten? Entschieden am 2026-08-18:**
+  Datei in `/home/nutzer`, Rechte 0600 - nicht der Schlüsselbund (der
+  entsperrt sich unter Autologin nicht zuverlässig und schützt hinter
+  derselben LUKS-Tür ohnehin nicht zusätzlich) und nicht der Stick (er
+  trägt den LUKS-Schlüssel, kann abgezogen werden, und wäre eine zweite
+  Stelle für dasselbe). Begründung in `docs/sicherheit-datenschutz.md`.
+  Ursprünglich stand hier:
+  DialOS liest und schreibt Mail direkt über IMAP/SMTP, weil Thunderbird
+  von außen nur `-compose` kennt und kein Lesen erlaubt (siehe
+  `docs/anwendungen.md`). Damit braucht DialOS die Zugangsdaten selbst.
+  Zwei Wege: GNOME-Schlüsselbund über libsecret, oder eine Datei, die nur
+  dem Konto gehört. **Gehört zur Sicherheits-Architektur**, nicht in eine
+  Nebenentscheidung - `docs/sicherheit-datenschutz.md` mit entscheiden.
+  Zum Testen liegt die Adresse `proband@dialos.org` bereit
+  (Mailserver `s111.goserver.host`, keine Autoconfig-Einträge).
+  **Fußzeile nicht vergessen:** Dieser Versandweg muss sich die
+  Herkunftszeile selbst holen (`dialos-fusszeile.py text --art mail`).
+  Die Thunderbird-Signatur vom 2026-08-20 greift nur bei Mails, die
+  durch Thunderbird gehen - also bei denen des sehenden Helfers.
+
+### Protokolle, Repo und Arbeitsumgebung
+
+- ☑️ **2026-08-14** — `scripts/dialos-claude-setup.sh` erweitert (Git-Identität +
+  `credential.helper=store` für `dialosadmin`) und tatsächlich
+  ausgeführt/verifiziert - erledigt 2026-08-14. `~/DialOS`-Symlink jetzt
+  bestätigt vorhanden (per `readlink -f`, zeigt korrekt auf
+  `.../SanDisk-Extreme/DialOS/repo`), Sudoers-Regel war schon vorhanden,
+  Git-Identität + `credential.helper` per `git config --global`
+  bestätigt. (Der vorherige "erledigt"-Eintrag hierzu war falsch - das
+  Skript war nie erfolgreich mit `sudo` durchgelaufen, siehe
+  Commit-Historie.)
+
+- ☑️ **2026-08-16** — **Erledigt durch den Neuaufbau (geprüft 2026-08-16):** `~/DialOS-repo`
   existiert nicht mehr - der Reinstall des T490 hat die Zweitkopie
   beseitigt. Damit ist die Gefahr weg, die den Eintrag ausgelöst hatte.
   Der Symlink `~/DialOS` zeigt jetzt auf das Repo der externen Platte,
@@ -908,35 +975,20 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
   unten), aber die Zweitkopie selbst liegt noch da. Zwei unabhängige
   Kopien nebeneinander sind fehleranfällig - genau dadurch sind zwei nie
   gepushte Commits vom 13.08. am 14.08. fast verloren gegangen.
-- [x] **Gegenstandslos seit 2026-08-16:** `/home/eggs/*.iso`-Restdateien aufräumen -
+
+- ☑️ **2026-08-16** — **Gegenstandslos seit 2026-08-16:** `/home/eggs/*.iso`-Restdateien aufräumen -
   Penguins' Eggs ist entfallen (Schritt 16, jetzt Rescuezilla), und auf dem
   neu aufgebauten T490 war es ohnehin nie installiert. Ursprünglich:
   (gehören `root`, die `eggs produce`-NOPASSWD-Regel deckt nur
   `eggs produce` selbst ab, nicht `rm` - braucht Stephans manuelles
   `sudo rm`).
 
-## Erledigt (zur Nachvollziehbarkeit)
-
-- [x] Live-Desktop-Icon für die Installation (`.desktop`-Datei mit
-  eigenem DialOS-Icon statt "Install System"/Ei-Icon auf dem
-  Live-Boot-Desktop) - erledigt 2026-08-10 (Branding via
-  skel-Überschreibung).
-- [x] Neuen ISO-Build mit allen gesammelten Fixes (Bootscreen,
-  Avatar-Skript, Calamares-Branding, Piper-TTS) erstellen - erledigt
-  2026-08-10/11 (ISO vom 11.08.).
-- [x] `scripts/dialos-claude-setup.sh` erweitert (Git-Identität +
-  `credential.helper=store` für `dialosadmin`) und tatsächlich
-  ausgeführt/verifiziert - erledigt 2026-08-14. `~/DialOS`-Symlink jetzt
-  bestätigt vorhanden (per `readlink -f`, zeigt korrekt auf
-  `.../SanDisk-Extreme/DialOS/repo`), Sudoers-Regel war schon vorhanden,
-  Git-Identität + `credential.helper` per `git config --global`
-  bestätigt. (Der vorherige "erledigt"-Eintrag hierzu war falsch - das
-  Skript war nie erfolgreich mit `sudo` durchgelaufen, siehe
-  Commit-Historie.)
-- [x] AppIndicator-Pakete für `dialos-tts-indicator.py`
-  (`gnome-shell-extension-appindicator`, `gir1.2-ayatanaappindicator3-0.1`)
-  in der Paketliste verankert - erledigt 2026-08-14, dabei zusätzlich
-  `gnome-shell-extension-desktop-icons-ng` (DING) ergänzt: GNOME zeigt
-  seit Jahren keine Desktop-Icons mehr von Haus aus, ohne diese
-  Erweiterung wären die Büro-Setup-Skripte auf `dialosadmin`s
-  Arbeitsfläche (siehe unten) unsichtbar geblieben.
+- ☑️ **2026-08-20** — **Die Protokolle wachsen unbegrenzt** - erledigt 2026-08-20. Stephans
+  Entscheidung: sieben Tage, dieselbe Frist wie beim Support-Protokoll.
+  Umgesetzt ueber `/etc/logrotate.d/dialos` statt in den sechs Programmen -
+  logrotate laeuft taeglich per systemd-Timer, waehrend ein Dienst, der eine
+  Woche durchlaeuft, nie zum Aufraeumen kaeme. Ohne `copytruncate`, weil die
+  Programme ihre Datei nicht offen halten (geprueft), mit `dateext`, weil im
+  Support nach einem Tag gesucht wird und nicht nach einer Nummer. Offen bleibt
+  nur, dass eine NEU angelegte Datei 0644 bekommt - ab der ersten Rotation gilt
+  0600.
