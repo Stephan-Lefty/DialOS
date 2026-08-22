@@ -32,7 +32,24 @@ import sys
 import time
 
 HEIM = os.path.expanduser("~")
-ARCHIV = os.path.join(HEIM, "Dokumente", "DialOS-DATA")
+
+# ZWEI ORTE, BEIDE PFLICHT (Stephan, 2026-08-22): "alle pdf Dateien ... muessen
+# unbedingt auf den Stick Bereich DialOS-DATA und unter Dokumente auf den
+# Rechner unter Dokumente/Archiv/DialOS-DATA".
+#
+# DIE PLATTE IST DER FUEHRENDE ORT, nicht der Stick - und zwar aus einem
+# handfesten Grund: Der Stick soll laut docs/sicherheit-datenschutz.md
+# getrennt vom Laptop aufbewahrt werden und steckt deshalb meistens NICHT. Ein
+# Archiv, das nur dort liegt, waere die meiste Zeit unerreichbar und beim
+# Schreiben gar nicht da. Geschrieben wird also immer zuerst auf die Platte;
+# der Stick bekommt eine Kopie, sobald er steckt - auch die von frueher.
+#
+# DER DATENSCHUTZ-EINWAND BLEIBT BESTEHEN und ist nicht ausgeraeumt, nur
+# entschieden: DIALOS-DATA ist unverschluesseltes exFAT, und derselbe Stick
+# traegt den LUKS-Schluessel. Wer ihn findet, hat beides. Ausgefuehrt in
+# docs/sicherheit-datenschutz.md; Stephan kennt den Einwand und will es so.
+ARCHIV = os.path.join(HEIM, "Dokumente", "Archiv", "DialOS-DATA")
+STICK_KENNUNG = "DIALOS-DATA"
 PROTOKOLL = os.path.join(HEIM, "dialos-archiv.log")
 
 # Seitenmasse in Punkt (1/72 Zoll). A4 = 595 x 842.
@@ -74,6 +91,71 @@ def als_pdf(text, ziel):
     return os.path.exists(ziel) and os.path.getsize(ziel) > 0
 
 
+def stick():
+    """Wohin der Stick eingehaengt ist - oder None.
+
+    Ueber die Datentraeger-KENNUNG, nicht ueber einen festen Pfad: Der
+    Einhaengepunkt haengt am angemeldeten Konto (/media/nutzer/... gegen
+    /media/dialosadmin/...) und aendert sich mit dem Geraet. Die Kennung
+    DIALOS-DATA vergibt dialos-setup-home-partition.sh und ist ueberall
+    dieselbe.
+    """
+    try:
+        p = subprocess.run(["findmnt", "-rn", "--source",
+                            f"LABEL={STICK_KENNUNG}", "-o", "TARGET"],
+                           capture_output=True, text=True, timeout=10)
+    except Exception as fehler:
+        melde(f"findmnt nicht nutzbar: {fehler}")
+        return None
+    ziel = p.stdout.strip().splitlines()
+    if not ziel:
+        return None
+    pfad = ziel[0]
+    if not os.access(pfad, os.W_OK):
+        # Auf dem Entwicklungsgeraet gehoert der Stick "nutzer", und
+        # dialosadmin kommt nicht hinein. Das ist kein Fehler, nur eine
+        # Tatsache - gemeldet statt verschwiegen.
+        melde(f"Stick unter {pfad}, aber nicht beschreibbar")
+        return None
+    return pfad
+
+
+def auf_den_stick(nur_neu=None):
+    """Kopiert das Archiv auf den Stick, soweit er da ist.
+
+    Holt auch nach, was frueher entstanden ist, waehrend er nicht steckte -
+    sonst waere die Kopie genau dann unvollstaendig, wenn man sie braucht.
+    """
+    ziel_wurzel = stick()
+    if not ziel_wurzel:
+        return 0
+    ziel = os.path.join(ziel_wurzel, "DialOS-Archiv")
+    try:
+        os.makedirs(ziel, exist_ok=True)
+    except OSError as fehler:
+        melde(f"Stick-Ordner nicht anlegbar: {fehler}")
+        return 0
+    import shutil
+    kopiert = 0
+    for name in sorted(os.listdir(ARCHIV)) if os.path.isdir(ARCHIV) else []:
+        if not name.endswith(".pdf"):
+            continue
+        if nur_neu and name not in nur_neu:
+            continue
+        quelle = os.path.join(ARCHIV, name)
+        drueben = os.path.join(ziel, name)
+        if os.path.exists(drueben) and os.path.getsize(drueben) == os.path.getsize(quelle):
+            continue
+        try:
+            shutil.copyfile(quelle, drueben)
+            kopiert += 1
+        except OSError as fehler:
+            melde(f"Kopie auf den Stick fehlgeschlagen ({name}): {fehler}")
+    if kopiert:
+        melde(f"{kopiert} Datei(en) auf den Stick kopiert: {ziel}")
+    return kopiert
+
+
 def ablegen(pfad, art):
     if not os.path.exists(pfad) or os.path.getsize(pfad) == 0:
         melde(f"nichts abzulegen: {pfad}")
@@ -92,10 +174,14 @@ def ablegen(pfad, art):
         melde(f"PDF fehlgeschlagen: {fehler}")
         return None
     melde(f"abgelegt: {ziel} ({os.path.getsize(ziel)/1024:.0f} kB)")
+    auf_den_stick({os.path.basename(ziel)})
     return ziel
 
 
 def zeigen():
+    ort = stick()
+    print(f"Platte: {ARCHIV}")
+    print(f"Stick:  {ort or 'nicht erreichbar'}")
     if not os.path.isdir(ARCHIV):
         print(f"{ARCHIV} gibt es noch nicht.")
         return 0

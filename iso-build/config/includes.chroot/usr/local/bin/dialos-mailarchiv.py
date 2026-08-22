@@ -46,8 +46,10 @@ import time
 
 HEIM = os.path.expanduser("~")
 ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
-ARCHIV = os.path.join(HEIM, "Dokumente", "DialOS-DATA")
-MERKLISTE = os.path.join(ARCHIV, ".archivierte-mails.txt")
+# Der Ort kommt aus dialos-archiv.py - EINE Quelle. Sonst laege das
+# Mailarchiv eines Tages woanders als das Briefarchiv.
+ARCHIV = None          # wird in main() gesetzt
+MERKLISTE = None
 PROTOKOLL = os.path.join(HEIM, "dialos-mailarchiv.log")
 BREITE = 76
 
@@ -183,7 +185,6 @@ def kurz(betreff):
 
 def main():
     wirklich = "--wirklich" in sys.argv[1:]
-    bekannt = merkliste_lesen()
     faecher = postfaecher()
     if not faecher:
         print("Kein lokales Thunderbird-Postfach gefunden.")
@@ -192,6 +193,10 @@ def main():
     spec = importlib.util.spec_from_file_location("dialos_archiv", ARCHIV_SKRIPT)
     archiv = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(archiv)
+    global ARCHIV, MERKLISTE
+    ARCHIV = archiv.ARCHIV
+    MERKLISTE = os.path.join(ARCHIV, ".archivierte-mails.txt")
+    bekannt = merkliste_lesen()
 
     neu, uebersprungen = [], 0
     for pfad, richtung, server in faecher:
@@ -228,6 +233,9 @@ def main():
         with open(MERKLISTE, "a", encoding="utf-8") as f:
             f.write(kennung + "\n")
         melde(f"abgelegt: {name}")
+    if wirklich:
+        # Auch das nachholen, was entstand, waehrend der Stick nicht steckte.
+        archiv.auf_den_stick()
     if neu and not wirklich:
         print("\nNichts abgelegt. Mit --wirklich archivieren.")
     return 0
