@@ -313,30 +313,21 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
       siehe den Punkt „Drucken per Sprache" weiter unten. Eine Writer-Vorlage
       in `~/Vorlagen` braucht es dafür nicht mehr - der Briefbogen entsteht
       im Text selbst.
-  - [ ] **PDF-Archiv jeder Mail und jedes Briefes** (Stephan,
-    2026-08-21). Ziel: `~/Dokumente/DialOS-DATA/`. Der Ordnername ist
-    Stephans Wahl, damit das Archiv spaeter unveraendert auf den Stick
-    wandern kann.
+  - [~] **PDF-Archiv - Briefe erledigt 2026-08-22, Mails offen.**
+    Jeder Brief landet beim Schreiben automatisch als PDF in
+    `~/Dokumente/DialOS-DATA/`. Eigener PDF-Erzeuger über `cairo`, weil der
+    Briefbogen mit Leerzeichen gesetzt ist und in einer Proportionalschrift
+    zerfiele; mit `pdftotext -layout` zurückgelesen und zeichengenau
+    verglichen.
     
-    **Auf dem Stick liegt es bewusst NICHT.** Zwei Gruende, beide aus
-    `docs/sicherheit-datenschutz.md`: Die Partition `DIALOS-DATA` ist
-    unverschluesseltes exFAT - absichtlich, damit der Nutzer sie an Windows
-    lesen kann -, und der Stick soll **getrennt vom Laptop** aufbewahrt
-    werden. Ein Archiv, das meistens nicht steckt, kann nicht automatisch
-    beschrieben werden; und Briefe an die Krankenkasse sind
-    Gesundheitsdaten, die nicht von der LUKS-Platte auf einen offenen Stick
-    gehoeren - schon gar nicht auf denselben Gegenstand, der den
-    LUKS-Schluessel traegt.
+    **Offen: die Mails.** Nicht am Archiv - DialOS verschickt noch keine Mail
+    selbst. Solange das über Thunderbird läuft, gibt es keinen Punkt zum
+    Eingreifen. Gehört an den eigenen Versandweg (erster Punkt im
+    Mail-Block).
     
-    Werkzeuge vorhanden: `libreoffice --headless` und `ps2pdf`.
-
-    **Zusammen zu entscheiden mit den Bildschirmfotos** (Stephan hat sie am
-    2026-08-21 gesehen und bewusst nichts geändert): Beide zeigen bzw.
-    enthalten Inhalte, die der Nutzer nicht mehr im Blick hat, wenn er sie
-    später an den Support gibt. Offen ist, ob es eine Ansage beim Auslösen
-    braucht, ob die Dateien wie die Protokolle nach sieben Tagen verfallen
-    und ob vor dem Versand eine Rückfrage kommt. Ausgeführt in
-    `docs/sicherheit-datenschutz.md`.
+    **Und die Datenschutzfrage bleibt offen** (mit den Bildschirmfotos
+    zusammen zu entscheiden): Verfallen die PDFs nach sieben Tagen wie die
+    Protokolle? Siehe `docs/sicherheit-datenschutz.md`.
   - [ ] **Vorlesen** von Mails, Dokumenten und Webseiten.
   - [x] **Drucken per Sprache - gebaut 2026-08-22.**
     „Brief drucken", „Einkaufszettel drucken", „Notizen drucken". Alle 24

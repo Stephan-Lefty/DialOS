@@ -392,6 +392,7 @@ DOKUMENT_ORDNER = os.path.join(os.path.expanduser("~"), "Dokumente")
 FUSSZEILE_SKRIPT = "/usr/local/bin/dialos-fusszeile.py"
 NAMEN_SKRIPT_PFAD = "/usr/local/bin/dialos-namen.py"
 ABSENDER = "/usr/local/share/dialos/absender.txt"
+ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
 
 # DER HINWEIS AN DER STELLE DER UNTERSCHRIFT (Stephan, 2026-08-21). Ein Brief
 # ohne Unterschrift wirft beim Empfaenger die Frage auf, ob jemand etwas
@@ -774,6 +775,19 @@ def brief_schreiben(zeilen):
             melde(f"  konnte den vorigen Brief nicht beiseitelegen: {fehler}")
     with open(pfad, "w", encoding="utf-8") as f:
         f.write(briefbogen("\n".join(zeilen)))
+
+    # JEDER BRIEF WANDERT ALS PDF INS ARCHIV (Stephans Vorgabe vom
+    # 2026-08-21). Nicht abwarten und nicht daran scheitern: Der Brief ist als
+    # Textdatei bereits geschrieben - ein fehlgeschlagenes Archiv darf ihn
+    # nicht mitreissen. Was schiefging, steht in dialos-archiv.log.
+    if os.access(ARCHIV_SKRIPT, os.X_OK):
+        try:
+            subprocess.Popen([ARCHIV_SKRIPT, "ablegen", pfad, "--art", "brief"],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             start_new_session=True)
+            melde("  ins Archiv gegeben")
+        except Exception as fehler:
+            melde(f"  Archiv nicht aufrufbar: {fehler}")
     return pfad
 
 

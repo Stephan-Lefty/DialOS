@@ -1760,6 +1760,46 @@ unterscheiden. Nutzerdienst und nicht Systemdienst, weil er spricht und die
 Sprachausgabe an der Sitzung haengt. Die Warnung ist zugleich die **sechste
 Quelle** der Mitschrift (`dialos-akku.log`).
 
+
+## Jeder Brief als PDF im Archiv (neu 2026-08-22)
+
+Stephans Vorgabe vom 2026-08-21: „Jeder Brief und auch jede Mail muss als pdf
+Datei in einen extra Ordner gepackt werden."
+
+```bash
+sudo /usr/local/sbin/dialos-aufspielen --wirklich   # oder von Hand installieren
+```
+
+**Wo: `~/Dokumente/DialOS-DATA/`.** Der Name ist Stephans Wahl, damit das
+Archiv später unverändert auf den Stick wandern kann. **Auf dem Stick liegt es
+bewusst nicht** — die Partition `DIALOS-DATA` ist unverschlüsseltes exFAT, und
+der Stick soll laut `sicherheit-datenschutz.md` getrennt vom Laptop aufbewahrt
+werden. Ein Archiv, das meistens nicht steckt, kann nicht beschrieben werden;
+und Briefe an die Krankenkasse gehören nicht von der LUKS-Platte auf einen
+offenen Datenträger.
+
+**Warum ein eigener PDF-Erzeuger und nicht LibreOffice.** Der Briefbogen ist
+mit **Leerzeichen** gesetzt: Absender und Datum stehen rechtsbündig, weil die
+Zeile auf Breite 76 aufgefüllt ist. In einer Proportionalschrift zerfällt das
+sofort, und LibreOffice importiert reinen Text mit seiner Standardschrift. Mit
+`cairo` (in Debian vorhanden) lässt sich eine **Festbreitenschrift** setzen —
+die Ausrichtung bleibt genau so, wie sie gemeint war. Nebenbei ist es
+schneller: kein Büroprogramm, das erst startet.
+
+**Nachgewiesen, nicht angenommen:** Das erzeugte PDF wurde mit `pdftotext
+-layout` zurückgelesen und Zeile für Zeile mit der Textdatei verglichen. Alle
+Zeilen stimmen zeichengenau; die einzige Abweichung ist ein Leerzeichen mehr
+in der Rückwandlung von `pdftotext` selbst.
+
+**Das Archiv darf den Brief nicht aufhalten.** Es wird nebenläufig gestartet,
+und schlägt es fehl, steht das im Protokoll — der Brief ist als Textdatei
+ohnehin schon geschrieben.
+
+**Die Mail-Hälfte fehlt noch**, und zwar aus einem Grund, der nicht am Archiv
+liegt: DialOS verschickt noch keine Mail selbst. Solange das über Thunderbird
+läuft, gibt es keinen Punkt, an dem DialOS eingreifen könnte. Der Hinweis
+steht in `TODO.md` bei dem Punkt, an dem der eigene Versandweg gebaut wird.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

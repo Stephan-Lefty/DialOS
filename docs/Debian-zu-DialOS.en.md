@@ -1686,6 +1686,45 @@ and not a system service, because it speaks and speech output hangs off the
 session. The warning is also the **sixth source** of the live transcript
 (`dialos-akku.log`).
 
+
+## Every letter as a PDF in the archive (new 2026-08-22)
+
+Stephan's requirement from 2026-08-21: "every letter and every mail must be
+put into a separate folder as a PDF file."
+
+```bash
+sudo /usr/local/sbin/dialos-aufspielen --wirklich   # or install by hand
+```
+
+**Where: `~/Dokumente/DialOS-DATA/`.** The name is Stephan's choice so the
+archive can later move to the stick unchanged. **It deliberately does not live
+on the stick** — the `DIALOS-DATA` partition is unencrypted exFAT, and per
+`sicherheit-datenschutz.md` the stick is meant to be kept apart from the
+laptop. An archive that is usually not plugged in cannot be written to; and
+letters to a health insurer do not belong from the LUKS disk onto an open
+medium.
+
+**Why an own PDF writer and not LibreOffice.** The letterhead is laid out with
+**spaces**: sender and date are right-aligned because the line is padded to
+width 76. In a proportional font that falls apart immediately, and LibreOffice
+imports plain text with its default font. With `cairo` (present in Debian) a
+**monospace** font can be set — the alignment stays exactly as intended. It is
+also faster: no office suite to start.
+
+**Proven, not assumed:** the generated PDF was read back with `pdftotext
+-layout` and compared line by line with the text file. Every line matches
+character for character; the only deviation is one extra space introduced by
+`pdftotext` itself.
+
+**The archive must not hold up the letter.** It is started concurrently, and
+if it fails that goes into the log — the letter has already been written as a
+text file.
+
+**The mail half is still missing**, for a reason that has nothing to do with
+the archive: DialOS does not send mail itself yet. As long as that runs
+through Thunderbird there is no point at which DialOS could step in. The note
+sits in `TODO.md` at the item where the own sending path gets built.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk
