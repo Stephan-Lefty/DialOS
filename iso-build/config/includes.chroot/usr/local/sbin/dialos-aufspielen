@@ -28,8 +28,9 @@ eingetragen; ein Pfad als Argument waere genau das Schlupfloch, das die enge
 Regel verhindern soll.
 
 Aufruf:
-    dialos-aufspielen              zeigt, was sich unterscheidet
-    dialos-aufspielen --wirklich   kopiert und startet neu
+    dialos-aufspielen                    zeigt, was sich unterscheidet
+    dialos-aufspielen --wirklich         kopiert die abweichenden Dateien
+    dialos-aufspielen --paket NAME ...   installiert Debian-Pakete
 """
 
 import os
@@ -147,7 +148,54 @@ def unterschiede():
 # und nicht zwei.
 
 
+# NUR INSTALLIEREN, NICHTS ANDERES (Stephan, 2026-08-22: "und auch die apt
+# Installationen"). Kein remove, kein purge, kein dist-upgrade.
+#
+# WAS DAS BEDEUTET, wieder unbeschoenigt: Wer Pakete installieren darf, darf
+# alles - apt fuehrt Skripte der Pakete als root aus. Die Regel war schon
+# vorher praktisch ein Root-Zugang; damit ist sie es ohne "praktisch". Auf
+# dem Entwicklungsgeraet ist das der Preis dafuer, dass nicht bei jedem
+# Versuch jemand ein Passwort tippen muss. Auf einem Kundengeraet darf weder
+# das Skript noch die Regel existieren.
+#
+# Die Einschraenkung auf "install" ist trotzdem kein Feigenblatt: Sie
+# verhindert, dass ein Tippfehler Pakete ENTFERNT - und ein halb
+# deinstalliertes GNOME ist auf einem Geraet, das nur per Sprache bedient
+# wird, ein Totalausfall.
+def pakete_installieren(namen):
+    for name in namen:
+        # Keine Optionen durchreichen: "--purge" oder "-y" als Paketname waere
+        # genau das Schlupfloch, das die Beschraenkung aushebelt.
+        if name.startswith("-") or "/" in name or " " in name:
+            print(f"Kein gueltiger Paketname: {name!r}", file=sys.stderr)
+            return 2
+    umgebung = dict(os.environ)
+    umgebung["DEBIAN_FRONTEND"] = "noninteractive"
+    print(f"Installiere: {' '.join(namen)}")
+    ergebnis = subprocess.run(
+        ["apt-get", "install", "--yes", "--no-install-recommends"] + list(namen),
+        env=umgebung)
+    if ergebnis.returncode != 0:
+        print(f"apt-get meldet Fehler {ergebnis.returncode}", file=sys.stderr)
+        return ergebnis.returncode
+    # Was wirklich ankam, aus dpkg - nicht aus der Absicht.
+    for name in namen:
+        p = subprocess.run(["dpkg-query", "-W", "-f=${Package} ${Version} ${Status}\n", name],
+                           capture_output=True, text=True)
+        print(f"  {p.stdout.strip() or name + ' NICHT installiert'}")
+    return 0
+
+
 def main():
+    argumente = sys.argv[1:]
+    if "--paket" in argumente:
+        i = argumente.index("--paket")
+        namen = [a for a in argumente[i + 1:] if a != "--wirklich"]
+        if not namen:
+            print("Aufruf: dialos-aufspielen --paket NAME ...", file=sys.stderr)
+            return 2
+        return pakete_installieren(namen)
+
     wirklich = "--wirklich" in sys.argv[1:]
     if not os.path.isdir(QUELLE):
         print(f"Quelle fehlt: {QUELLE}", file=sys.stderr)
