@@ -436,8 +436,13 @@ abgeschlossen.*
       sich als Michael vorstellt, ebenso wie ein Tempo, das zur vorigen Stimme
       gehört.
     - **Das Tempo ist pro Stimme verschieden, und zwar messbar:** derselbe Satz
-      braucht bei Thorsten 7,75 s mit Tempo 0,88, bei Kerstin **8,99 s** mit
-      demselben Wert. Erst 1,00 bringt sie auf 7,91 s. Damit ist der zweite der
+      **Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen
+      aus einem Erzeuger, der Kerstins 16-kHz-Rohdaten als 22050 Hz
+      deklarierte - jede Kerstin-Probe lief damit 38 % zu schnell. Richtig
+      gemessen braucht derselbe Satz bei Michael mit 0,88 rund 6,15 s und bei
+      Anna mit 1,00 rund 7,04 s; Anna ist also **14 % langsamer**, nicht
+      gleichauf. Seit dem 2026-08-22 steht Anna auf **0,95** - von Stephan aus
+      korrekt erzeugten Proben gewählt. Damit ist der zweite der
       drei Punkte vor der zweiten Stimme beantwortet - mit ja.
     - **Der Name stand längst fest** und wurde nicht neu erfunden:
       `docs/ersteinrichtung.md` nennt seit Langem männlich Michael und Daniel,

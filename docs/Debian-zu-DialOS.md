@@ -2066,9 +2066,12 @@ systemctl --user restart speech-dispatcher.service
 **Warum drei Dinge zusammen umschalten.** Eine Frauenstimme, die sich als
 Michael vorstellt, wäre falsch - und ein Nutzer, der den Bildschirm nicht sieht,
 hat nur diesen Namen, um das Gerät anzusprechen. Das Tempo ist pro Stimme
-verschieden, und zwar messbar: derselbe Satz braucht bei Thorsten 7,75 s mit
-Tempo 0,88, bei Kerstin **8,99 s** mit demselben Wert. Erst 1.00 bringt sie auf
-7,91 s. Ein gemeinsamer Wert für alle Stimmen wäre für die eine oder andere
+**Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen aus
+einem Erzeuger, der Kerstins 16-kHz-Rohdaten als 22050 Hz deklarierte - jede
+Kerstin-Probe lief damit 38 % zu schnell. Richtig gemessen braucht derselbe
+Satz bei Michael mit 0,88 rund 6,15 s und bei Anna mit 1,00 rund 7,04 s; Anna
+ist also **14 % langsamer**, nicht gleichauf. Seit dem 2026-08-22 steht Anna
+auf **0,95** - von Stephan aus korrekt erzeugten Proben gewählt. Ein gemeinsamer Wert für alle Stimmen wäre für die eine oder andere
 immer falsch.
 
 **Die Auswahl kam per Ohr, nicht per Rechnung.** Drei weibliche Piper-Stimmen

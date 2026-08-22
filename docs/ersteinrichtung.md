@@ -56,8 +56,13 @@ Vor Ort per Sprache erfragt werden nur:
   wurde:
 
   - **Jede Stimme braucht ihre eigene Einstellung.** Das Sprechtempo ist
-    nicht übertragbar: derselbe Satz braucht bei Thorsten 7,75 s mit
-    Tempo 0,88, bei Kerstin **8,99 s** mit demselben Wert. Und die
+    **Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen aus
+    einem Erzeuger, der Kerstins 16-kHz-Rohdaten als 22050 Hz deklarierte -
+    jede Kerstin-Probe lief damit 38 % zu schnell. Richtig gemessen braucht
+    derselbe Satz bei Michael mit 0,88 rund 6,15 s und bei Anna mit 1,00 rund
+    7,04 s; Anna ist also **14 % langsamer**, nicht gleichauf. Seit dem
+    2026-08-22 steht Anna auf **0,95** - von Stephan aus korrekt erzeugten
+    Proben gewählt. Und die
     Aussprache-Regeln („Tas tatur", „Ei Di", „Dial OS") sind auf Thorsten
     abgestimmt - ob Anna sie braucht, ist noch offen. Acht Stimmen hießen
     achtmal diese Arbeit, und ohne sie klingt jede einzelne schlechter als

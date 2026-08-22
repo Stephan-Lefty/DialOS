@@ -10,10 +10,16 @@
 # stoert er mehr als jedes andere Wort. Im zweiten Feld steht deshalb die
 # Schreibweise, die richtig KLINGT:
 #
-#     Stephan | Stefan
+#     Stephan | Steffan
 #
-# Geschrieben bleibt "Stephan" - fuer Briefe und Ausdrucke, wo "Stefan" schlicht
-# falsch waere.
+# Geschrieben bleibt "Stephan" - fuer Briefe und Ausdrucke, wo "Steffan"
+# schlicht falsch waere.
+#
+# ZWEIMAL NACHGEBESSERT, und beide Male hat Stephan es gehoert, nicht ich:
+# erst "Stefan" statt "Stefffan" (2026-08-20), dann "Steffan" statt "Stefan"
+# (2026-08-22) - die Betonung lag auf der falschen Silbe. Aus sechs
+# Schreibweisen im Hoervergleich gewaehlt. Wer einen Namen einstellt, sollte
+# ihn sich vorsprechen lassen, statt die naheliegende Schreibweise zu nehmen.
 #
 # WARUM NICHT IN DIE AUSSPRACHE-TABELLE von dialos-say.py: Dort stehen Regeln,
 # die fuer ALLE Geraete gelten ("Tastatur", "ID", "DialOS"). Ein Kundenname gilt

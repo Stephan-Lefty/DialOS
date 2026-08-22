@@ -1,6 +1,6 @@
 # Alle Ansagen von DialOS
 
-Erzeugt am 2026-08-22 12:07 mit `scripts/dialos-alle-ansagen.py`.
+Erzeugt am 2026-08-22 12:25 mit `scripts/dialos-alle-ansagen.py`.
 
 Jede Ansage liegt zweimal vor: `...-michael.ogg` und `...-anna.ogg`.
 
@@ -54,12 +54,12 @@ Jede Ansage liegt zweimal vor: `...-michael.ogg` und `...-anna.ogg`.
 | `46-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich höre Dich wieder. |
 | `47-ton-ausgabe-ansage_bluetooth-*.ogg` | ton-ausgabe | Ton über Lautsprecher. |
 | `48-ton-ausgabe-ansage_intern-*.ogg` | ton-ausgabe | Ton über Laptop. |
-| `49-auskunft-uhrzeit-*.ogg` | auskunft | Es ist zwölf Uhr vier. |
+| `49-auskunft-uhrzeit-*.ogg` | auskunft | Es ist zwölf Uhr zweiundzwanzig. |
 | `50-auskunft-datum-*.ogg` | auskunft | Heute ist Samstag, der zweiundzwanzigste August. |
-| `51-start-begruessung-*.ogg` | start | Hallo Stefan, ich bin Michael, ich bin Dein persönlicher Assistent. Heute ist Samstag, der zweiundzwanzigste August. Die aktuelle Uhrzeit ist zwölf sechs. Ich nenne Dir noch die Akku-Stände. Akku-Stand Laptop: 87 Prozent. Akku-Stand Lautsprecher: 100 Prozent. Es besteht eine Internetverbindung. Das Wetter in Seefeld in Tirol wird heute so sein. Vormittags 14 Grad und leicht bewölkt, nachmittags 19 Grad und sonnig. Ich wünsche Dir einen schönen Tag! |
+| `51-start-begruessung-*.ogg` | start | Hallo Steffan, ich bin Michael, ich bin Dein persönlicher Assistent. Heute ist Samstag, der zweiundzwanzigste August. Die aktuelle Uhrzeit ist zwölf dreiundzwanzig. Ich nenne Dir noch die Akku-Stände. Akku-Stand Laptop: 87 Prozent. Akku-Stand Lautsprecher: 100 Prozent. Es besteht eine Internetverbindung. Das Wetter in Seefeld in Tirol wird heute so sein. Vormittags 14 Grad und leicht bewölkt, nachmittags 19 Grad und sonnig. Ich wünsche Dir einen schönen Tag! |
 | `52-akku-stufe-25-*.ogg` | akku | Der Akku ist bei 25 Prozent. |
 | `53-akku-stufe-15-*.ogg` | akku | Der Akku ist bei 15 Prozent. Du solltest den Computer bald an die Steckdose hängen. |
-| `54-akku-stufe-5-*.ogg` | akku | Stefan, der Akku ist fast leer. Der Computer muss jetzt an die Steckdose. |
+| `54-akku-stufe-5-*.ogg` | akku | Steffan, der Akku ist fast leer. Der Computer muss jetzt an die Steckdose. |
 | `55-diktat-ende-notizen-*.ogg` | diktat | Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deine Notizen vorgelesen haben, dann sage: Notizen vorlesen. |
 | `56-diktat-ende-einkaufszettel-*.ogg` | diktat | Diktat beendet, 4 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen. |
 | `57-diktat-ende-brief-*.ogg` | diktat | Der Brief ist geschrieben, 2 Sätze. Möchtest Du Deinen Brief vorgelesen haben, dann sage: Brief vorlesen. |

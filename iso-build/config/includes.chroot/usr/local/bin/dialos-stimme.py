@@ -59,7 +59,13 @@ STIMMEN = {
     "kerstin": {
         "kennung": "de_DE-kerstin-low",
         "name": "Anna",
-        "tempo": "1.00",     # gewaehlt 2026-08-20
+        # 2026-08-22 von 1.00 auf 0.95. Die 1.00 war am 2026-08-20 aus
+        # Hoerproben gewaehlt worden, die 38 % ZU SCHNELL liefen: Der
+        # Beispiel-Erzeuger deklarierte Kerstins 16-kHz-Rohdaten als
+        # 22050 Hz. Stephan hat es gehoert ("Miky Maus Stimme"), nicht
+        # gemessen. Nach der Korrektur neu vorgespielt - 0.80, 0.90, 0.95,
+        # 1.00, 1.10, 1.20 - und seine Wahl war 0.95.
+        "tempo": "0.95",     # gewaehlt 2026-08-22, siehe oben
     },
 }
 

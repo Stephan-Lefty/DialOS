@@ -377,7 +377,12 @@ Stephan decides: a friendly female voice. The listening comparison produces
 voice, not just a test setting.
 
 Tempo differs per voice, measurably so: the same sentence takes Thorsten 7.75
-seconds, Kerstin **8.99** at the same value. Only 1.00 brings her to 7.91.
+**These figures were wrong** (corrected 2026-08-22): they came from a
+generator that declared Kerstin's 16 kHz raw data as 22050 Hz - every Kerstin
+sample ran 38 % too fast. Measured correctly, the same sentence takes about
+6.15 s for Michael at 0.88 and about 7.04 s for Anna at 1.00; Anna is
+therefore **14 % slower**, not on a par. Since 2026-08-22 Anna is set to
+**0.95**, chosen by Stephan from correctly generated samples.
 
 At Stephan's suggestion DialOS now addresses the user by name - in the
 greeting, at decisions, at errors. **Not** at confirmations and not at the

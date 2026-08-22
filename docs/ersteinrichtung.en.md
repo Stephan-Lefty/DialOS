@@ -52,8 +52,12 @@ Only the following is asked for on site, via voice:
   OK"). The reason lies in what was measured the same day:
 
   - **Every voice needs settings of its own.** The speaking rate does not
-    carry over: the same sentence takes 7.75 s for Thorsten at rate 0.88
-    and **8.99 s** for Kerstin at the same value. And the pronunciation
+    **These figures were wrong** (corrected 2026-08-22): they came from a
+    generator that declared Kerstin's 16 kHz raw data as 22050 Hz - every
+    Kerstin sample ran 38 % too fast. Measured correctly, the same sentence
+    takes about 6.15 s for Michael at 0.88 and about 7.04 s for Anna at 1.00;
+    Anna is therefore **14 % slower**, not on a par. Since 2026-08-22 Anna is
+    set to **0.95**, chosen by Stephan from correctly generated samples. And the pronunciation
     rules ("Tas tatur", "Ei Di", "Dial OS") are tuned to Thorsten - whether
     Anna needs them is still open. Eight voices would mean eight times that
     work, and without it each one sounds worse than it needs to.

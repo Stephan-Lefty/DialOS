@@ -388,8 +388,12 @@ Stephan entscheidet: eine freundliche Damenstimme. Aus dem Hörvergleich wird
 Auslieferungsstimme, nicht nur Testeinstellung.
 
 Das Tempo ist dabei pro Stimme verschieden, und zwar messbar: Derselbe Satz
-braucht bei Thorsten 7,75 Sekunden, bei Kerstin mit demselben Wert **8,99**.
-Erst 1,00 bringt sie auf 7,91.
+**Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen aus
+einem Erzeuger, der Kerstins 16-kHz-Rohdaten als 22050 Hz deklarierte - jede
+Kerstin-Probe lief damit 38 % zu schnell. Richtig gemessen braucht derselbe
+Satz bei Michael mit 0,88 rund 6,15 s und bei Anna mit 1,00 rund 7,04 s; Anna
+ist also **14 % langsamer**, nicht gleichauf. Seit dem 2026-08-22 steht Anna
+auf **0,95** - von Stephan aus korrekt erzeugten Proben gewählt.
 
 Auf Stephans Frage hin spricht DialOS den Nutzer jetzt mit Namen an - bei der
 Begrüßung, bei Entscheidungen, bei Fehlern. **Nicht** bei Bestätigungen und

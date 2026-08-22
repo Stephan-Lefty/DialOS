@@ -409,8 +409,13 @@ background) and `splash.png` (boot/login screen).
       introducing itself as Michael just as much as a tempo belonging to the
       previous voice.
     - **Tempo differs per voice, measurably so:** the same sentence takes
-      Thorsten 7.75 s at tempo 0.88, Kerstin **8.99 s** at the same value. Only
-      1.00 brings her to 7.91 s. That answers the second of the three points
+      **These figures were wrong** (corrected 2026-08-22): they came from a
+      generator that declared Kerstin's 16 kHz raw data as 22050 Hz - every
+      Kerstin sample ran 38 % too fast. Measured correctly, the same sentence
+      takes about 6.15 s for Michael at 0.88 and about 7.04 s for Anna at
+      1.00; Anna is therefore **14 % slower**, not on a par. Since 2026-08-22
+      Anna is set to **0.95**, chosen by Stephan from correctly generated
+      samples. That answers the second of the three points
       before the second voice - with yes.
     - **The name was settled long ago** and was not reinvented:
       `docs/ersteinrichtung.md` has long listed Michael and Daniel for male,
