@@ -587,7 +587,19 @@ def mitschrift_oeffnen():
     RUECKBLICK = "20"
     if terminal.endswith("gnome-terminal"):
         befehl = [terminal, "--title=DialOS - Mitschrift",
-                  "--geometry=100x30", "--",
+                  # EIN DRITTEL KLEINER (Stephan, 2026-08-22). Vorher
+                  # 100x30, gemessen rund 1170 x 738 px auf 1920 x 1080 -
+                  # das Fenster nahm die halbe Breite ein.
+                  #
+                  # WARUM NUR DIE GROESSE UND NICHT DIE POSITION: Stephan
+                  # wollte es unten rechts. Auf Wayland kann ein Fenster
+                  # seine Position NICHT selbst bestimmen - gemessen am
+                  # 2026-08-22: "--geometry=53x20+1440+720" landete mittig,
+                  # der Versatz wurde ignoriert. Nur X11-Clients ueber
+                  # XWayland duerfen das (mit xterm nachgewiesen: es landete
+                  # wirklich bei +1440+790). Stephans Entscheidung: lieber
+                  # die GNOME-Optik behalten und auf die Position verzichten.
+                  "--geometry=67x20", "--",
                   MITSCHRIFT, "--rueckblick", RUECKBLICK]
     else:
         # -e nimmt bei den meisten Terminals nur EINE Zeichenkette.

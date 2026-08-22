@@ -92,6 +92,32 @@ def modul(pfad, name):
     return m
 
 
+def abtastrate(modell):
+    """Die Abtastrate DIESES Modells, gelesen aus seiner .json.
+
+    HIER STAND FEST "22050" - und das war falsch, sobald eine zweite Stimme
+    dazukam (gefunden am 2026-08-22, weil Stephan beim Anhoeren sagte "die
+    Stimme in den Proben ist zu schnell"):
+
+        de_DE-thorsten-high   22050 Hz
+        de_DE-kerstin-low     16000 Hz
+
+    Anna ist ein 16-kHz-Modell. Werden ihre Rohdaten als 22050 Hz deklariert,
+    laeuft jede Probe um den Faktor 1,38 zu schnell und eine Quinte zu hoch.
+    Die Sprechkette des Systems macht es richtig - piper-generic.conf holt die
+    Rate mit jq aus derselben Datei. Nur die Beispiel-Erzeuger hatten sie fest
+    eingetragen, und solange nur Thorsten existierte, fiel das nicht auf.
+    """
+    import json
+    pfad = os.path.join(PIPER_DIR, modell + ".json")
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            return int(json.load(f)["audio"]["sample_rate"])
+    except Exception:
+        # Lieber laut scheitern als still falsch klingen.
+        raise SystemExit(f"Abtastrate nicht lesbar: {pfad}")
+
+
 def erzeugen(datei, text, aussprache):
     """Rendert EINEN Text nach OGG - dieselbe Kette wie speech-dispatcher."""
     fuer_piper = aussprache(text)
@@ -99,7 +125,7 @@ def erzeugen(datei, text, aussprache):
         f"cd {shlex.quote(PIPER_DIR)} && "
         f"printf %s {shlex.quote(fuer_piper)} | "
         f"./piper/piper --model {shlex.quote(stimme())} --noise_w 0 --output_raw 2>/dev/null | "
-        f"sox -r 22050 -c 1 -b 16 -e signed-integer -t raw - "
+        f"sox -r {abtastrate(stimme())} -c 1 -b 16 -e signed-integer -t raw - "
         f"-C 3 {shlex.quote(datei)} tempo {tempo()} norm 2>/dev/null"
     )
     subprocess.run(["sh", "-c", befehl], check=False)
