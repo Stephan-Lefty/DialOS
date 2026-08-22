@@ -1,0 +1,21 @@
+# DialOS: das Aufspiel-Skript darf ohne Passwort laufen.
+#
+# +-------------------------------------------------------------------------+
+# | NUR AUF DEM ENTWICKLUNGSGERAET. Diese Datei darf auf einem Kundengeraet  |
+# | NICHT existieren - siehe scripts/dialos-aufraeumen.sh und den Kopf von   |
+# | /usr/local/sbin/dialos-aufspielen.                                       |
+# |                                                                          |
+# | WAS SIE WIRKLICH BEDEUTET, unbeschoenigt: Das Skript kopiert Dateien aus |
+# | einem Ordner, den "dialosadmin" beschreiben darf, als root nach          |
+# | /usr/local/bin. Wer als dialosadmin schreiben kann, kann damit Code als  |
+# | root ausfuehren lassen. Die Regel IST praktisch ein Root-Zugang - nur    |
+# | einer, der genau einen Weg nimmt und dabei protokolliert, was er tut.    |
+# |                                                                          |
+# | Auf einem Geraet, auf dem entwickelt wird, ist das ein vertretbarer      |
+# | Tausch gegen staendige Tipparbeit (Stephan, 2026-08-22). Auf einem       |
+# | ausgelieferten Geraet ist es keiner.                                     |
+# +-------------------------------------------------------------------------+
+#
+# Der Pfad ist absolut und das Skript gehoert root - beides ist noetig, sonst
+# koennte man es austauschen und die Regel liefe ins Leere.
+dialosadmin ALL=(root) NOPASSWD: /usr/local/sbin/dialos-aufspielen

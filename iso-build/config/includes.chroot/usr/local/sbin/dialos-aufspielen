@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+"""DialOS: spielt den Repo-Stand auf dieses Geraet - und NUR das.
+
+Stephans Wunsch vom 2026-08-22: die Aufspiel-Befehle nicht mehr jedes Mal von
+Hand tippen. Zusammen mit einer Regel in /etc/sudoers.d/ darf dieses Skript
+ohne Passwort laufen.
+
++---------------------------------------------------------------------------+
+| NUR FUER DAS ENTWICKLUNGSGERAET. Auf einem Kundengeraet darf weder dieses  |
+| Skript noch die sudoers-Regel existieren.                                  |
+|                                                                            |
+| GRUND, ohne Beschoenigung: Das Skript kopiert Dateien aus einem Ordner,    |
+| den "dialosadmin" beschreiben darf, als root nach /usr/local/bin. Wer also |
+| als dialosadmin schreiben kann, kann Code als root ausfuehren lassen - die |
+| Regel ist damit praktisch ein Root-Zugang. Auf einem Geraet, auf dem       |
+| entwickelt wird, ist das ein vertretbarer Tausch gegen die staendige       |
+| Tipparbeit. Auf einem ausgelieferten Geraet ist es keiner.                 |
++---------------------------------------------------------------------------+
+
+WAS ES TUT: Es geht den Baum unter includes.chroot durch und kopiert jede
+Datei, die sich vom installierten Stand unterscheidet, an ihren Platz - mit
+den Rechten, die zum Ort gehoeren. Danach laedt es systemd neu und startet die
+DialOS-Dienste neu, deren Datei sich geaendert hat.
+
+WAS ES NICHT TUT: keine Pakete installieren, keine Konfiguration ausserhalb
+der bekannten Ziele anfassen, nichts loeschen. Die Quelle ist FEST
+eingetragen; ein Pfad als Argument waere genau das Schlupfloch, das die enge
+Regel verhindern soll.
+
+Aufruf:
+    dialos-aufspielen              zeigt, was sich unterscheidet
+    dialos-aufspielen --wirklich   kopiert und startet neu
+"""
+
+import os
+import pwd
+import shutil
+import subprocess
+import sys
+
+QUELLE = ("/media/dialosadmin/SanDisk-Extreme/DialOS/repo/"
+          "iso-build/config/includes.chroot")
+NUTZER = "dialosadmin"
+
+# Welche Rechte an welchem Ort gelten. Laengster Treffer gewinnt.
+RECHTE = [
+    # sudoers-Dateien verlangt sudo mit 0440 - mit 0644 laufen sie zwar, aber
+    # die Konvention ist strenger, und eine Regel, die Rechte vergibt, sollte
+    # selbst die engsten haben.
+    ("etc/sudoers.d", 0o440),
+    ("usr/local/bin", 0o755),
+    ("usr/local/sbin", 0o755),
+    ("etc/systemd", 0o644),
+    ("etc/xdg/autostart", 0o644),
+    ("usr/local/share", 0o644),
+    ("etc", 0o644),
+]
+
+# Welcher Dienst haengt an welcher Datei. Neu gestartet wird nur, was sich
+# geaendert hat - ein pauschaler Neustart aller Dienste waere bei jedem
+# Aufspielen ein unnoetiger Aussetzer der Spracherkennung.
+DIENSTE = {
+    "usr/local/bin/dialos-sprachbefehl-desktop.py": ("autostart", None),
+    "usr/local/bin/dialos-ton-ausgabe.py": ("autostart", None),
+    "usr/local/bin/dialos-tts-indicator.py": ("autostart", None),
+    "usr/local/bin/dialos-akku-warnung.py": ("user", "dialos-akku-warnung.service"),
+    "etc/systemd/user/dialos-akku-warnung.service": ("user", "dialos-akku-warnung.service"),
+    "etc/systemd/system/dialos-fusszeile.service": ("system", "dialos-fusszeile.service"),
+    "etc/systemd/system/dialos-fusszeile.path": ("system", "dialos-fusszeile.path"),
+}
+
+
+# WAS NIE AUFGESPIELT WIRD, und warum. Ohne diese Liste haette der erste
+# Trockenlauf am 2026-08-22 zwoelf .pyc-Dateien und eine zurueckgestellte
+# sudoers-Regel installiert.
+NIEMALS = [
+    # Bytecode, den Python beim Importieren im Repo anlegt - reines
+    # Nebenprodukt, steht auch in .gitignore.
+    ("__pycache__", "Python-Bytecode, kein Bestandteil des Systems"),
+    (".pyc", "Python-Bytecode"),
+    # ZURUECKGESTELLT (Stephan, 2026-08-20): Der Fernwartungs-Dienst ist
+    # gebaut und geprueft, aber bewusst nicht installiert, solange der Umbau
+    # auf den systemd-Dienst offen ist. Ein Aufspiel-Skript, das ihn
+    # klammheimlich mitnimmt, waere genau der stille Fehler, den dieses
+    # Projekt sonst ueberall vermeidet.
+    ("etc/sudoers.d/dialos-fernwartung", "zurueckgestellt, siehe TODO.md"),
+    ("usr/local/sbin/dialos-fernwartung", "zurueckgestellt, siehe TODO.md"),
+    # KOPPLUNGSDATEN SIND LAUFENDER ZUSTAND, keine Konfiguration. Im Abbild
+    # liegen sie, damit ein frisches Geraet den Lautsprecher schon kennt; auf
+    # einem LAUFENDEN Geraet wuerde ein Ueberschreiben die bestehende Kopplung
+    # zerstoeren, und BlueZ haelt die Dateien ohnehin offen.
+    ("var/lib/bluetooth", "laufende Kopplung, kein Konfigurationsstand"),
+]
+
+
+def uebersprungen(rel):
+    for muster, grund in NIEMALS:
+        if muster in rel:
+            return grund
+    return None
+
+
+def rechte_fuer(rel):
+    for anfang, modus in sorted(RECHTE, key=lambda p: -len(p[0])):
+        if rel.startswith(anfang):
+            return modus
+    return 0o644
+
+
+def unterschiede():
+    gefunden = []
+    for wurzel, _ordner, dateien in os.walk(QUELLE):
+        for name in dateien:
+            voll = os.path.join(wurzel, name)
+            rel = os.path.relpath(voll, QUELLE)
+            if uebersprungen(rel):
+                continue
+            ziel = "/" + rel
+            if not os.path.exists(ziel):
+                gefunden.append((rel, voll, ziel, "fehlt"))
+            else:
+                try:
+                    gleich = (open(voll, "rb").read() == open(ziel, "rb").read())
+                except OSError as fehler:
+                    gefunden.append((rel, voll, ziel, f"nicht lesbar: {fehler}"))
+                    continue
+                if not gleich:
+                    gefunden.append((rel, voll, ziel, "abweichend"))
+    return sorted(gefunden)
+
+
+def als_nutzer(befehl):
+    """systemctl --user des angemeldeten Nutzers erreichen, nicht das von root."""
+    eintrag = pwd.getpwnam(NUTZER)
+    umgebung = dict(os.environ)
+    umgebung["XDG_RUNTIME_DIR"] = f"/run/user/{eintrag.pw_uid}"
+    return subprocess.run(["setpriv", "--reuid", str(eintrag.pw_uid),
+                           "--regid", str(eintrag.pw_gid), "--init-groups",
+                           "--"] + befehl,
+                          env=umgebung, capture_output=True, text=True)
+
+
+def main():
+    wirklich = "--wirklich" in sys.argv[1:]
+    if not os.path.isdir(QUELLE):
+        print(f"Quelle fehlt: {QUELLE}", file=sys.stderr)
+        return 1
+
+    liste = unterschiede()
+    if not liste:
+        print("Nichts zu tun - das Geraet entspricht dem Repo.")
+        return 0
+
+    print(f"{len(liste)} Datei(en) weichen ab:")
+    for rel, _q, _z, grund in liste:
+        print(f"  {grund:12s} /{rel}")
+    if not wirklich:
+        print("\nNichts geaendert. Mit --wirklich aufspielen.")
+        return 0
+
+    neu_zu_starten = {"autostart": False, "user": set(), "system": set()}
+    for rel, quelle, ziel, _grund in liste:
+        os.makedirs(os.path.dirname(ziel), exist_ok=True)
+        shutil.copyfile(quelle, ziel)
+        os.chmod(ziel, rechte_fuer(rel))
+        os.chown(ziel, 0, 0)
+        print(f"  aufgespielt  /{rel}")
+        art_und_name = DIENSTE.get(rel)
+        if art_und_name:
+            art, name = art_und_name
+            if art == "autostart":
+                neu_zu_starten["autostart"] = True
+            else:
+                neu_zu_starten[art].add(name)
+
+    if neu_zu_starten["system"]:
+        subprocess.run(["systemctl", "daemon-reload"], check=False)
+        for dienst in sorted(neu_zu_starten["system"]):
+            subprocess.run(["systemctl", "restart", dienst], check=False)
+            print(f"  neu gestartet  {dienst}")
+    if neu_zu_starten["user"]:
+        als_nutzer(["systemctl", "--user", "daemon-reload"])
+        for dienst in sorted(neu_zu_starten["user"]):
+            als_nutzer(["systemctl", "--user", "restart", dienst])
+            print(f"  neu gestartet  {dienst} (Nutzerdienst)")
+    if neu_zu_starten["autostart"]:
+        # Die Autostart-Dienste haengen an keiner systemd-Unit. Sie werden
+        # beendet und neu gestartet; das Beenden allein reicht nicht, sie
+        # kaemen sonst erst beim naechsten Anmelden zurueck.
+        for skript in ("dialos-sprachbefehl-desktop.py", "dialos-ton-ausgabe.py",
+                       "dialos-tts-indicator.py"):
+            if any(rel.endswith(skript) for rel, *_ in liste):
+                als_nutzer(["pkill", "-f", f"python3 /usr/local/bin/{skript}"])
+                als_nutzer(["setsid", f"/usr/local/bin/{skript}"])
+                print(f"  neu gestartet  {skript} (Autostart)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
