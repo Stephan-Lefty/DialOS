@@ -35,6 +35,16 @@ import os
 import subprocess
 import sys
 
+# Papier und Ausrichtung werden ausdruecklich mitgegeben, nicht dem Drucker
+# ueberlassen: Am 2026-08-22 kam ein Ausdruck quer statt hochkant heraus.
+# Nachgemessen ist, dass es NICHT an CUPS lag - texttopdf und pdftopdf
+# liefern mit dem PPD dieser Warteschlange 595x842 Punkte, Drehung 0, also
+# A4 hochkant. Die Drehung entstand erst danach, im Drucker. Den fragt man
+# an dieser Stelle nicht, dem sagt man es.
+#   orientation-requested: 3 = hochkant, 4 = quer (RFC 8011)
+DRUCK_OPTIONEN = ["-o", "media=A4", "-o", "orientation-requested=3"]
+
+
 QUELLE = "/usr/local/share/dialos/fusszeile.txt"
 SIGNATUR_ORT = "/usr/local/share/dialos"
 
@@ -92,12 +102,37 @@ def anhaengen(pfad, art="dokument", breite=BREITE):
     return f"{inhalt}\n\n\n{rechtsbuendig(text(art), breite)}\n"
 
 
+
+def drucker():
+    """Ein Ziel finden - dieses Geraet hat keine Systemvoreinstellung.
+
+    Dieselbe Suche wie in dialos-drucken.py, dort steht die ausfuehrliche
+    Begruendung. Kurz: "lp -" ohne -d scheitert hier, weil lpstat -d
+    "keine systemvoreingestellten Ziele" meldet.
+    """
+    try:
+        p = subprocess.run(["lpstat", "-p"], capture_output=True,
+                           text=True, timeout=10)
+    except Exception:
+        return None
+    for zeile in p.stdout.splitlines():
+        teile = zeile.split()
+        if len(teile) >= 2 and teile[0] in ("Drucker", "printer"):
+            return teile[1]
+    return None
+
+
 def drucken(pfad, art="dokument"):
     fertig = anhaengen(pfad, art)
     if fertig is None:
         return 1
+    ziel = drucker()
+    if not ziel:
+        print("Kein Drucker gefunden.", file=sys.stderr)
+        return 1
     try:
-        p = subprocess.run(["lp", "-"], input=fertig.encode("utf-8"),
+        p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + ["-"],
+                           input=fertig.encode("utf-8"),
                            capture_output=True, timeout=30)
     except FileNotFoundError:
         print("lp fehlt - CUPS nicht installiert?", file=sys.stderr)

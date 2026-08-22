@@ -102,6 +102,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **A printout came out landscape instead of portrait** (2026-08-22). Paper
+  size and orientation are now part of the job (`-o media=A4 -o
+  orientation-requested=3`) instead of being left to defaults. It is measured
+  that CUPS was not at fault: both the filter chain and the printer report A4
+  portrait. This surfaced that `dialos-fusszeile.py drucken` called `lp`
+  without a destination - on a device with no system default that could never
+  have worked.
+
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
 

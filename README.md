@@ -110,6 +110,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Ausdruck kam quer statt hochkant** (2026-08-22). Papier und Ausrichtung
+  werden jetzt im Auftrag mitgegeben (`-o media=A4 -o
+  orientation-requested=3`) statt der Voreinstellung ueberlassen. Gemessen
+  ist, dass CUPS nicht schuld war: Filterweg und Drucker melden beide A4
+  hochkant. Dabei fiel auf, dass `dialos-fusszeile.py drucken` `lp` ohne Ziel
+  aufrief - auf einem Geraet ohne Systemvoreinstellung haette das nie
+  funktioniert.
+
 *In Arbeit seit 2026-08-17. Alles, was ab jetzt entsteht, wird hier
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*

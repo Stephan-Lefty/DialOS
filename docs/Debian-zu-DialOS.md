@@ -1396,6 +1396,30 @@ Durchgang mitten im Text. Notizen sind Arbeitszettel, keine Dokumente. Wird
 ein Zettel gedruckt, kommt die Zeile beim Drucken dazu:
 `dialos-fusszeile.py drucken DATEI`.
 
+**Papier und Ausrichtung werden dem Drucker vorgeschrieben.** Am 2026-08-22
+kam Stephans erster echter Ausdruck quer statt hochkant heraus. Nachgemessen
+wurde, wo die Drehung entsteht: Der CUPS-Filterweg dieser Warteschlange
+liefert sie nicht. `texttopdf` erzeugt mit dem PPD des Brother HL-L2350DW
+595x842 Punkte - A4 hochkant -, und `pdftopdf` gibt genau das weiter,
+Drehung 0. Auch der Drucker selbst meldet per IPP
+`orientation-requested-default = portrait` und `media-default = iso_a4`.
+Die Drehung entsteht also erst dahinter, im Gerät.
+
+Deshalb steht sie jetzt im Auftrag statt in niemandes Voreinstellung:
+
+    lp -d ZIEL -o media=A4 -o orientation-requested=3 -
+
+`3` ist hochkant, `4` waere quer (RFC 8011). Der Wert wird ausgeschrieben und
+nicht weggelassen - eine Voreinstellung, auf die man sich verlaesst, ist eine
+Annahme, und diese Annahme war nachweislich falsch.
+
+Dabei fiel ein zweiter Druckweg auf: `dialos-fusszeile.py drucken` rief
+`lp -` **ohne Ziel** auf. Auf diesem Geraet gibt es keine
+Systemvoreinstellung (`lpstat -d` sagt "keine systemvoreingestellten Ziele"),
+der Aufruf waere also gescheitert. Er sucht das Ziel jetzt genauso wie
+`dialos-drucken.py`.
+
+
 In einer Mail wird aus "Dieses Dokument" ein "Diese Nachricht" (`--art mail`)
 - eine Mail ist kein Dokument.
 

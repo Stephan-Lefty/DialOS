@@ -1334,6 +1334,29 @@ is appended to on every dictation; a footer would land in the middle of the
 text each time. Notes are working lists, not documents. When a list is
 printed, the line is added at print time: `dialos-fusszeile.py drucken FILE`.
 
+**Paper size and orientation are dictated to the printer.** On 2026-08-22
+Stephan's first real printout came out landscape instead of portrait. Where
+the rotation happens was measured: not in this queue's CUPS filter chain.
+With the Brother HL-L2350DW's PPD, `texttopdf` produces 595x842 points - A4
+portrait - and `pdftopdf` passes exactly that through, rotation 0. The printer
+itself reports `orientation-requested-default = portrait` and
+`media-default = iso_a4` over IPP. So the rotation happens beyond that, inside
+the device.
+
+It is therefore part of the job now instead of being nobody's default:
+
+    lp -d TARGET -o media=A4 -o orientation-requested=3 -
+
+`3` is portrait, `4` would be landscape (RFC 8011). The value is spelled out
+rather than omitted - a default you rely on is an assumption, and this
+assumption was demonstrably wrong.
+
+This surfaced a second print path: `dialos-fusszeile.py drucken` called
+`lp -` **without a destination**. This device has no system default
+(`lpstat -d` reports "no system default destination"), so the call would have
+failed. It now looks up the destination exactly as `dialos-drucken.py` does.
+
+
 In a mail "Dieses Dokument" becomes "Diese Nachricht" (`--art mail`) - a mail
 is not a document.
 

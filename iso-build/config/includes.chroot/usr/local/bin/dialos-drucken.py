@@ -38,6 +38,16 @@ NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
 FUSSZEILE_SKRIPT = "/usr/local/bin/dialos-fusszeile.py"
 PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-drucken.log")
 
+# Papier und Ausrichtung werden ausdruecklich mitgegeben, nicht dem Drucker
+# ueberlassen: Am 2026-08-22 kam ein Ausdruck quer statt hochkant heraus.
+# Nachgemessen ist, dass es NICHT an CUPS lag - texttopdf und pdftopdf
+# liefern mit dem PPD dieser Warteschlange 595x842 Punkte, Drehung 0, also
+# A4 hochkant. Die Drehung entstand erst danach, im Drucker. Den fragt man
+# an dieser Stelle nicht, dem sagt man es.
+#   orientation-requested: 3 = hochkant, 4 = quer (RFC 8011)
+DRUCK_OPTIONEN = ["-o", "media=A4", "-o", "orientation-requested=3"]
+
+
 HEIM = os.path.expanduser("~")
 # Wo was liegt - dieselbe Aufteilung wie beim Schreiben: Briefe sind
 # Dokumente, Zettel sind Notizen.
@@ -163,7 +173,8 @@ def main():
         return 1
 
     try:
-        p = subprocess.run(["lp", "-d", ziel, "-"], input=text.encode("utf-8"),
+        p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + ["-"],
+                           input=text.encode("utf-8"),
                            capture_output=True, timeout=60)
     except Exception as fehler:
         melde(f"lp nicht aufrufbar: {fehler}")
