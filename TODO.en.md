@@ -15,6 +15,94 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **DEFERRED: rebuild `dialos-hilfe.py` on top of the service** (Stephan,
+  2026-08-20: "können den Rustdesk ganz nach hinten schieben, wenn alles
+  andere läuft" - RustDesk can go right to the back once everything else
+  runs). The two voice commands have therefore been REMOVED from the grammar
+  rather than merely left unfinished: the command started the RustDesk
+  application, which crashes after 40 s without the service - a voice command
+  that half works is worse than one that does not exist. To re-enable:
+  uncomment two lines in GRAMMATIK_AN and two in HILFE_SAETZE.
+  (Fully prepared on 2026-08-19, just not wired in.) The path is proven and
+  the privileged side is written and checked; what is missing is the user
+  side.
+
+  **What came out yesterday:** the RustDesk APPLICATION cannot accept a
+  connection - without `ipc_service` it crashes after roughly 40 s ("Got
+  signal 11 and exit", recorded in the log). Connections are accepted by the
+  **service**, and the password belongs to it as well. The decisive
+  combination is "service running AND sudo": `sudo rustdesk --password` then
+  takes effect; four other combinations had no effect at all.
+
+  **Already built, checked, NOT installed:**
+  - `usr/local/sbin/dialos-fernwartung` (root): `starten` switches the service
+    on, sets a fresh eight-digit random password, verifies by reading the
+    configuration field back that it really is set (the call returns 0 even
+    when it had no effect), and prints `id=` and `pw=`. `beenden` changes the
+    password - only that makes the one read aloud a genuine one-time password
+    - and stops the service.
+  - `etc/sudoers.d/dialos-fernwartung`: both calls verbatim, no wildcards,
+    `visudo -c` reports it parses cleanly. Must be installed 0440 root:root.
+
+  **What is left to do, in this order:**
+  1. Have Stephan review both files - a sudoers rule is a security decision
+     and should not be installed unseen.
+  2. `dialos-hilfe.py`: replace `rustdesk_pids()` with
+     `systemctl is-active rustdesk`. The application is no longer started at
+     all, so the crash disappears.
+  3. `starten()`: call `sudo /usr/local/sbin/dialos-fernwartung starten`, read
+     `id=`/`pw=`, hand them to `nummern_sprechen()`. `einmalpasswort()` then
+     stops being a placeholder.
+  4. `beenden()`: `sudo ... beenden` instead of SIGTERM on processes.
+  5. The watchdog then checks the service rather than the processes.
+  6. After that: a real connection attempt from Stephan's second computer -
+     which at the same time supplies the signature the idle detection is
+     missing (separate item below).
+
+  **Loose end:** since Stephan's test on 2026-08-19 there is an eight-digit
+  random password in `/root/.config/rustdesk/RustDesk.toml` that nobody knows.
+  That is harmless - the service is stopped and `disabled` - and the first run
+  of `dialos-fernwartung starten` overwrites it.
+
+- [ ] **A real one-time password for remote support, as soon as RustDesk
+  allows it** (open since 2026-08-19). Five routes checked, all closed - the
+  list is in `docs/sicherheit-datenschutz.en.md` so that nobody works through
+  them a second time: the one-time password is in no file; `rustdesk
+  --password` has no effect as the user, with the application running, with
+  the service running, or as root; `--get-temp-password` does not return even
+  after 40 s; `rustdesk-utils` is missing from the package; writing the
+  encrypted value ourselves would be guesswork. Worth watching:
+  [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074). Until
+  then it is the RUNTIME that guarantees the limit, not the password.
+
+- [ ] **Idle detection for remote support** (open since 2026-08-19). The time
+  limit is absolute (one hour), although idleness would be the right
+  semantics: the risk is a remote session left open with NOBODY on it. Cutting
+  off an active session would be harmful, in the middle of an update for
+  instance. Why it is not built yet: nobody has ever connected to this device,
+  the signature of an active connection is unknown, and guessing it would be
+  the worse mistake. `dialos-hilfe.py` therefore notes the process count and
+  the size of RustDesk's log for every session (`spur_notieren`).
+  **Next step: NO test of its own needed** (Stephan, 2026-08-20: "da ich an
+  anderer Stelle Rustdesk täglich benutze, brauchen wir da nicht wirklich
+  einen Test machen" - he uses RustDesk daily elsewhere). He is right - what
+  is missing is not proof THAT RustDesk works, but the signature of an active
+  connection ON THIS device. It will arise by itself at the next ordinary
+  support session: `spur_notieren()` records the process count and log size
+  each time. After that it is in the log and the detection can be built on
+  evidence.
+
+- [ ] **Split entries when the user speaks without "und" in one go** (open
+  since 2026-08-19). "Milch sechs Eier Butter" in one breath stays a single
+  entry: Vosk delivers one utterance, and one utterance is one entry. Two
+  simple routes are handled so far - a short pause (now announced) and the
+  word "und" (which splits). The reliable route would be the **word
+  timestamps** that Vosk supplies with `SetWords(True)`: a gap of more than
+  roughly 0.4 s between two words is a split point, even when it is too short
+  to end the utterance. The threshold needs measuring - 0.4 s is guessed, not
+  measured, and chosen too small it would break "sechs Eier" into two entries.
+  Applies to `LISTEN_ZIELE` only, not to letters.
+
 - [ ] **The timezone does not follow the location - and a blind user cannot
   change it** (noticed 2026-08-19 on Stephan's question "does the time
   follow the actual location?"). Measured: `Time zone: Europe/Vienna`,
@@ -40,6 +128,33 @@ finished too, and then move down together. That way no reference breaks.
   objection was justified and is answered: Berlin would stay Berlin. The
   case that goes wrong is a holiday in the countryside - the announcement
   would be stale, but **audibly** stale, because it names the city.
+
+- [ ] **Judge Anna in everyday use** (open since 2026-08-20, Stephan: "das
+  werde ich aber erst mit der Zeit mitbekommen" - he will only notice over
+  time). Two things are measured but not yet proven in everyday use:
+  - **Tempo 0.95** - decided on 2026-08-22 by ear, the same way Thorsten's
+    0.88 was at the time. Stephan listened to 1.00, 0.90, 0.80 and 0.95 one
+    after another ("0,95 ist super bei Anna! Die ist beschlossen!"). That was
+    a verdict on a few sentences; whether it carries across a long text will
+    only show in everyday use. Changing it is a one-liner:
+    STIMMEN["kerstin"]["tempo"] in dialos-stimme.py, then `setzen kerstin`
+    again.
+  - **The three pronunciation rules** ("Tas tatur", "Ei Di", "Dial OS") are
+    tuned to Thorsten and currently apply to every voice. Each was played with
+    and without; Stephan's verdict is outstanding. If Anna does not need one
+    of them she sounds wrongly split - the rules would then have to be per
+    voice, and that changes the structure of the table in dialos-say.py. The
+    three words occur rarely, so waiting is defensible here.
+
+- [ ] **Decide how "DialOS" is pronounced** (open since 2026-08-22, Stephan's
+  wish: "bisher wird das System immer so gesprochen DIAL OS könen wir das auch
+  noch anpassen das es melodischer klingt dia los" - it should sound more
+  melodic). Affects the SPEECH OUTPUT only - "Das Wort selbst bleibt DialOS",
+  nothing changes in writing. Three variants were played, Stephan's decision
+  is outstanding. What would change is the first rule in AUSSPRACHE in
+  `dialos-say.py`, which currently reads "Dial OS". Until something is decided
+  it stays that way - and that is exactly why this item is here: so far it
+  existed only in conversation.
 
 - [ ] **Add a second voice early, the selection only at the end**
   (Stephan's question, 2026-08-18: "When do we want to add the other voices,
@@ -324,13 +439,6 @@ finished too, and then move down together. That way no reference breaks.
   `apt` on a running system, where the problem doesn't occur. Belongs in
   `iso-build/config/package-lists/desktop.list.chroot`.
 
-- [ ] **Move the lock file of `dialos-start-ansage.py` out of `/tmp`.**
-  `/tmp/dialos-start-ansage.pid` is a fixed path in shared `/tmp` - the
-  same design that caused a silent failure with the speaking marker on
-  2026-08-16 (sticky bit: one account can neither overwrite nor delete
-  another's file). The marker now lives under `$XDG_RUNTIME_DIR`, this
-  file does not.
-
 - [ ] **Test the microphone fallback without Bluetooth** (open since
   2026-08-16). The output side is proven - headset off, sound came from
   the built-in speaker. The input side is still missing: does the
@@ -551,6 +659,19 @@ memory, not just a record of successes.
   emit a short, always identical signal. A **tone** would serve better
   than a sentence - faster, unmistakable, and it doesn't wear out.
 
+- ☑️ **2026-08-19** — **Move the lock file of `dialos-start-ansage.py` out of
+  `/tmp`** - done 2026-08-19, after the case had actually occurred: two
+  startup announcements ran at the same time because `nutzer` owned the shared
+  file and `dialosadmin` could not overwrite it. It now lives in
+  `$XDG_RUNTIME_DIR`.
+
+  **How the task was worded before (for provenance):**
+  `/tmp/dialos-start-ansage.pid` is a fixed path in shared `/tmp` - the
+  same design that caused a silent failure with the speaking marker on
+  2026-08-16 (sticky bit: one account can neither overwrite nor delete
+  another's file). The marker now lives under `$XDG_RUNTIME_DIR`, this
+  file does not.
+
 ### Audio: microphone and speaker
 
 - ☑️ **2026-08-17** — **Cause of the microphone clipping determined (2026-08-17).** The
@@ -581,6 +702,25 @@ memory, not just a record of successes.
   deliberately skipped rather than naming the wrong city/region. Can
   therefore be missing more often in rural areas than before - an
   accepted trade-off.
+
+- ☑️ **2026-08-19** — **Capitalisation in dictation measured instead of
+  assumed** - done 2026-08-19. **10 out of 11** cases correct, measured with
+  `schreibung_richten()` itself. The one failure is a word list without
+  grammar ("milch sechs eier butter") - there LanguageTool lacks the sentence
+  it would need to recognise nouns. Individually every word comes out right,
+  and since that same day they arrive individually. For letters and mail,
+  which are whole sentences, the capitalisation holds up. The earlier
+  assessment "most urgent open item" is hereby withdrawn.
+
+- ☑️ **2026-08-19** — **The first correction of every session was a coin
+  toss** - done 2026-08-19. LanguageTool's German rules load on the first
+  **check request**, not at server start: 9.2 s against a time limit of
+  10.0 s. On 2026-08-19 at 10:03:03 it lost. Fixed with
+  `dialos-schreibhilfe-warmlaufen.py` as the unit's `ExecStartPost` - proven
+  in the journal: 9096 ms at startup, then 985 ms for the first real
+  correction. Side finding: `lt_lebt()` checks `/v2/languages` and therefore
+  reports "running" while the service still needs nine seconds - a readiness
+  check that tests something other than what matters.
 
 ### Desktop and user interface
 
@@ -726,9 +866,14 @@ memory, not just a record of successes.
 
 ### Logs, repo and working environment
 
-- ☑️ **2026-08-14** — Set up the `~/DialOS → .../SanDisk-Extreme/DialOS/repo` symlink
-  again - done 2026-08-14 via `scripts/dialos-claude-setup.sh`, which
-  now also restores the `eggs produce` sudoers rule on every reinstall.
+- ☑️ **2026-08-14** — Extended `scripts/dialos-claude-setup.sh` (Git identity +
+  `credential.helper=store` for `dialosadmin`) and actually ran and verified
+  it - done 2026-08-14. The `~/DialOS` symlink is now confirmed present (via
+  `readlink -f`, pointing correctly at `.../SanDisk-Extreme/DialOS/repo`), the
+  sudoers rule was already there, Git identity + `credential.helper` confirmed
+  via `git config --global`. (The previous "done" entry for this was wrong -
+  the script had never run through successfully under `sudo`, see the commit
+  history.)
 
 - ☑️ **2026-08-16** — **Resolved by the rebuild (checked 2026-08-16):** `~/DialOS-repo`
   no longer exists - the T490 reinstall removed the second copy. The
@@ -747,3 +892,13 @@ memory, not just a record of successes.
   Originally: Clean up leftover `/home/eggs/*.iso` files from the last builds
   (owned by `root`; the `eggs produce` NOPASSWD rule only covers
   `eggs produce` itself, not `rm` - needs Stephan's manual `sudo rm`).
+
+- ☑️ **2026-08-20** — **The logs grow without limit** - done 2026-08-20.
+  Stephan's decision: seven days, the same period as for the support log.
+  Implemented via `/etc/logrotate.d/dialos` rather than inside the six
+  programs - logrotate runs daily on a systemd timer, whereas a service that
+  runs for a week would never get round to tidying up. Without `copytruncate`,
+  because the programs do not hold their file open (checked), and with
+  `dateext`, because in support one searches by day and not by number. All
+  that remains open is that a NEWLY created file gets 0644 - from the first
+  rotation onwards 0600 applies.

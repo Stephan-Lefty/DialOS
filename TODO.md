@@ -24,9 +24,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Sprachbefehl, der halb funktioniert, ist schlimmer als einer, der nicht
   existiert. Wieder freigeben: zwei Zeilen in GRAMMATIK_AN und zwei in
   HILFE_SAETZE einkommentieren.
-  (2026-08-19 fertig vorbereitet, nicht mehr eingebaut.)
-  fertig vorbereitet, nicht mehr eingebaut). Der Weg ist belegt und die
-  privilegierte Seite ist geschrieben und geprueft, es fehlt die Nutzerseite.
+  (2026-08-19 fertig vorbereitet, nicht mehr eingebaut.) Der Weg ist belegt
+  und die privilegierte Seite ist geschrieben und geprueft, es fehlt die
+  Nutzerseite.
 
   **Was gestern herauskam:** Die RustDesk-ANWENDUNG kann keine Verbindung
   annehmen - ohne `ipc_service` stuerzt sie nach rund 40 s ab ("Got signal 11
@@ -92,9 +92,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Verbindung AUF DIESEM Geraet. Die faellt beim naechsten normalen
   Support-Einsatz von selbst an: spur_notieren() schreibt bei jeder
   Sitzung Prozessanzahl und Protokollgroesse mit. Danach steht sie im
-  Protokoll und die Erkennung laesst sich belegt bauen -
-  Rechner** - danach steht die Signatur im Protokoll und die Erkennung laesst
-  sich belegt bauen.
+  Protokoll und die Erkennung laesst sich belegt bauen.
 
 - [ ] **Eintraege trennen, wenn der Nutzer ohne „und" in einem Zug spricht**
   (offen seit 2026-08-19). „Milch sechs Eier Butter" in einem Atemzug bleibt ein
@@ -138,9 +136,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [ ] **Anna im Alltag beurteilen** (offen seit 2026-08-20, Stephan: "das werde
   ich aber erst mit der Zeit mitbekommen"). Zwei Dinge sind gemessen, aber nicht
   im Alltag erprobt:
-  - **Tempo 1.00.** Gewaehlt an EINEM Satz. Thorstens 0,88 hat Stephan seinerzeit
-    nach Gehoer gewaehlt, nicht gerechnet - dieselbe Pruefung fehlt fuer Anna
-    noch. Umstellen geht in einer Zeile: STIMMEN["kerstin"]["tempo"] in
+  - **Tempo 0,95** - entschieden am 2026-08-22 nach Gehoer, so wie Thorstens
+    0,88 seinerzeit. Stephan hat 1,00, 0,90, 0,80 und 0,95 nacheinander gehoert
+    ("0,95 ist super bei Anna! Die ist beschlossen!"). Das war ein Urteil an
+    wenigen Saetzen; ob es ueber einen langen Text traegt, zeigt erst der
+    Alltag. Umstellen geht in einer Zeile: STIMMEN["kerstin"]["tempo"] in
     dialos-stimme.py, danach `setzen kerstin` erneut.
   - **Die drei Aussprache-Regeln** ("Tas tatur", "Ei Di", "Dial OS") sind auf
     Thorsten abgestimmt und gelten derzeit fuer alle Stimmen. Vorgespielt wurde
@@ -148,6 +148,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     klingt sie damit falsch getrennt - dann muessen die Regeln pro Stimme
     gelten, und das aendert die Struktur der Tabelle in dialos-say.py. Die drei
     Woerter kommen selten vor, deshalb ist Warten hier vertretbar.
+
+- [ ] **Aussprache von „DialOS" entscheiden** (offen seit 2026-08-22, Stephans
+  Wunsch: "bisher wird das System immer so gesprochen DIAL OS könen wir das
+  auch noch anpassen das es melodischer klingt dia los"). Betrifft NUR die
+  Sprachausgabe - "Das Wort selbst bleibt DialOS", geschrieben ändert sich
+  nichts. Drei Varianten wurden vorgespielt, Stephans Entscheidung steht aus.
+  Geändert würde die erste Regel in AUSSPRACHE in `dialos-say.py`, dort steht
+  derzeit "Dial OS". Solange nichts entschieden ist, bleibt es dabei - und
+  genau deshalb steht der Punkt hier: Er existierte bisher nur im Gespräch.
 
 - [ ] **Zweite Stimme früh dazulegen, Auswahl erst zum Schluss**
   (Stephans Frage, 2026-08-18: „Wann wollen wir die anderen Stimmen z.B.
@@ -742,6 +751,7 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   besser als ein Satz - schneller, unmissverständlich, nutzt sich nicht ab.
 
 - ☑️ **2026-08-19** — **Lock-Datei von `dialos-start-ansage.py` aus `/tmp` holen** - erledigt 2026-08-19, nachdem der Fall live eingetreten war: Zwei Start-Ansagen liefen gleichzeitig, weil `nutzer` die geteilte Datei besaß und `dialosadmin` sie nicht überschreiben konnte. Liegt jetzt in `$XDG_RUNTIME_DIR`.
+  **So stand die Aufgabe vorher da (zur Herkunft):**
   `/tmp/dialos-start-ansage.pid` ist ein fester Pfad im geteilten `/tmp` -
   dieselbe Bauart, die am 2026-08-16 bei der Sprechen-Markierung zu einem
   stillen Fehlschlag geführt hat (Sticky-Bit: ein Konto kann die Datei
