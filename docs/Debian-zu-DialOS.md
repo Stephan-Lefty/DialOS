@@ -1957,6 +1957,11 @@ Ein `setzen *` waere die Luecke, durch die spaeter etwas anderes passt. Eine
 dritte Stimme braucht deshalb eine dritte Zeile - absichtlich: Wer eine
 Stimme hinzufuegt, soll ueber diese Datei stolpern.
 
+**Von Stephan durchgesehen und freigegeben am 2026-08-22** ("Regel passt so,
+lass sie drin"). Das steht hier, weil das Projekt sich darauf festgelegt hat,
+dass eine sudoers-Regel nicht ohne Blick auf ein Geraet kommt - und eine
+Durchsicht, die niemand belegen kann, ist keine.
+
 Gemessen am 2026-08-22: Die Stimme steht nach 4,4 Sekunden um, mit Ansage in
 der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 

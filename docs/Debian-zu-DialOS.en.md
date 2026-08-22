@@ -1876,6 +1876,11 @@ A `setzen *` would be the gap something else fits through later. A third
 voice therefore needs a third line - deliberately: whoever adds a voice
 should trip over this file.
 
+**Reviewed and approved by Stephan on 2026-08-22** ("Regel passt so, lass sie
+drin" - the rule is fine, leave it in). This is recorded because the project
+has committed to never letting a sudoers rule reach a device unseen - and a
+review nobody can point to is not one.
+
 Measured on 2026-08-22: the voice switches in 4.4 seconds, announcing itself
 in the new voice, in both directions. The look switches without delay.
 
