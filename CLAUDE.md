@@ -39,7 +39,7 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-21)
+## Aktueller Stand (Stand: 2026-08-22)
 
 **Wo das Projekt am Abend des 2026-08-21 steht.** Der ausfuehrliche Verlauf
 steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
@@ -60,15 +60,41 @@ steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
 - Kein Standby am Netz, keine Bildschirmsperre fuer `nutzer`.
 - Unattended-upgrades, Protokoll-Aufbewahrung sieben Tage.
 
-**Gebaut, aber noch nicht benutzbar - der Brief.** Der ganze Weg steht:
+**Neu am 2026-08-22:**
+
+- **Bildschirmfoto auf Zuruf** ueber das XDG-Portal (die GNOME-Schnittstelle
+  ist gesperrt, Werkzeuge sind keine installiert). Das Mitschrift-Fenster wird
+  vorher geschlossen.
+- **Drucken per Sprache** fuer Brief, Zettel und Notizen. Der Drucker wird
+  gesucht, nicht vorausgesetzt - CUPS hat kein Standardziel. **Noch nicht auf
+  Papier erprobt.**
+- **Jeder Brief wandert als PDF nach ~/Dokumente/DialOS-DATA/.** Eigener
+  PDF-Erzeuger ueber cairo, weil der Briefbogen mit Leerzeichen gesetzt ist.
+  Die Mail-Haelfte fehlt, solange DialOS nicht selbst verschickt.
+- **Anna spricht mit Tempo 0.95** und sagt "Steffan" - beide Entscheidungen
+  hat Stephan mit den Ohren getroffen, nachdem eine falsche Abtastrate
+  (16 kHz als 22050 deklariert) alle Hoerproben 38 % zu schnell hatte laufen
+  lassen.
+- **/usr/local/sbin/dialos-aufspielen** spielt den Repo-Stand auf, mit enger
+  sudoers-Regel. NUR fuer das Entwicklungsgeraet - die Regel ist praktisch ein
+  Root-Zugang, Begruendung im Kopf des Skripts.
+- **Alle 69 Ansagen** liegen in beiden Stimmen unter
+  docs/sprachbeispiele/alle-ansagen/. Diese Sammlung hat an einem Tag ZWEI
+  Fehler sichtbar gemacht, die kein Test gefunden haette: die Abtastrate und
+  ein "Die Notizen wird gedruckt".
+
+**Der Brief - fast fertig.** Der ganze Weg steht: Der ganze Weg steht:
 "Brief schreiben" nimmt auf, gesprochene Satzzeichen ("Komma setzen", "neuer
 Absatz") werden umgesetzt, der Text landet als Briefbogen in
 `~/Dokumente/brief.txt` mit Datum, Unterschriftshinweis und Fusszeile, und
-"Brief vorlesen" liest alles vor. **Unbrauchbar macht ihn ein einziger
-Punkt:** Der Schluss-Erkenner macht aus laufender Rede ein "diktat beenden"
-und bricht das Diktat mitten im Satz ab. Vier Reparaturen haben nicht
-gereicht; der naechste Schritt (Sprechpause als Bedingung) steht in `TODO.md`
-ganz oben im Diktat-Block.
+"Brief vorlesen" liest alles vor. Der Punkt, der ihn unbrauchbar machte, ist am 2026-08-22 behoben: Der
+Schluss verlangt jetzt eine **Sprechpause davor**. Offline gegen Piper
+geprueft, bevor Stephan testen musste - aus durchgehender Rede entstanden
+zwei VOLLSTAENDIGE "diktat beenden", beide abgewiesen; der echte nach einer
+Pause angenommen.
+
+**Was fehlt, ist der Beweis am Geraet:** ein Diktat mit echter Stimme, das von
+Anfang bis Ende durchlaeuft. Erst danach ist der Brief-Weg fertig.
 
 **Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, nicht installiert),
 Aufweckwort (Lizenz der fertigen Modelle ist nicht kommerziell).
