@@ -281,30 +281,20 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
       Sprechpause. Preis: „in diesem Punkt" wird zu „in diesem." - fällt
       beim Vorlesen auf. Ersetzt wird **wortweise**, damit „Punkte" und
       „Kommando" unangetastet bleiben. Listen bekommen keine Satzzeichen.
-    - [ ] **NÄCHSTER SCHRITT: Der Schluss braucht eine Sprechpause.**
-      Der Schluss-Erkenner macht aus laufender Rede ein „diktat beenden" -
-      gemessen mit Piper entstehen aus 30 s Brieftext im Sekundentakt
-      Bruchstücke (`'beenden'` bei 8,4 s, `'diktat'` bei 4,8 s,
-      `'beenden [unk]'` bei 18,2 s). Am 2026-08-21 brach Stephans Diktat
-      deshalb nach 12,1 s mitten im Satz ab. Sein Urteil ist das Maß:
-      **„Diesen Text kann ich nie zu Ende bringen."**
-
-      Vier Reparaturen haben nicht gereicht: Sperrfrist von 3 s, Pegel-Tor,
-      beide Wörter verlangen, Ansage bei halbem Schluss. Der **Aufbau** ist
-      das Problem, nicht die Regel: Ein zweiter Erkenner mit eingeschränkter
-      Grammatik muss jedes Geräusch auf eine seiner Phrasen abbilden.
-
-      **Der Weg:** Ein echtes „Diktat beenden" folgt auf eine Sprechpause,
-      ein Bruchstück entsteht mitten im Redefluss. Also einen Verlauf der
-      Blockpegel führen und den Schluss nur annehmen, wenn davor eine
-      Ruhephase lag. Dieselbe Bedingung bringt auch die Ansage zurück, die
-      am 2026-08-21 zurückgebaut werden musste, weil sie mitten im Diktat
-      störte.
-
-      **Pflicht: offline gegen Piper prüfen, bevor Stephan testet.** Zwei
-      Fälle, beide ohne ihn messbar - Dauerrede darf nicht stoppen, Text mit
-      Pause und Schlusssatz muss stoppen. Der Aufbau dafür steht: Piper
-      spricht, beide Erkenner hören mit, jedes Ergebnis mit Zeitstempel.
+    - [x] **Sprechpause vor dem Schluss - gebaut und geprüft 2026-08-22.**
+      In den letzten 5 s muss eine Ruhephase von mindestens 0,4 s gelegen
+      haben. Offline gegen Piper geprüft, bevor Stephan testen musste
+      (`scripts/dialos-schlussregel-pruefen.py`, benutzt den echten Code):
+      
+        - **A** durchgehende Rede: zwei **vollständige** „diktat beenden"
+          entstanden, beide abgewiesen - die hätten die Zwei-Wort-Regel
+          passiert.
+        - **B** Rede, Pause, Schlusssatz: dieselben zwei abgewiesen, der echte
+          angenommen.
+      
+      **Offen bleibt der Beweis am Gerät:** ein Diktat mit echter Stimme, das
+      von Anfang bis Ende durchläuft. Und ein Bruchstück, das zufällig direkt
+      nach einer Pause entsteht, käme weiterhin durch - klein, aber nicht null.
     - [ ] **Eine Zeile je Eintrag.** Vosk schneidet erst an einer
       Sprechpause; ohne Pause landet alles in einer Zeile. Für einen
       Einkaufszettel wäre eine Zeile je Eintrag besser.
@@ -348,18 +338,20 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
     und ob vor dem Versand eine Rückfrage kommt. Ausgeführt in
     `docs/sicherheit-datenschutz.md`.
   - [ ] **Vorlesen** von Mails, Dokumenten und Webseiten.
-  - [ ] **Drucken per Sprache - Stephans Wunsch vom 2026-08-21:**
-    „der Brief muss dann, wenn er fertig ist, gedruckt werden". Der Brother
-    HL-L2350DW ist eingerichtet und im Leerlauf, aber es gibt **keinen
-    Standarddrucker** - `dialos-fusszeile.py drucken` ruft `lp -` ohne Ziel
-    auf und liefe ins Leere. Zwei Dinge also: Standardziel setzen und einen
-    Sprachbefehl. Zu entscheiden ist noch, ob automatisch beim „Diktat
-    beenden" gedruckt wird oder auf eigenen Befehl - automatisch spart einen
-    Schritt, druckt aber auch jeden Probelauf.
-    Druckbefehl. `dialos-fusszeile.py drucken DATEI` liegt bereit und
-    hängt die Herkunftszeile beim Drucken an - auch an Notizen, die im
-    Bildschirm bewusst keine bekommen (Stephans Entscheidung vom
-    2026-08-19).
+  - [x] **Drucken per Sprache - gebaut 2026-08-22.**
+    „Brief drucken", „Einkaufszettel drucken", „Notizen drucken". Alle 24
+    Grammatiksätze geprüft.
+    
+    **Der Drucker wird gesucht, nicht vorausgesetzt.** CUPS hat auf diesem
+    Gerät kein Standardziel; ein blosses `lp -` liefe ins Leere. Das Skript
+    nimmt das Standardziel, sonst den einzigen Drucker, sonst den ersten -
+    und schreibt ins Protokoll, welchen.
+    
+    **Die Fußzeile kommt nur dahin, wo sie fehlt:** Der Brief hat sie schon,
+    Zettel und Notizen bekommen sie erst beim Drucken.
+    
+    **Noch nicht auf Papier erprobt** - der erste echte Ausdruck ist
+    Stephans. Ein Testdruck ohne ihn wäre Papier für nichts.
   - [ ] **Radio und Musik per Sprache** - Shortwave nach Stationsname,
     Rhythmbox über `rhythmbox-client`. Dabei die Ein-Player-Regel
     umsetzen: das eine beenden, bevor das andere startet.

@@ -177,6 +177,12 @@ GRAMMATIK_AN = json.dumps([
     # den sehenden Helfer und den Support: "Was steht da gerade?"
     "bildschirmfoto erstellen",
     "bildschirmfoto machen",
+    # Drucken (Stephans Vorgabe vom 2026-08-21). Der Brief traegt seine
+    # Fusszeile schon; Zettel und Notizen bekommen sie erst beim Drucken -
+    # ein Blatt Papier verlaesst das Haus, eine Notiz auf dem Schirm nicht.
+    "brief drucken",
+    "einkaufszettel drucken",
+    "notizen drucken",
     # "hilfe rufen" und "fernwartung beenden" sind ZURUECKGESTELLT
     # (Stephan, 2026-08-20: "können den Rustdesk ganz nach hinten schieben,
     # wenn alles andere läuft"). Sie stehen bewusst NICHT in der Grammatik,
@@ -239,6 +245,12 @@ DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 # dialos-auskunft.py: Am Einsatzort liefert die Standortbestimmung nur eine
 # IP-Schaetzung mit 26 km Ungenauigkeit, und der Befehl haette fast immer
 # geantwortet, dass er nichts abrufen kann.
+DRUCK_SKRIPT = "/usr/local/bin/dialos-drucken.py"
+DRUCK_SAETZE = {
+    "brief drucken": "brief",
+    "einkaufszettel drucken": "einkaufszettel",
+    "notizen drucken": "notizen",
+}
 FOTO_SKRIPT = "/usr/local/bin/dialos-bildschirmfoto.py"
 FOTO_SAETZE = ("bildschirmfoto erstellen", "bildschirmfoto machen")
 AUSKUNFT_SKRIPT = "/usr/local/bin/dialos-auskunft.py"
@@ -770,6 +782,27 @@ def diktat_starten(notiz):
 FOTO_NACHLAUF_S = 0.8
 
 
+def drucken(was):
+    """Startet den Druck und wartet NICHT darauf.
+
+    Wie bei der Auskunft: Der Dienst muss seine Schleife weiterlaufen lassen.
+    Der Druckauftrag ist in Millisekunden abgegeben, aber die Ansage danach
+    dauert - und der Drucker braucht ohnehin laenger als jede Schleife.
+    """
+    if not os.access(DRUCK_SKRIPT, os.X_OK):
+        sprich("Ich kann das Drucken nicht finden.")
+        return
+    try:
+        subprocess.Popen([DRUCK_SKRIPT, was],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Druck {was!r} gestartet")
+    except Exception as fehler:
+        melde(f"Druck liess sich nicht starten: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
 def bildschirmfoto():
     """Bildschirmfoto - OHNE das Mitschrift-Fenster (Stephan, 2026-08-21).
 
@@ -1231,6 +1264,13 @@ def main():
             # Ausloeser-Bedingung unten haengen blieben.
             if satz in DIKTAT_SAETZE:
                 diktat_starten(DIKTAT_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Drucken ---
+            if satz in DRUCK_SAETZE:
+                drucken(DRUCK_SAETZE[satz])
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

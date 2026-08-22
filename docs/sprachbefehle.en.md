@@ -48,6 +48,9 @@ listen?".
 | **"Welches Datum haben wir?"** (what is the date) | Equivalent. |
 | **"Bildschirmfoto erstellen"** (take a screenshot) | Saves a picture of the screen to `~/Bilder/Bildschirmfotos/`, with date and time in the name, and says "Das Bildschirmfoto ist gespeichert." **Not for the user** - he cannot see it - but for the sighted helper and for support: "what does it say right now?" cannot otherwise be answered. The device has no screenshot tool installed and the GNOME interface is blocked; DialOS therefore goes through the XDG portal - **without a prompt**, because a dialog here would be the same as no function at all. The **transcript window is closed beforehand** and reopened afterwards - it is DialOS' own display and on a support photo it covers exactly what the helper wants to see. |
 | **"Bildschirmfoto machen"** (take a screenshot) | Equivalent. |
+| **"Brief drucken"** (print the letter) | Prints `~/Dokumente/brief.txt`. The letter already carries its footer; it is not added a second time. |
+| **"Einkaufszettel drucken"** (print the shopping list) | Prints the list - **with** the footer it deliberately lacks on screen: a sheet of paper leaves the house, a note on the screen does not. |
+| **"Notizen drucken"** (print the notes) | The same for the collected notes. |
 | **"Einkaufszettel vorlesen"** (read the shopping list) | Says the number of entries and reads them out, with pauses in between. |
 | **"Notizen vorlesen"** (read the notes) | The same for the collective note. |
 | **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." If no usable answer arrives, DialOS asks **a second time** ("Das habe ich nicht verstanden. Sage ja oder nein."); only then does the list stay. The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |

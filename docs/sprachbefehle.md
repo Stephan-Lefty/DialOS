@@ -47,6 +47,9 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Welches Datum haben wir?"** | Gleichbedeutend. |
 | **„Bildschirmfoto erstellen"** | Legt ein Foto des Bildschirms unter `~/Bilder/Bildschirmfotos/` ab, mit Datum und Uhrzeit im Namen, und sagt „Das Bildschirmfoto ist gespeichert." **Nicht für den Nutzer** - er sieht es nicht -, sondern für den sehenden Helfer und den Support: „Was steht da gerade?" lässt sich sonst nicht beantworten. Das Gerät hat kein Screenshot-Werkzeug installiert und die GNOME-Schnittstelle ist gesperrt; DialOS geht deshalb über das XDG-Portal - **ohne Rückfrage**, denn ein Dialog wäre hier dasselbe wie keine Funktion. Das **Mitschrift-Fenster wird vorher geschlossen** und danach wieder geöffnet - es ist DialOS' eigene Anzeige und verdeckt auf einem Support-Foto genau das, was der Helfer sehen will. |
 | **„Bildschirmfoto machen"** | Gleichbedeutend. |
+| **„Brief drucken"** | Druckt `~/Dokumente/brief.txt`. Der Brief trägt seine Fußzeile schon, sie kommt kein zweites Mal dazu. |
+| **„Einkaufszettel drucken"** | Druckt den Zettel - **mit** Fußzeile, die er auf dem Bildschirm bewusst nicht hat: Ein Blatt Papier verlässt das Haus, eine Notiz auf dem Schirm nicht. |
+| **„Notizen drucken"** | Dasselbe für die Sammelnotiz. |
 | **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
 | **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
 | **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." Kommt keine verwertbare Antwort, fragt DialOS **ein zweites Mal** („Das habe ich nicht verstanden. Sage ja oder nein."); erst danach bleibt der Zettel stehen. Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
