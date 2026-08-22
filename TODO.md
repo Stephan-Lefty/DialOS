@@ -188,11 +188,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Ende gleichzeitig zu finden ist der teure Weg.
 
 - [ ] **ZUERST MORGEN: Zwei Diktate haben nichts aufgenommen** (2026-08-18,
-  letzter Lauf). Im Protokoll `~/dialos-diktat.log` steht zwischen „grosses
+  letzter Lauf). Im Protokoll `~/.log/dialos-diktat.log` steht zwischen „grosses
   Modell geladen" und „Schlusssatz erkannt" **keine einzige** `erkannt:`-
   Zeile - beim zweiten Lauf über 26 Sekunden hinweg. Der Einkaufszettel
   blieb leer, „Einkaufszettel vorlesen" und „Einkauf erledigt" wurden
-  deshalb nie ausgeführt (`~/dialos-notiz.log` ist leer). **Absichtlich
+  deshalb nie ausgeführt (`~/.log/dialos-notiz.log` ist leer). **Absichtlich
   keine Vermutung notiert** - keine ist belegt. Was zu prüfen wäre: ob zwei
   gleichzeitige `parec` auf derselben Quelle sich behindern (der
   Befehlsdienst liest weiter, auch wenn er verwirft), ob der Schluss-Erkenner
@@ -255,7 +255,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       im Text selbst.
   - [x] **PDF-Archiv - Briefe und Mails erledigt 2026-08-22.**
     Jeder Brief landet beim Schreiben automatisch als PDF in
-    `~/Dokumente/DialOS-DATA/`. Eigener PDF-Erzeuger über `cairo`, weil der
+    `~/Dokumente/Archiv/DialOS-DATA/` und auf dem Stick. Eigener PDF-Erzeuger
+    über `cairo`, weil der
     Briefbogen mit Leerzeichen gesetzt ist und in einer Proportionalschrift
     zerfiele; mit `pdftotext -layout` zurückgelesen und zeichengenau
     verglichen.
@@ -281,8 +282,19 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     **Die Fußzeile kommt nur dahin, wo sie fehlt:** Der Brief hat sie schon,
     Zettel und Notizen bekommen sie erst beim Drucken.
     
-    **Noch nicht auf Papier erprobt** - der erste echte Ausdruck ist
-    Stephans. Ein Testdruck ohne ihn wäre Papier für nichts.
+    **Auf Papier belegt am 2026-08-22** (Stephan: „Ausdruck ist jetzt
+    hochkant"). Der erste Ausdruck kam quer heraus. Nachgemessen wurde,
+    dass CUPS nicht schuld war - Filterweg und Drucker melden beide A4
+    hochkant -, die Drehung entstand also im Gerät. Papier und
+    Ausrichtung stehen jetzt im Auftrag (`-o media=A4 -o
+    orientation-requested=3`) statt in irgendeiner Voreinstellung.
+    
+    Der Nachtest davor fiel **lautlos** durch: Vosk verstand „notiz
+    drucken", die Grammatik kannte nur „notizen drucken". Kein Treffer
+    heißt keine Ansage - für einen blinden Nutzer der schlechteste
+    Ausgang, schlimmer als eine Fehlermeldung. Die Einzahl ist jetzt
+    zweite Formulierung. Der allgemeine Fall bleibt offen: erlaubte
+    Wortkombinationen, die keinen Befehl ergeben, fallen still durch.
   - [ ] **Radio und Musik per Sprache** - Shortwave nach Stationsname,
     Rhythmbox über `rhythmbox-client`. Dabei die Ein-Player-Regel
     umsetzen: das eine beenden, bevor das andere startet.

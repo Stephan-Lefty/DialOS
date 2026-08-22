@@ -2,7 +2,7 @@
 
 # Dreizehn Tage und mehr …
 
-*Die Entstehung von DialOS, vom 6. bis 21. August 2026. 261 Commits.
+*Die Entstehung von DialOS, vom 6. bis 22. August 2026. 289 Commits.
 Erzählt als das, was es war.*
 
 Alles hier ist belegt - im Änderungsprotokoll in [../README.md](../README.md),
@@ -385,7 +385,9 @@ die Entscheidungsfunktion geprüft, nicht die Reihenfolge.
 
 Stephan entscheidet: eine freundliche Damenstimme. Aus dem Hörvergleich wird
 `de_DE-kerstin-low`, Tempo 1,00, Name **Anna** - und sie wird
-Auslieferungsstimme, nicht nur Testeinstellung.
+Auslieferungsstimme, nicht nur Testeinstellung. (Das Tempo bleibt nicht so:
+Am 2026-08-22 hört Stephan 1,00 / 0,90 / 0,80 / 0,95 nacheinander und
+entscheidet **0,95**.)
 
 Das Tempo ist dabei pro Stimme verschieden, und zwar messbar: Derselbe Satz
 **Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen aus
@@ -549,6 +551,116 @@ Testlauf.
 
 Die zweite: **Eine Erklärung, die zu allen Beobachtungen passt, ist noch keine
 Ursache.**
+
+---
+
+## Tag 17: Der Fehler, der nichts sagt
+
+Der Tag beginnt mit einem Ordner voller Krempel. Fünfundzwanzig Protokolldateien
+liegen offen im Heimatverzeichnis, zwischen `Notizen`, `Dokumente` und `Bilder`.
+Stephan fragt, ob die gebraucht werden. Sechs davon speisen das
+Mitschrift-Fenster, alle zusammen sind das Gedächtnis für den Support - aber
+liegen müssen sie da nicht. Sie ziehen nach `~/.log`, und der Punkt am Anfang
+macht den Ordner unsichtbar.
+
+Dann kommt ein Satz, der die Änderung von der anderen Seite beleuchtet:
+
+> „immer dran denken wir haben auch sehende User"
+
+Das trifft genau diesen Umzug. Für den blinden Nutzer ist ein versteckter
+Ordner gleichgültig; er sieht ohnehin nichts. Für den Helfer, der neben ihm
+sitzt, ist etwas, das er nicht sieht, eine Hürde. Also kommt in die Anleitung
+eine Tabelle: was wo liegt und was davon sichtbar ist. Barrierefreiheit heißt
+nicht, dass nur eine Seite bedient wird.
+
+### Der Ausdruck kommt quer
+
+Nachmittags druckt Stephan zum ersten Mal wirklich. Das Blatt kommt quer heraus.
+
+Ich messe den ganzen Weg nach. `texttopdf` liefert mit dem PPD dieser
+Warteschlange 595 × 842 Punkte - A4 hochkant. `pdftopdf` gibt genau das weiter,
+Drehung 0. Der Drucker meldet per IPP `orientation-requested-default =
+portrait` und `media-default = iso_a4`. Die Warteschlange steht auf A4.
+
+Jede Stelle, die ich prüfen kann, sagt hochkant. **Und das Blatt ist quer.**
+
+Die Ursache liegt hinter allem, was auf diesem Gerät messbar ist. Ich kann sie
+nicht benennen - und das ist unbefriedigend, aber es ist die Wahrheit. Was ich
+ändern kann, ist die Haltung: Der Aufruf war nacktes `lp -d ZIEL -`, ohne eine
+einzige Option. Die Ausrichtung hing damit an einer Voreinstellung, auf die
+sich niemand festgelegt hatte. Jetzt steht sie im Auftrag:
+`-o media=A4 -o orientation-requested=3`.
+
+**Eine Voreinstellung, auf die man sich verlässt, ist eine Annahme.** Diese war
+nachweislich falsch, auch wenn ich nicht sagen kann, wo genau sie kippte.
+
+Beim Nachsehen fällt noch etwas auf: `dialos-fusszeile.py drucken` rief `lp -`
+**ohne Ziel** auf. Auf diesem Gerät gibt es kein Standardziel - der Aufruf wäre
+gescheitert, sobald ihn jemand benutzt hätte. Zwei Monate lang hätte niemand
+etwas gemerkt, weil niemand diesen Weg ging.
+
+### Und dann sagt das Gerät gar nichts
+
+Stephan testet nach. Ich schaue ins Protokoll. Im Druckprotokoll steht nichts
+Neues. Im Befehlsprotokoll steht:
+
+```
+15:07:32  erkannt: 'notiz drucken'
+```
+
+Einzahl. Die Grammatik kennt nur „notizen drucken".
+
+Das ist kein Hörfehler. Die eingeschränkte Grammatik ist eine Liste von
+**Sätzen**, aber Vosk baut daraus ein **Wortnetz** - und darf Wörter aus
+verschiedenen Sätzen kombinieren. „notiz" kommt aus „notiz aufnehmen",
+„drucken" aus den drei Druckbefehlen. Die Kombination ist erlaubt und ergibt
+doch keinen Befehl.
+
+Und weil kein Treffer vorliegt, gibt es auch keine Ansage.
+
+**Das ist der schlechteste mögliche Ausgang.** Nicht der Fehlschlag - die
+Stille. Ein sehender Nutzer sieht ein Fenster, das sich nicht öffnet, ein
+Blatt, das nicht kommt. Ein blinder Nutzer hat gesprochen, das Gerät hat
+zugehört, und nichts sagt ihm, dass nichts geschah. Er weiß nicht einmal, ob er
+falsch gesprochen hat oder ob das Gerät kaputt ist. Eine Fehlermeldung wäre
+besser gewesen. Fast alles wäre besser gewesen.
+
+Die Einzahl kommt in die Grammatik. Aber der eigentliche Fall bleibt offen, und
+er ist größer als dieser eine Satz: Im selben Protokoll stehen `'wie viel uhr
+schreiben'` und `'linux auf tag einkauf auf einkauf'`. Auch erlaubte
+Kombinationen. Auch ohne Befehl. Auch lautlos.
+
+Der zweite Ausdruck kommt hochkant.
+
+### Zwei Tasten und eine Regel, die ich nicht anfassen durfte
+
+Zum Schluss zwei Tastenkombinationen fürs Admin-Konto: `Strg`+`Alt`+`W`
+schaltet die Optik zwischen Linux und Windows, `Strg`+`Alt`+`S` die Stimme
+zwischen Michael und Anna. Beide Skripte schalten jetzt *um*, statt ein Ziel zu
+verlangen - wer eine Taste drückt, will nicht wissen, in welchem Zustand er ist.
+
+Die Stimme braucht dafür ein eigenes Skript, denn `setzen` macht nur die
+Hälfte: Es schreibt die Konfiguration und sagt dem Menschen dann, er möge
+speech-dispatcher neu starten. Am Terminal zumutbar. Hinter einer Taste nicht -
+wer eine Taste drückt, erwartet eine andere Stimme, keine Hausaufgabe.
+
+Dazwischen liegt noch eine kleine Lektion, und sie ist nicht technisch. Beim
+Aufräumen der TODO-Liste wollte ich alle erledigten Punkte nach unten sortieren.
+Sechs von ihnen hängen an noch offenen Punkten - „siehe oben", „Restrisiko
+dazu", „die zwei neuen Punkte unten". Ich hatte schon angefangen, fünf von
+Stephans Formulierungen umzuschreiben, damit meine Sortierung aufgeht. Er
+stoppt das:
+
+> „die bleiben oben, bis auch die anderen Punkte erledigt sind und wandern dann
+> gemeinsam hoch"
+
+Seine Regel ist besser als meine. Meine hätte seinen Text der Ordnung
+angepasst; seine passt die Ordnung dem Text an. Beim Nachzählen sind es dann
+sechs statt vier - einen Bezug hatte ich übersehen.
+
+**Die Lehre des Tages:** Ein Fehler, der etwas sagt, ist ein Fehler. Ein
+Fehler, der nichts sagt, ist ein Rätsel - und Rätsel sind für diese Zielgruppe
+keine Unannehmlichkeit, sondern eine Sackgasse.
 
 ---
 

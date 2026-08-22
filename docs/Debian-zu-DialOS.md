@@ -1413,6 +1413,11 @@ Deshalb steht sie jetzt im Auftrag statt in niemandes Voreinstellung:
 nicht weggelassen - eine Voreinstellung, auf die man sich verlaesst, ist eine
 Annahme, und diese Annahme war nachweislich falsch.
 
+**Belegt am 2026-08-22:** Der Ausdruck kommt seitdem hochkant (Stephan:
+„Ausdruck ist jetzt hochkant"). Die Ursache selbst ist damit nicht benannt -
+sie liegt hinter allem, was hier messbar ist. Aber eine ausdrueckliche
+Vorgabe gewinnt gegen jede Voreinstellung, und genau das war der Zweck.
+
 Dabei fiel ein zweiter Druckweg auf: `dialos-fusszeile.py drucken` rief
 `lp -` **ohne Ziel** auf. Auf diesem Geraet gibt es keine
 Systemvoreinstellung (`lpstat -d` sagt "keine systemvoreingestellten Ziele"),
@@ -1804,13 +1809,27 @@ Datei in einen extra Ordner gepackt werden."
 sudo /usr/local/sbin/dialos-aufspielen --wirklich   # oder von Hand installieren
 ```
 
-**Wo: `~/Dokumente/DialOS-DATA/`.** Der Name ist Stephans Wahl, damit das
-Archiv später unverändert auf den Stick wandern kann. **Auf dem Stick liegt es
-bewusst nicht** — die Partition `DIALOS-DATA` ist unverschlüsseltes exFAT, und
-der Stick soll laut `sicherheit-datenschutz.md` getrennt vom Laptop aufbewahrt
-werden. Ein Archiv, das meistens nicht steckt, kann nicht beschrieben werden;
-und Briefe an die Krankenkasse gehören nicht von der LUKS-Platte auf einen
-offenen Datenträger.
+**Wo: `~/Dokumente/Archiv/DialOS-DATA/` — und auf dem Stick.** Der Name ist
+Stephans Wahl, damit beide Orte gleich heißen.
+
+**Bis zum 2026-08-22 stand hier das Gegenteil**, und die Begründung dafür war
+nicht falsch: Die Partition `DIALOS-DATA` ist unverschlüsseltes exFAT, der
+Stick soll laut `sicherheit-datenschutz.md` getrennt vom Laptop aufbewahrt
+werden, und Briefe an die Krankenkasse gehören nicht von der LUKS-Platte auf
+einen offenen Datenträger.
+
+**Stephan hat anders entschieden** („alle pdf Dateien … müssen unbedingt auf
+den Stick Bereich DialOS-DATA und unter Dokumente auf den Rechner unter
+Dokumente/Archiv/DialOS-DATA"). Sein Grund wiegt schwerer als meiner: Ein
+Archiv, das nur auf der Platte liegt, ist beim nächsten Plattenschaden weg,
+und der Nutzer kann es nicht selbst sichern. Die Verschlüsselungsfrage bleibt
+davon unberührt und gehört in `sicherheit-datenschutz.md`, nicht in eine
+stille Verweigerung hier.
+
+Ein Archiv, das meistens nicht steckt, kann trotzdem nicht beschrieben werden
+— deshalb **holt `dialos-archiv.py` nach**, sobald der Stick auftaucht:
+Auf der Platte liegt alles immer, auf dem Stick alles, was seit dem letzten
+Einstecken dazugekommen ist.
 
 **Warum ein eigener PDF-Erzeuger und nicht LibreOffice.** Der Briefbogen ist
 mit **Leerzeichen** gesetzt: Absender und Datum stehen rechtsbündig, weil die

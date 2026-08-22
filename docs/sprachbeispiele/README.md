@@ -5,7 +5,8 @@
 Wie DialOS klingt, ohne dass man das Gerät vor sich hat. Erzeugt am
 2026-08-18 auf Stephans Wunsch.
 
-**Das ist Anna** (`de_DE-kerstin-low`, Tempo 1,00), die Auslieferungsstimme
+**Das ist Anna** (`de_DE-kerstin-low`, Tempo 0,95 seit dem 2026-08-22 - von
+Stephan nach Gehör aus 1,00 / 0,95 / 0,90 / 0,80 gewählt), die Auslieferungsstimme
 seit dem 2026-08-20. Bis zum 2026-08-21 zeigten diese Dateien noch Michael:
 Im Erzeuger stand die Stimme **fest eingetragen**, während das System längst
 die andere sprach - dieselbe Falle wie beim Tempo eine Zeile darunter, nur

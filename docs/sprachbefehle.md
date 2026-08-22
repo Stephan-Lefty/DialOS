@@ -49,7 +49,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Bildschirmfoto machen"** | Gleichbedeutend. |
 | **„Brief drucken"** | Druckt `~/Dokumente/brief.txt`. Der Brief trägt seine Fußzeile schon, sie kommt kein zweites Mal dazu. |
 | **„Einkaufszettel drucken"** | Druckt den Zettel - **mit** Fußzeile, die er auf dem Bildschirm bewusst nicht hat: Ein Blatt Papier verlässt das Haus, eine Notiz auf dem Schirm nicht. |
-| **„Notizen drucken"** | Dasselbe für die Sammelnotiz. |
+| **„Notizen drucken"** / **„Notiz drucken"** | Dasselbe für die Sammelnotiz. Die Einzahl gilt seit dem 2026-08-22 mit: Vosk hatte beim ersten Nachtest „notiz drucken" verstanden, und weil beide Wörter in der Grammatik stehen, war das eine erlaubte, aber befehlslose Kombination - der Befehl fiel **lautlos** durch, ohne jede Rückmeldung. |
 | **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
 | **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
 | **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." Kommt keine verwertbare Antwort, fragt DialOS **ein zweites Mal** („Das habe ich nicht verstanden. Sage ja oder nein."); erst danach bleibt der Zettel stehen. Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |

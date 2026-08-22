@@ -5,7 +5,8 @@
 What DialOS sounds like without having the device in front of you. Created
 on 2026-08-18 at Stephan's request.
 
-**This is Anna** (`de_DE-kerstin-low`, tempo 1.00), the delivery voice
+**This is Anna** (`de_DE-kerstin-low`, tempo 0.95 since 2026-08-22 - chosen
+by Stephan by ear from 1.00 / 0.95 / 0.90 / 0.80), the delivery voice
 since 2026-08-20. Until 2026-08-21 these files still showed Michael: the
 voice was **hard-coded** in the generator while the system had long been
 speaking the other one - the same trap as with the tempo one line below,

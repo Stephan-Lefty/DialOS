@@ -2,7 +2,7 @@
 
 # Thirteen Days and Counting …
 
-*How DialOS came to exist, 6 to 21 August 2026. 261 commits. Told as what
+*How DialOS came to exist, 6 to 22 August 2026. 289 commits. Told as what
 it was.*
 
 Everything here is on the record - in the changelog in
@@ -373,7 +373,9 @@ decision function, not the ordering.
 ### Anna
 
 Stephan decides: a friendly female voice. The listening comparison produces
-`de_DE-kerstin-low`, tempo 1.00, name **Anna** - and she becomes the delivery
+`de_DE-kerstin-low`, tempo 1.00, name **Anna** (the tempo does not stay that
+way: on 2026-08-22 Stephan listens to 1.00 / 0.90 / 0.80 / 0.95 in turn and
+settles on **0.95**) - and she becomes the delivery
 voice, not just a test setting.
 
 Tempo differs per voice, measurably so: the same sentence takes Thorsten 7.75
@@ -534,6 +536,115 @@ against Piper gets checked offline first.** Stephan is not the test run.
 
 The second: **an explanation that fits all the observations is not yet a
 cause.**
+
+---
+
+## Day 17: The failure that says nothing
+
+The day begins with a folder full of clutter. Twenty-five log files sit openly
+in the home directory, among `Notizen`, `Dokumente` and `Bilder`. Stephan asks
+whether they are needed. Six of them feed the live transcript window, and
+together they are the memory for support - but they do not have to sit there.
+They move to `~/.log`, and the leading dot makes the folder invisible.
+
+Then comes a sentence that lights the change from the other side:
+
+> "immer dran denken wir haben auch sehende User" - always remember, we have
+> sighted users too.
+
+That hits exactly this move. To the blind user a hidden folder makes no
+difference; he sees nothing anyway. To the helper sitting next to him,
+something he cannot see is an obstacle. So the manual gets a table: what lives
+where, and which of it is visible. Accessibility does not mean serving only one
+side.
+
+### The printout comes out landscape
+
+In the afternoon Stephan prints for real for the first time. The sheet comes
+out landscape.
+
+I measure the whole path. With this queue's PPD, `texttopdf` produces
+595 × 842 points - A4 portrait. `pdftopdf` passes exactly that through,
+rotation 0. Over IPP the printer reports `orientation-requested-default =
+portrait` and `media-default = iso_a4`. The queue is set to A4.
+
+Every place I can check says portrait. **And the sheet is landscape.**
+
+The cause lies beyond anything measurable on this device. I cannot name it -
+which is unsatisfying, but it is the truth. What I can change is the stance:
+the call was a bare `lp -d TARGET -`, without a single option. Orientation thus
+hung on a default nobody had committed to. Now it is part of the job:
+`-o media=A4 -o orientation-requested=3`.
+
+**A default you rely on is an assumption.** This one was demonstrably wrong,
+even if I cannot say where exactly it tipped over.
+
+While looking, something else surfaces: `dialos-fusszeile.py drucken` called
+`lp -` **without a destination**. This device has no default destination - the
+call would have failed the moment anyone used it. For two months nobody would
+have noticed, because nobody took that path.
+
+### And then the device says nothing at all
+
+Stephan retests. I look in the log. The print log holds nothing new. The
+command log holds this:
+
+```
+15:07:32  erkannt: 'notiz drucken'
+```
+
+Singular. The grammar only knows "notizen drucken".
+
+This is not a mishearing. The restricted grammar is a list of **phrases**, but
+Vosk turns it into a **word network** - and may combine words from different
+phrases. "notiz" comes from "notiz aufnehmen", "drucken" from the three print
+commands. The combination is permitted and yet is not a command.
+
+And because there is no match, there is no announcement either.
+
+**That is the worst possible outcome.** Not the failure - the silence. A
+sighted user sees a window that does not open, a sheet that does not arrive. A
+blind user has spoken, the device has listened, and nothing tells him that
+nothing happened. He does not even know whether he said it wrong or the device
+is broken. An error message would have been better. Almost anything would have
+been better.
+
+The singular goes into the grammar. But the real case stays open, and it is
+bigger than this one phrase: the same log holds `'wie viel uhr schreiben'` and
+`'linux auf tag einkauf auf einkauf'`. Also permitted combinations. Also no
+command. Also silent.
+
+The second printout comes out portrait.
+
+### Two keys and a rule I was not allowed to touch
+
+Finally, two keyboard shortcuts for the admin account: `Ctrl`+`Alt`+`W`
+switches the look between Linux and Windows, `Ctrl`+`Alt`+`S` the voice between
+Michael and Anna. Both scripts now *toggle* instead of demanding a target -
+whoever presses a key does not want to know which state they are in.
+
+The voice needs a script of its own for this, because `setzen` only does half
+the job: it writes the configuration and then tells the human to restart
+speech-dispatcher. Reasonable at a terminal. Not behind a key - whoever presses
+a key expects a different voice, not homework.
+
+In between there is one more small lesson, and it is not a technical one. While
+tidying the TODO list I wanted to sort every completed item to the bottom. Six
+of them hang off items that are still open - "see above", "residual risk from
+this", "the two new items below". I had already begun rewriting five of
+Stephan's sentences so that my sorting would work out. He stops it:
+
+> "die bleiben oben, bis auch die anderen Punkte erledigt sind und wandern dann
+> gemeinsam hoch" - they stay at the top until the other items are done as
+> well, and then move together.
+
+His rule is better than mine. Mine would have bent his text to fit the order;
+his bends the order to fit the text. On the recount it turns out to be six
+rather than four - I had missed one reference.
+
+**The lesson of the day:** a failure that says something is a failure. A
+failure that says nothing is a riddle - and for this audience riddles are not
+an inconvenience but a dead end.
 
 ---
 

@@ -204,7 +204,9 @@ system anyway
 ## The first run in Stephan's voice (2026-08-18)
 
 Three attempts, each showing something different. Evidenced by two
-timestamped logs - `~/dialos-diktat.log` and `~/dialos-sprachbefehl.log`.
+timestamped logs - `~/.log/dialos-diktat.log` and
+`~/.log/dialos-sprachbefehl.log`. (Until 2026-08-22 they sat openly in the
+home folder.)
 
 **The recognition is right.** "tomaten bananen äpfel" verbatim correct,
 umlaut included, and turned into "Tomaten Bananen Äpfel" by LanguageTool in

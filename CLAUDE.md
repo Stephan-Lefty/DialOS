@@ -39,74 +39,92 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-22)
+## Aktueller Stand (Stand: 2026-08-22, abends)
 
-**Wo das Projekt am Abend des 2026-08-21 steht.** Der ausfuehrliche Verlauf
+**Wo das Projekt am Abend des 2026-08-22 steht.** Der ausfuehrliche Verlauf
 steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
 
 **Laeuft und ist belegt:**
 
-- Sprachsteuerung mit 19 Grammatiksaetzen, alle von Piper gesprochen und von
-  Vosk woertlich erkannt. Das Einschalten verlangt beide Woerter
-  ("Sprachsteuerung starten") - im Betrieb gemessen: 60 Beinahe-Treffer, null
-  Fehlstarts.
-- Anna (`de_DE-kerstin-low`, Tempo 1,00) ist Auslieferungsstimme und spricht
-  den Nutzer mit Namen an, wo es Sinn hat.
-- Diktat in Notizen und Einkaufszettel, Schreibhilfe ueber LanguageTool
-  (98,1 % Schreibung).
+- Sprachsteuerung mit 26 Grammatiksaetzen. Das Einschalten verlangt beide
+  Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
+  Beinahe-Treffer, null Fehlstarts.
+- Anna (`de_DE-kerstin-low`) ist Auslieferungsstimme, **Tempo 0,95**, und
+  spricht den Nutzer mit Namen an ("Steffan"). Beide Werte hat Stephan mit den
+  Ohren entschieden.
+- Diktat in Notizen und Einkaufszettel, Schreibhilfe ueber LanguageTool.
 - Fusszeile in jeder Thunderbird-Mail, mit anklickbarem Verweis. Die
   Textquelle ist `/usr/local/share/dialos/fusszeile.txt` und nur die.
 - Akkuwarnung bei 25/15/5 %, Ansagen von Stephan abgenommen.
 - Kein Standby am Netz, keine Bildschirmsperre fuer `nutzer`.
 - Unattended-upgrades, Protokoll-Aufbewahrung sieben Tage.
-
-**Neu am 2026-08-22:**
-
 - **Bildschirmfoto auf Zuruf** ueber das XDG-Portal (die GNOME-Schnittstelle
   ist gesperrt, Werkzeuge sind keine installiert). Das Mitschrift-Fenster wird
   vorher geschlossen.
-- **Drucken per Sprache** fuer Brief, Zettel und Notizen. Der Drucker wird
-  gesucht, nicht vorausgesetzt - CUPS hat kein Standardziel. **Noch nicht auf
-  Papier erprobt.**
-- **Jeder Brief wandert als PDF nach ~/Dokumente/DialOS-DATA/.** Eigener
-  PDF-Erzeuger ueber cairo, weil der Briefbogen mit Leerzeichen gesetzt ist.
-  Die Mail-Haelfte fehlt, solange DialOS nicht selbst verschickt.
-- **Anna spricht mit Tempo 0.95** und sagt "Steffan" - beide Entscheidungen
-  hat Stephan mit den Ohren getroffen, nachdem eine falsche Abtastrate
-  (16 kHz als 22050 deklariert) alle Hoerproben 38 % zu schnell hatte laufen
-  lassen.
-- **/usr/local/sbin/dialos-aufspielen** spielt den Repo-Stand auf, mit enger
+- **Drucken per Sprache** fuer Brief, Zettel und Notizen - **auf Papier
+  belegt am 2026-08-22**. Der Drucker wird gesucht, nicht vorausgesetzt (CUPS
+  hat kein Standardziel), und Papier und Ausrichtung stehen ausdruecklich im
+  Auftrag: `-o media=A4 -o orientation-requested=3`.
+- **PDF-Archiv an zwei Orten:** `~/Dokumente/Archiv/DialOS-DATA/` auf der
+  Platte und `DialOS-Archiv/` auf dem Stick `DIALOS-DATA`, mit Nachholen,
+  sobald der Stick steckt. Eigener PDF-Erzeuger ueber cairo, weil der
+  Briefbogen mit Leerzeichen gesetzt ist.
+- **Mail-Archiv** aus Thunderbirds lokalen mbox-Dateien - ein- und ausgehend,
+  ohne Zugangsdaten. Dedup ueber Message-IDs, Entwuerfe ausgenommen.
+- **Alle Programmprotokolle liegen in `~/.log/`**, nicht mehr offen im
+  Heimatverzeichnis. Der Punkt am Anfang macht den Ordner unsichtbar; er darf
+  geloescht werden, jedes Skript legt ihn neu an.
+- **Zwei Tastenkombinationen fuers Admin-Konto:** `Strg`+`Alt`+`W` schaltet
+  die Optik Linux/Windows um, `Strg`+`Alt`+`S` die Stimme Michael/Anna
+  (gemessen 4,4 s bis zur Ansage in der neuen Stimme). NUR fuer
+  `dialosadmin` - das Nutzerkonto bedient beides ueber die Stimme.
+- **`/usr/local/sbin/dialos-aufspielen`** spielt den Repo-Stand auf, mit enger
   sudoers-Regel. NUR fuer das Entwicklungsgeraet - die Regel ist praktisch ein
   Root-Zugang, Begruendung im Kopf des Skripts.
 - **Alle 69 Ansagen** liegen in beiden Stimmen unter
-  docs/sprachbeispiele/alle-ansagen/. Diese Sammlung hat an einem Tag ZWEI
-  Fehler sichtbar gemacht, die kein Test gefunden haette: die Abtastrate und
-  ein "Die Notizen wird gedruckt".
+  `docs/sprachbeispiele/alle-ansagen/`. Diese Sammlung hat an einem Tag ZWEI
+  Fehler sichtbar gemacht, die kein Test gefunden haette: eine falsche
+  Abtastrate (16 kHz als 22050 deklariert, alle Hoerproben 38 % zu schnell)
+  und ein "Die Notizen wird gedruckt".
+- **Vorstellungsdialog** (Anna fragt, Michael antwortet, 3,5 Minuten) unter
+  `docs/video/dialos-vorstellung.ogg`, erzeugt von
+  `scripts/dialos-vorstellung.py`.
 
-**Der Brief - fast fertig.** Der ganze Weg steht: Der ganze Weg steht:
-"Brief schreiben" nimmt auf, gesprochene Satzzeichen ("Komma setzen", "neuer
-Absatz") werden umgesetzt, der Text landet als Briefbogen in
-`~/Dokumente/brief.txt` mit Datum, Unterschriftshinweis und Fusszeile, und
-"Brief vorlesen" liest alles vor. Der Punkt, der ihn unbrauchbar machte, ist am 2026-08-22 behoben: Der
-Schluss verlangt jetzt eine **Sprechpause davor**. Offline gegen Piper
-geprueft, bevor Stephan testen musste - aus durchgehender Rede entstanden
+**Der Brief - fast fertig.** Der ganze Weg steht: "Brief schreiben" nimmt auf,
+gesprochene Satzzeichen ("Komma setzen", "neuer Absatz") werden umgesetzt, der
+Text landet als Briefbogen nach DIN 5008 in `~/Dokumente/brief.txt` mit Datum,
+Unterschriftshinweis und Fusszeile, "Brief vorlesen" liest alles vor, "Brief
+drucken" druckt. Der Punkt, der ihn unbrauchbar machte, ist am 2026-08-22
+behoben: Der Schluss verlangt jetzt eine **Sprechpause davor**. Offline gegen
+Piper geprueft, bevor Stephan testen musste - aus durchgehender Rede entstanden
 zwei VOLLSTAENDIGE "diktat beenden", beide abgewiesen; der echte nach einer
 Pause angenommen.
 
 **Was fehlt, ist der Beweis am Geraet:** ein Diktat mit echter Stimme, das von
-Anfang bis Ende durchlaeuft. Erst danach ist der Brief-Weg fertig.
+Anfang bis Ende durchlaeuft. Erst danach ist der Brief-Weg fertig. Ausserdem
+fragt DIN 5008 nach Empfaenger und Betreff - der gefuehrte Dialog dafuer ist
+noch nicht gebaut.
 
-**Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, nicht installiert),
+**Ein Fehlermuster, das offen ist und Vorrang verdient.** Die eingeschraenkte
+Grammatik ist eine Liste von SAETZEN, aber Vosk baut daraus ein WORTNETZ. Es
+darf Woerter aus verschiedenen Saetzen kombinieren. Kommt dabei etwas heraus,
+das kein Befehl ist ("notiz drucken", "wie viel uhr schreiben", "linux auf tag
+einkauf auf einkauf" - alle drei am 2026-08-22 im Protokoll), passiert
+**nichts, und es wird auch nichts gesagt**. Fuer einen blinden Nutzer ist das
+der schlechteste Ausgang: Er hat gesprochen, das Geraet hat zugehoert, und
+nichts sagt ihm, dass nichts geschah. Eine Fehlermeldung waere besser als
+Stille.
+
+**Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, geprueft, bewusst
+nicht installiert - siehe die Ausschlussliste in `dialos-aufspielen`),
 Aufweckwort (Lizenz der fertigen Modelle ist nicht kommerziell).
 
-**Von Stephan gewuenscht, noch nicht gebaut:** Drucken des fertigen Briefes
-(der Brother HL-L2350DW ist eingerichtet, aber es gibt keinen
-Standarddrucker - `lp -` liefe ins Leere) und ein PDF-Archiv jeder Mail und
-jedes Briefes in `~/Dokumente/DialOS-DATA/`. Der Ordnername ist Stephans
-Wahl, damit er spaeter unveraendert auf den Stick wandern kann; auf dem Stick
-selbst liegt er bewusst NICHT, weil `DIALOS-DATA` unverschluesseltes exFAT ist
-und der Stick laut `docs/sicherheit-datenschutz.md` getrennt vom Geraet
-aufbewahrt werden soll.
+**Offen aus Stephans Wuenschen:** die Aussprache von "DialOS" in der
+Sprachausgabe - er wollte es melodischer ("dia los"), drei Varianten sind
+vorgespielt, die Wahl steht aus. Im Code steht weiterhin "Dial OS", und dabei
+bleibt es, solange nichts entschieden ist. Ausserdem: ob PDF-ANHAENGE aus
+Mails ebenfalls ins Archiv sollen.
+
 
 ## Frueherer Stand (2026-08-19)
 

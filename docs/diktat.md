@@ -211,8 +211,9 @@ Fernwartung dafür ist ohnehin Teil des Systems
 ## Der erste Lauf mit Stephans Stimme (2026-08-18)
 
 Drei Anläufe, und jeder hat etwas anderes gezeigt. Belegt durch zwei
-Protokolle mit Zeitstempeln - `~/dialos-diktat.log` und
-`~/dialos-sprachbefehl.log`.
+Protokolle mit Zeitstempeln - `~/.log/dialos-diktat.log` und
+`~/.log/dialos-sprachbefehl.log`. (Bis zum 2026-08-22 lagen sie offen im
+Heimatverzeichnis.)
 
 **Die Erkennung stimmt.** „tomaten bananen äpfel" wörtlich richtig,
 inklusive Umlaut, und über LanguageTool in einer Sekunde zu „Tomaten

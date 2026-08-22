@@ -1351,6 +1351,11 @@ It is therefore part of the job now instead of being nobody's default:
 rather than omitted - a default you rely on is an assumption, and this
 assumption was demonstrably wrong.
 
+**Confirmed on 2026-08-22:** printouts have come out portrait since (Stephan:
+„Ausdruck ist jetzt hochkant"). That does not name the cause - it lies beyond
+anything measurable here. But an explicit setting beats any default, and that
+was the point.
+
 This surfaced a second print path: `dialos-fusszeile.py drucken` called
 `lp -` **without a destination**. This device has no system default
 (`lpstat -d` reports "no system default destination"), so the call would have
@@ -1729,13 +1734,26 @@ put into a separate folder as a PDF file."
 sudo /usr/local/sbin/dialos-aufspielen --wirklich   # or install by hand
 ```
 
-**Where: `~/Dokumente/DialOS-DATA/`.** The name is Stephan's choice so the
-archive can later move to the stick unchanged. **It deliberately does not live
-on the stick** — the `DIALOS-DATA` partition is unencrypted exFAT, and per
+**Where: `~/Dokumente/Archiv/DialOS-DATA/` — and on the stick.** The name is
+Stephan's choice so that both places are called the same thing.
+
+**Until 2026-08-22 this said the opposite**, and the reasoning was not wrong:
+the `DIALOS-DATA` partition is unencrypted exFAT, per
 `sicherheit-datenschutz.md` the stick is meant to be kept apart from the
-laptop. An archive that is usually not plugged in cannot be written to; and
-letters to a health insurer do not belong from the LUKS disk onto an open
-medium.
+laptop, and letters to a health insurer do not belong from the LUKS disk onto
+an open medium.
+
+**Stephan decided otherwise** ("alle pdf Dateien … müssen unbedingt auf den
+Stick Bereich DialOS-DATA und unter Dokumente auf den Rechner unter
+Dokumente/Archiv/DialOS-DATA"). His reason outweighs mine: an archive that
+only lives on the disk is gone with the next disk failure, and the user cannot
+back it up himself. The encryption question is untouched by this and belongs
+in `sicherheit-datenschutz.md`, not in a silent refusal here.
+
+An archive that is usually not plugged in still cannot be written to — so
+**`dialos-archiv.py` catches up** as soon as the stick appears: the disk
+always holds everything, the stick everything added since it was last
+plugged in.
 
 **Why an own PDF writer and not LibreOffice.** The letterhead is laid out with
 **spaces**: sender and date are right-aligned because the line is padded to
