@@ -108,7 +108,9 @@ background) and `splash.png` (boot/login screen).
   that CUPS was not at fault: both the filter chain and the printer report A4
   portrait. This surfaced that `dialos-fusszeile.py drucken` called `lp`
   without a destination - on a device with no system default that could never
-  have worked.
+  have worked. The retest revealed a second fault: Vosk heard "notiz drucken"
+  while the grammar only knew "notizen drucken", so the command fell through
+  silently. The singular is now a second wording.
 
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*

@@ -1356,6 +1356,16 @@ This surfaced a second print path: `dialos-fusszeile.py drucken` called
 (`lpstat -d` reports "no system default destination"), so the call would have
 failed. It now looks up the destination exactly as `dialos-drucken.py` does.
 
+**"notiz drucken" now counts as well.** In the retest on 2026-08-22 Stephan
+spoke the command and nothing happened - the log reads `erkannt: 'notiz
+drucken'` while the grammar only had `notizen drucken`. That is not a
+mishearing but how the restricted grammar is built: Vosk turns the phrases
+into a word network. It knows "notiz" from "notiz aufnehmen" and "drucken"
+from the three print commands - the combination is permitted but is not one of
+the listed phrases. The command therefore fell through silently, with no
+announcement, because there was no match at all. The singular is now in the
+list as a second wording.
+
 
 In a mail "Dieses Dokument" becomes "Diese Nachricht" (`--art mail`) - a mail
 is not a document.

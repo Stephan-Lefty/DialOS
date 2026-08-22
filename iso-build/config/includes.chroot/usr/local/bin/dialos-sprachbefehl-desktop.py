@@ -183,6 +183,11 @@ GRAMMATIK_AN = json.dumps([
     "brief drucken",
     "einkaufszettel drucken",
     "notizen drucken",
+    # Einzahl als zweite Formulierung: Am 2026-08-22 hat Vosk beim Test
+    # "notiz drucken" verstanden. Beide Woerter stehen in der Grammatik
+    # ("notiz aufnehmen", "notizen drucken"), das Netz darf sie also
+    # kombinieren - der Satz war dann keiner, und es geschah nichts.
+    "notiz drucken",
     # "hilfe rufen" und "fernwartung beenden" sind ZURUECKGESTELLT
     # (Stephan, 2026-08-20: "können den Rustdesk ganz nach hinten schieben,
     # wenn alles andere läuft"). Sie stehen bewusst NICHT in der Grammatik,
@@ -250,6 +255,7 @@ DRUCK_SAETZE = {
     "brief drucken": "brief",
     "einkaufszettel drucken": "einkaufszettel",
     "notizen drucken": "notizen",
+    "notiz drucken": "notizen",
 }
 FOTO_SKRIPT = "/usr/local/bin/dialos-bildschirmfoto.py"
 FOTO_SAETZE = ("bildschirmfoto erstellen", "bildschirmfoto machen")

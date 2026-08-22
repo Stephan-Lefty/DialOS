@@ -1419,6 +1419,16 @@ Systemvoreinstellung (`lpstat -d` sagt "keine systemvoreingestellten Ziele"),
 der Aufruf waere also gescheitert. Er sucht das Ziel jetzt genauso wie
 `dialos-drucken.py`.
 
+**„notiz drucken" gilt jetzt auch.** Beim Nachtest am 2026-08-22 sagte
+Stephan den Befehl, und nichts geschah - im Protokoll steht `erkannt: 'notiz
+drucken'`, in der Grammatik stand nur `notizen drucken`. Das ist kein
+Hoerfehler, sondern die Bauart der eingeschraenkten Grammatik: Vosk baut aus
+den Saetzen ein Wortnetz. „notiz" kennt es aus „notiz aufnehmen", „drucken"
+aus den drei Druckbefehlen - die Kombination ist erlaubt, ergibt aber keinen
+Satz aus der Liste. Der Befehl fiel damit lautlos durch, ohne Ansage, weil
+gar kein Treffer vorlag. Die Einzahl steht jetzt als zweite Formulierung mit
+in der Liste.
+
 
 In einer Mail wird aus "Dieses Dokument" ein "Diese Nachricht" (`--art mail`)
 - eine Mail ist kein Dokument.
