@@ -41,6 +41,11 @@ scripts/dialos-sprachbeispiele.py
 | `12c-akku-5.ogg` | 3.8 s | Third warning at 5 % - **with the name** and phrased as a demand. The name appears only here: someone who hears it constantly stops hearing it. |
 | `12d-akku-am-netz.ogg` | 1.7 s | Confirmation after plugging in. Someone who cannot see whether the plug is seated needs this feedback. |
 
+**Every announcement, in both voices:** [alle-ansagen/](alle-ansagen/VERZEICHNIS.md)
+- 62 sentences × 2 voices, carrying the date and time of the day they were
+generated. Produced by `scripts/dialos-alle-ansagen.py`. This selection here
+stays the short round for listening.
+
 77 s and about 501 kB in total. OGG Vorbis, because `sox` can write it
 without an extra package and WAV would bloat the repository needlessly.
 

@@ -41,6 +41,11 @@ scripts/dialos-sprachbeispiele.py
 | `12c-akku-5.ogg` | 3,8 s | Dritte Warnung bei 5 % - **mit Namen** und als Aufforderung. Der Name steht nur hier: Wer ihn dauernd hört, überhört ihn. |
 | `12d-akku-am-netz.ogg` | 1,7 s | Bestätigung nach dem Anstecken. Wer nicht sieht, ob der Stecker sitzt, braucht diese Rückmeldung. |
 
+**Alle Ansagen, in beiden Stimmen:** [alle-ansagen/](alle-ansagen/VERZEICHNIS.md)
+- 62 Sätze × 2 Stimmen, mit dem Datum und der Uhrzeit des Erzeugungstags.
+Erzeugt von `scripts/dialos-alle-ansagen.py`. Diese Auswahl hier bleibt die
+kurze Runde zum Reinhören.
+
 Zusammen 77 s und rund 501 kB. OGG Vorbis, weil `sox` das ohne
 Zusatzpaket kann und WAV das Repo unnötig aufblähen würde.
 

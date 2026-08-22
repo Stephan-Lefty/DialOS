@@ -110,17 +110,26 @@ def erzeugen(datei, text, aussprache):
     return float(dauer), os.path.getsize(datei)
 
 
-def start_ansage_text(ansage):
+def start_ansage_text(ansage, jetzt=None):
     """Baut die Start-Ansage fuer nutzer mit den Funktionen des Originals.
 
-    Die Werte sind Beispielwerte: Datum und Uhrzeit sind fest gewaehlt, damit
-    das Beispiel reproduzierbar bleibt, und die Akkustaende sowie das Wetter
-    sind erfunden - beides kommt im Betrieb von der Hardware und aus dem Netz.
-    Der SATZBAU dagegen ist der echte, aus dialos-start-ansage.py.
+    Ohne "jetzt" sind Datum und Uhrzeit fest gewaehlt, damit die Hoerbeispiele
+    reproduzierbar bleiben; die Akkustaende und das Wetter sind ohnehin
+    erfunden, beides kommt im Betrieb von der Hardware und aus dem Netz. Der
+    SATZBAU dagegen ist der echte, aus dialos-start-ansage.py.
+
+    MIT "jetzt" (ein datetime) kommen Datum und Uhrzeit von der Uhr. Das
+    braucht scripts/dialos-alle-ansagen.py, das alle Ansagen mit den echten
+    Werten dieses Augenblicks erzeugt - und es soll dafuer keine dritte Kopie
+    dieses Satzes anlegen muessen.
     """
-    tag, monat, stunde, minute = 18, 8, 7, 30
     import datetime
-    wochentag = ansage.WOCHENTAGE[datetime.date(2026, monat, tag).weekday()]
+    if jetzt is None:
+        tag, monat, stunde, minute = 18, 8, 7, 30
+        wochentag = ansage.WOCHENTAGE[datetime.date(2026, monat, tag).weekday()]
+    else:
+        tag, monat, stunde, minute = jetzt.day, jetzt.month, jetzt.hour, jetzt.minute
+        wochentag = ansage.WOCHENTAGE[jetzt.weekday()]
     datum = f"{wochentag}, der {ansage.ORDINAL_TAGE[tag]} {ansage.MONATE[monat - 1]}"
     uhrzeit = f"{ansage.zahl_wort_0_99(stunde)} {ansage.zahl_wort_0_99(minute)}"
     # Beide Namen aus denselben Funktionen wie das Original - seit dem
