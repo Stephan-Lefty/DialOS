@@ -33,7 +33,6 @@ Aufruf:
 """
 
 import os
-import pwd
 import shutil
 import subprocess
 import sys
@@ -129,15 +128,23 @@ def unterschiede():
     return sorted(gefunden)
 
 
-def als_nutzer(befehl):
-    """systemctl --user des angemeldeten Nutzers erreichen, nicht das von root."""
-    eintrag = pwd.getpwnam(NUTZER)
-    umgebung = dict(os.environ)
-    umgebung["XDG_RUNTIME_DIR"] = f"/run/user/{eintrag.pw_uid}"
-    return subprocess.run(["setpriv", "--reuid", str(eintrag.pw_uid),
-                           "--regid", str(eintrag.pw_gid), "--init-groups",
-                           "--"] + befehl,
-                          env=umgebung, capture_output=True, text=True)
+# WARUM DAS SKRIPT KEINE SITZUNGSDIENSTE STARTET (Lehre vom 2026-08-22):
+#
+# Der erste Entwurf beendete den Befehlsdienst und startete ihn als root neu.
+# Das ging schief - ohne DISPLAY, WAYLAND_DISPLAY und DBus-Adresse findet er
+# weder Bildschirm noch Ton, und subprocess.run wartet ausserdem auf einen
+# Dienst, der bis zum Abmelden laeuft. Ergebnis: Der Laptop stand sieben
+# Minuten ohne Sprachsteuerung da, waehrend Stephan nicht am Platz war.
+#
+# Die Umgebung liesse sich aus einem laufenden Prozess abschreiben - aber es
+# bliebe der falsche Weg: Ein Dienst, der zur Sitzung gehoert, wird von der
+# Sitzung gestartet, nicht von root. Das Skript sagt jetzt nur noch, WAS neu
+# gestartet werden muss. Das kostet einen Handgriff und kann nichts kaputt
+# machen.
+#
+# Systemd-Units koennten bleiben - "systemctl restart" ist dafuer gebaut. Sie
+# sind trotzdem mit aufgefuehrt statt ausgefuehrt, damit es EINE Regel gibt
+# und nicht zwei.
 
 
 def main():
@@ -179,20 +186,19 @@ def main():
             subprocess.run(["systemctl", "restart", dienst], check=False)
             print(f"  neu gestartet  {dienst}")
     if neu_zu_starten["user"]:
-        als_nutzer(["systemctl", "--user", "daemon-reload"])
+        print("\n  Diese Nutzerdienste laufen noch in der alten Fassung:")
         for dienst in sorted(neu_zu_starten["user"]):
-            als_nutzer(["systemctl", "--user", "restart", dienst])
-            print(f"  neu gestartet  {dienst} (Nutzerdienst)")
+            print(f"    systemctl --user restart {dienst}")
+
     if neu_zu_starten["autostart"]:
-        # Die Autostart-Dienste haengen an keiner systemd-Unit. Sie werden
-        # beendet und neu gestartet; das Beenden allein reicht nicht, sie
-        # kaemen sonst erst beim naechsten Anmelden zurueck.
-        for skript in ("dialos-sprachbefehl-desktop.py", "dialos-ton-ausgabe.py",
-                       "dialos-tts-indicator.py"):
+        print("\n  Diese Dienste gehoeren zur Sitzung und laufen noch in der")
+        print("  alten Fassung. Als angemeldeter Nutzer, OHNE sudo:")
+        for skript in ("dialos-sprachbefehl-desktop.py",
+                       "dialos-ton-ausgabe.py", "dialos-tts-indicator.py"):
             if any(rel.endswith(skript) for rel, *_ in liste):
-                als_nutzer(["pkill", "-f", f"python3 /usr/local/bin/{skript}"])
-                als_nutzer(["setsid", f"/usr/local/bin/{skript}"])
-                print(f"  neu gestartet  {skript} (Autostart)")
+                print(f"    pkill -f 'python3 /usr/local/bin/{skript}'")
+                print(f"    setsid /usr/local/bin/{skript} >/dev/null 2>&1 &")
+
     return 0
 
 
