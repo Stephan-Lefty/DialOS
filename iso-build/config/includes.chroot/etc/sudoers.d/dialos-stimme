@@ -1,0 +1,22 @@
+# Stimme umschalten ohne Passwortabfrage - nur fuer dialosadmin.
+#
+# WARUM: dialos-stimme.py setzen schreibt die Piper-Konfiguration unter /etc
+# und braucht deshalb root. Hinter einer Tastenkombination ist eine
+# Passwortabfrage aber keine Sicherheit, sondern ein Abbruch: Das Fenster
+# erscheint, hat keinen Fokus, und der Benutzer haelt die Taste fuer kaputt.
+#
+# WARUM ES TROTZDEM VERTRETBAR IST: Die beiden Aufrufe stehen woertlich da,
+# mit ihrem Argument, ohne Platzhalter. "setzen kerstin" und "setzen thorsten"
+# sind alles, was erlaubt ist - kein "setzen *", denn ein Platzhalter waere
+# genau die Luecke, durch die spaeter etwas anderes passt. Das Skript selbst
+# gehoert root und ist nicht schreibbar (root:root 0755 in einem
+# root-eigenen /usr/local/bin); waere es das, koennte jeder, der es aendert,
+# damit root werden.
+#
+# WAS DAMIT NICHT GEHT: eine dritte Stimme. Die braucht eine dritte Zeile
+# hier - absichtlich. Wer eine Stimme hinzufuegt, soll ueber diese Datei
+# stolpern und die Entscheidung bewusst treffen.
+#
+# Muss mit 0440 root:root installiert werden, sonst ignoriert sudo sie.
+dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen thorsten
+dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen kerstin

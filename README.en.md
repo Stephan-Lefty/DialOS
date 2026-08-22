@@ -102,6 +102,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Two keyboard shortcuts for the admin account** (2026-08-22, Stephan's
+  request). `Ctrl`+`Alt`+`W` switches the look between Linux and Windows 11,
+  `Ctrl`+`Alt`+`S` the voice between Michael and Anna. Both scripts now TOGGLE
+  instead of demanding a target. The voice needed a script of its own:
+  `setzen` only writes the configuration and leaves the speech-dispatcher
+  restart to the human - behind a key that is no solution. Measured: 4.4
+  seconds to the announcement in the new voice. For `dialosadmin` only - the
+  user account does both by voice.
+
 - **A printout came out landscape instead of portrait** (2026-08-22). Paper
   size and orientation are now part of the job (`-o media=A4 -o
   orientation-requested=3`) instead of being left to defaults. It is measured

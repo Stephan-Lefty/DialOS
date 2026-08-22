@@ -1908,6 +1908,58 @@ nicht reicht.
 an; verloren wäre nur die Vergangenheit. `logrotate` räumt ihn ohnehin nach
 sieben Tagen auf.
 
+
+### Tastenkombinationen fuer das Admin-Konto
+
+Stephans Wunsch vom 2026-08-22: zwei Tasten, die umschalten, ohne dass man
+sprechen muss - beim Vorfuehren, Entwickeln und Pruefen ist das der
+schnellere Weg.
+
+| Taste | Was passiert |
+|---|---|
+| `Strg`+`Alt`+`W` | Optik Linux ↔ Windows 11 |
+| `Strg`+`Alt`+`S` | Stimme Michael ↔ Anna |
+
+**Nur fuer `dialosadmin`.** Das Nutzerkonto bedient beides ueber die Stimme.
+Eine Tastenkombination waere dort ein Weg, den niemand findet und den man
+versehentlich ausloest.
+
+Gesetzt werden sie mit `scripts/dialos-admin-tastenkuerzel.sh` (ohne sudo -
+die Einstellungen sind benutzereigen), im Buero-Setup als Schritt 11c. Das
+Skript prueft vorher, ob die Ziele ueberhaupt ausfuehrbar sind: Lieber keine
+Taste als eine, die nichts tut - wer sie einmal drueckt und nichts merkt,
+drueckt sie nie wieder. `zeigen` listet den Stand, `entfernen` raeumt beides
+weg.
+
+**Beide Skripte schalten um, statt ein Ziel zu verlangen.**
+`dialos-desktop-stil.sh umschalten` liest die Merkdatei und nimmt das jeweils
+andere - nicht den Zustand der geladenen Erweiterungen, denn die koennen
+mitten im Wechsel halb geladen sein. `dialos-stimme-wechseln.py` nimmt die
+NAECHSTE Stimme aus der Liste in `dialos-stimme.py`, nicht "die andere": Bei
+einer dritten Stimme waere "die andere" keine eindeutige Angabe mehr.
+
+**Warum die Stimme ein eigenes Skript braucht.** `dialos-stimme.py setzen`
+macht nur die Haelfte: Es schreibt die Piper-Konfiguration - dafuer braucht
+es root - und sagt dem Menschen danach, er moege speech-dispatcher neu
+starten. Am Terminal ist das zumutbar, hinter einer Taste nicht. Das neue
+Skript laeuft deshalb OHNE root und teilt die Arbeit: den privilegierten Teil
+ueber `sudo`, den Neustart von speech-dispatcher selbst - root koennte den
+Dienst des angemeldeten Nutzers gar nicht anfassen. Dieselbe Aufteilung wie
+bei `dialos-aufspielen`.
+
+Dazu gehoert `/etc/sudoers.d/dialos-stimme` (0440 root:root). Die Regel nennt
+zwei Aufrufe woertlich, mit Argument, ohne Platzhalter:
+
+    dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen thorsten
+    dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen kerstin
+
+Ein `setzen *` waere die Luecke, durch die spaeter etwas anderes passt. Eine
+dritte Stimme braucht deshalb eine dritte Zeile - absichtlich: Wer eine
+Stimme hinzufuegt, soll ueber diese Datei stolpern.
+
+Gemessen am 2026-08-22: Die Stimme steht nach 4,4 Sekunden um, mit Ansage in
+der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

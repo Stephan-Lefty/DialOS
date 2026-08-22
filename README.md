@@ -110,6 +110,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Zwei Tastenkombinationen fuers Admin-Konto** (2026-08-22, Stephans
+  Wunsch). `Strg`+`Alt`+`W` schaltet die Optik zwischen Linux und Windows 11,
+  `Strg`+`Alt`+`S` die Stimme zwischen Michael und Anna. Beide Skripte
+  schalten jetzt UM, statt ein Ziel zu verlangen. Die Stimme brauchte dafuer
+  ein eigenes Skript: `setzen` schreibt nur die Konfiguration und ueberlaesst
+  den Neustart von speech-dispatcher dem Menschen - hinter einer Taste ist das
+  keine Loesung. Gemessen: 4,4 Sekunden bis zur Ansage in der neuen Stimme.
+  Nur fuer `dialosadmin` - das Nutzerkonto bedient beides ueber die Stimme.
+
 - **Ausdruck kam quer statt hochkant** (2026-08-22). Papier und Ausrichtung
   werden jetzt im Auftrag mitgegeben (`-o media=A4 -o
   orientation-requested=3`) statt der Voreinstellung ueberlassen. Gemessen

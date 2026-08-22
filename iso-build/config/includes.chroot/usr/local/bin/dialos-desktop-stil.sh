@@ -12,6 +12,7 @@
 # Aufruf (bewusst OHNE sudo - alle Einstellungen sind benutzereigen):
 #   dialos-desktop-stil.sh windows   -> Windows-11-Optik
 #   dialos-desktop-stil.sh gnome     -> zurueck zum GNOME-Standard
+#   dialos-desktop-stil.sh umschalten -> auf das jeweils andere
 #   dialos-desktop-stil.sh status    -> was ist gerade aktiv
 #   dialos-desktop-stil.sh           -> wie "status"
 #   dialos-desktop-stil.sh wiederherstellen
@@ -472,13 +473,26 @@ wiederherstellen() {
   echo "Stil wiederhergestellt: $(gemerkter_stil)"
 }
 
+# Fuer eine Tastenkombination: ein Aufruf, kein Ziel. Die Merkdatei ist dabei
+# die Wahrheit und nicht ein Blick auf die geladenen Erweiterungen - die
+# koennen waehrend eines Wechsels halb geladen sein, waehrend die zuletzt
+# getroffene Wahl eindeutig ist. Wer eine Taste drueckt, will nicht wissen,
+# in welchem Zustand er gerade ist; er will den anderen.
+umschalten() {
+  case "$(gemerkter_stil)" in
+    windows) auf_gnome ;;
+    *)       auf_windows ;;
+  esac
+}
+
 case "${1:-status}" in
   windows|Windows|win) auf_windows ;;
+  umschalten|wechseln|toggle) umschalten ;;
   gnome|Gnome|GNOME|standard) auf_gnome ;;
   wiederherstellen|--wiederherstellen) wiederherstellen ;;
   status|"") zeige_status ;;
   *)
-    echo "Aufruf: $0 [windows|gnome|status|wiederherstellen]" >&2
+    echo "Aufruf: $0 [windows|gnome|umschalten|status|wiederherstellen]" >&2
     exit 1
     ;;
 esac

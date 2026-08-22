@@ -1830,6 +1830,55 @@ The raw logs are the case where neither is enough.
 **The folder may be deleted.** Every script recreates it when writing; only the
 past would be lost. `logrotate` clears it after seven days anyway.
 
+
+### Keyboard shortcuts for the admin account
+
+Stephan's request of 2026-08-22: two keys that switch without having to
+speak - when demonstrating, developing and checking, that is the faster way.
+
+| Key | What happens |
+|---|---|
+| `Ctrl`+`Alt`+`W` | Look: Linux ↔ Windows 11 |
+| `Ctrl`+`Alt`+`S` | Voice: Michael ↔ Anna |
+
+**For `dialosadmin` only.** The user account does both by voice. A keyboard
+shortcut there would be a path nobody finds and everybody triggers by
+accident.
+
+They are set by `scripts/dialos-admin-tastenkuerzel.sh` (no sudo - the
+settings belong to the user), as step 11c of the office setup. The script
+checks first whether the targets are executable at all: better no key than
+one that does nothing - press it once with no effect and you never press it
+again. `zeigen` lists the current state, `entfernen` removes both.
+
+**Both scripts toggle rather than demand a target.**
+`dialos-desktop-stil.sh umschalten` reads the remembered style and takes the
+other one - not the state of the loaded extensions, which can be half loaded
+mid-switch. `dialos-stimme-wechseln.py` takes the NEXT voice from the list in
+`dialos-stimme.py`, not "the other one": with a third voice, "the other one"
+would no longer be unambiguous.
+
+**Why the voice needs a script of its own.** `dialos-stimme.py setzen` only
+does half the job: it writes the Piper configuration - which needs root - and
+then tells the human to restart speech-dispatcher. At a terminal that is
+reasonable; behind a key it is not. The new script therefore runs WITHOUT
+root and splits the work: the privileged part via `sudo`, the
+speech-dispatcher restart itself - root could not touch the logged-in user's
+service at all. The same split as in `dialos-aufspielen`.
+
+It comes with `/etc/sudoers.d/dialos-stimme` (0440 root:root). The rule names
+two calls verbatim, with their argument, no wildcards:
+
+    dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen thorsten
+    dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen kerstin
+
+A `setzen *` would be the gap something else fits through later. A third
+voice therefore needs a third line - deliberately: whoever adds a voice
+should trip over this file.
+
+Measured on 2026-08-22: the voice switches in 4.4 seconds, announcing itself
+in the new voice, in both directions. The look switches without delay.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

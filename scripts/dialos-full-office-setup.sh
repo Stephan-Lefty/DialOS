@@ -344,6 +344,12 @@ schritt_11_sprachausgabe() {
   # "nutzer", der spaeter per Sprachbefehl umschalten koennen soll.
   sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-desktop-stil.sh /usr/local/bin/
   sudo chmod 755 /usr/local/bin/dialos-desktop-stil.sh
+
+  # Stimme umschalten in einem Aufruf (Michael <-> Anna). Braucht selbst kein
+  # root - es ruft nur den privilegierten Teil ueber sudo auf und startet
+  # danach speech-dispatcher in der SITZUNG neu, was root gar nicht koennte.
+  sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-stimme-wechseln.py /usr/local/bin/
+  sudo chmod 755 /usr/local/bin/dialos-stimme-wechseln.py
   # Eigenes Startknopf-Symbol fuer die Windows-Optik (generisches Fenster,
   # bewusst nicht Microsofts Markenzeichen - Begruendung in der Datei).
   sudo mkdir -p /usr/local/share/dialos
@@ -412,6 +418,23 @@ schritt_11_sprachausgabe() {
   fi
 }
 
+schritt_11c_admin_tastenkuerzel() {
+  log "Schritt 11c: Tastenkombinationen fuer das Admin-Konto"
+
+  # Die Regel erlaubt dialosadmin, die Stimme ohne Passwort umzustellen.
+  # Hinter einer Taste ist eine Passwortabfrage kein Schutz, sondern ein
+  # Abbruch: Das Fenster erscheint, hat keinen Fokus, nichts passiert.
+  # Eng gefasst - zwei woertliche Aufrufe, kein Platzhalter, und das Skript
+  # gehoert root. Die Begruendung steht ausfuehrlich in der Datei selbst.
+  sudo install -o root -g root -m 0440 \
+    iso-build/config/includes.chroot/etc/sudoers.d/dialos-stimme \
+    /etc/sudoers.d/dialos-stimme
+
+  # NUR fuer das Admin-Konto. "nutzer" bedient beides ueber die Stimme; eine
+  # Tastenkombination waere dort ein Weg, den niemand findet.
+  ./scripts/dialos-admin-tastenkuerzel.sh
+}
+
 schritt_12_sicherheit() {
   log "Schritt 12: Sicherheits-Werkzeuge (nutzers Daten verschluesseln + Autologin-Gate)"
   # dialos-install ist am 2026-08-16 entfallen (siehe Schritt 5): es war
@@ -477,7 +500,7 @@ schritt_15_vosk() {
 # "./dialos-full-office-setup.sh 14" aufrufbar.
 ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 04_autologin 05_calamares_entfernen 06_rustdesk
   07_claude_cli 08_piper 09_gnome_erweiterungen 10_standardprogramme
-  11_sprachausgabe 12_sicherheit 14_bluetooth 15_vosk)
+  11_sprachausgabe 11c_admin_tastenkuerzel 12_sicherheit 14_bluetooth 15_vosk)
 
 main() {
   local bluetooth_kopplung=0
