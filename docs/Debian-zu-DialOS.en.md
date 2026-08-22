@@ -1725,6 +1725,48 @@ the archive: DialOS does not send mail itself yet. As long as that runs
 through Thunderbird there is no point at which DialOS could step in. The note
 sits in `TODO.md` at the item where the own sending path gets built.
 
+
+### Mail in the archive - without a password (new 2026-08-22)
+
+Stephan's addition the same day: "can we also put all incoming and outgoing
+mail in there!"
+
+**The obvious route would be IMAP - and it is ruled out.** It would need the
+mailbox credentials, which do not exist in any readable file on this device
+yet, and it would be a second way into the mailbox. But Thunderbird keeps
+local copies in real mbox format:
+
+```
+~/.thunderbird/<profile>/ImapMail/<server>/INBOX
+~/.thunderbird/<profile>/ImapMail/<server>/Sent
+```
+
+Those files are already there. **No password, no network, no new place where
+credentials live.**
+
+`dialos-mailarchiv.py` reads them, decodes the headers (`=?UTF-8?B?...`
+becomes text again), takes the `text/plain` part and files each mail as a PDF -
+with a header block of From, To, Date, Subject and the attachment names. If
+only HTML exists it is crudely stripped; for an archive the wording is what
+counts.
+
+**Each mail only once.** What is remembered is the `Message-ID` in
+`.archivierte-mails.txt`, not the file name: with the same subject on the same
+day the name would collide, the ID never. Proven - the second run reported
+"4 already archived, 0 new".
+
+**Drafts stay out.** A draft was neither received nor sent, and it still
+changes.
+
+**Every 15 minutes**, via `dialos-mailarchiv.timer`. Not more often, because a
+mail arriving in the archive a quarter of an hour later is no problem; not
+less often, because a mail just written should be findable there.
+
+**The price, stated openly:** the local store contains only what Thunderbird
+has fetched. A mail never opened has no text there - then the PDF says so
+instead of producing an empty page. A complete archive only comes with the own
+IMAP path.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk

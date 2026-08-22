@@ -313,17 +313,17 @@ gelöscht - so bleibt nachvollziehbar, was schon erledigt ist.
       siehe den Punkt „Drucken per Sprache" weiter unten. Eine Writer-Vorlage
       in `~/Vorlagen` braucht es dafür nicht mehr - der Briefbogen entsteht
       im Text selbst.
-  - [~] **PDF-Archiv - Briefe erledigt 2026-08-22, Mails offen.**
+  - [x] **PDF-Archiv - Briefe und Mails erledigt 2026-08-22.**
     Jeder Brief landet beim Schreiben automatisch als PDF in
     `~/Dokumente/DialOS-DATA/`. Eigener PDF-Erzeuger über `cairo`, weil der
     Briefbogen mit Leerzeichen gesetzt ist und in einer Proportionalschrift
     zerfiele; mit `pdftotext -layout` zurückgelesen und zeichengenau
     verglichen.
     
-    **Offen: die Mails.** Nicht am Archiv - DialOS verschickt noch keine Mail
-    selbst. Solange das über Thunderbird läuft, gibt es keinen Punkt zum
-    Eingreifen. Gehört an den eigenen Versandweg (erster Punkt im
-    Mail-Block).
+    **Mails ohne Passwort:** aus Thunderbirds lokalem mbox-Speicher, alle 15
+    Minuten per Timer. Jede Mail nur einmal (Message-ID gemerkt). Der
+    eigene IMAP-Weg bleibt trotzdem nötig - der lokale Speicher enthält nur,
+    was Thunderbird geholt hat.
     
     **Und die Datenschutzfrage bleibt offen** (mit den Bildschirmfotos
     zusammen zu entscheiden): Verfallen die PDFs nach sieben Tagen wie die

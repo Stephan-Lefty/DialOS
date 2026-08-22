@@ -1800,6 +1800,48 @@ liegt: DialOS verschickt noch keine Mail selbst. Solange das über Thunderbird
 läuft, gibt es keinen Punkt, an dem DialOS eingreifen könnte. Der Hinweis
 steht in `TODO.md` bei dem Punkt, an dem der eigene Versandweg gebaut wird.
 
+
+### Mails im Archiv - ohne Passwort (neu 2026-08-22)
+
+Stephans Ergänzung am selben Tag: „können wir dort auch alle eingehenden und
+ausgehenden Mails ablegen!"
+
+**Der naheliegende Weg wäre IMAP — und der scheidet aus.** Er bräuchte die
+Zugangsdaten des Postfachs, die es auf diesem Gerät noch in keiner lesbaren
+Datei gibt, und er wäre ein zweiter Zugang zum Postfach. Thunderbird hält
+aber lokale Kopien im echten mbox-Format:
+
+```
+~/.thunderbird/<profil>/ImapMail/<server>/INBOX
+~/.thunderbird/<profil>/ImapMail/<server>/Sent
+```
+
+Diese Dateien sind schon da. **Kein Passwort, kein Netz, keine neue Stelle,
+an der Zugangsdaten liegen.**
+
+`dialos-mailarchiv.py` liest sie, entschlüsselt die Kopfzeilen (aus
+`=?UTF-8?B?...` wird wieder Text), nimmt den `text/plain`-Teil und legt jede
+Mail als PDF ab — mit Kopfblock aus Von, An, Datum, Betreff und den Namen der
+Anhänge. Gibt es nur HTML, wird es grob entkernt; für ein Archiv zählt der
+Wortlaut.
+
+**Jede Mail nur einmal.** Gemerkt wird die `Message-ID` in
+`.archivierte-mails.txt`, nicht der Dateiname: Bei gleichem Betreff am selben
+Tag wäre der Name doppelt, die ID nie. Nachgewiesen — der zweite Lauf meldete
+„4 schon archiviert, 0 neu".
+
+**Entwürfe bleiben draußen.** Ein Entwurf wurde weder empfangen noch gesendet
+und ändert sich noch.
+
+**Alle 15 Minuten**, über `dialos-mailarchiv.timer`. Nicht häufiger, weil eine
+Mail eine Viertelstunde später im Archiv kein Problem ist; nicht seltener,
+weil man eine gerade geschriebene Mail dort finden soll.
+
+**Der Preis, offen benannt:** Der lokale Speicher enthält nur, was Thunderbird
+geholt hat. Eine nie geöffnete Mail hat dort keinen Text — dann steht das im
+PDF, statt eine leere Seite zu erzeugen. Ein vollständiges Archiv gibt es
+erst mit dem eigenen IMAP-Weg.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-
