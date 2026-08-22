@@ -155,6 +155,16 @@ def gebaute_saetze():
                      f"{bez} {hat} {len(waren)} Einträge. "
                      f"Soll ich {ihn} löschen? Sage ja oder nein."))
 
+    # Drucken - die Ansagen entstehen aus der Bezeichnung samt Beugung.
+    # Sie stehen deshalb nicht als Konstante im Skript und muessen hier
+    # gebaut werden, sonst fehlen sie in der Sammlung. Genau dabei ist am
+    # 2026-08-22 aufgefallen, dass "Die Notizen wird gedruckt" herauskam.
+    drucken = modul("dialos-drucken.py", "d_drucken")
+    for name, (_pfad, bez, wird, ist, _f) in drucken.ZIELE.items():
+        gefunden.append(("drucken", f"{name}-laeuft", f"{bez} {wird} gedruckt."))
+        gefunden.append(("drucken", f"{name}-leer",
+                         f"{bez} {ist} leer. Es gibt nichts zu drucken."))
+
     # Schreibtisch-Umschaltung
     for name, satz in (("linux", "Linux Desktop."),
                        ("windows", "Windows Desktop."),

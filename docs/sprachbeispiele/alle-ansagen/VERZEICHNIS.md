@@ -1,6 +1,6 @@
 # Alle Ansagen von DialOS
 
-Erzeugt am 2026-08-22 12:25 mit `scripts/dialos-alle-ansagen.py`.
+Erzeugt am 2026-08-22 13:15 mit `scripts/dialos-alle-ansagen.py`.
 
 Jede Ansage liegt zweimal vor: `...-michael.ogg` und `...-anna.ogg`.
 
@@ -45,28 +45,35 @@ Jede Ansage liegt zweimal vor: `...-michael.ogg` und `...-anna.ogg`.
 | `37-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann die Umschaltung nicht finden. |
 | `38-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das Diktat nicht finden. |
 | `39-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich schreibe schon mit. |
-| `40-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das Bildschirmfoto nicht finden. |
-| `41-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann die Auskunft nicht finden. |
-| `42-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann die Fernwartung nicht finden. |
-| `43-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann die Notizen nicht finden. |
-| `44-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das Diktat nicht starten. |
-| `45-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das nicht ausführen. |
-| `46-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich höre Dich wieder. |
-| `47-ton-ausgabe-ansage_bluetooth-*.ogg` | ton-ausgabe | Ton über Lautsprecher. |
-| `48-ton-ausgabe-ansage_intern-*.ogg` | ton-ausgabe | Ton über Laptop. |
-| `49-auskunft-uhrzeit-*.ogg` | auskunft | Es ist zwölf Uhr zweiundzwanzig. |
-| `50-auskunft-datum-*.ogg` | auskunft | Heute ist Samstag, der zweiundzwanzigste August. |
-| `51-start-begruessung-*.ogg` | start | Hallo Steffan, ich bin Michael, ich bin Dein persönlicher Assistent. Heute ist Samstag, der zweiundzwanzigste August. Die aktuelle Uhrzeit ist zwölf dreiundzwanzig. Ich nenne Dir noch die Akku-Stände. Akku-Stand Laptop: 87 Prozent. Akku-Stand Lautsprecher: 100 Prozent. Es besteht eine Internetverbindung. Das Wetter in Seefeld in Tirol wird heute so sein. Vormittags 14 Grad und leicht bewölkt, nachmittags 19 Grad und sonnig. Ich wünsche Dir einen schönen Tag! |
-| `52-akku-stufe-25-*.ogg` | akku | Der Akku ist bei 25 Prozent. |
-| `53-akku-stufe-15-*.ogg` | akku | Der Akku ist bei 15 Prozent. Du solltest den Computer bald an die Steckdose hängen. |
-| `54-akku-stufe-5-*.ogg` | akku | Steffan, der Akku ist fast leer. Der Computer muss jetzt an die Steckdose. |
-| `55-diktat-ende-notizen-*.ogg` | diktat | Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deine Notizen vorgelesen haben, dann sage: Notizen vorlesen. |
-| `56-diktat-ende-einkaufszettel-*.ogg` | diktat | Diktat beendet, 4 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen. |
-| `57-diktat-ende-brief-*.ogg` | diktat | Der Brief ist geschrieben, 2 Sätze. Möchtest Du Deinen Brief vorgelesen haben, dann sage: Brief vorlesen. |
-| `58-notiz-vorlesen-*.ogg` | notiz | 3 Einträge. Milch. Butter. Sechs Eier. |
-| `59-notiz-rueckfrage-leeren-*.ogg` | notiz | Der Einkaufszettel hat 3 Einträge. Soll ich ihn löschen? Sage ja oder nein. |
-| `60-desktop-linux-*.ogg` | desktop | Linux Desktop. |
-| `61-desktop-windows-*.ogg` | desktop | Windows Desktop. |
-| `62-desktop-steht-schon-*.ogg` | desktop | Der Schreibtisch steht schon auf Linux Desktop. |
+| `40-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das Drucken nicht finden. |
+| `41-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das Bildschirmfoto nicht finden. |
+| `42-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann die Auskunft nicht finden. |
+| `43-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann die Fernwartung nicht finden. |
+| `44-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann die Notizen nicht finden. |
+| `45-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das Diktat nicht starten. |
+| `46-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich kann das nicht ausführen. |
+| `47-sprachbefehl-desktop-im-code-*.ogg` | sprachbefehl-desktop | Ich höre Dich wieder. |
+| `48-ton-ausgabe-ansage_bluetooth-*.ogg` | ton-ausgabe | Ton über Lautsprecher. |
+| `49-ton-ausgabe-ansage_intern-*.ogg` | ton-ausgabe | Ton über Laptop. |
+| `50-auskunft-uhrzeit-*.ogg` | auskunft | Es ist dreizehn Uhr zwölf. |
+| `51-auskunft-datum-*.ogg` | auskunft | Heute ist Samstag, der zweiundzwanzigste August. |
+| `52-start-begruessung-*.ogg` | start | Hallo Steffan, ich bin Michael, ich bin Dein persönlicher Assistent. Heute ist Samstag, der zweiundzwanzigste August. Die aktuelle Uhrzeit ist dreizehn dreizehn. Ich nenne Dir noch die Akku-Stände. Akku-Stand Laptop: 87 Prozent. Akku-Stand Lautsprecher: 100 Prozent. Es besteht eine Internetverbindung. Das Wetter in Seefeld in Tirol wird heute so sein. Vormittags 14 Grad und leicht bewölkt, nachmittags 19 Grad und sonnig. Ich wünsche Dir einen schönen Tag! |
+| `53-akku-stufe-25-*.ogg` | akku | Der Akku ist bei 25 Prozent. |
+| `54-akku-stufe-15-*.ogg` | akku | Der Akku ist bei 15 Prozent. Du solltest den Computer bald an die Steckdose hängen. |
+| `55-akku-stufe-5-*.ogg` | akku | Steffan, der Akku ist fast leer. Der Computer muss jetzt an die Steckdose. |
+| `56-diktat-ende-notizen-*.ogg` | diktat | Diktat beendet, 3 Einträge geschrieben. Möchtest Du Deine Notizen vorgelesen haben, dann sage: Notizen vorlesen. |
+| `57-diktat-ende-einkaufszettel-*.ogg` | diktat | Diktat beendet, 4 Einträge geschrieben. Möchtest Du Deinen Einkaufszettel vorgelesen haben, dann sage: Einkaufszettel vorlesen. |
+| `58-diktat-ende-brief-*.ogg` | diktat | Der Brief ist geschrieben, 2 Sätze. Möchtest Du Deinen Brief vorgelesen haben, dann sage: Brief vorlesen. |
+| `59-notiz-vorlesen-*.ogg` | notiz | 3 Einträge. Milch. Butter. Sechs Eier. |
+| `60-notiz-rueckfrage-leeren-*.ogg` | notiz | Der Einkaufszettel hat 3 Einträge. Soll ich ihn löschen? Sage ja oder nein. |
+| `61-drucken-brief-laeuft-*.ogg` | drucken | Der Brief wird gedruckt. |
+| `62-drucken-brief-leer-*.ogg` | drucken | Der Brief ist leer. Es gibt nichts zu drucken. |
+| `63-drucken-notizen-laeuft-*.ogg` | drucken | Die Notizen werden gedruckt. |
+| `64-drucken-notizen-leer-*.ogg` | drucken | Die Notizen sind leer. Es gibt nichts zu drucken. |
+| `65-drucken-einkaufszettel-laeuft-*.ogg` | drucken | Der Einkaufszettel wird gedruckt. |
+| `66-drucken-einkaufszettel-leer-*.ogg` | drucken | Der Einkaufszettel ist leer. Es gibt nichts zu drucken. |
+| `67-desktop-linux-*.ogg` | desktop | Linux Desktop. |
+| `68-desktop-windows-*.ogg` | desktop | Windows Desktop. |
+| `69-desktop-steht-schon-*.ogg` | desktop | Der Schreibtisch steht schon auf Linux Desktop. |
 
 *Eine Ausnahme: Die **Begrüßung** nennt den Namen des Assistenten und lautet deshalb in jeder Stimme anders - Michael sagt „ich bin Michael", Anna sagt „ich bin Anna". In der Tabelle steht die Fassung der ersten Stimme.*

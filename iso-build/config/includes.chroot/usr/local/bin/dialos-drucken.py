@@ -41,11 +41,19 @@ PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-drucken.log")
 HEIM = os.path.expanduser("~")
 # Wo was liegt - dieselbe Aufteilung wie beim Schreiben: Briefe sind
 # Dokumente, Zettel sind Notizen.
+# Bezeichnung MIT Beugung. Ohne sie sagt DialOS "Die Notizen wird gedruckt"
+# und "Die Notizen ist leer" - genau der Fehler, den dialos-notiz.py mit
+# benennen() schon einmal geloest hat. Aufgefallen erst beim Nachziehen der
+# Ansagen-Sammlung am 2026-08-22; gesprochen haette ihn jeder sofort gehoert.
+#
+# Felder: Pfad, Bezeichnung, "wird/werden", "ist/sind", Fusszeile noetig?
 ZIELE = {
-    "brief": (os.path.join(HEIM, "Dokumente", "brief.txt"), "Der Brief", False),
-    "notizen": (os.path.join(HEIM, "Notizen", "notizen.txt"), "Die Notizen", True),
+    "brief": (os.path.join(HEIM, "Dokumente", "brief.txt"),
+              "Der Brief", "wird", "ist", False),
+    "notizen": (os.path.join(HEIM, "Notizen", "notizen.txt"),
+                "Die Notizen", "werden", "sind", True),
     "einkaufszettel": (os.path.join(HEIM, "Notizen", "einkaufszettel.txt"),
-                       "Der Einkaufszettel", True),
+                       "Der Einkaufszettel", "wird", "ist", True),
 }
 
 
@@ -106,7 +114,7 @@ def drucker():
 
 def text_fuer(name):
     """Der zu druckende Text - mit Fusszeile, wo sie fehlt."""
-    pfad, bezeichnung, braucht_fusszeile = ZIELE[name]
+    pfad, bezeichnung, _wird, _ist, braucht_fusszeile = ZIELE[name]
     if not os.path.exists(pfad) or os.path.getsize(pfad) == 0:
         return None, bezeichnung
     if not braucht_fusszeile:
@@ -132,10 +140,11 @@ def main():
     name = sys.argv[1]
     melde(f"=== drucken {name} ===")
 
-    text, bezeichnung = text_fuer(name)
+    _pfad, bezeichnung, wird, ist, _f = ZIELE[name]
+    text, _bez = text_fuer(name)
     if text is None:
         melde("nichts zu drucken")
-        sprich(f"{bezeichnung} ist leer. Es gibt nichts zu drucken.")
+        sprich(f"{bezeichnung} {ist} leer. Es gibt nichts zu drucken.")
         return 0
 
     ziel = drucker()
@@ -160,7 +169,7 @@ def main():
     melde(f"gedruckt auf {ziel}: {auftrag}")
     # Die Anzahl der Seiten waere schoener, aber lp kennt sie nicht - und eine
     # geratene Zahl waere schlechter als keine.
-    sprich(f"{bezeichnung} wird gedruckt.")
+    sprich(f"{bezeichnung} {wird} gedruckt.")
     return 0
 
 
