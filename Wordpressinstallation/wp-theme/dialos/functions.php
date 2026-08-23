@@ -51,3 +51,29 @@ function dialos_child_footer_text() {
 	</script>
 	<?php
 }
+
+/**
+ * Oberes Menue beim Scrollen ausblenden.
+ *
+ * Der Hamburger-Button ist per CSS rechts fest positioniert und bleibt
+ * dadurch immer erreichbar - er oeffnet dasselbe Seiten-Menue wie schon
+ * bisher auf dem Smartphone (.side-collapse), nur jetzt auch bei
+ * breiten Bildschirmen sichtbar.
+ */
+add_action( 'wp_footer', 'dialos_child_scroll_nav', 20 );
+
+function dialos_child_scroll_nav() {
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var navbar = document.querySelector('.navbar');
+		if (!navbar) return;
+		var schwelle = 80;
+		window.addEventListener('scroll', function () {
+			var y = window.pageYOffset || document.documentElement.scrollTop;
+			navbar.classList.toggle('dialos-nav-hidden', y > schwelle);
+		}, { passive: true });
+	});
+	</script>
+	<?php
+}

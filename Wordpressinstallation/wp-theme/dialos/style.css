@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 0.4.2
+Version: 0.5.0
 Text Domain: dialos
 */
 
@@ -121,6 +121,35 @@ body.page-id-2 main#main {
 }
 .page-template-home.navbar-scroll-down .navbar {
   background-color: rgba(255, 255, 255, 0) !important;
+}
+
+/* ------------------------------------------------------------------
+   Oberes Menue beim Scrollen ausblenden, Hamburger-Button stattdessen
+   rechts fest im Bild - siehe dialos_child_scroll_nav() in functions.php
+   fuer das Scroll-Verhalten. (Stephan, 2026-08-23)
+   ------------------------------------------------------------------ */
+.navbar {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.navbar.dialos-nav-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.navbar-toggle {
+  display: block !important;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1100;
+  margin: 0 !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  border-radius: 4px;
+  padding: 9px 10px;
+}
+.navbar-toggle .icon-bar {
+  background: #fff !important;
 }
 
 /* ------------------------------------------------------------------
