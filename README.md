@@ -73,6 +73,25 @@ Details zum jeweiligen Stand stehen im
 - [Vorführvideos aufnehmen](docs/video-aufnahme.md) – OBS-Einrichtung mit getrennten Tonspuren, und die zwei Fallen, die den Ton ruinieren
 - [Offene Punkte](docs/offene-punkte.md) – was noch zu klären/entscheiden ist
 - [Abbild-Verzeichnis](docs/iso-builds.md) – welches Sicherungs-Abbild zu welchem Code-Stand gehört (Rescuezilla/Clonezilla)
+- [Lizenzen und Herkunft](docs/lizenzen.md) – was von wem stammt, unter welcher Lizenz, und welche Pflichten beim Weitergeben eines Geräts entstehen
+
+## Lizenz
+
+DialOS steht unter der **GNU General Public License, Version 3** (siehe
+[LICENSE](LICENSE)). Wer eine geänderte Fassung weitergibt, muss deren
+Quelltext ebenfalls offenlegen – DialOS ist für Menschen gebaut, die auf
+Hilfe angewiesen sind, und was daraus entsteht, soll ihnen offen bleiben.
+
+**Ausgenommen sind Name und Erscheinungsbild**: „DialOS", das Logo, das
+App-Symbol und die Hintergrundbilder. Umbauen ist erlaubt, das Ergebnis
+weiterhin „DialOS" zu nennen nicht – sonst trägt fremde Arbeit einen
+Namen, für den jemand anderes einsteht.
+
+Die Lizenz gilt nur für dieses Repository. Debian, GNOME und alle
+mitgelieferten Programme behalten ihre eigenen Lizenzen. Was das beim
+Weitergeben eines Geräts bedeutet – Quelltext-Pflicht, Markenrecht, die
+Lizenzen der Stimmen und Spracherkennungs-Modelle – steht vollständig in
+[docs/lizenzen.md](docs/lizenzen.md).
 
 ## Logo & Branding
 
@@ -110,6 +129,26 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Lizenz: GPL-3.0, dazu eine Bestandsaufnahme aller fremden Bestandteile**
+  (2026-08-23, Stephans Entscheidung). DialOS war oeffentlich, aber ohne
+  Lizenzdatei - und das heisst nicht "frei", sondern das Gegenteil: volles
+  Urheberrecht, sichtbar, aber niemand darf es benutzen, aendern oder
+  weitergeben. Stephan hat sich fuer Copyleft entschieden, damit ein Ableger
+  von DialOS offen bleiben muss. Name, Logo, App-Symbol und Hintergrundbilder
+  sind ausdruecklich ausgenommen, wie es Debian, Firefox und Ubuntu auch
+  halten: umbauen ja, weiterhin "DialOS" nennen nein.
+  Neu ist [docs/lizenzen.md](docs/lizenzen.md) (+ `.en.md`) mit dem, was beim
+  Weitergeben eines verkauften Geraets wirklich zaehlt: die Quelltext-Pflicht
+  aus der GPL (erfuellt, solange Debian-Pakete unveraendert bleiben - deshalb
+  legt DialOS eigene Skripte daneben, statt fremde Pakete zu patchen), der
+  Hinweis, dass `/usr/share/doc/` die Lizenznachweise traegt und beim
+  Aufraeumen nicht geloescht werden darf, und die Marken von Debian, GNOME
+  und Mozilla. **Die Lizenzen der Stimmen und Erkenner sind nachgelesen, nicht
+  geschaetzt:** Piper-Datensaetze `kerstin` und `thorsten` sind CC0, die
+  Vosk-Modelle `de-0.21`, `small-de-0.15` und `de-tuda-0.6-900k` Apache 2.0 -
+  alle vier duerfen auf verkauften Geraeten ausgeliefert werden. Der schon
+  bekannte Gegenfall (openWakeWord, CC BY-NC-SA) steht dort jetzt mit
+  Begruendung, damit ihn niemand ein zweites Mal pruefen muss.
 - **Zwei Tastenkombinationen fuers Admin-Konto** (2026-08-22, Stephans
   Wunsch). `Strg`+`Alt`+`W` schaltet die Optik zwischen Linux und Windows 11,
   `Strg`+`Alt`+`S` die Stimme zwischen Michael und Anna. Beide Skripte

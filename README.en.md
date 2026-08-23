@@ -73,6 +73,25 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 - [Recording demo videos](docs/video-aufnahme.en.md) – OBS setup with separate audio tracks, and the two traps that ruin the audio
 - [Open questions](docs/offene-punkte.en.md) – what still needs to be decided
 - [Image ledger](docs/iso-builds.en.md) – which backup image belongs to which code state (Rescuezilla/Clonezilla)
+- [Licences and provenance](docs/lizenzen.en.md) – what comes from where, under which licence, and what obligations arise when a device is passed on
+
+## Licence
+
+DialOS is under the **GNU General Public License, version 3** (see
+[LICENSE](LICENSE)). Anyone distributing a modified version must publish
+its source as well – DialOS is built for people who depend on assistance,
+and what grows out of it should stay open to them.
+
+**The name and visual identity are excluded**: "DialOS", the logo, the
+app icon and the wallpapers. Rebuilding is allowed, still calling the
+result "DialOS" is not – otherwise someone else's work carries a name
+that a different person stands behind.
+
+The licence covers this repository only. Debian, GNOME and every bundled
+program keep their own licences. What that means when a device is passed
+on – source code obligations, trademarks, the licences of the voices and
+speech models – is set out in full in
+[docs/lizenzen.en.md](docs/lizenzen.en.md).
 
 ## Logo & branding
 
@@ -102,6 +121,26 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Licence: GPL-3.0, plus an inventory of every third-party component**
+  (2026-08-23, Stephan's decision). DialOS was public but had no licence
+  file - and that does not mean "free", it means the opposite: full
+  copyright, visible, but nobody may use, change or pass it on. Stephan
+  chose copyleft so that a derivative of DialOS has to stay open. Name,
+  logo, app icon and wallpapers are explicitly excluded, the way Debian,
+  Firefox and Ubuntu handle it too: rebuilding yes, still calling it
+  "DialOS" no.
+  New is [docs/lizenzen.en.md](docs/lizenzen.en.md) (+ German original)
+  covering what actually matters when a sold device is handed on: the GPL
+  source obligation (satisfied as long as Debian packages stay unmodified -
+  which is why DialOS places its own scripts alongside rather than patching
+  other people's packages), the note that `/usr/share/doc/` carries the
+  licence evidence and must not be deleted when cleaning up, and the
+  trademarks of Debian, GNOME and Mozilla. **The licences of the voices and
+  recognisers were read, not guessed:** the Piper datasets `kerstin` and
+  `thorsten` are CC0, the Vosk models `de-0.21`, `small-de-0.15` and
+  `de-tuda-0.6-900k` are Apache 2.0 - all four may ship on devices that are
+  sold. The already-known counterexample (openWakeWord, CC BY-NC-SA) is now
+  recorded there with its reasoning, so nobody has to check it twice.
 - **Two keyboard shortcuts for the admin account** (2026-08-22, Stephan's
   request). `Ctrl`+`Alt`+`W` switches the look between Linux and Windows 11,
   `Ctrl`+`Alt`+`S` the voice between Michael and Anna. Both scripts now TOGGLE
