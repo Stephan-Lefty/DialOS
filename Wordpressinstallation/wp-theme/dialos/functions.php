@@ -86,6 +86,34 @@ function dialos_child_to_top() {
 }
 
 /**
+ * Oberes Menue beim Scrollen ausblenden (Stephan, urspruenglich
+ * 2026-08-23, beim Entfernen des Hamburger-Versuchs versehentlich mit
+ * entfernt). Diesmal unproblematisch: der "Nach oben"-Button haengt
+ * unabhaengig an <body>, nicht mehr im Menue verschachtelt wie beim
+ * Hamburger - wird vom Ausblenden also nicht mehr beruehrt. Bewusst
+ * "opacity" statt "transform" (transform auf einem Vorfahren wuerde
+ * einen neuen Bezugsrahmen fuer "position: fixed"-Nachfahren erzeugen,
+ * siehe der urspruengliche Hamburger-Bug).
+ */
+add_action( 'wp_footer', 'dialos_child_scroll_nav', 20 );
+
+function dialos_child_scroll_nav() {
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var navbar = document.querySelector('.navbar');
+		if (!navbar) return;
+		var schwelle = 80;
+		window.addEventListener('scroll', function () {
+			var y = window.pageYOffset || document.documentElement.scrollTop;
+			navbar.classList.toggle('dialos-nav-hidden', y > schwelle);
+		}, { passive: true });
+	});
+	</script>
+	<?php
+}
+
+/**
  * Seitenweite Suche + Barrierefrei-Umschalter im Menue, nebeneinander
  * in einem gemeinsamen <li> (Stephan, 2026-08-23). Impressum und die
  * Datenschutzerklaerungen sind dafuer aus dem Menue in die Fusszeile
