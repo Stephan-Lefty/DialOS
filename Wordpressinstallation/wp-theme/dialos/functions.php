@@ -86,32 +86,85 @@ function dialos_child_to_top() {
 }
 
 /**
- * Seitenweite Suche als letzten Menuepunkt anhaengen.
- *
- * WordPress' eingebaute Suche funktioniert bereits (Aufruf ueber
- * ?s=...), das Theme zeigt bisher nur kein Formular dafuer an. Als
- * <li> ans bestehende Menue "menu-seiten" angehaengt statt eigenes
- * Markup irgendwo einzuschieben - erscheint dadurch automatisch auch
- * im mobilen Seiten-Menue mit, ohne eigene Positionierung noetig.
+ * Seitenweite Suche + Barrierefrei-Umschalter im Menue, nebeneinander
+ * in einem gemeinsamen <li> (Stephan, 2026-08-23). Impressum und die
+ * Datenschutzerklaerungen sind dafuer aus dem Menue in die Fusszeile
+ * gewandert (siehe dialos_child_footer_links()), damit hier Platz ist
+ * und die "position: fixed"-Navbar nicht durch eine zusaetzliche Zeile
+ * waechst (sonst rutscht der Seiteninhalt nicht mit, siehe Screenshot
+ * vom 2026-08-23 - deshalb waren beide zwischenzeitlich in der
+ * Fusszeile).
  */
-add_action( 'wp_footer', 'dialos_child_search' );
+add_action( 'wp_footer', 'dialos_child_search_and_a11y' );
 
-function dialos_child_search() {
+function dialos_child_search_and_a11y() {
 	$aktion = esc_url( home_url( '/' ) );
 	?>
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
 		var menu = document.getElementById('menu-seiten');
 		if (!menu) return;
+
 		var li = document.createElement('li');
-		li.className = 'dialos-search-item';
-		li.innerHTML =
-			'<form class="dialos-search-form" role="search" method="get" action="<?php echo $aktion; ?>">' +
+		li.className = 'dialos-search-a11y-item';
+
+		var form = document.createElement('form');
+		form.className = 'dialos-search-form';
+		form.setAttribute('role', 'search');
+		form.method = 'get';
+		form.action = '<?php echo $aktion; ?>';
+		form.innerHTML =
 			'<label class="dialos-visually-hidden" for="dialos-search-input">Suchen</label>' +
 			'<input type="search" id="dialos-search-input" name="s" placeholder="Suchen …" />' +
-			'<button type="submit" aria-label="Suche starten">&#128269;</button>' +
-			'</form>';
+			'<button type="submit" aria-label="Suche starten">&#128269;</button>';
+		li.appendChild(form);
+
+		var SCHLUESSEL = 'dialos-a11y-mode';
+		var btn = document.createElement('button');
+		btn.type = 'button';
+		btn.id = 'dialos-a11y-button';
+		btn.className = 'dialos-a11y-button';
+		var istAn = localStorage.getItem(SCHLUESSEL) === '1';
+		btn.setAttribute('aria-pressed', istAn ? 'true' : 'false');
+		btn.textContent = istAn ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
+		btn.addEventListener('click', function () {
+			var an = !document.body.classList.contains('dialos-a11y-mode');
+			localStorage.setItem(SCHLUESSEL, an ? '1' : '0');
+			document.body.classList.toggle('dialos-a11y-mode', an);
+			btn.setAttribute('aria-pressed', an ? 'true' : 'false');
+			btn.textContent = an ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
+		});
+		li.appendChild(btn);
+
 		menu.appendChild(li);
+
+		document.body.classList.toggle('dialos-a11y-mode', istAn);
+	});
+	</script>
+	<?php
+}
+
+/**
+ * Impressum und Datenschutzerklaerungen in der Fusszeile statt im
+ * oberen Menue (Stephan, 2026-08-23) - Menue-Eintraege dafuer per
+ * REST API entfernt. Ersetzen dort den "Top"-Link, der seit dem
+ * eigenen "Nach oben"-Button (dialos_child_to_top) ohnehin doppelt
+ * war, statt eine zusaetzliche Fusszeilen-Zeile anzuhaengen.
+ */
+add_action( 'wp_footer', 'dialos_child_footer_links' );
+
+function dialos_child_footer_links() {
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var ziel = document.querySelector('.footer .col-md-6:last-child');
+		if (!ziel) return;
+		ziel.innerHTML =
+			'<p class="dialos-footer-links">' +
+			'<a href="https://dialos.org/impressum/">Impressum</a>' +
+			'<a href="https://dialos.org/datenschutzerklaerung/">Datenschutz &ndash; Website &amp; DialOS-System</a>' +
+			'<a href="https://dialos.org/dialos-mobil-datenschutz/">Datenschutz &ndash; DialOS Mobil (App)</a>' +
+			'</p>';
 	});
 	</script>
 	<?php
@@ -174,47 +227,3 @@ function dialos_child_skip_link() {
 	<?php
 }
 
-/**
- * Barrierefrei-Umschalter: solide statt transparente Navbar, dunklerer
- * Link-Kontrast, unterstrichene Links. Als Menuepunkt erreichbar,
- * merkt sich die Wahl per localStorage seitenuebergreifend.
- */
-add_action( 'wp_footer', 'dialos_child_a11y_toggle' );
-
-function dialos_child_a11y_toggle() {
-	?>
-	<script>
-	document.addEventListener('DOMContentLoaded', function () {
-		var SCHLUESSEL = 'dialos-a11y-mode';
-
-		function anwenden( an ) {
-			document.body.classList.toggle('dialos-a11y-mode', an);
-			var btn = document.getElementById('dialos-a11y-button');
-			if (btn) {
-				btn.setAttribute('aria-pressed', an ? 'true' : 'false');
-				btn.textContent = an ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
-			}
-		}
-
-		anwenden( localStorage.getItem(SCHLUESSEL) === '1' );
-
-		var menu = document.getElementById('menu-seiten');
-		if (!menu) return;
-		var li = document.createElement('li');
-		var btn = document.createElement('button');
-		btn.type = 'button';
-		btn.id = 'dialos-a11y-button';
-		btn.className = 'dialos-a11y-button';
-		btn.setAttribute('aria-pressed', localStorage.getItem(SCHLUESSEL) === '1' ? 'true' : 'false');
-		btn.textContent = localStorage.getItem(SCHLUESSEL) === '1' ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
-		btn.addEventListener('click', function () {
-			var an = !document.body.classList.contains('dialos-a11y-mode');
-			localStorage.setItem(SCHLUESSEL, an ? '1' : '0');
-			anwenden(an);
-		});
-		li.appendChild(btn);
-		menu.appendChild(li);
-	});
-	</script>
-	<?php
-}

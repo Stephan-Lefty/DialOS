@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 0.9.0
+Version: 1.0.0
 Text Domain: dialos
 */
 
@@ -224,20 +224,24 @@ a:focus {
 }
 
 /* ------------------------------------------------------------------
-   Seitenweite Suche im Menue (Stephan, 2026-08-23). Nutzt WordPress'
-   eingebaute Suche (funktioniert schon unter /?s=..., hatte bisher nur
-   kein sichtbares Formular). Als eigenes <li> ans bestehende Menue
-   angehaengt statt eigenes Markup - erscheint dadurch automatisch auch
-   im mobilen Seiten-Menue, ohne zusaetzliche Positionierungs-Tricks.
+   Seitenweite Suche + Barrierefrei-Umschalter, nebeneinander in einem
+   Menuepunkt (Stephan, 2026-08-23). Nutzt WordPress' eingebaute Suche
+   (funktioniert schon unter /?s=...). Impressum/Datenschutz sind dafuer
+   in die Fusszeile gewandert, damit hier Platz ist, ohne dass die
+   "position: fixed"-Navbar durch eine zusaetzliche Zeile waechst (siehe
+   Screenshot vom 2026-08-23, in dem genau das den Seiteninhalt
+   ueberlappt hatte).
    ------------------------------------------------------------------ */
-.dialos-search-item {
+.dialos-search-a11y-item {
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  flex-wrap: wrap;
 }
 .dialos-search-form {
   display: flex;
   align-items: center;
-  padding: 12px 15px;
 }
 .dialos-search-form input[type="search"] {
   border: 1px solid #ccc;
@@ -282,11 +286,11 @@ a:focus {
 }
 
 /* ------------------------------------------------------------------
-   Barrierefrei-Umschalter: Button im Menue + Wirkung von
-   body.dialos-a11y-mode. Behebt konkret zwei gemessene Kontrast-
-   Probleme: die transparente Navbar (dunkler Text auf variablem
-   Hintergrundbild) und die gruene Linkfarbe (~2,7:1 auf Weiss statt
-   der von WCAG geforderten 4,5:1). (Stephan, 2026-08-23)
+   Barrierefrei-Umschalter: Button im Menue, neben der Suche (Stephan,
+   2026-08-23) + Wirkung von body.dialos-a11y-mode. Behebt konkret zwei
+   gemessene Kontrast-Probleme: die transparente Navbar (dunkler Text
+   auf variablem Hintergrundbild) und die gruene Linkfarbe (~2,7:1 auf
+   Weiss statt der von WCAG geforderten 4,5:1).
    ------------------------------------------------------------------ */
 .dialos-a11y-button {
   background: none;
@@ -294,9 +298,9 @@ a:focus {
   border-radius: 4px;
   color: #333;
   font-size: 13px;
-  padding: 8px 12px;
-  margin: 10px 15px;
+  padding: 7px 12px;
   cursor: pointer;
+  white-space: nowrap;
 }
 .dialos-a11y-button[aria-pressed="true"] {
   background: #04b484;
@@ -325,4 +329,20 @@ body.dialos-a11y-mode .dropdown-menu > .active > a {
 body.dialos-a11y-mode *:focus {
   outline: 3px solid #027a5c !important;
   outline-offset: 2px !important;
+}
+
+/* ------------------------------------------------------------------
+   Impressum/Datenschutz-Links in der Fusszeile - ersetzen dort den
+   "Top"-Link, der seit dem eigenen "Nach oben"-Button ohnehin doppelt
+   war (Stephan, 2026-08-23).
+   ------------------------------------------------------------------ */
+.dialos-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 16px;
+  margin: 0 !important;
+}
+.dialos-footer-links a {
+  white-space: nowrap;
 }
