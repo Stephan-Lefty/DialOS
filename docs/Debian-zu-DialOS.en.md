@@ -423,7 +423,7 @@ logo and the login/desktop).
 ## 4. Set up autologin
 
 **Key gotcha:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`, see
-[the file in the repo](../iso-build/config/includes.chroot/etc/gdm3/custom.conf))
+[the file in the repo](beispiele/gdm3-custom.conf))
 is **not** the effective switch on this Debian 13/GDM 48 combination -
 the actual mechanism is a per-user property in the running
 AccountsService, set via D-Bus:
@@ -1334,8 +1334,114 @@ is appended to on every dictation; a footer would land in the middle of the
 text each time. Notes are working lists, not documents. When a list is
 printed, the line is added at print time: `dialos-fusszeile.py drucken FILE`.
 
+**Paper size and orientation are dictated to the printer.** On 2026-08-22
+Stephan's first real printout came out landscape instead of portrait. Where
+the rotation happens was measured: not in this queue's CUPS filter chain.
+With the Brother HL-L2350DW's PPD, `texttopdf` produces 595x842 points - A4
+portrait - and `pdftopdf` passes exactly that through, rotation 0. The printer
+itself reports `orientation-requested-default = portrait` and
+`media-default = iso_a4` over IPP. So the rotation happens beyond that, inside
+the device.
+
+It is therefore part of the job now instead of being nobody's default:
+
+    lp -d TARGET -o media=A4 -o orientation-requested=3 -
+
+`3` is portrait, `4` would be landscape (RFC 8011). The value is spelled out
+rather than omitted - a default you rely on is an assumption, and this
+assumption was demonstrably wrong.
+
+**Confirmed on 2026-08-22:** printouts have come out portrait since (Stephan:
+„Ausdruck ist jetzt hochkant"). That does not name the cause - it lies beyond
+anything measurable here. But an explicit setting beats any default, and that
+was the point.
+
+This surfaced a second print path: `dialos-fusszeile.py drucken` called
+`lp -` **without a destination**. This device has no system default
+(`lpstat -d` reports "no system default destination"), so the call would have
+failed. It now looks up the destination exactly as `dialos-drucken.py` does.
+
+**"notiz drucken" now counts as well.** In the retest on 2026-08-22 Stephan
+spoke the command and nothing happened - the log reads `erkannt: 'notiz
+drucken'` while the grammar only had `notizen drucken`. That is not a
+mishearing but how the restricted grammar is built: Vosk turns the phrases
+into a word network. It knows "notiz" from "notiz aufnehmen" and "drucken"
+from the three print commands - the combination is permitted but is not one of
+the listed phrases. The command therefore fell through silently, with no
+announcement, because there was no match at all. The singular is now in the
+list as a second wording.
+
+
 In a mail "Dieses Dokument" becomes "Diese Nachricht" (`--art mail`) - a mail
 is not a document.
+
+**The footer in EVERY mail (added 2026-08-20).** The next day Stephan sent a
+mail and the line was not in it. It could not have been:
+`dialos-fusszeile.py` was built and documented, but **not a single program
+called it** - a tool without users. The Thunderbird profile held zero
+signature entries. A requirement is not met because the tool for it exists,
+only once something uses it.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mail-signatur.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/system/dialos-fusszeile.service /etc/systemd/system/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/system/dialos-fusszeile.path /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now dialos-fusszeile.path dialos-fusszeile.service
+dialos-mail-signatur.py          # as the logged-in user, with Thunderbird closed
+```
+
+`dialos-fusszeile.py signatur` generates `mail-signatur.html` and
+`mail-signatur.txt` next to the source. Thunderbird can only read a signature
+from a **file**, not from a program - so that file is a second place holding
+the sentence, exactly the copy this section is meant to avoid. It is therefore
+never maintained by hand: the `.path` unit watches `fusszeile.txt` and
+regenerates it as soon as the sentence changes. That way it cannot go stale
+unnoticed. **Measured 2026-08-20:** `touch` on
+`fusszeile.txt` at 18:34:07, both signature files rewritten 80 ms later
+(`journalctl -u dialos-fusszeile.service`).
+
+`dialos-mail-signatur.py` writes the entries into the profile's **`user.js`**,
+not into `prefs.js`: Thunderbird rewrites `prefs.js` on exit and would lose a
+foreign entry. `user.js` is layered on top at every start. The price: the
+signature cannot be switched off permanently in the account settings - for an
+origin notice that is required in EVERY mail, that is the right way round. It
+is set for **every** identity the `prefs.js` knows, and `sig_bottom=false`
+places it directly below the user's own text when replying instead of below
+the whole quote (the profile replies above the quote).
+
+Two formats on purpose: Thunderbird composes in HTML here, and only there does
+"discreet and right-aligned" work cleanly - in plain text it would need spaces
+that wrap on a phone. The `.txt` sits alongside in case an account composes in
+plain text; then the account setting is switched over, with nothing to build.
+The `sig_file` entry is internally a file type (`datatype="nsIFile"` in
+`am-main.xhtml`), whose stored form on Linux is the absolute path - so a path
+as text is enough.
+
+**The name is clickable (Stephan's follow-up, 2026-08-20).** In the HTML
+version "DialOS.org" becomes a link to `https://dialos.org` - canonical
+without "www", since `www.dialos.org` redirects there with a 301 (checked the
+same day). It inherits the line's colour (`color:inherit`) and is only
+underlined: the usual link blue would be the loudest thing on the page in a
+line that is meant to be "discreet" - without the underline, conversely,
+nobody would see it is a link. **The `.txt` stays without an address.** In
+plain text a spelled-out address would be a second version of the same
+sentence, and the recipient would have to retype it; their mail client
+usually turns "DialOS.org" into a link by itself anyway.
+
+**This covers one of two mail paths.** According to `docs/anwendungen.md`
+Thunderbird is the interface, not the engine: DialOS is to send via IMAP/SMTP
+itself later, because Thunderbird cannot be driven from outside. The signature
+only applies to mail going through Thunderbird - that is, to everything the
+sighted helper writes. The own sending path has to fetch the line itself
+(`dialos-fusszeile.py text --art mail`); the note sits in `TODO.md` at that
+point.
+
+**The account is not part of the image.** It is created by hand during initial
+setup (form `thunderbird-angaben-formular.md`), and only after that is there an
+identity a signature can be set for. `dialos-mail-signatur.py` therefore
+belongs at the **end** of initial setup, after the account has been set up.
+Without an account it stops with a message instead of silently doing nothing.
 
 **Live transcript for sighted onlookers.**
 
@@ -1508,6 +1614,293 @@ decision.
 **Worth knowing when rebuilding:** a freshly installed shell extension is
 invisible to the RUNNING shell - it scans the directory only at startup, and
 under Wayland it cannot be restarted. Only logging out and back in helps.
+
+### 11j. Power: no standby, no lock screen, three battery warnings (new 2026-08-21)
+
+Three things that belong together: the device must not fall asleep, it must not
+lock the user out, and it must say when the battery is running low.
+
+**The first two were found in passing.** Stephan wanted to let DialOS run
+through a night in order to measure self-activation with nobody in the room.
+While preparing that it turned out nothing would have come of it - and why that
+concerns more than the test.
+
+```bash
+sudo install -m 644 iso-build/config/includes.chroot_before_packages/etc/dconf/db/local.d/01-dialos-defaults /etc/dconf/db/local.d/
+sudo dconf update
+# Switch the lock back on for the support account only:
+gsettings set org.gnome.desktop.screensaver lock-enabled true
+```
+
+**No standby on mains.** Out of the box GNOME sleeps after 900 seconds without
+keyboard or mouse input, on mains just as on battery. Proven in this device's
+system log on 2026-08-20: twice `Starting systemd-suspend.service` while DialOS
+was running (16:26 and 18:20). Speech does **not** reset GNOME's idle counter -
+only input devices do, and none of the ten inhibitors blocks (all are "delay").
+A blind user who touches nothing for a quarter of an hour and then says
+"Sprachsteuerung starten" would get no reaction and would not see why. On mains
+therefore `'nothing'`; on battery standby stays as protection against a flat
+battery, but only after 30 minutes (Stephan's decision).
+
+**No screen lock for the user.** `lock-enabled=true` with `lock-delay=0` means
+locking the moment the screen goes dark, i.e. after five minutes. Together with
+the autologin the user would be locked out of their own device after five
+minutes - for someone with impaired motor control that is precisely the reason
+DialOS exists. The door is the LUKS full-disk encryption (see
+`docs/sicherheit-datenschutz.md`), not the lock screen. For `dialosadmin` the
+lock is switched back on individually, because that is where the support tools
+live and where a person sits who can type a password. The **screen** may still
+go dark - that does not stop the voice control.
+
+**Three battery warnings** (Stephan's requirement the same day: 25 %, 15 %, 5 %,
+"the last one with an announcement that the device must go to the mains socket"):
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-akku-warnung.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-akku-warnung.service /etc/systemd/user/
+sudo systemctl --global enable dialos-akku-warnung.service
+systemctl --user daemon-reload && systemctl --user start dialos-akku-warnung.service
+```
+
+GNOME does warn about a low battery itself - with an on-screen message the user
+cannot see. For them the device shuts down without warning, mid-sentence, and a
+flat battery is harder for them to interpret than almost any other fault: the
+device simply stops answering.
+
+Three levels, three tones - at 25 % a statement, at 15 % advice, at 5 % a demand
+**with the name**. The same sentence three times would carry the same weight
+three times, leaving no escalation for the serious case. Spoken is "Steckdose"
+rather than Stephan's "Netzdose", because everyone understands that without
+thinking - the announcement comes at a moment when little time is left.
+
+**"Computer" and not "Gerät"** (Stephan, 2026-08-21: "when we say Gerät we
+mean the laptop, the computer - so let us call it Computer"). This applies
+everywhere DialOS speaks, not only to the battery - five announcements
+affected, three in the battery warning and two in remote support. "Gerät" is a
+technician's word; someone who cannot see what is being talked about needs the
+word they use themselves. Note the grammatical gender: "das Gerät" becomes "der
+Computer" - a plain word swap would have left wrong articles behind.
+
+**Via the mains indicator, not the battery status.** `BAT0/status` on this
+device reported `Not charging` while the power supply was plugged in - a charge
+threshold holds the battery at 78 %. Equating "not charging" with "on battery"
+warns with the cable connected. What is read is therefore `online` of the source
+of type `Mains`.
+
+**The check runs every 10 seconds, and the reason is not the battery.** For
+the warnings 60 s was ample - hours pass between 25 % and 15 %. It was too slow
+only for the confirmation when plugging in: someone who cannot see whether the
+plug is seated waited up to a minute for the answer. Measured on 2026-08-21:
+Stephan pulled the cable and plugged it back in within a minute - at a 60 s
+interval not a single check fell in the window where it was disconnected, and
+no log line appeared in 130 s. What is checked less often than it happens gets
+missed. The price is two tiny files more per check; the earlier two intervals
+(60 s, dropping to 20 s below 10 %) are gone without replacement.
+
+**Every change is logged, in both directions.** The first version only wrote
+"Netz getrennt"; reconnecting was only logged if a warning had been given
+before. Found on 2026-08-21 when Stephan pulled the cable to try it out and
+plugged it back in - the log read "Netz getrennt bei 77 %" with no end to it.
+For a sighted helper looking later, that is half the story.
+
+The whole chain was tested against a **simulated power supply** (a `/sys` tree
+in scratch space) rather than waiting for a genuinely flat battery:
+unplugging, 24 %, 20 % with no second message, 14 %, 4 %, plugging in with
+confirmation, and a jump from 60 % straight to 3 % that says "almost empty"
+and not "25 percent".
+
+**Once per discharge**, and skipped levels count as done: if the device drops
+from 30 % to 4 % while suspended, "almost empty" is the right announcement, not
+"25 percent". During a dictation 25 % and 15 % wait; the 5 % speaks anyway,
+because an interrupted sentence is better than a device that dies mid-letter.
+And someone who cannot see whether the plug is seated gets a short confirmation
+after plugging in.
+
+As a **systemd user service** with `Restart=always`, not via
+`/etc/xdg/autostart` like the other DialOS services - the same reasoning as for
+the LanguageTool service: if it fails, nobody notices until the device goes off,
+and then the failure is indistinguishable from a flat battery. A user service
+and not a system service, because it speaks and speech output hangs off the
+session. The warning is also the **sixth source** of the live transcript
+(`dialos-akku.log`).
+
+
+## Every letter as a PDF in the archive (new 2026-08-22)
+
+Stephan's requirement from 2026-08-21: "every letter and every mail must be
+put into a separate folder as a PDF file."
+
+```bash
+sudo /usr/local/sbin/dialos-aufspielen --wirklich   # or install by hand
+```
+
+**Where: `~/Dokumente/Archiv/DialOS-DATA/` — and on the stick.** The name is
+Stephan's choice so that both places are called the same thing.
+
+**Until 2026-08-22 this said the opposite**, and the reasoning was not wrong:
+the `DIALOS-DATA` partition is unencrypted exFAT, per
+`sicherheit-datenschutz.md` the stick is meant to be kept apart from the
+laptop, and letters to a health insurer do not belong from the LUKS disk onto
+an open medium.
+
+**Stephan decided otherwise** ("alle pdf Dateien … müssen unbedingt auf den
+Stick Bereich DialOS-DATA und unter Dokumente auf den Rechner unter
+Dokumente/Archiv/DialOS-DATA"). His reason outweighs mine: an archive that
+only lives on the disk is gone with the next disk failure, and the user cannot
+back it up himself. The encryption question is untouched by this and belongs
+in `sicherheit-datenschutz.md`, not in a silent refusal here.
+
+An archive that is usually not plugged in still cannot be written to — so
+**`dialos-archiv.py` catches up** as soon as the stick appears: the disk
+always holds everything, the stick everything added since it was last
+plugged in.
+
+**Why an own PDF writer and not LibreOffice.** The letterhead is laid out with
+**spaces**: sender and date are right-aligned because the line is padded to
+width 76. In a proportional font that falls apart immediately, and LibreOffice
+imports plain text with its default font. With `cairo` (present in Debian) a
+**monospace** font can be set — the alignment stays exactly as intended. It is
+also faster: no office suite to start.
+
+**Proven, not assumed:** the generated PDF was read back with `pdftotext
+-layout` and compared line by line with the text file. Every line matches
+character for character; the only deviation is one extra space introduced by
+`pdftotext` itself.
+
+**The archive must not hold up the letter.** It is started concurrently, and
+if it fails that goes into the log — the letter has already been written as a
+text file.
+
+**The mail half is still missing**, for a reason that has nothing to do with
+the archive: DialOS does not send mail itself yet. As long as that runs
+through Thunderbird there is no point at which DialOS could step in. The note
+sits in `TODO.md` at the item where the own sending path gets built.
+
+
+### Mail in the archive - without a password (new 2026-08-22)
+
+Stephan's addition the same day: "can we also put all incoming and outgoing
+mail in there!"
+
+**The obvious route would be IMAP - and it is ruled out.** It would need the
+mailbox credentials, which do not exist in any readable file on this device
+yet, and it would be a second way into the mailbox. But Thunderbird keeps
+local copies in real mbox format:
+
+```
+~/.thunderbird/<profile>/ImapMail/<server>/INBOX
+~/.thunderbird/<profile>/ImapMail/<server>/Sent
+```
+
+Those files are already there. **No password, no network, no new place where
+credentials live.**
+
+`dialos-mailarchiv.py` reads them, decodes the headers (`=?UTF-8?B?...`
+becomes text again), takes the `text/plain` part and files each mail as a PDF -
+with a header block of From, To, Date, Subject and the attachment names. If
+only HTML exists it is crudely stripped; for an archive the wording is what
+counts.
+
+**Each mail only once.** What is remembered is the `Message-ID` in
+`.archivierte-mails.txt`, not the file name: with the same subject on the same
+day the name would collide, the ID never. Proven - the second run reported
+"4 already archived, 0 new".
+
+**Drafts stay out.** A draft was neither received nor sent, and it still
+changes.
+
+**Every 15 minutes**, via `dialos-mailarchiv.timer`. Not more often, because a
+mail arriving in the archive a quarter of an hour later is no problem; not
+less often, because a mail just written should be findable there.
+
+**The price, stated openly:** the local store contains only what Thunderbird
+has fetched. A mail never opened has no text there - then the PDF says so
+instead of producing an empty page. A complete archive only comes with the own
+IMAP path.
+
+
+## Where things live — for the sighted helper (as of 2026-08-22)
+
+Stephan's reminder the same day: "always remember, we have sighted users too."
+That applies to the logs: since today they live in `~/.log/` and are therefore
+**invisible** in the file manager. For the user that makes no difference — he
+sees nothing anyway. For the helper sitting next to him, a folder he cannot
+see is an obstacle. So here is where everything is:
+
+| What | Where | Visible |
+|---|---|---|
+| Program logs | `~/.log/` | **no** (leading dot) |
+| PDF archive, letters and mail | `~/Dokumente/Archiv/DialOS-DATA/` | yes |
+| The same on the stick | `<DIALOS-DATA>/DialOS-Archiv/` | yes, once plugged in |
+| Letters as text | `~/Dokumente/` | yes |
+| Notes and shopping list | `~/Notizen/` | yes |
+| Screenshots | `~/Bilder/Bildschirmfotos/` | yes |
+
+**Why the logs are hidden** (Stephan's wish): previously 25 files sat openly in
+the home folder — ten live and fifteen rotated — among `Notizen`, `Dokumente`
+and `Bilder`. That is exactly the clutter in which a helper fails to find what
+he is looking for.
+
+**Anyone doing support rarely needs them.** The live transcript window shows
+the same thing as it happens, and the support log summarises what occurred.
+The raw logs are the case where neither is enough.
+
+**The folder may be deleted.** Every script recreates it when writing; only the
+past would be lost. `logrotate` clears it after seven days anyway.
+
+
+### Keyboard shortcuts for the admin account
+
+Stephan's request of 2026-08-22: two keys that switch without having to
+speak - when demonstrating, developing and checking, that is the faster way.
+
+| Key | What happens |
+|---|---|
+| `Ctrl`+`Alt`+`W` | Look: Linux ↔ Windows 11 |
+| `Ctrl`+`Alt`+`S` | Voice: Michael ↔ Anna |
+
+**For `dialosadmin` only.** The user account does both by voice. A keyboard
+shortcut there would be a path nobody finds and everybody triggers by
+accident.
+
+They are set by `scripts/dialos-admin-tastenkuerzel.sh` (no sudo - the
+settings belong to the user), as step 11c of the office setup. The script
+checks first whether the targets are executable at all: better no key than
+one that does nothing - press it once with no effect and you never press it
+again. `zeigen` lists the current state, `entfernen` removes both.
+
+**Both scripts toggle rather than demand a target.**
+`dialos-desktop-stil.sh umschalten` reads the remembered style and takes the
+other one - not the state of the loaded extensions, which can be half loaded
+mid-switch. `dialos-stimme-wechseln.py` takes the NEXT voice from the list in
+`dialos-stimme.py`, not "the other one": with a third voice, "the other one"
+would no longer be unambiguous.
+
+**Why the voice needs a script of its own.** `dialos-stimme.py setzen` only
+does half the job: it writes the Piper configuration - which needs root - and
+then tells the human to restart speech-dispatcher. At a terminal that is
+reasonable; behind a key it is not. The new script therefore runs WITHOUT
+root and splits the work: the privileged part via `sudo`, the
+speech-dispatcher restart itself - root could not touch the logged-in user's
+service at all. The same split as in `dialos-aufspielen`.
+
+It comes with `/etc/sudoers.d/dialos-stimme` (0440 root:root). The rule names
+two calls verbatim, with their argument, no wildcards:
+
+    dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen thorsten
+    dialosadmin ALL=(root) NOPASSWD: /usr/local/bin/dialos-stimme.py setzen kerstin
+
+A `setzen *` would be the gap something else fits through later. A third
+voice therefore needs a third line - deliberately: whoever adds a voice
+should trip over this file.
+
+**Reviewed and approved by Stephan on 2026-08-22** ("Regel passt so, lass sie
+drin" - the rule is fine, leave it in). This is recorded because the project
+has committed to never letting a sudoers rule reach a device unseen - and a
+review nobody can point to is not one.
+
+Measured on 2026-08-22: the voice switches in 4.4 seconds, announcing itself
+in the new voice, in both directions. The look switches without delay.
 
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
@@ -1823,6 +2216,15 @@ blind user operates alone, that decision belongs to a human with a screen.
 | | `gnome-sound-recorder` | recording is DialOS's job |
 | | `simple-scan` | no scanner in the build |
 | | `shotwell` | the image viewer is enough |
+| C - decided 2026-08-19 | `libreoffice-calc`, `libreoffice-impress`, `libreoffice-draw`, `libreoffice-math` | only **Writer** is specified (letters). Writer, `libreoffice-core` and `libreoffice-common` are demonstrably untouched - simulated before the decision. |
+
+**Deliberately NOT removed**, although hidden for `nutzer`: `obs-studio` and
+`gnome-snapshot` (video recording - the purpose is unresolved per
+[anwendungen.en.md](anwendungen.en.md), and what is not decided is not thrown
+away in advance), `yelp`, `baobab`, `gnome-software`, `seahorse` (can help during
+support). `libreoffice-startcenter` also stays - with the consequence that it
+then shows tiles for programs that no longer exist. A blemish for `dialosadmin`,
+invisible for `nutzer`.
 
 **Three "duplicates" canNOT be removed by package** - found on 2026-08-19,
 because `dpkg -S` on the duplicate names the same package as the original:
@@ -1878,6 +2280,13 @@ administrative happens on `dialosadmin`. **That has a consequence which must be
 understood:** a helper at the customer's home cannot pair a Bluetooth speaker
 without switching accounts. Pairing happens in the office (step 14); for the
 exceptional case, switching to `dialosadmin` remains.
+
+**Stephan decided this on 2026-08-19** after the consequence had been named -
+and the reason outweighs the convenience: Settings is the most dangerous window
+in the system on a device whose user cannot see the screen. One wrong click in
+audio output or the microphone leaves DialOS mute or deaf, and the user would
+have no way of finding out why. A middle option - exposing only the Bluetooth
+page through a menu entry of its own - was rejected as well.
 
 **Override instead of deletion:** files in
 `~/.local/share/applications/*.desktop` with `NoDisplay=true` override the

@@ -45,13 +45,42 @@ Stimmenauswahl, existiert noch nicht.
 Vor Ort per Sprache erfragt werden nur:
 - **Name** des Nutzers, mit Rückbestätigung ("Ich habe verstanden: Anna
   Schmidt. Stimmt das?") und Korrekturmöglichkeit.
-- **Begrüßungsstimme**: Auswahl aus 4 Piper-Stimmen (2 männlich, 2
-  weiblich, jeweils höchste verfügbare Sprachqualität) per Hörprobe,
-  mit Namen statt "Stimme 1/2" ansprechbar. Männlich: **Michael**,
-  **Daniel** (Reserve für spätere Erweiterung: Christian, Andreas,
-  Stefan). Weiblich: **Anna**, **Julia** (Reserve: Sarah, Katharina,
-  Christina). Später jederzeit änderbar, nicht nur bei der
+- **Begrüßungsstimme**: Auswahl aus **zwei** Stimmen per Hörprobe -
+  **Michael** (`de_DE-thorsten-high`) und **Anna**
+  (`de_DE-kerstin-low`). Später jederzeit änderbar, nicht nur bei der
   Ersteinrichtung.
+
+  **Zwei statt vier, und das ist eine Verschärfung, keine Sparmaßnahme**
+  (Stephan, 2026-08-20: „lieber 2 Stimmen optimiert als 8 Stimmen na es
+  geht gerade so"). Der Grund liegt in dem, was am selben Tag gemessen
+  wurde:
+
+  - **Jede Stimme braucht ihre eigene Einstellung.** Das Sprechtempo ist
+    **Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen aus
+    einem Erzeuger, der Kerstins 16-kHz-Rohdaten als 22050 Hz deklarierte -
+    jede Kerstin-Probe lief damit 38 % zu schnell. Richtig gemessen braucht
+    derselbe Satz bei Michael mit 0,88 rund 6,15 s und bei Anna mit 1,00 rund
+    7,04 s; Anna ist also **14 % langsamer**, nicht gleichauf. Seit dem
+    2026-08-22 steht Anna auf **0,95** - von Stephan aus korrekt erzeugten
+    Proben gewählt. Und die
+    Aussprache-Regeln („Tas tatur", „Ei Di", „Dial OS") sind auf Thorsten
+    abgestimmt - ob Anna sie braucht, ist noch offen. Acht Stimmen hießen
+    achtmal diese Arbeit, und ohne sie klingt jede einzelne schlechter als
+    nötig.
+  - **Für einen blinden Nutzer ist die Stimme nicht ein Merkmal, sondern
+    die ganze Oberfläche.** Eine mittelmäßige Stimme ist deshalb kein
+    Schönheitsfehler, den man mit Auswahl ausgleicht - eine große Auswahl
+    mittelmäßiger Stimmen ist schlechter als zwei gute.
+  - **Zwei decken die eigentliche Präferenz ab:** männlich oder weiblich.
+    Alles darüber ist Geschmack, den man später ergänzen kann, wenn er
+    verlangt wird.
+
+  **Korrektur einer früheren Annahme:** Hier stand „jeweils höchste
+  verfügbare Sprachqualität". Das ist bei den weiblichen Stimmen nicht
+  erreichbar - Piper bietet für Deutsch nur `eva_k-x_low`, `kerstin-low`
+  und `ramona-low`, alle mit **16 000 Hz** gegen Thorstens 22 050 Hz.
+  Anna klingt hörbar rauher als Michael, und das ist keine
+  Einstellungssache, sondern der Stand der verfügbaren Modelle.
 - Ggf. Bestätigung vorbereiteter Konten (siehe Datenschutz-Varianten
   unten) – reine Ja/Nein-Antwort, kein Diktat.
 
@@ -79,6 +108,23 @@ zur Verfügung stellen. Zwei Varianten:
   es zu keinem Zeitpunkt zu sehen. Google unterstützt das nativ; bei
   iCloud eingeschränkter (ggf. App-spezifisches Passwort nötig, das der
   Nutzer selbst erzeugt).
+
+## Fußzeile in die Mail eintragen (Pflichtschritt nach der Konto-Einrichtung)
+
+Sobald das Mailkonto steht - egal ob nach Variante 1 oder 2 - fehlt noch
+ein Schritt, und er lässt sich nicht vorziehen: Erst mit dem Konto gibt es
+eine Identität, für die eine Signatur gesetzt werden kann. Bei geschlossenem
+Thunderbird als der angemeldete Nutzer:
+
+```bash
+dialos-mail-signatur.py
+```
+
+Damit trägt jede Mail die Herkunftszeile aus
+`/usr/local/share/dialos/fusszeile.txt`. Ohne diesen Aufruf geht das Gerät
+ohne Fußzeile in Mails raus - am 2026-08-20 genau so passiert, weil das
+Werkzeug zwar gebaut war, aber niemand es aufrief. Ohne Konto bricht das
+Skript mit einem Hinweis ab, statt stillschweigend nichts zu tun.
 
 ## Kontaktdaten: laufende Synchronisation
 

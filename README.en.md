@@ -102,8 +102,485 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Two keyboard shortcuts for the admin account** (2026-08-22, Stephan's
+  request). `Ctrl`+`Alt`+`W` switches the look between Linux and Windows 11,
+  `Ctrl`+`Alt`+`S` the voice between Michael and Anna. Both scripts now TOGGLE
+  instead of demanding a target. The voice needed a script of its own:
+  `setzen` only writes the configuration and leaves the speech-dispatcher
+  restart to the human - behind a key that is no solution. Measured: 4.4
+  seconds to the announcement in the new voice. For `dialosadmin` only - the
+  user account does both by voice.
+
+- **A printout came out landscape instead of portrait** (2026-08-22). Paper
+  size and orientation are now part of the job (`-o media=A4 -o
+  orientation-requested=3`) instead of being left to defaults. It is measured
+  that CUPS was not at fault: both the filter chain and the printer report A4
+  portrait. This surfaced that `dialos-fusszeile.py drucken` called `lp`
+  without a destination - on a device with no system default that could never
+  have worked. The retest revealed a second fault: Vosk heard "notiz drucken"
+  while the grammar only knew "notizen drucken", so the command fell through
+  silently. The singular is now a second wording.
+
 *In progress since 2026-08-17. Everything created from now on goes here -
 0.5.0 is closed with the voice command for the desktop switch.*
+
+- **Screenshot on request (Stephan, 2026-08-21).** "Bildschirmfoto erstellen"
+  or "Bildschirmfoto machen". All 21 grammar sentences afterwards spoken by
+  Piper and recognised verbatim by Vosk.
+    - **The transcript window is not in the picture** (Stephan's addition).
+      It is DialOS' own display - a terminal a hundred columns wide in the
+      middle of the screen - and on a support photo it covers exactly what
+      the helper wants to see. The service therefore closes it **before** the
+      shot and reopens it afterwards; that costs about four seconds during
+      which recognition is paused. Acceptable, because the user has just
+      spoken a command and is waiting for the announcement anyway. It is only
+      reopened if one was running before - switching the transcript off is
+      not undone by taking a screenshot.
+    - **Not for the user but for support.** He cannot see the picture. But
+      "what does it say right now?" cannot be answered without one when nobody
+      is sitting next to him.
+    - **The device could not take screenshots at all.** Checked: neither
+      `gnome-screenshot` nor `grim`, `scrot`, `spectacle` or `flameshot` are
+      installed; `xwd` is X11 and useless under Wayland.
+    - **And the obvious interface is blocked.** `org.gnome.Shell.Screenshot`
+      answers with `AccessDenied: Screenshot is not allowed` - GNOME 48
+      reserves it for the shell itself.
+    - **The route is the XDG portal, and the decisive property is
+      `interactive: false`:** it delivers the picture **without a prompt**. A
+      dialog the user would have to confirm would, on this device, be the same
+      as no function at all. Checked, response code 0, a real PNG at
+      1920 × 1080.
+    - **DialOS assigns the name, not the portal.** The portal writes
+      `Screenshot.png` and counts up. Someone receiving three pictures in
+      support wants to know which was taken when - hence
+      `bildschirmfoto-2026-08-21-144048.png` in the `Bildschirmfotos` folder
+      that GNOME provides for it anyway.
+
+- **The letter path: built, measured - and still open in one place
+  (2026-08-21).** Stephan's request to tackle the letter. What emerged is a
+  complete path from speech to a finished letterhead; **not solved** is that
+  the dictation terminates itself mid-sentence.
+    - **Three new voice commands:** "Brief aufnehmen", "Brief schreiben"
+      (Stephan wanted both wordings) and "Brief vorlesen". All 19 grammar
+      sentences spoken by Piper and recognised verbatim by Vosk.
+    - **The letter goes to `~/Dokumente/brief.txt`,** not into the notes
+      folder: a note is appended to at every dictation, a letter is a finished
+      piece. An existing letter is set aside with date and time in the name,
+      not overwritten.
+    - **A letterhead in plain text** - sender and date right-aligned, body
+      wrapped to the same width of 76, footer bottom right. Month names and
+      the footer sentence are **fetched from the existing scripts, not copied**.
+      The address deliberately is not in the image; without `absender.txt` the
+      block is omitted.
+    - **A note about the missing signature** (Stephan's wish), where the
+      recipient looks for it. **Not** "valid without signature" - that would be
+      a legal statement, and where written form is required it is wrong.
+    - **Everything is read back**, with the parts named ("Absender:", "Datum:",
+      "Fußzeile:"). My first draft left out header and footer; Stephan's
+      objection: "shouldn't everything always be read out?" He is right - what
+      the user does not hear does not exist for them.
+    - **Spoken punctuation, measured twice and revised once.** The bare words
+      ("Komma", "Punkt") scored **three out of six** with Stephan's voice:
+      `komma` → `komme`, `punkt` → `kommt`, `doppelpunkt` → `dörte depots`. The
+      two-word forms ("Komma setzen", "Punkt setzen") scored **three out of
+      three**. That also removed the price Stephan had accepted beforehand:
+      "in diesem Punkt" now stays intact.
+    - **Silence produced text.** In 80 seconds of quiet the big model invented
+      **seven words** - "köln", "einen gefunden", "vom". Those landed in the
+      letter. A level gate at mean 150 separates cleanly: noise sits at 47-84,
+      speech at 3475-4196. Proven live: "köln" at level 37 and "ln" at 33 were
+      discarded.
+    - **The gravest fault had been there from the start: `FinalResult()` was
+      missing.** Vosk only delivers at a speech pause. Anyone speaking the
+      letter in one go and then saying "Diktat beenden" has both in **the
+      same** pause - the stop broke the loop and the buffered text was gone.
+      The log said "0 utterances" although a whole letter had been spoken. It
+      never showed up because on a shopping list you pause between items.
+    - **And the emergency exit was broken too.** The two-minute timeout could
+      never fire: every `[unk]` from room noise reset the silence clock. One
+      dictation ran on for nine minutes, held the "another service is
+      listening" marker - and Stephan could no longer start the voice control.
+      The very phantom words the new level gate discards when writing were what
+      kept it alive.
+    - **OPEN, and the reason the path is not yet usable:** the stop recogniser
+      turns ongoing speech into "diktat beenden". Measured with Piper: 30
+      seconds of letter text produce fragments by the second - `'beenden'` at
+      8.4 s, `'diktat'` at 4.8 s, `'beenden [unk]'` at 18.2 s. Counted across
+      the day: **six false triggers, all from a bare "beenden"** - which is why
+      the stop now requires both words. That is not enough: on the same day a
+      clean "diktat beenden" arose twice from plain speech, and Stephan's
+      verdict is the measure: **"I can never get to the end of this text."**
+    - **On the working method, because it belongs to the result:** I patched
+      the stop detection **four times** in one afternoon - guard period, level
+      gate, both words, announcement - and each time the next test found the
+      next gap. Two of my explanations (ambient noise, our own announcement)
+      were measured to be **wrong**, and one of the repairs - the announcement
+      "Sage bitte: Diktat beenden." - interrupted Stephan mid-dictation and had
+      to be removed the same day. The next step is therefore fixed: **a speech
+      pause as the condition, tested offline against Piper before Stephan tests
+      again.**
+
+- **Three battery warnings - and the speech samples still used the old voice
+  (2026-08-21).** Stephan's requirement: warnings at 25 %, 15 % and 5 %, "the
+  last one with an announcement that the device must go to the mains socket".
+    - **And the interval was too slow - not for the battery, for the**
+      **confirmation.** Stephan pulled the cable and plugged it back in within
+      a minute: at a 60 s interval no check fell in the window where it was
+      disconnected - **no log line at all in 130 s**. For the warnings that
+      would not matter (hours pass between 25 % and 15 %), for "Der Computer
+      hängt am Netz und lädt." it does: someone who cannot see whether the
+      plug is seated waited up to a minute. Now 10 s, and the two earlier
+      intervals are gone without replacement - one special case fewer.
+    - **Reconnecting was not logged** - found because Stephan pulled the cable
+      to try it and plugged it back in. The log read "Netz getrennt bei 77 %"
+      with no end to it: the line for plugging in was only written if a
+      warning had been given before. Now **every** change is logged, in both
+      directions. The chain was tested against a **simulated power supply**
+      rather than a genuinely flat battery - including a jump from 60 %
+      straight to 3 %.
+    - **"Computer" instead of "Gerät"** (Stephan's addition the same day:
+      "when we say Gerät we mean the laptop, the computer"). Applies
+      everywhere DialOS speaks - five announcements, three for the battery and
+      two in remote support. "Gerät" is a technician's word; someone who
+      cannot see what is being talked about needs the word they use
+      themselves. The grammatical gender changes with it: "das Gerät" becomes
+      "der Computer". A plain word swap would have left wrong articles behind.
+    - **Why GNOME does not already handle this:** it warns with an on-screen
+      message. The user cannot see it. For them the device shuts down without
+      warning, mid-sentence - and a flat battery is harder for them to
+      interpret than almost any other fault, because the device simply stops
+      answering.
+    - **Three levels, three tones:** at 25 % a statement, at 15 % advice, at
+      5 % a demand **with the name**. The same sentence three times would carry
+      the same weight three times, leaving no escalation for the serious case.
+      Spoken is "Steckdose" rather than "Netzdose" - the announcement comes at a
+      moment when little time is left and has to land first time.
+    - **Via the mains indicator, not the battery status.** `BAT0/status`
+      reported `Not charging` while the power supply was plugged in: a charge
+      threshold holds the battery at 78 %. Equating "not charging" with "on
+      battery" warns with the cable connected.
+    - **Skipped levels count as done.** If the device drops from 30 % to 4 %
+      while suspended, "almost empty" is the right announcement, not "25
+      percent". During a dictation 25 % and 15 % wait; the 5 % speaks anyway -
+      an interrupted sentence is better than a device that dies mid-letter.
+    - **A mistake I nearly made while writing the announcements:** "Das Geraet
+      muss an die Steckdose" - in this project identifiers and comments are
+      ASCII, but **spoken texts carry real umlauts**. Piper would have said
+      "Ge-ra-et", in the most urgent announcement of all. Found by comparing
+      with the existing announcements, before anything was spoken.
+    - **And a mistake that was already a day old:** the speech-sample generator
+      had the voice **hard-coded** (`de_DE-thorsten-high`), while Anna has been
+      the delivery voice since 2026-08-20. So all 15 samples in the repo were
+      still Michael - unnoticed, because they sound right on their own. Exactly
+      the trap the comment at `tempo()` **one line below** describes and which
+      had already been fixed there. Voice and tempo now both come from
+      `piper-generic.conf`; all 19 samples were regenerated, and the durations
+      in the table were read from the files instead of copied.
+
+- **The device fell asleep on its own - and locked the user out (2026-08-21).**
+  Both findings came up while preparing the overnight measurement, and both
+  concern the product, not the test.
+    - **Standby:** out of the box GNOME sleeps after 900 s without keyboard or
+      mouse input, on mains as on battery. Proven in the system log: twice
+      `Starting systemd-suspend.service` while DialOS was running (16:26 and
+      18:20 on 2026-08-20). **Speech does not reset GNOME's idle counter** -
+      only input devices do, and none of the ten inhibitors blocks. A blind user
+      who touches nothing for a quarter of an hour and then says
+      "Sprachsteuerung starten" would get no reaction and would not see why. On
+      mains now `'nothing'`, on battery standby after 30 instead of 15 minutes.
+    - **Lock:** `lock-enabled=true` with `lock-delay=0` - locking the moment the
+      screen goes dark. With the autologin the user would be locked out of their
+      own device after five minutes. For someone with impaired motor control
+      that is precisely the reason DialOS exists. The door is the LUKS full-disk
+      encryption, not the lock screen; for `dialosadmin` it stays switched on
+      individually.
+    - **The screen may still go dark** (Stephan's decision) - it stops nothing
+      and saves power. Set explicitly rather than inherited: an inherited value
+      is not a decision, and it can read differently after the next GNOME jump.
+
+- **The footer was built, but nobody called it (2026-08-20).** Stephan: "I
+  sent a mail yesterday and the line was not in it!" It **could not** have
+  been. `dialos-fusszeile.py` had been built the day before, documented, and
+  cleanly designed around a single source of text - only no program ever
+  called it. A tool without users. The Thunderbird profile held zero signature
+  entries. **A requirement is not met because the tool for it exists, only
+  once something uses it** - and exactly that last connection was missing,
+  without it showing up while building or while documenting.
+    - **`dialos-fusszeile.py signatur`** generates `mail-signatur.html` and
+      `mail-signatur.txt` from `fusszeile.txt`. Thunderbird can only read a
+      signature from a **file**, not from a program - so that file is a second
+      place holding the sentence, exactly the copy the design set out to avoid.
+    - **That is why it is never maintained by hand.** `dialos-fusszeile.path`
+      watches the source and has it regenerated as soon as the sentence
+      changes. Change the sentence and letters, printouts **and** mail switch
+      over at once. Without that the copy would eventually go stale unnoticed -
+      the same trap the design had already avoided for the code.
+    - **`dialos-mail-signatur.py` writes to `user.js`, not `prefs.js`.**
+      Thunderbird rewrites `prefs.js` on exit and would lose a foreign entry;
+      `user.js` is layered on top at every start. The price: it cannot be
+      switched off permanently in the account settings - for an origin notice
+      required in **every** mail that is the right way round. It is set for
+      every identity the profile knows.
+    - **Two formats.** The profile composes in HTML, and only there does
+      "discreet and right-aligned" work cleanly - in plain text it would need
+      spaces that wrap on a phone. The `.txt` sits alongside in case an account
+      composes in plain text; then it is switched over, not built.
+    - **The name is clickable** (Stephan's follow-up the same day). In the
+      HTML version “DialOS.org” leads to `https://dialos.org` - canonical
+      without “www”, since `www.dialos.org` redirects there with a 301. The
+      link inherits the line's colour and is only underlined: the usual link
+      blue would be the loudest thing on the page in a line meant to be
+      “discreet” - without the underline, conversely, nobody would see it is
+      a link. The `.txt` stays without an address; in plain text it would be a
+      second version of the same sentence that nobody can click.
+    - **What this does *not* solve:** according to `docs/anwendungen.en.md`
+      Thunderbird is the interface, not the engine - DialOS is to send via
+      IMAP/SMTP itself later. The signature only applies to mail going through
+      Thunderbird, i.e. the sighted helper's. The own sending path has to fetch
+      the line itself; the note now sits in `TODO.md` at exactly the place
+      where that path gets built.
+
+- **The user's name sounded wrong - and pronunciation belongs in the name
+  file, not in the rule table (2026-08-20).** Stephan's observation: "Michael
+  says Stefffan". The name is spoken in **every** greeting, every question and
+  every error - mispronounced it grates more than any other word.
+    - **`nutzer-name.txt` now has two fields:** `Stephan | Stefan`. The written
+      form stays "Stephan" - for letters and printouts, where "Stefan" would
+      simply be wrong. The second field is what gets spoken. If it is missing,
+      the first counts for both.
+    - **Why not in the pronunciation table** of `dialos-say.py`, where
+      "Tastatur" and "ID" live: rules there apply to **all** devices. A
+      customer's name applies to **one**. One rule per customer would be a list
+      of strangers' names in the repo within a year - and wrong again for the
+      next customer. Pronunciation belongs where the name is.
+    - **I would not have found this alone.** I had checked the name form of
+      address against three announcements and declared it done; that the name
+      itself sounds wrong is only audible to someone who knows it.
+    - Edge cases checked: nonsense in the second field falls back to the written
+      name, comment lines in the file are allowed, an empty file still yields the
+      plain "Du".
+
+- **30 -> 7 -> 3: switching on now requires both words, and without a command
+  it ends after 30 seconds (evening of 2026-08-20).** Two small changes instead
+  of the wake word - both calculated on the same two hours of operating data.
+    - **"Sprachsteuerung starten" needs both words.** `'starten'` alone had
+      fired 27 times, `'sprachsteuerung'` alone four times - and **none** of the
+      seven activations was followed by a command. 30 possible false starts
+      become **3**, and those three are exactly the real attempts. Two specific
+      words in a row practically do not occur in conversation.
+    - **Two deadlines instead of one:** 30 seconds as long as **no** command has
+      come, the full two minutes afterwards. That day all 7 activations ran into
+      the 120 s - 14 minutes of live command grammar nobody wanted; with the
+      short deadline it would have been 3.5.
+    - **And two different announcements for it.** After a conversation the
+      reason ("you haven't said anything for a while"), otherwise only the short
+      "I am no longer listening to you." A long explanation for something the
+      user never triggered is itself just noise.
+    - **Why this instead of the wake word:** openWakeWord's ready-made models
+      are **CC BY-NC-SA** - non-commercial, and DialOS is sold. An own model is
+      possible (code and Google's embedding are Apache 2.0), but the training
+      data decides sellability: that is exactly where the shipped models failed.
+      That is a project of days, not hours - and **a wake word does not close
+      the microphone anyway**, it has to listen in order to hear the wake word.
+      These two changes deliver more today and make the later measurement better.
+    - **Confirmed in operation (morning of 2026-08-21).** The numbers above were
+      *calculated* - the same two hours of data run through both rules. Now they
+      are *measured*: **2 h 19 min** of listening time on the evening of
+      2026-08-20 (service start 16:45:06 to shutdown at 19:04:39; the device did
+      **not** run overnight). **46 times** `'starten'` alone, **7 times** `'sprachsteuerung'`
+      alone, **7 times** `'[unk] starten'` - that is **60 near misses and zero
+      false starts**. All seven activations came with the full sentence and were
+      Stephan's tests. The prediction "two specific words in a row practically do
+      not occur in conversation" held up in the field. That is roughly **26
+      near misses per hour** - ambient noise the old rule would have switched on.
+    - **The short deadline works too.** The day before, **all** seven activations
+      ran into the 120 s. Now **6 of 8** ended after 30 seconds and only 2 after
+      120 - that is 9 minutes less live command grammar on a single test day.
+
+- **The core-word change is measured in operation - 30 against 7 (2026-08-20).**
+  Two hours of log from the running device, **the same data run through both
+  rules**:
+    - `'starten'` alone was recognized **27 times** - pure ambient noise.
+    - The old rule would have switched on **30 times**, the new one switched on
+      **7 times**. Saving: **23 activations of two minutes each = 46 minutes of
+      open microphone** in a good two hours.
+    - This is a better measurement than the morning's, because it does not
+      compare two periods but sends one body of data through both rules.
+    - **And it shows the limit:** 7 activations, 7 deadline shutdowns - not a
+      single one was followed by a command. So those 7 were largely noise too,
+      above all the four with `'sprachsteuerung'` alone. The change pushes the
+      problem down by a good three quarters, it does not solve it. The real road
+      remains the wake word (`TODO.md`).
+    - **My own mistake along the way:** my restart helper always set the log
+      aside under the same name and overwrote the first backup on the second run
+      - the raw data of the 157 utterances from that morning is gone. The result
+      is in the commits, the data is not. The helper now sets nothing aside at
+      all: since that day logrotate cleans up the logs, and a second mechanism
+      next to it only creates name collisions.
+
+- **Anna is the new voice of DialOS (2026-08-20).** Stephan's decision: a
+  friendly female voice. The listening comparison of three Piper voices produced
+  **`de_DE-kerstin-low`** at tempo **1.00**, name **Anna** - and since this
+  change also the **delivery voice** in the template, not only on the test
+  device.
+    - **Three things switch together** (`dialos-stimme.py setzen kerstin`):
+      voice, name and tempo. Individually each would be wrong - a female voice
+      introducing itself as Michael just as much as a tempo belonging to the
+      previous voice.
+    - **Tempo differs per voice, measurably so:** the same sentence takes
+      **These figures were wrong** (corrected 2026-08-22): they came from a
+      generator that declared Kerstin's 16 kHz raw data as 22050 Hz - every
+      Kerstin sample ran 38 % too fast. Measured correctly, the same sentence
+      takes about 6.15 s for Michael at 0.88 and about 7.04 s for Anna at
+      1.00; Anna is therefore **14 % slower**, not on a par. Since 2026-08-22
+      Anna is set to **0.95**, chosen by Stephan from correctly generated
+      samples. That answers the second of the three points
+      before the second voice - with yes.
+    - **The name was settled long ago** and was not reinvented:
+      `docs/ersteinrichtung.md` has long listed Michael and Daniel for male,
+      Anna and Julia for female. Stephan pointed me to it before I had asked.
+    - **And Anna knows the user's name.** Following Stephan's question ("can we
+      build in the user name too ... rather where it makes sense, as a
+      replacement for Du/Dir") DialOS now addresses him - in the greeting, at
+      decisions and at errors, **not** at confirmations and not at the deadline.
+      The reason weighs more here than politeness: the name at the start of a
+      sentence is a **signal** - with the radio on or a visitor in the room,
+      "Stephan, ..." says unmistakably that this concerns him. Someone who hears
+      it constantly stops hearing it.
+    - **Without a name file it stays the plain "Du",** and every announcement
+      still reads correctly. None of them depends on a name being entered.
+    - **Four mistakes of my own on the way:** "Stephan, **I**ch finde kein
+      Mikrofon" (after a comma it is lower case in German); "Stephan, hallo, ich
+      bin Anna" (the greeting builds the name in itself); the greeting sentence
+      exists in **two** places and I changed only one; and I put an example file
+      into `includes.chroot` - exactly what I had identified as wrong an hour
+      earlier with `gdm3/custom.conf`. The check script found the last two, not
+      me.
+
+- **Security updates now run unattended (2026-08-20).** `unattended-upgrades`
+  2.12 installed and configured - decided in `docs/anwendungen.en.md` on
+  2026-08-18 and listed there as "package not yet installed".
+    - **`#clear` before `Origins-Pattern` is mandatory, and I got it wrong at
+      first.** An `Origins-Pattern` line **appends** (`::`), it does not replace.
+      After the first attempt five patterns were in the list - my two **and**
+      Debian's three, including `label=Debian` without `-Security`, i.e. the
+      ordinary stable suite. I had told Stephan "security updates only"; that was
+      not true. Noticed only because `apt-config dump` was read after installing
+      instead of believing my own file - **writing a configuration file is not
+      the same as setting a setting.**
+    - **`Remove-Unused-Dependencies "false"` is the most important line.** After
+      the cleanup step 49 packages count as "automatically installed" - among
+      them `gnome-shell`, `nautilus`, `pipewire-audio`. An automatic `autoremove`
+      would offer overnight to remove the desktop and the audio stack. The
+      cleanup script protects them, but this setting must not rely on that: if
+      the protection misses **one** package, the device would be unusable in the
+      morning - and the user could not even call for help.
+    - **`Automatic-Reboot "false"`** weighs more here than usual: `/home/nutzer`
+      sits on the LUKS partition the security stick opens. A nightly reboot
+      without the stick plugged in locks the user out completely.
+    - **Proven, not assumed:** the dry run shows in
+      `/var/log/unattended-upgrades/unattended-upgrades.log` that `trixie`,
+      `trixie-updates` **and** the Anthropic repository are pinned at `-32768` -
+      apt's "never". Only `Debian-Security` is absent from that list.
+    - **Deliberately blocked too: `trixie-updates`,** where `tzdata` comes from
+      among others. The timezone database therefore ages until the voice command
+      "System aktualisieren" - worth noting on a device whose time announcement
+      is a core command.
+
+- **Logs are deleted after seven days (2026-08-20).** Stephan's decision, the
+  same period as the support log. Until then six logs grew without limit - for
+  the dictation that meant every letter ever dictated stayed on the device in
+  plain text.
+    - **Via `/etc/logrotate.d/dialos`, not inside the programs.** The support log
+      clears itself because `dialos-mitschrift.py` runs anyway while it is
+      written. For six programs that would be the same code six times - and a
+      service running for a week would never get round to it, because it only
+      looks on startup.
+    - **No `copytruncate`, and that is verified:** the programs do **not** hold
+      their file open, they open to write and close again (checked via
+      `/proc/*/fd`). Plain renaming is therefore safe. `copytruncate` would
+      answer a problem that does not exist here, and it can lose lines.
+    - **`dateext`** instead of a sequence number:
+      `dialos-diktat.log-2026-08-20`. Whoever looks during support searches for a
+      day - the same reasoning as for the support log.
+    - **Proven, not assumed:** forced run, all six rotated, new files with
+      **0600** instead of 0644. The two measurement backups were left alone
+      because they do not end in `.log`.
+    - **Remaining gap, stated:** a *newly* created file gets 0644 (the programs'
+      default umask); only rotation sets 0600. And the files rotated away today
+      still carry the old permissions - that corrects itself from tomorrow.
+
+- **The voice control switched itself on - and nearly requested remote support
+  (2026-08-20).** Stephan left DialOS running overnight: "every now and then
+  Michael spoke up. And just now on dialosadmin he asked me whether he should
+  switch remote support on."
+    - **The log explains both at once:** `14:04:07 erkannt: 'starten'` switches
+      the voice control on, `14:04:43 erkannt: 'hilfe rufen'` requests remote
+      support - **nobody spoke.** Only the yes/no confirmation prevented it.
+    - **Measured over 157 recorded utterances:** `'starten'` alone **18×**
+      against the full sentence 4×. So the voice control switched itself on 18
+      times, each time two minutes of open microphone - about 26 minutes nobody
+      wanted.
+    - **The core word is now "sprachsteuerung"** instead of "starten": long,
+      distinctive, present in only 16 of 157 utterances. Checked against the same
+      data: 22 activations become 9. The price is that a swallowed
+      "sprachsteuerung" makes the user repeat the sentence - an inconvenience,
+      unlike a microphone that switches itself on.
+    - **Yesterday's relaxation fixed one fault and created a bigger one.**
+      Recorded as a rule: a core word must be not only unambiguous but also
+      **long enough**.
+    - **What this confirmed is the confirmation prompt.** It was the only layer
+      that held - which is exactly why `docs/sprachbefehle.en.md` says
+      safety-critical commands get one "regardless of how confident the
+      recognition was".
+
+- **The announcement cache used the wrong voice (2026-08-20).**
+  `speicher_fuellen()` in `dialos-say.py` took the **first** `.onnx` file in the
+  directory instead of the configured one. While only Thorsten is installed that
+  goes unnoticed; with a second voice the cache would speak a different one than
+  the system, depending on sort order - and unnoticed, because both paths sound
+  right on their own. It now reads `DefaultVoice` from `piper-generic.conf`, the
+  same file as the tempo. If the configured voice is not installed and several
+  are present, it does **not** guess but stores nothing. Five cases verified.
+  (The code change slipped into the previous commit - `git add -A` takes what is
+  there.)
+
+- **"Hilfe rufen" - DialOS can now call for help (2026-08-19).** Until then a
+  user for whom something did not work had **no way** to reach support;
+  everything built for traceability presupposed that somebody gets to the device
+  at all.
+    - **"Hilfe rufen"** asks with a confirmation that explains what happens
+      ("your supporter can then see what is on the screen"), starts RustDesk and
+      reads the number out **digit by digit in groups of four and twice**. Spoken
+      as a number it would be useless, and the user cannot write it down.
+      **"Fernwartung beenden"** ends it again.
+    - **A one-time password is not obtainable with RustDesk 1.4.9** - five routes
+      tested, all closed (details in `docs/sicherheit-datenschutz.en.md`). It is
+      in no file, `rustdesk --password` has no effect even as root, and
+      [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074) is open.
+    - **So RUNTIME guarantees the limit, not the password** - the harder lever: as
+      long as RustDesk is not running, no connection is possible, whoever knows
+      the password. It never starts by itself and ends by itself after **one
+      hour**, with a warning three minutes before; another "Hilfe rufen" extends
+      it.
+    - **And the announcement says so, instead of claiming something false.** "The
+      password is only valid for this session" would be a lie while it is
+      permanent - telling a user who cannot see the screen a false sense of
+      security is worse than explaining the real one.
+    - **Absolute rather than idle-based, and why:** Stephan's question was right -
+      idle would be the better semantics. But nobody has ever connected to this
+      device, the signature of an active connection is unknown, and a limit that
+      mistakes an active session for idle cuts the supporter off mid-work.
+      `spur_notieren()` therefore collects the evidence; after the first real
+      connection attempt the detection can be built from **evidence**.
+    - **Two findings on the way:** `rustdesk --help` **starts the UI** instead of
+      printing help - the call ran into the timeout and left a RustDesk running,
+      which I stopped. And RustDesk contacts `api.rustdesk.com` on startup; that
+      is now in the privacy documentation.
+    - **New tool:** `scripts/dialos-grammatik-pruefen.py` - Piper speaks every
+      sentence of the grammar, Vosk listens. A mandatory check that depends on
+      somebody remembering the Piper invocation eventually stops happening. **All
+      18 sentences recognized verbatim**, including the 16 existing ones.
 
 - **The first correction of every session was a coin toss - and capitalization
   is better than assumed (2026-08-19).** The morning failure ("LanguageTool nicht

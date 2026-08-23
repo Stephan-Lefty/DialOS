@@ -52,11 +52,15 @@ Aufruf:
 Beenden durch den Satz "diktat beenden" oder mit Strg+C.
 """
 
+import array
+import collections
 import json
+import math
 import os
 import re
 import subprocess
 import sys
+import textwrap
 import time
 import urllib.parse
 import urllib.request
@@ -77,7 +81,7 @@ DEBUG = "--debug" in sys.argv
 # erkannt worden war - nur noch, was in der Notiz stand. Bei einer
 # Erkennung, die man nur durch Vergleichen von Gesagtem und Geschriebenem
 # beurteilen kann, ist das die entscheidende Information.
-PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-diktat.log")
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-diktat.log")
 
 # Der Satz, der das Diktat beendet. Er wird NUR erkannt, wenn er die
 # gesamte Aeusserung ist - sonst koennte man ihn in einem Brief nicht
@@ -86,39 +90,187 @@ SCHLUSSSATZ = "diktat beenden"
 GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, "[unk]"])
 SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 
+# SPERRFRIST FUER DEN SCHLUSS (2026-08-21). Am selben Tag endete ein Diktat
+# sechs Sekunden nach dem Start von selbst: Der Schluss-Erkenner lieferte das
+# nackte 'beenden', obwohl Stephan nach eigener Aussage nichts gesagt hatte.
+# Der Brief blieb leer, und seine Saetze liefen danach in die
+# Befehlserkennung, die sie in Unsinn presste ('gnome gnome welchen tag linux').
+#
+# DIE URSACHE IST NICHT GEFUNDEN, und das steht hier bewusst so. Zwei
+# Messungen haben sie NICHT bestaetigt:
+#   - 180 s Stille im selben Raum, dieselbe Grammatik: 0 Ergebnisse.
+#   - Dreimal die Bereit-Ansage gesprochen und sofort zugehoert: nichts.
+# Weder Umgebungsgeraeusch noch die eigene Ansage reichen also als Erklaerung.
+#
+# DIESE SPERRE IST DESHALB KEINE BEHEBUNG, SONDERN EINE ABSICHERUNG: Niemand
+# sagt drei Sekunden nach dem Start "Diktat beenden" - wer diktieren will,
+# diktiert. Ein Schluss in diesem Fenster ist mit hoher Wahrscheinlichkeit
+# keiner, und der Schaden davon ist gross (leeres Ergebnis), waehrend der
+# Schaden der Sperre klein ist (drei Sekunden warten, falls jemand es doch
+# sofort abbrechen will).
+SCHLUSS_SPERRFRIST_S = 3.0
+
+
+# PEGEL-TOR (gemessen am 2026-08-21, Stephans Stimme, 120 s).
+#
+# DAS PROBLEM: Das grosse Modell erfindet in Stille Woerter. Gemessen wurden
+# in 80 s Ruhe sieben Stueck - 'koeln', 'einen gefunden', 'vom', 'ln'. Im
+# Diktat landen die im Brief: Wer beim Diktieren nachdenkt, bekommt "koeln"
+# mitten in seine Kuendigung geschrieben. Das betrifft JEDES Diktat, nicht nur
+# Briefe; beim Einkaufszettel duerfte es bisher als falsch verstandene Ware
+# durchgegangen sein.
+#
+# DIE MESSUNG trennt sauber - Mittelpegel je Aeusserung:
+#
+#     'koeln'   (Rauschen)          71
+#     'nun'     (Rauschen)          84
+#     'einen'   (Rauschen)          47
+#     Stephans Saetze         3475 - 4196
+#     'sechsundzwanzig'            350   <- echte Sprache, aber leise
+#
+# WARUM AM ERGEBNIS UND NICHT AM AUDIOSTROM: Ein Tor, das leise Bloecke gar
+# nicht erst durchlaesst, zerschneidet Woerter - zwischen zwei Silben ist es
+# still. Am fertigen Ergebnis zu pruefen kostet nichts und kann nichts
+# zerteilen.
+#
+# DIE SCHWELLE liegt bewusst naeher am Rauschen als an der Sprache: 150 ist
+# das Doppelte des lautesten gemessenen Rauschens und weniger als die Haelfte
+# der leisesten echten Aeusserung. Jede verworfene Aeusserung wird
+# protokolliert - faellt dort echte Sprache hinein, sieht man es sofort.
+PEGEL_SCHWELLE = 150.0
+
+
+# SPRECHPAUSE VOR DEM SCHLUSS (2026-08-22).
+#
+# WARUM ES DIESE REGEL BRAUCHT: Der Schluss-Erkenner arbeitet mit einer
+# eingeschraenkten Grammatik und MUSS deshalb jedes Stueck Ton auf eine seiner
+# Phrasen abbilden. Gemessen mit Piper an 30 s zusammenhaengendem Brieftext:
+#
+#     bei  4,8 s  'diktat'
+#     bei  8,4 s  'beenden'
+#     bei 12,2 s  'diktat [unk] beenden'
+#     bei 15,1 s  'beenden'
+#
+# Bruchstuecke im Sekundentakt, aus ganz normaler Rede. Vier Reparaturen haben
+# das nicht dicht bekommen - Sperrfrist, Pegel-Tor, beide Woerter verlangen,
+# Ansage. Am 2026-08-21 brach Stephans Diktat nach 12,1 s mitten im Satz ab,
+# sein Urteil: "Diesen Text kann ich nie zu Ende bringen."
+#
+# DER UNTERSCHIED, DEN ES WIRKLICH GIBT: Ein echtes "Diktat beenden" kommt,
+# NACHDEM der Nutzer mit dem Text fertig ist - davor liegt eine Pause. Jedes
+# Bruchstueck entsteht mitten im Redefluss, wo es keine gibt. Genau das
+# schuetzt den Einkaufszettel seit jeher, ohne dass es jemand geplant haette:
+# "Milch." Pause. "Butter." Pause.
+#
+# DIE REGEL: In den letzten RUHE_FENSTER_S Sekunden muss es eine
+# zusammenhaengende Ruhephase von mindestens RUHE_MINDESTENS_S gegeben haben.
+RUHE_FENSTER_S = 5.0
+RUHE_MINDESTENS_S = 0.4
+
+# Wie lange ein Block dauert: 4000 Bytes, 16 Bit, mono, 16 kHz.
+BLOCK_S = 4000 / 2 / 16000.0
+
+
+def pause_davor(verlauf, fenster_s=RUHE_FENSTER_S,
+                mindestens_s=RUHE_MINDESTENS_S, schwelle=PEGEL_SCHWELLE):
+    """Lag in den letzten Sekunden eine Sprechpause?
+
+    "verlauf" ist eine Folge von Pegeln, aeltester zuerst, je Block einer.
+    Geprueft wird nur das letzte Fenster; alles davor ist fuer die Frage
+    "kam der Satz nach einer Pause" ohne Bedeutung.
+
+    Reine Funktion ohne Uhr und ohne Mikrofon - damit ist sie gegen
+    aufgezeichnete Faelle pruefbar, und genau das ist am 2026-08-22 passiert,
+    bevor Stephan wieder testen musste.
+    """
+    bloecke_fenster = max(1, int(fenster_s / BLOCK_S))
+    noetig = max(1, int(mindestens_s / BLOCK_S))
+    lauf = 0
+    for pegel in list(verlauf)[-bloecke_fenster:]:
+        if pegel < schwelle:
+            lauf += 1
+            if lauf >= noetig:
+                return True
+        else:
+            lauf = 0
+    return False
+
+
+def pegel(block):
+    """Effektivwert eines Audioblocks (16 Bit, mono)."""
+    werte = array.array("h")
+    werte.frombytes(block[:len(block) // 2 * 2])
+    if not werte:
+        return 0.0
+    return math.sqrt(sum(w * w for w in werte) / len(werte))
+
 
 def ist_schluss(gehoert):
-    """Beendet diese Aeusserung das Diktat?
+    """Beendet diese Aeusserung das Diktat? Nur der VOLLE Satz zaehlt.
 
-    NICHT exakte Uebereinstimmung - das war der Fehler vom 2026-08-18. Der
-    Nutzer sagte "diktat beenden", der Erkenner lieferte nur 'beenden', und
-    die exakte Bedingung wies es ab. Ergebnis: ein sieben Minuten langes
-    Diktat, das den ganzen Raum mitschrieb und nur von Hand zu stoppen war.
+    GEZAEHLT AM 2026-08-21, alle Schluss-Ereignisse eines Testtages:
 
-    Die neue Bedingung ist aus den Messdaten desselben Laufs abgeleitet. Der
-    Schluss-Erkenner lieferte in sieben Minuten Dauergerede genau zwei
-    Ergebnisse ausser "[unk]", und beide waren 'beenden' - jeweils als
-    Stephan es gesagt hat. Ein falsches Ergebnis kam NIE zustande.
+        nacktes 'beenden'        6 x falsch ausgeloest, 3 x echt
+        volles 'diktat beenden'  0 x falsch,            2 x echt
 
-    Deshalb: Es genuegt, wenn die Aeusserung
-      - "beenden" enthaelt,
-      - ausser Woertern des Schlusssatzes nichts weiter enthaelt, und
-      - kein "[unk]" enthaelt.
+    Jeder einzelne Fehlauslöser war ein nacktes 'beenden'. Zweimal beendete
+    sich ein Diktat dadurch, bevor ueberhaupt etwas gesprochen war; einmal
+    machte der Erkenner aus einem Bruchstueck von Stephans Diktat ein
+    'beenden', waehrend er gerade den Brief sprach. Beim naechsten Mal haette
+    dasselbe Bruchstueck ihn mitten im Satz gestoppt.
 
-    Das letzte Kriterium ist das wichtige. Beim ersten Test machte der
-    Erkenner aus "Tomaten Bananen Aepfel" ein 'beenden beenden [unk]' - mit
-    [unk] als Kennzeichen dafuer, dass da noch etwas anderes gesprochen
-    wurde. Ohne diese Bedingung waere jenes Geraeusch als Schluss
-    durchgegangen.
+    WARUM DAS FRUEHER ANDERS ENTSCHIEDEN WAR: Am 2026-08-18 lieferte der
+    Schluss-Erkenner in sieben Minuten Dauergerede nur zweimal etwas anderes
+    als '[unk]', und beide Male war es ein echtes 'beenden'. Daraus wurde die
+    Regel "es genuegt das Wort". Diese Messung hat aber nie geprueft, was beim
+    normalen DIKTIEREN passiert - und genau dort entstehen die Bruchstuecke.
+
+    Der Preis ist gering: Der volle Satz wurde an demselben Tag zweimal sauber
+    erkannt, und wird er einmal nicht erkannt, sagt DialOS es (siehe
+    ANSAGE_SCHLUSS_UNKLAR). Der Nutzer spricht also nie ins Leere, ohne es zu
+    merken - das war der eigentliche Schaden der alten Regel.
+
+    Die Bedingungen im Einzelnen:
+      - kein "[unk]" (da wurde noch etwas anderes gesprochen),
+      - BEIDE Woerter des Schlusssatzes kommen vor,
+      - und ausser Woertern des Schlusssatzes nichts weiter.
     """
     worte = gehoert.split()
     if not worte or "[unk]" in worte:
         return False
-    if "beenden" not in worte:
+    if not SCHLUSS_WOERTER <= set(worte):
         return False
     return set(worte) <= SCHLUSS_WOERTER
 
+
+def ist_halber_schluss(gehoert):
+    """Klingt nach Schluss, ist aber nicht der volle Satz.
+
+    Dafuer gibt es die Ansage: Wer "beenden" sagt und nichts passiert, wuerde
+    sonst dasselbe Wort wiederholen, bis er aufgibt.
+    """
+    worte = gehoert.split()
+    if not worte or "[unk]" in worte:
+        return False
+    return "beenden" in worte and set(worte) <= SCHLUSS_WOERTER
+
+
 ANSAGE_BEREIT = "Ich schreibe mit."
+
+# WENN EIN SCHLUSS VERWORFEN WIRD, MUSS DER NUTZER DAS HOEREN (2026-08-21).
+#
+# Stephan sagte dreimal "Diktat beenden", zweimal wurde es verworfen
+# (nacktes 'beenden' ohne vorherige Aeusserung), und er bekam kein Wort
+# zurueck. Am Bildschirm ist das aergerlich; wer den Bildschirm nicht sieht,
+# hat keine Moeglichkeit herauszufinden, warum nichts passiert - er
+# wiederholt dasselbe Wort, und es passiert wieder nichts.
+#
+# EINMAL je Diktat, nicht bei jedem Verwerfen: Eine Ansage, die sich
+# wiederholt, wird zum Geraeusch - und sie liefe selbst wieder ins Mikrofon.
+ANSAGE_SCHLUSS_UNKLAR = "Sage bitte: Diktat beenden."
+# ZURZEIT UNBENUTZT - siehe die Begruendung an der Auswertung des halben
+# Schlusses. Die Ansage bleibt stehen, weil sie mit der Sprechpause-Regel
+# zurueckkommt; geloescht muesste sie dann wortgleich neu erfunden werden.
 
 # ZIELE, DIE EINE LISTE SIND UND KEIN TEXT (2026-08-19). Bei einem
 # Einkaufszettel ist jede Ware ein eigener Eintrag; in einem Brief ist eine
@@ -131,6 +283,12 @@ ANSAGE_BEREIT = "Ich schreibe mit."
 # zwischen Eintraege, nicht innerhalb. Nach drei Tests standen drei solche
 # Zeilen im Zettel, und "3 Eintraege" klang wie dreimal dasselbe.
 LISTEN_ZIELE = ("einkaufszettel",)
+
+# BRIEFE GEHEN NICHT IN DEN NOTIZORDNER (Stephan, 2026-08-21). Eine Notiz ist
+# ein Arbeitszettel, der bei jedem Diktat ERGAENZT wird; ein Brief ist ein
+# fertiges Stueck, das einen Kopf, ein Datum und eine Fusszeile hat. Wuerde er
+# angehaengt, staende der zweite Brief unter der Fusszeile des ersten.
+BRIEF_ZIELE = ("brief",)
 
 # Anleitung nur bei einer Liste, und nur EIN Satz. Der Nutzer sieht nicht, dass
 # gerade ein einziger Eintrag entsteht statt drei - gesagt werden muss es
@@ -177,6 +335,10 @@ def eintraege_aus(name, text):
 VORLESEN_HINWEIS = {
     "einkaufszettel": ("Deinen Einkaufszettel", "Einkaufszettel vorlesen"),
     "notizen": ("Deine Notizen", "Notizen vorlesen"),
+    # Beim Brief ist das Vorlesen keine Bequemlichkeit, sondern die einzige
+    # Kontrolle: Vosk liefert rund 2 % falsch geschriebene Woerter, und wer
+    # den Bildschirm nicht sieht, findet sie nur beim Hoeren.
+    "brief": ("Deinen Brief", "Brief vorlesen"),
 }
 
 
@@ -187,8 +349,16 @@ def ansage_ende(name, anzahl):
     einzige, woran ein blinder Nutzer merkt, dass ueberhaupt etwas angekommen
     ist - und wieviel. "Diktat beendet." allein liesse ihn im Dunkeln.
     """
-    satz = ("Diktat beendet, ein Eintrag geschrieben." if anzahl == 1
-            else f"Diktat beendet, {anzahl} Einträge geschrieben.")
+    # EIN BRIEF HAT KEINE EINTRAEGE (2026-08-21). "Diktat beendet, 4 Einträge
+    # geschrieben" beschreibt einen Zettel, keinen Brief - und die Anzahl sagt
+    # dem Nutzer hier nichts, weil ein Brief nicht aus Posten besteht. Was ihm
+    # etwas sagt, ist die Anzahl der SAETZE, denn danach hat er diktiert.
+    if name in BRIEF_ZIELE:
+        satz = ("Der Brief ist geschrieben, ein Satz." if anzahl == 1
+                else f"Der Brief ist geschrieben, {anzahl} Sätze.")
+    else:
+        satz = ("Diktat beendet, ein Eintrag geschrieben." if anzahl == 1
+                else f"Diktat beendet, {anzahl} Einträge geschrieben.")
     hinweis = VORLESEN_HINWEIS.get(name)
     if hinweis:
         besitz, befehl = hinweis
@@ -218,6 +388,35 @@ DIKTAT_ZEITGRENZE_S = 120.0
 ANSAGE_LADEN = "Einen Moment, ich hole Zettel und Stift."
 
 NOTIZ_ORDNER = os.path.join(os.path.expanduser("~"), "Notizen")
+DOKUMENT_ORDNER = os.path.join(os.path.expanduser("~"), "Dokumente")
+FUSSZEILE_SKRIPT = "/usr/local/bin/dialos-fusszeile.py"
+NAMEN_SKRIPT_PFAD = "/usr/local/bin/dialos-namen.py"
+ABSENDER = "/usr/local/share/dialos/absender.txt"
+ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
+
+# DER HINWEIS AN DER STELLE DER UNTERSCHRIFT (Stephan, 2026-08-21). Ein Brief
+# ohne Unterschrift wirft beim Empfaenger die Frage auf, ob jemand etwas
+# vergessen hat - der Hinweis beantwortet sie, bevor sie entsteht.
+#
+# WARUM NICHT "ohne Unterschrift gueltig", die uebliche Formel: Das ist eine
+# rechtliche Aussage. Bei Schriftform-Erfordernis - und Kuendigungen sind
+# genau der Fall, den wir als Beispiel benutzen - ist ein Brief ohne
+# eigenhaendige Unterschrift eben NICHT gueltig. Der Hinweis erklaert die
+# fehlende Unterschrift, er ersetzt sie nicht.
+#
+# WARUM ER TROTZ DER FUSSZEILE NOETIG IST, die dasselbe Verfahren nennt: Die
+# Fusszeile steht unten rechts als Herkunftsangabe und gehoert zum Blatt. Der
+# Unterschriftshinweis steht dort, wo der Empfaenger die Unterschrift SUCHT.
+# Zwei Stellen, zwei Aufgaben.
+#
+# DASS "per Spracheingabe" DAMIT ZWEIMAL AUF DEM BLATT STEHT, ist gesehen und
+# so entschieden (Stephan, 2026-08-21, nach Vorlage der drei Moeglichkeiten:
+# so lassen, Hinweis kuerzen, Fusszeile im Brief weglassen). Wer das spaeter
+# fuer eine Doppelung haelt und eine der beiden Zeilen streicht, nimmt dem
+# Brief entweder die Herkunftsangabe oder die Erklaerung der fehlenden
+# Unterschrift - es ist keine Nachlaessigkeit, sondern eine Wahl.
+UNTERSCHRIFT_HINWEIS = ("Dieser Brief wurde per Spracheingabe erstellt und "
+                        "ist deshalb nicht unterschrieben.")
 
 
 def marke_pfad(name):
@@ -230,14 +429,43 @@ def marke_pfad(name):
 DIKTAT_MARKE = marke_pfad("dialos-diktat-aktiv")
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
     if DEBUG:
         print(text, flush=True)
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")
     except OSError:
         pass          # ein fehlendes Protokoll darf kein Diktat verhindern
+
+
+NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
+
+
+def anrede(satz):
+    """Stellt den Nutzernamen voran, wo es Sinn macht - siehe dialos-namen.py.
+
+    Geholt statt kopiert: Die Regel, WANN ein Name benutzt wird, gehoert an eine
+    Stelle. Faellt das Modul aus, kommt der Satz unveraendert zurueck - eine
+    Ansage darf nie davon abhaengen, dass ein Name eingetragen ist.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dialos_namen", NAMEN_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.anrede(satz)
+    except Exception:
+        return satz
 
 
 def sprich(text):
@@ -255,6 +483,97 @@ def lt_lebt():
         return True
     except Exception:
         return False
+
+
+# GESPROCHENE SATZZEICHEN - ZWEIWORTIGE MERKWOERTER (gemessen 2026-08-21).
+#
+# ERSTER ENTWURF WAREN DIE NACKTEN WOERTER "komma", "punkt", "absatz".
+# Stephans Entscheidung dazu lautete "immer als Satzzeichen werten", mit dem
+# bewussten Preis, dass "in diesem Punkt" zu "in diesem." wird. GEMESSEN hat
+# sich das nicht gehalten - die kurzen Woerter werden gar nicht zuverlaessig
+# erkannt:
+#
+#     gesagt                       Piper            Stephans Stimme
+#     "...Herren komma"            komma  ok        komme        falsch
+#     "...Herren (Pause) komma"    komme  falsch    komma        ok
+#     "komma" allein               ja     falsch    einen koffer falsch
+#     "punkt" allein               das    falsch    kommt        falsch
+#     "doppelpunkt" allein         doerte depots    -
+#
+# Drei von sechs. Es liegt weder an der Aussprache noch an der Pause - bei
+# Piper klappte das Gegenteil. Es ist das Sprachmodell: Es raet aus dem
+# Zusammenhang, und nach "Roessner" ist "komme" wahrscheinlicher als "Komma".
+#
+# DIE ZWEITE MESSUNG hat die Loesung gezeigt - dieselbe Stimme, dieselbe Kette:
+#
+#     "...Roessner komma setzen"        komma setzen        ok
+#     "...Vertrag punkt setzen"         punkt setzen        ok
+#     "...helfen fragezeichen setzen"   fragezeichen setzen ok
+#     "neuer satz"                      neuer ersatz        falsch
+#
+# Dreimal von drei. Dieselbe Lektion wie beim Einschalten der
+# Sprachsteuerung: Ein Merkwort muss eindeutig UND lang genug sein.
+#
+# DIE NACKTEN FORMEN SIND DESHALB RAUS, und das ist ein doppelter Gewinn: Die
+# Erkennung wird zuverlaessig, UND der eingangs akzeptierte Preis entfaellt -
+# "in diesem Punkt" bleibt stehen, weil nur "Punkt setzen" ein Zeichen macht.
+# "neuer satz" wurde nicht aufgenommen, weil es gemessen scheitert.
+#
+# Laengere Wendungen zuerst, sonst frisst "absatz" den "neuen absatz".
+SATZZEICHEN = [
+    ("neuer absatz", "\n\n"),
+    ("neue zeile", "\n"),
+    ("komma setzen", ","),
+    ("punkt setzen", "."),
+    ("fragezeichen setzen", "?"),
+    ("ausrufezeichen setzen", "!"),
+    ("doppelpunkt setzen", ":"),
+    ("gedankenstrich setzen", " - "),
+]
+
+
+def satzzeichen_setzen(satz):
+    """Ersetzt gesprochene Satzzeichen durch die Zeichen selbst.
+
+    WORTWEISE UND NICHT PER TEXTSUCHE. Eine Ersetzung im Fliesstext haette
+    "Punkte", "Kommando" und "Absatzweise" mitgetroffen - der Text zerfiele an
+    Stellen, an denen der Nutzer nie ein Satzzeichen gesagt hat.
+
+    Das Zeichen haengt am Wort davor, ohne Leerzeichen; danach kommt eines.
+    Absaetze raeumen die Leerzeichen davor weg, damit keine Zeile mit einem
+    Leerzeichen endet.
+    """
+    tabelle = dict(SATZZEICHEN)
+    worte = satz.split()
+    teile = []
+    i = 0
+    while i < len(worte):
+        zwei = " ".join(worte[i:i + 2]).lower()
+        if len(worte) - i >= 2 and zwei in tabelle:
+            teile.append(("zeichen", tabelle[zwei]))
+            i += 2
+            continue
+        eins = worte[i].lower()
+        if eins in tabelle:
+            teile.append(("zeichen", tabelle[eins]))
+            i += 1
+            continue
+        teile.append(("wort", worte[i]))
+        i += 1
+
+    text = ""
+    for art, wert in teile:
+        if art == "wort":
+            if text and not text.endswith(("\n", " ")):
+                text += " "
+            text += wert
+        elif wert.startswith("\n"):
+            text = text.rstrip() + wert
+        elif wert == " - ":
+            text = text.rstrip() + wert
+        else:
+            text = text.rstrip() + wert + " "
+    return text.strip()
 
 
 def schreibung_richten(satz):
@@ -338,6 +657,149 @@ def aufzaehlen(zeilen):
     return " ".join(saubern(z) + "." for z in zeilen if saubern(z))
 
 
+def holen(pfad, name, ersatz=None):
+    """Holt eine Funktion oder einen Wert aus einem anderen DialOS-Skript.
+
+    Geholt statt kopiert - dieselbe Regel wie bei anrede(). Faellt das Skript
+    aus, kommt der Ersatz zurueck: Ein Brief ohne Fusszeile ist besser als kein
+    Brief.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("geholt_" + name, pfad)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul
+    except Exception:
+        return ersatz
+
+
+def datum_ausgeschrieben(heute=None):
+    """"21. August 2026" - Monatsnamen aus dialos-start-ansage.py.
+
+    Nicht abgeschrieben: Die Liste steht dort schon, und zwei Listen mit
+    Monatsnamen laufen irgendwann auseinander.
+    """
+    import datetime
+    heute = heute or datetime.date.today()
+    ansage = holen("/usr/local/bin/dialos-start-ansage.py", "ansage")
+    monate = getattr(ansage, "MONATE", None) if ansage else None
+    if not monate:
+        return heute.strftime("%d.%m.%Y")
+    return f"{heute.day}. {monate[heute.month - 1]} {heute.year}"
+
+
+def absenderzeilen():
+    """Der Absenderblock, falls er erfasst ist - sonst nichts.
+
+    Die Anschrift steht bewusst NICHT im Abbild: Sie gehoert dem Nutzer und
+    wird bei der Ersteinrichtung eingetragen. Fehlt sie, faellt der Block
+    ersatzlos weg - ein Brief mit leeren Platzhalterzeilen waere schlimmer als
+    einer ohne Kopf, weil ein blinder Nutzer die Luecke nicht sieht.
+    """
+    zeilen = []
+    namen = holen(NAMEN_SKRIPT_PFAD, "namen")
+    if namen:
+        try:
+            geschrieben = namen.nutzer_name_geschrieben()
+            if geschrieben:
+                zeilen.append(geschrieben)
+        except Exception:
+            pass
+    try:
+        with open(ABSENDER, encoding="utf-8") as f:
+            for zeile in f:
+                zeile = zeile.strip()
+                if zeile and not zeile.startswith("#"):
+                    zeilen.append(zeile)
+    except OSError:
+        pass
+    return zeilen
+
+
+def briefbogen(text):
+    """Setzt den diktierten Text in einen Briefbogen aus reinem Text.
+
+    Absender und Datum rechtsbuendig, der Text linksbuendig, die Fusszeile
+    unten rechts - dieselbe Breite und dasselbe Verfahren wie in
+    dialos-fusszeile.py, weil es dieselbe Seite ist.
+    """
+    fuss = holen(FUSSZEILE_SKRIPT, "fusszeile")
+    breite = getattr(fuss, "BREITE", 76) if fuss else 76
+
+    def rechts(zeile):
+        if fuss:
+            return fuss.rechtsbuendig(zeile, breite)
+        return zeile.rjust(breite) if len(zeile) < breite else zeile
+
+    teile = []
+    absender = absenderzeilen()
+    if absender:
+        teile += [rechts(z) for z in absender]
+        teile.append("")
+    teile.append(rechts(datum_ausgeschrieben()))
+    teile.append("")
+    teile.append("")
+    # UMBRUCH AUF DIESELBE BREITE. Ohne ihn stuende der Fliesstext in einer
+    # einzigen 118 Zeichen langen Zeile, waehrend Datum und Fusszeile bei 76
+    # ausgerichtet sind - ein Briefbogen mit zwei Breiten ist keiner. Absaetze
+    # bleiben Absaetze: umgebrochen wird je Absatz, nicht ueber den ganzen Text.
+    absaetze = []
+    for absatz in text.rstrip().split("\n\n"):
+        einzeln = " ".join(absatz.split())
+        absaetze.append(textwrap.fill(einzeln, breite) if einzeln else "")
+    teile.append("\n\n".join(absaetze))
+    teile.append("")
+    # Linksbuendig und nicht rechts: Er gehoert zum Brief, nicht zum Briefkopf -
+    # und beim Vorlesen zaehlt er deshalb zum Text, wird also mitgelesen.
+    teile.append(textwrap.fill(UNTERSCHRIFT_HINWEIS, breite))
+    teile.append("")
+    teile.append("")
+    satz = fuss.text("dokument") if fuss else \
+        "Dieses Dokument wurde per Spracheingabe powered by DialOS.org erstellt!"
+    teile.append(rechts(satz))
+    return "\n".join(teile) + "\n"
+
+
+def brief_schreiben(zeilen):
+    """Schreibt den Brief - und legt einen vorhandenen zur Seite, statt ihn
+    zu ueberschreiben.
+
+    "brief.txt" bleibt der eine Brief, den der Nutzer meint, wenn er "Brief
+    vorlesen" sagt. Der vorige wandert mit Datum und Uhrzeit im Namen daneben.
+    Ueberschreiben waere hier schlimmer als bei einer Notiz: Ein Brief ist
+    Arbeit von Minuten, und wer ihn verliert, merkt es erst, wenn er ihn
+    braucht.
+    """
+    os.makedirs(DOKUMENT_ORDNER, exist_ok=True)
+    pfad = os.path.join(DOKUMENT_ORDNER, "brief.txt")
+    if os.path.exists(pfad) and os.path.getsize(pfad) > 0:
+        beiseite = os.path.join(
+            DOKUMENT_ORDNER,
+            "brief-" + time.strftime("%Y-%m-%d-%H%M%S") + ".txt")
+        try:
+            os.replace(pfad, beiseite)
+            melde(f"  vorigen Brief beiseitegelegt: {beiseite}")
+        except OSError as fehler:
+            melde(f"  konnte den vorigen Brief nicht beiseitelegen: {fehler}")
+    with open(pfad, "w", encoding="utf-8") as f:
+        f.write(briefbogen("\n".join(zeilen)))
+
+    # JEDER BRIEF WANDERT ALS PDF INS ARCHIV (Stephans Vorgabe vom
+    # 2026-08-21). Nicht abwarten und nicht daran scheitern: Der Brief ist als
+    # Textdatei bereits geschrieben - ein fehlgeschlagenes Archiv darf ihn
+    # nicht mitreissen. Was schiefging, steht in dialos-archiv.log.
+    if os.access(ARCHIV_SKRIPT, os.X_OK):
+        try:
+            subprocess.Popen([ARCHIV_SKRIPT, "ablegen", pfad, "--art", "brief"],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             start_new_session=True)
+            melde("  ins Archiv gegeben")
+        except Exception as fehler:
+            melde(f"  Archiv nicht aufrufbar: {fehler}")
+    return pfad
+
+
 def notiz_schreiben(name, zeilen):
     os.makedirs(NOTIZ_ORDNER, exist_ok=True)
     sicher = re.sub(r"[^\w -]", "", name).strip() or "notizen"
@@ -360,7 +822,7 @@ def main():
 
     quelle = waehle_mikrofon()
     if not quelle:
-        sprich("Ich finde kein Mikrofon. Diktat ist nicht möglich.")
+        sprich(anrede("Ich finde kein Mikrofon. Diktat ist nicht möglich."))
         return 1
 
     if not lt_lebt():
@@ -389,6 +851,41 @@ def main():
             os.unlink(DIKTAT_MARKE)
         except OSError:
             pass
+
+
+def aeusserung_verarbeiten(name, text):
+    """Der Weg jeder Aeusserung: Satzzeichen, Schreibung, Zerlegung.
+
+    Herausgeloest, damit der Resttext nach dem Schluss GENAU denselben Weg
+    nimmt wie jede andere Aeusserung. Zwei Kopien dieses Ablaufs waeren zwei
+    Stellen, an denen kuenftig eine Aenderung vergessen wird.
+
+    SATZZEICHEN VOR LanguageTool, und der Grund ist GEMESSEN, nicht vermutet
+    (2026-08-21). Ich hatte behauptet, mit Satzzeichen entscheide LanguageTool
+    die Grossschreibung besser. Fuer die SUBSTANTIVE stimmt das nicht -
+    "Damen", "Herren", "Vertrag", "Termin", "Kuendigung", "Gruessen" kamen mit
+    und ohne Zeichen gleich heraus. Was Satzzeichen bringen, sind die
+    SATZANFAENGE:
+
+        ohne:  ... schriftlich mit freundlichen Gruessen
+        mit:   ... schriftlich. Mit freundlichen Gruessen
+
+    In einem Brief ist das kein Schoenheitsfehler, sondern falsch. Listen
+    bleiben aussen vor - auf einem Einkaufszettel waere "Butter." keine
+    Verbesserung.
+    """
+    mit_zeichen = text if name in LISTEN_ZIELE else satzzeichen_setzen(text)
+    if mit_zeichen != text:
+        melde(f"  Satzzeichen:  {mit_zeichen!r}")
+    gefasst = schreibung_richten(mit_zeichen)
+    if gefasst.lower() != mit_zeichen.lower():
+        melde("  ACHTUNG: Schreibhilfe hat mehr als die Schreibung geaendert")
+    melde(f"  geschrieben: {gefasst!r}")
+    neue = eintraege_aus(name, gefasst)
+    if len(neue) > 1:
+        melde(f"  in {len(neue)} Eintraege getrennt: {neue!r}")
+    return neue
+
 
 
 def diktat_fuehren(zweck, name, quelle):
@@ -421,6 +918,15 @@ def diktat_fuehren(zweck, name, quelle):
                    if modell_klein else None)
         sprich(ANSAGE_BEREIT_LISTE if name in LISTEN_ZIELE else ANSAGE_BEREIT)
         prozess = aufnahme_starten(quelle)
+        # Beginn der AUFNAHME, nicht der Funktion: Davor liegen rund neun
+        # Sekunden Modellladezeit, in denen niemand sprechen kann.
+        aufnahme_seit = time.time()
+        anzahl_aeusserungen = 0
+        pegel_puffer = []
+        # Der VERLAUF wird nie zurueckgesetzt - anders als pegel_puffer, der zu
+        # jeder Aeusserung gehoert. Er beantwortet eine andere Frage: War es
+        # kurz vorher still?
+        pegel_verlauf = collections.deque(maxlen=int(RUHE_FENSTER_S / BLOCK_S) + 8)
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -434,25 +940,102 @@ def diktat_fuehren(zweck, name, quelle):
                 time.sleep(0.5)
                 prozess = aufnahme_starten(quelle)
                 continue
+            pegel_puffer.append(pegel(block))
+            pegel_verlauf.append(pegel_puffer[-1])
+
             # ZUERST den Schluss-Erkenner fragen. Er bekommt denselben
             # Block; wer zuerst fertig ist, ist unerheblich - entscheidend
             # ist, dass der Schlusssatz nicht erst durch die freie
             # Erkennung muss, wo er verloren geht.
             if schluss is not None and schluss.AcceptWaveform(block):
                 gehoert = json.loads(schluss.Result()).get("text", "").strip()
+                mittel = ((sum(pegel_puffer) / len(pegel_puffer))
+                          if pegel_puffer else 0.0)
                 if ist_schluss(gehoert):
-                    melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r}")
+                    # ZU LEISE IST KEIN SCHLUSS - ein Stoergeraeusch hat nicht den
+                    # Pegel einer Stimme. Dieselbe Schwelle wie bei der freien
+                    # Erkennung weiter unten.
+                    if mittel < PEGEL_SCHWELLE:
+                        melde(f"  Schluss {gehoert!r} verworfen - zu leise "
+                              f"(Pegel {mittel:.0f} unter {PEGEL_SCHWELLE:.0f})")
+                        continue
+                    # KEIN SCHLUSS OHNE SPRECHPAUSE DAVOR - siehe pause_davor().
+                    # Das ist die Regel, die die vier vorherigen Reparaturen nicht
+                    # geschafft haben: Bruchstuecke entstehen MITTEN im Redefluss, ein
+                    # echtes 'Diktat beenden' folgt auf eine Pause.
+                    if not pause_davor(pegel_verlauf):
+                        melde(f"  Schluss {gehoert!r} verworfen - keine Sprechpause davor "
+                              f"(Pegel {mittel:.0f})")
+                        continue
+                    seit_start = time.time() - aufnahme_seit
+                    if seit_start < SCHLUSS_SPERRFRIST_S:
+                        # Niemand beendet drei Sekunden nach dem Start; wer
+                        # diktieren will, diktiert.
+                        melde(f"  Schluss {gehoert!r} nach nur {seit_start:.1f} s "
+                              f"- Sperrfrist, wird verworfen")
+                        continue
+                    melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r} "
+                          f"nach {seit_start:.1f} s, "
+                          f"{anzahl_aeusserungen} Aeusserungen, Pegel {mittel:.0f}")
                     break
+                if ist_halber_schluss(gehoert):
+                    # NUR DAS HALBE WORT - kein Schluss, aber der Nutzer muss es
+                    # HOEREN. Wer 'beenden' sagt und nichts passiert, wiederholt
+                    # dasselbe Wort, bis er aufgibt; wer den Bildschirm nicht sieht,
+                    # hat keine andere Moeglichkeit, den Grund zu erfahren. Genau so
+                    # ist am 2026-08-21 'Brief vorlesen' im Brieftext gelandet:
+                    # Stephan hielt das Diktat fuer beendet.
+                    #
+                    # Nicht bei jedem Mal - die Ansage liefe sonst selbst wieder ins
+                    # Mikrofon und wuerde zum Geraeusch.
+                    melde(f"  {gehoert!r} ist kein Schluss - der volle Satz zaehlt "
+                          f"(Pegel {mittel:.0f})")
+                    # DIE ANSAGE IST WIEDER RAUS (2026-08-21, noch am selben Tag).
+                    #
+                    # Sie war als Hilfe gedacht: Wer 'beenden' sagt und nichts passiert,
+                    # soll erfahren, warum. Gemessen entstehen diese Bruchstuecke aber im
+                    # Sekundentakt aus ganz normaler Rede - die Ansage unterbrach Stephan
+                    # also MITTEN IM DIKTIEREN, nach rund vier Sekunden. Sein Urteil:
+                    # "Diesen Text kann ich nie zu Ende bringen."
+                    #
+                    # Eine Hilfe, die haeufiger stoert als sie hilft, ist keine. Sie kommt
+                    # erst zurueck, wenn wir sie an eine Sprechpause binden koennen - dann
+                    # trifft sie nur den Fall, fuer den sie gedacht war.
+                    melde("  (kein Hinweis gesprochen - er wuerde das Diktat stoeren)")
+                    continue
                 if gehoert:
-                    letzte_aeusserung = time.time()
                     melde(f"  (Schluss-Erkenner: {gehoert!r} - kein Schluss)")
+                    # DIE STILLE-UHR NUR BEI ECHTER SPRACHE ZURUECKSETZEN.
+                    #
+                    # Vorher stand hier ein blosses "letzte_aeusserung = time.time()":
+                    # Jedes Geraeusch im Raum erzeugt beim Schluss-Erkenner ein '[unk]',
+                    # und jedes davon hat die Uhr zurueckgesetzt. Damit konnte ein Diktat
+                    # NIE von selbst enden - am 2026-08-21 lief eines neun Minuten weiter,
+                    # hielt die Marke 'ein anderer Dienst hoert zu', und Stephan konnte die
+                    # Sprachsteuerung nicht mehr starten. Der Notausgang, auf den ich ihn
+                    # kurz zuvor verwiesen hatte, war also selbst defekt.
+                    #
+                    # Dieselbe Schwelle wie ueberall: Was zu leise fuer den Text ist, ist
+                    # auch zu leise, um als Lebenszeichen zu gelten.
+                    if mittel >= PEGEL_SCHWELLE:
+                        letzte_aeusserung = time.time()
 
             if not erkenner.AcceptWaveform(block):
                 continue
             text = json.loads(erkenner.Result()).get("text", "").strip()
+            mittel = ((sum(pegel_puffer) / len(pegel_puffer))
+                      if pegel_puffer else 0.0)
+            pegel_puffer = []
             if not text:
                 continue
+            if mittel < PEGEL_SCHWELLE:
+                # Protokolliert und nicht stillschweigend verworfen: Faellt hier
+                # echte Sprache hinein, sieht man es sofort - und die Schwelle
+                # gehoert dann nach unten.
+                melde(f"  verworfen, zu leise (Pegel {mittel:.0f}): {text!r}")
+                continue
             letzte_aeusserung = time.time()
+            anzahl_aeusserungen += 1
             melde(f"  erkannt:     {text!r}")
             if text == SCHLUSSSATZ:
                 # Kommt praktisch nie vor - die freie Erkennung trifft den
@@ -460,14 +1043,7 @@ def diktat_fuehren(zweck, name, quelle):
                 # das kleine Modell fehlt.
                 melde("  -> Schlusssatz in der freien Erkennung, Diktat endet")
                 break
-            gefasst = schreibung_richten(text)
-            if gefasst.lower() != text.lower():
-                melde(f"  ACHTUNG: Schreibhilfe hat mehr als die Schreibung geaendert")
-            melde(f"  geschrieben: {gefasst!r}")
-            neue = eintraege_aus(name, gefasst)
-            if len(neue) > 1:
-                melde(f"  in {len(neue)} Eintraege getrennt: {neue!r}")
-            gesammelt += neue
+            gesammelt += aeusserung_verarbeiten(name, text)
     except KeyboardInterrupt:
         pass
     finally:
@@ -477,11 +1053,41 @@ def diktat_fuehren(zweck, name, quelle):
             except Exception:
                 pass
 
+    # DER REST IM ERKENNER - gefunden am 2026-08-21 durch Stephans Test.
+    #
+    # Vosk sammelt Audio und liefert erst an einer Sprechpause ab. Wer den
+    # Brief in einem Zug spricht und dann "Diktat beenden" sagt, hat beides in
+    # DERSELBEN Pause: Der Schluss-Erkenner bricht die Schleife ab, bevor die
+    # freie Erkennung ihren angesammelten Text abliefern konnte - und der war
+    # damit weg. Im Protokoll stand '0 Aeusserungen', obwohl ein ganzer Brief
+    # gesprochen worden war.
+    #
+    # DER FEHLER WAR VON ANFANG AN DA und ist nur nie aufgefallen: Beim
+    # Einkaufszettel macht man zwischen den Waren Pausen, jede Ware wird fuer
+    # sich abgeschlossen, und was nach der letzten Pause kam, war meist nichts.
+    #
+    # Die Schlussworte muessen weg: Die freie Erkennung hoert "diktat beenden"
+    # mit, und es gehoert nicht in den Brief.
+    rest = ""
+    try:
+        rest = json.loads(erkenner.FinalResult()).get("text", "").strip()
+    except Exception as fehler:
+        melde(f"  Resttext nicht lesbar: {fehler}")
+    if rest:
+        worte = rest.split()
+        while worte and worte[-1] in SCHLUSS_WOERTER:
+            worte.pop()
+        rest = " ".join(worte).strip()
+    if rest:
+        melde(f"  Resttext aus dem Erkenner: {rest!r}")
+        gesammelt += aeusserung_verarbeiten(name, rest)
+    
     if not gesammelt:
         sprich(ANSAGE_LEER)
         return 0
 
-    pfad = notiz_schreiben(name, gesammelt)
+    pfad = (brief_schreiben(gesammelt) if name in BRIEF_ZIELE
+            else notiz_schreiben(name, gesammelt))
     melde(f"  geschrieben nach {pfad}")
     sprich(ansage_ende(name, len(gesammelt)))
     # KEIN Vorlesen mehr an dieser Stelle (Stephan, 2026-08-19) - siehe

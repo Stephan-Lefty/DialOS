@@ -46,18 +46,24 @@ listen?".
 | **"Wie ist die Uhrzeit?"** (what is the time) | Equivalent. |
 | **"Welchen Tag haben wir?"** (what day is it) | "Heute ist Mittwoch, der neunzehnte August." The same wording as the login announcement, built from the same functions. |
 | **"Welches Datum haben wir?"** (what is the date) | Equivalent. |
+| **"Bildschirmfoto erstellen"** (take a screenshot) | Saves a picture of the screen to `~/Bilder/Bildschirmfotos/`, with date and time in the name, and says "Das Bildschirmfoto ist gespeichert." **Not for the user** - he cannot see it - but for the sighted helper and for support: "what does it say right now?" cannot otherwise be answered. The device has no screenshot tool installed and the GNOME interface is blocked; DialOS therefore goes through the XDG portal - **without a prompt**, because a dialog here would be the same as no function at all. The **transcript window is closed beforehand** and reopened afterwards - it is DialOS' own display and on a support photo it covers exactly what the helper wants to see. |
+| **"Bildschirmfoto machen"** (take a screenshot) | Equivalent. |
+| **"Brief drucken"** (print the letter) | Prints `~/Dokumente/brief.txt`. The letter already carries its footer; it is not added a second time. |
+| **"Einkaufszettel drucken"** (print the shopping list) | Prints the list - **with** the footer it deliberately lacks on screen: a sheet of paper leaves the house, a note on the screen does not. |
+| **"Notizen drucken"** / **"Notiz drucken"** (print the notes) | The same for the collected notes. The singular counts too since 2026-08-22: on the first retest Vosk heard "notiz drucken", and because both words are in the grammar that was a permitted but command-less combination - the command fell through **silently**, with no feedback at all. |
 | **"Einkaufszettel vorlesen"** (read the shopping list) | Says the number of entries and reads them out, with pauses in between. |
 | **"Notizen vorlesen"** (read the notes) | The same for the collective note. |
 | **"Einkauf erledigt"** (shopping done) | Empties the shopping list - **with a confirmation**: "Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." If no usable answer arrives, DialOS asks **a second time** ("Das habe ich nicht verstanden. Sage ja oder nein."); only then does the list stay. The old content moves to `einkaufszettel-verworfen.txt` so a sighted helper can retrieve it if needed. |
 | **"Einkaufszettel wegwerfen"** (throw the shopping list away) | Equivalent to "Einkauf erledigt". Two phrasings for the same thing so the user need not memorise one - as with "auf Linux" and "auf Gnome". |
 | **"ja" / "nein"** (yes/no) | Answer to a confirmation - so far only before emptying a note. Valid **only during the confirmation**: a recognizer of its own runs for it, with a grammar of exactly these two words, while the command service keeps out. If nothing usable arrives, DialOS asks once more; after that the list stays. |
+| **"Hilfe rufen"** (call for help) ⏸ **deferred** | *Not in the grammar, see below.* Starts remote support - **with a confirmation** that explains what happens: "Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." The RustDesk number is then read out **digit by digit and twice**. During a running session the same sentence **extends** it by an hour. DialOS then asks back: "Hast Du das Deinem Betreuer weitergegeben?" - on "nein", or when nothing was understood: "Soll ich es wiederholen?" At most two repetitions, then the hint that "Hilfe rufen" repeats the numbers at any time. The user cannot see the numbers and cannot write them down; a waiting supporter and a user who lost half of them are this command's most likely failure mode. |
+| **"Fernwartung beenden"** (end remote support) ⏸ **deferred** | Ends it. "Niemand kann mehr zusehen." Also happens by itself after an hour, with a warning three minutes before. The core word is **"fernwartung"**, not "beenden": the user knows the latter as the dictation's closing word, and a word in two roles is ambiguous when spoken even when the grammar is not. |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |
 
 ## Planned, not built yet
 
 | Voice command | Action |
 |---|---|
-| "Hilfe rufen" (call for help) | Starts RustDesk for remote support. Deliberately only on explicit request, see [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md). |
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
 | "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |
 | "Ruf {person} an" (call {person}) | Telephony via SIM or paired phone, see [telefonie.en.md](telefonie.en.md). |
@@ -81,11 +87,20 @@ occurred:
   suffices, provided nothing but words of the phrase appears and no `[unk]`
   is present - the same as a day earlier for the dictation's stop phrase.
   - **The core word must be unambiguous.** "stoppen" appears in exactly one
-    sentence of the grammar, so it always suffices. "starten" appears in two
-    ("Sprachsteuerung starten" and "Diktat starten") - on its own it
-    therefore suffices only in the **off** state, where the grammar knows
-    just one sentence. Anyone adding a new command with an already-used verb
-    must check this.
+    sentence of the grammar, so it always suffices.
+  - **And it must be LONG enough - the more expensive lesson** (2026-08-20).
+    Until then "starten" was the core word for switching on. Measured over 157
+    recorded utterances: **18 times `'starten'` alone against 4 times the full
+    sentence.** Short, common words arise from ambient noise, and the voice
+    control switched itself on 18 times because of it - each time two minutes
+    of open microphone. On 2026-08-20 at 14:04, during one of those phases,
+    pure noise produced `'hilfe rufen'` and remote support was requested
+    without anyone having said a thing. Only the yes/no confirmation prevented
+    it. Since then the core word is **"sprachsteuerung"**: long, distinctive,
+    present in only 16 of 157 utterances. That turns 22 activations into 9. The
+    price: if the recognizer swallows exactly that word, the user has to repeat
+    the sentence. An inconvenience - a microphone that switches itself on is
+    not.
 - **An operating rule the user cannot see has to be spoken.** A shopping list
   only becomes a list if there is a small pause between items - that was how it
   was built from the start, but it was never announced. On 2026-08-19 Stephan

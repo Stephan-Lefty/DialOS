@@ -1,0 +1,18 @@
+[Unit]
+# Legt eingegangene und gesendete Mails als PDF im Archiv ab.
+#
+# WARUM EIN NUTZERDIENST: Er liest Thunderbirds lokalen Speicher im
+# Heimatverzeichnis. Als Systemdienst muesste er fremde Heimatverzeichnisse
+# durchsuchen - das waere weder noetig noch sauber.
+#
+# WARUM KEIN Restart: Ein einmaliger Lauf. Faellt er aus, holt ihn der
+# naechste Zeitpunkt nach; nichts geht verloren, weil die Merkliste den Stand
+# haelt.
+Description=DialOS: Mails als PDF archivieren
+Documentation=file:///usr/local/bin/dialos-mailarchiv.py
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dialos-mailarchiv.py --wirklich
+# Das Archiv ist Nebensache gegenueber Erkennung und Sprachausgabe.
+Nice=15

@@ -258,10 +258,12 @@ device.** So this is the place to record what sits where, and who can see it.
 
 | File | Content | Mode | Retention |
 |---|---|---|---|
-| `~/dialos-sprachbefehl.log` | recognized commands | 0644 (default umask) | grows, not rotated |
-| `~/dialos-diktat.log` | **every dictated sentence verbatim** | 0644 | grows, not rotated |
-| `~/dialos-auskunft.log` | questions and answers | 0644 | grows, not rotated |
-| `~/dialos-notiz.log` | actions, **not** the entries | 0644 | grows, not rotated |
+| `~/dialos-sprachbefehl.log` | recognized commands | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-diktat.log` | **every dictated sentence verbatim** | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-auskunft.log` | questions and answers | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-notiz.log` | actions, **not** the entries | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-ton-ausgabe.log` | output device changes | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/dialos-hilfe.log` | remote support on/off, **no** ID, **no** password | 0600 from the first rotation | **7 days** (logrotate) |
 | `~/.local/share/dialos/support/befehle-YYYY-MM-DD.log` | commands + first line of a dictation | **0600** | **7 days**, self-clearing |
 
 All of them live in `/home/nutzer` and therefore **inside the encrypted home
@@ -291,9 +293,30 @@ user said, and that is not for other accounts on the same device. Seven days,
 because a support case is settled within that time; the transcript deletes older
 daily files on startup and at midnight by itself.
 
-**Open:** the four program logs grow without limit and are not rotated - for the
-dictation that is not merely a disk-space question but means every letter ever
-dictated stays on disk in plain text permanently. Recorded in `TODO.md`.
+**Retention: seven days** (Stephan's decision of 2026-08-20, the same period as
+the support log). Until then the logs grew without limit - for the dictation that
+meant every letter ever dictated stayed on disk in plain text.
+
+Done via `/etc/logrotate.d/dialos`, not inside the programs. Three decisions
+behind that:
+
+- **logrotate instead of self-clearing.** The support log clears itself because
+  `dialos-mitschrift.py` runs anyway while it is written. For six programs that
+  would be the same code six times - and a service running for a week would never
+  get round to clearing, because it only looks on startup. logrotate runs daily
+  via the systemd timer.
+- **No `copytruncate`.** Verified on 2026-08-20: the programs do **not** hold
+  their file open, they open to write and close again. Plain renaming is
+  therefore safe. `copytruncate` would answer a problem that does not exist here,
+  and it can lose lines written between the copy and the truncate.
+- **`dateext`,** i.e. `dialos-diktat.log-2026-08-20` instead of `.1`. Whoever
+  looks during support searches for a day, not a sequence number - the same
+  reasoning as for the support log.
+
+**Remaining gap, stated honestly:** the programs create a *missing* file with
+0644 (default umask). Only the first rotation sets 0600. Closing that means
+touching `melde()` in six scripts; as long as the logs live inside the encrypted
+home partition, the gain is small.
 
 ## Remote support (RustDesk)
 
@@ -301,10 +324,52 @@ dictated stays on disk in plain text permanently. Recorded in `TODO.md`.
 - **Relay**: initially the public rustdesk.com service, later (once the
   system runs stably) a self-hosted server (hbbs/hbbr). The migration is
   a deliberately open point for later.
-- **Unattended access** runs with a permanent password, so a helper can
-  get in even if the user isn't able to respond. For blind users, the
-  RustDesk ID/password must be read aloud via TTS, since they can't read
-  it off the screen themselves.
+- **The ID is read out via TTS**, digit by digit in groups of four and twice
+  over - a blind user can neither read it nor write it down. Spoken as a number
+  it would be useless ("sixty-eight million...").
+- **A one-time password is not obtainable with RustDesk 1.4.9** (five routes
+  tested on 2026-08-19, all closed):
+  - The one-time password RustDesk generates itself is in **no file** - memory
+    and UI only, so nowhere for a blind user.
+  - `rustdesk --password <value>` has no effect: as the user, with the app
+    running, with the systemd service running **and as root**. Exit code 0, but
+    the field stays empty.
+  - `rustdesk --get-temp-password` does not return even after 40 s - it starts a
+    full instance.
+  - `rustdesk-utils`, which could compute the value, is not in the package.
+  - Writing the value directly is out: RustDesk stores no plain hash there but a
+    value encrypted with a local key (like `enc_id`, 70 characters). Recreating
+    that would be guesswork and would break silently on the next version.
+
+  This is not a fault of this project:
+  [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074) is titled
+  "Permanent password not deployable without user interaction" and is open.
+  **The supporter therefore sets the password once in the office via the UI** -
+  it lives in their records, not in the customer's room.
+- **Instead DialOS guarantees the limit through RUNTIME**, which is the harder
+  lever: as long as RustDesk is not running, no connection is possible -
+  regardless of who knows the password.
+  - It never starts by itself, only on "Hilfe rufen".
+  - "Fernwartung beenden" stops it.
+  - If the user forgets, it ends **by itself after one hour, with an
+    announcement** (Stephan, 2026-08-19). A warning comes three minutes before,
+    and another "Hilfe rufen" extends it - so a supporter is not cut off
+    mid-work.
+- **The announcement says exactly that, instead of claiming something false:**
+  "Das Passwort kennt Dein Betreuer schon. Die Fernwartung läuft nur, bis Du
+  sagst: Fernwartung beenden." Telling a user who cannot see the screen a false
+  sense of security ("the password is only valid for this session") would be
+  worse than explaining the real one.
+- **Open, and in `TODO.md`:** the timeout is **absolute**, not idle-based, even
+  though idle would be the right semantics - the risk is a remote session left
+  open with nobody attached. But nobody has ever connected to this device, so the
+  signature of an active connection is unknown, and guessing it would be the
+  worse error. `dialos-hilfe.py` therefore records process count and log size
+  during every session; after the first real connection the idle detection can be
+  built from **evidence**.
+- **RustDesk phones home:** on startup it contacts `api.rustdesk.com` and the
+  rendezvous service (shown in its log). That is the price of the public relay
+  and one more reason for our own server later.
 - **Additional safety layer**: RustDesk does NOT run permanently in the
   background/autostart. The user on site must actively start RustDesk via
   a voice command (e.g. "call for help") — only then is a remote
@@ -320,3 +385,26 @@ Fedora Atomic/Silverblue or openSUSE Aeon) — Stephan prioritizes Debian's
 stability, hardware support, and the mature live-build tooling over
 built-in atomic rollback. A rollback safety net would need to be added
 separately via Btrfs snapshots if needed.
+
+## Screenshots show everything that is open (open, 2026-08-21)
+
+The command "Bildschirmfoto erstellen" saves a picture of the whole screen to
+`~/Bilder/Bildschirmfotos/`. That is intended - it exists for support, and a
+crop would not help there.
+
+**The consequence is not yet decided.** If a mail, a letter or a web page is
+open when it fires, its content is in the picture. If the user later sends it
+to support, that goes along. DialOS' own display window is already excluded
+(it is closed before the shot), but that only solves the part belonging to
+DialOS.
+
+Stephan saw this on 2026-08-21 and **deliberately changed nothing** - the
+function stays as it is. What remains to be decided:
+
+- Does DialOS announce, when triggering, that everything visible goes into the
+  picture?
+- Are the pictures deleted after seven days like the logs?
+- Should there be a confirmation before sending to support?
+
+The same question arises for the planned PDF archive of every mail and letter
+(`TODO.md`) - both belong together.

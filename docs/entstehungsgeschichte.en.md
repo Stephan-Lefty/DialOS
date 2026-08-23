@@ -1,8 +1,8 @@
 [Deutsch](entstehungsgeschichte.md) | [English](entstehungsgeschichte.en.md)
 
-# Thirteen Days
+# Thirteen Days and Counting …
 
-*How DialOS came to exist, 6 to 18 August 2026. 194 commits. Told as what
+*How DialOS came to exist, 6 to 22 August 2026. 289 commits. Told as what
 it was.*
 
 Everything here is on the record - in the changelog in
@@ -18,8 +18,10 @@ is a principle:
 
 **A system that reports success while it fails.**
 
-It appears six times in thirteen days, in a different disguise each time,
-and each time somebody believes it. Usually me.
+So far it appears seven times, in a different disguise each time, and each
+time somebody believes it. Usually me.
+
+On the last day it wears mine.
 
 ---
 
@@ -280,9 +282,375 @@ risk is not a handled risk.**
 
 ---
 
+## Day 14: For two days something else was running than the repo said
+
+**19 August.** 26 commits. The day starts with a wish from Stephan that sounds
+like a detail: it should feel like a **dialogue**, not like a machine
+reporting states. That becomes a rule, and every single announcement is
+checked against it. "Ich höre Dir zu" instead of "speech recognition active".
+
+Then comes the yes/no question before emptying the shopping list. It does not
+work. Stephan says "ja", nothing happens.
+
+The reason is an ordering: the caller spoke the question - and **then** the
+function loaded its speech model, for eleven seconds. The answer fell into
+exactly that hole. The question had been asked, but nobody was listening.
+Since then the function asks the question itself, once it is ready.
+
+### The check script's blind spot
+
+The same day it turns out that **two scripts had been running for two days in
+an older version than the repo held**. Everything was committed, everything
+looked right, and the device was executing something else.
+
+The answer to that is a check script: it compares what is in the repo with
+what is installed. Exactly the kind of tool this project needs.
+
+The check script has a blind spot. It looks at **one directory**. Files beside
+it do not exist for it - and "does not exist" it reports as fine.
+
+That is the same antagonist as on day 8 and day 12, one level up: this time it
+is not the system reporting success but **the tool meant to verify the
+success**. It is improved twice - first a hand-maintained list (out of date
+with the next new script), then the whole tree. And since then it explicitly
+reports what it is **not allowed** to read, instead of staying silent.
+
+### A coin toss with 0.8 seconds of margin
+
+The writing aid needs **9.2 seconds** for the first sentence of a session -
+the German rules do not load when the server starts but on the first check
+request. The timeout in the dictation is 10.0 seconds.
+
+Eight tenths of a second of headroom. The first correction of every session
+was a coin toss, and at 10:03:03 it lost.
+
+The fix is a warm-up at login: the nine seconds happen once, where nobody is
+waiting for them. After that the check answers in 1.0 seconds.
+
+By evening "Hilfe rufen" exists: DialOS reads an ID and a one-time password to
+the user, slowly, with a pause between them, and asks afterwards whether both
+arrived. The privileged part is built, checked - and **deliberately not
+installed**, because the service behind it is not ready.
+
+---
+
+## Day 15: The same data through both rules
+
+**20 August.** 19 commits. Stephan has let DialOS run for a day and reports
+something unsettling: "every now and then Michael spoke up." The voice control
+switches itself **on**. Once it even asks whether it should start remote
+support.
+
+Switching on listened for a core word, and the core word was "starten". The
+log records how often that word arose from pure ambient noise: **27 times in
+two hours.**
+
+### The best measurement of the project
+
+The change itself is quick - the core word becomes "sprachsteuerung", long and
+distinctive. What is interesting is how it is proven: **the same two hours of
+log are run through both rules.** Not two periods compared, where somebody
+else was in the room or the radio was on - one body of data, two rules.
+
+Result: the old rule would have switched on **30 times**, the new one **7**.
+Saving: 46 minutes of open microphone in a good two hours.
+
+And the same measurement shows the limit: **not one** of the seven was
+followed by a command. Those seven were largely noise too. The change pushes
+the problem down by three quarters; it does not solve it.
+
+From that come two small changes instead of the big wake word, whose
+ready-made models carry a non-commercial licence: switching on requires
+**both** words, and without a command it ends after 30 seconds instead of two
+minutes.
+
+The second change does not take effect at first. The reason is one line in the
+wrong order: the timestamp was set **before** the announcement, and the
+announcement takes a good second - after which it looked as though a command
+had already come. Stephan's test found it, not mine: mine had checked the
+decision function, not the ordering.
+
+### Anna
+
+Stephan decides: a friendly female voice. The listening comparison produces
+`de_DE-kerstin-low`, tempo 1.00, name **Anna** (the tempo does not stay that
+way: on 2026-08-22 Stephan listens to 1.00 / 0.90 / 0.80 / 0.95 in turn and
+settles on **0.95**) - and she becomes the delivery
+voice, not just a test setting.
+
+Tempo differs per voice, measurably so: the same sentence takes Thorsten 7.75
+**These figures were wrong** (corrected 2026-08-22): they came from a
+generator that declared Kerstin's 16 kHz raw data as 22050 Hz - every Kerstin
+sample ran 38 % too fast. Measured correctly, the same sentence takes about
+6.15 s for Michael at 0.88 and about 7.04 s for Anna at 1.00; Anna is
+therefore **14 % slower**, not on a par. Since 2026-08-22 Anna is set to
+**0.95**, chosen by Stephan from correctly generated samples.
+
+At Stephan's suggestion DialOS now addresses the user by name - in the
+greeting, at decisions, at errors. **Not** at confirmations and not at the
+timeout. The reason weighs more than politeness: with the radio on or a
+visitor in the room, "Stephan, …" says unmistakably that this concerns him.
+Someone who hears the name constantly stops hearing it.
+
+Then Stephan listens more closely: "Michael says Stefffan."
+
+The name is spoken in every greeting, every question, every error.
+Mispronounced it grates more than any other word. The name file gets a second
+field: `Stephan | Stefan`. The written form stays "Stephan" - for letters,
+where "Stefan" would simply be wrong. The second field is what gets spoken.
+
+**I would never have found this alone.** I had checked the name form of
+address against three announcements and declared it done. That the name itself
+sounds wrong is only audible to someone who knows it.
+
+### "Security updates only", before I had checked
+
+`unattended-upgrades` is set up. I tell Stephan it is security updates only.
+
+Then I look. An `Origins-Pattern` line **appends**, it does not replace. After
+the first attempt five patterns were in the list: my two **and** Debian's
+three, including ordinary stable without `-Security`. The device would have
+updated everything overnight.
+
+Fixed with `#clear`, proven with a dry run in which everything except
+`Debian-Security` sits at pin `-32768`, "under no circumstances". But the claim
+had gone out before the check. Stephan's reply is the sentence that sums up the
+day: **"Mistakes are human."**
+
+The same day I lose data: my restart helper always set the log aside under the
+same name and overwrote the first backup on the second run. The raw data of the
+157 utterances is gone; the result is in the commits, the data is not. The
+helper sets nothing aside at all any more - since that same day logrotate
+cleans up the logs after seven days, and a second mechanism beside it only
+creates name collisions.
+
+---
+
+## Day 16: The repair from day 13 turns on us
+
+**21 August.** Stephan wants the letter. Everything for it exists: dictation,
+writing aid, footer. What is missing is punctuation, a place to put it and a
+letterhead. A day's work, one would think.
+
+The morning goes well. Spoken punctuation, measured rather than guessed: the
+bare words score **three out of six** with Stephan's voice - "Komma" becomes
+"komme", "Punkt" becomes "kommt", "Doppelpunkt" becomes "dörte depots". The
+two-word forms score **three out of three**. So "Komma setzen". In passing
+that removes a price Stephan had accepted beforehand: "in diesem Punkt" now
+stays intact.
+
+Then he dictates the first letter. The dictation ends after six seconds. By
+itself.
+
+### This time the unreliable narrator is me
+
+I have an explanation: ambient noise. The stop recogniser knows only "diktat
+beenden" and `[unk]`; it has to map every sound onto one of the two. Sounds
+plausible.
+
+I measure it: 180 seconds of silence in the same room, same grammar. **Zero
+results.** The explanation is wrong.
+
+I have a second one: Anna hears herself. The ready announcement plays, the
+recording starts, echo cancellation needs a moment. Also plausible.
+
+I measure it: three times announcement, three times listening immediately.
+**Nothing.** Also wrong.
+
+Two diagnoses, both internally consistent, both refuted. Until now the
+antagonist has used systems that report success. On this day he uses me.
+
+### Four repairs in one afternoon
+
+I build a guard period: no stop in the first three seconds. The next test
+breaks off after 4.2.
+
+I build a level gate: too quiet is no stop. The noise is loud enough.
+
+I count them - all stop events of the day: **six false triggers, every single
+one a bare "beenden"**, none from "diktat beenden". So the stop requires both
+words. That overturns the rule from **day 13**, which had been created the
+other way round: back then exact matching had let a dictation run for seven
+minutes, and the lesson was that the word alone suffices. It came from seven
+minutes of continuous talking - and had never checked what happens while
+*dictating*.
+
+I build an announcement: if only "beenden" arrives, DialOS should say so, so
+nobody speaks into the void. It interrupts Stephan after four seconds in the
+middle of his letter. His verdict is the sentence of the day:
+
+> **"I can never get to the end of this text."**
+
+The announcement is removed the same day. A help that disturbs more often than
+it helps is not one.
+
+### Two faults that had been sitting there for weeks
+
+Between the repairs two things come to light that have nothing to do with the
+stop phrase and are older than it.
+
+**Vosk only delivers at a speech pause.** Anyone who speaks the letter in one
+go and then says "Diktat beenden" has both in *the same* pause: the stop
+breaks the loop before the recognition could deliver its buffered text.
+`FinalResult()` was never called. The log says "0 utterances" while a whole
+letter was spoken.
+
+**And the emergency exit was broken itself.** Two minutes of silence were
+meant to end any dictation. They could never take effect: every `[unk]` from
+room noise reset the clock. One dictation runs on for nine minutes, holds the
+"another service is listening" marker - and Stephan can no longer start the
+voice control. The very phantom words the new level gate discards when writing
+are what keep it alive.
+
+Both faults are as old as the dictation. Both only show up when somebody
+dictates a *letter* instead of a shopping list.
+
+### The best question of the day
+
+In the evening Stephan asks: then why does the shopping list work cleanly?
+
+The answer is in a measurement that was already there. Thirty seconds of
+continuous letter text through the stop recogniser:
+
+```
+at  4.8 s  'diktat'
+at  8.4 s  'beenden'
+at 12.2 s  'diktat [unk] beenden'
+at 15.1 s  'beenden'
+```
+
+Fragments by the second - out of *continuous* speech. A shopping list sounds
+different: "Milch." Pause. "Butter." Pause. And 180 seconds of silence had
+produced **zero** results. The pauses between the items protect the shopping
+list, without anyone having planned it that way.
+
+That also makes clear where the lever is: a genuine "Diktat beenden" follows a
+pause. Every fragment arises in the middle of the flow.
+
+### What the day cost
+
+Six test runs by Stephan, each containing a fault I could have found
+beforehand. Four rules have sat at the top of [../CLAUDE.md](../CLAUDE.md)
+since then, and the most important one is: **whatever can be checked offline
+against Piper gets checked offline first.** Stephan is not the test run.
+
+The second: **an explanation that fits all the observations is not yet a
+cause.**
+
+---
+
+## Day 17: The failure that says nothing
+
+The day begins with a folder full of clutter. Twenty-five log files sit openly
+in the home directory, among `Notizen`, `Dokumente` and `Bilder`. Stephan asks
+whether they are needed. Six of them feed the live transcript window, and
+together they are the memory for support - but they do not have to sit there.
+They move to `~/.log`, and the leading dot makes the folder invisible.
+
+Then comes a sentence that lights the change from the other side:
+
+> "immer dran denken wir haben auch sehende User" - always remember, we have
+> sighted users too.
+
+That hits exactly this move. To the blind user a hidden folder makes no
+difference; he sees nothing anyway. To the helper sitting next to him,
+something he cannot see is an obstacle. So the manual gets a table: what lives
+where, and which of it is visible. Accessibility does not mean serving only one
+side.
+
+### The printout comes out landscape
+
+In the afternoon Stephan prints for real for the first time. The sheet comes
+out landscape.
+
+I measure the whole path. With this queue's PPD, `texttopdf` produces
+595 × 842 points - A4 portrait. `pdftopdf` passes exactly that through,
+rotation 0. Over IPP the printer reports `orientation-requested-default =
+portrait` and `media-default = iso_a4`. The queue is set to A4.
+
+Every place I can check says portrait. **And the sheet is landscape.**
+
+The cause lies beyond anything measurable on this device. I cannot name it -
+which is unsatisfying, but it is the truth. What I can change is the stance:
+the call was a bare `lp -d TARGET -`, without a single option. Orientation thus
+hung on a default nobody had committed to. Now it is part of the job:
+`-o media=A4 -o orientation-requested=3`.
+
+**A default you rely on is an assumption.** This one was demonstrably wrong,
+even if I cannot say where exactly it tipped over.
+
+While looking, something else surfaces: `dialos-fusszeile.py drucken` called
+`lp -` **without a destination**. This device has no default destination - the
+call would have failed the moment anyone used it. For two months nobody would
+have noticed, because nobody took that path.
+
+### And then the device says nothing at all
+
+Stephan retests. I look in the log. The print log holds nothing new. The
+command log holds this:
+
+```
+15:07:32  erkannt: 'notiz drucken'
+```
+
+Singular. The grammar only knows "notizen drucken".
+
+This is not a mishearing. The restricted grammar is a list of **phrases**, but
+Vosk turns it into a **word network** - and may combine words from different
+phrases. "notiz" comes from "notiz aufnehmen", "drucken" from the three print
+commands. The combination is permitted and yet is not a command.
+
+And because there is no match, there is no announcement either.
+
+**That is the worst possible outcome.** Not the failure - the silence. A
+sighted user sees a window that does not open, a sheet that does not arrive. A
+blind user has spoken, the device has listened, and nothing tells him that
+nothing happened. He does not even know whether he said it wrong or the device
+is broken. An error message would have been better. Almost anything would have
+been better.
+
+The singular goes into the grammar. But the real case stays open, and it is
+bigger than this one phrase: the same log holds `'wie viel uhr schreiben'` and
+`'linux auf tag einkauf auf einkauf'`. Also permitted combinations. Also no
+command. Also silent.
+
+The second printout comes out portrait.
+
+### Two keys and a rule I was not allowed to touch
+
+Finally, two keyboard shortcuts for the admin account: `Ctrl`+`Alt`+`W`
+switches the look between Linux and Windows, `Ctrl`+`Alt`+`S` the voice between
+Michael and Anna. Both scripts now *toggle* instead of demanding a target -
+whoever presses a key does not want to know which state they are in.
+
+The voice needs a script of its own for this, because `setzen` only does half
+the job: it writes the configuration and then tells the human to restart
+speech-dispatcher. Reasonable at a terminal. Not behind a key - whoever presses
+a key expects a different voice, not homework.
+
+In between there is one more small lesson, and it is not a technical one. While
+tidying the TODO list I wanted to sort every completed item to the bottom. Six
+of them hang off items that are still open - "see above", "residual risk from
+this", "the two new items below". I had already begun rewriting five of
+Stephan's sentences so that my sorting would work out. He stops it:
+
+> "die bleiben oben, bis auch die anderen Punkte erledigt sind und wandern dann
+> gemeinsam hoch" - they stay at the top until the other items are done as
+> well, and then move together.
+
+His rule is better than mine. Mine would have bent his text to fit the order;
+his bends the order to fit the text. On the recount it turns out to be six
+rather than four - I had missed one reference.
+
+**The lesson of the day:** a failure that says something is a failure. A
+failure that says nothing is a riddle - and for this audience riddles are not
+an inconvenience but a dead end.
+
+---
+
 ## How it ends
 
-It does not end. On 18 August at 16:03 the 194th commit is in place.
+It does not end. On 21 August at 14:19 the 261st commit is in place.
 
 What exists: a voice control that listens only when told to, and says so. A
 dictation that writes notes, with 98.1 % correct capitalisation. A shopping
@@ -291,18 +659,26 @@ because it came into being by speaking alone. An audio output that believes
 no device but tries it. And documentation that carries every one of these
 faults, because otherwise they get made again.
 
-What does not exist: telephony, reading out mail, scanning post. And one
-unexplained item from the last evening - two dictations recorded nothing,
-and it sits in the list deliberately without a conjecture.
+Added over the last three days: an origin line in every mail, three battery
+warnings, a machine that no longer falls asleep and no longer locks its user
+out - and a letter that comes into being as a letterhead, with date, footer
+and the note explaining why it is not signed.
+
+What does not exist: telephony, reading out mail, scanning post. And the
+letter cannot be dictated to the end, because the stop recogniser turns
+ongoing speech into "diktat beenden". That is the single point standing
+between a finished path and a usable letter.
 
 The antagonist is not defeated. He is recognized. With this antagonist that
 is the whole difference: **a system that lies is harmless the moment you
 stop believing it and start measuring.**
 
+Day 16 added one sentence to that: the same goes for whoever is measuring.
+
 ---
 
 *For the figures and the evidence: [../README.en.md](../README.en.md) has
 the full changelog, [../TODO.en.md](../TODO.en.md) the open items,
-[../CLAUDE.md](../CLAUDE.md) the rules that came out of these thirteen days.
+[../CLAUDE.md](../CLAUDE.md) the rules that came out of these days.
 What DialOS sounds like is in
 [sprachbeispiele/](sprachbeispiele/README.en.md).*

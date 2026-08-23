@@ -279,10 +279,12 @@ wer es sehen kann.
 
 | Datei | Inhalt | Rechte | Aufbewahrung |
 |---|---|---|---|
-| `~/dialos-sprachbefehl.log` | erkannte Befehle | 0644 (Standard-umask) | wächst, wird nicht gedreht |
-| `~/dialos-diktat.log` | **jeder diktierte Satz wörtlich** | 0644 | wächst, wird nicht gedreht |
-| `~/dialos-auskunft.log` | Fragen und Antworten | 0644 | wächst, wird nicht gedreht |
-| `~/dialos-notiz.log` | Aktionen, **keine** Einträge | 0644 | wächst, wird nicht gedreht |
+| `~/dialos-sprachbefehl.log` | erkannte Befehle | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-diktat.log` | **jeder diktierte Satz wörtlich** | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-auskunft.log` | Fragen und Antworten | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-notiz.log` | Aktionen, **keine** Einträge | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-ton-ausgabe.log` | Wechsel des Ausgabegeräts | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/dialos-hilfe.log` | Fernwartung an/aus, **keine** ID, **kein** Passwort | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
 | `~/.local/share/dialos/support/befehle-JJJJ-MM-TT.log` | Befehle + erste Zeile eines Diktats | **0600** | **7 Tage**, räumt sich selbst |
 
 Alle liegen in `/home/nutzer` und damit **innerhalb der verschlüsselten
@@ -311,9 +313,32 @@ der Nutzer gesagt hat, und das ist nichts für andere Konten auf demselben
 Gerät. Sieben Tage, weil ein Support-Fall in dieser Zeit besprochen ist; die
 Mitschrift löscht ältere Tagesdateien beim Start und um Mitternacht selbst.
 
-**Offen:** Die vier Programm-Protokolle wachsen unbegrenzt und werden nicht
-gedreht - beim Diktat ist das nicht nur eine Platzfrage, sondern heißt, dass
-jeder je diktierte Brief dauerhaft im Klartext liegt. Steht in `TODO.md`.
+**Aufbewahrung: sieben Tage** (Stephans Entscheidung vom 2026-08-20, dieselbe
+Frist wie beim Support-Protokoll). Bis dahin wuchsen die Protokolle unbegrenzt -
+beim Diktat hieß das, dass jeder je diktierte Brief dauerhaft im Klartext lag.
+
+Erledigt über `/etc/logrotate.d/dialos`, nicht in den Programmen selbst. Drei
+Entscheidungen dahinter:
+
+- **logrotate statt Selbstaufräumen.** Das Support-Protokoll räumt sich selbst
+  auf, weil `dialos-mitschrift.py` ohnehin läuft, während es geschrieben wird.
+  Bei sechs Programmen wäre dasselbe sechsmal derselbe Code - und ein Dienst,
+  der eine Woche durchläuft, käme nie zum Aufräumen, weil er nur beim Start
+  nachsähe. logrotate läuft täglich per systemd-Timer.
+- **Kein `copytruncate`.** Geprüft am 2026-08-20: Die Programme halten ihre
+  Datei **nicht** offen, sie öffnen zum Schreiben und schließen wieder. Damit
+  ist normales Umbenennen gefahrlos. `copytruncate` wäre die Antwort auf ein
+  Problem, das hier nicht besteht, und es kann Zeilen verlieren, die zwischen
+  Kopieren und Abschneiden geschrieben werden.
+- **`dateext`,** also `dialos-diktat.log-2026-08-20` statt `.1`. Wer im Support
+  nachsieht, sucht einen Tag und keine laufende Nummer - dieselbe Überlegung wie
+  beim Support-Protokoll.
+
+**Rest-Lücke, ehrlich benannt:** Die Programme legen eine *fehlende* Datei mit
+0644 an (Standard-umask). Erst die erste Rotation setzt 0600. Wer das schließen
+will, muss die `melde()`-Funktion in sechs Skripten anfassen; solange die
+Protokolle innerhalb der verschlüsselten Home-Partition liegen, ist der Gewinn
+gering.
 
 ## Fernwartung (RustDesk)
 
@@ -321,10 +346,55 @@ jeder je diktierte Brief dauerhaft im Klartext liegt. Steht in `TODO.md`.
 - **Relay**: zunächst der öffentliche rustdesk.com-Dienst, später (sobald
   das System stabil läuft) ein eigener Server (hbbs/hbbr). Migration ist
   ein bewusst offener Punkt für später.
-- **Unbeaufsichtigter Zugriff** läuft mit einem dauerhaften Passwort,
-  damit ein Helfer auch reinkommt, wenn der Nutzer gerade nicht reagieren
-  kann. Für blinde Nutzer muss die RustDesk-ID/das Passwort per TTS
-  vorgelesen werden, da sie nicht selbst ablesbar sind.
+- **Die ID wird per TTS vorgelesen**, ziffernweise in Vierergruppen und
+  zweimal - ein blinder Nutzer kann sie nicht ablesen und nichts mitschreiben.
+  Als Zahl gesprochen wäre sie unbrauchbar („achtundsechzig Millionen…").
+- **Ein Einmalpasswort ist mit RustDesk 1.4.9 nicht zu haben** (fünf Wege am
+  2026-08-19 geprüft, alle zu):
+  - Das Einmalpasswort, das RustDesk selbst erzeugt, steht in **keiner Datei** -
+    nur im Speicher und in der Oberfläche, für einen blinden Nutzer also
+    nirgends.
+  - `rustdesk --password <wert>` ist wirkungslos: als Nutzer, mit laufender
+    Anwendung, mit laufendem systemd-Dienst **und als root**. Rückgabewert 0,
+    aber das Feld bleibt leer.
+  - `rustdesk --get-temp-password` kommt auch nach 40 s nicht zurück - es
+    startet eine volle Instanz.
+  - `rustdesk-utils`, das den Wert berechnen könnte, ist im Paket nicht
+    enthalten.
+  - Den Wert selbst zu schreiben fällt aus: RustDesk legt dort keinen einfachen
+    Hash ab, sondern einen mit einem lokalen Schlüssel verschlüsselten Wert (wie
+    bei `enc_id`, 70 Zeichen). Das nachzubauen wäre geraten und bräche bei der
+    nächsten Version still.
+
+  Das ist kein Fehler dieses Projekts: [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074)
+  heißt „Permanent password not deployable without user interaction" und ist
+  offen. **Das Passwort setzt der Betreuer deshalb einmal im Büro über die
+  Oberfläche** - es steht in seinen Unterlagen und nicht im Raum des Kunden.
+- **Stattdessen garantiert DialOS die Begrenzung über die LAUFZEIT**, und das
+  ist der härtere Hebel: Solange RustDesk nicht läuft, ist keine Verbindung
+  möglich - unabhängig davon, wer das Passwort kennt.
+  - Es startet nie von selbst, nur auf „Hilfe rufen".
+  - „Fernwartung beenden" beendet es.
+  - Vergisst der Nutzer das, endet es **nach einer Stunde von selbst, mit
+    Ansage** (Stephan, 2026-08-19). Drei Minuten vorher kommt eine Vorwarnung,
+    und ein erneutes „Hilfe rufen" verlängert - damit wird ein Betreuer nicht
+    mitten in der Arbeit abgeschnitten.
+- **Die Ansage sagt genau das, statt etwas Falsches zu behaupten:** „Das
+  Passwort kennt Dein Betreuer schon. Die Fernwartung läuft nur, bis Du sagst:
+  Fernwartung beenden." Einem Nutzer, der den Bildschirm nicht sieht, eine
+  falsche Sicherheit zu erzählen („das Passwort gilt nur für diesen Einsatz")
+  wäre schlimmer, als ihm die richtige zu erklären.
+- **Offen und in `TODO.md`:** Die Zeitgrenze ist **absolut** und nicht am
+  Leerlauf orientiert, obwohl Leerlauf die richtige Semantik wäre - das Risiko
+  ist eine offene Fernwartung, an der niemand hängt. Auf diesem Gerät hat sich
+  aber noch nie jemand verbunden, die Signatur einer aktiven Verbindung ist also
+  unbekannt, und sie zu raten wäre der schlechtere Fehler. `dialos-hilfe.py`
+  notiert deshalb während jeder Sitzung Prozessanzahl und Protokollgröße; nach
+  der ersten echten Verbindung lässt sich die Leerlauf-Erkennung daraus **belegt**
+  bauen.
+- **RustDesk telefoniert nach Hause:** Beim Start werden `api.rustdesk.com` und
+  der Vermittlungsdienst kontaktiert (im Protokoll belegt). Das ist der Preis
+  des öffentlichen Relays und ein weiterer Grund für den eigenen Server später.
 - **Zusätzliche Sicherheitsschicht**: RustDesk läuft NICHT dauerhaft im
   Hintergrund/Autostart. Der Nutzer vor Ort muss RustDesk erst aktiv per
   Sprachbefehl starten (z. B. "Hilfe rufen") – erst danach ist eine
@@ -344,3 +414,25 @@ eingebautem Atomic-Rollback. (Der ursprünglich mitgenannte Grund
 [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Schritt 16.)
 Eine Rollback-Absicherung müsste bei Bedarf separat über Btrfs-Snapshots
 nachgerüstet werden.
+
+## Bildschirmfotos zeigen alles, was offen ist (offen, 2026-08-21)
+
+Der Befehl „Bildschirmfoto erstellen" legt ein Bild des ganzen Schirms unter
+`~/Bilder/Bildschirmfotos/` ab. Das ist gewollt - er existiert für den
+Support, und ein Ausschnitt hülfe dort nicht.
+
+**Die Folge ist noch nicht entschieden.** Steht beim Auslösen eine Mail, ein
+Brief oder eine Webseite offen, ist deren Inhalt auf dem Bild. Schickt der
+Nutzer es später an den Support, geht das mit. Das eigene Anzeigefenster von
+DialOS ist bereits ausgenommen (es wird vor dem Foto geschlossen), aber das
+löst nur den Teil, der DialOS gehört.
+
+Stephan hat das am 2026-08-21 gesehen und **bewusst nichts geändert** - die
+Funktion bleibt, wie sie ist. Zu entscheiden bleibt:
+
+- Sagt DialOS beim Auslösen an, dass alles Sichtbare mit aufs Bild kommt?
+- Werden die Bilder wie die Protokolle nach sieben Tagen gelöscht?
+- Gehört vor dem Versand an den Support eine Rückfrage?
+
+Dieselbe Frage stellt sich beim geplanten PDF-Archiv jeder Mail und jedes
+Briefes (`TODO.md`) - beides gehört zusammen entschieden.

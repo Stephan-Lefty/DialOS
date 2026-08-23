@@ -39,7 +39,96 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-19)
+## Aktueller Stand (Stand: 2026-08-22, abends)
+
+**Wo das Projekt am Abend des 2026-08-22 steht.** Der ausfuehrliche Verlauf
+steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
+
+**Laeuft und ist belegt:**
+
+- Sprachsteuerung mit 26 Grammatiksaetzen. Das Einschalten verlangt beide
+  Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
+  Beinahe-Treffer, null Fehlstarts.
+- Anna (`de_DE-kerstin-low`) ist Auslieferungsstimme, **Tempo 0,95**, und
+  spricht den Nutzer mit Namen an ("Steffan"). Beide Werte hat Stephan mit den
+  Ohren entschieden.
+- Diktat in Notizen und Einkaufszettel, Schreibhilfe ueber LanguageTool.
+- Fusszeile in jeder Thunderbird-Mail, mit anklickbarem Verweis. Die
+  Textquelle ist `/usr/local/share/dialos/fusszeile.txt` und nur die.
+- Akkuwarnung bei 25/15/5 %, Ansagen von Stephan abgenommen.
+- Kein Standby am Netz, keine Bildschirmsperre fuer `nutzer`.
+- Unattended-upgrades, Protokoll-Aufbewahrung sieben Tage.
+- **Bildschirmfoto auf Zuruf** ueber das XDG-Portal (die GNOME-Schnittstelle
+  ist gesperrt, Werkzeuge sind keine installiert). Das Mitschrift-Fenster wird
+  vorher geschlossen.
+- **Drucken per Sprache** fuer Brief, Zettel und Notizen - **auf Papier
+  belegt am 2026-08-22**. Der Drucker wird gesucht, nicht vorausgesetzt (CUPS
+  hat kein Standardziel), und Papier und Ausrichtung stehen ausdruecklich im
+  Auftrag: `-o media=A4 -o orientation-requested=3`.
+- **PDF-Archiv an zwei Orten:** `~/Dokumente/Archiv/DialOS-DATA/` auf der
+  Platte und `DialOS-Archiv/` auf dem Stick `DIALOS-DATA`, mit Nachholen,
+  sobald der Stick steckt. Eigener PDF-Erzeuger ueber cairo, weil der
+  Briefbogen mit Leerzeichen gesetzt ist.
+- **Mail-Archiv** aus Thunderbirds lokalen mbox-Dateien - ein- und ausgehend,
+  ohne Zugangsdaten. Dedup ueber Message-IDs, Entwuerfe ausgenommen.
+- **Alle Programmprotokolle liegen in `~/.log/`**, nicht mehr offen im
+  Heimatverzeichnis. Der Punkt am Anfang macht den Ordner unsichtbar; er darf
+  geloescht werden, jedes Skript legt ihn neu an.
+- **Zwei Tastenkombinationen fuers Admin-Konto:** `Strg`+`Alt`+`W` schaltet
+  die Optik Linux/Windows um, `Strg`+`Alt`+`S` die Stimme Michael/Anna
+  (gemessen 4,4 s bis zur Ansage in der neuen Stimme). NUR fuer
+  `dialosadmin` - das Nutzerkonto bedient beides ueber die Stimme.
+- **`/usr/local/sbin/dialos-aufspielen`** spielt den Repo-Stand auf, mit enger
+  sudoers-Regel. NUR fuer das Entwicklungsgeraet - die Regel ist praktisch ein
+  Root-Zugang, Begruendung im Kopf des Skripts.
+- **Alle 69 Ansagen** liegen in beiden Stimmen unter
+  `docs/sprachbeispiele/alle-ansagen/`. Diese Sammlung hat an einem Tag ZWEI
+  Fehler sichtbar gemacht, die kein Test gefunden haette: eine falsche
+  Abtastrate (16 kHz als 22050 deklariert, alle Hoerproben 38 % zu schnell)
+  und ein "Die Notizen wird gedruckt".
+- **Vorstellungsdialog** (Anna fragt, Michael antwortet, 3,5 Minuten) unter
+  `docs/video/dialos-vorstellung.ogg`, erzeugt von
+  `scripts/dialos-vorstellung.py`.
+
+**Der Brief - fast fertig.** Der ganze Weg steht: "Brief schreiben" nimmt auf,
+gesprochene Satzzeichen ("Komma setzen", "neuer Absatz") werden umgesetzt, der
+Text landet als Briefbogen nach DIN 5008 in `~/Dokumente/brief.txt` mit Datum,
+Unterschriftshinweis und Fusszeile, "Brief vorlesen" liest alles vor, "Brief
+drucken" druckt. Der Punkt, der ihn unbrauchbar machte, ist am 2026-08-22
+behoben: Der Schluss verlangt jetzt eine **Sprechpause davor**. Offline gegen
+Piper geprueft, bevor Stephan testen musste - aus durchgehender Rede entstanden
+zwei VOLLSTAENDIGE "diktat beenden", beide abgewiesen; der echte nach einer
+Pause angenommen.
+
+**Was fehlt, ist der Beweis am Geraet:** ein Diktat mit echter Stimme, das von
+Anfang bis Ende durchlaeuft. Erst danach ist der Brief-Weg fertig. Ausserdem
+fragt DIN 5008 nach Empfaenger und Betreff - der gefuehrte Dialog dafuer ist
+noch nicht gebaut.
+
+**Ein Fehlermuster, das offen ist und Vorrang verdient.** Die eingeschraenkte
+Grammatik ist eine Liste von SAETZEN, aber Vosk baut daraus ein WORTNETZ. Es
+darf Woerter aus verschiedenen Saetzen kombinieren. Kommt dabei etwas heraus,
+das kein Befehl ist ("notiz drucken", "wie viel uhr schreiben", "linux auf tag
+einkauf auf einkauf" - alle drei am 2026-08-22 im Protokoll), passiert
+**nichts, und es wird auch nichts gesagt**. Fuer einen blinden Nutzer ist das
+der schlechteste Ausgang: Er hat gesprochen, das Geraet hat zugehoert, und
+nichts sagt ihm, dass nichts geschah. Eine Fehlermeldung waere besser als
+Stille. **Eigener Punkt in TODO.md**, mit den Zahlen vom 2026-08-22: 382
+solche Aeusserungen im eingeschalteten Zustand - deshalb ist "einfach eine
+Ansage einbauen" keine Loesung, sondern der naechste Fehler.
+
+**Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, geprueft, bewusst
+nicht installiert - siehe die Ausschlussliste in `dialos-aufspielen`),
+Aufweckwort (Lizenz der fertigen Modelle ist nicht kommerziell).
+
+**Offen aus Stephans Wuenschen:** die Aussprache von "DialOS" in der
+Sprachausgabe - er wollte es melodischer ("dia los"), drei Varianten sind
+vorgespielt, die Wahl steht aus. Im Code steht weiterhin "Dial OS", und dabei
+bleibt es, solange nichts entschieden ist. Ausserdem: ob PDF-ANHAENGE aus
+Mails ebenfalls ins Archiv sollen.
+
+
+## Frueherer Stand (2026-08-19)
 
 **Neu am Abend des 2026-08-16: DialOS hat seinen ersten echten
 Sprachbefehl.** `dialos-sprachbefehl-desktop.py` laeuft dauerhaft mit
@@ -309,6 +398,34 @@ Ende einer Arbeitssitzung ausführen** - ein Commit beweist nur, dass die
 eine nicht installierte Änderung testet den alten Stand, ohne es zu sagen.
 
 ## Arbeitsweise mit Stephan
+
+**Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,
+weil sie den Tag gekostet haben:**
+
+1. **Nur EIN Befehlsblock je Nachricht.** Mehrere Bloecke landen in Stephans
+   Oberflaeche ohne Zeilenumbruch in derselben Eingabezeile - aus zwei
+   Befehlen wird ein dritter, der nicht existiert
+   (`dialos-akku-warnung.servicesudo.service`: "Unit not found"). Es laeuft
+   dann WEDER der erste NOCH der zweite, und es sieht aus, als sei nichts
+   passiert. Braucht ein Schritt mehrere Befehle: mit `&&` in einen Block
+   oder ueber mehrere Nachrichten verteilen.
+2. **Nach "Befehl ist durch" erst kurz warten, dann pruefen.** Zweimal an
+   diesem Tag habe ich zu frueh nachgesehen und daraus geschlossen, es sei
+   nichts ausgefuehrt worden - und Stephan denselben Befehl mehrfach
+   ausfuehren lassen.
+3. **Keine Regel bauen, die Stephan ungeprueft testen muss.** Ich habe die
+   Schlusserkennung des Diktats an einem Nachmittag viermal geflickt, und
+   jedes Mal hat der naechste Test die naechste Luecke gefunden - eine der
+   "Reparaturen" unterbrach ihn sogar mitten im Diktieren. Was gegen Piper
+   offline pruefbar ist, wird VORHER offline geprueft. Der Aufbau dafuer
+   steht: Piper spricht, beide Erkenner hoeren mit, jedes Ergebnis mit
+   Zeitstempel.
+4. **Eine Erklaerung, die zu allen Beobachtungen passt, ist noch keine
+   Ursache.** Zwei meiner Diagnosen an diesem Tag waren in sich schluessig
+   und gemessen falsch (Umgebungsgeraeusch, die eigene Ansage). Erst messen,
+   dann behaupten - und wenn die Messung die eigene Behauptung widerlegt,
+   gehoert das in den Quelltext, damit es niemand ein zweites Mal prueft.
+
 
 - Stephan ist technisch versiert, aber kein Linux-Systembau-Experte -
   Erklärungen gerne kompakt, aber nicht zu knapp weglassen warum etwas

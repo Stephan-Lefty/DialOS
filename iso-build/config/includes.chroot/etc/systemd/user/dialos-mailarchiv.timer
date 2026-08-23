@@ -1,0 +1,18 @@
+[Unit]
+# Alle 15 Minuten nachsehen, ob Thunderbird neue Mails geholt hat.
+#
+# WARUM NICHT HAEUFIGER: Der Lauf liest Dateien und erzeugt PDFs - billig,
+# aber nicht umsonst. Und eine Mail, die eine Viertelstunde spaeter im Archiv
+# liegt, ist kein Problem; das Archiv ist fuer spaeter, nicht fuer jetzt.
+#
+# WARUM NICHT SELTENER: Wer eine Mail schreibt und sie gleich im Archiv sucht,
+# soll sie finden.
+Description=DialOS: Mailarchiv regelmaessig nachfuehren
+
+[Timer]
+OnStartupSec=3min
+OnUnitActiveSec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

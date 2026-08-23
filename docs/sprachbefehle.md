@@ -33,7 +33,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | Sprachbefehl | Aktion |
 |---|---|
 | **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre Dir zu." Läuft sie schon: „Ich höre Dir schon zu." Öffnet zugleich das [Mitschrift-Fenster](Debian-zu-DialOS.md) für sehende Zuschauer - einmal, nicht bei jedem Befehl. |
-| **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre Dir nicht mehr zu." Nach zwei Minuten ohne Befehl geschieht das von selbst, mit Ansage. Das Mitschrift-Fenster geht in beiden Fällen mit zu. |
+| **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre Dir nicht mehr zu." Von selbst geschieht das nach **30 Sekunden**, wenn überhaupt kein Befehl kam, und nach **zwei Minuten** im laufenden Gespräch - mit unterschiedlicher Ansage: die lange Begründung nur dann, wenn wirklich ein Gespräch lief. Das Mitschrift-Fenster geht in beiden Fällen mit zu. |
 | „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Der Schreibtisch steht schon auf Windows Desktop." |
 | „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Der Schreibtisch steht schon auf Linux Desktop." |
 | „auf Gnome umschalten" | Gleichbedeutend mit „auf Linux umschalten". |
@@ -45,18 +45,42 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Wie ist die Uhrzeit?"** | Gleichbedeutend. |
 | **„Welchen Tag haben wir?"** | „Heute ist Mittwoch, der neunzehnte August." Dieselbe Formulierung wie in der Start-Ansage, aus denselben Funktionen gebaut. |
 | **„Welches Datum haben wir?"** | Gleichbedeutend. |
+| **„Bildschirmfoto erstellen"** | Legt ein Foto des Bildschirms unter `~/Bilder/Bildschirmfotos/` ab, mit Datum und Uhrzeit im Namen, und sagt „Das Bildschirmfoto ist gespeichert." **Nicht für den Nutzer** - er sieht es nicht -, sondern für den sehenden Helfer und den Support: „Was steht da gerade?" lässt sich sonst nicht beantworten. Das Gerät hat kein Screenshot-Werkzeug installiert und die GNOME-Schnittstelle ist gesperrt; DialOS geht deshalb über das XDG-Portal - **ohne Rückfrage**, denn ein Dialog wäre hier dasselbe wie keine Funktion. Das **Mitschrift-Fenster wird vorher geschlossen** und danach wieder geöffnet - es ist DialOS' eigene Anzeige und verdeckt auf einem Support-Foto genau das, was der Helfer sehen will. |
+| **„Bildschirmfoto machen"** | Gleichbedeutend. |
+| **„Brief drucken"** | Druckt `~/Dokumente/brief.txt`. Der Brief trägt seine Fußzeile schon, sie kommt kein zweites Mal dazu. |
+| **„Einkaufszettel drucken"** | Druckt den Zettel - **mit** Fußzeile, die er auf dem Bildschirm bewusst nicht hat: Ein Blatt Papier verlässt das Haus, eine Notiz auf dem Schirm nicht. |
+| **„Notizen drucken"** / **„Notiz drucken"** | Dasselbe für die Sammelnotiz. Die Einzahl gilt seit dem 2026-08-22 mit: Vosk hatte beim ersten Nachtest „notiz drucken" verstanden, und weil beide Wörter in der Grammatik stehen, war das eine erlaubte, aber befehlslose Kombination - der Befehl fiel **lautlos** durch, ohne jede Rückmeldung. |
 | **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
 | **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
 | **„Einkauf erledigt"** | Leert den Einkaufszettel - **mit Rückfrage**: „Der Einkaufszettel hat vier Einträge. Soll ich ihn löschen? Sage ja oder nein." Kommt keine verwertbare Antwort, fragt DialOS **ein zweites Mal** („Das habe ich nicht verstanden. Sage ja oder nein."); erst danach bleibt der Zettel stehen. Der alte Inhalt wandert nach `einkaufszettel-verworfen.txt`, damit ein sehender Helfer ihn im Notfall zurückholen kann. |
 | **„Einkaufszettel wegwerfen"** | Gleichbedeutend mit „Einkauf erledigt". Zwei Formulierungen für dasselbe, damit der Nutzer sich keine merken muss - wie bei „auf Linux" und „auf Gnome". |
 | **„ja" / „nein"** | Antwort auf eine Rückfrage - bisher nur vor dem Leeren einer Notiz. Gilt **nur während der Rückfrage**: dafür läuft ein eigener Erkenner mit einer Grammatik aus genau diesen zwei Wörtern, der Befehlsdienst hält sich heraus. Kommt nichts Verwertbares, wird einmal nachgefragt, danach bleibt der Zettel stehen. |
+| **„Hilfe rufen"** ⏸ **zurückgestellt** | *Nicht in der Grammatik, siehe unten.* Startet die Fernwartung - **mit Rückfrage**, die erklärt, was passiert: „Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." Danach wird die RustDesk-Nummer **ziffernweise und zweimal** vorgelesen. Während einer laufenden Sitzung **verlängert** derselbe Satz sie um eine Stunde. Danach fragt DialOS nach: „Hast Du das Deinem Betreuer weitergegeben?" - bei „nein" oder wenn nichts verstanden wurde: „Soll ich es wiederholen?" Höchstens zwei Wiederholungen, danach der Hinweis, dass „Hilfe rufen" die Zahlen jederzeit wiederholt. Der Nutzer sieht die Zahlen nicht und kann nichts mitschreiben; ein wartender Betreuer und ein Nutzer, der die Hälfte verloren hat, sind der wahrscheinlichste Fehlerfall dieses Befehls. |
+| **„Fernwartung beenden"** ⏸ **zurückgestellt** | Beendet sie. „Niemand kann mehr zusehen." Passiert auch von selbst nach einer Stunde, mit Vorwarnung drei Minuten vorher. Kernwort ist **„fernwartung"** und nicht „beenden": Letzteres kennt der Nutzer als Schlusswort des Diktats, und ein Wort in zwei Rollen ist beim Sprechen zweideutig, auch wenn die Grammatik es nicht ist. |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |
+
+> **⏸ Zurückgestellt am 2026-08-20** (Stephan: „können den Rustdesk ganz nach
+> hinten schieben, wenn alles andere läuft"). „Hilfe rufen" und „Fernwartung
+> beenden" stehen **nicht** in der Grammatik und sind damit nicht auslösbar.
+>
+> **Nicht nur verschoben, sondern abgeschaltet - und das ist der Punkt:** Der
+> Befehl war halb gebaut und installiert. Er startet die RustDesk-**Anwendung**,
+> und die stürzt ohne den systemd-Dienst nach rund 40 Sekunden ab („Got signal 11
+> and exit", am 2026-08-19 im Protokoll belegt). Der Nutzer bekäme die ID
+> vorgelesen, sein Betreuer könnte sich nicht verbinden - und beim nächsten Mal
+> glaubt er dem Gerät nicht mehr. **Ein Sprachbefehl, der halb funktioniert, ist
+> schlimmer als einer, der nicht existiert**, und ausgerechnet bei dem, mit dem
+> Hilfe geholt wird, wenn nichts mehr geht.
+>
+> Der Code bleibt vollständig liegen - `dialos-hilfe.py` mit Rückfrage, Wache,
+> Zeitgrenze und Nachfragen. Wieder freigeben heißt: zwei Zeilen in
+> `GRAMMATIK_AN` und zwei in `HILFE_SAETZE` einkommentieren. Was vorher fehlt,
+> steht als erster Punkt in `TODO.md`.
 
 ## Vorgesehen, noch nicht gebaut
 
 | Sprachbefehl | Aktion |
 |---|---|
-| „Hilfe rufen" | Startet RustDesk für die Fernwartung. Bewusst nur auf ausdrückliche Ansage, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md). |
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |
@@ -81,11 +105,43 @@ einmal aufgetreten ist:
   kein `[unk]` dabei ist - dasselbe schon einen Tag vorher beim Schlusssatz
   des Diktats.
   - **Das Kernwort muss eindeutig sein.** „stoppen" kommt in genau einem
-    Satz der Grammatik vor, genügt also immer. „starten" kommt in zwei vor
-    („Sprachsteuerung starten" und „Diktat starten") - allein genügt es
-    deshalb nur im **ausgeschalteten** Zustand, wo die Grammatik nur einen
-    Satz kennt. Wer einen neuen Befehl mit einem schon benutzten Verb
-    anlegt, muss das prüfen.
+    Satz der Grammatik vor, genügt also immer.
+  - **Und es muss LANG genug sein - das ist die teurere Lehre**
+    (2026-08-20). Bis dahin galt beim Einschalten „starten" als Kernwort. Über
+    157 aufgezeichnete Äußerungen gemessen: **18-mal `'starten'` allein gegen
+    4-mal den vollen Satz.** Kurze, häufige Wörter entstehen aus
+    Umgebungsgeräusch, und die Sprachsteuerung hat sich dadurch 18-mal von
+    selbst eingeschaltet - jedes Mal für zwei Minuten offenes Mikrofon.
+    Am 2026-08-20 um 14:04 kam in einer dieser Phasen aus reinem Geräusch
+    `'hilfe rufen'`, und die Fernwartung wurde angefordert, ohne dass jemand
+    etwas gesagt hatte. Nur die Ja/Nein-Rückfrage hat es verhindert.
+    Zuerst wurde das Kernwort auf **„sprachsteuerung"** umgestellt: lang,
+    markant, in nur 16 von 157 Äußerungen vorgekommen.
+  - **Und am selben Abend weiter auf BEIDE Wörter**, weil auch das noch nicht
+    reichte. Zwei Stunden Betrieb, dieselben Daten durch alle drei Regeln
+    gerechnet:
+
+    | verlangt | Einschaltungen in 2 Std. |
+    |---|---|
+    | Kernwort „starten" | **30** |
+    | Kernwort „sprachsteuerung" | 7 |
+    | **beide Wörter** | **3** |
+
+    Die 27 Fehlstarts der ersten Regel kamen aus `'starten'` allein, vier der
+    sieben aus `'sprachsteuerung'` allein - und auf **keine** der sieben folgte
+    ein Befehl. Zwei bestimmte Wörter hintereinander fallen im Gespräch
+    praktisch nicht; eines schon.
+
+    Der Preis ist bewusst in Kauf genommen: Verschluckt der Erkenner eines der
+    beiden, muss der Nutzer den Satz wiederholen. Genau dieser Fehler hatte am
+    2026-08-19 zur Lockerung geführt - nur liegt die Gegenrechnung inzwischen
+    gemessen vor. Wiederholen ist eine Unbequemlichkeit; ein Mikrofon, das sich
+    von selbst scharf schaltet, ist es nicht.
+  - **Vertauschte oder doppelte Wörter zählen weiter.** Geprüft wird als
+    **Menge**, nicht als Zeichenkette - der Erkenner liefert Wörter auch
+    doppelt oder in anderer Reihenfolge („sprachsteuerung sprachsteuerung
+    stoppen" kam vor). Nur `[unk]` schließt aus: dann war noch etwas anderes
+    dabei.
 - **Eine Bedienregel, die der Nutzer nicht sehen kann, muss gesagt werden.**
   Ein Einkaufszettel entsteht nur dann als Liste, wenn zwischen den Waren eine
   kleine Pause liegt - das war von Anfang an so gebaut, aber nie angesagt. Am

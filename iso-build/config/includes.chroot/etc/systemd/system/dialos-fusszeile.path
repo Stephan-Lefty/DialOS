@@ -1,0 +1,14 @@
+[Unit]
+# Beobachtet die eine Textquelle. Aendert Stephan den Satz, sind Briefe,
+# Ausdrucke UND Mails sofort umgestellt - ohne dass jemand daran denken muss,
+# die Signatur nachzuziehen. Genau dieses Nachziehen ist die Stelle, an der
+# eine Kopie sonst still veraltet.
+Description=DialOS: Fusszeilen-Quelle beobachten
+Documentation=file:///usr/local/bin/dialos-fusszeile.py
+
+[Path]
+PathChanged=/usr/local/share/dialos/fusszeile.txt
+Unit=dialos-fusszeile.service
+
+[Install]
+WantedBy=multi-user.target

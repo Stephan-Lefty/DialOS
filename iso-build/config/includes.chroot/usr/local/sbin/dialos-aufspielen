@@ -1,0 +1,254 @@
+#!/usr/bin/env python3
+"""DialOS: spielt den Repo-Stand auf dieses Geraet - und NUR das.
+
+Stephans Wunsch vom 2026-08-22: die Aufspiel-Befehle nicht mehr jedes Mal von
+Hand tippen. Zusammen mit einer Regel in /etc/sudoers.d/ darf dieses Skript
+ohne Passwort laufen.
+
++---------------------------------------------------------------------------+
+| NUR FUER DAS ENTWICKLUNGSGERAET. Auf einem Kundengeraet darf weder dieses  |
+| Skript noch die sudoers-Regel existieren.                                  |
+|                                                                            |
+| GRUND, ohne Beschoenigung: Das Skript kopiert Dateien aus einem Ordner,    |
+| den "dialosadmin" beschreiben darf, als root nach /usr/local/bin. Wer also |
+| als dialosadmin schreiben kann, kann Code als root ausfuehren lassen - die |
+| Regel ist damit praktisch ein Root-Zugang. Auf einem Geraet, auf dem       |
+| entwickelt wird, ist das ein vertretbarer Tausch gegen die staendige       |
+| Tipparbeit. Auf einem ausgelieferten Geraet ist es keiner.                 |
++---------------------------------------------------------------------------+
+
+WAS ES TUT: Es geht den Baum unter includes.chroot durch und kopiert jede
+Datei, die sich vom installierten Stand unterscheidet, an ihren Platz - mit
+den Rechten, die zum Ort gehoeren. Danach laedt es systemd neu und startet die
+DialOS-Dienste neu, deren Datei sich geaendert hat.
+
+WAS ES NICHT TUT: keine Pakete installieren, keine Konfiguration ausserhalb
+der bekannten Ziele anfassen, nichts loeschen. Die Quelle ist FEST
+eingetragen; ein Pfad als Argument waere genau das Schlupfloch, das die enge
+Regel verhindern soll.
+
+Aufruf:
+    dialos-aufspielen                    zeigt, was sich unterscheidet
+    dialos-aufspielen --wirklich         kopiert die abweichenden Dateien
+    dialos-aufspielen --paket NAME ...   installiert Debian-Pakete
+"""
+
+import os
+import shutil
+import subprocess
+import sys
+
+QUELLE = ("/media/dialosadmin/SanDisk-Extreme/DialOS/repo/"
+          "iso-build/config/includes.chroot")
+NUTZER = "dialosadmin"
+
+# Welche Rechte an welchem Ort gelten. Laengster Treffer gewinnt.
+RECHTE = [
+    # sudoers-Dateien verlangt sudo mit 0440 - mit 0644 laufen sie zwar, aber
+    # die Konvention ist strenger, und eine Regel, die Rechte vergibt, sollte
+    # selbst die engsten haben.
+    ("etc/sudoers.d", 0o440),
+    ("usr/local/bin", 0o755),
+    ("usr/local/sbin", 0o755),
+    ("etc/systemd", 0o644),
+    ("etc/xdg/autostart", 0o644),
+    ("usr/local/share", 0o644),
+    ("etc", 0o644),
+]
+
+# Welcher Dienst haengt an welcher Datei. Neu gestartet wird nur, was sich
+# geaendert hat - ein pauschaler Neustart aller Dienste waere bei jedem
+# Aufspielen ein unnoetiger Aussetzer der Spracherkennung.
+DIENSTE = {
+    "usr/local/bin/dialos-sprachbefehl-desktop.py": ("autostart", None),
+    "usr/local/bin/dialos-ton-ausgabe.py": ("autostart", None),
+    "usr/local/bin/dialos-tts-indicator.py": ("autostart", None),
+    "usr/local/bin/dialos-akku-warnung.py": ("user", "dialos-akku-warnung.service"),
+    "etc/systemd/user/dialos-akku-warnung.service": ("user", "dialos-akku-warnung.service"),
+    "etc/systemd/system/dialos-fusszeile.service": ("system", "dialos-fusszeile.service"),
+    "etc/systemd/system/dialos-fusszeile.path": ("system", "dialos-fusszeile.path"),
+}
+
+
+# WAS NIE AUFGESPIELT WIRD, und warum. Ohne diese Liste haette der erste
+# Trockenlauf am 2026-08-22 zwoelf .pyc-Dateien und eine zurueckgestellte
+# sudoers-Regel installiert.
+NIEMALS = [
+    # Bytecode, den Python beim Importieren im Repo anlegt - reines
+    # Nebenprodukt, steht auch in .gitignore.
+    ("__pycache__", "Python-Bytecode, kein Bestandteil des Systems"),
+    (".pyc", "Python-Bytecode"),
+    # ZURUECKGESTELLT (Stephan, 2026-08-20): Der Fernwartungs-Dienst ist
+    # gebaut und geprueft, aber bewusst nicht installiert, solange der Umbau
+    # auf den systemd-Dienst offen ist. Ein Aufspiel-Skript, das ihn
+    # klammheimlich mitnimmt, waere genau der stille Fehler, den dieses
+    # Projekt sonst ueberall vermeidet.
+    ("etc/sudoers.d/dialos-fernwartung", "zurueckgestellt, siehe TODO.md"),
+    ("usr/local/sbin/dialos-fernwartung", "zurueckgestellt, siehe TODO.md"),
+    # KOPPLUNGSDATEN SIND LAUFENDER ZUSTAND, keine Konfiguration. Im Abbild
+    # liegen sie, damit ein frisches Geraet den Lautsprecher schon kennt; auf
+    # einem LAUFENDEN Geraet wuerde ein Ueberschreiben die bestehende Kopplung
+    # zerstoeren, und BlueZ haelt die Dateien ohnehin offen.
+    ("var/lib/bluetooth", "laufende Kopplung, kein Konfigurationsstand"),
+]
+
+
+def uebersprungen(rel):
+    for muster, grund in NIEMALS:
+        if muster in rel:
+            return grund
+    return None
+
+
+def rechte_fuer(rel):
+    for anfang, modus in sorted(RECHTE, key=lambda p: -len(p[0])):
+        if rel.startswith(anfang):
+            return modus
+    return 0o644
+
+
+def unterschiede():
+    gefunden = []
+    for wurzel, _ordner, dateien in os.walk(QUELLE):
+        for name in dateien:
+            voll = os.path.join(wurzel, name)
+            rel = os.path.relpath(voll, QUELLE)
+            if uebersprungen(rel):
+                continue
+            ziel = "/" + rel
+            if not os.path.exists(ziel):
+                gefunden.append((rel, voll, ziel, "fehlt"))
+            else:
+                try:
+                    gleich = (open(voll, "rb").read() == open(ziel, "rb").read())
+                except OSError as fehler:
+                    gefunden.append((rel, voll, ziel, f"nicht lesbar: {fehler}"))
+                    continue
+                if not gleich:
+                    gefunden.append((rel, voll, ziel, "abweichend"))
+    return sorted(gefunden)
+
+
+# WARUM DAS SKRIPT KEINE SITZUNGSDIENSTE STARTET (Lehre vom 2026-08-22):
+#
+# Der erste Entwurf beendete den Befehlsdienst und startete ihn als root neu.
+# Das ging schief - ohne DISPLAY, WAYLAND_DISPLAY und DBus-Adresse findet er
+# weder Bildschirm noch Ton, und subprocess.run wartet ausserdem auf einen
+# Dienst, der bis zum Abmelden laeuft. Ergebnis: Der Laptop stand sieben
+# Minuten ohne Sprachsteuerung da, waehrend Stephan nicht am Platz war.
+#
+# Die Umgebung liesse sich aus einem laufenden Prozess abschreiben - aber es
+# bliebe der falsche Weg: Ein Dienst, der zur Sitzung gehoert, wird von der
+# Sitzung gestartet, nicht von root. Das Skript sagt jetzt nur noch, WAS neu
+# gestartet werden muss. Das kostet einen Handgriff und kann nichts kaputt
+# machen.
+#
+# Systemd-Units koennten bleiben - "systemctl restart" ist dafuer gebaut. Sie
+# sind trotzdem mit aufgefuehrt statt ausgefuehrt, damit es EINE Regel gibt
+# und nicht zwei.
+
+
+# NUR INSTALLIEREN, NICHTS ANDERES (Stephan, 2026-08-22: "und auch die apt
+# Installationen"). Kein remove, kein purge, kein dist-upgrade.
+#
+# WAS DAS BEDEUTET, wieder unbeschoenigt: Wer Pakete installieren darf, darf
+# alles - apt fuehrt Skripte der Pakete als root aus. Die Regel war schon
+# vorher praktisch ein Root-Zugang; damit ist sie es ohne "praktisch". Auf
+# dem Entwicklungsgeraet ist das der Preis dafuer, dass nicht bei jedem
+# Versuch jemand ein Passwort tippen muss. Auf einem Kundengeraet darf weder
+# das Skript noch die Regel existieren.
+#
+# Die Einschraenkung auf "install" ist trotzdem kein Feigenblatt: Sie
+# verhindert, dass ein Tippfehler Pakete ENTFERNT - und ein halb
+# deinstalliertes GNOME ist auf einem Geraet, das nur per Sprache bedient
+# wird, ein Totalausfall.
+def pakete_installieren(namen):
+    for name in namen:
+        # Keine Optionen durchreichen: "--purge" oder "-y" als Paketname waere
+        # genau das Schlupfloch, das die Beschraenkung aushebelt.
+        if name.startswith("-") or "/" in name or " " in name:
+            print(f"Kein gueltiger Paketname: {name!r}", file=sys.stderr)
+            return 2
+    umgebung = dict(os.environ)
+    umgebung["DEBIAN_FRONTEND"] = "noninteractive"
+    print(f"Installiere: {' '.join(namen)}")
+    ergebnis = subprocess.run(
+        ["apt-get", "install", "--yes", "--no-install-recommends"] + list(namen),
+        env=umgebung)
+    if ergebnis.returncode != 0:
+        print(f"apt-get meldet Fehler {ergebnis.returncode}", file=sys.stderr)
+        return ergebnis.returncode
+    # Was wirklich ankam, aus dpkg - nicht aus der Absicht.
+    for name in namen:
+        p = subprocess.run(["dpkg-query", "-W", "-f=${Package} ${Version} ${Status}\n", name],
+                           capture_output=True, text=True)
+        print(f"  {p.stdout.strip() or name + ' NICHT installiert'}")
+    return 0
+
+
+def main():
+    argumente = sys.argv[1:]
+    if "--paket" in argumente:
+        i = argumente.index("--paket")
+        namen = [a for a in argumente[i + 1:] if a != "--wirklich"]
+        if not namen:
+            print("Aufruf: dialos-aufspielen --paket NAME ...", file=sys.stderr)
+            return 2
+        return pakete_installieren(namen)
+
+    wirklich = "--wirklich" in sys.argv[1:]
+    if not os.path.isdir(QUELLE):
+        print(f"Quelle fehlt: {QUELLE}", file=sys.stderr)
+        return 1
+
+    liste = unterschiede()
+    if not liste:
+        print("Nichts zu tun - das Geraet entspricht dem Repo.")
+        return 0
+
+    print(f"{len(liste)} Datei(en) weichen ab:")
+    for rel, _q, _z, grund in liste:
+        print(f"  {grund:12s} /{rel}")
+    if not wirklich:
+        print("\nNichts geaendert. Mit --wirklich aufspielen.")
+        return 0
+
+    neu_zu_starten = {"autostart": False, "user": set(), "system": set()}
+    for rel, quelle, ziel, _grund in liste:
+        os.makedirs(os.path.dirname(ziel), exist_ok=True)
+        shutil.copyfile(quelle, ziel)
+        os.chmod(ziel, rechte_fuer(rel))
+        os.chown(ziel, 0, 0)
+        print(f"  aufgespielt  /{rel}")
+        art_und_name = DIENSTE.get(rel)
+        if art_und_name:
+            art, name = art_und_name
+            if art == "autostart":
+                neu_zu_starten["autostart"] = True
+            else:
+                neu_zu_starten[art].add(name)
+
+    if neu_zu_starten["system"]:
+        subprocess.run(["systemctl", "daemon-reload"], check=False)
+        for dienst in sorted(neu_zu_starten["system"]):
+            subprocess.run(["systemctl", "restart", dienst], check=False)
+            print(f"  neu gestartet  {dienst}")
+    if neu_zu_starten["user"]:
+        print("\n  Diese Nutzerdienste laufen noch in der alten Fassung:")
+        for dienst in sorted(neu_zu_starten["user"]):
+            print(f"    systemctl --user restart {dienst}")
+
+    if neu_zu_starten["autostart"]:
+        print("\n  Diese Dienste gehoeren zur Sitzung und laufen noch in der")
+        print("  alten Fassung. Als angemeldeter Nutzer, OHNE sudo:")
+        for skript in ("dialos-sprachbefehl-desktop.py",
+                       "dialos-ton-ausgabe.py", "dialos-tts-indicator.py"):
+            if any(rel.endswith(skript) for rel, *_ in liste):
+                print(f"    pkill -f 'python3 /usr/local/bin/{skript}'")
+                print(f"    setsid /usr/local/bin/{skript} >/dev/null 2>&1 &")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

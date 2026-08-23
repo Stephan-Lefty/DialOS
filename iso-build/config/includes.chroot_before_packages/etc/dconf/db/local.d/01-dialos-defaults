@@ -16,6 +16,70 @@ enabled=true
 accent-color='blue'
 color-scheme='default'
 show-battery-percentage=true
+# ---------------------------------------------------------------------------
+# Standby: am Netz NIE (Stephans Entscheidung, 2026-08-21)
+#
+# GEFUNDEN, WEIL EINE MESSUNG UEBER NACHT GEPLANT WAR. Ab Werk schlaeft GNOME
+# nach 900 Sekunden ohne Tastatur- oder Mauseingabe ein - am Netz genauso wie
+# im Akkubetrieb. Belegt im Systemprotokoll dieses Geraets am 2026-08-20:
+# zweimal "Starting systemd-suspend.service", waehrend DialOS lief (16:26 und
+# 18:20 Uhr). Sprache setzt GNOMEs Untaetigkeits-Zaehler NICHT zurueck, das
+# tun nur Eingabegeraete.
+#
+# WARUM DAS EIN PRODUKTFEHLER WAERE, nicht nur ein Testproblem: Ein blinder
+# Nutzer, der eine Viertelstunde nichts anfasst und dann "Sprachsteuerung
+# starten" sagt, bekaeme keine Reaktion - und saehe nicht, dass das Geraet
+# schlaeft. Ein sprachgesteuertes Geraet, das nur durch Tastendruck wach
+# bleibt, widerspricht seinem eigenen Zweck.
+#
+# AM NETZ NIE, IM AKKU NACH 30 MINUTEN. Zuhause haengt das Geraet am Netz,
+# dort darf es nie einschlafen. Unterwegs ist ein leergelaufener Akku
+# schlimmer als ein Standby - ein totes Geraet ist fuer einen blinden Nutzer
+# schwerer zu deuten als ein schlafendes. 30 statt 15 Minuten, damit eine
+# laengere Gespraechspause nicht schon reicht.
+[org/gnome/settings-daemon/plugins/power]
+sleep-inactive-ac-type='nothing'
+sleep-inactive-battery-type='suspend'
+sleep-inactive-battery-timeout=1800
+
+# Der BILDSCHIRM darf weiter dunkel werden (Stephan, 2026-08-21). Das stoppt
+# die Sprachsteuerung nicht, spart Strom, und fuer einen blinden Nutzer hat es
+# ohnehin keinen Nachteil. Ausdruecklich gesetzt und nicht stillschweigend
+# geerbt: 300 s ist zwar auch GNOMEs Standard, aber ein geerbter Wert ist
+# keine Entscheidung - und beim naechsten GNOME-Sprung kann er sich aendern.
+[org/gnome/desktop/session]
+idle-delay=uint32 300
+
+# ---------------------------------------------------------------------------
+# Der Bildschirm SPERRT NICHT (Stephans Entscheidung, 2026-08-21)
+#
+# GEFUNDEN AM SELBEN TAG wie der Standby: lock-enabled=true bei lock-delay=0,
+# also Sperre in dem Moment, in dem der Bildschirm dunkel wird - nach fuenf
+# Minuten. Zusammen mit dem Autologin heisst das: Der Nutzer ist nach fuenf
+# Minuten Untaetigkeit aus seinem eigenen Geraet ausgesperrt und muesste ein
+# Passwort tippen. Fuer einen motorisch eingeschraenkten Nutzer ist genau das
+# der Grund, warum es DialOS gibt.
+#
+# DAS IST ABSICHTLICH DAS GEGENTEIL DER UEBLICHEN VOREINSTELLUNG, und der
+# Grund steht in docs/sicherheit-datenschutz.md: Die Tuer ist die
+# LUKS-Vollverschluesselung. Wer das ausgeschaltete Geraet mitnimmt, kommt an
+# nichts. Ein Sperrbildschirm schuetzt nur gegen jemanden, der bereits im
+# selben Raum steht, waehrend das Geraet laeuft - und er sperrt dafuer den
+# Besitzer aus, der ihn nicht bedienen kann. Das ist der schlechtere Tausch.
+#
+# UMGEKEHRT FUER dialosadmin: Dort liegen die Support-Werkzeuge, und dort
+# sitzt ein Mensch, der ein Passwort tippen kann. Die Sperre wird deshalb fuer
+# DIESES Konto einzeln wieder eingeschaltet - der Eintrag in der eigenen
+# Nutzer-Datenbank sticht die Systemvorgabe:
+#
+#     sudo -u dialosadmin gsettings set org.gnome.desktop.screensaver lock-enabled true
+#
+# Warum in dieser Richtung und nicht andersherum: Der zugaengliche Zustand ist
+# der Standard, jede Ausnahme muss eingetragen werden. Ein kuenftig angelegtes
+# Konto erbt damit die bedienbare Voreinstellung und nicht die Aussperrung.
+[org/gnome/desktop/screensaver]
+lock-enabled=false
+
 [org/gnome/shell]
 enabled-extensions=['bluetooth-battery-monitor@v8v88v8v88.com', 'ubuntu-appindicators@ubuntu.com', 'ding@rastersoft.com', 'blur-my-shell@aunetx']
 [org/gnome/shell/extensions/ding]

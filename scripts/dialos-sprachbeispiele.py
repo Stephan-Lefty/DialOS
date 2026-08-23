@@ -31,8 +31,36 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BIN = os.path.join(REPO, "iso-build/config/includes.chroot/usr/local/bin")
 PIPER_DIR = "/usr/local/share/dialos-piper"
-STIMME = "voices/de_DE-thorsten-high.onnx"
 PIPER_CONF = "/etc/speech-dispatcher/modules/piper-generic.conf"
+
+
+def stimme():
+    """Die EINGESTELLTE Stimme, gelesen statt eingetragen.
+
+    Hier stand fest "voices/de_DE-thorsten-high.onnx". Am 2026-08-20 wurde Anna
+    (de_DE-kerstin-low) zur Auslieferungsstimme - die Hoerbeispiele im Repo
+    blieben trotzdem Michael, und zwar unbemerkt, weil sie fuer sich genommen
+    richtig klingen. Genau der Fehler, den der Kommentar bei tempo() unten fuer
+    das Tempo beschreibt, nur eine Zeile weiter oben. Beide Werte kommen jetzt
+    aus piper-generic.conf, also aus derselben Quelle wie im Betrieb.
+    """
+    name = None
+    try:
+        with open(PIPER_CONF, encoding="utf-8") as f:
+            for zeile in f:
+                if zeile.startswith("DefaultVoice"):
+                    teile = shlex.split(zeile)
+                    if len(teile) > 1:
+                        name = teile[1]
+                    break
+    except OSError:
+        pass
+    if not name:
+        return None
+    pfad = os.path.join("voices", name + ".onnx")
+    # Lieber gar keine Beispiele als welche mit der falschen Stimme: Wer sie
+    # anhoert, glaubt sonst, so klinge das Geraet.
+    return pfad if os.path.exists(os.path.join(PIPER_DIR, pfad)) else None
 
 
 def tempo():
@@ -64,14 +92,40 @@ def modul(pfad, name):
     return m
 
 
+def abtastrate(modell):
+    """Die Abtastrate DIESES Modells, gelesen aus seiner .json.
+
+    HIER STAND FEST "22050" - und das war falsch, sobald eine zweite Stimme
+    dazukam (gefunden am 2026-08-22, weil Stephan beim Anhoeren sagte "die
+    Stimme in den Proben ist zu schnell"):
+
+        de_DE-thorsten-high   22050 Hz
+        de_DE-kerstin-low     16000 Hz
+
+    Anna ist ein 16-kHz-Modell. Werden ihre Rohdaten als 22050 Hz deklariert,
+    laeuft jede Probe um den Faktor 1,38 zu schnell und eine Quinte zu hoch.
+    Die Sprechkette des Systems macht es richtig - piper-generic.conf holt die
+    Rate mit jq aus derselben Datei. Nur die Beispiel-Erzeuger hatten sie fest
+    eingetragen, und solange nur Thorsten existierte, fiel das nicht auf.
+    """
+    import json
+    pfad = os.path.join(PIPER_DIR, modell + ".json")
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            return int(json.load(f)["audio"]["sample_rate"])
+    except Exception:
+        # Lieber laut scheitern als still falsch klingen.
+        raise SystemExit(f"Abtastrate nicht lesbar: {pfad}")
+
+
 def erzeugen(datei, text, aussprache):
     """Rendert EINEN Text nach OGG - dieselbe Kette wie speech-dispatcher."""
     fuer_piper = aussprache(text)
     befehl = (
         f"cd {shlex.quote(PIPER_DIR)} && "
         f"printf %s {shlex.quote(fuer_piper)} | "
-        f"./piper/piper --model {shlex.quote(STIMME)} --noise_w 0 --output_raw 2>/dev/null | "
-        f"sox -r 22050 -c 1 -b 16 -e signed-integer -t raw - "
+        f"./piper/piper --model {shlex.quote(stimme())} --noise_w 0 --output_raw 2>/dev/null | "
+        f"sox -r {abtastrate(stimme())} -c 1 -b 16 -e signed-integer -t raw - "
         f"-C 3 {shlex.quote(datei)} tempo {tempo()} norm 2>/dev/null"
     )
     subprocess.run(["sh", "-c", befehl], check=False)
@@ -82,20 +136,42 @@ def erzeugen(datei, text, aussprache):
     return float(dauer), os.path.getsize(datei)
 
 
-def start_ansage_text(ansage):
+def start_ansage_text(ansage, jetzt=None):
     """Baut die Start-Ansage fuer nutzer mit den Funktionen des Originals.
 
-    Die Werte sind Beispielwerte: Datum und Uhrzeit sind fest gewaehlt, damit
-    das Beispiel reproduzierbar bleibt, und die Akkustaende sowie das Wetter
-    sind erfunden - beides kommt im Betrieb von der Hardware und aus dem Netz.
-    Der SATZBAU dagegen ist der echte, aus dialos-start-ansage.py.
+    Ohne "jetzt" sind Datum und Uhrzeit fest gewaehlt, damit die Hoerbeispiele
+    reproduzierbar bleiben; die Akkustaende und das Wetter sind ohnehin
+    erfunden, beides kommt im Betrieb von der Hardware und aus dem Netz. Der
+    SATZBAU dagegen ist der echte, aus dialos-start-ansage.py.
+
+    MIT "jetzt" (ein datetime) kommen Datum und Uhrzeit von der Uhr. Das
+    braucht scripts/dialos-alle-ansagen.py, das alle Ansagen mit den echten
+    Werten dieses Augenblicks erzeugt - und es soll dafuer keine dritte Kopie
+    dieses Satzes anlegen muessen.
     """
-    tag, monat, stunde, minute = 18, 8, 7, 30
     import datetime
-    wochentag = ansage.WOCHENTAGE[datetime.date(2026, monat, tag).weekday()]
+    if jetzt is None:
+        tag, monat, stunde, minute = 18, 8, 7, 30
+        wochentag = ansage.WOCHENTAGE[datetime.date(2026, monat, tag).weekday()]
+    else:
+        tag, monat, stunde, minute = jetzt.day, jetzt.month, jetzt.hour, jetzt.minute
+        wochentag = ansage.WOCHENTAGE[jetzt.weekday()]
     datum = f"{wochentag}, der {ansage.ORDINAL_TAGE[tag]} {ansage.MONATE[monat - 1]}"
     uhrzeit = f"{ansage.zahl_wort_0_99(stunde)} {ansage.zahl_wort_0_99(minute)}"
-    text = ("Hallo, ich bin Michael, ich bin Dein persönlicher Assistent. "
+    # Beide Namen aus denselben Funktionen wie das Original - seit dem
+    # 2026-08-20 steht keiner mehr fest im Text: der des Assistenten haengt an
+    # der eingestellten Stimme, der des Nutzers an nutzer-name.txt.
+    #
+    # DASS DIESER SATZ HIER UEBERHAUPT NACHGEBAUT WIRD, ist die eigentliche
+    # Schwaeche: Er steht in dialos-start-ansage.py noch einmal, und beim
+    # Einbau des Nutzernamens am 2026-08-20 wurde prompt nur die eine Fassung
+    # geaendert. Solange die Start-Ansage ihren Text nicht als Funktion
+    # herausgibt, bleibt das so - notiert in TODO.md.
+    _n = ansage.namen()
+    _nutzer = _n.nutzer_name() if _n else None
+    _gruss = f" {_nutzer}" if _nutzer else ""
+    text = (f"Hallo{_gruss}, ich bin {ansage.assistent_name()}, "
+            "ich bin Dein persönlicher Assistent. "
             f"Heute ist {datum}. Die aktuelle Uhrzeit ist {uhrzeit}.")
     # nutzer bekommt nur Laptop und Lautsprecher (KIND_REIHENFOLGE_NUTZER)
     text += (" Ich nenne Dir noch die Akku-Stände."
@@ -128,6 +204,7 @@ def main():
     # zu.", dann "Du hast MIR eine Weile nichts gesagt"). Abgeschrieben waeren
     # die Beispiele beim zweiten Mal veraltet gewesen, ohne dass es auffaellt.
     befehl = modul("dialos-sprachbefehl-desktop.py", "dbefehl")
+    akku = modul("dialos-akku-warnung.py", "dakku")
     aussprache = say.fuer_sprachausgabe
 
     # Rueckfrage genau so bauen wie _loeschen() in dialos-notiz.py
@@ -158,6 +235,13 @@ def main():
         ("09b-rueckfrage-nochmal", notiz.ANSAGE_NOCHMAL),
         ("10-ton-ueber-lautsprecher", "Ton über Lautsprecher."),
         ("11-kein-mikrofon", "Ich finde kein Mikrofon. Die Sprachsteuerung ist aus."),
+        # Die drei Akku-Stufen und die Bestaetigung beim Anstecken (Stephans
+        # Vorgabe vom 2026-08-21). Texte aus dem echten Skript, und die letzte
+        # MIT Anrede - genau so kommt sie im Betrieb.
+        ("12-akku-25", akku.STUFEN[0][1]),
+        ("12b-akku-15", akku.STUFEN[1][1]),
+        ("12c-akku-5", akku.anrede(akku.STUFEN[2][1])),
+        ("12d-akku-am-netz", akku.ANSAGE_AM_NETZ),
     ]
 
     print(f"Ziel: {ziel}")

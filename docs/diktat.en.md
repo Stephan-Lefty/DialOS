@@ -204,7 +204,9 @@ system anyway
 ## The first run in Stephan's voice (2026-08-18)
 
 Three attempts, each showing something different. Evidenced by two
-timestamped logs - `~/dialos-diktat.log` and `~/dialos-sprachbefehl.log`.
+timestamped logs - `~/.log/dialos-diktat.log` and
+`~/.log/dialos-sprachbefehl.log`. (Until 2026-08-22 they sat openly in the
+home folder.)
 
 **The recognition is right.** "tomaten bananen äpfel" verbatim correct,
 umlaut included, and turned into "Tomaten Bananen Äpfel" by LanguageTool in
@@ -490,3 +492,259 @@ those words comes out right, and individually is how they arrive since
 **So capitalization is dependable for letters and mails** - those are whole
 sentences. An earlier assessment that capitalization was the most urgent open
 point is hereby withdrawn: the more urgent one was the load time above it.
+
+## Spoken punctuation (2026-08-21)
+
+Vosk delivers words, not characters. Irrelevant for a shopping list, the end of
+usability for a letter. So the user speaks them:
+
+| spoken | becomes |
+|---|---|
+| **Komma setzen** | `,` |
+| **Punkt setzen** | `.` |
+| **Fragezeichen setzen** | `?` |
+| **Ausrufezeichen setzen** | `!` |
+| **Doppelpunkt setzen** | `:` |
+| **Gedankenstrich setzen** | ` - ` |
+| **neuer Absatz** | blank line |
+| **neue Zeile** | line break |
+
+*The first draft used the bare words ("Komma", "Punkt"). Why they became
+two-word markers is below under "Spoken punctuation only partly works" - in
+short: measured, the short words were not recognised reliably.*
+
+**All nine are in the vocabulary** of the big model - checked in
+`graph/words.txt` with 822,389 entries. That check was mandatory: it was exactly
+what had been missing for "löschen", where the command would silently never have
+fired.
+
+**And the obvious checking method does not work here.** The route via a
+restricted grammar, which reports missing words on the small model, gives an
+empty promise on the big one: it accepts no grammar at all (`Runtime graphs are
+not supported by this model`) and therefore reports nothing either. Nine words
+looked "present"; nothing had been checked. Only the model's word list answers
+the question.
+
+**Always punctuation** (Stephan's decision). The price: "in diesem Punkt"
+becomes "in diesem." That shows up during read-back, and the passage gets
+dictated again. The alternative would have been to split only at a speech pause -
+Vosk provides word timestamps - but then anyone dictating fluently would get no
+punctuation at all.
+
+**Replacement is word-wise, not by text search.** Otherwise it would have hit
+"Punkte", "Kommando" and "Absatzweise", and the text would fall apart at places
+where nobody spoke a punctuation mark.
+
+### What punctuation does for capitalisation - measured
+
+The assumption was that LanguageTool decides capitalisation better with
+punctuation. **For the nouns that is not true:** "Damen", "Herren", "Vertrag",
+"Termin", "Kündigung", "Grüßen" came out the same with and without. What
+punctuation delivers is the **sentence beginnings**:
+
+```
+without:  ... schriftlich mit freundlichen Grüßen
+with:     ... schriftlich. Mit freundlichen Grüßen
+```
+
+In a letter that is not a cosmetic flaw but wrong. That is why punctuation runs
+**before** LanguageTool. Lists are left out - on a shopping list "Butter." would
+be no improvement.
+
+## Silence produces text - the level gate (measured 2026-08-21)
+
+The big model **invents words in silence**. Measured with Stephan's microphone
+over 80 seconds of quiet: seven of them - `köln`, `einen gefunden`, `vom`,
+`ln`, `einen`, `nun`, `schon`. In a dictation those land in the text. Someone
+who pauses to think gets "köln" written into the middle of their termination
+letter. This affects **every** dictation; on a shopping list it will so far
+have passed as a misheard item.
+
+Measuring the mean level per recognised utterance separates them cleanly:
+
+| utterance | peak | mean |
+|---|---|---|
+| `'köln'` (noise) | 601 | **71** |
+| `'nun'` (noise) | 1265 | **84** |
+| `'einen'` (noise) | 528 | **47** |
+| `'sechsundzwanzig'` (spoken quietly) | 2383 | **350** |
+| whole sentences | 11606-13447 | **3475-4196** |
+
+**The threshold is 150** - twice the loudest measured noise and less than half
+the quietest genuine utterance.
+
+**The check happens on the result, not on the audio stream.** A gate that
+never lets quiet blocks through cuts words apart: between two syllables it is
+silent. Checking the finished result costs nothing and can sever nothing.
+
+**The same check protects the stop phrase** - though not as far as I first
+assumed. I had thought it the best suspect for the unexplained
+self-termination. **The next test disproved that:** a dictation terminated
+itself again, after 4.2 s, and the level gate did not catch it - the noise was
+loud enough. What the new log line revealed is in the next section.
+
+## A bare "beenden" before the first utterance is not a stop
+
+Twice on 2026-08-21 a dictation terminated itself, both times with **0
+utterances beforehand** - once after 6 s, once after 4.2 s. The second time
+neither the 3 s guard period nor the level gate caught it.
+
+The clue sat in the line that had been added for exactly this purpose: the
+**free recognition delivered nothing** in the same span, while the stop
+recogniser delivered "beenden". The same audio, two recognisers, two results.
+That is the restricted grammar: it **must** map every noise onto one of its
+phrases, and the `[unk]` catch-all does not always win.
+
+The first answer to that was a special case: discard a bare "beenden" **before
+the first utterance**. It lasted one day.
+
+### Counted - and that is why the stop now requires both words
+
+All stop events of 2026-08-21:
+
+| | bare "beenden" | full "diktat beenden" |
+|---|---|---|
+| **false** triggers | **6×** | 0× |
+| **genuine** from the user | 3× | 2× |
+
+**Every single false trigger was a bare "beenden".** Once the recogniser turned
+a fragment of Stephan's dictation into "beenden" **while he was speaking the
+letter**. The special case saved him there by chance - nothing had been
+finalised yet. Once one sentence has arrived, the same fragment would have
+stopped him mid-letter.
+
+The consequential damage was visible: Stephan believed the dictation had
+ended, said "Brief vorlesen" - and **that landed in the letter text**.
+
+**Why it was decided differently before:** on 2026-08-18 the stop recogniser
+produced something other than `[unk]` only twice in seven minutes of continuous
+talking, both times a genuine "beenden". From that came "the word is enough".
+But that measurement never checked what happens while **dictating** - and that
+is exactly where the fragments arise.
+
+The price is small: the full sentence was recognised cleanly twice on the same
+day. And if it is not recognised, **DialOS says so**: "Sage bitte: Diktat
+beenden.", at most every 15 seconds so the announcement does not itself become
+noise and run back into the microphone. The user never again speaks into the
+void without noticing - that was the real damage of the old rule.
+
+This also removes the "nothing dictated yet" special case - one patch fewer.
+
+**Every discarded utterance is logged.** If genuine speech ends up there, it
+shows immediately, and the threshold belongs lower.
+
+## Spoken punctuation only partly works (measured 2026-08-21)
+
+Measured after building it, first with Piper, then with Stephan's voice:
+
+| spoken | Piper is heard as | Stephan speaks, Vosk hears |
+|---|---|---|
+| "…Herren **Komma**" | ✅ | `komme` ✗ |
+| "…Herren *(pause)* **Komma**" | `komme` ✗ | ✅ |
+| **"Komma"** alone | `ja` ✗ | `einen koffer` ✗ |
+| "…Vertrag **Punkt**" | ✅ | ✅ |
+| **"Punkt"** alone | `das` ✗ | `kommt` ✗ |
+| **"neuer Absatz"** | ✅ | ✅ |
+| **"Doppelpunkt"** alone | `dörte depots` ✗ | - |
+
+**Three out of six with Stephan's voice.** The pattern is neither the
+pronunciation nor the pause - with Piper the exact opposite worked. It is the
+language model: it guesses from context, and with short words it guesses
+wrong. What consistently fails are the **isolated short words**; what
+consistently works is **"neuer Absatz"**, two syllables longer and with
+nothing to confuse it with.
+
+This is the same lesson as for switching the voice control on: a marker word
+must be **unambiguous and long enough**. "Komma" and "Punkt" collide with
+"komme", "kommt", "Koffer", "das", "ja" - all words that occur in a letter.
+**Open:** whether longer markers ("Komma setzen", "neuer Satz") solve it.
+
+### Solved with two-word markers (second measurement, 2026-08-21)
+
+Same voice, same chain, the longer forms:
+
+| spoken | heard | |
+|---|---|---|
+| "…Rößner **Komma setzen**" | `komma setzen` | ✅ |
+| "…Vertrag **Punkt setzen**" | `punkt setzen` | ✅ |
+| "…helfen **Fragezeichen setzen**" | `fragezeichen setzen` | ✅ |
+| "**neuer Satz**" | `neuer ersatz` | ✗ |
+| "…Rößner **Komma**" *(control)* | `komma` | ✅ **this time** |
+
+**Three out of three.** "neuer Satz" was therefore not adopted.
+
+The bare "Komma" hit here after failing twice - and that is the worst case:
+the user learns that it works, and then it does not.
+
+**The bare forms were therefore removed**, and that is a double win: the
+recognition becomes reliable **and** the price accepted at the outset
+disappears. "In diesem Punkt", "drei Punkte" and "ein Komma an dieser Stelle"
+stay untouched, because only "Punkt **setzen**" produces a mark.
+
+## Whatever came after the last pause was lost (2026-08-21)
+
+**The most serious fault of the day, and it had been there from the start.**
+Vosk buffers audio and only delivers at a speech pause. Anyone who speaks a
+letter **in one go** and then says "Diktat beenden" has both in the **same**
+pause: the stop recogniser breaks the loop before the free recognition could
+deliver its buffered text. `FinalResult()` was never called - the text was
+gone.
+
+The log said `0 Aeusserungen` although a whole letter had been spoken. Twice I
+drew the wrong conclusions from that and searched elsewhere.
+
+**Why it never showed:** on a shopping list you pause between items. Each item
+is finalised on its own, and after the last pause there was usually nothing
+left. Only the letter, spoken in one go, makes the fault visible.
+
+Fixed: after the loop `FinalResult()` is fetched and sent down **the same
+path** as every other utterance - punctuation, capitalisation, splitting. The
+stop words are trimmed off, because the free recognition hears "Diktat
+beenden" too, and that does not belong in the letter.
+
+## The stop needs a speech pause (2026-08-22, verified offline)
+
+Four repairs in one afternoon did not close it - guard period, level gate,
+requiring both words, an announcement. Each time the next test found the next
+gap, and once Stephan's dictation broke off mid-sentence after 12.1 seconds.
+His verdict was the measure: **"I can never get to the end of this text."**
+
+**The difference that actually exists:** a genuine "Diktat beenden" comes
+*after* the user has finished the text - a pause precedes it. Every fragment
+arises in the middle of the flow, where there is none. That is exactly what
+has always protected the shopping list, without anyone planning it: "Milch."
+Pause. "Butter." Pause.
+
+The rule: within the last **5 seconds** there must have been a continuous
+quiet stretch of at least **0.4 seconds**. Implemented as a pure function
+`pause_davor()` - no clock, no microphone, so it can be checked against
+recorded cases.
+
+### Verified offline before anyone had to speak
+
+`scripts/dialos-schlussregel-pruefen.py` lets Piper speak and sends the result
+through the **real** code - `ist_schluss()`, `pause_davor()` and the level
+threshold come from `dialos-diktat.py`, not from a reimplementation.
+
+| Case | Result |
+|---|---|
+| **A** continuous speech, no stop phrase | 2 complete `'diktat beenden'` arose - **both rejected**, no stop |
+| **B** same speech, pause, then "Diktat beenden" | the same two rejected, the genuine one accepted at 21.4 s |
+
+What is remarkable about case A: plain speech produced **two complete** stop
+phrases. Those would have passed the previous day's two-word rule - the pause
+requirement rejects them.
+
+### How short may the pause be?
+
+Measured with inserted pauses from 0.0 to 1.5 seconds: **all were detected.**
+The reason is instructive - Piper takes a breath of its own after a full stop.
+So the rule keys not on an artificially inserted silence but on the **natural
+sentence boundary**. For the user that means: nothing has to be done
+differently.
+
+**What it cannot do:** a fragment that happens to arise right after a speech
+pause still gets through. Together with the three other conditions - both
+words, level above the threshold, not within the first three seconds - the
+residual risk is small, but it is not zero. The proof is still outstanding: a
+dictation with a real voice that runs from beginning to end.

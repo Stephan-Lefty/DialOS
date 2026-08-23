@@ -1,0 +1,13 @@
+// DialOS: schaltet die unbeaufsichtigten Updates ein.
+//
+// Getrennt von 52dialos-unattended-upgrades, weil es zwei verschiedene Dinge
+// sind: WAS aktualisiert wird (dort) und OB ueberhaupt (hier). Debian legt
+// diese Datei sonst per debconf an; sie hier mitzuliefern macht den Zustand
+// im Repo sichtbar, statt ihn von einer Frage bei der Installation abhaengen
+// zu lassen.
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+// Heruntergeladene Pakete nach sieben Tagen wegraeumen - dieselbe Frist wie
+// bei den Protokollen, und auf einem Geraet mit 100 GiB root kein Engpass,
+// aber es sammelt sich sonst unbegrenzt.
+APT::Periodic::AutocleanInterval "7";

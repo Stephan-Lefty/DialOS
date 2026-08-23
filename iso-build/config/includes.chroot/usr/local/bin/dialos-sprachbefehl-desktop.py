@@ -156,14 +156,57 @@ GRAMMATIK_AN = json.dumps([
     "diktat starten",
     "einkaufszettel aufnehmen",
     "notiz aufnehmen",
+    # Zwei Formulierungen fuer dasselbe (Stephan, 2026-08-21: "und vielleicht
+    # optional Brief schreiben") - dieselbe Ueberlegung wie bei "auf Linux" und
+    # "auf Gnome": Zwei Eintraege kosten nichts, und der Nutzer muss sich keine
+    # Formulierung merken. Beide Saetze sind im Wortschatz des kleinen Modells
+    # geprueft, ebenso "brief vorlesen" und "brief wegwerfen" fuer spaeter.
+    "brief aufnehmen",
+    "brief schreiben",
     "einkaufszettel vorlesen",
     "notizen vorlesen",
+    "brief vorlesen",
     "einkauf erledigt",
     "einkaufszettel wegwerfen",
     "wie viel uhr ist es",
     "wie ist die uhrzeit",
     "welchen tag haben wir",
     "welches datum haben wir",
+    # Bildschirmfoto (Stephan, 2026-08-21). Zwei Formulierungen wie ueberall.
+    # Das Foto ist nicht fuer den Nutzer - er sieht es nicht -, sondern fuer
+    # den sehenden Helfer und den Support: "Was steht da gerade?"
+    "bildschirmfoto erstellen",
+    "bildschirmfoto machen",
+    # Drucken (Stephans Vorgabe vom 2026-08-21). Der Brief traegt seine
+    # Fusszeile schon; Zettel und Notizen bekommen sie erst beim Drucken -
+    # ein Blatt Papier verlaesst das Haus, eine Notiz auf dem Schirm nicht.
+    "brief drucken",
+    "einkaufszettel drucken",
+    "notizen drucken",
+    # Einzahl als zweite Formulierung: Am 2026-08-22 hat Vosk beim Test
+    # "notiz drucken" verstanden. Beide Woerter stehen in der Grammatik
+    # ("notiz aufnehmen", "notizen drucken"), das Netz darf sie also
+    # kombinieren - der Satz war dann keiner, und es geschah nichts.
+    "notiz drucken",
+    # "hilfe rufen" und "fernwartung beenden" sind ZURUECKGESTELLT
+    # (Stephan, 2026-08-20: "können den Rustdesk ganz nach hinten schieben,
+    # wenn alles andere läuft"). Sie stehen bewusst NICHT in der Grammatik,
+    # solange der Umbau auf den systemd-Dienst offen ist - der Befehl wuerde
+    # heute die RustDesk-ANWENDUNG starten, und die stuerzt ohne ipc_service
+    # nach rund 40 Sekunden ab ("Got signal 11 and exit", am 2026-08-19 im
+    # Protokoll belegt). Der Nutzer bekaeme die ID vorgelesen, sein Betreuer
+    # koennte sich nicht verbinden, und beim naechsten Mal glaubt er dem
+    # Geraet nicht mehr.
+    #
+    # Ein Sprachbefehl, der halb funktioniert, ist schlimmer als einer, der
+    # nicht existiert - und ausgerechnet bei dem, mit dem Hilfe geholt wird,
+    # wenn nichts mehr geht.
+    #
+    # Der Code bleibt vollstaendig liegen: dialos-hilfe.py, die Wache, die
+    # Zeitgrenze, die Nachfragen. Wieder freigeben heisst, diese zwei Zeilen
+    # wieder einzukommentieren - siehe TODO.md, erster Punkt.
+    #   "hilfe rufen",
+    #   "fernwartung beenden",
     "[unk]",
 ])
 
@@ -180,6 +223,8 @@ DIKTAT_SAETZE = {
     "diktat starten": "notizen",
     "notiz aufnehmen": "notizen",
     "einkaufszettel aufnehmen": "einkaufszettel",
+    "brief aufnehmen": "brief",
+    "brief schreiben": "brief",
 }
 DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 
@@ -205,6 +250,15 @@ DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 # dialos-auskunft.py: Am Einsatzort liefert die Standortbestimmung nur eine
 # IP-Schaetzung mit 26 km Ungenauigkeit, und der Befehl haette fast immer
 # geantwortet, dass er nichts abrufen kann.
+DRUCK_SKRIPT = "/usr/local/bin/dialos-drucken.py"
+DRUCK_SAETZE = {
+    "brief drucken": "brief",
+    "einkaufszettel drucken": "einkaufszettel",
+    "notizen drucken": "notizen",
+    "notiz drucken": "notizen",
+}
+FOTO_SKRIPT = "/usr/local/bin/dialos-bildschirmfoto.py"
+FOTO_SAETZE = ("bildschirmfoto erstellen", "bildschirmfoto machen")
 AUSKUNFT_SKRIPT = "/usr/local/bin/dialos-auskunft.py"
 AUSKUNFT_SAETZE = {
     "wie viel uhr ist es": "uhrzeit",
@@ -214,11 +268,31 @@ AUSKUNFT_SAETZE = {
 }
 
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
+HILFE_SKRIPT = "/usr/local/bin/dialos-hilfe.py"
 NOTIZ_SAETZE = {
     "einkaufszettel vorlesen": ("einkaufszettel", "vorlesen"),
     "notizen vorlesen": ("notizen", "vorlesen"),
+    "brief vorlesen": ("brief", "vorlesen"),
     "einkauf erledigt": ("einkaufszettel", "loeschen"),
     "einkaufszettel wegwerfen": ("einkaufszettel", "loeschen"),
+}
+
+# Fernwartung (neu 2026-08-19). Beide Woerter am selben Tag gegen den Wortschatz
+# geprueft - Vosk meldete kein "Ignoring word missing in vocabulary" -, und beide
+# Kernwoerter sind eindeutig: "rufen" und "fernwartung" kommen in keinem anderen
+# Satz der Grammatik vor.
+#
+# WARUM "fernwartung" DAS KERNWORT DES SCHLUSSSATZES IST und nicht "beenden":
+# "beenden" steht zwar in dieser Grammatik in keinem zweiten Satz, aber der
+# Nutzer kennt es als Schlusswort des Diktats. Ein Wort, das in zwei Rollen
+# vorkommt, ist beim Sprechen zweideutig, auch wenn es die Grammatik nicht ist.
+# Leer, solange die Saetze nicht in der Grammatik stehen (siehe dort). Die
+# Zuordnung bleibt STEHEN und wird nicht geloescht: Sie ist der Ort, an dem der
+# Zusammenhang dokumentiert ist, und beim Wiederfreigeben soll niemand sie neu
+# erfinden muessen.
+HILFE_SAETZE = {
+    # "hilfe rufen": "starten",
+    # "fernwartung beenden": "beenden",
 }
 
 # Nach so langer Stille schaltet sich die Erkennung von selbst ab
@@ -226,6 +300,22 @@ NOTIZ_SAETZE = {
 # Stromsparen, sondern Sicherheit: Wer das "stoppen" vergisst, haette
 # sonst dauerhaft ein offenes Mikrofon.
 ZEITGRENZE_S = 120.0
+
+# KURZE FRIST, SOLANGE KEIN BEFEHL KAM (neu 2026-08-20). Wer wirklich
+# "Sprachsteuerung starten" sagt, sagt binnen Sekunden auch den Befehl - dafuer
+# hat er ja eingeschaltet. Eine Einschaltung, auf die nichts folgt, war mit
+# hoher Wahrscheinlichkeit keine.
+#
+# Gemessen an zwei Stunden vom 2026-08-20: Alle 7 Einschaltungen liefen in die
+# Zwei-Minuten-Grenze, auf KEINE folgte ein Befehl - zusammen 14 Minuten scharfe
+# Befehlsgrammatik, die niemand wollte. Mit 30 Sekunden waeren daraus 3,5
+# Minuten geworden.
+#
+# 30 und nicht 20: Wer den Bildschirm nicht sieht, formuliert manchmal
+# langsamer, und ihn mitten im Nachdenken abzuschalten waere aergerlich fuer
+# nichts. Sobald EIN Befehl gekommen ist, gilt wieder die volle
+# Zwei-Minuten-Grenze - dann ist ein Gespraech im Gange.
+ERSTE_BEFEHL_FRIST_S = 30.0
 
 # Erkannt wird nur, was BEIDES enthaelt: ein Ziel und das Wort
 # "umschalten". Siehe Kopf der Datei - ohne die zweite Bedingung reicht
@@ -310,9 +400,17 @@ DEBUG = "--debug" in sys.argv
 # Ein Protokoll, das man erst einschalten muss, ist beim Fehler nicht da.
 # Die Pegelanzeige bleibt bewusst NUR auf dem Bildschirm - sie erzeugte am
 # 2026-08-19 allein 4132 Zeilen gegen 13 echte.
-PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-sprachbefehl.log")
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-sprachbefehl.log")
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
     """Meldung MIT Zeitstempel - immer ins Protokoll, mit --debug auch auf den
     Bildschirm.
@@ -326,6 +424,7 @@ def melde(text):
     zeile = f"{time.strftime('%H:%M:%S')}  {text}"
     if DEBUG:
         print("\n" + zeile, flush=True)
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(zeile + "\n")
@@ -381,8 +480,15 @@ def ist_phrase(gehoert, phrase, kernwort):
     worte = gehoert.split()
     if not worte or "[unk]" in worte:
         return False
-    if kernwort not in worte:
+    # Ein Wort oder mehrere. Beim Einschalten sind es seit dem 2026-08-20 BEIDE
+    # ("sprachsteuerung" UND "starten"), siehe die Begruendung dort.
+    pflicht = (kernwort,) if isinstance(kernwort, str) else tuple(kernwort)
+    if any(w not in worte for w in pflicht):
         return False
+    # Bewusst als MENGE geprueft und nicht als Zeichenkette: Der Erkenner
+    # liefert Woerter auch doppelt oder vertauscht ("sprachsteuerung
+    # sprachsteuerung stoppen" kam am 2026-08-19 vor). Solange nichts
+    # Fremdes dabei ist, zaehlt es.
     return set(worte) <= set(phrase.split())
 
 
@@ -392,6 +498,26 @@ def spricht_gerade():
 
 def diktat_laeuft():
     return os.path.exists(DIKTAT_MARKE)
+
+
+NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
+
+
+def anrede(satz):
+    """Stellt den Nutzernamen voran, wo es Sinn macht - siehe dialos-namen.py.
+
+    Geholt statt kopiert: Die Regel, WANN ein Name benutzt wird, gehoert an eine
+    Stelle. Faellt das Modul aus, kommt der Satz unveraendert zurueck - eine
+    Ansage darf nie davon abhaengen, dass ein Name eingetragen ist.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dialos_namen", NAMEN_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.anrede(satz)
+    except Exception:
+        return satz
 
 
 def sprich(text):
@@ -488,7 +614,19 @@ def mitschrift_oeffnen():
     RUECKBLICK = "20"
     if terminal.endswith("gnome-terminal"):
         befehl = [terminal, "--title=DialOS - Mitschrift",
-                  "--geometry=100x30", "--",
+                  # EIN DRITTEL KLEINER (Stephan, 2026-08-22). Vorher
+                  # 100x30, gemessen rund 1170 x 738 px auf 1920 x 1080 -
+                  # das Fenster nahm die halbe Breite ein.
+                  #
+                  # WARUM NUR DIE GROESSE UND NICHT DIE POSITION: Stephan
+                  # wollte es unten rechts. Auf Wayland kann ein Fenster
+                  # seine Position NICHT selbst bestimmen - gemessen am
+                  # 2026-08-22: "--geometry=53x20+1440+720" landete mittig,
+                  # der Versatz wurde ignoriert. Nur X11-Clients ueber
+                  # XWayland duerfen das (mit xterm nachgewiesen: es landete
+                  # wirklich bei +1440+790). Stephans Entscheidung: lieber
+                  # die GNOME-Optik behalten und auf die Position verzichten.
+                  "--geometry=67x20", "--",
                   MITSCHRIFT, "--rueckblick", RUECKBLICK]
     else:
         # -e nimmt bei den meisten Terminals nur EINE Zeichenkette.
@@ -653,6 +791,70 @@ def diktat_starten(notiz):
         sprich("Ich kann das Diktat nicht starten.")
 
 
+# Wie lange das Fenster braucht, um wirklich vom Bildschirm zu verschwinden.
+# Ohne diese Pause steht es noch auf dem Foto - der Fenstermanager raeumt es
+# nicht in dem Augenblick weg, in dem der Prozess endet.
+FOTO_NACHLAUF_S = 0.8
+
+
+def drucken(was):
+    """Startet den Druck und wartet NICHT darauf.
+
+    Wie bei der Auskunft: Der Dienst muss seine Schleife weiterlaufen lassen.
+    Der Druckauftrag ist in Millisekunden abgegeben, aber die Ansage danach
+    dauert - und der Drucker braucht ohnehin laenger als jede Schleife.
+    """
+    if not os.access(DRUCK_SKRIPT, os.X_OK):
+        sprich("Ich kann das Drucken nicht finden.")
+        return
+    try:
+        subprocess.Popen([DRUCK_SKRIPT, was],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Druck {was!r} gestartet")
+    except Exception as fehler:
+        melde(f"Druck liess sich nicht starten: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
+def bildschirmfoto():
+    """Bildschirmfoto - OHNE das Mitschrift-Fenster (Stephan, 2026-08-21).
+
+    WARUM DAS FENSTER WEG MUSS: Die Mitschrift ist DialOS' eigene Anzeige, ein
+    Terminal mit hundert Spalten mitten auf dem Schirm. Auf einem Foto fuer den
+    Support verdeckt sie genau das, was der Helfer sehen will - und zeigt ihm
+    dafuer Zeilen, die er im Support-Protokoll ohnehin lesen kann.
+
+    DESHALB SYNCHRON, anders als bei der Auskunft: schliessen, fotografieren,
+    wieder oeffnen. Das haelt die Schleife rund vier Sekunden auf. Das ist
+    vertretbar, weil der Nutzer gerade selbst einen Befehl gesprochen hat und
+    ohnehin auf die Ansage wartet - und die Alternative waere ein Foto, auf dem
+    das Wichtigste verdeckt ist.
+
+    WIEDER GEOEFFNET WIRD NUR, WENN VORHER EINES LIEF. Wer die Mitschrift
+    abgeschaltet hat, bekommt sie nicht durch ein Bildschirmfoto zurueck.
+    """
+    if not os.access(FOTO_SKRIPT, os.X_OK):
+        sprich("Ich kann das Bildschirmfoto nicht finden.")
+        return
+    lief = bool(mitschrift_pids())
+    if lief:
+        melde("  Mitschrift wird fuers Foto geschlossen")
+        mitschrift_schliessen()
+        time.sleep(FOTO_NACHLAUF_S)
+    try:
+        subprocess.run([FOTO_SKRIPT], stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, timeout=60)
+        melde("Bildschirmfoto erstellt")
+    except Exception as fehler:
+        melde(f"Bildschirmfoto liess sich nicht erstellen: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+    finally:
+        if lief:
+            mitschrift_oeffnen()
+
+
 def auskunft(was):
     """Startet die Auskunft und kehrt sofort zurueck.
 
@@ -671,6 +873,28 @@ def auskunft(was):
         melde(f"Auskunft {was!r} gestartet")
     except Exception as fehler:
         melde(f"Auskunft liess sich nicht starten: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
+def hilfe_aktion(was):
+    """Startet oder beendet die Fernwartung und kehrt sofort zurueck.
+
+    Nicht abwarten, wie beim Diktat und bei den Notizen: Das Starten enthaelt
+    eine Rueckfrage, die selbst zuhoert, dazu sechs Sekunden Anmeldung beim
+    Vermittlungsdienst und das zweimalige Vorlesen der Nummer. Waehrend dieser
+    Zeit muss dieser Dienst seine Schleife weiterlaufen lassen.
+    """
+    if not os.access(HILFE_SKRIPT, os.X_OK):
+        sprich("Ich kann die Fernwartung nicht finden.")
+        return
+    try:
+        subprocess.Popen([HILFE_SKRIPT, was],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Fernwartung {was!r} gestartet")
+    except OSError as fehler:
+        melde(f"Fernwartung liess sich nicht starten: {fehler}")
         sprich("Ich kann das nicht ausführen.")
 
 
@@ -750,7 +974,8 @@ def main():
         # kein Terminal. Ohne Ansage waere die Sprachsteuerung einfach
         # stumm tot - und niemand wuesste, warum nichts reagiert.
         print("Kein Mikrofon gefunden.", file=sys.stderr)
-        sprich("Ich finde kein Mikrofon. Die Sprachsteuerung ist aus.")
+        # MIT Namen: Wenn etwas nicht geht, muss klar sein, wer gemeint ist.
+        sprich(anrede("Ich finde kein Mikrofon. Die Sprachsteuerung ist aus."))
         return 1
 
     # Eine Startzeile ins Protokoll, damit "leeres Protokoll" nicht zweideutig
@@ -773,6 +998,10 @@ def main():
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
     prozess = aufnahme_starten(quelle)
     letzte_aktivitaet = time.time()
+    # Gleich gesetzt: Es kam noch kein Befehl. Bewegt sich
+    # letzte_aktivitaet spaeter darueber hinaus, war einer dabei - daran
+    # haengt, welche der beiden Fristen gilt.
+    an_seit = letzte_aktivitaet
     aufnahme_verwerfen = False
     saettigungen = 0
     letzte_pegelkorrektur = 0.0
@@ -790,7 +1019,13 @@ def main():
             if diktat_laeuft():
                 letzte_aktivitaet = time.time()
 
-            if hoert_zu and time.time() - letzte_aktivitaet > ZEITGRENZE_S:
+            # Welche Frist gilt: die kurze, solange seit dem Einschalten kein
+            # Befehl kam, sonst die lange. Erkennbar daran, ob letzte_aktivitaet
+            # sich seit dem Einschalten bewegt hat - jeder ausgefuehrte Befehl
+            # setzt sie neu.
+            frist = (ZEITGRENZE_S if letzte_aktivitaet > an_seit
+                     else ERSTE_BEFEHL_FRIST_S)
+            if hoert_zu and time.time() - letzte_aktivitaet > frist:
                 hoert_zu = False
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
                 # PROTOKOLLIEREN, UND ZWAR VOR DER ANSAGE (2026-08-19). Bisher
@@ -803,8 +1038,14 @@ def main():
                 #
                 # Vor der Ansage, weil die Ansage 3,5 s dauert - in dieser Zeit
                 # liest die Mitschrift die Zeile noch, bevor sie zugeht.
-                melde(f"Zeitgrenze: {ZEITGRENZE_S:.0f} s ohne Befehl")
-                sprich(ANSAGE_ZEITGRENZE)
+                melde(f"Zeitgrenze: {frist:.0f} s ohne Befehl")
+                # Zwei Ansagen fuer zwei Lagen. Nach einem Gespraech gehoert die
+                # Begruendung dazu. War dagegen ueberhaupt kein Befehl dabei, war
+                # das Einschalten vermutlich Geraeusch - dann ist die kurze
+                # Ansage richtig: Eine lange Erklaerung fuer etwas, das der
+                # Nutzer nie ausgeloest hat, ist selbst nur Laerm.
+                sprich(ANSAGE_ZEITGRENZE if letzte_aktivitaet > an_seit
+                       else ANSAGE_AUS)
                 mitschrift_schliessen()
                 continue
 
@@ -871,7 +1112,7 @@ def main():
                     # abgestuerzter Dienst kommt in dieser Sitzung nicht
                     # mehr wieder.
                     if not mikrofon_fehlt_gemeldet:
-                        sprich("Ich finde kein Mikrofon mehr.")
+                        sprich(anrede("Ich finde kein Mikrofon mehr."))
                         mikrofon_fehlt_gemeldet = True
                     time.sleep(5)
                     continue
@@ -939,8 +1180,47 @@ def main():
             # "diktat starten" - ein blosses 'starten' waere dann
             # zweideutig, und ein falsch geratenes Diktat waere schlimmer als
             # ein nicht erkannter Satz.
-            if (ist_phrase(satz, STARTSATZ, "starten") if not hoert_zu
-                    else STARTSATZ in satz):
+            # KERNWORT IST "sprachsteuerung", NICHT "starten" (2026-08-20).
+            #
+            # Gestern galt "starten" als Kernwort, weil der Erkenner am
+            # 2026-08-19 einmal nur dieses Wort geliefert hatte und die
+            # Sprachsteuerung sich dadurch nicht einschalten liess. Die
+            # Lockerung hat den Fehler behoben und einen groesseren geschaffen.
+            #
+            # GEMESSEN am 2026-08-20 ueber 157 aufgezeichnete Aeusserungen:
+            #
+            #     'starten' allein            18x   <- fast alles Geraeusch
+            #     'sprachsteuerung starten'    4x   <- die echten Male
+            #     'sprachsteuerung' allein     5x
+            #
+            # Die Sprachsteuerung hat sich also 18-mal von selbst eingeschaltet,
+            # weil "starten" kurz ist und aus Umgebungsgeraeusch entsteht. Und
+            # weil danach die volle Grammatik gilt, kam am 2026-08-20 um
+            # 14:04:43 aus reinem Geraeusch der vollstaendige Satz
+            # 'hilfe rufen' - die Fernwartung wurde angefordert, ohne dass
+            # jemand etwas gesagt hatte. Nur die Ja/Nein-Rueckfrage hat es
+            # verhindert.
+            #
+            # "sprachsteuerung" ist lang und markant und kam in nur 16 von 157
+            # Aeusserungen ueberhaupt vor. Es zu verlangen kostet den Fall, dass
+            # der Erkenner GENAU dieses Wort verschluckt - dann muss der Nutzer
+            # den Satz wiederholen. Das ist eine Unbequemlichkeit; ein
+            # Mikrofon, das sich unaufgefordert einschaltet, ist es nicht.
+            # BEIDE WOERTER, seit 2026-08-20 nachmittags. Die Umstellung vom
+            # Kernwort "starten" auf "sprachsteuerung" am selben Vormittag hat
+            # die Fehlstarts von 30 auf 7 in zwei Stunden gedrueckt - aber vier
+            # der sieben kamen aus 'sprachsteuerung' ALLEIN, und auf keinen
+            # einzigen der sieben folgte ein Befehl. Zwei bestimmte Woerter
+            # hintereinander fallen im Gespraech praktisch nicht; eines schon.
+            #
+            # Preis: Verschluckt der Erkenner eines der beiden, muss der Nutzer
+            # den Satz wiederholen. Das ist genau der Fehler vom 2026-08-19, der
+            # zur Lockerung gefuehrt hat - er ist jetzt bewusst in Kauf genommen,
+            # weil die Gegenrechnung inzwischen gemessen vorliegt. Wiederholen
+            # ist eine Unbequemlichkeit; ein Mikrofon, das sich von selbst
+            # scharf schaltet, ist es nicht.
+            if (ist_phrase(satz, STARTSATZ, ("sprachsteuerung", "starten"))
+                    if not hoert_zu else STARTSATZ in satz):
                 # In BEIDEN Faellen, und VOR der Ansage. Vor der Ansage, weil
                 # das Fenster einen Moment braucht und die Ansage ohnehin gut
                 # eine Sekunde dauert - so steht es, wenn der Nutzer den ersten
@@ -961,7 +1241,19 @@ def main():
                 # SPERRFRIST_S. Direkt nach "Ich hoere." erwartet der
                 # Nutzer, dass er sprechen kann. Gegen die eigene Ansage
                 # schuetzt das Neubeginnen der Aufnahme.
-                letzte_aktivitaet = time.time()
+                #
+                # BEIDE GEMEINSAM UND GLEICH, und zwar HIER. Der erste Versuch
+                # setzte an_seit vor sprich(ANSAGE_AN) - die Ansage dauert gut
+                # eine Sekunde, danach war letzte_aktivitaet groesser als
+                # an_seit, und die Bedingung "es kam schon ein Befehl" war von
+                # Anfang an wahr. Ergebnis: Die kurze Frist griff nie, im Test
+                # vom 2026-08-20 um 17:42 lief es in die vollen 120 s.
+                #
+                # Der eigene Test hatte das nicht gefunden, weil er die
+                # ENTSCHEIDUNGSFUNKTION geprueft hat und nicht die REIHENFOLGE.
+                # Zwei Werte, die gleich sein muessen, gehoeren in eine
+                # Zuweisung - dann kann keine Ansage dazwischenrutschen.
+                letzte_aktivitaet = an_seit = time.time()
                 continue
 
             # Ist die Erkennung aus, kann hier nichts anderes mehr kommen -
@@ -991,9 +1283,32 @@ def main():
                 erkenner.Reset()
                 continue
 
+            # --- Befehle: Drucken ---
+            if satz in DRUCK_SAETZE:
+                drucken(DRUCK_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehl: Bildschirmfoto ---
+            if satz in FOTO_SAETZE:
+                bildschirmfoto()
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
             # --- Befehle: Auskunft ---
             if satz in AUSKUNFT_SAETZE:
                 auskunft(AUSKUNFT_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Fernwartung ---
+            # VOR der Umschaltung, wie Diktat und Auskunft: Diese Saetze
+            # enthalten "umschalten" nicht.
+            if satz in HILFE_SAETZE:
+                hilfe_aktion(HILFE_SAETZE[satz])
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

@@ -211,8 +211,9 @@ Fernwartung dafür ist ohnehin Teil des Systems
 ## Der erste Lauf mit Stephans Stimme (2026-08-18)
 
 Drei Anläufe, und jeder hat etwas anderes gezeigt. Belegt durch zwei
-Protokolle mit Zeitstempeln - `~/dialos-diktat.log` und
-`~/dialos-sprachbefehl.log`.
+Protokolle mit Zeitstempeln - `~/.log/dialos-diktat.log` und
+`~/.log/dialos-sprachbefehl.log`. (Bis zum 2026-08-22 lagen sie offen im
+Heimatverzeichnis.)
 
 **Die Erkennung stimmt.** „tomaten bananen äpfel" wörtlich richtig,
 inklusive Umlaut, und über LanguageTool in einer Sekunde zu „Tomaten
@@ -506,3 +507,267 @@ Einzeln geht jedes dieser Wörter richtig, und einzeln kommen sie seit dem
 ganze Sätze. Eine frühere Einschätzung, die Schreibung sei der dringendste
 offene Punkt, ist damit zurückgenommen: Der dringendere war die Ladezeit
 darüber.
+
+## Gesprochene Satzzeichen (2026-08-21)
+
+Vosk liefert Wörter, keine Zeichen. Für einen Einkaufszettel belanglos, für
+einen Brief das Ende der Brauchbarkeit. Der Nutzer spricht sie deshalb aus:
+
+| gesagt | wird zu |
+|---|---|
+| **Komma setzen** | `,` |
+| **Punkt setzen** | `.` |
+| **Fragezeichen setzen** | `?` |
+| **Ausrufezeichen setzen** | `!` |
+| **Doppelpunkt setzen** | `:` |
+| **Gedankenstrich setzen** | ` - ` |
+| **neuer Absatz** | Leerzeile |
+| **neue Zeile** | Zeilenumbruch |
+
+*Der erste Entwurf benutzte die nackten Wörter („Komma", „Punkt"). Warum daraus
+zweiwortige Merkwörter wurden, steht weiter unten unter „Gesprochene
+Satzzeichen tragen nur zum Teil" - kurz: gemessen wurden die kurzen Wörter
+nicht zuverlässig erkannt.*
+
+**Alle neun stehen im Wortschatz** des grossen Modells - geprüft in
+`graph/words.txt` mit 822 389 Einträgen. Diese Prüfung war Pflicht: Bei
+„löschen" hatte genau das gefehlt, und der Befehl wäre still nie ausgelöst
+worden.
+
+**Und die naheliegende Prüfmethode trägt hier nicht.** Der Weg über eine
+eingeschränkte Grammatik, der beim kleinen Modell fehlende Wörter meldet,
+liefert beim grossen ein leeres Versprechen: Es nimmt gar keine Grammatik an
+(`Runtime graphs are not supported by this model`) und meldet deshalb auch
+nichts. Neun Wörter sahen „vorhanden" aus, geprüft worden war nichts. Erst die
+Wortliste des Modells gibt eine Antwort.
+
+**Immer als Satzzeichen** (Stephans Entscheidung). Der Preis: „in diesem Punkt"
+wird zu „in diesem." Das fällt beim Vorlesen auf, und die Stelle wird neu
+diktiert. Die Alternative wäre gewesen, nur bei einer Sprechpause zu trennen -
+Vosk liefert Wortzeitstempel -, aber dann bekäme, wer flüssig diktiert, gar
+keine Satzzeichen.
+
+**Ersetzt wird wortweise, nicht per Textsuche.** Sonst hätte es „Punkte",
+„Kommando" und „Absatzweise" mitgetroffen, und der Text zerfiele an Stellen,
+an denen niemand ein Satzzeichen gesagt hat.
+
+### Was Satzzeichen für die Schreibung bringen - gemessen
+
+Die Vermutung war, LanguageTool entscheide mit Satzzeichen die Grossschreibung
+besser. **Für die Substantive stimmt das nicht:** „Damen", „Herren",
+„Vertrag", „Termin", „Kündigung", „Grüßen" kamen mit und ohne Zeichen gleich
+heraus. Was Satzzeichen bringen, sind die **Satzanfänge**:
+
+```
+ohne:  ... schriftlich mit freundlichen Grüßen
+mit:   ... schriftlich. Mit freundlichen Grüßen
+```
+
+In einem Brief ist das kein Schönheitsfehler, sondern falsch. Deshalb laufen
+die Satzzeichen **vor** LanguageTool. Listen bleiben aussen vor - auf einem
+Einkaufszettel wäre „Butter." keine Verbesserung.
+
+## Stille erzeugt Text - das Pegel-Tor (gemessen 2026-08-21)
+
+Das große Modell **erfindet in Stille Wörter**. Gemessen mit Stephans Mikrofon
+in 80 Sekunden Ruhe: sieben Stück - `köln`, `einen gefunden`, `vom`, `ln`,
+`einen`, `nun`, `schon`. Im Diktat landen die im Text. Wer beim Diktieren
+nachdenkt, bekommt „köln" mitten in seine Kündigung geschrieben. Das betrifft
+**jedes** Diktat; beim Einkaufszettel dürfte es bisher als falsch verstandene
+Ware durchgegangen sein.
+
+Die Messung des Mittelpegels je erkannter Äußerung trennt sauber:
+
+| Äußerung | Spitze | Mittel |
+|---|---|---|
+| `'köln'` (Rauschen) | 601 | **71** |
+| `'nun'` (Rauschen) | 1265 | **84** |
+| `'einen'` (Rauschen) | 528 | **47** |
+| `'sechsundzwanzig'` (leise gesprochen) | 2383 | **350** |
+| ganze Sätze | 11606-13447 | **3475-4196** |
+
+**Die Schwelle liegt bei 150** - das Doppelte des lautesten gemessenen
+Rauschens und weniger als die Hälfte der leisesten echten Äußerung.
+
+**Geprüft wird am Ergebnis, nicht am Audiostrom.** Ein Tor, das leise Blöcke
+gar nicht erst durchlässt, zerschneidet Wörter: Zwischen zwei Silben ist es
+still. Am fertigen Ergebnis zu prüfen kostet nichts und kann nichts zerteilen.
+
+**Dieselbe Prüfung schützt den Schlusssatz** - allerdings nicht so weit, wie
+ich zunächst annahm. Ich hatte sie für den besten Verdacht bei der ungeklärten
+Selbstbeendigung gehalten. **Der nächste Test hat das widerlegt:** Ein Diktat
+beendete sich erneut von selbst, nach 4,2 s, und das Pegel-Tor griff nicht -
+das Geräusch war laut genug. Was die neue Protokollzeile dabei verriet, steht
+im nächsten Abschnitt.
+
+## Ein nacktes „beenden" vor der ersten Äußerung ist kein Schluss
+
+Zweimal am 2026-08-21 beendete sich ein Diktat von selbst, beide Male mit
+**0 Äußerungen davor** - einmal nach 6 s, einmal nach 4,2 s. Beim zweiten Mal
+griffen weder die Sperrfrist von 3 s noch das Pegel-Tor.
+
+Der Hinweis steckte in der Zeile, die für genau diesen Zweck eingebaut worden
+war: Die **freie Erkennung lieferte in derselben Zeit nichts**, der
+Schluss-Erkenner aber „beenden". Dieselbe Audiospur, zwei Erkenner, zwei
+Ergebnisse. Das ist die eingeschränkte Grammatik: Sie **muss** jedes Geräusch
+auf eine ihrer Phrasen abbilden, und der `[unk]`-Auffang gewinnt nicht immer.
+
+Die erste Antwort darauf war eine Sonderregel: ein nacktes „beenden" **vor der
+ersten Äußerung** verwerfen. Sie hat einen Tag gehalten.
+
+### Ausgezählt - und deshalb verlangt der Schluss jetzt beide Wörter
+
+Alle Schluss-Ereignisse des 2026-08-21:
+
+| | nacktes „beenden" | volles „diktat beenden" |
+|---|---|---|
+| **falsch** ausgelöst | **6×** | 0× |
+| **echt** vom Nutzer | 3× | 2× |
+
+**Jeder einzelne Fehlauslöser war ein nacktes „beenden".** Einmal machte der
+Erkenner aus einem Bruchstück von Stephans Diktat ein „beenden", **während er
+den Brief sprach**. Die Sonderregel rettete ihn dort zufällig - es war noch
+nichts abgeschlossen. Sobald ein Satz angekommen ist, hätte dasselbe
+Bruchstück ihn mitten im Brief gestoppt.
+
+Der Folgeschaden war sichtbar: Stephan hielt das Diktat für beendet, sagte
+„Brief vorlesen" - und **das landete im Brieftext**.
+
+**Warum es vorher anders entschieden war:** Am 2026-08-18 lieferte der
+Schluss-Erkenner in sieben Minuten Dauergerede nur zweimal etwas anderes als
+`[unk]`, beide Male ein echtes „beenden". Daraus wurde „es genügt das Wort".
+Diese Messung hat aber nie geprüft, was beim **Diktieren** passiert - und
+genau dort entstehen die Bruchstücke.
+
+Der Preis ist gering: Der volle Satz wurde am selben Tag zweimal sauber
+erkannt. Und wird er einmal nicht erkannt, **sagt DialOS es**: „Sage bitte:
+Diktat beenden.", höchstens alle 15 Sekunden, damit die Ansage nicht selbst
+zum Geräusch wird und ins Mikrofon läuft. Der Nutzer spricht nie wieder ins
+Leere, ohne es zu merken - das war der eigentliche Schaden der alten Regel.
+
+Damit entfällt auch die Sonderregel „noch nichts diktiert" - ein Flickwerk
+weniger.
+
+**Jede verworfene Äußerung wird protokolliert.** Fällt dort echte Sprache
+hinein, sieht man es sofort, und die Schwelle gehört nach unten.
+
+## Gesprochene Satzzeichen tragen nur zum Teil (gemessen 2026-08-21)
+
+Nach dem Einbau gemessen, erst mit Piper, dann mit Stephans Stimme:
+
+| gesagt | Piper hört | Stephan spricht, Vosk hört |
+|---|---|---|
+| „…Herren **Komma**" | ✅ | `komme` ✗ |
+| „…Herren *(Pause)* **Komma**" | `komme` ✗ | ✅ |
+| **„Komma"** allein | `ja` ✗ | `einen koffer` ✗ |
+| „…Vertrag **Punkt**" | ✅ | ✅ |
+| **„Punkt"** allein | `das` ✗ | `kommt` ✗ |
+| **„neuer Absatz"** | ✅ | ✅ |
+| **„Doppelpunkt"** allein | `dörte depots` ✗ | - |
+
+**Drei von sechs bei Stephans Stimme.** Das Muster ist nicht die Aussprache
+und nicht die Pause - bei Piper klappte genau das Gegenteil. Es ist das
+Sprachmodell: Es rät aus dem Zusammenhang, und bei kurzen Wörtern rät es
+falsch. Durchgehend scheitern die **allein stehenden kurzen Wörter**;
+durchgehend trägt **„neuer Absatz"**, zwei Silben mehr und ohne
+Verwechslungsmöglichkeit.
+
+Das ist dieselbe Lektion wie beim Einschalten der Sprachsteuerung: Ein
+Merkwort muss **eindeutig und lang genug** sein. „Komma" und „Punkt"
+kollidieren mit „komme", „kommt", „Koffer", „das", „ja" - allesamt Wörter, die
+in einem Brief vorkommen. **Offen** ist damit, ob längere Merkwörter („Komma
+setzen", „neuer Satz") den Fall lösen.
+
+### Gelöst mit zweiwortigen Merkwörtern (zweite Messung, 2026-08-21)
+
+Dieselbe Stimme, dieselbe Kette, die längeren Formen:
+
+| gesagt | gehört | |
+|---|---|---|
+| „…Rößner **Komma setzen**" | `komma setzen` | ✅ |
+| „…Vertrag **Punkt setzen**" | `punkt setzen` | ✅ |
+| „…helfen **Fragezeichen setzen**" | `fragezeichen setzen` | ✅ |
+| „**neuer Satz**" | `neuer ersatz` | ✗ |
+| „…Rößner **Komma**" *(Vergleich)* | `komma` | ✅ **diesmal** |
+
+**Dreimal von drei.** „neuer Satz" wurde deshalb nicht aufgenommen.
+
+Das nackte „Komma" traf hier, nachdem es zweimal gescheitert war - und genau
+das ist der schlechteste Fall: Der Nutzer merkt sich, dass es geht, und dann
+geht es doch nicht.
+
+**Die nackten Formen sind deshalb entfernt**, und das ist ein doppelter
+Gewinn: Die Erkennung wird zuverlässig, **und** der anfangs akzeptierte Preis
+entfällt. „In diesem Punkt", „drei Punkte" und „ein Komma an dieser Stelle"
+bleiben unangetastet, weil nur „Punkt **setzen**" ein Zeichen erzeugt.
+
+## Was nach der letzten Sprechpause kam, ging verloren (2026-08-21)
+
+**Der schwerste Fehler des Tages, und er war von Anfang an da.** Vosk sammelt
+Audio und liefert erst an einer Sprechpause ab. Wer einen Brief **in einem
+Zug** spricht und danach „Diktat beenden" sagt, hat beides in **derselben**
+Pause: Der Schluss-Erkenner bricht die Schleife ab, bevor die freie Erkennung
+ihren angesammelten Text abliefern konnte. `FinalResult()` wurde nie
+aufgerufen - der Text war weg.
+
+Im Protokoll stand `0 Aeusserungen`, obwohl ein ganzer Brief gesprochen worden
+war. Zweimal habe ich daraus die falschen Schlüsse gezogen und an anderen
+Stellen gesucht.
+
+**Warum es nie aufgefallen ist:** Beim Einkaufszettel macht man zwischen den
+Waren Pausen. Jede Ware wird für sich abgeschlossen, und nach der letzten
+Pause kam meist nichts mehr. Erst der Brief, den man am Stück spricht, macht
+den Fehler sichtbar.
+
+Behoben: Nach der Schleife wird `FinalResult()` geholt und **denselben Weg**
+geschickt wie jede andere Äußerung - Satzzeichen, Schreibung, Zerlegung. Die
+Schlussworte werden dabei abgeschnitten, denn die freie Erkennung hört „Diktat
+beenden" mit, und das gehört nicht in den Brief.
+
+## Der Schluss braucht eine Sprechpause (2026-08-22, offline geprüft)
+
+Vier Reparaturen an einem Nachmittag haben es nicht dicht bekommen -
+Sperrfrist, Pegel-Tor, beide Wörter verlangen, Ansage. Jedes Mal fand der
+nächste Test die nächste Lücke, und einmal brach Stephans Diktat nach
+12,1 Sekunden mitten im Satz ab. Sein Urteil war das Maß: **„Diesen Text kann
+ich nie zu Ende bringen."**
+
+**Der Unterschied, den es wirklich gibt:** Ein echtes „Diktat beenden" kommt,
+*nachdem* der Nutzer mit dem Text fertig ist - davor liegt eine Pause. Jedes
+Bruchstück entsteht mitten im Redefluss, wo es keine gibt. Genau das schützt
+den Einkaufszettel seit jeher, ohne dass es jemand geplant hätte: „Milch."
+Pause. „Butter." Pause.
+
+Die Regel: In den letzten **5 Sekunden** muss eine zusammenhängende Ruhephase
+von mindestens **0,4 Sekunden** gelegen haben. Umgesetzt als reine Funktion
+`pause_davor()` - ohne Uhr, ohne Mikrofon, damit sie gegen aufgezeichnete
+Fälle prüfbar ist.
+
+### Offline geprüft, bevor jemand sprechen musste
+
+`scripts/dialos-schlussregel-pruefen.py` lässt Piper sprechen und schickt das
+Ergebnis durch den **echten** Code - `ist_schluss()`, `pause_davor()` und die
+Pegelschwelle kommen aus `dialos-diktat.py`, nicht aus einer Nachbildung.
+
+| Fall | Ergebnis |
+|---|---|
+| **A** durchgehende Rede, kein Schlusssatz | 2 vollständige `'diktat beenden'` entstanden - **beide abgewiesen**, kein Schluss |
+| **B** dieselbe Rede, Pause, dann „Diktat beenden" | dieselben zwei abgewiesen, der echte bei 21,4 s **angenommen** |
+
+Bemerkenswert an Fall A: Aus reiner Rede entstanden **zwei vollständige**
+Schlusssätze. Die hätten die Zwei-Wort-Regel vom Vortag passiert - die
+Sprechpause weist sie ab.
+
+### Wie kurz darf die Pause sein?
+
+Gemessen mit eingefügten Pausen von 0,0 bis 1,5 Sekunden: **alle wurden
+erkannt.** Der Grund ist lehrreich - Piper macht nach einem Satzpunkt von
+selbst eine Atempause. Die Regel greift also nicht an einer künstlich
+eingefügten Stille, sondern an der **natürlichen Satzgrenze**. Für den Nutzer
+heißt das: Er muss nichts anders machen als bisher.
+
+**Was sie nicht kann:** Ein Bruchstück, das zufällig direkt nach einer
+Sprechpause entsteht, kommt weiterhin durch. Zusammen mit den drei anderen
+Bedingungen - beide Wörter, Pegel über der Schwelle, nicht in den ersten drei
+Sekunden - ist das Restrisiko klein, aber es ist nicht null. Der Beweis dafür
+steht noch aus: ein Diktat mit echter Stimme, das von Anfang bis Ende durchläuft.

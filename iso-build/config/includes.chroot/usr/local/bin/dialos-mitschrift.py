@@ -48,7 +48,7 @@ unlesbar. Dieses Skript wirft die Pegelanzeige weg und uebersetzt die
 Protokollzeilen in Saetze, die auch jemand versteht, der den Quelltext nicht
 kennt.
 
-VIER QUELLEN, EINE ZEITACHSE. Befehlsdienst, Diktat, Auskunft und Notizen
+SECHS QUELLEN, EINE ZEITACHSE. Befehlsdienst, Diktat, Auskunft und Notizen
 schreiben getrennte Protokolle - hier laufen sie zusammen und werden nach
 Uhrzeit gemischt. Genau dieses Zusammenfuehren hat am 2026-08-18 den Beweis
 gebracht, dass sich Diktat und Befehlserkennung nicht ins Gehege kommen; von
@@ -68,15 +68,20 @@ import time
 
 HEIM = os.path.expanduser("~")
 QUELLEN = {
-    "Sprache":  os.path.join(HEIM, "dialos-sprachbefehl.log"),
-    "Diktat":   os.path.join(HEIM, "dialos-diktat.log"),
-    "Auskunft": os.path.join(HEIM, "dialos-auskunft.log"),
-    "Notiz":    os.path.join(HEIM, "dialos-notiz.log"),
+    "Sprache":  os.path.join(HEIM, ".log", "dialos-sprachbefehl.log"),
+    "Diktat":   os.path.join(HEIM, ".log", "dialos-diktat.log"),
+    "Auskunft": os.path.join(HEIM, ".log", "dialos-auskunft.log"),
+    "Notiz":    os.path.join(HEIM, ".log", "dialos-notiz.log"),
     # Fuenfte Quelle seit dem 2026-08-19: der Ton-Beobachter. Er schreibt erst
     # seit diesem Tag ueberhaupt ein Protokoll - und er gehoert hierher, weil
     # ein Wechsel des Ausgabegeraets die eine Aenderung ist, die der Nutzer
     # sofort hoert, ohne sie ausgeloest zu haben.
-    "Ausgabe":  os.path.join(HEIM, "dialos-ton-ausgabe.log"),
+    "Ausgabe":  os.path.join(HEIM, ".log", "dialos-ton-ausgabe.log"),
+    # Sechste Quelle seit dem 2026-08-21: die Akku-Warnung. Sie gehoert
+    # hierher, weil ein sehender Helfer sonst raet, warum DialOS gerade
+    # von sich aus gesprochen hat - und weil ein bevorstehendes Ende der
+    # Sitzung das Wichtigste ist, was auf dem Schirm stehen kann.
+    "Akku":     os.path.join(HEIM, ".log", "dialos-akku.log"),
 }
 
 # Zeilen, die niemanden interessieren. Die Pegelanzeige ist eine laufende

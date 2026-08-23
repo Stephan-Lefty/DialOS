@@ -1,0 +1,16 @@
+[Unit]
+# Erzeugt die Mail-Signaturdateien aus /usr/local/share/dialos/fusszeile.txt.
+# Thunderbird kann eine Signatur nur aus einer Datei lesen, nicht aus einem
+# Programm - diese Datei ist damit eine zweite Stelle, an der der Satz steht.
+# Damit sie nicht veraltet, wird sie nie von Hand gepflegt, sondern erzeugt:
+# einmal beim Start und danach bei jeder Aenderung der Quelle (siehe die
+# gleichnamige .path-Einheit).
+Description=DialOS: Mail-Signatur aus der Fusszeilen-Quelle erzeugen
+Documentation=file:///usr/local/bin/dialos-fusszeile.py
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dialos-fusszeile.py signatur
+
+[Install]
+WantedBy=multi-user.target

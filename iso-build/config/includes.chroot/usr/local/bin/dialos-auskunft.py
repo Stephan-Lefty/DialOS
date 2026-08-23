@@ -35,14 +35,23 @@ from datetime import datetime
 
 SAY = "/usr/local/bin/dialos-say.py"
 ANSAGE_SKRIPT = "/usr/local/bin/dialos-start-ansage.py"
-PROTOKOLL = os.path.join(os.path.expanduser("~"), "dialos-auskunft.log")
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-auskunft.log")
 
 DEBUG = "--debug" in sys.argv
 
 
+# WARUM IN EINEM VERSTECKTEN ORDNER (Stephan, 2026-08-22): Vorher lagen die
+# Protokolle offen im Heimatverzeichnis - zehn laufende und fuenfzehn gedrehte
+# Fassungen, also 25 Dateien zwischen "Notizen", "Dokumente" und "Bilder". Der
+# Nutzer sieht sie nicht, aber ein sehender Helfer sucht dazwischen. In "~/.log"
+# stoeren sie niemanden und sind trotzdem da, wo man sie vermutet.
+#
+# Der Ordner wird beim Schreiben angelegt, nicht vorausgesetzt: Ein neues Konto
+# hat ihn noch nicht, und ein fehlendes Protokoll darf keine Ansage aufhalten.
 def melde(text):
     if DEBUG:
         print(text, flush=True)
+    os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
             f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")

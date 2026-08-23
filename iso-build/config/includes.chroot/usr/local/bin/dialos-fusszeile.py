@@ -28,13 +28,32 @@ Aufruf:
     dialos-fusszeile.py text --art mail       mit "Diese Nachricht"
     dialos-fusszeile.py anhaengen DATEI       Inhalt + rechtsbuendige Fusszeile
     dialos-fusszeile.py drucken DATEI         dasselbe direkt an den Drucker
+    dialos-fusszeile.py signatur              Mail-Signatur fuer Thunderbird
 """
 
 import os
 import subprocess
 import sys
 
+# Papier und Ausrichtung werden ausdruecklich mitgegeben, nicht dem Drucker
+# ueberlassen: Am 2026-08-22 kam ein Ausdruck quer statt hochkant heraus.
+# Nachgemessen ist, dass es NICHT an CUPS lag - texttopdf und pdftopdf
+# liefern mit dem PPD dieser Warteschlange 595x842 Punkte, Drehung 0, also
+# A4 hochkant. Die Drehung entstand erst danach, im Drucker. Den fragt man
+# an dieser Stelle nicht, dem sagt man es.
+#   orientation-requested: 3 = hochkant, 4 = quer (RFC 8011)
+DRUCK_OPTIONEN = ["-o", "media=A4", "-o", "orientation-requested=3"]
+
+
 QUELLE = "/usr/local/share/dialos/fusszeile.txt"
+SIGNATUR_ORT = "/usr/local/share/dialos"
+
+# Der anklickbare Verweis in der Mail-Signatur. Nur in HTML - im reinen Text
+# waere eine ausgeschriebene Adresse eine zweite Fassung desselben Satzes.
+# Die kanonische Form ist ohne "www": www.dialos.org leitet mit 301 dorthin
+# um (geprueft 2026-08-20).
+NETZNAME = "DialOS.org"
+NETZADRESSE = "https://dialos.org"
 ERSATZ = "Dieses Dokument wurde per Spracheingabe powered by DialOS.org erstellt!"
 
 # Breite fuer den rechtsbuendigen Satz im reinen Text. 76 Zeichen passen in
@@ -83,12 +102,37 @@ def anhaengen(pfad, art="dokument", breite=BREITE):
     return f"{inhalt}\n\n\n{rechtsbuendig(text(art), breite)}\n"
 
 
+
+def drucker():
+    """Ein Ziel finden - dieses Geraet hat keine Systemvoreinstellung.
+
+    Dieselbe Suche wie in dialos-drucken.py, dort steht die ausfuehrliche
+    Begruendung. Kurz: "lp -" ohne -d scheitert hier, weil lpstat -d
+    "keine systemvoreingestellten Ziele" meldet.
+    """
+    try:
+        p = subprocess.run(["lpstat", "-p"], capture_output=True,
+                           text=True, timeout=10)
+    except Exception:
+        return None
+    for zeile in p.stdout.splitlines():
+        teile = zeile.split()
+        if len(teile) >= 2 and teile[0] in ("Drucker", "printer"):
+            return teile[1]
+    return None
+
+
 def drucken(pfad, art="dokument"):
     fertig = anhaengen(pfad, art)
     if fertig is None:
         return 1
+    ziel = drucker()
+    if not ziel:
+        print("Kein Drucker gefunden.", file=sys.stderr)
+        return 1
     try:
-        p = subprocess.run(["lp", "-"], input=fertig.encode("utf-8"),
+        p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + ["-"],
+                           input=fertig.encode("utf-8"),
                            capture_output=True, timeout=30)
     except FileNotFoundError:
         print("lp fehlt - CUPS nicht installiert?", file=sys.stderr)
@@ -98,6 +142,51 @@ def drucken(pfad, art="dokument"):
         return 1
     print(p.stdout.decode(errors="replace").strip())
     return 0
+
+
+def signatur(verzeichnis=SIGNATUR_ORT):
+    """Schreibt die Mail-Signatur fuer Thunderbird - erzeugt, nie getippt.
+
+    Thunderbird kann eine Signatur nur aus einer DATEI lesen, nicht aus einem
+    Programm. Diese Datei ist damit eine zweite Stelle, an der der Satz steht -
+    genau das, was der Kopf dieses Skripts vermeiden will. Die Loesung ist
+    nicht, es zu lassen, sondern die Datei ERZEUGEN zu lassen: Sie wird aus
+    fusszeile.txt geschrieben, und eine systemd-Pfadeinheit erzeugt sie neu,
+    sobald sich die Quelle aendert. Von Hand aendert sie niemand.
+
+    ZWEI FORMATE, mit Absicht. Thunderbird verfasst hier in HTML, und nur in
+    HTML laesst sich "dezent und rechtsbuendig" sauber umsetzen - im reinen
+    Text ginge das nur ueber Leerzeichen, die auf einem Telefon umbrechen.
+    Die .txt liegt trotzdem daneben: Verfasst ein Konto in reinem Text, waere
+    die HTML-Datei dort als roher Quelltext sichtbar. Dann wird in der
+    Kontoeinstellung auf die .txt umgestellt, ohne dass etwas gebaut werden
+    muss.
+    """
+    satz = text("mail")
+    os.makedirs(verzeichnis, exist_ok=True)
+    # Die Auszeichnung bewusst sparsam: kleiner, grau, rechts. Keine Trennlinie
+    # und kein Logo - Stephans Vorgabe war "ganz dezent".
+    roh = (satz.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    # Der Name wird anklickbar - aber in der Farbe der Zeile und nur
+    # unterstrichen. Das uebliche Linkblau waere in einer Zeile, die "ganz
+    # dezent" sein soll, das Lauteste auf der Seite. Ohne Unterstreichung
+    # wiederum sieht niemand, dass es ein Verweis ist.
+    if NETZNAME in roh:
+        roh = roh.replace(
+            NETZNAME,
+            f'<a href="{NETZADRESSE}" '
+            f'style="color:inherit; text-decoration:underline;">'
+            f'{NETZNAME}</a>', 1)
+    html = ('<div style="text-align:right; font-size:85%; color:#777777;">'
+            f'{roh}</div>\n')
+    geschrieben = []
+    for name, inhalt in (("mail-signatur.html", html),
+                         ("mail-signatur.txt", rechtsbuendig(satz) + "\n")):
+        ziel = os.path.join(verzeichnis, name)
+        with open(ziel, "w", encoding="utf-8") as f:
+            f.write(inhalt)
+        geschrieben.append(ziel)
+    return geschrieben
 
 
 def main():
@@ -125,6 +214,10 @@ def main():
     was = argumente[0]
     if was == "text":
         print(text(art))
+        return 0
+    if was == "signatur":
+        for ziel in signatur():
+            print(ziel)
         return 0
     if was in ("anhaengen", "drucken"):
         if len(argumente) < 2:

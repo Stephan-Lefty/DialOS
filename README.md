@@ -110,9 +110,513 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Zwei Tastenkombinationen fuers Admin-Konto** (2026-08-22, Stephans
+  Wunsch). `Strg`+`Alt`+`W` schaltet die Optik zwischen Linux und Windows 11,
+  `Strg`+`Alt`+`S` die Stimme zwischen Michael und Anna. Beide Skripte
+  schalten jetzt UM, statt ein Ziel zu verlangen. Die Stimme brauchte dafuer
+  ein eigenes Skript: `setzen` schreibt nur die Konfiguration und ueberlaesst
+  den Neustart von speech-dispatcher dem Menschen - hinter einer Taste ist das
+  keine Loesung. Gemessen: 4,4 Sekunden bis zur Ansage in der neuen Stimme.
+  Nur fuer `dialosadmin` - das Nutzerkonto bedient beides ueber die Stimme.
+
+- **Ausdruck kam quer statt hochkant** (2026-08-22). Papier und Ausrichtung
+  werden jetzt im Auftrag mitgegeben (`-o media=A4 -o
+  orientation-requested=3`) statt der Voreinstellung ueberlassen. Gemessen
+  ist, dass CUPS nicht schuld war: Filterweg und Drucker melden beide A4
+  hochkant. Dabei fiel auf, dass `dialos-fusszeile.py drucken` `lp` ohne Ziel
+  aufrief - auf einem Geraet ohne Systemvoreinstellung haette das nie
+  funktioniert. Der Nachtest zeigte einen zweiten Fehler: Vosk verstand
+  "notiz drucken", die Grammatik kannte nur "notizen drucken", und der Befehl
+  fiel lautlos durch. Die Einzahl ist jetzt zweite Formulierung.
+
 *In Arbeit seit 2026-08-17. Alles, was ab jetzt entsteht, wird hier
 eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
 abgeschlossen.*
+
+- **Bildschirmfoto auf Zuruf (Stephan, 2026-08-21).** „Bildschirmfoto
+  erstellen" oder „Bildschirmfoto machen". Alle 21 Grammatiksätze danach von
+  Piper gesprochen und von Vosk wörtlich erkannt.
+    - **Das Mitschrift-Fenster ist nicht mit auf dem Bild** (Stephans
+      Nachtrag). Es ist DialOS' eigene Anzeige - ein Terminal mit hundert
+      Spalten mitten auf dem Schirm - und verdeckt auf einem Support-Foto
+      genau das, was der Helfer sehen will. Der Dienst schließt es deshalb
+      **vor** dem Foto und öffnet es danach wieder; das kostet rund vier
+      Sekunden, in denen die Erkennung steht. Vertretbar, weil der Nutzer
+      gerade selbst einen Befehl gesprochen hat und ohnehin auf die Ansage
+      wartet. Wieder geöffnet wird nur, wenn vorher eines lief - wer die
+      Mitschrift abgeschaltet hat, bekommt sie nicht durch ein
+      Bildschirmfoto zurück.
+    - **Nicht für den Nutzer, sondern für den Support.** Er sieht das Bild
+      nicht. Aber „was steht da gerade?" lässt sich ohne ein Foto nicht
+      beantworten, wenn niemand danebensitzt.
+    - **Das Gerät konnte gar keine Bildschirmfotos.** Geprüft: weder
+      `gnome-screenshot` noch `grim`, `scrot`, `spectacle` oder `flameshot`
+      sind installiert; `xwd` ist X11 und unter Wayland nutzlos.
+    - **Und die naheliegende Schnittstelle ist gesperrt.**
+      `org.gnome.Shell.Screenshot` antwortet mit
+      `AccessDenied: Screenshot is not allowed` - GNOME 48 behält sie der
+      Shell selbst vor.
+    - **Der Weg ist das XDG-Portal, und die entscheidende Eigenschaft ist
+      `interactive: false`:** Es liefert das Bild **ohne Rückfrage**. Ein
+      Dialog, den der Nutzer bestätigen müsste, wäre auf diesem Gerät dasselbe
+      wie gar keine Funktion. Geprüft, Antwortcode 0, echtes PNG mit
+      1920 × 1080.
+    - **Den Namen vergibt DialOS, nicht das Portal.** Das Portal legt
+      `Screenshot.png` an und zählt hoch. Wer im Support drei Bilder bekommt,
+      will wissen, welches wann entstand - deshalb
+      `bildschirmfoto-2026-08-21-144048.png` im Ordner `Bildschirmfotos`, den
+      GNOME dafür ohnehin vorsieht.
+
+- **Der Brief-Weg: gebaut, gemessen - und an einer Stelle noch offen
+  (2026-08-21).** Stephans Wunsch, den Brief anzugehen. Entstanden ist ein
+  vollständiger Weg von der Sprache zum fertigen Briefbogen; **nicht gelöst**
+  ist, dass sich das Diktat mitten im Satz selbst beendet.
+    - **Drei neue Sprachbefehle:** „Brief aufnehmen", „Brief schreiben"
+      (Stephan wollte beide Formulierungen) und „Brief vorlesen". Alle 19
+      Sätze der Grammatik von Piper gesprochen und von Vosk wörtlich erkannt.
+    - **Der Brief geht nach `~/Dokumente/brief.txt`,** nicht in den
+      Notizordner: Eine Notiz wird bei jedem Diktat ergänzt, ein Brief ist ein
+      fertiges Stück. Ein vorhandener Brief wird mit Datum und Uhrzeit im
+      Namen beiseitegelegt, nicht überschrieben.
+    - **Briefbogen aus reinem Text** - Absender und Datum rechtsbündig, Text
+      auf dieselbe Breite 76 umgebrochen, Fußzeile unten rechts. Monatsnamen
+      und Fußzeilensatz werden aus den vorhandenen Skripten **geholt, nicht
+      abgeschrieben**. Die Anschrift steht bewusst nicht im Abbild; fehlt
+      `absender.txt`, fällt der Block weg.
+    - **Hinweis auf die fehlende Unterschrift** (Stephans Wunsch), dort wo der
+      Empfänger sie sucht. **Nicht** „ohne Unterschrift gültig" - das wäre eine
+      rechtliche Aussage, und bei Schriftform-Erfordernis ist sie falsch.
+    - **Vorgelesen wird alles**, mit benannten Teilen („Absender:", „Datum:",
+      „Fußzeile:"). Mein erster Entwurf ließ Kopf und Fußzeile weg; Stephans
+      Einwand: „Es sollte immer alles vorgelesen werden oder?" Er hat recht -
+      was der Nutzer nicht hört, existiert für ihn nicht.
+    - **Gesprochene Satzzeichen, zweimal gemessen und einmal verworfen.** Die
+      nackten Wörter („Komma", „Punkt") kamen bei Stephans Stimme auf **drei
+      von sechs**: `komma` → `komme`, `punkt` → `kommt`, `doppelpunkt` →
+      `dörte depots`. Die zweiwortigen Formen („Komma setzen", „Punkt setzen")
+      trafen **dreimal von drei**. Damit entfiel auch der Preis, den Stephan
+      vorher akzeptiert hatte: „in diesem Punkt" bleibt jetzt stehen.
+    - **Stille erzeugte Text.** In 80 Sekunden Ruhe erfand das große Modell
+      **sieben Wörter** - „köln", „einen gefunden", „vom". Die landeten im
+      Brief. Ein Pegel-Tor bei Mittelwert 150 trennt sauber: Rauschen liegt bei
+      47-84, Sprache bei 3475-4196. Live belegt: „köln" mit Pegel 37 und „ln"
+      mit 33 wurden aussortiert.
+    - **Der schwerste Fehler war von Anfang an da: `FinalResult()` fehlte.**
+      Vosk liefert erst an einer Sprechpause ab. Wer den Brief in einem Zug
+      spricht und dann „Diktat beenden" sagt, hat beides in **derselben**
+      Pause - der Schluss brach die Schleife ab, und der gesammelte Text war
+      weg. Im Protokoll stand „0 Äußerungen", obwohl ein ganzer Brief
+      gesprochen worden war. Aufgefallen ist es nie, weil man beim
+      Einkaufszettel zwischen den Waren Pausen macht.
+    - **Und der Notausgang war ebenfalls defekt.** Die Zwei-Minuten-Zeitgrenze
+      konnte nie greifen: Jedes `[unk]` aus Raumgeräusch setzte die Stille-Uhr
+      zurück. Ein Diktat lief neun Minuten weiter, hielt die Marke „ein anderer
+      Dienst hört zu" - und Stephan konnte die Sprachsteuerung nicht mehr
+      starten. Ausgerechnet die Geisterwörter, die das neue Pegel-Tor beim
+      Schreiben aussortiert, hielten es am Leben.
+    - **OFFEN und der Grund, warum der Weg noch nicht benutzbar ist:** Der
+      Schluss-Erkenner macht aus laufender Rede ein „diktat beenden".
+      Gemessen mit Piper: aus 30 Sekunden Brieftext entstehen im Sekundentakt
+      Bruchstücke - `'beenden'` bei 8,4 s, `'diktat'` bei 4,8 s,
+      `'beenden [unk]'` bei 18,2 s. Ausgezählt über den Tag: **sechs
+      Fehlauslöser, alle aus nacktem „beenden"** - deshalb verlangt der Schluss
+      jetzt beide Wörter. Das reicht nicht: Am selben Tag entstand zweimal ein
+      sauberes „diktat beenden" aus reiner Rede, und Stephans Urteil dazu ist
+      das Maß: **„Diesen Text kann ich nie zu Ende bringen."**
+    - **Zur Arbeitsweise, weil es zum Ergebnis gehört:** Ich habe die
+      Schlusserkennung an einem Nachmittag **viermal** geflickt - Sperrfrist,
+      Pegel-Tor, beide Wörter, Ansage - und jedes Mal hat der nächste Test die
+      nächste Lücke gefunden. Zwei meiner Erklärungen (Umgebungsgeräusch, die
+      eigene Ansage) waren gemessen **falsch**, und eine der Reparaturen - die
+      Ansage „Sage bitte: Diktat beenden." - unterbrach Stephan mitten im
+      Diktieren und musste noch am selben Tag zurückgebaut werden. Der nächste
+      Schritt ist deshalb festgelegt: **Sprechpause als Bedingung, offline
+      gegen Piper geprüft, bevor Stephan wieder testet.**
+
+- **Drei Akkuwarnungen - und die Hörbeispiele sprachen noch mit der alten
+  Stimme (2026-08-21).** Stephans Vorgabe: Warnungen bei 25 %, 15 % und 5 %,
+  „bei der letzten mit einer Ansage, das Gerät muss an die Netzdose".
+    - **Und der Takt war zu langsam - nicht für den Akku, für die**
+      **Bestätigung.** Stephan zog das Kabel und steckte es in unter einer
+      Minute wieder ein: Bei 60 s Takt lag zwischen zwei Blicken kein
+      einziger, bei dem es getrennt war - **in 130 s kam keine einzige
+      Protokollzeile**. Für die Warnungen wäre das egal (von 25 % auf 15 %
+      vergehen Stunden), für „Der Computer hängt am Netz und lädt." nicht:
+      Wer nicht sieht, ob der Stecker sitzt, wartete bis zu einer Minute.
+      Jetzt 10 s, und die beiden früheren Takte sind ersatzlos entfallen -
+      ein Sonderfall weniger.
+    - **Das Wiedereinstecken stand nicht im Protokoll** - gefunden, weil
+      Stephan das Kabel zum Ausprobieren zog und wieder einsteckte. Da stand
+      „Netz getrennt bei 77 %" und kein Ende dazu: Die Zeile fürs Einstecken
+      schrieb ich nur, wenn vorher gewarnt worden war. Jetzt wird **jeder**
+      Wechsel protokolliert, in beide Richtungen. Geprüft wurde die Kette
+      gegen eine **nachgebaute Stromversorgung** statt gegen einen echten
+      leeren Akku - inklusive Sprung von 60 % direkt auf 3 %.
+    - **„Computer" statt „Gerät"** (Stephans Nachtrag am selben Tag: „Wir
+      meinen bei Gerät ja das Laptop bzw. den Computer"). Gilt überall, wo
+      DialOS spricht - fünf Ansagen, drei beim Akku und zwei in der
+      Fernwartung. „Gerät" ist das Wort eines Technikers; wer nicht sieht,
+      worüber gesprochen wird, braucht das Wort, das er selbst benutzt. Dabei
+      ändert sich das Geschlecht mit: aus „das Gerät" wird „der Computer",
+      aus „das Gerät bedienen" ein „den Computer bedienen". Eine reine
+      Wortersetzung hätte falsche Artikel hinterlassen.
+    - **Warum GNOME das nicht schon erledigt:** Es warnt mit einer
+      Bildschirmmeldung. Der Nutzer sieht sie nicht. Für ihn fährt das Gerät
+      ohne Vorwarnung herunter, mitten im Satz - und ein leerer Akku ist für
+      ihn schwerer zu deuten als fast jeder andere Fehler, weil das Gerät
+      einfach nicht mehr antwortet.
+    - **Drei Stufen, drei Tonfälle:** bei 25 % eine Feststellung, bei 15 % ein
+      Rat, bei 5 % eine Aufforderung **mit Namen**. Dreimal derselbe Satz wäre
+      dreimal dasselbe Gewicht, und für den Ernstfall bliebe keine Steigerung.
+      Gesprochen wird „Steckdose" statt „Netzdose" - die Ansage kommt in dem
+      Moment, in dem wenig Zeit bleibt, und muss auf Anhieb sitzen.
+    - **Über die Netzteil-Anzeige, nicht über den Akkustatus.** `BAT0/status`
+      meldete `Not charging`, während das Netzteil steckte: Eine Ladeschwelle
+      hält den Akku bei 78 %. Wer „nicht am Laden" mit „am Akku" gleichsetzt,
+      warnt bei gestecktem Kabel.
+    - **Übersprungene Stufen gelten als erledigt.** Fällt das Gerät im
+      Ruhezustand von 30 % auf 4 %, ist „fast leer" die richtige Ansage und
+      nicht „25 Prozent". Während eines Diktats warten 25 % und 15 %; die 5 %
+      sprechen trotzdem - ein unterbrochener Satz ist besser als ein Gerät, das
+      mitten im Brief ausgeht.
+    - **Ein Fehler, den ich beim Schreiben der Ansagen fast gemacht hätte:**
+      „Das Geraet muss an die Steckdose" - im Projekt sind Bezeichner und
+      Kommentare ASCII, **gesprochene Texte tragen echte Umlaute**. Piper hätte
+      „Ge-ra-et" gesagt, ausgerechnet in der dringendsten Ansage. Gefunden beim
+      Vergleich mit den vorhandenen Ansagen, vor dem ersten Sprechen.
+    - **Und ein Fehler, der schon einen Tag alt war:** Im Erzeuger der
+      Hörbeispiele stand die Stimme **fest eingetragen**
+      (`de_DE-thorsten-high`), während seit dem 2026-08-20 Anna ausgeliefert
+      wird. Alle 15 Beispiele im Repo waren also noch Michael - unbemerkt, weil
+      sie für sich genommen richtig klingen. Exakt die Falle, die der Kommentar
+      bei `tempo()` **eine Zeile darunter** beschreibt und die dort schon
+      behoben war. Stimme und Tempo kommen jetzt beide aus
+      `piper-generic.conf`; alle 19 Beispiele sind neu erzeugt, und die Dauern
+      in der Tabelle wurden aus den Dateien gelesen statt abgeschrieben.
+
+- **Das Gerät schlief von allein ein - und sperrte den Nutzer aus
+  (2026-08-21).** Beide Funde kamen beim Vorbereiten der Nachtmessung, und
+  beide betreffen das Produkt, nicht den Test.
+    - **Standby:** Ab Werk schläft GNOME nach 900 s ohne Tastatur- oder
+      Mauseingabe ein, am Netz wie im Akkubetrieb. Belegt im Systemprotokoll:
+      zweimal `Starting systemd-suspend.service`, während DialOS lief (16:26
+      und 18:20 am 2026-08-20). **Sprache setzt GNOMEs Untätigkeits-Zähler
+      nicht zurück** - das tun nur Eingabegeräte, und keiner der zehn
+      Inhibitoren blockiert. Ein blinder Nutzer, der eine Viertelstunde nichts
+      anfasst und dann „Sprachsteuerung starten" sagt, bekäme keine Reaktion
+      und sähe nicht, warum. Am Netz jetzt `'nothing'`, im Akku Standby nach 30
+      statt 15 Minuten.
+    - **Sperre:** `lock-enabled=true` bei `lock-delay=0` - Sperre in dem
+      Moment, in dem der Bildschirm dunkel wird. Mit Autologin wäre der Nutzer
+      nach fünf Minuten aus seinem eigenen Gerät ausgesperrt. Für einen
+      motorisch eingeschränkten Menschen ist genau das der Grund, warum es
+      DialOS gibt. Die Tür ist die LUKS-Vollverschlüsselung, nicht der
+      Sperrbildschirm; für `dialosadmin` bleibt sie einzeln eingeschaltet.
+    - **Der Bildschirm darf weiter dunkel werden** (Stephans Entscheidung) - er
+      stoppt nichts und spart Strom. Ausdrücklich gesetzt statt geerbt: Ein
+      geerbter Wert ist keine Entscheidung und kann beim nächsten
+      GNOME-Sprung anders lauten.
+
+- **Die Fußzeile war gebaut, aber niemand rief sie auf (2026-08-20).**
+  Stephan: „ich habe gestern mal eine Mail geschickt und da ist die Zeile
+  nicht drin gewesen!" Sie **konnte** nicht drin sein. `dialos-fusszeile.py`
+  war einen Tag zuvor gebaut, dokumentiert und mit einer einzigen Textquelle
+  sauber entworfen - nur rief kein einziges Programm es auf. Ein Werkzeug ohne
+  Benutzer. Im Thunderbird-Profil standen null Signatur-Einträge. **Eine
+  Vorgabe ist nicht erfüllt, weil das Werkzeug dafür existiert, sondern erst,
+  wenn etwas es benutzt** - und genau diese letzte Verbindung fehlte, ohne
+  dass es beim Bauen oder beim Dokumentieren aufgefallen wäre.
+    - **`dialos-fusszeile.py signatur`** erzeugt `mail-signatur.html` und
+      `mail-signatur.txt` aus `fusszeile.txt`. Thunderbird kann eine Signatur
+      nur aus einer **Datei** lesen, nicht aus einem Programm - diese Datei ist
+      damit eine zweite Stelle, an der der Satz steht, also genau die Kopie,
+      die der Entwurf vermeiden wollte.
+    - **Deshalb wird sie nie von Hand gepflegt.** `dialos-fusszeile.path`
+      beobachtet die Textquelle und lässt sie neu erzeugen, sobald sich der
+      Satz ändert. Änderst du den Satz, sind Briefe, Ausdrucke **und** Mails
+      sofort umgestellt. Ohne das wäre die Kopie irgendwann still veraltet -
+      dieselbe Falle, die der Entwurf für den Code schon vermieden hatte.
+    - **`dialos-mail-signatur.py` schreibt in `user.js`, nicht in `prefs.js`.**
+      Thunderbird schreibt `prefs.js` beim Beenden neu und verlöre einen
+      Fremdeintrag; `user.js` wird bei jedem Start darüber gelegt. Preis: In
+      den Kontoeinstellungen lässt sie sich nicht dauerhaft abschalten - für
+      eine Herkunftsangabe, die in **jeder** Mail stehen soll, ist das richtig
+      herum. Gesetzt wird sie für jede Identität, die das Profil kennt.
+    - **Zwei Formate.** Das Profil verfasst in HTML, und nur dort geht „dezent
+      und rechtsbündig" sauber - im reinen Text ginge es nur über Leerzeichen,
+      die auf einem Telefon umbrechen. Die `.txt` liegt daneben, falls ein
+      Konto in reinem Text schreibt; dann wird umgestellt statt gebaut.
+    - **Der Name ist anklickbar** (Stephans Nachfrage am selben Tag). In der
+      HTML-Fassung führt „DialOS.org“ auf `https://dialos.org` - kanonisch
+      ohne „www“, denn `www.dialos.org` leitet mit 301 dorthin um. Der
+      Verweis erbt die Farbe der Zeile und ist nur unterstrichen: Das übliche
+      Linkblau wäre in einer Zeile, die „ganz dezent“ sein soll, das Lauteste
+      auf der Seite - ohne Unterstreichung sähe umgekehrt niemand, dass es
+      ein Verweis ist. Die `.txt` bleibt ohne Adresse; im reinen Text wäre sie
+      eine zweite Fassung desselben Satzes, die niemand anklicken kann.
+    - **Was das *nicht* löst:** Laut `docs/anwendungen.md` ist Thunderbird die
+      Oberfläche, nicht der Motor - DialOS soll später selbst über IMAP/SMTP
+      versenden. Die Signatur greift nur bei Mails, die durch Thunderbird
+      gehen, also bei denen des sehenden Helfers. Der eigene Versandweg muss
+      sich die Zeile selbst holen; der Hinweis steht jetzt in `TODO.md` an
+      genau der Stelle, an der dieser Weg gebaut wird.
+
+- **Der Name des Nutzers klang falsch - und die Aussprache gehört in die
+  Namensdatei, nicht in die Regeltabelle (2026-08-20).** Stephans Beobachtung:
+  „Michael sagt Stefffan". Der Name wird bei **jeder** Begrüßung, jeder
+  Rückfrage und jedem Fehler gesagt - falsch ausgesprochen stört er mehr als
+  jedes andere Wort.
+    - **`nutzer-name.txt` hat jetzt zwei Felder:** `Stephan | Stefan`.
+      Geschrieben bleibt „Stephan" - für Briefe und Ausdrucke, wo „Stefan"
+      schlicht falsch wäre. Gesprochen wird das zweite Feld. Fehlt es, gilt das
+      erste für beides.
+    - **Warum nicht in die Aussprache-Tabelle** von `dialos-say.py`, wo
+      „Tastatur" und „ID" stehen: Dort gelten Regeln für **alle** Geräte. Ein
+      Kundenname gilt für **eines**. Eine Regel pro Kunde wäre in einem Jahr
+      eine Liste von Namen fremder Leute im Repo - und beim nächsten Kunden
+      wieder falsch. Die Aussprache gehört dorthin, wo der Name steht.
+    - **Das hätte ich allein nicht gefunden.** Ich hatte die Namensanrede an
+      drei Ansagen geprüft und für fertig erklärt; dass der Name selbst falsch
+      klingt, hört nur, wer ihn kennt.
+    - Randfälle gegengeprüft: Unsinn im zweiten Feld fällt auf den geschriebenen
+      Namen zurück, Kommentarzeilen in der Datei sind erlaubt, leere Datei
+      ergibt weiter das schlichte „Du".
+
+- **30 → 7 → 3: das Einschalten verlangt jetzt beide Wörter, und ohne Befehl
+  ist nach 30 Sekunden Schluss (2026-08-20 abends).** Zwei kleine Änderungen
+  anstelle des Aufweckworts - beide an denselben zwei Stunden Betriebsdaten
+  gerechnet.
+    - **„Sprachsteuerung starten" braucht beide Wörter.** `'starten'` allein
+      hatte 27-mal ausgelöst, `'sprachsteuerung'` allein viermal - und auf
+      **keine** der sieben Einschaltungen folgte ein Befehl. Aus 30 möglichen
+      Fehlstarts werden **3**, und die drei sind genau die echten Versuche. Zwei
+      bestimmte Wörter hintereinander fallen im Gespräch praktisch nicht.
+    - **Zwei Fristen statt einer:** 30 Sekunden, solange **kein** Befehl kam,
+      danach die vollen zwei Minuten. Heute liefen alle 7 Einschaltungen in die
+      120 s - zusammen 14 Minuten scharfe Befehlsgrammatik, die niemand wollte;
+      mit der kurzen Frist wären es 3,5 gewesen.
+    - **Und zwei verschiedene Ansagen dazu.** Nach einem Gespräch die
+      Begründung („Du hast mir eine Weile nichts gesagt"), sonst nur das kurze
+      „Ich höre Dir nicht mehr zu." Eine lange Erklärung für etwas, das der
+      Nutzer nie ausgelöst hat, ist selbst nur Lärm.
+    - **Warum das statt des Aufweckworts:** openWakeWords fertige Modelle sind
+      **CC BY-NC-SA** - nicht kommerziell, und DialOS wird verkauft. Ein eigenes
+      Modell ist möglich (Code und Googles Einbettung sind Apache 2.0), aber die
+      Trainingsdaten entscheiden über die Verkäuflichkeit: Genau daran sind die
+      mitgelieferten Modelle gescheitert. Das ist ein Projekt von Tagen, nicht
+      von Stunden - und **ein Aufweckwort schließt das Mikrofon ohnehin nicht**,
+      es muss zuhören, um das Weckwort zu hören. Diese zwei Änderungen bringen
+      heute mehr und machen die Messung für später besser.
+    - **Im Betrieb bestätigt (2026-08-21 früh).** Die Zahlen oben waren
+      *gerechnet* - dieselben zwei Stunden Daten durch beide Regeln geschickt.
+      Jetzt liegen sie *gemessen* vor: **2 h 19 min** Zuhörzeit am Abend des
+      2026-08-20 (Dienststart 16:45:06 bis zum Herunterfahren um 19:04:39; das
+      Gerät lief **nicht** über Nacht). **46-mal** `'starten'` allein,
+      **7-mal** `'sprachsteuerung'` allein, **7-mal** `'[unk] starten'` - also
+      **60 Beinahe-Treffer und null Fehlstarts**. Alle sieben Einschaltungen
+      kamen mit dem vollen Satz und waren Stephans Tests. Die Vorhersage „zwei
+      bestimmte Wörter hintereinander fallen im Gespräch praktisch nicht" hat
+      im Feld gehalten. Das sind rund **26 Beinahe-Treffer je Stunde** -
+      Umgebungsgeräusch, das die alte Regel eingeschaltet hätte.
+    - **Auch die kurze Frist greift.** Am Vortag liefen **alle** sieben
+      Einschaltungen in die 120 s. Jetzt endeten **6 von 8** nach 30 Sekunden
+      und nur 2 nach 120 - das sind 9 Minuten weniger scharfe
+      Befehlsgrammatik an einem einzigen Testtag.
+
+- **Die Kernwort-Umstellung ist im Betrieb gemessen - 30 gegen 7 (2026-08-20).**
+  Zwei Stunden Protokoll aus dem laufenden Gerät, **dieselben Daten durch beide
+  Regeln** gerechnet:
+    - `'starten'` allein wurde **27-mal** erkannt - reines Umgebungsgeräusch.
+    - Die alte Regel hätte **30-mal** eingeschaltet, die neue hat **7-mal**
+      eingeschaltet. Ersparnis: **23 Einschaltungen à zwei Minuten = 46 Minuten
+      offenes Mikrofon** in gut zwei Stunden.
+    - Das ist eine bessere Messung als die vom Vormittag, weil sie nicht zwei
+      Zeiträume vergleicht, sondern eine Datenbasis durch beide Regeln schickt.
+    - **Und sie zeigt die Grenze:** 7 Einschaltungen, 7 Zeitgrenzen-Abschaltungen
+      - auf keine einzige folgte ein Befehl. Auch die 7 waren also überwiegend
+      Geräusch, vor allem die vier mit `'sprachsteuerung'` allein. Die Umstellung
+      drückt das Problem um gut drei Viertel, sie löst es nicht. Der eigentliche
+      Weg bleibt das Aufweckwort (`TODO.md`).
+    - **Eigener Fehler dabei:** Mein Neustart-Werkzeug legte das Protokoll immer
+      unter demselben Namen beiseite und hat beim zweiten Lauf die erste
+      Sicherung überschrieben - die Rohdaten der 157 Äußerungen vom Vormittag
+      sind weg. Das Ergebnis steht in den Commits, die Daten nicht. Das Werkzeug
+      legt jetzt gar nichts mehr beiseite: Seit heute räumt logrotate die
+      Protokolle auf, und ein zweiter Mechanismus daneben schafft nur
+      Namenskollisionen.
+
+- **Anna ist die neue Stimme von DialOS (2026-08-20).** Stephans Entscheidung:
+  eine freundliche Damenstimme. Aus dem Hörvergleich dreier Piper-Stimmen wurde
+  **`de_DE-kerstin-low`** mit Tempo **1,00**, Name **Anna** - und seit dieser
+  Änderung auch die **Auslieferungsstimme** in der Vorlage, nicht nur auf dem
+  Testgerät.
+    - **Drei Dinge schalten zusammen um** (`dialos-stimme.py setzen kerstin`):
+      Stimme, Name und Tempo. Einzeln wäre jedes falsch - eine Frauenstimme, die
+      sich als Michael vorstellt, ebenso wie ein Tempo, das zur vorigen Stimme
+      gehört.
+    - **Das Tempo ist pro Stimme verschieden, und zwar messbar:** derselbe Satz
+      **Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen
+      aus einem Erzeuger, der Kerstins 16-kHz-Rohdaten als 22050 Hz
+      deklarierte - jede Kerstin-Probe lief damit 38 % zu schnell. Richtig
+      gemessen braucht derselbe Satz bei Michael mit 0,88 rund 6,15 s und bei
+      Anna mit 1,00 rund 7,04 s; Anna ist also **14 % langsamer**, nicht
+      gleichauf. Seit dem 2026-08-22 steht Anna auf **0,95** - von Stephan aus
+      korrekt erzeugten Proben gewählt. Damit ist der zweite der
+      drei Punkte vor der zweiten Stimme beantwortet - mit ja.
+    - **Der Name stand längst fest** und wurde nicht neu erfunden:
+      `docs/ersteinrichtung.md` nennt seit Langem männlich Michael und Daniel,
+      weiblich Anna und Julia. Stephan hat mich darauf hingewiesen, bevor ich
+      danach gefragt hatte.
+    - **Und Anna kennt den Namen des Nutzers.** Auf Stephans Frage hin
+      („können wir auch den Benutzernamen einbauen … eher da wo es Sinn macht
+      als Ersatz zu Du/Dir") spricht DialOS ihn jetzt an - bei der Begrüßung,
+      bei Entscheidungen und bei Fehlern, **nicht** bei Bestätigungen und nicht
+      bei der Zeitgrenze. Der Grund wiegt hier schwerer als Höflichkeit: Der
+      Name am Satzanfang ist ein **Signal** - läuft das Radio oder ist Besuch im
+      Raum, sagt „Stephan, …" unmissverständlich, dass es ihn betrifft. Wer ihn
+      dauernd hört, überhört ihn.
+    - **Ohne Namensdatei bleibt es beim schlichten „Du",** und jede Ansage stimmt
+      trotzdem. Keine hängt davon ab, dass ein Name eingetragen ist.
+    - **Vier eigene Fehler dabei:** „Stephan, **I**ch finde kein Mikrofon" (nach
+      dem Komma gehört es klein); „Stephan, hallo, ich bin Anna" (die Begrüßung
+      baut den Namen selbst ein); der Begrüßungssatz steht an **zwei** Stellen
+      und ich änderte nur eine; und ich legte eine Beispieldatei nach
+      `includes.chroot` - genau das, was ich eine Stunde vorher beim
+      `gdm3/custom.conf` als falsch erkannt hatte. Beide letzten fand das
+      Prüfskript, nicht ich.
+
+- **Sicherheitsupdates laufen jetzt unbeaufsichtigt (2026-08-20).**
+  `unattended-upgrades` 2.12 installiert und eingerichtet - in
+  `docs/anwendungen.md` war es seit dem 2026-08-18 entschieden und stand als
+  „Paket noch nicht installiert" da.
+    - **`#clear` vor `Origins-Pattern` ist Pflicht, und das habe ich erst falsch
+      gemacht.** Eine `Origins-Pattern`-Zeile **hängt an** (`::`), sie ersetzt
+      nicht. Nach dem ersten Versuch standen fünf Muster in der Liste - meine
+      zwei **und** Debians drei, darunter `label=Debian` ohne `-Security`, also
+      die normale Stable-Quelle. Ich hatte Stephan vorher „nur
+      Sicherheitsupdates" gesagt; das stimmte nicht. Aufgefallen nur, weil nach
+      dem Installieren `apt-config dump` gelesen wurde statt der eigenen Datei zu
+      glauben - **eine Konfigurationsdatei zu schreiben ist nicht dasselbe wie
+      eine Einstellung zu setzen.**
+    - **`Remove-Unused-Dependencies "false"` ist die wichtigste Zeile.** Nach dem
+      Aufräum-Schritt gelten 49 Pakete als „automatisch installiert" - darunter
+      `gnome-shell`, `nautilus`, `pipewire-audio`. Ein automatisches
+      `autoremove` würde nachts anbieten, den Desktop und den Ton-Unterbau zu
+      entfernen. Das Aufräum-Skript schützt sie, aber diese Einstellung darf sich
+      nicht darauf verlassen: Übersieht der Schutz **ein** Paket, wäre das Gerät
+      am Morgen unbenutzbar - und der Nutzer könnte nicht einmal Hilfe rufen.
+    - **`Automatic-Reboot "false"`** wiegt hier schwerer als üblich: `/home/nutzer`
+      liegt auf der LUKS-Partition, die der Sicherheits-Stick öffnet. Ein
+      nächtlicher Neustart ohne steckenden Stick sperrt den Nutzer am Morgen
+      komplett aus.
+    - **Belegt statt geglaubt:** Der Probelauf zeigt in
+      `/var/log/unattended-upgrades/unattended-upgrades.log`, dass `trixie`,
+      `trixie-updates` **und** die Anthropic-Quelle mit Pin `-32768` gesperrt
+      sind - apts „auf keinen Fall". Nur `Debian-Security` fehlt in dieser Liste.
+    - **Bewusst mit gesperrt: `trixie-updates`,** wo unter anderem `tzdata`
+      herkommt. Die Zeitzonen-Datenbank veraltet damit bis zum Sprachbefehl
+      „System aktualisieren" - erwähnenswert bei einem Gerät, dessen
+      Uhrzeit-Ansage ein Kernbefehl ist.
+
+- **Die Protokolle werden nach sieben Tagen gelöscht (2026-08-20).** Stephans
+  Entscheidung, dieselbe Frist wie beim Support-Protokoll. Bis dahin wuchsen
+  sechs Protokolle unbegrenzt - beim Diktat hieß das, dass jeder je diktierte
+  Brief dauerhaft im Klartext auf dem Gerät lag.
+    - **Über `/etc/logrotate.d/dialos`, nicht in den Programmen.** Das
+      Support-Protokoll räumt sich selbst auf, weil `dialos-mitschrift.py`
+      ohnehin läuft, während es geschrieben wird. Bei sechs Programmen wäre das
+      sechsmal derselbe Code - und ein Dienst, der eine Woche durchläuft, käme
+      nie zum Aufräumen, weil er nur beim Start nachsähe.
+    - **Kein `copytruncate`, und das ist geprüft:** Die Programme halten ihre
+      Datei **nicht** offen, sie öffnen zum Schreiben und schließen wieder
+      (über `/proc/*/fd` nachgesehen). Damit ist normales Umbenennen gefahrlos.
+      `copytruncate` wäre die Antwort auf ein Problem, das hier nicht besteht,
+      und es kann Zeilen verlieren.
+    - **`dateext`** statt laufender Nummer: `dialos-diktat.log-2026-08-20`. Wer
+      im Support nachsieht, sucht einen Tag - dieselbe Überlegung wie beim
+      Support-Protokoll.
+    - **Belegt statt geglaubt:** erzwungener Lauf, alle sechs rotiert, neue
+      Dateien mit **0600** statt 0644. Die beiden Messsicherungen blieben
+      unangetastet, weil sie nicht auf `.log` enden.
+    - **Rest-Lücke, benannt:** Eine *neu* angelegte Datei bekommt 0644 (Standard-
+      umask der Programme), erst die Rotation setzt 0600. Und die heute
+      weggerotierten Dateien tragen noch die alten Rechte - das korrigiert sich
+      ab morgen von selbst.
+
+- **Die Sprachsteuerung hat sich selbst eingeschaltet - und dabei fast die
+  Fernwartung angefordert (2026-08-20).** Stephan ließ DialOS über Nacht laufen:
+  „immer mal wieder meldete sich Michael. Und eben beim dialosadmin fragte er
+  mich, ob er die Fernwartung einschalten soll."
+    - **Das Protokoll erklärt beides auf einmal:** `14:04:07 erkannt: 'starten'`
+      schaltet die Sprachsteuerung ein, `14:04:43 erkannt: 'hilfe rufen'` fordert
+      die Fernwartung an - **niemand hat gesprochen.** Nur die Ja/Nein-Rückfrage
+      hat es verhindert.
+    - **Gemessen über 157 aufgezeichnete Äußerungen:** `'starten'` allein **18×**
+      gegen den vollen Satz 4×. Die Sprachsteuerung hat sich also 18-mal
+      unaufgefordert eingeschaltet, jedes Mal für zwei Minuten offenes Mikrofon -
+      rund 26 Minuten, die niemand wollte.
+    - **Kernwort ist jetzt „sprachsteuerung"** statt „starten": lang, markant, in
+      nur 16 von 157 Äußerungen vorgekommen. Gegen dieselben Daten geprüft: aus
+      22 Einschaltungen werden 9. Der Preis ist, dass ein verschlucktes
+      „sprachsteuerung" den Satz wiederholen lässt - eine Unbequemlichkeit, im
+      Gegensatz zu einem Mikrofon, das sich von selbst einschaltet.
+    - **Die Lockerung von gestern hat einen Fehler behoben und einen größeren
+      geschaffen.** Als Regel eingetragen: Ein Kernwort muss nicht nur eindeutig,
+      sondern auch **lang genug** sein.
+    - **Bestätigt hat sich dabei die Rückfrage.** Sie war die einzige Schicht,
+      die gehalten hat - genau dafür steht in `docs/sprachbefehle.md`, dass
+      sicherheitskritische Befehle eine Rückfrage bekommen, „unabhängig davon,
+      wie sicher die Erkennung war".
+
+- **Der Ansagen-Speicher nahm die falsche Stimme (2026-08-20).**
+  `speicher_fuellen()` in `dialos-say.py` griff die **erste** `.onnx`-Datei im
+  Ordner statt der eingestellten. Solange nur Thorsten installiert ist, fällt das
+  nicht auf; mit einer zweiten Stimme spräche der Speicher je nach Sortierung
+  eine andere als das System - und zwar unbemerkt, weil beide Wege für sich
+  richtig klingen. Gelesen wird jetzt `DefaultVoice` aus `piper-generic.conf`,
+  dieselbe Datei wie beim Tempo. Ist die eingestellte Stimme nicht installiert
+  und liegen mehrere im Ordner, wird **nicht geraten**, sondern nichts
+  gespeichert. Fünf Fälle gegengeprüft. (Die Code-Änderung ist versehentlich in
+  den Commit davor gerutscht - `git add -A` nimmt mit, was da ist.)
+
+- **„Hilfe rufen" - DialOS kann jetzt um Hilfe rufen (2026-08-19).** Bis dahin
+  hatte ein Nutzer, bei dem etwas nicht funktioniert, **keinen Weg**, den Support
+  zu erreichen; alles, was an Nachvollziehbarkeit gebaut wurde, setzte voraus,
+  dass überhaupt jemand an das Gerät kommt.
+    - **„Hilfe rufen"** fragt mit einer Rückfrage nach, die erklärt, was passiert
+      („Dein Betreuer kann dann sehen, was auf dem Bildschirm steht"), startet
+      RustDesk und liest die Nummer **ziffernweise in Vierergruppen und zweimal**
+      vor. Als Zahl gelesen wäre sie unbrauchbar, und mitschreiben kann der
+      Nutzer nicht. **„Fernwartung beenden"** beendet sie wieder.
+    - **Ein Einmalpasswort ist mit RustDesk 1.4.9 nicht zu haben** - fünf Wege
+      geprüft, alle zu (Details in `docs/sicherheit-datenschutz.md`). Es steht in
+      keiner Datei, `rustdesk --password` ist wirkungslos selbst als root, und
+      [rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074) ist offen.
+    - **Deshalb garantiert die LAUFZEIT die Begrenzung, nicht das Passwort** - der
+      härtere Hebel: Solange RustDesk nicht läuft, ist keine Verbindung möglich,
+      egal wer das Passwort kennt. Es startet nie von selbst und endet nach
+      **einer Stunde** von selbst, mit Vorwarnung drei Minuten vorher; ein
+      erneutes „Hilfe rufen" verlängert.
+    - **Und die Ansage sagt das, statt etwas Falsches zu behaupten.** „Das
+      Passwort gilt nur für diesen Einsatz" wäre eine Lüge, solange es dauerhaft
+      ist - einem Nutzer, der den Bildschirm nicht sieht, eine falsche Sicherheit
+      zu erzählen ist schlimmer, als ihm die richtige zu erklären.
+    - **Absolut statt im Leerlauf, und warum:** Stephans Frage war richtig -
+      Leerlauf wäre die bessere Semantik. Nur hat sich auf diesem Gerät noch nie
+      jemand verbunden, die Signatur einer aktiven Verbindung ist unbekannt, und
+      eine Grenze, die eine aktive Sitzung für Leerlauf hält, schneidet den
+      Betreuer bei der Arbeit ab. `spur_notieren()` sammelt deshalb die
+      Anhaltspunkte mit; nach dem ersten echten Verbindungsversuch lässt sich die
+      Erkennung **belegt** bauen.
+    - **Zwei Funde am Rand:** `rustdesk --help` **startet die Oberfläche** statt
+      Hilfe auszugeben - der Aufruf lief in die Zeitgrenze und ließ ein RustDesk
+      laufen, das ich beendet habe. Und RustDesk kontaktiert beim Start
+      `api.rustdesk.com`; das steht jetzt in der Datenschutz-Doku.
+    - **Neues Werkzeug:** `scripts/dialos-grammatik-pruefen.py` - Piper spricht
+      jeden Satz der Grammatik, Vosk hört zu. Eine Pflichtprüfung, die davon
+      abhängt, dass sich jemand an den Piper-Aufruf erinnert, findet irgendwann
+      nicht mehr statt. **Alle 18 Sätze wörtlich erkannt**, auch die 16
+      bestehenden.
 
 - **Die erste Korrektur jeder Sitzung war ein Muenzwurf - und die Schreibung ist
   besser als gedacht (2026-08-19).** Der Ausfall vom Morgen ("LanguageTool nicht
