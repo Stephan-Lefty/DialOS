@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 0.6.0
+Version: 0.7.0
 Text Domain: dialos
 */
 
@@ -126,50 +126,42 @@ body.page-id-2 main#main {
 }
 
 /* ------------------------------------------------------------------
-   Oberes Menue beim Scrollen ausblenden, Hamburger-Button stattdessen
-   rechts fest im Bild - siehe dialos_child_scroll_nav() in functions.php
-   fuer das Scroll-Verhalten. (Stephan, 2026-08-23)
-
-   WICHTIG: Hier bewusst kein "transform" auf .navbar selbst - transform
-   auf einem Vorfahren erzeugt einen neuen Bezugsrahmen fuer
-   "position: fixed"-Nachfahren (hier: den Hamburger-Button), der dann
-   nicht mehr am Bildschirm, sondern an der (verschobenen) Navbar
-   fixiert waere. Ausserdem wird nur die sichtbare Marke/das Menue
-   ausgeblendet (Opacity), NICHT ".side-collapse" - das ist das Panel,
-   das der Hamburger oeffnet, und muss unabhaengig vom Scroll-Zustand
-   immer funktionieren.
+   "Nach oben"-Button: rechts fest im Bild, erscheint erst nach etwas
+   Scrollen, bringt per Klick sanft zurueck zum Seitenanfang. Ersetzt
+   den Versuch mit dem immer sichtbaren Hamburger-Button (Stephan,
+   2026-08-23 - der Hamburger-Ansatz hatte zu viele Nebenwirkungen mit
+   dem bestehenden Seiten-Menue). Button-Erzeugung und Scroll-Logik in
+   dialos_child_to_top() in functions.php.
    ------------------------------------------------------------------ */
-.navbar-header .navbar-brand,
-#mainmenu {
-  transition: opacity 0.3s ease;
-}
-.navbar.dialos-nav-hidden .navbar-header .navbar-brand,
-.navbar.dialos-nav-hidden #mainmenu {
+.dialos-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 32px;
+  z-index: 1200;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #04b484;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  text-decoration: none;
   opacity: 0;
   pointer-events: none;
+  transition: opacity 0.3s ease, background 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
-/* Panel, das der Hamburger oeffnet, bleibt davon immer unberuehrt */
-.navbar.dialos-nav-hidden .side-collapse.in #mainmenu,
-.navbar.dialos-nav-hidden .side-collapse-container #mainmenu {
-  opacity: 1 !important;
-  pointer-events: auto !important;
+.dialos-to-top.dialos-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
-
-.navbar-toggle {
-  display: block !important;
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1200;
-  margin: 0 !important;
-  background: rgba(0, 0, 0, 0.55) !important;
-  border-radius: 4px;
-  padding: 9px 10px;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-.navbar-toggle .icon-bar {
-  background: #fff !important;
+.dialos-to-top:hover,
+.dialos-to-top:focus {
+  background: #038f6a;
+  color: #fff;
 }
 
 /* ------------------------------------------------------------------
