@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 0.4.0
+Version: 0.4.1
 Text Domain: dialos
 */
 
@@ -82,6 +82,30 @@ body.page-id-2 main#main {
 .footer p,
 .footer a {
   color: #00b7ff;
+}
+/* Copyright-Zeile passt in der 50/50-Spaltenaufteilung nicht in eine
+   Zeile - die "Top"-Spalte braucht kaum Platz, also bekommt die
+   Copyright-Spalte den Rest. */
+.footer .row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.footer .col-md-6:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.footer .col-md-6:first-child p {
+  white-space: nowrap;
+}
+.footer .col-md-6:last-child {
+  flex: 0 0 auto;
+  width: auto;
+}
+@media (max-width: 768px) {
+  .footer .col-md-6:first-child p {
+    font-size: 12px;
+  }
 }
 
 /* ------------------------------------------------------------------
