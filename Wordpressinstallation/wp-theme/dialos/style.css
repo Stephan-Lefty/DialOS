@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 0.1.0
+Version: 0.2.0
 Text Domain: dialos
 */
 
@@ -32,3 +32,41 @@ Text Domain: dialos
   width: 100%;
   height: 100%;
 }
+
+/* ------------------------------------------------------------------
+   Startseiten-Hintergrund
+   Hintergrundbild liegt hinter dem vorhandenen Inhalt bis zur Fusszeile;
+   der Textbereich in Inhaltsbreite bleibt weiss, damit er lesbar bleibt.
+   Zuvor als wp:html-Block direkt im Seiteninhalt (Seite 2).
+   ------------------------------------------------------------------ */
+body.page-id-2 {
+  background-image: url('https://dialos.org/wp-content/uploads/2026/08/wallpaper-startseite-hell.png');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+body.page-id-2 .side-collapse-container,
+body.page-id-2 .side-collapse-content,
+body.page-id-2 .container,
+body.page-id-2 .row {
+  background: transparent !important;
+}
+body.page-id-2 main#main {
+  background: #fff !important;
+  padding: 2rem !important;
+}
+
+/* ------------------------------------------------------------------
+   Kontaktformular: zweispaltiges Layout (Contact Form 7)
+   Zuvor als wp:html-Block direkt im Seiteninhalt (Seite 50, Kontakt).
+   ------------------------------------------------------------------ */
+.wpcf7-form .cf7-columns { display: flex; gap: 2.5rem; flex-wrap: wrap; align-items: stretch; }
+.wpcf7-form .cf7-col { flex: 1 1 320px; display: flex; flex-direction: column; }
+.wpcf7-form .cf7-col label { display: block; }
+.wpcf7-form .cf7-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.wpcf7-form .cf7-row > label { flex: 1 1 45%; min-width: 150px; }
+.wpcf7-form .cf7-col:last-child p:has(textarea),
+.wpcf7-form .cf7-col:last-child label:has(textarea) { flex: 1; display: flex; flex-direction: column; }
+.wpcf7-form .cf7-col:last-child textarea { flex: 1; resize: vertical; min-height: 150px; }
+.wpcf7-form .cf7-col:last-child p:has(input[type="submit"]) { text-align: right; margin-top: auto; }
