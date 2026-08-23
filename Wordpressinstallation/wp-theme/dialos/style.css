@@ -1,0 +1,34 @@
+/*
+Theme Name: DialOS
+Theme URI: https://dialos.org
+Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
+Author: Stephan Rösner
+Template: wlow
+Version: 0.1.0
+Text Domain: dialos
+*/
+
+/* ------------------------------------------------------------------
+   Video-Einbettungen im 16:9-Format
+   Das Eltern-Theme "wlow" unterstuetzt WordPress' eingebaute responsive
+   Video-Einbettung nicht (fehlende "wp-embed-responsive"-Body-Klasse),
+   und eine Erweiterung packt zusaetzlich ein unstyled
+   <figure class="video-container"> um jedes iframe. Ohne diese Regel
+   haengen eingebettete YouTube-Videos auf ihrer festen HTML-Breite/-Hoehe
+   fest, statt sich responsive im 16:9-Format anzupassen.
+   ------------------------------------------------------------------ */
+.wp-block-embed-youtube .wp-block-embed__wrapper {
+  position: relative;
+  height: 0;
+  padding-top: 56.25%;
+  overflow: hidden;
+}
+.wp-block-embed-youtube .wp-block-embed__wrapper iframe,
+.wp-block-embed-youtube .wp-block-embed__wrapper .video-container,
+.wp-block-embed-youtube .wp-block-embed__wrapper .video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
