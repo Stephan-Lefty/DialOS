@@ -116,3 +116,105 @@ function dialos_child_search() {
 	</script>
 	<?php
 }
+
+/**
+ * lang-Attribut korrigieren.
+ *
+ * Alle Seiten/Beitraege liefern bisher lang="de", auch die englischen
+ * (z.B. /en/idea/, /who-is-claude/) - die Site nutzt kein Mehrsprachen-
+ * Plugin mit strukturierten Sprachdaten. Verlaesslichstes Signal, das
+ * es gibt: Jede Seite/jeder Beitrag beginnt laut Konvention dieser
+ * Website mit einem Sprachumschalter-Link ("Deutsch"/"English") zur
+ * jeweils anderen Sprachversion - steht die deutsche Sprungmarke am
+ * Anfang, ist die aktuelle Seite die englische.
+ */
+add_filter( 'language_attributes', 'dialos_child_language_attributes' );
+
+function dialos_child_language_attributes( $output ) {
+	if ( is_singular() ) {
+		global $post;
+		if ( $post && strpos( mb_substr( $post->post_content, 0, 300 ), '>Deutsch<' ) !== false ) {
+			$output = str_replace( 'lang="de"', 'lang="en"', $output );
+		}
+	}
+	return $output;
+}
+
+/**
+ * "Zum Inhalt springen"-Link fuer Tastatur-/Screenreader-Nutzer.
+ *
+ * Per JS ganz an den Anfang von <body> gesetzt statt per header.php-
+ * Override (gleiche Begruendung wie beim Fusszeilen-Text: das Original
+ * nicht blind nachbauen). Optisch unsichtbar, erscheint nur bei
+ * Tastatur-Fokus (siehe .dialos-skip-link in style.css).
+ */
+add_action( 'wp_footer', 'dialos_child_skip_link' );
+
+function dialos_child_skip_link() {
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var ziel = document.getElementById('main');
+		if (!ziel) return;
+		if (!ziel.hasAttribute('tabindex')) {
+			ziel.setAttribute('tabindex', '-1');
+		}
+		var link = document.createElement('a');
+		link.href = '#main';
+		link.className = 'dialos-skip-link';
+		link.textContent = 'Zum Inhalt springen';
+		link.addEventListener('click', function (e) {
+			e.preventDefault();
+			ziel.focus();
+			ziel.scrollIntoView();
+		});
+		document.body.insertBefore(link, document.body.firstChild);
+	});
+	</script>
+	<?php
+}
+
+/**
+ * Barrierefrei-Umschalter: solide statt transparente Navbar, dunklerer
+ * Link-Kontrast, unterstrichene Links. Als Menuepunkt erreichbar,
+ * merkt sich die Wahl per localStorage seitenuebergreifend.
+ */
+add_action( 'wp_footer', 'dialos_child_a11y_toggle' );
+
+function dialos_child_a11y_toggle() {
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var SCHLUESSEL = 'dialos-a11y-mode';
+
+		function anwenden( an ) {
+			document.body.classList.toggle('dialos-a11y-mode', an);
+			var btn = document.getElementById('dialos-a11y-button');
+			if (btn) {
+				btn.setAttribute('aria-pressed', an ? 'true' : 'false');
+				btn.textContent = an ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
+			}
+		}
+
+		anwenden( localStorage.getItem(SCHLUESSEL) === '1' );
+
+		var menu = document.getElementById('menu-seiten');
+		if (!menu) return;
+		var li = document.createElement('li');
+		var btn = document.createElement('button');
+		btn.type = 'button';
+		btn.id = 'dialos-a11y-button';
+		btn.className = 'dialos-a11y-button';
+		btn.setAttribute('aria-pressed', localStorage.getItem(SCHLUESSEL) === '1' ? 'true' : 'false');
+		btn.textContent = localStorage.getItem(SCHLUESSEL) === '1' ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
+		btn.addEventListener('click', function () {
+			var an = !document.body.classList.contains('dialos-a11y-mode');
+			localStorage.setItem(SCHLUESSEL, an ? '1' : '0');
+			anwenden(an);
+		});
+		li.appendChild(btn);
+		menu.appendChild(li);
+	});
+	</script>
+	<?php
+}
