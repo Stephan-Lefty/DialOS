@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 0.5.0
+Version: 0.5.1
 Text Domain: dialos
 */
 
@@ -127,14 +127,30 @@ body.page-id-2 main#main {
    Oberes Menue beim Scrollen ausblenden, Hamburger-Button stattdessen
    rechts fest im Bild - siehe dialos_child_scroll_nav() in functions.php
    fuer das Scroll-Verhalten. (Stephan, 2026-08-23)
+
+   WICHTIG: Hier bewusst kein "transform" auf .navbar selbst - transform
+   auf einem Vorfahren erzeugt einen neuen Bezugsrahmen fuer
+   "position: fixed"-Nachfahren (hier: den Hamburger-Button), der dann
+   nicht mehr am Bildschirm, sondern an der (verschobenen) Navbar
+   fixiert waere. Ausserdem wird nur die sichtbare Marke/das Menue
+   ausgeblendet (Opacity), NICHT ".side-collapse" - das ist das Panel,
+   das der Hamburger oeffnet, und muss unabhaengig vom Scroll-Zustand
+   immer funktionieren.
    ------------------------------------------------------------------ */
-.navbar {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.navbar-header .navbar-brand,
+#mainmenu {
+  transition: opacity 0.3s ease;
 }
-.navbar.dialos-nav-hidden {
-  transform: translateY(-100%);
+.navbar.dialos-nav-hidden .navbar-header .navbar-brand,
+.navbar.dialos-nav-hidden #mainmenu {
   opacity: 0;
   pointer-events: none;
+}
+/* Panel, das der Hamburger oeffnet, bleibt davon immer unberuehrt */
+.navbar.dialos-nav-hidden .side-collapse.in #mainmenu,
+.navbar.dialos-nav-hidden .side-collapse-container #mainmenu {
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .navbar-toggle {
@@ -142,11 +158,13 @@ body.page-id-2 main#main {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 1100;
+  z-index: 1200;
   margin: 0 !important;
   background: rgba(0, 0, 0, 0.55) !important;
   border-radius: 4px;
   padding: 9px 10px;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 .navbar-toggle .icon-bar {
   background: #fff !important;
