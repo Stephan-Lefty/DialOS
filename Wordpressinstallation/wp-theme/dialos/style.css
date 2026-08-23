@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 0.7.0
+Version: 0.8.0
 Text Domain: dialos
 */
 
@@ -204,4 +204,61 @@ a:focus {
 .dropdown-menu > .active > a:hover,
 .dropdown-menu > .active > a:focus {
   color: #04b484 !important;
+}
+
+/* ------------------------------------------------------------------
+   Nur fuer Screenreader sichtbarer Text. Das Theme hat zwar eine Klasse
+   namens ".screen-reader-text", die ist aber nur eine Kalender-Widget-
+   Ueberschrift und blendet nichts visuell aus - deshalb eigene Klasse.
+   ------------------------------------------------------------------ */
+.dialos-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------------
+   Seitenweite Suche im Menue (Stephan, 2026-08-23). Nutzt WordPress'
+   eingebaute Suche (funktioniert schon unter /?s=..., hatte bisher nur
+   kein sichtbares Formular). Als eigenes <li> ans bestehende Menue
+   angehaengt statt eigenes Markup - erscheint dadurch automatisch auch
+   im mobilen Seiten-Menue, ohne zusaetzliche Positionierungs-Tricks.
+   ------------------------------------------------------------------ */
+.dialos-search-item {
+  display: flex;
+  align-items: center;
+}
+.dialos-search-form {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+}
+.dialos-search-form input[type="search"] {
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+  padding: 6px 10px;
+  font-size: 14px;
+  width: 160px;
+  max-width: 100%;
+}
+.dialos-search-form button {
+  border: 1px solid #ccc;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  background: #04b484;
+  color: #fff;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+.dialos-search-form button:hover,
+.dialos-search-form button:focus {
+  background: #038f6a;
 }

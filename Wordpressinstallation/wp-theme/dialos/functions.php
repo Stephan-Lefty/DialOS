@@ -84,3 +84,35 @@ function dialos_child_to_top() {
 	</script>
 	<?php
 }
+
+/**
+ * Seitenweite Suche als letzten Menuepunkt anhaengen.
+ *
+ * WordPress' eingebaute Suche funktioniert bereits (Aufruf ueber
+ * ?s=...), das Theme zeigt bisher nur kein Formular dafuer an. Als
+ * <li> ans bestehende Menue "menu-seiten" angehaengt statt eigenes
+ * Markup irgendwo einzuschieben - erscheint dadurch automatisch auch
+ * im mobilen Seiten-Menue mit, ohne eigene Positionierung noetig.
+ */
+add_action( 'wp_footer', 'dialos_child_search' );
+
+function dialos_child_search() {
+	$aktion = esc_url( home_url( '/' ) );
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var menu = document.getElementById('menu-seiten');
+		if (!menu) return;
+		var li = document.createElement('li');
+		li.className = 'dialos-search-item';
+		li.innerHTML =
+			'<form class="dialos-search-form" role="search" method="get" action="<?php echo $aktion; ?>">' +
+			'<label class="dialos-visually-hidden" for="dialos-search-input">Suchen</label>' +
+			'<input type="search" id="dialos-search-input" name="s" placeholder="Suchen …" />' +
+			'<button type="submit" aria-label="Suche starten">&#128269;</button>' +
+			'</form>';
+		menu.appendChild(li);
+	});
+	</script>
+	<?php
+}
