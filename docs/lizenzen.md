@@ -120,6 +120,35 @@ sind, unterliegen die erzeugten Audiodateien keinen Auflagen aus der
 Stimme. Die **Texte** der Ansagen stammen aus DialOS und stehen wie der
 übrige Inhalt dieses Repositories unter GPL-3.0.
 
+## Logo, Symbole und Hintergrundbilder
+
+Die Bilddateien in [assets/](../assets/) - Logo, Bildmarke, App-Symbol,
+Hintergrundbilder, Startbildschirm - sind **von Stephan Rösner zusammen
+mit ChatGPT (OpenAI) erzeugt**, in mehreren Durchgängen aus eigenen
+Vorgaben und mit eigener Auswahl. Keine Fremdquelle, kein Stockmaterial,
+keine fremden Nutzungsrechte.
+
+Nach den Nutzungsbedingungen von OpenAI stehen die Rechte an erzeugten
+Bildern dem Nutzer zu; die kommerzielle Verwendung ist damit gedeckt.
+
+**Was daraus aber nicht folgt:** Ob an einem im Wesentlichen maschinell
+erzeugten Bild überhaupt ein Urheberrecht entsteht, ist zumindest
+zweifelhaft. Deutsches Recht verlangt eine „persönliche geistige
+Schöpfung" (§ 2 Abs. 2 UrhG), und das US Copyright Office lehnt Schutz
+ohne menschliche Urheberschaft ausdrücklich ab. Es kann also sein, dass
+diese Bilder gemeinfrei sind und jeder sie verwenden darf.
+
+**Für den Markenvorbehalt oben ist das ohne Belang** - und das ist der
+entscheidende Punkt. Der Schutz von Name und Erscheinungsbild kommt nicht
+aus dem Urheberrecht, sondern aus dem **Markenrecht**, und das setzt
+keine schöpferische Leistung voraus, sondern Benutzung im geschäftlichen
+Verkehr. „DialOS" als Kennzeichen eines verkauften Produkts ist damit
+geschützt, unabhängig davon, wie das Logo entstanden ist.
+
+Wer das belastbar haben will, meldet die Wort-/Bildmarke beim DPMA an.
+Solange das nicht geschehen ist, trägt der Vorbehalt so weit, wie
+Benutzung und Bekanntheit reichen - für den Anfang genügt das.
+
 ## Für Wiederverkäufer und Kunden
 
 Wer ein DialOS-Gerät weitergibt, gibt GPL-Software weiter und übernimmt
@@ -133,11 +162,36 @@ damit deren Pflichten. Praktisch heißt das:
 3. Bei eigenen Änderungen an DialOS deren Quelltext offenlegen (GPL-3.0)
    und einen anderen Namen verwenden (siehe oben).
 
+## Keine Paketliste im Repo - und warum nicht
+
+Naheliegender Gedanke: alle zusätzlich installierten Debian-Pakete mit
+ihren Lizenzen hier auflisten. **Das ist weder nötig noch sinnvoll.**
+
+Nötig ist es nicht, weil die GPL zwei Dinge verlangt - den Lizenztext
+beim Programm und den Quelltext auf Verlangen -, aber keine
+Inhaltsangabe. Beides ist erfüllt: Der Lizenztext jedes Pakets **reist
+auf dem Gerät mit**, unter `/usr/share/doc/PAKET/copyright`, und der
+Quelltext liegt bei Debian.
+
+Sinnvoll ist es nicht, weil eine von Hand gepflegte Liste sofort veraltet
+- jedes `apt upgrade` verschiebt Versionen, Pakete kommen und gehen. Eine
+solche Liste würde bald etwas behaupten, was auf keinem Gerät mehr
+stimmt. Das wäre schlechter als keine Liste, weil ihr jemand glaubt.
+
+Welche Pakete DialOS zusätzlich installiert, steht ohnehin bereits an der
+richtigen Stelle: in [Debian-zu-DialOS.md](Debian-zu-DialOS.md), wo es
+beim Nachbauen gebraucht wird und deshalb gepflegt wird.
+
+Fragt ein Kunde oder Wiederverkäufer trotzdem nach einer Aufstellung,
+wird sie **auf dem Gerät erzeugt** statt aus dem Repo abgeschrieben -
+dann stimmt sie auch:
+
+```bash
+dpkg-query -W -f='${Package}\t${Version}\t${Homepage}\n' | sort > pakete.txt
+```
+
 ## Offen
 
-- Vollständige Liste der Debian-Pakete, die DialOS zusätzlich
-  installiert, mit ihren jeweiligen Lizenzen. Auf dem Gerät nachvollzieh-
-  bar über `/usr/share/doc/`, im Repo bisher nicht zusammengestellt.
-- Herkunft der Hintergrundbilder und des Logos schriftlich festhalten
-  (Eigenerstellung oder Quelle), damit der Markenvorbehalt oben auch
-  belegt ist.
+- Anmeldung der Wort-/Bildmarke „DialOS" beim DPMA, falls der
+  Markenvorbehalt belastbar sein soll (siehe oben). Bis dahin trägt er
+  nur so weit wie Benutzung und Bekanntheit.

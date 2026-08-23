@@ -118,6 +118,35 @@ generated audio carries no obligations from the voice. The **texts** of
 the announcements originate in DialOS and are under GPL-3.0 like the rest
 of this repository.
 
+## Logo, icons and wallpapers
+
+The image files in [assets/](../assets/) - logo, icon, app icon,
+wallpapers, splash screen - were **created by Stephan Rösner together
+with ChatGPT (OpenAI)**, over several rounds from his own prompts and
+with his own selection. No third-party source, no stock material, no
+third-party rights involved.
+
+Under OpenAI's terms of use the rights to generated images pass to the
+user, so commercial use is covered.
+
+**What does not follow from that:** whether copyright arises at all in a
+substantially machine-generated image is at least doubtful. German law
+requires a "personal intellectual creation" (§ 2 (2) UrhG), and the US
+Copyright Office explicitly refuses protection without human authorship.
+It may well be that these images are in the public domain and anyone may
+use them.
+
+**For the trademark reservation above this is irrelevant** - and that is
+the decisive point. Protection of the name and visual identity does not
+come from copyright but from **trademark law**, which requires no
+creative achievement, only use in trade. "DialOS" as the mark of a
+product being sold is protected accordingly, regardless of how the logo
+came about.
+
+To put that on a firm footing, register the word/figurative mark with the
+German Patent and Trade Mark Office. Until then the reservation carries
+as far as use and recognition reach - which is enough for now.
+
 ## For resellers and customers
 
 Passing on a DialOS device means passing on GPL software and taking on
@@ -130,11 +159,35 @@ its obligations. In practice:
 3. If you change DialOS yourself, publish your source (GPL-3.0) and use a
    different name (see above).
 
+## No package list in the repository - and why not
+
+The obvious idea: list every additionally installed Debian package with
+its licence here. **That is neither required nor useful.**
+
+Not required, because the GPL demands two things - the licence text with
+the program and the source on request - but no inventory. Both are
+satisfied: the licence text of every package **travels on the device**,
+under `/usr/share/doc/PACKAGE/copyright`, and the source is at Debian.
+
+Not useful, because a hand-maintained list goes stale immediately - every
+`apt upgrade` shifts versions, packages come and go. Such a list would
+soon assert something true of no device any more. That is worse than no
+list, because somebody will believe it.
+
+Which packages DialOS additionally installs is already recorded where it
+belongs: in [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), where it is
+needed for rebuilding and therefore kept current.
+
+If a customer or reseller does ask for a listing, it is **generated on
+the device** rather than copied from the repository - then it is actually
+correct:
+
+```bash
+dpkg-query -W -f='${Package}\t${Version}\t${Homepage}\n' | sort > packages.txt
+```
+
 ## Open
 
-- A complete list of the Debian packages DialOS installs on top, with
-  their respective licences. Traceable on the device via
-  `/usr/share/doc/`, not yet compiled in the repository.
-- Record the provenance of the wallpapers and the logo in writing (own
-  work or source), so that the trademark reservation above is documented
-  as well.
+- Registration of the "DialOS" word/figurative mark, should the trademark
+  reservation need to be enforceable (see above). Until then it carries
+  only as far as use and recognition reach.
