@@ -162,8 +162,8 @@ function dialos_child_footer_links() {
 		ziel.innerHTML =
 			'<p class="dialos-footer-links">' +
 			'<a href="https://dialos.org/impressum/">Impressum</a>' +
-			'<a href="https://dialos.org/datenschutzerklaerung/">Datenschutz &ndash; Website &amp; DialOS-System</a>' +
-			'<a href="https://dialos.org/dialos-mobil-datenschutz/">Datenschutz &ndash; DialOS Mobil (App)</a>' +
+			'<a href="https://dialos.org/datenschutzerklaerung/">Datenschutz (Website)</a>' +
+			'<a href="https://dialos.org/dialos-mobil-datenschutz/">Datenschutz (App)</a>' +
 			'</p>';
 	});
 	</script>
