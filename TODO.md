@@ -16,6 +16,61 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Kundendaten an EINER Stelle - und nicht unverschlüsselt** (Stephans
+  Anstoß vom 2026-08-24: „wo wir zentral alle wichtigen Daten des Kunden
+  einmalig ablegen und die Mail, der Brief und das Diktat usw. greifen auf
+  diese Daten immer zu").
+
+  **Wie es heute aussieht.** Dieselbe Person steht an mehreren Stellen, jede
+  mit eigenem Format:
+
+  | Was | Wo | Wer liest es |
+  |---|---|---|
+  | Name, gesprochen und geschrieben | `/usr/local/share/dialos/nutzer-name.txt` | Start-Ansage, Briefbogen, Anrede |
+  | Anschrift | `/usr/local/share/dialos/absender.txt` | Briefbogen - **existiert nicht** |
+  | Fußzeilentext | `/usr/local/share/dialos/fusszeile.txt` | Mail, Brief, Ausdruck |
+  | Mail-Signatur | `mail-signatur.txt` / `.html` | Thunderbird (erzeugt) |
+  | Mailbox-Zugangsdaten | Datei in `/home/nutzer`, 0600 | Mailabruf |
+
+  **Der schwerwiegende Teil ist nicht die Verteilung, sondern der Ort.**
+  Gemessen am 2026-08-24:
+
+      /usr/local/share/dialos/nutzer-name.txt  →  /dev/nvme0n1p1  ext4   0644
+      /home/nutzer                             →  nvme0n1p4       LUKS
+
+  Der Name des Kunden liegt **unverschlüsselt und für jeden lesbar** auf der
+  Wurzelpartition, während seine Briefe hinter LUKS liegen. Die Anschrift soll
+  laut Briefbogen an denselben Ort. Bei einem gestohlenen Laptop ist damit
+  genau das lesbar, was die Person identifiziert - und der Zweck der
+  verschlüsselten Home-Partition ist zur Hälfte hinfällig. Siehe
+  `docs/sicherheit-datenschutz.md`.
+
+  **Zweiter Fehler, derselbe Ort:** Die Dateien sind systemweit, die Daten aber
+  personenbezogen. Auf dem Entwicklungsgerät teilen sich `dialosadmin` und
+  `nutzer` denselben Namen - ein Brief des Admin-Kontos trüge den Namen des
+  Kunden.
+
+  **Vor dem Bauen zu klären:**
+  1. **Wohin?** `/home/nutzer/.config/dialos/` liegt auf der verschlüsselten
+     Partition und ist personenbezogen - beides richtig. Dagegen spricht: Der
+     `dialos-stick-gate`-Dienst öffnet die Partition erst nach dem Booten, die
+     Start-Ansage braucht den Namen aber früh. Diese Reihenfolge ist zu prüfen,
+     bevor etwas verschoben wird.
+  2. **Welches Format?** Fünf Dateien mit fünf Formaten sind der heutige Stand.
+     Eine Datei mit klaren Feldern (Name gesprochen, Name geschrieben, Straße,
+     Ort, Telefon, Mailadresse) wäre lesbar und erweiterbar.
+  3. **Was ist NICHT Kundendatum?** `assistent-name.txt` (Michael/Anna) und
+     `fusszeile.txt` sind Systemeinstellungen und gehören nicht dorthin. Die
+     Trennlinie muss gezogen werden, sonst wandert am Ende alles in eine Datei
+     und niemand weiß mehr, was beim Kundenwechsel zu löschen ist.
+  4. **Was passiert beim Wechsel?** Ein Gerät, das an eine andere Person geht,
+     muss diese Daten sicher loswerden. Eine zentrale Stelle macht das
+     möglich - fünf verstreute Dateien machen es unzuverlässig.
+
+  **Erst danach** lohnt sich der geführte Dialog für Empfänger und Betreff
+  (siehe `docs/brief-vorlage.md`): Er würde sonst auf einen Datenbestand
+  aufsetzen, der gerade umzieht.
+
 - [ ] **Stimmprobe beim ersten Anmelden - und die Aufnahme danach löschen**
   (Stephans Idee vom 2026-08-24: „wenn alles funktioniert, dem neuen Benutzer
   einen Text präsentieren … damit das System eine Stimmenprobe von der Person

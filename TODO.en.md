@@ -15,6 +15,59 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Customer data in ONE place - and not unencrypted** (Stephan's prompt of
+  2026-08-24: "wo wir zentral alle wichtigen Daten des Kunden einmalig ablegen
+  und die Mail, der Brief und das Diktat usw. greifen auf diese Daten immer
+  zu").
+
+  **How it looks today.** The same person appears in several places, each with
+  its own format:
+
+  | What | Where | Who reads it |
+  |---|---|---|
+  | Name, spoken and written | `/usr/local/share/dialos/nutzer-name.txt` | startup announcement, letterhead, salutation |
+  | Postal address | `/usr/local/share/dialos/absender.txt` | letterhead - **does not exist** |
+  | Footer text | `/usr/local/share/dialos/fusszeile.txt` | mail, letter, printout |
+  | Mail signature | `mail-signatur.txt` / `.html` | Thunderbird (generated) |
+  | Mailbox credentials | a file in `/home/nutzer`, 0600 | mail retrieval |
+
+  **The serious part is not the spread but the location.** Measured on
+  2026-08-24:
+
+      /usr/local/share/dialos/nutzer-name.txt  →  /dev/nvme0n1p1  ext4   0644
+      /home/nutzer                             →  nvme0n1p4       LUKS
+
+  The customer's name sits **unencrypted and world-readable** on the root
+  partition while their letters sit behind LUKS. The postal address is meant to
+  go to the same place. With a stolen laptop, exactly what identifies the person
+  is readable - and half the purpose of the encrypted home partition is void.
+  See `docs/sicherheit-datenschutz.en.md`.
+
+  **A second fault, same location:** the files are system-wide but the data is
+  personal. On the development machine `dialosadmin` and `nutzer` share the same
+  name - a letter from the admin account would carry the customer's name.
+
+  **To settle before building:**
+  1. **Where to?** `/home/nutzer/.config/dialos/` is on the encrypted partition
+     and is per-person - both correct. Against it: the `dialos-stick-gate`
+     service only opens that partition after boot, while the startup
+     announcement needs the name early. That order must be checked before
+     anything moves.
+  2. **Which format?** Five files with five formats is today's state. One file
+     with clear fields (name spoken, name written, street, town, phone, mail
+     address) would be readable and extensible.
+  3. **What is NOT customer data?** `assistent-name.txt` (Michael/Anna) and
+     `fusszeile.txt` are system settings and do not belong there. That line has
+     to be drawn, or everything ends up in one file and nobody knows what to
+     delete when the device changes hands.
+  4. **What happens on handover?** A device going to a different person must
+     shed this data reliably. One central place makes that possible; five
+     scattered files make it unreliable.
+
+  **Only after that** is the guided dialogue for recipient and subject worth
+  building (see `docs/brief-vorlage.md`): it would otherwise build on a data
+  store that is in the middle of moving.
+
 - [ ] **Voice sample at first login - and delete the recording afterwards**
   (Stephan's idea of 2026-08-24: "wenn alles funktioniert, dem neuen Benutzer
   einen Text präsentieren … damit das System eine Stimmenprobe von der Person
