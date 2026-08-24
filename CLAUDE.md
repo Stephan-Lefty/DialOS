@@ -48,7 +48,13 @@ steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
 
 - Sprachsteuerung mit 26 Grammatiksaetzen. Das Einschalten verlangt beide
   Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
-  Beinahe-Treffer, null Fehlstarts.
+  Beinahe-Treffer, null Fehlstarts. **Diese Zahl ist ueberholt:** Am
+  2026-08-24 um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet -
+  "sprachsteuerung starten" erkannt, obwohl Stephan an dem Tag kein Wort zu
+  ihr gesagt hatte und DialOS zu der Zeit selbst nichts sprach (im
+  Ton-Protokoll steht zwischen 14:35 und 14:42 keine Zeile). Erster
+  protokollierter Fehlstart. Ursache offen - Umgebungssprache ist die
+  naechstliegende Vermutung, aber eine Vermutung.
 - Anna (`de_DE-kerstin-low`) ist Auslieferungsstimme, **Tempo 0,95**, und
   spricht den Nutzer mit Namen an ("Steffan"). Beide Werte hat Stephan mit den
   Ohren entschieden.

@@ -2032,6 +2032,32 @@ Durchsicht, die niemand belegen kann, ist keine.
 Gemessen am 2026-08-22: Die Stimme steht nach 4,4 Sekunden um, mit Ansage in
 der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 
+
+### Protokolle tragen ein Datum, nicht nur eine Uhrzeit
+
+**Seit dem 2026-08-24, und der Anlass war ein Fehlschluss von mir.** Alle
+`melde()`-Funktionen schrieben `%H:%M:%S` — nur die Uhrzeit. logrotate dreht
+täglich, aber nur, wenn das Gerät läuft. Steht es zwei Tage, liegen drei Tage
+in **einer** Datei, und niemand sieht es: Die Uhrzeit springt einfach zurück.
+
+Genau daran bin ich gescheitert. Ich habe aus
+`~/.log/dialos-sprachbefehl.log` einen Verlauf „von heute" rekonstruiert,
+Stephan einen Vorfall geschildert — dreizehn vergebliche Einschaltversuche,
+ein ausgelöster Druck — und daraus Schlüsse über die Bedienbarkeit gezogen.
+Alles davon stammte vom **22.08.** Aufgefallen ist es nur, weil Stephan
+antwortete, er habe an diesem Tag gar nicht mit der Sprachsteuerung
+gesprochen. Zwei Rückwärtssprünge in der Datei (15:39 → 15:09 und
+15:21 → 10:23) belegen die drei Tage.
+
+Zwölf Skripte schreiben jetzt `%m-%d %H:%M:%S`. Das Format bleibt kurz genug
+für die Mitschrift und macht einen Tageswechsel sichtbar.
+
+**Die Lehre dahinter ist nicht das Format.** Ein Protokoll ohne Datum ist kein
+kleiner Schönheitsfehler, sondern eine Falle für genau die Person, die im
+Support hineinschaut — und die liest es unter Zeitdruck. Es hat mich einen
+kompletten Analyseweg gekostet, und ohne Stephans Einwand hätte eine falsche
+Schlussfolgerung in der Dokumentation gestanden.
+
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
 **Design seit 2026-08-14** (löst die ursprüngliche Ganze-Platte-

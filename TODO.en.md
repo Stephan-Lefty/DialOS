@@ -15,6 +15,27 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **First false start of the voice control - cause unknown** (2026-08-24).
+  At 14:41:12 the voice control switched itself on: Vosk recognised
+  "sprachsteuerung starten", the transcript window opened, and then came
+  "datum vorlesen drucken" and "welchen". **Stephan had not said a word to the
+  voice control that day.**
+
+  **What is ruled out:** its own announcement. The audio log holds not a single
+  line between 14:35 and 14:42, so DialOS did not speak. The echo cancellation
+  was not even called upon.
+
+  **What is open:** what the microphone heard. Ambient speech (a conversation
+  in the room, radio, a video) is the obvious guess - but a guess, and this
+  project has twice measured past a plausible guess. The first thing to settle
+  with Stephan is whether anyone or anything was speaking in the room at 14:41.
+
+  **Why it matters:** the two-word rule exists precisely so that a passing word
+  triggers nothing. If ambient speech defeats it, the device can switch itself
+  on - window and executed commands included - without anyone addressing it.
+  For the blind user the window would be invisible; all he notices is that the
+  device is suddenly listening.
+
 - [ ] **Permitted word combinations that form no command fall through
   SILENTLY** (open since 2026-08-22, found during the print test). The most
   serious open item for the target group.
@@ -43,7 +64,8 @@ finished too, and then move down together. That way no reference breaks.
 
   The 345 in the OFF state are nearly all fragments of "sprachsteuerung
   starten". **Silence is correct there and must stay** - that is the two-word
-  rule that produced 60 near-misses and zero false starts. Only the 382 in the
+  rule that produced 60 near-misses and, for a long time, zero false starts -
+  the first one came on 2026-08-24 (see its own item above). Only the 382 in the
   ON state are the fault.
 
   **And that is where the dilemma sits:** 382 announcements would be

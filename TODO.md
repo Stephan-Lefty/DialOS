@@ -16,6 +16,28 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Erster Fehlstart der Sprachsteuerung - Ursache offen** (2026-08-24).
+  Um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet: Vosk erkannte
+  „sprachsteuerung starten", das Mitschrift-Fenster ging auf, danach kamen
+  „datum vorlesen drucken" und „welchen". **Stephan hatte an diesem Tag kein
+  Wort zur Sprachsteuerung gesagt.**
+
+  **Was ausgeschlossen ist:** die eigene Ansage. Im Ton-Protokoll steht
+  zwischen 14:35 und 14:42 keine einzige Zeile, DialOS hat also nicht selbst
+  gesprochen. Die Echo-Unterdrückung war damit gar nicht gefordert.
+
+  **Was offen ist:** was das Mikrofon gehört hat. Umgebungssprache (Gespräch
+  im Raum, Radio, Video) ist die naheliegende Vermutung - aber eine Vermutung,
+  und dieses Projekt hat schon zweimal an einer schlüssigen Vermutung
+  vorbeigemessen. Zu klären ist zuerst mit Stephan, ob um 14:41 jemand oder
+  etwas im Raum gesprochen hat.
+
+  **Warum es zählt:** Die Zwei-Wort-Regel ist genau dafür gebaut, dass ein
+  beiläufiges Wort nichts auslöst. Wenn Umgebungssprache sie überwindet, ist
+  ein selbsttätiges Einschalten samt Fenster und ausgeführten Befehlen
+  möglich, ohne dass jemand mit dem Gerät spricht. Beim blinden Nutzer wäre
+  das Fenster unsichtbar - er merkt nur, dass das Gerät plötzlich zuhört.
+
 - [ ] **Erlaubte Wortkombinationen ohne Befehl fallen LAUTLOS durch** (offen
   seit 2026-08-22, gefunden beim Drucktest). Der schwerwiegendste offene Punkt
   für die Zielgruppe.
@@ -44,7 +66,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
   Die 345 im AUS-Zustand sind fast alle Bruchstücke von „sprachsteuerung
   starten". **Dort ist Schweigen richtig und muss so bleiben** - das ist die
-  Zwei-Wort-Regel, die 60 Beinahe-Treffer und null Fehlstarts gebracht hat. Nur
+  Zwei-Wort-Regel, die 60 Beinahe-Treffer und lange null Fehlstarts gebracht
+  hat - der erste kam am 2026-08-24 (siehe eigener Punkt oben). Nur
   die 382 im EINGESCHALTETEN Zustand sind der Fehler.
 
   **Und da liegt das Dilemma:** 382 Ansagen wären unerträglich. Das Gerät würde

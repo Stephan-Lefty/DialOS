@@ -421,7 +421,15 @@ def melde(text):
     die Sperre versagt hat - oder davor. Ein Protokoll ohne Zeit kann
     Gleichzeitigkeit nicht belegen, und genau darum ging es.
     """
-    zeile = f"{time.strftime('%H:%M:%S')}  {text}"
+    # MIT DATUM, seit dem 2026-08-24 - und das ist keine Kosmetik.
+    # Vorher stand hier nur die Uhrzeit. logrotate dreht taeglich, aber
+    # nur, wenn das Geraet laeuft; steht es zwei Tage, liegen drei Tage
+    # in EINER Datei - und niemand sieht es, weil die Uhrzeit einfach
+    # zurueckspringt. Genau daran bin ich am 2026-08-24 gescheitert: Ich
+    # habe drei Tage zu einem Verlauf verlesen und Stephan einen Vorfall
+    # geschildert, den es nie gab. Aufgefallen ist es nur, weil er sagte,
+    # er habe an dem Tag gar nicht mit dem Geraet gesprochen.
+    zeile = f"{time.strftime('%m-%d %H:%M:%S')}  {text}"
     if DEBUG:
         print("\n" + zeile, flush=True)
     os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)

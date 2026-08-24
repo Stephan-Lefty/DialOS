@@ -101,7 +101,7 @@ def melde(text):
     os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
-            f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")
+            f.write(f"{time.strftime('%m-%d %H:%M:%S')}  {text}\n")
     except OSError:
         pass
 

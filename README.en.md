@@ -121,6 +121,18 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Logs now carry a date** (2026-08-24) - and the trigger was a false
+  conclusion of mine. Twelve scripts wrote the time only; logrotate rotates
+  daily but only while the device runs, so three days sat in one file. I
+  reconstructed a sequence "from today" out of it and described an incident to
+  Stephan that never happened that day. It surfaced only because he said he had
+  not spoken to the voice control at all.
+- **First false start of the voice control** (2026-08-24, cause unknown). At
+  14:41:12 Vosk recognised "sprachsteuerung starten" without anyone addressing
+  the device; its own announcement is ruled out, the audio log is empty for that
+  window. The documented "zero false starts" is therefore superseded. Its own
+  item in TODO.md - first establish what the microphone heard, then build.
+
 - **The voice choice was silently reset on install** (found and fixed
   2026-08-24). `piper-generic.conf` holds both configuration and the voice the
   user chose; `dialos-aufspielen` overwrote it with the repo's version.

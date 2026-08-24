@@ -129,6 +129,19 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Protokolle tragen jetzt ein Datum** (2026-08-24) - und der Anlass war ein
+  Fehlschluss von mir. Zwoelf Skripte schrieben nur die Uhrzeit; logrotate
+  dreht taeglich, aber nur bei laufendem Geraet, also lagen drei Tage in einer
+  Datei. Ich habe daraus einen Verlauf "von heute" rekonstruiert und Stephan
+  einen Vorfall geschildert, den es an dem Tag nie gab. Aufgefallen ist es nur,
+  weil er sagte, er habe gar nicht mit der Sprachsteuerung gesprochen.
+- **Erster Fehlstart der Sprachsteuerung** (2026-08-24, Ursache offen). Um
+  14:41:12 erkannte Vosk "sprachsteuerung starten", ohne dass jemand mit dem
+  Geraet sprach; die eigene Ansage ist ausgeschlossen, das Ton-Protokoll ist in
+  dem Fenster leer. Die dokumentierten "null Fehlstarts" sind damit ueberholt.
+  Eigener Punkt in TODO.md - erst klaeren, was das Mikrofon gehoert hat, dann
+  bauen.
+
 - **Die Stimmwahl wurde beim Aufspielen stillschweigend zurueckgesetzt**
   (2026-08-24 gefunden und behoben). `piper-generic.conf` enthaelt sowohl
   Konfiguration als auch die vom Nutzer gewaehlte Stimme; `dialos-aufspielen`
@@ -472,6 +485,12 @@ abgeschlossen.*
       bestimmte Wörter hintereinander fallen im Gespräch praktisch nicht" hat
       im Feld gehalten. Das sind rund **26 Beinahe-Treffer je Stunde** -
       Umgebungsgeräusch, das die alte Regel eingeschaltet hätte.
+
+      **Nachtrag vom 2026-08-24:** Der erste Fehlstart ist da. Um 14:41:12
+      erkannte Vosk „sprachsteuerung starten", ohne dass jemand mit dem Gerät
+      gesprochen hatte. Die Messung oben bleibt richtig für ihr Fenster von
+      2 h 19 min - sie war nur zu kurz, um diesen Fall zu enthalten. Siehe
+      `TODO.md`.
     - **Auch die kurze Frist greift.** Am Vortag liefen **alle** sieben
       Einschaltungen in die 120 s. Jetzt endeten **6 von 8** nach 30 Sekunden
       und nur 2 nach 120 - das sind 9 Minuten weniger scharfe

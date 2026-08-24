@@ -1949,6 +1949,30 @@ review nobody can point to is not one.
 Measured on 2026-08-22: the voice switches in 4.4 seconds, announcing itself
 in the new voice, in both directions. The look switches without delay.
 
+
+### Logs carry a date, not just a time
+
+**Since 2026-08-24, and the trigger was a false conclusion of mine.** Every
+`melde()` wrote `%H:%M:%S` — the time only. logrotate rotates daily, but only
+while the device is running. Leave it off for two days and three days end up in
+**one** file, and nobody notices: the clock simply jumps backwards.
+
+That is exactly what caught me. From `~/.log/dialos-sprachbefehl.log` I
+reconstructed a sequence "from today", described an incident to Stephan —
+thirteen failed attempts to switch on, a triggered print job — and drew
+conclusions about usability from it. All of it was from **22 August**. It only
+surfaced because Stephan replied that he had not spoken to the voice control
+that day at all. Two backward jumps in the file (15:39 → 15:09 and
+15:21 → 10:23) prove the three days.
+
+Twelve scripts now write `%m-%d %H:%M:%S`. The format stays short enough for
+the live transcript and makes a change of day visible.
+
+**The lesson is not the format.** A log without a date is not a cosmetic flaw
+but a trap for exactly the person reading it during support — under time
+pressure. It cost me a whole line of analysis, and without Stephan's objection
+a wrong conclusion would have ended up in the documentation.
+
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 
 **Design since 2026-08-14** (replaces the original whole-disk
