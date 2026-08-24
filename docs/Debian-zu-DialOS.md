@@ -2037,6 +2037,60 @@ der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 
 
 
+
+### Ein vollständiger Befehl mit einem Wort zu viel gilt jetzt
+
+**Die Zuordnung war ein exakter Vergleich** (`if satz in DRUCK_SAETZE`). Ein
+einziges Wort zu viel, und der vollständige Befehl fiel durch. Gemessen an 283
+aufgezeichneten Äußerungen — die Stephan am 2026-08-24 **alle als
+Befehlsversuche bestätigt** hat („das waren alles Befehsversuche") — enthielten
+21 den kompletten Befehl und lösten trotzdem nichts aus:
+
+    'auf windows umschalten windows'   →  auf windows umschalten
+    'notiz notiz drucken'              →  notiz drucken
+    'wir notiz aufnehmen'              →  notiz aufnehmen
+
+**Warum die Grenze von zwei Zusatzwörtern nicht verhandelbar ist.** Ohne Grenze
+hätte dieselbe Regel viermal Wortsalat ausgeführt, und zwar den heikelsten
+Befehl:
+
+    'es wir auf machen welchen tag haben tag haben wir einkauf erledigt
+     bildschirmfoto es drucken notiz uhr notiz datum gnome es uhr wir …'
+         →  einkauf erledigt      (der Einkaufszettel wäre weg)
+
+| erlaubte Zusatzwörter | gerettet | davon Wortsalat |
+|---:|---:|---:|
+| 0 | 0 | 0 |
+| 1 | 8 | 0 |
+| **2** | **10** | **0** |
+| 3 | 13 | 0 |
+| 5 | 16 | 0 |
+| ohne Grenze | 21 | **4** ← kippt |
+
+Zwei ist bewusst kein Optimum, sondern der konservative Rand. Bei 5 wäre in
+*dieser* Aufzeichnung ebenfalls kein Salat dabei gewesen — aber eine
+Aufzeichnung ist keine Garantie. Wer die Zahl erhöhen will, messe erst neu: Der
+teure Fehler ist hier nicht der nicht erkannte Befehl, sondern der falsch
+erkannte.
+
+**Drei Bedingungen, alle nötig:**
+
+- **Zusammenhängend**, nicht bloß „alle Wörter kommen vor". Sonst würde
+  `wie viel wir viel wegwerfen` als „Einkaufszettel wegwerfen" gelten.
+- **Genau ein** Treffer. Bei zweien ist unklar, was gemeint war, und Raten wäre
+  schlimmer als Nichtstun. Genau einmal kam das vor.
+- **Kein `[unk]`** — dasselbe Argument wie bei `ist_phrase()`.
+
+**Nicht angewandt auf das Ein- und Ausschalten.** Diese beiden Sätze behalten
+ihre engere Prüfung (`ist_phrase`), die mehrfach nachjustiert wurde und die
+Fehlstarts von 30 auf 7 gedrückt hat. Deshalb greift die neue Regel in 8 statt
+10 Fällen: Die zwei „Sprachsteuerung stoppen" bleiben bewusst außen vor.
+
+Gegengeprüft gegen alle 283 Aufzeichnungen: 8 werden zugeordnet, Wortsalat,
+Mehrdeutigkeit und `[unk]` kommen nicht durch. Jede Zuordnung steht mit im
+Protokoll — `als 'notiz drucken' zugeordnet (+1 Wort zu viel)` —, damit später
+nachvollziehbar ist, was die Lockerung tatsächlich tut.
+
 ### Die Aussprache-Regeln gelten jetzt pro Stimme
 
 **Stephans Entscheidung vom 2026-08-24:** „Michael lassen wir wie bisher und

@@ -121,6 +121,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **A complete command with one word too many now counts** (2026-08-24).
+  Matching was an exact comparison; one extra word made the whole command fall
+  through. The basis is Stephan's verdict on the sample: all 283 recorded
+  command-less utterances were attempted commands. 21 of them contained the
+  complete command. The obvious loosening ("containing the command is enough")
+  was measured and REJECTED: it would have executed "einkauf erledigt" from word
+  salad four times. With a limit of two extra words: 8 cases rescued, no salad,
+  switching on and off deliberately excluded.
+
 - **Pronunciation of "DialOS" decided per voice** (2026-08-24, Stephan by ear):
   Anna says "Dial O S", Michael stays with "Dial OS". The pronunciation rules
   gained a fourth field for this - the voices they apply to. Measured and

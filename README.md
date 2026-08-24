@@ -129,6 +129,16 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Ein vollstaendiger Befehl mit einem Wort zu viel gilt jetzt** (2026-08-24).
+  Die Zuordnung war ein exakter Vergleich; ein Wort zu viel liess den ganzen
+  Befehl durchfallen. Grundlage ist Stephans Urteil ueber die Stichprobe: Die
+  283 aufgezeichneten befehlslosen Aeusserungen waren ALLE Befehlsversuche.
+  21 davon enthielten den kompletten Befehl. Die naheliegende Lockerung
+  ("Befehl enthalten genuegt") ist gemessen und VERWORFEN: Sie haette viermal
+  aus Wortsalat "einkauf erledigt" ausgefuehrt. Mit einer Grenze von zwei
+  Zusatzwoertern: 8 Faelle gerettet, null Salat, Ein- und Ausschalten bewusst
+  ausgenommen.
+
 - **Aussprache von "DialOS" pro Stimme entschieden** (2026-08-24, Stephan nach
   Gehoer): Anna sagt "Dial O S", Michael bleibt bei "Dial OS". Die
   Aussprache-Regeln haben dafuer ein viertes Feld bekommen - die Stimmen, fuer

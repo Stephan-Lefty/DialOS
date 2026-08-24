@@ -1954,6 +1954,59 @@ in the new voice, in both directions. The look switches without delay.
 
 
 
+
+### A complete command with one word too many now counts
+
+**Matching was an exact comparison** (`if satz in DRUCK_SAETZE`). One word too
+many and the complete command fell through. Measured against 283 recorded
+utterances - which Stephan **confirmed on 2026-08-24 were all attempted
+commands** ("das waren alles Befehsversuche") - 21 contained the complete
+command and still did nothing:
+
+    'auf windows umschalten windows'   →  auf windows umschalten
+    'notiz notiz drucken'              →  notiz drucken
+    'wir notiz aufnehmen'              →  notiz aufnehmen
+
+**Why the limit of two extra words is not negotiable.** Without a limit the same
+rule would have executed word salad four times, and the most sensitive command
+at that:
+
+    'es wir auf machen welchen tag haben tag haben wir einkauf erledigt
+     bildschirmfoto es drucken notiz uhr notiz datum gnome es uhr wir …'
+         →  einkauf erledigt      (the shopping list would be gone)
+
+| extra words allowed | rescued | of those, word salad |
+|---:|---:|---:|
+| 0 | 0 | 0 |
+| 1 | 8 | 0 |
+| **2** | **10** | **0** |
+| 3 | 13 | 0 |
+| 5 | 16 | 0 |
+| no limit | 21 | **4** ← tips over |
+
+Two is deliberately not an optimum but the conservative edge. At 5 there would
+have been no salad in *this* recording either - but a recording is no guarantee.
+Anyone raising the number should measure afresh: the expensive fault here is not
+the unrecognised command but the wrongly recognised one.
+
+**Three conditions, all required:**
+
+- **Contiguous**, not merely "all words occur". Otherwise
+  `wie viel wir viel wegwerfen` would count as "throw the shopping list away".
+- **Exactly one** match. With two it is unclear what was meant, and guessing
+  would be worse than doing nothing. That happened exactly once.
+- **No `[unk]`** - the same argument as in `ist_phrase()`.
+
+**Not applied to switching on and off.** Those two sentences keep their
+narrower check (`ist_phrase`), which has been adjusted repeatedly and brought
+false starts down from 30 to 7. That is why the new rule fires in 8 cases rather
+than 10: the two "Sprachsteuerung stoppen" are deliberately left out.
+
+Verified against all 283 recordings: 8 are matched; word salad, ambiguity and
+`[unk]` do not get through. Every match is logged - `als 'notiz drucken'
+zugeordnet (+1 Wort zu viel)` - so that what the loosening actually does stays
+traceable.
+
 ### Pronunciation rules are now per voice
 
 **Stephan's decision of 2026-08-24:** "Michael lassen wir wie bisher und bei

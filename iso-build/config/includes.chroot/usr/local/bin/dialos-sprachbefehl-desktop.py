@@ -210,6 +210,9 @@ GRAMMATIK_AN = json.dumps([
     "[unk]",
 ])
 
+BEFEHLSSAETZE = tuple(x for x in json.loads(GRAMMATIK_AN)
+                      if x not in ("[unk]", STARTSATZ, STOPPSATZ))
+
 # Welcher Satz welche Notiz fuellt. "diktat starten" und "notiz aufnehmen"
 # schreiben in dieselbe Sammelnotiz; der Einkaufszettel bekommt eine eigene,
 # weil er der Fall ist, den Stephan als Beispiel genannt hat - und weil eine
@@ -463,6 +466,75 @@ MARKIERUNG = markierungsdatei()
 # nicht als Altlast zurueckbleiben und den Dienst dauerhaft stumm schalten.
 DIKTAT_MARKE = markierungsdatei().replace("dialos-sprachausgabe-aktiv",
                                           "dialos-diktat-aktiv")
+
+
+ZUSATZWORTE_MAX = 2
+
+
+def enthaltener_befehl(worte):
+    """Steckt genau EIN Befehl als zusammenhaengende Wortfolge in der Aeusserung?
+
+    ANLASS (2026-08-24). Die Zuordnung war ein exakter Vergleich
+    ("if satz in DRUCK_SAETZE"). Ein einziges Wort zu viel, und der
+    vollstaendige Befehl fiel durch. Gemessen an 283 aufgezeichneten
+    Aeusserungen, die Stephan alle als Befehlsversuche bestaetigt hat
+    ("das waren alles Befehsversuche"), enthielten 21 den kompletten Befehl
+    und loesten trotzdem nichts aus:
+
+        'auf windows umschalten windows'  ->  auf windows umschalten
+        'notiz notiz drucken'             ->  notiz drucken
+        'wir notiz aufnehmen'             ->  notiz aufnehmen
+
+    WARUM DIE GRENZE VON ZWEI ZUSATZWOERTERN, und warum sie nicht verhandelbar
+    ist: Ohne Grenze haette dieselbe Regel viermal Wortsalat ausgefuehrt, und
+    zwar den heikelsten Befehl. Dieser Fall stand im Protokoll:
+
+        'es wir auf machen welchen tag haben tag haben wir einkauf erledigt
+         bildschirmfoto es drucken notiz uhr notiz datum gnome es uhr wir ...'
+             ->  einkauf erledigt      (der Einkaufszettel waere weg)
+
+    Gemessen ueber dieselben 283 Aeusserungen:
+
+        erlaubte Zusatzwoerter    gerettet    davon Wortsalat
+                 0                    0             0
+                 1                    8             0
+                 2                   10             0
+                 3                   13             0
+                 5                   16             0
+              ohne Grenze            21             4     <- kippt
+
+    Zwei ist bewusst kein Optimum, sondern der konservative Rand: Bei 5 waere
+    in DIESER Aufzeichnung ebenfalls kein Salat dabei gewesen, aber die
+    Aufzeichnung ist keine Garantie. Wer die Zahl erhoehen will, messe erst
+    neu - der teure Fehler ist hier nicht der nicht erkannte Befehl, sondern
+    der falsch erkannte.
+
+    DREI BEDINGUNGEN, alle noetig:
+      - zusammenhaengend, nicht bloss "alle Woerter kommen vor". Sonst wuerde
+        'wie viel wir viel wegwerfen' als 'einkaufszettel wegwerfen' gelten.
+      - GENAU EIN Treffer. Bei zweien ist unklar, was gemeint war, und Raten
+        waere hier schlimmer als Nichtstun. Genau einmal kam das vor.
+      - kein "[unk]" - dasselbe Argument wie bei ist_phrase(): "[unk]" heisst,
+        dass noch etwas anderes gesprochen wurde.
+
+    Nicht angewandt auf das Ein- und Ausschalten. Diese beiden Saetze haben
+    ihre eigene, enger gefasste Pruefung (ist_phrase), die mehrfach nachjustiert
+    wurde und die Fehlstarts von 30 auf 7 gedrueckt hat. Eine Lockerung dort
+    waere genau der Rueckschritt, der schon einmal ein selbsttaetiges
+    Einschalten erzeugt hat.
+    """
+    if "[unk]" in worte:
+        return None
+    treffer = []
+    for satz in BEFEHLSSAETZE:
+        sw = satz.split()
+        if len(worte) - len(sw) > ZUSATZWORTE_MAX:
+            continue
+        for i in range(len(worte) - len(sw) + 1):
+            if worte[i:i + len(sw)] == sw:
+                treffer.append(satz)
+                break
+    return treffer[0] if len(treffer) == 1 else None
 
 
 def ist_phrase(gehoert, phrase, kernwort):
@@ -1304,6 +1376,18 @@ def main():
                 # Fenster steht, solange Michael spricht.
                 mitschrift_schliessen()
                 continue
+
+            # --- Vollstaendiger Befehl mit einem Wort zu viel ---
+            # Erst hier, nach dem Ein- und Ausschalten: Deren Pruefung ist
+            # enger gefasst und bleibt unberuehrt (Begruendung in
+            # enthaltener_befehl()).
+            if satz not in BEFEHLSSAETZE:
+                genauer = enthaltener_befehl(worte)
+                if genauer:
+                    melde(f"  als {genauer!r} zugeordnet "
+                          f"(+{len(worte) - len(genauer.split())} Wort zu viel)")
+                    satz = genauer
+                    worte = genauer.split()
 
             # --- Befehle: Diktat ---
             # VOR der Umschaltung geprueft, weil diese Saetze das Wort
