@@ -1831,6 +1831,54 @@ Ein Archiv, das meistens nicht steckt, kann trotzdem nicht beschrieben werden
 Auf der Platte liegt alles immer, auf dem Stick alles, was seit dem letzten
 Einstecken dazugekommen ist.
 
+
+**Beim Admin gibt es keinen Stick — und das ist kein Mangel.** Stephans
+Entscheidung vom 2026-08-24: „Beim Admin brauchen wir den Stick nicht, stell
+die Meldung ab. Und wir simulieren beim Admin den Stick mit einem Verzeichnis
+unter Dokumente/Archiv/DialOS-DATA. Den haben wir ja dafür angelegt!" Für
+`dialosadmin` ist der Ordner auf der Platte also nicht die Vorstufe zum Stick,
+sondern das Archiv selbst. `dialos-archiv.py` sucht dort keinen Stick und
+bemängelt keinen (Liste `OHNE_STICK` im Kopf des Skripts).
+
+**Warum das nötig war.** exFAT wird mit `uid`/`gid` dessen eingehängt, der es
+einhängt. Auf einem Gerät mit zwei Konten heißt das: Wer den Stick zuerst
+einsteckt, besitzt ihn, und das andere Konto kommt nicht einmal lesend hinein.
+Gemessen am 2026-08-24: `uid=1001,gid=1001,dmask=0022`, für `dialosadmin`
+„Keine Berechtigung". Das ist keine Fehlkonfiguration, sondern wie GNOME
+Wechseldatenträger einhängt. Vorher schrieb das Archiv deshalb **alle
+16 Minuten** „Stick unter /media/nutzer/DIALOS-DATA, aber nicht beschreibbar" —
+eine Meldung, die niemand liest und die nichts ändert.
+
+**Für den Nutzer bleibt die Meldung.** Dort ist ein nicht beschreibbarer Stick
+ein echter Fehler: Seine Sicherungskopie entsteht dann nicht.
+
+### Die Stimmwahl ist laufender Zustand, keine Konfiguration
+
+**Ein Fehler vom 2026-08-24, der zeigt, wie leicht das zu übersehen ist.** In
+`/etc/speech-dispatcher/modules/piper-generic.conf` stehen zwei verschiedene
+Dinge: wie das Piper-Modul aufgerufen wird — das ist Konfiguration und gehört
+ins Repo — und `DefaultVoice` plus `GenericRateMultiply`, also die Stimme, die
+der Nutzer gewählt hat. `dialos-stimme.py` schreibt genau dort hinein.
+
+Stephan hatte am 2026-08-22 um 15:21 per Tastendruck auf Michael umgestellt.
+Beim nächsten `dialos-aufspielen` setzte diese Datei die Wahl stillschweigend
+auf die Repo-Fassung zurück — während `assistent-name.txt` weiter „Michael"
+sagte. Das Gerät hätte sich mit **Annas Stimme als Michael** vorgestellt. Genau
+der Fehler, den es am 2026-08-19 schon einmal gab.
+
+Die Datei steht deshalb jetzt in der Ausschlussliste `NIEMALS` von
+`dialos-aufspielen`, wie die Bluetooth-Kopplungsdaten aus demselben Grund.
+Wer sie wirklich ändern will (neuer Piper-Aufruf, andere Modulparameter),
+spielt sie bewusst von Hand auf.
+
+**Und das Skript sagt jetzt an, was es übergangen hat.** Bis dahin
+verschwanden ausgeschlossene Dateien lautlos — derselbe Fehler wie ein
+Sprachbefehl ohne Rückmeldung: Wer nichts hört, hält es für erledigt. Die
+Meldung ist nach **Grund** gruppiert und nennt höchstens drei Pfade je Grund;
+der erste Entwurf listete 29 Dateien, davon 20 Python-Bytecode, und begrub die
+eine, auf die es ankam. Deshalb hat jeder Eintrag in `NIEMALS` jetzt eine
+dritte Spalte: *ist diese Auslassung meldenswert?*
+
 **Warum ein eigener PDF-Erzeuger und nicht LibreOffice.** Der Briefbogen ist
 mit **Leerzeichen** gesetzt: Absender und Datum stehen rechtsbündig, weil die
 Zeile auf Breite 76 aufgefüllt ist. In einer Proportionalschrift zerfällt das

@@ -1755,6 +1755,53 @@ An archive that is usually not plugged in still cannot be written to — so
 always holds everything, the stick everything added since it was last
 plugged in.
 
+
+**The admin has no stick — and that is not a shortcoming.** Stephan's decision
+of 2026-08-24: "Beim Admin brauchen wir den Stick nicht, stell die Meldung ab.
+Und wir simulieren beim Admin den Stick mit einem Verzeichnis unter
+Dokumente/Archiv/DialOS-DATA. Den haben wir ja dafür angelegt!" So for
+`dialosadmin` the folder on disk is not a staging area for the stick but the
+archive itself. `dialos-archiv.py` neither looks for a stick there nor
+complains about one (list `OHNE_STICK` at the top of the script).
+
+**Why this was needed.** exFAT is mounted with the `uid`/`gid` of whoever
+mounts it. On a device with two accounts that means: whoever plugs the stick in
+first owns it, and the other account cannot even read it. Measured on
+2026-08-24: `uid=1001,gid=1001,dmask=0022`, for `dialosadmin` "permission
+denied". That is not a misconfiguration but how GNOME mounts removable media.
+Before this, the archive therefore wrote "Stick unter
+/media/nutzer/DIALOS-DATA, aber nicht beschreibbar" **every 16 minutes** — a
+message nobody reads and that changes nothing.
+
+**For the user the message stays.** There, a stick that cannot be written to is
+a real fault: their backup copy does not come into existence.
+
+### The voice choice is running state, not configuration
+
+**A mistake from 2026-08-24 that shows how easily this is missed.**
+`/etc/speech-dispatcher/modules/piper-generic.conf` holds two different things:
+how the Piper module is invoked — that is configuration and belongs in the repo
+— and `DefaultVoice` plus `GenericRateMultiply`, that is, the voice the user
+chose. `dialos-stimme.py` writes into exactly that file.
+
+On 2026-08-22 at 15:21 Stephan had switched to Michael with the keyboard
+shortcut. The next `dialos-aufspielen` silently reset that choice to the repo's
+version — while `assistent-name.txt` still said "Michael". The device would
+have introduced itself **as Michael in Anna's voice**. Precisely the fault that
+already happened on 2026-08-19.
+
+The file is therefore now in `dialos-aufspielen`'s `NIEMALS` exclusion list,
+alongside the Bluetooth pairing data for the same reason. Anyone who really
+wants to change it (a new Piper invocation, different module parameters)
+installs it deliberately by hand.
+
+**And the script now says what it passed over.** Until then, excluded files
+vanished silently — the same fault as a voice command without feedback: hear
+nothing, assume it worked. The message is grouped by **reason** and names at
+most three paths per reason; the first draft listed 29 files, 20 of them Python
+bytecode, and buried the one that mattered. That is why every `NIEMALS` entry
+now has a third column: *is this omission worth reporting?*
+
 **Why an own PDF writer and not LibreOffice.** The letterhead is laid out with
 **spaces**: sender and date are right-aligned because the line is padded to
 width 76. In a proportional font that falls apart immediately, and LibreOffice

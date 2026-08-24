@@ -121,6 +121,20 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **The voice choice was silently reset on install** (found and fixed
+  2026-08-24). `piper-generic.conf` holds both configuration and the voice the
+  user chose; `dialos-aufspielen` overwrote it with the repo's version.
+  Stephan's choice of Michael from 22 August was gone while the name file still
+  said "Michael" - the device would have introduced itself as Michael in Anna's
+  voice. The file is now in the exclusion list, and the script REPORTS what it
+  passed over: grouped by reason, because the first draft printed 29 lines and
+  buried the one that mattered under 20 lines of Python bytecode.
+- **No stick for the admin account** (2026-08-24, Stephan's decision). There the
+  folder `~/Dokumente/Archiv/DialOS-DATA/` is the archive itself. Before this
+  the archive reported an unwritable stick every 16 minutes - exFAT belongs to
+  the account that mounts it, and that was `nutzer`. For the user the message
+  stays: without the stick no backup copy comes into existence.
+
 - **Licence: GPL-3.0, plus an inventory of every third-party component**
   (2026-08-23, Stephan's decision). DialOS was public but had no licence
   file - and that does not mean "free", it means the opposite: full

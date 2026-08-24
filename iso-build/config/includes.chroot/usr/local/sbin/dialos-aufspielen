@@ -76,28 +76,53 @@ DIENSTE = {
 NIEMALS = [
     # Bytecode, den Python beim Importieren im Repo anlegt - reines
     # Nebenprodukt, steht auch in .gitignore.
-    ("__pycache__", "Python-Bytecode, kein Bestandteil des Systems"),
-    (".pyc", "Python-Bytecode"),
+    # Die dritte Spalte sagt, ob die Auslassung MELDENSWERT ist. Bytecode ist
+    # es nicht: Er entsteht beim Importieren von selbst und interessiert
+    # niemanden. Am 2026-08-24 standen deswegen 20 .pyc-Zeilen in der Meldung
+    # und begruben die eine, auf die es ankam. Eine Warnung, die man
+    # ueberblaettern muss, ist keine.
+    ("__pycache__", "Python-Bytecode, kein Bestandteil des Systems", False),
+    (".pyc", "Python-Bytecode", False),
     # ZURUECKGESTELLT (Stephan, 2026-08-20): Der Fernwartungs-Dienst ist
     # gebaut und geprueft, aber bewusst nicht installiert, solange der Umbau
     # auf den systemd-Dienst offen ist. Ein Aufspiel-Skript, das ihn
     # klammheimlich mitnimmt, waere genau der stille Fehler, den dieses
     # Projekt sonst ueberall vermeidet.
-    ("etc/sudoers.d/dialos-fernwartung", "zurueckgestellt, siehe TODO.md"),
-    ("usr/local/sbin/dialos-fernwartung", "zurueckgestellt, siehe TODO.md"),
+    ("etc/sudoers.d/dialos-fernwartung", "zurueckgestellt, siehe TODO.md", True),
+    ("usr/local/sbin/dialos-fernwartung", "zurueckgestellt, siehe TODO.md", True),
     # KOPPLUNGSDATEN SIND LAUFENDER ZUSTAND, keine Konfiguration. Im Abbild
     # liegen sie, damit ein frisches Geraet den Lautsprecher schon kennt; auf
     # einem LAUFENDEN Geraet wuerde ein Ueberschreiben die bestehende Kopplung
     # zerstoeren, und BlueZ haelt die Dateien ohnehin offen.
-    ("var/lib/bluetooth", "laufende Kopplung, kein Konfigurationsstand"),
+    ("var/lib/bluetooth", "laufende Kopplung, kein Konfigurationsstand", True),
+    # DIE STIMMWAHL IST LAUFENDER ZUSTAND (Lehre vom 2026-08-24, teuer
+    # bezahlt). In derselben Datei stehen zwei Dinge: wie das Piper-Modul
+    # aufgerufen wird - das ist Konfiguration und gehoert ins Repo - und
+    # DefaultVoice/GenericRateMultiply, also die Stimme, die der Nutzer
+    # gewaehlt hat. dialos-stimme.py schreibt genau dort hinein.
+    #
+    # Was passiert ist: Stephan hatte am 2026-08-22 um 15:21 per Tastendruck
+    # auf Michael umgestellt. Beim naechsten Aufspielen setzte diese Datei die
+    # Wahl stillschweigend auf die Repo-Fassung zurueck - waehrend
+    # assistent-name.txt weiter "Michael" sagte. Das Geraet haette sich mit
+    # Annas Stimme als Michael vorgestellt. Genau der Fehler, den wir am
+    # 2026-08-19 schon einmal hatten.
+    #
+    # Wer die Datei WIRKLICH aendern will (neuer Piper-Aufruf, andere
+    # Modulparameter), spielt sie bewusst von Hand auf. Das Skript sagt an,
+    # dass es sie uebergangen hat - stumm uebergehen waere der naechste stille
+    # Fehler.
+    ("etc/speech-dispatcher/modules/piper-generic.conf",
+     "enthaelt die vom Nutzer gewaehlte Stimme - laufender Zustand", True),
 ]
 
 
 def uebersprungen(rel):
-    for muster, grund in NIEMALS:
+    """(Grund, meldenswert) - oder (None, False), wenn die Datei aufzuspielen ist."""
+    for muster, grund, melden in NIEMALS:
         if muster in rel:
-            return grund
-    return None
+            return grund, melden
+    return None, False
 
 
 def rechte_fuer(rel):
@@ -108,12 +133,30 @@ def rechte_fuer(rel):
 
 
 def unterschiede():
-    gefunden = []
+    """Was abweicht - und getrennt davon, was uebergangen wurde, obwohl es
+    abweicht.
+
+    Die zweite Liste gab es bis zum 2026-08-24 nicht: Uebergangene Dateien
+    verschwanden lautlos. Das ist derselbe Fehler wie ein Sprachbefehl ohne
+    Rueckmeldung - wer nichts hoert, haelt es fuer erledigt.
+    """
+    gefunden, uebergangen = [], []
     for wurzel, _ordner, dateien in os.walk(QUELLE):
         for name in dateien:
             voll = os.path.join(wurzel, name)
             rel = os.path.relpath(voll, QUELLE)
-            if uebersprungen(rel):
+            grund_aus, melden = uebersprungen(rel)
+            if grund_aus:
+                if not melden:
+                    continue
+                ziel = "/" + rel
+                try:
+                    anders = (not os.path.exists(ziel)
+                              or open(voll, "rb").read() != open(ziel, "rb").read())
+                except OSError:
+                    anders = True
+                if anders:
+                    uebergangen.append((rel, grund_aus))
                 continue
             ziel = "/" + rel
             if not os.path.exists(ziel):
@@ -126,7 +169,7 @@ def unterschiede():
                     continue
                 if not gleich:
                     gefunden.append((rel, voll, ziel, "abweichend"))
-    return sorted(gefunden)
+    return sorted(gefunden), sorted(uebergangen)
 
 
 # WARUM DAS SKRIPT KEINE SITZUNGSDIENSTE STARTET (Lehre vom 2026-08-22):
@@ -201,14 +244,39 @@ def main():
         print(f"Quelle fehlt: {QUELLE}", file=sys.stderr)
         return 1
 
-    liste = unterschiede()
+    liste, uebergangen = unterschiede()
+
+    def uebergangene_zeigen():
+        """Nach GRUND gruppiert, nicht Datei fuer Datei.
+
+        Acht Bluetooth-Dateien mit derselben Begruendung sind eine Aussage,
+        nicht acht. Wer alle Pfade sehen will, liest NIEMALS im Kopf dieser
+        Datei.
+        """
+        if not uebergangen:
+            return
+        nach_grund = {}
+        for rel, grund in uebergangen:
+            nach_grund.setdefault(grund, []).append(rel)
+        print(f"\nBEWUSST uebergangen, obwohl abweichend "
+              f"({len(uebergangen)} Datei(en)):")
+        for grund, dateien in sorted(nach_grund.items()):
+            print(f"  {grund}")
+            for rel in dateien[:3]:
+                print(f"      /{rel}")
+            if len(dateien) > 3:
+                print(f"      ... und {len(dateien) - 3} weitere")
+        print("  Wer eine davon wirklich aufspielen will, kopiert sie von Hand.")
+
     if not liste:
         print("Nichts zu tun - das Geraet entspricht dem Repo.")
+        uebergangene_zeigen()
         return 0
 
     print(f"{len(liste)} Datei(en) weichen ab:")
     for rel, _q, _z, grund in liste:
         print(f"  {grund:12s} /{rel}")
+    uebergangene_zeigen()
     if not wirklich:
         print("\nNichts geaendert. Mit --wirklich aufspielen.")
         return 0

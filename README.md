@@ -129,6 +129,21 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Die Stimmwahl wurde beim Aufspielen stillschweigend zurueckgesetzt**
+  (2026-08-24 gefunden und behoben). `piper-generic.conf` enthaelt sowohl
+  Konfiguration als auch die vom Nutzer gewaehlte Stimme; `dialos-aufspielen`
+  ueberschrieb sie mit der Repo-Fassung. Stephans Wahl von Michael vom 22.08.
+  war damit weg, waehrend die Namensdatei weiter "Michael" sagte - das Geraet
+  haette sich mit Annas Stimme als Michael vorgestellt. Die Datei steht jetzt
+  in der Ausschlussliste, und das Skript MELDET, was es uebergangen hat: nach
+  Grund gruppiert, weil der erste Entwurf 29 Zeilen ausgab und die eine
+  wichtige unter 20 Zeilen Python-Bytecode begrub.
+- **Kein Stick fuer das Admin-Konto** (2026-08-24, Stephans Entscheidung). Der
+  Ordner `~/Dokumente/Archiv/DialOS-DATA/` ist dort das Archiv selbst. Vorher
+  meldete das Archiv alle 16 Minuten einen nicht beschreibbaren Stick - exFAT
+  gehoert dem Konto, das es einhaengt, und das war `nutzer`. Fuer den Nutzer
+  bleibt die Meldung: dort entsteht ohne Stick keine Sicherungskopie.
+
 - **Lizenz: GPL-3.0, dazu eine Bestandsaufnahme aller fremden Bestandteile**
   (2026-08-23, Stephans Entscheidung). DialOS war oeffentlich, aber ohne
   Lizenzdatei - und das heisst nicht "frei", sondern das Gegenteil: volles
