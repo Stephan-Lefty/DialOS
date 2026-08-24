@@ -15,6 +15,28 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **No self-check on whether the device still speaks at all** (open since
+  2026-08-24, surfaced by the muted `paplay`). On 2026-08-24 every `paplay`
+  stream was muted because PipeWire remembers that per application. The
+  consequence: all **cached** announcements silent, plus the question tone and
+  the probe tone. `paplay` returns 0 while doing so, `aus_speicher()` considers
+  the announcement successful and does not fall back to `spd-say`.
+
+  **For a blind user this is the worst case there is:** the device is mute, no
+  error is recorded anywhere, and he cannot go and look. The cause is fixed
+  (see the changelog), but the **class** of fault is not: nothing anywhere
+  notices "I spoke, but nothing was audible".
+
+  **To settle before anything gets built:** how can this be measured at all?
+  Candidates: check our own stream for `Mute` right after it appears (cheap,
+  catches exactly this case), or read the sink's level during the announcement
+  (catches more, but is more work and doubtful with headphones). No guessing -
+  first find out what PipeWire actually offers.
+
+  **And how would it be reported?** Not by an announcement - that would be
+  silent too. What remains: the log, the transcript window, and a visible hint
+  for the helper at the next login.
+
 - [ ] **First false start of the voice control - cause unknown** (2026-08-24).
   At 14:41:12 the voice control switched itself on: Vosk recognised
   "sprachsteuerung starten", the transcript window opened, and then came

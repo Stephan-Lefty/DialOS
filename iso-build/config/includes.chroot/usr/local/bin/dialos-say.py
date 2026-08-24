@@ -16,6 +16,7 @@ import json
 import os
 import re
 import shlex
+import signal
 import subprocess
 import sys
 import time
@@ -372,6 +373,40 @@ def ist_speech_dispatcher(stream):
     return name.startswith("speech-dispatcher")
 
 
+def ist_eigener_ton(stream):
+    """Toene, die DialOS selbst abspielt - die duerfen NIE stumm werden.
+
+    ENTDECKT AM 2026-08-24, nachdem Stephan bei einer Hoerprobe "ich hoere
+    nix" sagte. Der paplay-Strom kam STUMMGESCHALTET zur Welt:
+
+        Sink Input #602
+            Mute: yes
+            module-stream-restore.id = "sink-input-by-application-name:paplay"
+
+    PipeWire merkt sich Lautstaerke und Stummschaltung JE ANWENDUNG. Wird ein
+    paplay-Strom einmal stummgeschaltet und nicht wieder freigegeben, ist
+    jeder kuenftige paplay-Strom stumm - dauerhaft, ueber Neustarts hinweg.
+
+    Und DialOS spielt ueber paplay: den Frageton, den stillen Testton der
+    Ausgabewahl UND die zwischengespeicherten Ansagen. Damit waeren alle
+    gespeicherten Ansagen lautlos. Schlimmer noch: paplay gibt dabei 0
+    zurueck, aus_speicher() haelt die Ansage fuer geglueckt und faellt NICHT
+    auf spd-say zurueck. Das Geraet waere fuer einen blinden Nutzer stumm,
+    ohne dass irgendwo ein Fehler stuende.
+
+    Wie es dazu kommt: Laufen zwei Ansagen kurz hintereinander, sieht die
+    zweite den paplay-Strom der ersten und schaltet ihn stumm. Stirbt sie
+    dann, bevor sie ihn freigibt - SIGTERM laesst kein "finally" laufen -,
+    bleibt die Stummschaltung in PipeWires Merkdatei stehen.
+
+    Der Preis dieser Ausnahme: Spielte eine FREMDE Anwendung ueber paplay
+    Musik ab, wuerde sie waehrend einer Ansage nicht leiser. Das ist der
+    guenstigere Fehler.
+    """
+    name = stream.get("properties", {}).get("application.name", "")
+    return name == "paplay"
+
+
 def markierung_setzen():
     try:
         open(MARKIERUNGSDATEI, "w").close()
@@ -412,7 +447,22 @@ def sprich(cmd, grenze_s):
         return False
 
 
+def bei_signal(nummer, _rahmen):
+    """SIGTERM/SIGINT/SIGHUP in eine Ausnahme wandeln.
+
+    Ohne das laeuft der "finally"-Block unten NICHT: Pythons Vorgabe fuer
+    SIGTERM beendet den Prozess sofort, ohne Aufraeumen. Genau daran ist am
+    2026-08-24 die Stummschaltung haengengeblieben - siehe ist_eigener_ton().
+    Aufraeumen heisst hier: fremde Stroeme wieder freigeben und die
+    Sprech-Markierung entfernen. Bleibt die Markierung liegen, haelt sich der
+    Sprachbefehl-Dienst dauerhaft heraus und hoert nicht mehr zu.
+    """
+    raise SystemExit(128 + nummer)
+
+
 def main():
+    for nummer in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(nummer, bei_signal)
     argv = sys.argv[1:]
     # "--frage" markiert die Ausgabe als Frage an den Nutzer. Der Text
     # selbst bleibt unveraendert - sein Fragezeichen sorgt bei Piper fuer
@@ -448,7 +498,7 @@ def main():
     stummgeschaltet = []
     for stream in streams:
         index = stream.get("index")
-        if index is None or ist_speech_dispatcher(stream):
+        if index is None or ist_speech_dispatcher(stream) or ist_eigener_ton(stream):
             continue
         if not stream.get("mute", False):
             set_mute(index, True)

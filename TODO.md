@@ -16,6 +16,29 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Keine Selbstprüfung, ob das Gerät überhaupt noch spricht** (offen seit
+  2026-08-24, aufgefallen am stummen `paplay`). Am 2026-08-24 war jeder
+  `paplay`-Strom stummgeschaltet, weil PipeWire sich das je Anwendung merkt.
+  Folge: alle **zwischengespeicherten** Ansagen lautlos, dazu Frageton und
+  Testton. `paplay` gibt dabei 0 zurück, `aus_speicher()` hält die Ansage für
+  geglückt und fällt nicht auf `spd-say` zurück.
+
+  **Für einen blinden Nutzer ist das der schlimmste Fall überhaupt:** Das
+  Gerät ist stumm, es steht nirgends ein Fehler, und er kann nicht nachsehen.
+  Die Ursache ist behoben (siehe Änderungsprotokoll), aber die **Klasse** des
+  Fehlers nicht: Es gibt keine Stelle, die merkt „ich habe gesprochen, aber es
+  war nichts zu hören".
+
+  **Was zu klären ist, bevor etwas gebaut wird:** Woran lässt sich das
+  überhaupt messen? Kandidaten: den eigenen Strom nach dem Anlegen auf `Mute`
+  prüfen (billig, fängt genau diesen Fall), oder den Pegel der Senke während
+  der Ansage lesen (fängt mehr, ist aber aufwendiger und bei Kopfhörern
+  zweifelhaft). Nicht raten - erst prüfen, was PipeWire wirklich hergibt.
+
+  **Und wie sagt man es?** Eine Ansage kann es nicht sein - die wäre ja
+  ebenfalls stumm. Bleibt: Protokoll, Mitschrift-Fenster, und beim nächsten
+  Anmelden ein sichtbarer Hinweis für den Helfer.
+
 - [ ] **Erster Fehlstart der Sprachsteuerung - Ursache offen** (2026-08-24).
   Um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet: Vosk erkannte
   „sprachsteuerung starten", das Mitschrift-Fenster ging auf, danach kamen

@@ -1952,6 +1952,56 @@ in the new voice, in both directions. The look switches without delay.
 
 
 
+
+### A muted paplay makes the device silent - with no error
+
+**Found on 2026-08-24 because Stephan said "ich höre nix" during a listening
+test.** The `paplay` stream was **born muted**:
+
+    Sink Input #602
+        Mute: yes
+        module-stream-restore.id = "sink-input-by-application-name:paplay"
+
+PipeWire remembers volume and mute **per application**, persistently and across
+reboots. Mute a `paplay` stream once without releasing it and every future
+`paplay` is silent.
+
+**Why this is more than a failed listening test.** DialOS plays via `paplay`:
+the question tone, the silent probe tone for output selection, **and cached
+announcements** (`dialos-say.py`, `aus_speicher`). All cached announcements
+would be silent. And `paplay` returns **0** in that case — `aus_speicher()`
+considers the announcement successful and does **not** fall back to `spd-say`.
+The device would be mute for a blind user without any error anywhere. He would
+have no way to find the cause, and we none to see it in the log.
+
+**How it happens.** `dialos-say.py` mutes other streams while it speaks and
+releases them in a `finally`. Two gaps:
+
+1. With two announcements in quick succession, the second sees the first's
+   `paplay` stream and mutes it.
+2. A `finally` does **not** run on SIGTERM - Python's default terminates the
+   process at once. Kill an announcement and the mute stays in PipeWire's
+   store.
+
+**Fixed in both directions:**
+
+- `ist_eigener_ton()` excludes streams of the application `paplay` from
+  muting. The price: were a foreign application playing music through
+  `paplay`, it would not duck during an announcement - the cheaper fault.
+- Signal handlers for SIGTERM, SIGINT and SIGHUP turn the signal into an
+  exception so the cleanup runs. Evidenced: exit code **143** instead of -15,
+  and the speaking marker is not left behind. That matters in its own right -
+  a stale marker keeps the voice-command service from listening for good.
+
+**Repair, should it recur** (the store can only be changed through a live
+stream):
+
+    paplay SOMEFILE.ogg &
+    pactl set-sink-input-mute $(pactl list sink-inputs | awk '/Sink Input #/{i=$3} /application.name = "paplay"/{print substr(i,2); exit}') 0
+
+**What stays open:** there is no self-check. A device that has stopped speaking
+does not report it - see `TODO.md`.
+
 ### The level is now in the log for every recognition
 
 **Measured on 2026-08-24, after the voice control switched itself on.** Twenty

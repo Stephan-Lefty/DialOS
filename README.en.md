@@ -121,6 +121,17 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **A muted `paplay` made the device silent - with no error** (found and fixed
+  2026-08-24). It surfaced through a failed listening test: the paplay stream
+  was born muted because PipeWire remembers volume and mute PER APPLICATION.
+  DialOS plays the question tone, the probe tone AND cached announcements
+  through paplay - all of them were silent, at exit code 0, so aus_speicher()
+  never fell back to spd-say. Cause: dialos-say.py mutes other streams and
+  releases them in a finally - which does not run on SIGTERM, and with two
+  announcements in quick succession the second mutes the first's paplay. Fixed
+  by an exception for our own tones plus signal handlers (exit code 143
+  instead of -15 evidenced, and the speaking marker is no longer left behind).
+
 - **The level of every recognition is logged** (2026-08-24), together with a
   measuring tool (`scripts/dialos-fehlstart-messen.py`). Twenty minutes of
   listening ruled out one line of attack before it was built: Vosk returned

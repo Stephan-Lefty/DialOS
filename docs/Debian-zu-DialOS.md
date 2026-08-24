@@ -2035,6 +2035,58 @@ der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 
 
 
+
+### Ein stummer paplay macht das Gerät lautlos - ohne Fehlermeldung
+
+**Gefunden am 2026-08-24, weil Stephan bei einer Hörprobe „ich höre nix"
+sagte.** Der `paplay`-Strom kam **stummgeschaltet zur Welt**:
+
+    Sink Input #602
+        Mute: yes
+        module-stream-restore.id = "sink-input-by-application-name:paplay"
+
+PipeWire merkt sich Lautstärke und Stummschaltung **je Anwendung**, dauerhaft
+und über Neustarts hinweg. Wird ein `paplay`-Strom einmal stummgeschaltet und
+nicht wieder freigegeben, ist jeder künftige `paplay` stumm.
+
+**Warum das mehr ist als eine misslungene Hörprobe.** DialOS spielt über
+`paplay`: den Frageton, den stillen Testton der Ausgabewahl **und die
+zwischengespeicherten Ansagen** (`dialos-say.py`, `aus_speicher`). Damit wären
+alle gespeicherten Ansagen lautlos. Und `paplay` gibt in diesem Fall **0**
+zurück — `aus_speicher()` hält die Ansage für geglückt und fällt **nicht** auf
+`spd-say` zurück. Das Gerät wäre für einen blinden Nutzer stumm, ohne dass
+irgendwo ein Fehler stünde. Er hätte keine Möglichkeit, die Ursache zu finden,
+und wir keine, es aus dem Protokoll zu sehen.
+
+**Wie es dazu kommt.** `dialos-say.py` schaltet fremde Ströme stumm, solange es
+spricht, und gibt sie im `finally` wieder frei. Zwei Lücken:
+
+1. Laufen zwei Ansagen kurz hintereinander, sieht die zweite den
+   `paplay`-Strom der ersten und schaltet ihn stumm.
+2. Ein `finally` läuft bei **SIGTERM nicht** — Pythons Vorgabe beendet den
+   Prozess sofort. Wird eine Ansage abgeschossen, bleibt die Stummschaltung
+   in PipeWires Merkdatei stehen.
+
+**Behoben in beide Richtungen:**
+
+- `ist_eigener_ton()` nimmt Ströme der Anwendung `paplay` vom Stummschalten
+  aus. Der Preis: Spielte eine fremde Anwendung über `paplay` Musik, würde sie
+  während einer Ansage nicht leiser — der günstigere Fehler.
+- Signalbehandler für SIGTERM, SIGINT und SIGHUP wandeln das Signal in eine
+  Ausnahme, damit das Aufräumen läuft. Belegt: Rückgabewert **143** statt
+  −15, und die Sprech-Markierung bleibt nicht liegen. Das ist auch für sich
+  wichtig — eine liegengebliebene Markierung hält den Sprachbefehl-Dienst
+  dauerhaft vom Zuhören ab.
+
+**Reparatur, falls es doch wieder auftritt** (die Merkdatei lässt sich nur über
+einen laufenden Strom ändern):
+
+    paplay IRGENDEINE.ogg &
+    pactl set-sink-input-mute $(pactl list sink-inputs | awk '/Sink Input #/{i=$3} /application.name = "paplay"/{print substr(i,2); exit}') 0
+
+**Was offen bleibt:** Es gibt keine Selbstprüfung. Ein Gerät, das nicht mehr
+spricht, meldet das nicht — siehe `TODO.md`.
+
 ### Beim Fehlstart steht jetzt der Pegel im Protokoll
 
 **Gemessen am 2026-08-24, nachdem die Sprachsteuerung sich selbst

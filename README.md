@@ -129,6 +129,19 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Ein stummer `paplay` machte das Geraet lautlos - ohne Fehlermeldung**
+  (2026-08-24 gefunden und behoben). Aufgefallen an einer misslungenen
+  Hoerprobe: Der paplay-Strom kam stummgeschaltet zur Welt, weil PipeWire
+  Lautstaerke und Stummschaltung JE ANWENDUNG merkt. DialOS spielt ueber
+  paplay den Frageton, den Testton UND die zwischengespeicherten Ansagen -
+  die waren damit alle lautlos, bei Rueckgabewert 0, also ohne dass
+  aus_speicher() auf spd-say zurueckgefallen waere. Ursache: dialos-say.py
+  schaltet fremde Stroeme stumm und gibt sie im finally frei - das laeuft bei
+  SIGTERM aber nicht, und bei zwei kurz aufeinanderfolgenden Ansagen schaltet
+  die zweite den paplay der ersten stumm. Behoben durch eine Ausnahme fuer
+  eigene Toene und Signalbehandler (Rueckgabewert 143 statt -15 belegt, die
+  Sprech-Markierung bleibt nicht mehr liegen).
+
 - **Pegel bei jeder Erkennung im Protokoll** (2026-08-24), und ein Messwerkzeug
   dazu (`scripts/dialos-fehlstart-messen.py`). Zwanzig Minuten Mitschnitt haben
   einen Loesungsweg ausgeschlossen, bevor er gebaut wurde: Vosk lieferte
