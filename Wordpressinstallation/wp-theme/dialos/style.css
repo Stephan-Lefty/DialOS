@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.2.1
+Version: 1.3.0
 Text Domain: dialos
 */
 
@@ -192,17 +192,21 @@ body.page-id-2 main#main {
 }
 
 /* ------------------------------------------------------------------
-   Link- und Menue-Hover-Farbe: Gruenton aus der Fusszeile (#04b484)
-   statt des Theme-Standards (Pink/Rot #ff3b60, Dropdown-Aktiv-Cyan
-   #26c6da). (Stephan, 2026-08-23)
+   Link- und Menue-Hover-Farbe: dunkleres Gruen (#027a5c) statt des
+   Theme-Standards (Pink/Rot #ff3b60, Dropdown-Aktiv-Cyan #26c6da).
+   Urspruenglich das hellere Marken-Gruen (#04b484, Stephan,
+   2026-08-23), aber das lag auf Weiss nur bei ~2,7:1 Kontrast - WCAG
+   verlangt 4,5:1 fuer Fliesstext. #027a5c schafft ~5,5:1 und ist damit
+   jetzt direkt der Standard, nicht nur im Barrierefrei-Modus (Stephan,
+   2026-08-24, nach WCAG-Nachpruefung).
    ------------------------------------------------------------------ */
 a,
 .link-color {
-  color: #04b484;
+  color: #027a5c;
 }
 a:hover,
 a:focus {
-  color: #04b484;
+  color: #027a5c;
 }
 .navbar-nav > li > a:hover,
 .navbar-nav > li.active > a,
@@ -215,7 +219,7 @@ a:focus {
 .dropdown-menu > .active > a,
 .dropdown-menu > .active > a:hover,
 .dropdown-menu > .active > a:focus {
-  color: #04b484 !important;
+  color: #027a5c !important;
 }
 
 /* ------------------------------------------------------------------
@@ -328,15 +332,12 @@ body.dialos-a11y-mode .navbar-header .navbar-brand,
 body.dialos-a11y-mode .navbar-nav > li > a {
   color: #000000 !important;
 }
+/* Linkfarbe ist inzwischen schon im Normalzustand #027a5c (WCAG-
+   Nachpruefung, 2026-08-24) - hier nur noch die zusaetzliche
+   Unterstreichung, damit Links auch ohne Farbe erkennbar sind. */
 body.dialos-a11y-mode a,
 body.dialos-a11y-mode .link-color {
-  color: #027a5c !important;
   text-decoration: underline;
-}
-body.dialos-a11y-mode .navbar-nav > li > a:hover,
-body.dialos-a11y-mode .navbar-nav > li.active > a,
-body.dialos-a11y-mode .dropdown-menu > .active > a {
-  color: #027a5c !important;
 }
 body.dialos-a11y-mode *:focus {
   outline: 3px solid #027a5c !important;
