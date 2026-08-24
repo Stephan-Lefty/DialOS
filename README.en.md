@@ -121,6 +121,20 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Pronunciation of "DialOS" decided per voice** (2026-08-24, Stephan by ear):
+  Anna says "Dial O S", Michael stays with "Dial OS". The pronunciation rules
+  gained a fourth field for this - the voices they apply to. Measured and
+  documented so nobody works through it again: Piper knows no MIDDLE pause.
+  Comma, semicolon, colon, dash and multiple spaces all yield 0 ms of silence;
+  only sentence-ending punctuation produces any (period 220 ms). The period even
+  matched Stephan's own speaking pause - measured from a recording of his voice,
+  105 and 180 ms - but it turned the word into two sentences.
+- **At the end of a sentence the pronunciation rule did nothing at all**
+  (2026-08-24, surfaced during the rebuild). The lookahead (?!\.) was meant to
+  protect dialos.org but excluded any following period - including the full
+  stop. "Willkommen bei DialOS." was read as ONE word while "DialOS ist bereit."
+  came out right. The most common case was the broken one.
+
 - **A muted `paplay` made the device silent - with no error** (found and fixed
   2026-08-24). It surfaced through a failed listening test: the paplay stream
   was born muted because PipeWire remembers volume and mute PER APPLICATION.

@@ -140,7 +140,7 @@ def main():
         roh = os.path.join(ordner, f"{nummer:02d}.wav")
         befehl = (
             f"cd {shlex.quote(PIPER_DIR)} && "
-            f"printf %s {shlex.quote(say.fuer_sprachausgabe(text))} | "
+            f"printf %s {shlex.quote(say.fuer_sprachausgabe(text, a['kennung']))} | "
             f"./piper/piper --model {shlex.quote(modell)} --noise_w 0 "
             f"--output_raw 2>/dev/null | "
             f"sox -r {beispiele.abtastrate(modell)} -c 1 -b 16 "

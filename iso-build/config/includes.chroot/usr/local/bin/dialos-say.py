@@ -22,14 +22,51 @@ import sys
 import time
 
 
-# Aussprache-Regeln fuer Piper. Jede Zeile: Muster, Ersatz, Begruendung.
-# Die Begruendung steht bewusst mit im Code - ohne sie sieht eine solche
-# Regel spaeter wie ein Tippfehler aus und wird "korrigiert".
+# Jede Regel hat VIER Felder: Muster, Ersatz, Begruendung, und die Stimmen,
+# fuer die sie gilt (None = alle). Das vierte kam am 2026-08-24 dazu, weil
+# Stephan die Aussprache von "DialOS" pro Stimme verschieden wollte: "Michael
+# lassen wir wie bisher und bei Anne die Variante 2".
 AUSSPRACHE = [
     (
-        re.compile(r"\bDialOS\b(?!\.)", re.IGNORECASE),
+        # ANNA spricht die Buchstaben einzeln. Aus acht Schreibweisen von
+        # Stephan nach Gehoer gewaehlt (2026-08-24); sein Einwand vorher war,
+        # "Dial OS" sei zu gedraengt: "zwischen Dial und OS eine etwas
+        # groessere Pause".
+        #
+        # GEMESSEN, damit es niemand erneut durchprobiert: Piper kennt keine
+        # MITTLERE Pause. Semikolon, Doppelpunkt, Auslassungspunkte,
+        # Gedankenstrich, mehrere Leerzeichen - alle exakt 0 ms Stille. Nur
+        # Satzende-Zeichen erzeugen welche: Punkt 220 ms, Fragezeichen 230 ms,
+        # Ausrufezeichen 290 ms.
+        #
+        # "Dial. OS" traf damit sogar Stephans eigene Sprechpause (an seiner
+        # Stimme gemessen: 105 und 180 ms), machte aber aus dem Wort zwei
+        # SAETZE - die Melodie faellt nach "Dial" ab. Sein Urteil: "das zweite
+        # ist ja alles aber nicht das Wort DialOS". "Dial O S" fuegt deshalb
+        # keine Stille ein, sondern spricht die Buchstaben einzeln. Das Wort
+        # bleibt eines und wird laenger: 0,47 -> 0,64 s.
+        re.compile(r"\bDialOS\b(?!\.[A-Za-z])", re.IGNORECASE),
+        "Dial O S",
+        "Anna spricht die Buchstaben einzeln - Stephans Wahl vom 2026-08-24.",
+        ("de_DE-kerstin-low",),
+    ),
+    (
+        # MICHAEL bleibt bei der bisherigen Schreibweise - Stephans
+        # Entscheidung am 2026-08-24, nachdem er beide gehoert hat. Bei ihm
+        # dauert "Dial O S" 1,19 s gegen 0,98 s, der Unterschied ist also
+        # aehnlich gross wie bei Anna; ihm gefiel es hier trotzdem nicht.
+        #
+        # Diese Regel gilt fuer ALLE anderen Stimmen und ist damit auch der
+        # Rueckfall fuer eine kuenftige dritte: lieber die bewaehrte Trennung
+        # als gar keine.
+        #
+        # Bei Anna laeuft sie nicht ins Leere, sondern findet nichts mehr - die
+        # Regel darueber hat "DialOS" dann bereits ersetzt. Die Reihenfolge in
+        # dieser Liste ist deshalb nicht beliebig: spezifisch vor allgemein.
+        re.compile(r"\bDialOS\b(?!\.[A-Za-z])", re.IGNORECASE),
         "Dial OS",
         "Sonst als ein Wort gelesen; gemeint ist 'Dial O S'.",
+        None,
     ),
     (
         # Deutsch spricht "st" am Silbenanfang als "scht". Piper setzt die
@@ -40,6 +77,7 @@ AUSSPRACHE = [
         re.compile(r"\bTastatur(en)?\b", re.IGNORECASE),
         r"Tas tatur\1",
         "Sonst 'Taschtatur' - falsche Silbengrenze.",
+        None,
     ),
     (
         # "ID" wird von der deutschen Stimme als Wort gelesen ("id"). Gemeint
@@ -58,15 +96,32 @@ AUSSPRACHE = [
         re.compile(r"\bID\b"),
         "Ei Di",
         "Sonst als deutsches Wort gelesen; gemeint ist englisch 'eye-dee'.",
+        None,
     ),
 ]
 
 
-def fuer_sprachausgabe(text):
-    """Schreibweisen anpassen, die Piper sonst falsch ausspricht.
+def stimm_kennung():
+    """Welche Stimme speech-dispatcher gerade benutzt, z. B. "de_DE-kerstin-low".
 
-    "DialOS" wuerde als ein Wort gelesen. Getrennt geschrieben spricht die
-    Stimme es als "Dial OS", was gemeint ist.
+    GELESEN, NICHT GERATEN - dieselbe Quelle wie ueberall: DefaultVoice in
+    piper-generic.conf. Gibt None zurueck, wenn sie nicht zu lesen ist; dann
+    gelten nur die Regeln ohne Stimmenbindung, und das ist der richtige
+    Rueckfall: lieber die allgemeine Trennung als keine.
+    """
+    try:
+        with open(PIPER_CONF) as f:
+            for zeile in f:
+                if zeile.startswith("DefaultVoice"):
+                    teile = shlex.split(zeile)
+                    return teile[1] if len(teile) > 1 else None
+    except OSError:
+        pass
+    return None
+
+
+def fuer_sprachausgabe(text, stimme=None):
+    r"""Schreibweisen anpassen, die Piper sonst falsch ausspricht.
 
     Bewusst ZENTRAL hier statt in den einzelnen Texten: So kann keine
     kuenftige Ansage die Trennung vergessen, und die Texte selbst bleiben
@@ -75,18 +130,34 @@ def fuer_sprachausgabe(text):
 
     Wortgrenze und die Ausnahme fuer den Punkt sind wichtig:
       "dialosadmin"     bleibt - kein Wortende nach "dialos"
-      "dialos.org"      bleibt - der Lookahead schliesst den Punkt aus
+      "dialos.org"      bleibt - der Lookahead schliesst "Punkt+Buchstabe" aus
+      "DialOS."         wird getrennt - Satzende, siehe unten
       "DialOS-System"   wird getrennt - richtig so, es ist gesprochener Text
     Ein Bindestrich IST eine Wortgrenze, "dialos-say.py" wuerde also
     ebenfalls getrennt. Das ist folgenlos: Skript- und Dateinamen kommen
     in gesprochenen Texten nicht vor, nur in Kommentaren und Pfaden - und
     die laufen nie durch diese Funktion.
 
-    Seit 2026-08-17 eine Liste statt einer einzelnen Ersetzung: Es kam die
-    zweite Regel dazu, und es werden weitere kommen. Neue Regel = eine
-    Zeile in AUSSPRACHE, mit einem Satz dazu, WARUM sie noetig ist.
+    FEHLER BEHOBEN AM 2026-08-24: Der Lookahead hiess vorher (?!\.) und
+    schloss damit JEDEN folgenden Punkt aus - also auch den Schlusspunkt eines
+    Satzes. "Willkommen bei DialOS." wurde deshalb NICHT getrennt und als ein
+    Wort gelesen, waehrend "DialOS ist bereit." richtig klang. Ausgerechnet der
+    haeufigste Fall war der falsche, und aufgefallen ist es nur, weil beim
+    Einbau der neuen Regel beide Stellungen geprueft wurden. Jetzt
+    (?!\.[A-Za-z]): Ein Punkt zaehlt nur dann als Teil des Wortes, wenn ein
+    Buchstabe folgt - das trifft "dialos.org" und verschont den Satzpunkt.
+
+    Der Parameter "stimme" ist die Kennung (z. B. "de_DE-kerstin-low"). Ohne
+    Angabe wird die eingestellte gelesen. Die Erzeuger der Hoerproben MUESSEN
+    sie mitgeben: Sie erzeugen Dateien fuer eine bestimmte Stimme, nicht fuer
+    die gerade eingestellte - sonst bekaeme Michaels Datei Annas Aussprache.
+    Genau diese Verwechslung hat dieses Projekt schon zweimal gekostet.
     """
-    for muster, ersatz, _grund in AUSSPRACHE:
+    if stimme is None:
+        stimme = stimm_kennung()
+    for muster, ersatz, _grund, nur_stimmen in AUSSPRACHE:
+        if nur_stimmen is not None and stimme not in nur_stimmen:
+            continue
         text = muster.sub(ersatz, text)
     return text
 

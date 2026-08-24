@@ -235,22 +235,16 @@ finished too, and then move down together. That way no reference breaks.
     only show in everyday use. Changing it is a one-liner:
     STIMMEN["kerstin"]["tempo"] in dialos-stimme.py, then `setzen kerstin`
     again.
-  - **The three pronunciation rules** ("Tas tatur", "Ei Di", "Dial OS") are
-    tuned to Thorsten and currently apply to every voice. Each was played with
-    and without; Stephan's verdict is outstanding. If Anna does not need one
-    of them she sounds wrongly split - the rules would then have to be per
-    voice, and that changes the structure of the table in dialos-say.py. The
-    three words occur rarely, so waiting is defensible here.
+  - **Pronunciation rules have been per voice since 2026-08-24** - the
+    structural question raised in this item is answered, and by the first real
+    case: Anna says "Dial O S" for "DialOS" while Michael stays with "Dial OS"
+    (Stephan's choice, by ear). Every rule now has a fourth field naming the
+    voices it applies to.
+    **Still open are "Tas tatur" and "Ei Di":** both are tuned to Thorsten and
+    still apply to every voice. Each was played with and without; Stephan's
+    verdict is outstanding. The rebuild that used to be the expensive part of
+    this is done - all that is left is listening.
 
-- [ ] **Decide how "DialOS" is pronounced** (open since 2026-08-22, Stephan's
-  wish: "bisher wird das System immer so gesprochen DIAL OS könen wir das auch
-  noch anpassen das es melodischer klingt dia los" - it should sound more
-  melodic). Affects the SPEECH OUTPUT only - "Das Wort selbst bleibt DialOS",
-  nothing changes in writing. Three variants were played, Stephan's decision
-  is outstanding. What would change is the first rule in AUSSPRACHE in
-  `dialos-say.py`, which currently reads "Dial OS". Until something is decided
-  it stays that way - and that is exactly why this item is here: so far it
-  existed only in conversation.
 
 - [ ] **Add a second voice early, the selection only at the end**
   (Stephan's question, 2026-08-18: "When do we want to add the other voices,
@@ -767,6 +761,24 @@ memory, not just a record of successes.
   2026-08-16 (sticky bit: one account can neither overwrite nor delete
   another's file). The marker now lives under `$XDG_RUNTIME_DIR`, this
   file does not.
+
+- ☑️ **2026-08-24** — **Pronunciation of "DialOS" decided** - by Stephan, by
+  ear, out of eight spellings. **Anna says "Dial O S", Michael stays with
+  "Dial OS"** ("Michael lassen wir wie bisher und bei Anne die Variante 2").
+  Affects the speech output only; the word itself stays DialOS everywhere.
+
+  Measured so nobody works through it again: **Piper knows no middle pause.**
+  Comma, semicolon, colon, ellipsis, dash and multiple spaces all yield exactly
+  0 ms of silence; only sentence-ending punctuation produces any (period
+  220 ms, question mark 230 ms, exclamation mark 290 ms). The period even
+  matched Stephan's own speaking pause - measured from a recording of his
+  voice: 105 and 180 ms - but it turned the word into two sentences. His
+  verdict: "das zweite ist ja alles aber nicht das Wort DialOS". "Dial O S"
+  therefore inserts no silence but speaks the letters singly: 0.47 to 0.64 s.
+
+  An old fault surfaced along the way: at the end of a sentence the rule did
+  **nothing at all**. The lookahead excluded any following period, the full
+  stop included - "Willkommen bei DialOS." was read as one word. Fixed.
 
 ### Audio: microphone and speaker
 

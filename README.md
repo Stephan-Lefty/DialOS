@@ -129,6 +129,21 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Aussprache von "DialOS" pro Stimme entschieden** (2026-08-24, Stephan nach
+  Gehoer): Anna sagt "Dial O S", Michael bleibt bei "Dial OS". Die
+  Aussprache-Regeln haben dafuer ein viertes Feld bekommen - die Stimmen, fuer
+  die sie gelten. Gemessen und dokumentiert, damit es niemand erneut
+  durchprobiert: Piper kennt keine MITTLERE Pause. Komma, Semikolon,
+  Doppelpunkt, Gedankenstrich und mehrere Leerzeichen ergeben 0 ms Stille, nur
+  Satzende-Zeichen erzeugen welche (Punkt 220 ms). Der Punkt traf sogar
+  Stephans eigene Sprechpause - an einer Aufnahme seiner Stimme gemessen, 105
+  und 180 ms -, machte aber aus dem Wort zwei Saetze.
+- **Am Satzende griff die Aussprache-Regel gar nicht** (2026-08-24, beim Umbau
+  aufgefallen). Der Lookahead (?!\.) sollte dialos.org schuetzen, schloss aber
+  jeden folgenden Punkt aus - also auch den Schlusspunkt. "Willkommen bei
+  DialOS." wurde als EIN Wort gelesen, "DialOS ist bereit." dagegen richtig.
+  Ausgerechnet der haeufigste Fall war der falsche.
+
 - **Ein stummer `paplay` machte das Geraet lautlos - ohne Fehlermeldung**
   (2026-08-24 gefunden und behoben). Aufgefallen an einer misslungenen
   Hoerprobe: Der paplay-Strom kam stummgeschaltet zur Welt, weil PipeWire

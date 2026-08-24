@@ -2036,6 +2036,61 @@ der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 
 
 
+
+### Die Aussprache-Regeln gelten jetzt pro Stimme
+
+**Stephans Entscheidung vom 2026-08-24:** „Michael lassen wir wie bisher und
+bei Anne die Variante 2." Jede Regel in `AUSSPRACHE` hat deshalb ein viertes
+Feld — die Stimmen, für die sie gilt, oder `None` für alle.
+
+| Stimme | „DialOS" wird gelesen als | Wortdauer |
+|---|---|---|
+| Anna (`de_DE-kerstin-low`) | `Dial O S` | 0,47 → 0,64 s |
+| Michael (`de_DE-thorsten-high`) | `Dial OS` | unverändert 0,98 s |
+| jede andere | `Dial OS` | Rückfall |
+
+Die Reihenfolge in der Liste ist **nicht beliebig**: spezifisch vor allgemein.
+Bei Anna greift die erste Regel, danach findet die allgemeine nichts mehr.
+
+**Wie die Wahl zustande kam, damit es niemand erneut durchprobiert.** Piper
+kennt keine *mittlere* Pause. Gemessen an Annas Stimme:
+
+| Schreibweise | Stille | Wortdauer |
+|---|---|---|
+| `Dial OS` | 0 ms | 0,47 s |
+| `Dial, OS` | 0 ms | 0,53 s |
+| `Dial - OS` | 0 ms | 0,46 s |
+| `Dial; OS` / `Dial: OS` / `Dial ... OS` | 0 ms | ~0,45 s |
+| `Dial O S` | 0 ms | **0,64 s** |
+| `Dial. OS` | **220 ms** | 0,70 s |
+| `Dial? OS` | 230 ms | 0,71 s |
+| `Dial! OS` | 290 ms | 0,69 s |
+
+Nur Satzende-Zeichen erzeugen Stille. Der Punkt traf sogar Stephans eigene
+Sprechpause — an einer Aufnahme seiner Stimme gemessen: **105 und 180 ms** —
+machte aber aus dem Wort zwei Sätze, die Melodie fällt nach „Dial" ab. Sein
+Urteil: „das zweite ist ja alles aber nicht das Wort DialOS". `Dial O S` fügt
+deshalb keine Stille ein, sondern spricht die Buchstaben einzeln.
+
+**Die Erzeuger der Hörproben müssen die Stimme mitgeben.** `fuer_sprachausgabe`
+nimmt jetzt einen zweiten Parameter. `dialos-alle-ansagen.py` und
+`dialos-vorstellung.py` reichen die Kennung durch — ohne das bekäme Michaels
+Datei Annas Aussprache, unbemerkt, weil beide für sich richtig klingen. Genau
+diese Verwechslung gab es hier schon einmal, damals bei der Stimme selbst.
+
+### Ein Fehler, der beim Umbau auffiel: am Satzende griff die Regel nicht
+
+Der Lookahead hieß `(?!\.)` und sollte `dialos.org` schützen. Er schloss aber
+**jeden** folgenden Punkt aus — also auch den Schlusspunkt eines Satzes:
+
+    Willkommen bei DialOS.   →   unverändert, als ein Wort gelesen
+    DialOS ist bereit.       →   Dial OS ist bereit.
+
+Ausgerechnet der häufigste Fall war der falsche. Aufgefallen ist es nur, weil
+beim Einbau der neuen Regel **beide Satzstellungen** geprüft wurden. Jetzt
+`(?!\.[A-Za-z])`: Ein Punkt zählt nur als Teil des Wortes, wenn ein Buchstabe
+folgt. Das trifft `dialos.org` und verschont den Satzpunkt.
+
 ### Ein stummer paplay macht das Gerät lautlos - ohne Fehlermeldung
 
 **Gefunden am 2026-08-24, weil Stephan bei einer Hörprobe „ich höre nix"

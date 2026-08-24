@@ -1953,6 +1953,62 @@ in the new voice, in both directions. The look switches without delay.
 
 
 
+
+### Pronunciation rules are now per voice
+
+**Stephan's decision of 2026-08-24:** "Michael lassen wir wie bisher und bei
+Anne die Variante 2" - Michael stays as he was, Anna gets variant 2. Every rule
+in `AUSSPRACHE` therefore has a fourth field: the voices it applies to, or
+`None` for all.
+
+| Voice | "DialOS" is read as | Word duration |
+|---|---|---|
+| Anna (`de_DE-kerstin-low`) | `Dial O S` | 0.47 → 0.64 s |
+| Michael (`de_DE-thorsten-high`) | `Dial OS` | unchanged, 0.98 s |
+| any other | `Dial OS` | fallback |
+
+The order in the list is **not arbitrary**: specific before general. For Anna
+the first rule fires, after which the general one finds nothing.
+
+**How the choice came about, so nobody works through it again.** Piper knows no
+*middle* pause. Measured on Anna's voice:
+
+| Spelling | Silence | Word duration |
+|---|---|---|
+| `Dial OS` | 0 ms | 0.47 s |
+| `Dial, OS` | 0 ms | 0.53 s |
+| `Dial - OS` | 0 ms | 0.46 s |
+| `Dial; OS` / `Dial: OS` / `Dial ... OS` | 0 ms | ~0.45 s |
+| `Dial O S` | 0 ms | **0.64 s** |
+| `Dial. OS` | **220 ms** | 0.70 s |
+| `Dial? OS` | 230 ms | 0.71 s |
+| `Dial! OS` | 290 ms | 0.69 s |
+
+Only sentence-ending punctuation produces silence. The period even matched
+Stephan's own speaking pause - measured from a recording of his voice: **105
+and 180 ms** - but it turned the word into two sentences, with the melody
+falling after "Dial". His verdict: "das zweite ist ja alles aber nicht das Wort
+DialOS". `Dial O S` therefore inserts no silence but speaks the letters singly.
+
+**The sample generators must pass the voice.** `fuer_sprachausgabe` now takes a
+second parameter. `dialos-alle-ansagen.py` and `dialos-vorstellung.py` pass the
+identifier through - without it Michael's file would get Anna's pronunciation,
+unnoticed, because both sound right on their own. That very confusion has
+happened here before, back then with the voice itself.
+
+### A fault the rebuild surfaced: at the end of a sentence the rule did nothing
+
+The lookahead was `(?!\.)` and was meant to protect `dialos.org`. But it
+excluded **any** following period - including the full stop of a sentence:
+
+    Willkommen bei DialOS.   →   unchanged, read as one word
+    DialOS ist bereit.       →   Dial OS ist bereit.
+
+The most common case was the broken one. It surfaced only because **both
+sentence positions** were checked while fitting the new rule. Now
+`(?!\.[A-Za-z])`: a period counts as part of the word only when a letter
+follows. That covers `dialos.org` and spares the full stop.
+
 ### A muted paplay makes the device silent - with no error
 
 **Found on 2026-08-24 because Stephan said "ich höre nix" during a listening

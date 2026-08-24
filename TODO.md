@@ -240,21 +240,16 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     wenigen Saetzen; ob es ueber einen langen Text traegt, zeigt erst der
     Alltag. Umstellen geht in einer Zeile: STIMMEN["kerstin"]["tempo"] in
     dialos-stimme.py, danach `setzen kerstin` erneut.
-  - **Die drei Aussprache-Regeln** ("Tas tatur", "Ei Di", "Dial OS") sind auf
-    Thorsten abgestimmt und gelten derzeit fuer alle Stimmen. Vorgespielt wurde
-    jede mit und ohne; Stephans Urteil steht aus. Braucht Anna eine davon nicht,
-    klingt sie damit falsch getrennt - dann muessen die Regeln pro Stimme
-    gelten, und das aendert die Struktur der Tabelle in dialos-say.py. Die drei
-    Woerter kommen selten vor, deshalb ist Warten hier vertretbar.
+  - **Die Aussprache-Regeln gelten seit dem 2026-08-24 PRO STIMME** - die
+    Strukturfrage aus diesem Punkt ist damit beantwortet, und zwar durch den
+    ersten echten Fall: "DialOS" spricht Anna als "Dial O S", Michael bleibt
+    bei "Dial OS" (Stephans Wahl nach Gehoer). Jede Regel hat ein viertes
+    Feld fuer die Stimmen, fuer die sie gilt.
+    **Offen bleiben "Tas tatur" und "Ei Di":** beide sind auf Thorsten
+    abgestimmt und gelten weiterhin fuer alle Stimmen. Vorgespielt wurde jede
+    mit und ohne; Stephans Urteil dazu steht aus. Der Umbau, der frueher der
+    teure Teil daran war, ist jetzt erledigt - es fehlt nur noch das Hoeren.
 
-- [ ] **Aussprache von „DialOS" entscheiden** (offen seit 2026-08-22, Stephans
-  Wunsch: "bisher wird das System immer so gesprochen DIAL OS könen wir das
-  auch noch anpassen das es melodischer klingt dia los"). Betrifft NUR die
-  Sprachausgabe - "Das Wort selbst bleibt DialOS", geschrieben ändert sich
-  nichts. Drei Varianten wurden vorgespielt, Stephans Entscheidung steht aus.
-  Geändert würde die erste Regel in AUSSPRACHE in `dialos-say.py`, dort steht
-  derzeit "Dial OS". Solange nichts entschieden ist, bleibt es dabei - und
-  genau deshalb steht der Punkt hier: Er existierte bisher nur im Gespräch.
 
 - [ ] **Zweite Stimme früh dazulegen, Auswahl erst zum Schluss**
   (Stephans Frage, 2026-08-18: „Wann wollen wir die anderen Stimmen z.B.
@@ -867,6 +862,25 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   stillen Fehlschlag geführt hat (Sticky-Bit: ein Konto kann die Datei
   eines anderen weder überschreiben noch löschen). Die Markierung liegt
   jetzt unter `$XDG_RUNTIME_DIR`, diese Datei noch nicht.
+
+- ☑️ **2026-08-24** — **Aussprache von „DialOS" entschieden** - Stephan nach
+  Gehoer, aus acht Schreibweisen. **Anna sagt „Dial O S", Michael bleibt bei
+  „Dial OS"** („Michael lassen wir wie bisher und bei Anne die Variante 2").
+  Betrifft nur die Sprachausgabe; das Wort selbst bleibt ueberall DialOS.
+
+  Gemessen, damit es niemand erneut durchprobiert: **Piper kennt keine
+  mittlere Pause.** Komma, Semikolon, Doppelpunkt, Auslassungspunkte,
+  Gedankenstrich und mehrere Leerzeichen ergeben alle exakt 0 ms Stille; nur
+  Satzende-Zeichen erzeugen welche (Punkt 220 ms, Fragezeichen 230 ms,
+  Ausrufezeichen 290 ms). Der Punkt traf sogar Stephans eigene Sprechpause -
+  an einer Aufnahme seiner Stimme gemessen: 105 und 180 ms -, machte aber aus
+  dem Wort zwei Saetze. Sein Urteil: „das zweite ist ja alles aber nicht das
+  Wort DialOS". „Dial O S" fuegt deshalb keine Stille ein, sondern spricht die
+  Buchstaben einzeln: 0,47 auf 0,64 s.
+
+  Dabei fiel ein alter Fehler auf: Am Satzende griff die Regel **gar nicht**.
+  Der Lookahead schloss jeden folgenden Punkt aus, also auch den Schlusspunkt -
+  „Willkommen bei DialOS." wurde als ein Wort gelesen. Behoben.
 
 ### Audio: Mikrofon und Lautsprecher
 
