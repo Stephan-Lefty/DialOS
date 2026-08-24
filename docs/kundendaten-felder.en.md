@@ -98,8 +98,7 @@ mailadresse         =
 
 ## What is not decided yet
 
-**Where the file goes.** That is the open and awkward question, set out at
-length in [TODO.en.md](../TODO.en.md). In short: today the user data sits in
+**Where the file goes.** Today the user data sits in
 `/usr/local/share/dialos/` - on the **unencrypted** root partition, mode 0644,
 while `/home/nutzer` is LUKS-encrypted. Measured on 2026-08-24:
 
@@ -107,10 +106,28 @@ while `/home/nutzer` is LUKS-encrypted. Measured on 2026-08-24:
     /home/nutzer                             →  nvme0n1p4       LUKS
 
 For a name that is already questionable; for an address and phone number it
-would contradict the entire encryption approach. But the obvious location
-`/home/nutzer/.config/dialos/` has a catch: `dialos-stick-gate` only opens that
-partition **after** boot, and the startup announcement needs the name early.
-That order must be checked before anything moves.
+would contradict the entire encryption approach.
+
+**The boot order is NOT an obstacle** - this said otherwise at first and was
+wrong (corrected on 2026-08-24 after Stephan asked). Checked in
+`dialos-stick-gate.service` and `-.sh`: the service runs with
+`Before=display-manager.service`, mounts `/home/nutzer` and enables autologin
+**afterwards**. Without the stick it additionally locks the account with
+`usermod -L` - reasoned explicitly in the script, because a session would
+otherwise run "against a directory on the UNENCRYPTED root partition". **So
+whenever `nutzer` has a session the partition is mounted**, and the startup
+announcement is an XDG autostart inside that session. The mistake was confusing
+"after boot" with "after login".
+
+**Two real constraints remain, both smaller:**
+
+- **The gate itself** runs before the mount and could never read the data. Today
+  it does not speak, only logs. Should it ever say "please insert the security
+  stick", it could not use the name.
+- **The admin account** would have no access; `/home/dialosadmin` is on the root
+  partition. A letter written there for testing would have no sender. That is
+  probably right - it is the customer's data - but it must be a deliberate
+  decision, not a side effect.
 
 **Hence only the structure is here.** Filling in values is worth doing once it
 is clear where they belong - otherwise they would be entered twice, and the

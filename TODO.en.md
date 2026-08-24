@@ -49,10 +49,14 @@ finished too, and then move down together. That way no reference breaks.
 
   **To settle before building:**
   1. **Where to?** `/home/nutzer/.config/dialos/` is on the encrypted partition
-     and is per-person - both correct. Against it: the `dialos-stick-gate`
-     service only opens that partition after boot, while the startup
-     announcement needs the name early. That order must be checked before
-     anything moves.
+     and is per-person - both correct. **The boot order is NOT an argument
+     against it**; that stood here first and was wrong (corrected 2026-08-24).
+     `dialos-stick-gate` runs `Before=display-manager.service`, mounts the
+     partition and only then enables autologin - without the stick it even locks
+     the account. Whenever `nutzer` has a session the partition is mounted. What
+     remains open: the ADMIN account would have no access
+     (`/home/dialosadmin` is on the root partition), and the gate itself could
+     never read the data should it ever need to speak.
   2. **Which format?** Five files with five formats is today's state. One file
      with clear fields (name spoken, name written, street, town, phone, mail
      address) would be readable and extensible.

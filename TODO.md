@@ -52,10 +52,14 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
   **Vor dem Bauen zu klären:**
   1. **Wohin?** `/home/nutzer/.config/dialos/` liegt auf der verschlüsselten
-     Partition und ist personenbezogen - beides richtig. Dagegen spricht: Der
-     `dialos-stick-gate`-Dienst öffnet die Partition erst nach dem Booten, die
-     Start-Ansage braucht den Namen aber früh. Diese Reihenfolge ist zu prüfen,
-     bevor etwas verschoben wird.
+     Partition und ist personenbezogen - beides richtig. **Die Startreihenfolge
+     spricht NICHT dagegen**; das stand hier zuerst und war falsch (berichtigt
+     2026-08-24). `dialos-stick-gate` läuft `Before=display-manager.service`,
+     mountet die Partition und schaltet erst danach Autologin ein - ohne Stick
+     sperrt er das Konto sogar. Hat `nutzer` eine Sitzung, ist die Partition
+     immer gemountet. Offen bleibt nur: Das ADMIN-Konto käme nicht heran
+     (`/home/dialosadmin` liegt auf der Wurzelpartition), und der Gate selbst
+     könnte die Daten nie lesen, falls er einmal sprechen soll.
   2. **Welches Format?** Fünf Dateien mit fünf Formaten sind der heutige Stand.
      Eine Datei mit klaren Feldern (Name gesprochen, Name geschrieben, Straße,
      Ort, Telefon, Mailadresse) wäre lesbar und erweiterbar.

@@ -100,9 +100,8 @@ mailadresse         =
 
 ## Was noch nicht entschieden ist
 
-**Wohin die Datei kommt.** Das ist die offene und unangenehme Frage, und sie
-steht ausführlich in [TODO.md](../TODO.md). Kurz: Heute liegen die Nutzerdaten
-in `/usr/local/share/dialos/` — auf der **unverschlüsselten** Wurzelpartition,
+**Wohin die Datei kommt.** Heute liegen die Nutzerdaten in
+`/usr/local/share/dialos/` — auf der **unverschlüsselten** Wurzelpartition,
 Rechte 0644, während `/home/nutzer` mit LUKS verschlüsselt ist. Am 2026-08-24
 gemessen:
 
@@ -110,10 +109,28 @@ gemessen:
     /home/nutzer                             →  nvme0n1p4       LUKS
 
 Für einen Namen ist das schon fragwürdig; für Anschrift und Telefonnummer wäre
-es der Widerspruch zum ganzen Verschlüsselungsansatz. Der naheliegende Ort
-`/home/nutzer/.config/dialos/` hat aber einen Haken: `dialos-stick-gate` öffnet
-diese Partition erst **nach** dem Booten, und die Start-Ansage braucht den
-Namen früh. Diese Reihenfolge ist zu prüfen, bevor etwas verschoben wird.
+es der Widerspruch zum ganzen Verschlüsselungsansatz.
+
+**Die Startreihenfolge ist KEIN Hindernis** — das stand hier zuerst anders und
+war falsch (berichtigt am 2026-08-24, nachdem Stephan nachgefragt hat).
+Nachgesehen in `dialos-stick-gate.service` und `-.sh`: Der Dienst läuft mit
+`Before=display-manager.service`, mountet `/home/nutzer` und schaltet **danach**
+Autologin ein. Ohne Stick sperrt er das Konto zusätzlich mit `usermod -L` — im
+Skript ausdrücklich begründet, weil eine Sitzung sonst „gegen ein Verzeichnis
+auf der UNVERSCHLÜSSELTEN root-Partition" liefe. **Wenn `nutzer` eine Sitzung
+hat, ist die Partition also immer gemountet**, und die Start-Ansage ist ein
+XDG-Autostart innerhalb dieser Sitzung. Der Fehler war, „nach dem Booten" mit
+„nach dem Anmelden" zu verwechseln.
+
+**Zwei echte Einschränkungen bleiben, beide kleiner:**
+
+- **Der Gate selbst** läuft vor dem Mount und könnte die Daten nie lesen. Heute
+  spricht er nicht, nur ins Journal. Sollte er einmal „Bitte Sicherheits-Stick
+  einstecken" sagen, könnte er den Namen nicht verwenden.
+- **Das Admin-Konto** käme nicht heran; `/home/dialosadmin` liegt auf der
+  Wurzelpartition. Ein Brief, der zum Testen dort geschrieben wird, hätte keinen
+  Absender. Das ist wahrscheinlich richtig — es sind die Daten des Kunden —,
+  muss aber eine bewusste Entscheidung sein und kein Nebeneffekt.
 
 **Deshalb steht hier nur die Struktur.** Die Werte einzutragen lohnt erst, wenn
 klar ist, wohin sie gehören — sonst müssten sie zweimal erfasst werden, und
