@@ -75,7 +75,10 @@ def main():
     print(f"    Start:     {time.strftime('%H:%M:%S')}")
     print()
     print("    Jede Zeile ist ein Ergebnis. '[unk]' ist der gewuenschte Fall.")
-    print("    Alles andere waere ein Fehlstart.")
+    print("    Alles andere ist AUFFAELLIG - aber noch kein Fehlstart:")
+    print("    Einschalten wuerde der Dienst nur bei einem Ergebnis, das das")
+    print("    Kernwort enthaelt UND kein [unk]. Das entscheidet die Spalte")
+    print("    'schaltet ein'.")
     print()
 
     p = subprocess.Popen(befehl, stdout=subprocess.PIPE,
@@ -104,9 +107,15 @@ def main():
             if text == "[unk]":
                 continue
             konf = [(w.get("word"), w.get("conf")) for w in r.get("result", [])]
-            treffer.append((time.strftime("%H:%M:%S"), text, p_wert, konf))
-            print(f"    {time.strftime('%H:%M:%S')}  TREFFER '{text}'  "
-                  f"Pegel {p_wert:.0f}")
+            # Die Regel des Dienstes: Kernwort vorhanden UND kein [unk].
+            # Ohne diese Unterscheidung meldet das Werkzeug jeden Wortfetzen
+            # als Fehlstart - am 2026-08-24 hat es genau das getan und vier
+            # gemeldet, von denen keiner eingeschaltet haette.
+            schaltet = "starten" in text.split() and "[unk]" not in text
+            treffer.append((time.strftime("%H:%M:%S"), text, p_wert, konf, schaltet))
+            print(f"    {time.strftime('%H:%M:%S')}  '{text}'  "
+                  f"Pegel {p_wert:.0f}  "
+                  f"{'>>> SCHALTET EIN' if schaltet else '(schaltet nicht ein)'}")
             for wort, c in konf:
                 print(f"                  {wort:22s} Konfidenz "
                       f"{c if c is None else f'{c:.3f}'}")
@@ -120,8 +129,10 @@ def main():
     print(f"    Pegel:  Mittel {pegel_summe / max(1, pegel_n):.0f}, "
           f"Spitze {pegel_max:.0f}   ({pegel_n} Bloecke)")
     print(f"    Ergebnisse: {ergebnisse}")
-    print(f"    FEHLSTARTS: {len(treffer)}")
-    if not treffer:
+    echte = [t for t in treffer if t[4]]
+    print(f"    Auffaellige Ergebnisse: {len(treffer)}")
+    print(f"    Davon ECHTE FEHLSTARTS (haetten eingeschaltet): {len(echte)}")
+    if not echte:
         print("    In diesem Fenster keiner. Das WIDERLEGT nichts - es heisst")
         print("    nur, dass das Geraeusch dieses Fensters nicht gereicht hat.")
     return 0

@@ -2034,6 +2034,46 @@ der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 
 
 
+
+### Beim Fehlstart steht jetzt der Pegel im Protokoll
+
+**Gemessen am 2026-08-24, nachdem die Sprachsteuerung sich selbst
+eingeschaltet hatte.** Zwanzig Minuten Mitschnitt mit derselben Quelle und
+derselben Grammatik wie der Dienst ergaben vier auffällige Ergebnisse — und
+zwei Zahlen, die einen Lösungsweg ausschließen, bevor er gebaut wird:
+
+| Zeit | Ergebnis | Pegel (RMS) | Konfidenz |
+|---|---|---|---|
+| 15:25:48 | `sprachsteuerung` | **30** | 1,000 |
+| 15:28:10 | `[unk] [unk] starten` | **28** | 0,979 |
+| 15:28:14 | `[unk] [unk] starten` | 5552 | 0,631 |
+
+Der Leerlauf dieses Raumes liegt bei **52**, Sprache lag bei der
+Diktat-Messung zwischen 3475 und 4196. Vosk hat also aus etwas, das **leiser
+als Stille** ist, ganze Befehlswörter gebaut — und war sich dabei sicherer als
+bei dem lauten Fall.
+
+**Damit ist die Konfidenz als Filter erledigt.** In einer Grammatik mit einem
+einzigen Satz ist der Erkenner konstruktionsbedingt sicher: Er hat keine
+Alternative außer `[unk]`. Eine Schwelle auf die Konfidenz hätte den lauten,
+echten Fall verworfen und die stillen Geister durchgelassen — genau falsch
+herum.
+
+**Keiner der vier hätte eingeschaltet**, und das ist die gute Nachricht:
+`sprachsteuerung` fehlt das zweite Wort, und die anderen enthalten `[unk]`.
+Die Regel „Kernwort UND kein `[unk]`" hat gehalten. Das Messwerkzeug hat sie
+im ersten Entwurf nicht nachgebildet und deshalb vier „Fehlstarts" gemeldet,
+die keine waren — inzwischen berichtigt, es unterscheidet jetzt „auffällig"
+von „hätte eingeschaltet".
+
+Der Dienst schreibt bei jeder Erkennung die **Pegelspitze seit dem letzten
+Ergebnis** mit. Beim nächsten echten Fehlstart steht damit im Protokoll, ob
+eine Pegelschwelle ihn verhindert hätte. Vorher wird keine gebaut.
+
+**Achtung beim Vergleichen:** Der Dienst schreibt den SPITZENWERT der
+Amplitude, das Messwerkzeug und `dialos-diktat.py` rechnen RMS. Die Zahlen
+sind nicht untereinander vergleichbar; deshalb heißt es im Protokoll „Spitze".
+
 ### Was gesprochen wurde, steht im Protokoll
 
 **Seit dem 2026-08-24 — und der Anlass war eine Lücke in meiner eigenen

@@ -1013,6 +1013,28 @@ def main():
     aufnahme_verwerfen = False
     saettigungen = 0
     letzte_pegelkorrektur = 0.0
+    # PEGELSPITZE SEIT DEM LETZTEN ERGEBNIS (seit 2026-08-24). Gemessen am
+    # selben Tag: Vosk baut aus etwas, das LEISER als Stille ist, ganze
+    # Befehlswoerter - 'sprachsteuerung' bei Pegel 30 mit Konfidenz 1,000,
+    # '[unk] [unk] starten' bei Pegel 28 mit 0,979. Der Leerlauf dieses
+    # Raumes liegt bei 52, Sprache lag bei der Diktat-Messung zwischen 3475
+    # und 4196.
+    #
+    # Die Konfidenz taugt hier NICHT als Filter: In einer Grammatik mit einem
+    # einzigen Satz ist der Erkenner konstruktionsbedingt sicher, er hat ja
+    # keine Alternative. Der Pegel trennt dagegen sauber - deshalb steht er
+    # jetzt bei jeder Erkennung im Protokoll. Beim naechsten echten Fehlstart
+    # steht damit im Protokoll, ob eine Pegelschwelle ihn verhindert haette.
+    # Erst messen, dann bauen.
+    #
+    # ACHTUNG BEIM VERGLEICHEN: Hier steht der SPITZENWERT der Amplitude
+    # (0 bis 32768), nicht der RMS. scripts/dialos-fehlstart-messen.py
+    # rechnet RMS, dialos-diktat.py ebenfalls. Die Zahlen sind deshalb NICHT
+    # untereinander vergleichbar - der Spitzenwert liegt bei Sprache um ein
+    # Mehrfaches hoeher. Deshalb heisst es im Protokoll "Spitze" und nicht
+    # "Pegel". Wer beide Zahlen gegenueberstellen will, muss dasselbe Mass
+    # rechnen.
+    pegel_spitze = 0
 
     try:
         while True:
@@ -1136,6 +1158,7 @@ def main():
 
             pegel = max(abs(int.from_bytes(block[i:i + 2], "little", signed=True))
                         for i in range(0, len(block) - 1, 2))
+            pegel_spitze = max(pegel_spitze, pegel)
             gesaettigt = pegel >= 32000
             if DEBUG:
                 print(f"\rPegel {100 * pegel / 32768:5.1f} %"
@@ -1175,7 +1198,8 @@ def main():
             # ausgeloest hat. Genau das Gegenteil dessen, was man beim
             # Fehlersuchen braucht.
             if text:
-                melde(f"erkannt: {text!r}")
+                melde(f"erkannt: {text!r}  (Spitze {pegel_spitze})")
+            pegel_spitze = 0
             if not text:
                 continue
             worte = text.split()

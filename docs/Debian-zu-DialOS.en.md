@@ -1951,6 +1951,44 @@ in the new voice, in both directions. The look switches without delay.
 
 
 
+
+### The level is now in the log for every recognition
+
+**Measured on 2026-08-24, after the voice control switched itself on.** Twenty
+minutes of listening on the same source with the same grammar as the service
+produced four notable results — and two numbers that rule out one line of
+attack before it gets built:
+
+| Time | Result | Level (RMS) | Confidence |
+|---|---|---|---|
+| 15:25:48 | `sprachsteuerung` | **30** | 1.000 |
+| 15:28:10 | `[unk] [unk] starten` | **28** | 0.979 |
+| 15:28:14 | `[unk] [unk] starten` | 5552 | 0.631 |
+
+This room idles at **52**, and speech measured between 3475 and 4196 in the
+dictation tests. So Vosk built whole command words out of something **quieter
+than silence** — and was more confident about those than about the loud case.
+
+**That disposes of confidence as a filter.** In a grammar holding a single
+phrase the recogniser is confident by construction: it has no alternative
+except `[unk]`. A confidence threshold would have discarded the loud, genuine
+case and let the quiet ghosts through — exactly backwards.
+
+**None of the four would have switched on**, and that is the good news:
+`sprachsteuerung` lacks its second word, and the others contain `[unk]`. The
+rule "core word AND no `[unk]`" held. The measuring tool did not reproduce that
+rule in its first draft and therefore reported four "false starts" that were
+none — since corrected; it now separates "notable" from "would have switched
+on".
+
+The service now records the **peak level since the previous result** with every
+recognition. When the next genuine false start happens, the log will show
+whether a level threshold would have prevented it. Until then none gets built.
+
+**Careful when comparing:** the service writes the PEAK amplitude, while the
+measuring tool and `dialos-diktat.py` compute RMS. The numbers are not
+comparable with each other; that is why the log says "Spitze".
+
 ### What was spoken goes into the log
 
 **Since 2026-08-24 — and the trigger was a gap in my own reasoning.** After the

@@ -121,6 +121,17 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **The level of every recognition is logged** (2026-08-24), together with a
+  measuring tool (`scripts/dialos-fehlstart-messen.py`). Twenty minutes of
+  listening ruled out one line of attack before it was built: Vosk returned
+  `sprachsteuerung` at level 30 with confidence 1.000 and `[unk] [unk] starten`
+  at level 28 with 0.979 - both QUIETER than the idle level of 52, while speech
+  sits between 3475 and 4196. Confidence cannot filter this: in a grammar with
+  one phrase the recogniser is confident by construction. None of the cases
+  would have switched on, the rule "core word AND no [unk]" held - the tool had
+  not reproduced that rule in its first draft and reported four "false starts"
+  that were none.
+
 - **Every announcement now appears in a log** (2026-08-24). `dialos-say.py`
   writes to `~/.log/dialos-say.log`. The trigger was a gap in the evidence:
   after the false start at 14:41:12 I claimed DialOS had not spoken, citing the

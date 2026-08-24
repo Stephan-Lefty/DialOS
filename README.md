@@ -129,6 +129,18 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Pegel bei jeder Erkennung im Protokoll** (2026-08-24), und ein Messwerkzeug
+  dazu (`scripts/dialos-fehlstart-messen.py`). Zwanzig Minuten Mitschnitt haben
+  einen Loesungsweg ausgeschlossen, bevor er gebaut wurde: Vosk lieferte
+  `sprachsteuerung` bei Pegel 30 mit Konfidenz 1,000 und `[unk] [unk] starten`
+  bei Pegel 28 mit 0,979 - beides LEISER als der Leerlauf von 52, waehrend
+  Sprache bei 3475 bis 4196 liegt. Ueber die Konfidenz ist das nicht zu
+  filtern: In einer Grammatik mit einem Satz ist der Erkenner
+  konstruktionsbedingt sicher. Keiner der Faelle haette eingeschaltet, die
+  Regel "Kernwort UND kein [unk]" hat gehalten - das Werkzeug hatte sie im
+  ersten Entwurf nicht nachgebildet und vier "Fehlstarts" gemeldet, die keine
+  waren.
+
 - **Jede Ansage steht jetzt im Protokoll** (2026-08-24). `dialos-say.py`
   schreibt nach `~/.log/dialos-say.log`. Anlass war eine Beweisluecke: Beim
   Fehlstart um 14:41:12 habe ich behauptet, DialOS habe nicht gesprochen, und
