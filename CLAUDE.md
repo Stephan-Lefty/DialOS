@@ -24,6 +24,14 @@ rückholbar: `stephan.roesner@protonmail.com` in
 `scripts/dialos-claude-setup.sh` sowie vier Autoradressen in der
 Commit-Historie.
 
+> **Dauerregel (Stephan, 2026-08-24):** „Meine persönlichen Daten, die bereits
+> im Repo sind, die können dort bleiben. Bei allen neuen Daten, einfach
+> fragen." Also: nichts nachträglich entfernen und keine Historie umschreiben —
+> aber **jedes neue personenbezogene Datum vor dem Commit erfragen**, auch wenn
+> Stephan es selbst im Gespräch genannt hat. Ein Wert im Chat ist nicht
+> dasselbe wie ein Wert auf GitHub, und er hat den Unterschied ausdrücklich
+> gezogen.
+
 **Wichtig für Claude selbst:** Dein eigenes Memory-System
 (`~/.claude/...`) liegt auf der internen Platte des T490 und wird bei
 jedem Reinstall gelöscht - genau wie der bisherige Chat und alle
