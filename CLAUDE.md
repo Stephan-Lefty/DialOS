@@ -12,7 +12,17 @@ Sprachsteuerung, Telefonie, Ersteinrichtung, offene Punkte). Diese
 Datei hier ist nur eine kurze Landkarte + der aktuelle Stand, keine
 Doppelung der eigentlichen Doku.
 
-**GitHub-Repo:** https://github.com/Stephan-Lefty/DialOS (privat).
+**GitHub-Repo:** https://github.com/Stephan-Lefty/DialOS - **ÖFFENTLICH.**
+Hier stand bis zum 2026-08-24 „(privat)", und das war falsch: Anonym
+abgefragt meldet die GitHub-API `private: False`. Aufgefallen ist es, als
+Stephan seine Anschrift und Telefonnummer für die zentralen Kundendaten
+durchgegeben hat - ein Commit hätte sie veröffentlicht. **Keine
+personenbezogenen Werte ins Repo**, nur Vorlagen mit leeren Feldern (siehe
+[docs/kundendaten-felder.md](docs/kundendaten-felder.md) und
+`Wordpressinstallation/.env.example`). Bereits öffentlich und nicht mehr
+rückholbar: `stephan.roesner@protonmail.com` in
+`scripts/dialos-claude-setup.sh` sowie vier Autoradressen in der
+Commit-Historie.
 
 **Wichtig für Claude selbst:** Dein eigenes Memory-System
 (`~/.claude/...`) liegt auf der internen Platte des T490 und wird bei
