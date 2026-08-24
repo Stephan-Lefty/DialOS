@@ -16,6 +16,62 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Stimmprobe beim ersten Anmelden - und die Aufnahme danach löschen**
+  (Stephans Idee vom 2026-08-24: „wenn alles funktioniert, dem neuen Benutzer
+  einen Text präsentieren … damit das System eine Stimmenprobe von der Person
+  hat, die dann mit DialOS kommuniziert").
+
+  **NICHT VORHER ANFANGEN** (Stephan, 2026-08-24): „Das sollten wir ja erst
+  angehen, wenn alles mit meiner Stimme reibungslos läuft." Das ist die richtige
+  Reihenfolge, und zwar nicht nur aus Zeitgründen: Die Stimmprobe MISST gegen
+  den bestehenden Stand. Solange sich Schwellen, Grammatik und Zuordnung noch
+  ändern, misst sie ein bewegliches Ziel - und jede Zahl, die dabei
+  herauskommt, wäre beim nächsten Umbau wieder falsch. Erst wenn es mit
+  Stephans Stimme trägt, ist der Schritt zu einer fremden Stimme überhaupt ein
+  Schritt und nicht bloß eine zweite Baustelle.
+
+  **Wofür sie NICHT gut ist, damit niemand das Falsche baut:** Die Erkennung
+  wird davon nicht besser. Vosk ist sprecherunabhängig und lernt aus einer
+  Probe nichts; es gibt in diesem Aufbau keine Sprecheranpassung.
+
+  **Wofür sie gut ist: drei geratene Zahlen durch gemessene ersetzen.** Alle
+  drei sind heute offene Punkte:
+
+  - **Der Pegel dieser Person.** DialOS arbeitet mit Schwellen, die an
+    Stephans Stimme gemessen sind (Sprache 3475-4196 gegen Rauschen 47-84).
+    Wer leiser spricht, fällt darunter - und dann passiert nichts, ohne dass
+    jemand weiß warum. Siehe auch den Punkt zur fehlenden Selbstprüfung.
+  - **Die Sprechpausen dieser Person.** Das Diktat trennt Einträge nach
+    0,4 s Pause. Diese Zahl ist **geraten** - es steht ausdrücklich so im
+    Punkt „Einträge trennen" weiter oben. Wer langsam spricht, bekommt seinen
+    Einkaufszettel in Einzelwörter zerlegt.
+  - **Ein Abnahmetest.** Werden alle Befehlssätze in DIESER Stimme erkannt?
+    Heute stellt sich das erst heraus, wenn der Nutzer allein mit dem Gerät
+    ist.
+
+  **Wie der Text gebaut sein muss:** jeder Befehlssatz genau einmal darin, und
+  dazwischen natürliche Sätze für die Pausenmessung. Nicht länger als eine
+  Minute - für einen ungeübten Nutzer ist Vorlesen ohnehin eine Prüfung, und
+  eine lange Prüfung am ersten Tag schreckt ab.
+
+  **Die Aufnahme wird nach der Messung gelöscht** (Stephans Entscheidung vom
+  2026-08-24). Behalten werden nur die Zahlen: Pegel, Pausenlängen,
+  Trefferquote je Befehl. Damit liegt kein Sprachmitschnitt des Nutzers auf
+  dem Gerät, und die Werte, die DialOS braucht, sind trotzdem da. Das Löschen
+  gehört in denselben Programmlauf wie die Messung - eine Aufnahme, die
+  „später" gelöscht wird, bleibt liegen.
+
+  **Vorher zu klären:**
+  1. Wohin mit den Zahlen? Eine Datei je Konto, oder in die bestehende
+     Konfiguration? Sie müssen einen Reinstall überleben oder bewusst nicht.
+  2. Was passiert, wenn die Probe schlecht ausfällt - zu leise, zu wenige
+     Befehle erkannt? Wiederholen, mit anderem Mikrofon versuchen, oder
+     abnehmen und dem Helfer melden? Ein Nutzer, der beim ersten Versuch
+     durchfällt, darf nicht ohne Weg dastehen.
+  3. Läuft sie beim ERSTEN Anmelden automatisch, oder ruft der Helfer sie auf?
+     Automatisch heißt: Der Nutzer wird beim ersten Kontakt geprüft, bevor er
+     weiß, was das Gerät kann.
+
 - [ ] **Keine Selbstprüfung, ob das Gerät überhaupt noch spricht** (offen seit
   2026-08-24, aufgefallen am stummen `paplay`). Am 2026-08-24 war jeder
   `paplay`-Strom stummgeschaltet, weil PipeWire sich das je Anwendung merkt.

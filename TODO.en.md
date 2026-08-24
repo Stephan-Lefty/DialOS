@@ -15,6 +15,60 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Voice sample at first login - and delete the recording afterwards**
+  (Stephan's idea of 2026-08-24: "wenn alles funktioniert, dem neuen Benutzer
+  einen Text präsentieren … damit das System eine Stimmenprobe von der Person
+  hat, die dann mit DialOS kommuniziert").
+
+  **DO NOT START BEFORE** (Stephan, 2026-08-24): "Das sollten wir ja erst
+  angehen, wenn alles mit meiner Stimme reibungslos läuft" - only once
+  everything runs smoothly with his voice. That is the right order, and not
+  merely for reasons of time: the voice sample MEASURES against the existing
+  state. While thresholds, grammar and matching are still changing it measures a
+  moving target, and every number it produces would be wrong again after the
+  next rebuild. Only once it holds with Stephan's voice is the step to a
+  stranger's voice a step at all, rather than a second building site.
+
+  **What it is NOT good for, so nobody builds the wrong thing:** recognition
+  does not improve from it. Vosk is speaker-independent and learns nothing from
+  a sample; there is no speaker adaptation in this setup.
+
+  **What it is good for: replacing three guessed numbers with measured ones.**
+  All three are open items today:
+
+  - **This person's level.** DialOS works with thresholds measured on
+    Stephan's voice (speech 3475-4196 against noise 47-84). Anyone speaking
+    more quietly falls below them - and then nothing happens, with nobody
+    knowing why. See also the item on the missing self-check.
+  - **This person's speaking pauses.** Dictation splits entries after a 0.4 s
+    pause. That number is **guessed** - it says so explicitly in the "split
+    entries" item above. Someone speaking slowly gets their shopping list
+    broken into single words.
+  - **An acceptance test.** Are all command sentences recognised in THIS
+    voice? Today that only emerges once the user is alone with the device.
+
+  **How the text has to be built:** every command sentence exactly once, with
+  natural sentences in between for measuring pauses. No longer than a minute -
+  reading aloud is an examination for an inexperienced user anyway, and a long
+  examination on day one puts people off.
+
+  **The recording is deleted after the measurement** (Stephan's decision of
+  2026-08-24). Only the numbers are kept: level, pause lengths, hit rate per
+  command. That way no voice recording of the user sits on the device while the
+  values DialOS needs are still there. The deletion belongs in the same program
+  run as the measurement - a recording deleted "later" stays put.
+
+  **To settle first:**
+  1. Where do the numbers go? One file per account, or into the existing
+     configuration? They must survive a reinstall, or deliberately not.
+  2. What happens when the sample turns out poor - too quiet, too few commands
+     recognised? Repeat, try another microphone, or accept it and report to the
+     helper? A user who fails on the first attempt must not be left without a
+     way forward.
+  3. Does it run automatically at FIRST login, or does the helper start it?
+     Automatically means the user is tested at first contact, before knowing
+     what the device can do.
+
 - [ ] **No self-check on whether the device still speaks at all** (open since
   2026-08-24, surfaced by the muted `paplay`). On 2026-08-24 every `paplay`
   stream was muted because PipeWire remembers that per application. The
