@@ -15,6 +15,44 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **FIRST THING TOMORROW: on 2026-08-24 the voice control could no longer
+  be switched on** - and a level hypothesis is open and untested.
+
+  **The finding.** Between 17:01 and 17:06 the log held only `starten`,
+  `[unk]` and `sprachsteuerung` - **not once `sprachsteuerung starten`**.
+  Thirteen attempts, none successful. So the new announcement never got its
+  turn either: it only applies in the switched-on state.
+
+  **The hypothesis, based on the new level column.** Peaks were **21935 to
+  30499** out of 32768 - 67 to 93 % of full scale. The service's saturation
+  threshold is 32000, so it never fired. But Vosk recognises speech by the
+  **pauses between words**; at that level they smear, and two words become one.
+  That very mechanism was already the cause on 2026-08-16 - back then through
+  "Capture +30 dB AND Internal Mic Boost +30 dB".
+
+  **What was changed on the evening of 2026-08-24 - RUNTIME ONLY, nothing in
+  the repo:** the volume of the source `alsa_input.pci-…analog-stereo` from
+  35 % to **18 %**. Effect measured: idle level from 52 to **17**, peak from 150
+  to 99. The echo source `dialos_mikrofon_ohne_echo` is itself at 100 % and
+  inherits from the raw signal, so the control does reach the service.
+  **A reboot resets this**, because `dialos-mikrofon-pegel.service` sets
+  `CAPTURE_PEGEL="100%"` again.
+
+  **A detour worth recording:** at first ALSA `Capture` was set directly to
+  50 %. That dropped the PipeWire volume from 35 to 13 % - the two controls are
+  coupled and were moved against each other. It would probably have been too
+  quiet. Everything now hangs on one control.
+
+  **Tomorrow, in this order:**
+  1. Say "Sprachsteuerung starten". Does the whole phrase come through?
+  2. Read the peaks in the log - are they now around 11000 to 15000?
+  3. **If it does not help, the diagnosis was wrong.** Then it is not the level,
+     and it gets measured differently: record Stephan's voice and check whether
+     the pause between "Sprachsteuerung" and "starten" arrives at all. A
+     plausible explanation is not yet a cause - that has been the mistake twice
+     already in this project.
+  4. Only then decide whether `CAPTURE_PEGEL` in the script changes.
+
 - [ ] **Customer data in ONE place - and not unencrypted** (Stephan's prompt of
   2026-08-24: "wo wir zentral alle wichtigen Daten des Kunden einmalig ablegen
   und die Mail, der Brief und das Diktat usw. greifen auf diese Daten immer

@@ -16,6 +16,46 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **ZUERST MORGEN: Die Sprachsteuerung ließ sich am 2026-08-24 nicht mehr
+  einschalten** — und ein Pegelverdacht ist ungeprüft offen.
+
+  **Der Befund.** Zwischen 17:01 und 17:06 stand im Protokoll ausschließlich
+  `starten`, `[unk]` und `sprachsteuerung` — **kein einziges Mal
+  `sprachsteuerung starten`**. Dreizehn Versuche, keiner erfolgreich. Damit kam
+  auch die neue Ansage nie zum Zug: Sie greift nur im eingeschalteten Zustand.
+
+  **Der Verdacht, gestützt auf die neue Pegelspalte.** Die Spitzen lagen bei
+  **21935 bis 30499** von 32768 — 67 bis 93 % des Vollausschlags. Die
+  Sättigungsschwelle im Dienst liegt bei 32000, sie hat also nie gegriffen.
+  Vosk erkennt Sprache aber an den **Pausen zwischen Wörtern**; bei diesem
+  Pegel verschmieren die, und aus zwei Wörtern wird eines. Genau dieser
+  Mechanismus war am 2026-08-16 schon einmal die Ursache — damals durch
+  „Capture +30 dB UND Internal Mic Boost +30 dB".
+
+  **Was am 2026-08-24 abends geändert wurde — NUR ZUR LAUFZEIT, nichts im
+  Repo:** die Lautstärke der Quelle `alsa_input.pci-…analog-stereo` von 35 %
+  auf **18 %**. Wirkung gemessen: Leerlaufpegel von 52 auf **17**, Spitze von
+  150 auf 99. Die Echo-Quelle `dialos_mikrofon_ohne_echo` steht selbst auf
+  100 % und erbt vom Rohsignal, der Regler greift also beim Dienst.
+  **Ein Neustart setzt das zurück**, weil `dialos-mikrofon-pegel.service`
+  wieder `CAPTURE_PEGEL="100%"` setzt.
+
+  **Ein Umweg, der dokumentiert gehört:** Zuerst wurde ALSA `Capture` direkt
+  auf 50 % gestellt. Dabei fiel die PipeWire-Lautstärke von 35 auf 13 % —
+  beide Regler sind gekoppelt und wurden gegeneinander verstellt. Das wäre
+  vermutlich zu leise geworden. Es hängt jetzt alles an einem Regler.
+
+  **Morgen zuerst:**
+  1. „Sprachsteuerung starten" sprechen. Kommt der ganze Satz durch?
+  2. Die Spitzen im Protokoll ablesen — liegen sie jetzt bei etwa
+     11000 bis 15000?
+  3. **Hilft es nicht, war die Diagnose falsch.** Dann liegt es nicht am Pegel,
+     und es wird anders gemessen: Stephans Stimme aufnehmen und prüfen, ob die
+     Pause zwischen „Sprachsteuerung" und „starten" überhaupt ankommt. Eine
+     plausible Erklärung ist noch keine Ursache — das war in diesem Projekt
+     schon zweimal der Fehler.
+  4. Erst danach entscheiden, ob `CAPTURE_PEGEL` im Skript geändert wird.
+
 - [ ] **Kundendaten an EINER Stelle - und nicht unverschlüsselt** (Stephans
   Anstoß vom 2026-08-24: „wo wir zentral alle wichtigen Daten des Kunden
   einmalig ablegen und die Mail, der Brief und das Diktat usw. greifen auf
