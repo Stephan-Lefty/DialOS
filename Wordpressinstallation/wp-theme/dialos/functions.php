@@ -214,7 +214,7 @@ add_filter( 'language_attributes', 'dialos_child_language_attributes' );
 function dialos_child_language_attributes( $output ) {
 	if ( is_singular() ) {
 		global $post;
-		if ( $post && strpos( mb_substr( $post->post_content, 0, 300 ), '>Deutsch<' ) !== false ) {
+		if ( $post && strpos( $post->post_content, '>Deutsch<' ) !== false ) {
 			$output = str_replace( 'lang="de"', 'lang="en"', $output );
 		}
 	}
