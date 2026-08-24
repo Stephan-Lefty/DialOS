@@ -2033,6 +2033,34 @@ Gemessen am 2026-08-22: Die Stimme steht nach 4,4 Sekunden um, mit Ansage in
 der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 
 
+
+### Was gesprochen wurde, steht im Protokoll
+
+**Seit dem 2026-08-24 — und der Anlass war eine Lücke in meiner eigenen
+Beweisführung.** Nach dem Fehlstart um 14:41:12 habe ich behauptet, DialOS
+habe zu der Zeit nicht gesprochen, und das mit `dialos-ton-ausgabe.log`
+belegt. Das protokolliert aber nur **Gerätewechsel**, keine Ansagen. Meine
+Aussage war damit nicht belegt, sondern nur nicht widerlegt — ein Unterschied,
+der in diesem Projekt schon zweimal teuer war.
+
+`dialos-say.py` schreibt jetzt nach `~/.log/dialos-say.log`, mit Datum und
+Uhrzeit, Fragen als `FRAGE` gekennzeichnet. Ohne diese Datei ist der erste
+Verdächtige bei jedem Fehlstart — die eigene Ansage, wenn die
+Echo-Unterdrückung versagt — weder zu bestätigen noch auszuräumen.
+
+**Der Text wird bei 120 Zeichen gekürzt**, und das ist eine
+Datenschutz-Entscheidung, kein Platzsparen: Bei einem Vorlese-Befehl wäre die
+Ansage das ganze Dokument. Ein vollständiger Mitschnitt jeder Ansage wäre ein
+Wortprotokoll des Nutzers, das niemand bestellt hat. Für den Zweck — wann
+wurde etwa was gesagt — reichen 120 Zeichen.
+
+Das Protokollieren hält das Sprechen nie auf: Schlägt das Schreiben fehl,
+wird es verschluckt. Eine Ansage, die wegen eines vollen Dateisystems
+ausfällt, wäre der schlechtere Fehler.
+
+`logrotate` erfasst die Datei ohne Änderung — die Regel greift auf
+`dialos-*.log`.
+
 ### Protokolle tragen ein Datum, nicht nur eine Uhrzeit
 
 **Seit dem 2026-08-24, und der Anlass war ein Fehlschluss von mir.** Alle

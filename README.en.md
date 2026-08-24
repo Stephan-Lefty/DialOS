@@ -121,6 +121,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Every announcement now appears in a log** (2026-08-24). `dialos-say.py`
+  writes to `~/.log/dialos-say.log`. The trigger was a gap in the evidence:
+  after the false start at 14:41:12 I claimed DialOS had not spoken, citing the
+  audio log - which only records device changes. The claim was not established,
+  merely not refuted. The text is truncated at 120 characters for data
+  protection: for a read-aloud command the announcement would be the whole
+  document.
+
 - **Logs now carry a date** (2026-08-24) - and the trigger was a false
   conclusion of mine. Twelve scripts wrote the time only; logrotate rotates
   daily but only while the device runs, so three days sat in one file. I

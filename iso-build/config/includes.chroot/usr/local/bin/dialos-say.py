@@ -18,6 +18,7 @@ import re
 import shlex
 import subprocess
 import sys
+import time
 
 
 # Aussprache-Regeln fuer Piper. Jede Zeile: Muster, Ersatz, Begruendung.
@@ -111,6 +112,37 @@ FRAGE_TON = "/usr/local/share/dialos/frage-ton.wav"
 SPEICHER = os.path.join(
     os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache")),
     "dialos", "ansagen")
+# WAS GESPROCHEN WURDE, GEHOERT INS PROTOKOLL (seit 2026-08-24).
+#
+# Vorher stand es nirgends. Aufgefallen ist das an einer Beweisluecke: Am
+# 2026-08-24 hat sich die Sprachsteuerung um 14:41:12 selbst eingeschaltet,
+# und ich habe behauptet, DialOS habe zu der Zeit nicht gesprochen - belegt
+# mit dialos-ton-ausgabe.log. Das protokolliert aber nur GERAETEWECHSEL, nicht
+# Ansagen. Meine Aussage war also nicht belegt, sondern nur nicht widerlegt.
+#
+# Warum das mehr ist als Ordnungsliebe: Die eigene Ansage ist der erste
+# Verdaechtige bei jedem Fehlstart - die Echo-Unterdrueckung kann schliesslich
+# versagen. Ohne Aufzeichnung ist dieser Verdacht weder zu bestaetigen noch
+# auszuraeumen, und man raet.
+#
+# Der Text wird auf 120 Zeichen gekuerzt: Es geht um WANN und WAS ETWA, nicht
+# um ein Wortprotokoll des Nutzers. Ein vollstaendiger Mitschnitt jeder Ansage
+# waere bei einem Vorlese-Befehl das ganze Dokument - und damit ein
+# Datenschutzproblem, das niemand bestellt hat.
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-say.log")
+PROTOKOLL_MAX = 120
+
+
+def melde(text):
+    """Nie den Aufrufer aufhalten: Sprechen ist wichtiger als Protokollieren."""
+    try:
+        os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
+        with open(PROTOKOLL, "a", encoding="utf-8") as f:
+            f.write(f"{time.strftime('%m-%d %H:%M:%S')}  {text}\n")
+    except OSError:
+        pass
+
+
 PIPER_CONF = "/etc/speech-dispatcher/modules/piper-generic.conf"
 PIPER_STIMMEN = "/usr/local/share/dialos-piper/voices"
 
@@ -410,6 +442,8 @@ def main():
         frageton_abspielen()
     if not text:
         return
+    gekuerzt = text if len(text) <= PROTOKOLL_MAX else text[:PROTOKOLL_MAX] + " …"
+    melde(f"{'FRAGE ' if ist_frage else ''}{gekuerzt}")
     streams = sink_inputs()
     stummgeschaltet = []
     for stream in streams:

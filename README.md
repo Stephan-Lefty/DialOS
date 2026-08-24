@@ -129,6 +129,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Jede Ansage steht jetzt im Protokoll** (2026-08-24). `dialos-say.py`
+  schreibt nach `~/.log/dialos-say.log`. Anlass war eine Beweisluecke: Beim
+  Fehlstart um 14:41:12 habe ich behauptet, DialOS habe nicht gesprochen, und
+  das mit dem Ton-Protokoll belegt - das aber nur Geraetewechsel aufzeichnet.
+  Die Aussage war nicht belegt, nur nicht widerlegt. Der Text wird bei 120
+  Zeichen gekuerzt, und zwar aus Datenschutzgruenden: Bei einem
+  Vorlese-Befehl waere die Ansage das ganze Dokument.
+
 - **Protokolle tragen jetzt ein Datum** (2026-08-24) - und der Anlass war ein
   Fehlschluss von mir. Zwoelf Skripte schrieben nur die Uhrzeit; logrotate
   dreht taeglich, aber nur bei laufendem Geraet, also lagen drei Tage in einer

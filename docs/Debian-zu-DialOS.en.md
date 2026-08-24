@@ -1950,6 +1950,32 @@ Measured on 2026-08-22: the voice switches in 4.4 seconds, announcing itself
 in the new voice, in both directions. The look switches without delay.
 
 
+
+### What was spoken goes into the log
+
+**Since 2026-08-24 — and the trigger was a gap in my own reasoning.** After the
+false start at 14:41:12 I claimed DialOS had not spoken at that time, citing
+`dialos-ton-ausgabe.log`. But that only records **device changes**, not
+announcements. My statement was therefore not established, merely not
+refuted — a difference that has already been expensive twice in this project.
+
+`dialos-say.py` now writes to `~/.log/dialos-say.log`, with date and time, and
+questions marked `FRAGE`. Without that file the first suspect in any false
+start — the device's own announcement, should echo cancellation fail — can
+neither be confirmed nor ruled out.
+
+**The text is truncated at 120 characters**, and that is a data-protection
+decision, not thrift: for a read-aloud command the announcement would be the
+whole document. A full transcript of every announcement would be a verbatim
+record of the user, which nobody asked for. For the purpose — roughly when was
+roughly what said — 120 characters suffice.
+
+Logging never holds up speaking: if the write fails it is swallowed. An
+announcement lost to a full filesystem would be the worse fault.
+
+`logrotate` covers the file without any change — the rule matches
+`dialos-*.log`.
+
 ### Logs carry a date, not just a time
 
 **Since 2026-08-24, and the trigger was a false conclusion of mine.** Every
