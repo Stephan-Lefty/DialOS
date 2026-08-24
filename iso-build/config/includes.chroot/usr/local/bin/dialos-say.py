@@ -16,18 +16,57 @@ import json
 import os
 import re
 import shlex
+import signal
 import subprocess
 import sys
+import time
 
 
-# Aussprache-Regeln fuer Piper. Jede Zeile: Muster, Ersatz, Begruendung.
-# Die Begruendung steht bewusst mit im Code - ohne sie sieht eine solche
-# Regel spaeter wie ein Tippfehler aus und wird "korrigiert".
+# Jede Regel hat VIER Felder: Muster, Ersatz, Begruendung, und die Stimmen,
+# fuer die sie gilt (None = alle). Das vierte kam am 2026-08-24 dazu, weil
+# Stephan die Aussprache von "DialOS" pro Stimme verschieden wollte: "Michael
+# lassen wir wie bisher und bei Anne die Variante 2".
 AUSSPRACHE = [
     (
-        re.compile(r"\bDialOS\b(?!\.)", re.IGNORECASE),
+        # ANNA spricht die Buchstaben einzeln. Aus acht Schreibweisen von
+        # Stephan nach Gehoer gewaehlt (2026-08-24); sein Einwand vorher war,
+        # "Dial OS" sei zu gedraengt: "zwischen Dial und OS eine etwas
+        # groessere Pause".
+        #
+        # GEMESSEN, damit es niemand erneut durchprobiert: Piper kennt keine
+        # MITTLERE Pause. Semikolon, Doppelpunkt, Auslassungspunkte,
+        # Gedankenstrich, mehrere Leerzeichen - alle exakt 0 ms Stille. Nur
+        # Satzende-Zeichen erzeugen welche: Punkt 220 ms, Fragezeichen 230 ms,
+        # Ausrufezeichen 290 ms.
+        #
+        # "Dial. OS" traf damit sogar Stephans eigene Sprechpause (an seiner
+        # Stimme gemessen: 105 und 180 ms), machte aber aus dem Wort zwei
+        # SAETZE - die Melodie faellt nach "Dial" ab. Sein Urteil: "das zweite
+        # ist ja alles aber nicht das Wort DialOS". "Dial O S" fuegt deshalb
+        # keine Stille ein, sondern spricht die Buchstaben einzeln. Das Wort
+        # bleibt eines und wird laenger: 0,47 -> 0,64 s.
+        re.compile(r"\bDialOS\b(?!\.[A-Za-z])", re.IGNORECASE),
+        "Dial O S",
+        "Anna spricht die Buchstaben einzeln - Stephans Wahl vom 2026-08-24.",
+        ("de_DE-kerstin-low",),
+    ),
+    (
+        # MICHAEL bleibt bei der bisherigen Schreibweise - Stephans
+        # Entscheidung am 2026-08-24, nachdem er beide gehoert hat. Bei ihm
+        # dauert "Dial O S" 1,19 s gegen 0,98 s, der Unterschied ist also
+        # aehnlich gross wie bei Anna; ihm gefiel es hier trotzdem nicht.
+        #
+        # Diese Regel gilt fuer ALLE anderen Stimmen und ist damit auch der
+        # Rueckfall fuer eine kuenftige dritte: lieber die bewaehrte Trennung
+        # als gar keine.
+        #
+        # Bei Anna laeuft sie nicht ins Leere, sondern findet nichts mehr - die
+        # Regel darueber hat "DialOS" dann bereits ersetzt. Die Reihenfolge in
+        # dieser Liste ist deshalb nicht beliebig: spezifisch vor allgemein.
+        re.compile(r"\bDialOS\b(?!\.[A-Za-z])", re.IGNORECASE),
         "Dial OS",
         "Sonst als ein Wort gelesen; gemeint ist 'Dial O S'.",
+        None,
     ),
     (
         # Deutsch spricht "st" am Silbenanfang als "scht". Piper setzt die
@@ -38,6 +77,7 @@ AUSSPRACHE = [
         re.compile(r"\bTastatur(en)?\b", re.IGNORECASE),
         r"Tas tatur\1",
         "Sonst 'Taschtatur' - falsche Silbengrenze.",
+        None,
     ),
     (
         # "ID" wird von der deutschen Stimme als Wort gelesen ("id"). Gemeint
@@ -56,15 +96,32 @@ AUSSPRACHE = [
         re.compile(r"\bID\b"),
         "Ei Di",
         "Sonst als deutsches Wort gelesen; gemeint ist englisch 'eye-dee'.",
+        None,
     ),
 ]
 
 
-def fuer_sprachausgabe(text):
-    """Schreibweisen anpassen, die Piper sonst falsch ausspricht.
+def stimm_kennung():
+    """Welche Stimme speech-dispatcher gerade benutzt, z. B. "de_DE-kerstin-low".
 
-    "DialOS" wuerde als ein Wort gelesen. Getrennt geschrieben spricht die
-    Stimme es als "Dial OS", was gemeint ist.
+    GELESEN, NICHT GERATEN - dieselbe Quelle wie ueberall: DefaultVoice in
+    piper-generic.conf. Gibt None zurueck, wenn sie nicht zu lesen ist; dann
+    gelten nur die Regeln ohne Stimmenbindung, und das ist der richtige
+    Rueckfall: lieber die allgemeine Trennung als keine.
+    """
+    try:
+        with open(PIPER_CONF) as f:
+            for zeile in f:
+                if zeile.startswith("DefaultVoice"):
+                    teile = shlex.split(zeile)
+                    return teile[1] if len(teile) > 1 else None
+    except OSError:
+        pass
+    return None
+
+
+def fuer_sprachausgabe(text, stimme=None):
+    r"""Schreibweisen anpassen, die Piper sonst falsch ausspricht.
 
     Bewusst ZENTRAL hier statt in den einzelnen Texten: So kann keine
     kuenftige Ansage die Trennung vergessen, und die Texte selbst bleiben
@@ -73,18 +130,34 @@ def fuer_sprachausgabe(text):
 
     Wortgrenze und die Ausnahme fuer den Punkt sind wichtig:
       "dialosadmin"     bleibt - kein Wortende nach "dialos"
-      "dialos.org"      bleibt - der Lookahead schliesst den Punkt aus
+      "dialos.org"      bleibt - der Lookahead schliesst "Punkt+Buchstabe" aus
+      "DialOS."         wird getrennt - Satzende, siehe unten
       "DialOS-System"   wird getrennt - richtig so, es ist gesprochener Text
     Ein Bindestrich IST eine Wortgrenze, "dialos-say.py" wuerde also
     ebenfalls getrennt. Das ist folgenlos: Skript- und Dateinamen kommen
     in gesprochenen Texten nicht vor, nur in Kommentaren und Pfaden - und
     die laufen nie durch diese Funktion.
 
-    Seit 2026-08-17 eine Liste statt einer einzelnen Ersetzung: Es kam die
-    zweite Regel dazu, und es werden weitere kommen. Neue Regel = eine
-    Zeile in AUSSPRACHE, mit einem Satz dazu, WARUM sie noetig ist.
+    FEHLER BEHOBEN AM 2026-08-24: Der Lookahead hiess vorher (?!\.) und
+    schloss damit JEDEN folgenden Punkt aus - also auch den Schlusspunkt eines
+    Satzes. "Willkommen bei DialOS." wurde deshalb NICHT getrennt und als ein
+    Wort gelesen, waehrend "DialOS ist bereit." richtig klang. Ausgerechnet der
+    haeufigste Fall war der falsche, und aufgefallen ist es nur, weil beim
+    Einbau der neuen Regel beide Stellungen geprueft wurden. Jetzt
+    (?!\.[A-Za-z]): Ein Punkt zaehlt nur dann als Teil des Wortes, wenn ein
+    Buchstabe folgt - das trifft "dialos.org" und verschont den Satzpunkt.
+
+    Der Parameter "stimme" ist die Kennung (z. B. "de_DE-kerstin-low"). Ohne
+    Angabe wird die eingestellte gelesen. Die Erzeuger der Hoerproben MUESSEN
+    sie mitgeben: Sie erzeugen Dateien fuer eine bestimmte Stimme, nicht fuer
+    die gerade eingestellte - sonst bekaeme Michaels Datei Annas Aussprache.
+    Genau diese Verwechslung hat dieses Projekt schon zweimal gekostet.
     """
-    for muster, ersatz, _grund in AUSSPRACHE:
+    if stimme is None:
+        stimme = stimm_kennung()
+    for muster, ersatz, _grund, nur_stimmen in AUSSPRACHE:
+        if nur_stimmen is not None and stimme not in nur_stimmen:
+            continue
         text = muster.sub(ersatz, text)
     return text
 
@@ -111,6 +184,37 @@ FRAGE_TON = "/usr/local/share/dialos/frage-ton.wav"
 SPEICHER = os.path.join(
     os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache")),
     "dialos", "ansagen")
+# WAS GESPROCHEN WURDE, GEHOERT INS PROTOKOLL (seit 2026-08-24).
+#
+# Vorher stand es nirgends. Aufgefallen ist das an einer Beweisluecke: Am
+# 2026-08-24 hat sich die Sprachsteuerung um 14:41:12 selbst eingeschaltet,
+# und ich habe behauptet, DialOS habe zu der Zeit nicht gesprochen - belegt
+# mit dialos-ton-ausgabe.log. Das protokolliert aber nur GERAETEWECHSEL, nicht
+# Ansagen. Meine Aussage war also nicht belegt, sondern nur nicht widerlegt.
+#
+# Warum das mehr ist als Ordnungsliebe: Die eigene Ansage ist der erste
+# Verdaechtige bei jedem Fehlstart - die Echo-Unterdrueckung kann schliesslich
+# versagen. Ohne Aufzeichnung ist dieser Verdacht weder zu bestaetigen noch
+# auszuraeumen, und man raet.
+#
+# Der Text wird auf 120 Zeichen gekuerzt: Es geht um WANN und WAS ETWA, nicht
+# um ein Wortprotokoll des Nutzers. Ein vollstaendiger Mitschnitt jeder Ansage
+# waere bei einem Vorlese-Befehl das ganze Dokument - und damit ein
+# Datenschutzproblem, das niemand bestellt hat.
+PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-say.log")
+PROTOKOLL_MAX = 120
+
+
+def melde(text):
+    """Nie den Aufrufer aufhalten: Sprechen ist wichtiger als Protokollieren."""
+    try:
+        os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
+        with open(PROTOKOLL, "a", encoding="utf-8") as f:
+            f.write(f"{time.strftime('%m-%d %H:%M:%S')}  {text}\n")
+    except OSError:
+        pass
+
+
 PIPER_CONF = "/etc/speech-dispatcher/modules/piper-generic.conf"
 PIPER_STIMMEN = "/usr/local/share/dialos-piper/voices"
 
@@ -340,6 +444,40 @@ def ist_speech_dispatcher(stream):
     return name.startswith("speech-dispatcher")
 
 
+def ist_eigener_ton(stream):
+    """Toene, die DialOS selbst abspielt - die duerfen NIE stumm werden.
+
+    ENTDECKT AM 2026-08-24, nachdem Stephan bei einer Hoerprobe "ich hoere
+    nix" sagte. Der paplay-Strom kam STUMMGESCHALTET zur Welt:
+
+        Sink Input #602
+            Mute: yes
+            module-stream-restore.id = "sink-input-by-application-name:paplay"
+
+    PipeWire merkt sich Lautstaerke und Stummschaltung JE ANWENDUNG. Wird ein
+    paplay-Strom einmal stummgeschaltet und nicht wieder freigegeben, ist
+    jeder kuenftige paplay-Strom stumm - dauerhaft, ueber Neustarts hinweg.
+
+    Und DialOS spielt ueber paplay: den Frageton, den stillen Testton der
+    Ausgabewahl UND die zwischengespeicherten Ansagen. Damit waeren alle
+    gespeicherten Ansagen lautlos. Schlimmer noch: paplay gibt dabei 0
+    zurueck, aus_speicher() haelt die Ansage fuer geglueckt und faellt NICHT
+    auf spd-say zurueck. Das Geraet waere fuer einen blinden Nutzer stumm,
+    ohne dass irgendwo ein Fehler stuende.
+
+    Wie es dazu kommt: Laufen zwei Ansagen kurz hintereinander, sieht die
+    zweite den paplay-Strom der ersten und schaltet ihn stumm. Stirbt sie
+    dann, bevor sie ihn freigibt - SIGTERM laesst kein "finally" laufen -,
+    bleibt die Stummschaltung in PipeWires Merkdatei stehen.
+
+    Der Preis dieser Ausnahme: Spielte eine FREMDE Anwendung ueber paplay
+    Musik ab, wuerde sie waehrend einer Ansage nicht leiser. Das ist der
+    guenstigere Fehler.
+    """
+    name = stream.get("properties", {}).get("application.name", "")
+    return name == "paplay"
+
+
 def markierung_setzen():
     try:
         open(MARKIERUNGSDATEI, "w").close()
@@ -380,7 +518,22 @@ def sprich(cmd, grenze_s):
         return False
 
 
+def bei_signal(nummer, _rahmen):
+    """SIGTERM/SIGINT/SIGHUP in eine Ausnahme wandeln.
+
+    Ohne das laeuft der "finally"-Block unten NICHT: Pythons Vorgabe fuer
+    SIGTERM beendet den Prozess sofort, ohne Aufraeumen. Genau daran ist am
+    2026-08-24 die Stummschaltung haengengeblieben - siehe ist_eigener_ton().
+    Aufraeumen heisst hier: fremde Stroeme wieder freigeben und die
+    Sprech-Markierung entfernen. Bleibt die Markierung liegen, haelt sich der
+    Sprachbefehl-Dienst dauerhaft heraus und hoert nicht mehr zu.
+    """
+    raise SystemExit(128 + nummer)
+
+
 def main():
+    for nummer in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(nummer, bei_signal)
     argv = sys.argv[1:]
     # "--frage" markiert die Ausgabe als Frage an den Nutzer. Der Text
     # selbst bleibt unveraendert - sein Fragezeichen sorgt bei Piper fuer
@@ -410,11 +563,13 @@ def main():
         frageton_abspielen()
     if not text:
         return
+    gekuerzt = text if len(text) <= PROTOKOLL_MAX else text[:PROTOKOLL_MAX] + " …"
+    melde(f"{'FRAGE ' if ist_frage else ''}{gekuerzt}")
     streams = sink_inputs()
     stummgeschaltet = []
     for stream in streams:
         index = stream.get("index")
-        if index is None or ist_speech_dispatcher(stream):
+        if index is None or ist_speech_dispatcher(stream) or ist_eigener_ton(stream):
             continue
         if not stream.get("mute", False):
             set_mute(index, True)

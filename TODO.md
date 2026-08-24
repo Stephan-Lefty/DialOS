@@ -16,6 +16,206 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **ZUERST MORGEN: Die Sprachsteuerung ließ sich am 2026-08-24 nicht mehr
+  einschalten** — und ein Pegelverdacht ist ungeprüft offen.
+
+  **Der Befund.** Zwischen 17:01 und 17:06 stand im Protokoll ausschließlich
+  `starten`, `[unk]` und `sprachsteuerung` — **kein einziges Mal
+  `sprachsteuerung starten`**. Dreizehn Versuche, keiner erfolgreich. Damit kam
+  auch die neue Ansage nie zum Zug: Sie greift nur im eingeschalteten Zustand.
+
+  **Der Verdacht, gestützt auf die neue Pegelspalte.** Die Spitzen lagen bei
+  **21935 bis 30499** von 32768 — 67 bis 93 % des Vollausschlags. Die
+  Sättigungsschwelle im Dienst liegt bei 32000, sie hat also nie gegriffen.
+  Vosk erkennt Sprache aber an den **Pausen zwischen Wörtern**; bei diesem
+  Pegel verschmieren die, und aus zwei Wörtern wird eines. Genau dieser
+  Mechanismus war am 2026-08-16 schon einmal die Ursache — damals durch
+  „Capture +30 dB UND Internal Mic Boost +30 dB".
+
+  **Was am 2026-08-24 abends geändert wurde — NUR ZUR LAUFZEIT, nichts im
+  Repo:** die Lautstärke der Quelle `alsa_input.pci-…analog-stereo` von 35 %
+  auf **18 %**. Wirkung gemessen: Leerlaufpegel von 52 auf **17**, Spitze von
+  150 auf 99. Die Echo-Quelle `dialos_mikrofon_ohne_echo` steht selbst auf
+  100 % und erbt vom Rohsignal, der Regler greift also beim Dienst.
+  **Ein Neustart setzt das zurück**, weil `dialos-mikrofon-pegel.service`
+  wieder `CAPTURE_PEGEL="100%"` setzt.
+
+  **Ein Umweg, der dokumentiert gehört:** Zuerst wurde ALSA `Capture` direkt
+  auf 50 % gestellt. Dabei fiel die PipeWire-Lautstärke von 35 auf 13 % —
+  beide Regler sind gekoppelt und wurden gegeneinander verstellt. Das wäre
+  vermutlich zu leise geworden. Es hängt jetzt alles an einem Regler.
+
+  **Morgen zuerst:**
+  1. „Sprachsteuerung starten" sprechen. Kommt der ganze Satz durch?
+  2. Die Spitzen im Protokoll ablesen — liegen sie jetzt bei etwa
+     11000 bis 15000?
+  3. **Hilft es nicht, war die Diagnose falsch.** Dann liegt es nicht am Pegel,
+     und es wird anders gemessen: Stephans Stimme aufnehmen und prüfen, ob die
+     Pause zwischen „Sprachsteuerung" und „starten" überhaupt ankommt. Eine
+     plausible Erklärung ist noch keine Ursache — das war in diesem Projekt
+     schon zweimal der Fehler.
+  4. Erst danach entscheiden, ob `CAPTURE_PEGEL` im Skript geändert wird.
+
+- [ ] **Kundendaten an EINER Stelle - und nicht unverschlüsselt** (Stephans
+  Anstoß vom 2026-08-24: „wo wir zentral alle wichtigen Daten des Kunden
+  einmalig ablegen und die Mail, der Brief und das Diktat usw. greifen auf
+  diese Daten immer zu").
+
+  **Wie es heute aussieht.** Dieselbe Person steht an mehreren Stellen, jede
+  mit eigenem Format:
+
+  | Was | Wo | Wer liest es |
+  |---|---|---|
+  | Name, gesprochen und geschrieben | `/usr/local/share/dialos/nutzer-name.txt` | Start-Ansage, Briefbogen, Anrede |
+  | Anschrift | `/usr/local/share/dialos/absender.txt` | Briefbogen - **existiert nicht** |
+  | Fußzeilentext | `/usr/local/share/dialos/fusszeile.txt` | Mail, Brief, Ausdruck |
+  | Mail-Signatur | `mail-signatur.txt` / `.html` | Thunderbird (erzeugt) |
+  | Mailbox-Zugangsdaten | Datei in `/home/nutzer`, 0600 | Mailabruf |
+
+  **Der schwerwiegende Teil ist nicht die Verteilung, sondern der Ort.**
+  Gemessen am 2026-08-24:
+
+      /usr/local/share/dialos/nutzer-name.txt  →  /dev/nvme0n1p1  ext4   0644
+      /home/nutzer                             →  nvme0n1p4       LUKS
+
+  Der Name des Kunden liegt **unverschlüsselt und für jeden lesbar** auf der
+  Wurzelpartition, während seine Briefe hinter LUKS liegen. Die Anschrift soll
+  laut Briefbogen an denselben Ort. Bei einem gestohlenen Laptop ist damit
+  genau das lesbar, was die Person identifiziert - und der Zweck der
+  verschlüsselten Home-Partition ist zur Hälfte hinfällig. Siehe
+  `docs/sicherheit-datenschutz.md`.
+
+  **Zweiter Fehler, derselbe Ort:** Die Dateien sind systemweit, die Daten aber
+  personenbezogen. Auf dem Entwicklungsgerät teilen sich `dialosadmin` und
+  `nutzer` denselben Namen - ein Brief des Admin-Kontos trüge den Namen des
+  Kunden.
+
+  **Vor dem Bauen zu klären:**
+  1. **Wohin?** `/home/nutzer/.config/dialos/` liegt auf der verschlüsselten
+     Partition und ist personenbezogen - beides richtig. **Die Startreihenfolge
+     spricht NICHT dagegen**; das stand hier zuerst und war falsch (berichtigt
+     2026-08-24). `dialos-stick-gate` läuft `Before=display-manager.service`,
+     mountet die Partition und schaltet erst danach Autologin ein - ohne Stick
+     sperrt er das Konto sogar. Hat `nutzer` eine Sitzung, ist die Partition
+     immer gemountet. Offen bleibt nur: Das ADMIN-Konto käme nicht heran
+     (`/home/dialosadmin` liegt auf der Wurzelpartition), und der Gate selbst
+     könnte die Daten nie lesen, falls er einmal sprechen soll.
+  2. **Welches Format?** Fünf Dateien mit fünf Formaten sind der heutige Stand.
+     Eine Datei mit klaren Feldern (Name gesprochen, Name geschrieben, Straße,
+     Ort, Telefon, Mailadresse) wäre lesbar und erweiterbar.
+  3. **Was ist NICHT Kundendatum?** `assistent-name.txt` (Michael/Anna) und
+     `fusszeile.txt` sind Systemeinstellungen und gehören nicht dorthin. Die
+     Trennlinie muss gezogen werden, sonst wandert am Ende alles in eine Datei
+     und niemand weiß mehr, was beim Kundenwechsel zu löschen ist.
+  4. **Was passiert beim Wechsel?** Ein Gerät, das an eine andere Person geht,
+     muss diese Daten sicher loswerden. Eine zentrale Stelle macht das
+     möglich - fünf verstreute Dateien machen es unzuverlässig.
+
+  **Erst danach** lohnt sich der geführte Dialog für Empfänger und Betreff
+  (siehe `docs/brief-vorlage.md`): Er würde sonst auf einen Datenbestand
+  aufsetzen, der gerade umzieht.
+
+- [ ] **Stimmprobe beim ersten Anmelden - und die Aufnahme danach löschen**
+  (Stephans Idee vom 2026-08-24: „wenn alles funktioniert, dem neuen Benutzer
+  einen Text präsentieren … damit das System eine Stimmenprobe von der Person
+  hat, die dann mit DialOS kommuniziert").
+
+  **NICHT VORHER ANFANGEN** (Stephan, 2026-08-24): „Das sollten wir ja erst
+  angehen, wenn alles mit meiner Stimme reibungslos läuft." Das ist die richtige
+  Reihenfolge, und zwar nicht nur aus Zeitgründen: Die Stimmprobe MISST gegen
+  den bestehenden Stand. Solange sich Schwellen, Grammatik und Zuordnung noch
+  ändern, misst sie ein bewegliches Ziel - und jede Zahl, die dabei
+  herauskommt, wäre beim nächsten Umbau wieder falsch. Erst wenn es mit
+  Stephans Stimme trägt, ist der Schritt zu einer fremden Stimme überhaupt ein
+  Schritt und nicht bloß eine zweite Baustelle.
+
+  **Wofür sie NICHT gut ist, damit niemand das Falsche baut:** Die Erkennung
+  wird davon nicht besser. Vosk ist sprecherunabhängig und lernt aus einer
+  Probe nichts; es gibt in diesem Aufbau keine Sprecheranpassung.
+
+  **Wofür sie gut ist: drei geratene Zahlen durch gemessene ersetzen.** Alle
+  drei sind heute offene Punkte:
+
+  - **Der Pegel dieser Person.** DialOS arbeitet mit Schwellen, die an
+    Stephans Stimme gemessen sind (Sprache 3475-4196 gegen Rauschen 47-84).
+    Wer leiser spricht, fällt darunter - und dann passiert nichts, ohne dass
+    jemand weiß warum. Siehe auch den Punkt zur fehlenden Selbstprüfung.
+  - **Die Sprechpausen dieser Person.** Das Diktat trennt Einträge nach
+    0,4 s Pause. Diese Zahl ist **geraten** - es steht ausdrücklich so im
+    Punkt „Einträge trennen" weiter oben. Wer langsam spricht, bekommt seinen
+    Einkaufszettel in Einzelwörter zerlegt.
+  - **Ein Abnahmetest.** Werden alle Befehlssätze in DIESER Stimme erkannt?
+    Heute stellt sich das erst heraus, wenn der Nutzer allein mit dem Gerät
+    ist.
+
+  **Wie der Text gebaut sein muss:** jeder Befehlssatz genau einmal darin, und
+  dazwischen natürliche Sätze für die Pausenmessung. Nicht länger als eine
+  Minute - für einen ungeübten Nutzer ist Vorlesen ohnehin eine Prüfung, und
+  eine lange Prüfung am ersten Tag schreckt ab.
+
+  **Die Aufnahme wird nach der Messung gelöscht** (Stephans Entscheidung vom
+  2026-08-24). Behalten werden nur die Zahlen: Pegel, Pausenlängen,
+  Trefferquote je Befehl. Damit liegt kein Sprachmitschnitt des Nutzers auf
+  dem Gerät, und die Werte, die DialOS braucht, sind trotzdem da. Das Löschen
+  gehört in denselben Programmlauf wie die Messung - eine Aufnahme, die
+  „später" gelöscht wird, bleibt liegen.
+
+  **Vorher zu klären:**
+  1. Wohin mit den Zahlen? Eine Datei je Konto, oder in die bestehende
+     Konfiguration? Sie müssen einen Reinstall überleben oder bewusst nicht.
+  2. Was passiert, wenn die Probe schlecht ausfällt - zu leise, zu wenige
+     Befehle erkannt? Wiederholen, mit anderem Mikrofon versuchen, oder
+     abnehmen und dem Helfer melden? Ein Nutzer, der beim ersten Versuch
+     durchfällt, darf nicht ohne Weg dastehen.
+  3. Läuft sie beim ERSTEN Anmelden automatisch, oder ruft der Helfer sie auf?
+     Automatisch heißt: Der Nutzer wird beim ersten Kontakt geprüft, bevor er
+     weiß, was das Gerät kann.
+
+- [ ] **Keine Selbstprüfung, ob das Gerät überhaupt noch spricht** (offen seit
+  2026-08-24, aufgefallen am stummen `paplay`). Am 2026-08-24 war jeder
+  `paplay`-Strom stummgeschaltet, weil PipeWire sich das je Anwendung merkt.
+  Folge: alle **zwischengespeicherten** Ansagen lautlos, dazu Frageton und
+  Testton. `paplay` gibt dabei 0 zurück, `aus_speicher()` hält die Ansage für
+  geglückt und fällt nicht auf `spd-say` zurück.
+
+  **Für einen blinden Nutzer ist das der schlimmste Fall überhaupt:** Das
+  Gerät ist stumm, es steht nirgends ein Fehler, und er kann nicht nachsehen.
+  Die Ursache ist behoben (siehe Änderungsprotokoll), aber die **Klasse** des
+  Fehlers nicht: Es gibt keine Stelle, die merkt „ich habe gesprochen, aber es
+  war nichts zu hören".
+
+  **Was zu klären ist, bevor etwas gebaut wird:** Woran lässt sich das
+  überhaupt messen? Kandidaten: den eigenen Strom nach dem Anlegen auf `Mute`
+  prüfen (billig, fängt genau diesen Fall), oder den Pegel der Senke während
+  der Ansage lesen (fängt mehr, ist aber aufwendiger und bei Kopfhörern
+  zweifelhaft). Nicht raten - erst prüfen, was PipeWire wirklich hergibt.
+
+  **Und wie sagt man es?** Eine Ansage kann es nicht sein - die wäre ja
+  ebenfalls stumm. Bleibt: Protokoll, Mitschrift-Fenster, und beim nächsten
+  Anmelden ein sichtbarer Hinweis für den Helfer.
+
+- [ ] **Erster Fehlstart der Sprachsteuerung - Ursache offen** (2026-08-24).
+  Um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet: Vosk erkannte
+  „sprachsteuerung starten", das Mitschrift-Fenster ging auf, danach kamen
+  „datum vorlesen drucken" und „welchen". **Stephan hatte an diesem Tag kein
+  Wort zur Sprachsteuerung gesagt.**
+
+  **Was ausgeschlossen ist:** die eigene Ansage. Im Ton-Protokoll steht
+  zwischen 14:35 und 14:42 keine einzige Zeile, DialOS hat also nicht selbst
+  gesprochen. Die Echo-Unterdrückung war damit gar nicht gefordert.
+
+  **Was offen ist:** was das Mikrofon gehört hat. Umgebungssprache (Gespräch
+  im Raum, Radio, Video) ist die naheliegende Vermutung - aber eine Vermutung,
+  und dieses Projekt hat schon zweimal an einer schlüssigen Vermutung
+  vorbeigemessen. Zu klären ist zuerst mit Stephan, ob um 14:41 jemand oder
+  etwas im Raum gesprochen hat.
+
+  **Warum es zählt:** Die Zwei-Wort-Regel ist genau dafür gebaut, dass ein
+  beiläufiges Wort nichts auslöst. Wenn Umgebungssprache sie überwindet, ist
+  ein selbsttätiges Einschalten samt Fenster und ausgeführten Befehlen
+  möglich, ohne dass jemand mit dem Gerät spricht. Beim blinden Nutzer wäre
+  das Fenster unsichtbar - er merkt nur, dass das Gerät plötzlich zuhört.
+
 - [ ] **Erlaubte Wortkombinationen ohne Befehl fallen LAUTLOS durch** (offen
   seit 2026-08-22, gefunden beim Drucktest). Der schwerwiegendste offene Punkt
   für die Zielgruppe.
@@ -44,7 +244,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
   Die 345 im AUS-Zustand sind fast alle Bruchstücke von „sprachsteuerung
   starten". **Dort ist Schweigen richtig und muss so bleiben** - das ist die
-  Zwei-Wort-Regel, die 60 Beinahe-Treffer und null Fehlstarts gebracht hat. Nur
+  Zwei-Wort-Regel, die 60 Beinahe-Treffer und lange null Fehlstarts gebracht
+  hat - der erste kam am 2026-08-24 (siehe eigener Punkt oben). Nur
   die 382 im EINGESCHALTETEN Zustand sind der Fehler.
 
   **Und da liegt das Dilemma:** 382 Ansagen wären unerträglich. Das Gerät würde
@@ -194,21 +395,16 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     wenigen Saetzen; ob es ueber einen langen Text traegt, zeigt erst der
     Alltag. Umstellen geht in einer Zeile: STIMMEN["kerstin"]["tempo"] in
     dialos-stimme.py, danach `setzen kerstin` erneut.
-  - **Die drei Aussprache-Regeln** ("Tas tatur", "Ei Di", "Dial OS") sind auf
-    Thorsten abgestimmt und gelten derzeit fuer alle Stimmen. Vorgespielt wurde
-    jede mit und ohne; Stephans Urteil steht aus. Braucht Anna eine davon nicht,
-    klingt sie damit falsch getrennt - dann muessen die Regeln pro Stimme
-    gelten, und das aendert die Struktur der Tabelle in dialos-say.py. Die drei
-    Woerter kommen selten vor, deshalb ist Warten hier vertretbar.
+  - **Die Aussprache-Regeln gelten seit dem 2026-08-24 PRO STIMME** - die
+    Strukturfrage aus diesem Punkt ist damit beantwortet, und zwar durch den
+    ersten echten Fall: "DialOS" spricht Anna als "Dial O S", Michael bleibt
+    bei "Dial OS" (Stephans Wahl nach Gehoer). Jede Regel hat ein viertes
+    Feld fuer die Stimmen, fuer die sie gilt.
+    **Offen bleiben "Tas tatur" und "Ei Di":** beide sind auf Thorsten
+    abgestimmt und gelten weiterhin fuer alle Stimmen. Vorgespielt wurde jede
+    mit und ohne; Stephans Urteil dazu steht aus. Der Umbau, der frueher der
+    teure Teil daran war, ist jetzt erledigt - es fehlt nur noch das Hoeren.
 
-- [ ] **Aussprache von „DialOS" entscheiden** (offen seit 2026-08-22, Stephans
-  Wunsch: "bisher wird das System immer so gesprochen DIAL OS könen wir das
-  auch noch anpassen das es melodischer klingt dia los"). Betrifft NUR die
-  Sprachausgabe - "Das Wort selbst bleibt DialOS", geschrieben ändert sich
-  nichts. Drei Varianten wurden vorgespielt, Stephans Entscheidung steht aus.
-  Geändert würde die erste Regel in AUSSPRACHE in `dialos-say.py`, dort steht
-  derzeit "Dial OS". Solange nichts entschieden ist, bleibt es dabei - und
-  genau deshalb steht der Punkt hier: Er existierte bisher nur im Gespräch.
 
 - [ ] **Zweite Stimme früh dazulegen, Auswahl erst zum Schluss**
   (Stephans Frage, 2026-08-18: „Wann wollen wir die anderen Stimmen z.B.
@@ -821,6 +1017,25 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   stillen Fehlschlag geführt hat (Sticky-Bit: ein Konto kann die Datei
   eines anderen weder überschreiben noch löschen). Die Markierung liegt
   jetzt unter `$XDG_RUNTIME_DIR`, diese Datei noch nicht.
+
+- ☑️ **2026-08-24** — **Aussprache von „DialOS" entschieden** - Stephan nach
+  Gehoer, aus acht Schreibweisen. **Anna sagt „Dial O S", Michael bleibt bei
+  „Dial OS"** („Michael lassen wir wie bisher und bei Anne die Variante 2").
+  Betrifft nur die Sprachausgabe; das Wort selbst bleibt ueberall DialOS.
+
+  Gemessen, damit es niemand erneut durchprobiert: **Piper kennt keine
+  mittlere Pause.** Komma, Semikolon, Doppelpunkt, Auslassungspunkte,
+  Gedankenstrich und mehrere Leerzeichen ergeben alle exakt 0 ms Stille; nur
+  Satzende-Zeichen erzeugen welche (Punkt 220 ms, Fragezeichen 230 ms,
+  Ausrufezeichen 290 ms). Der Punkt traf sogar Stephans eigene Sprechpause -
+  an einer Aufnahme seiner Stimme gemessen: 105 und 180 ms -, machte aber aus
+  dem Wort zwei Saetze. Sein Urteil: „das zweite ist ja alles aber nicht das
+  Wort DialOS". „Dial O S" fuegt deshalb keine Stille ein, sondern spricht die
+  Buchstaben einzeln: 0,47 auf 0,64 s.
+
+  Dabei fiel ein alter Fehler auf: Am Satzende griff die Regel **gar nicht**.
+  Der Lookahead schloss jeden folgenden Punkt aus, also auch den Schlusspunkt -
+  „Willkommen bei DialOS." wurde als ein Wort gelesen. Behoben.
 
 ### Audio: Mikrofon und Lautsprecher
 

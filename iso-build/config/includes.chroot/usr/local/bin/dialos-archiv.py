@@ -4,13 +4,17 @@
 Stephans Vorgabe vom 2026-08-21: "Jeder Brief und auch jede Mail muss als pdf
 Datei in einen extra Ordner gepackt werden."
 
-WO. In ~/Dokumente/DialOS-DATA/ - der Name ist Stephans Wahl, damit das Archiv
-spaeter unveraendert auf den Stick wandern kann. Auf dem Stick liegt es
-bewusst NICHT: Die Partition DIALOS-DATA ist unverschluesseltes exFAT, und der
-Stick soll laut docs/sicherheit-datenschutz.md getrennt vom Laptop
-aufbewahrt werden. Ein Archiv, das meistens nicht steckt, kann nicht
-beschrieben werden - und Briefe an die Krankenkasse gehoeren nicht von der
-LUKS-Platte auf einen offenen Datentraeger.
+WO. In ~/Dokumente/Archiv/DialOS-DATA/ - und beim Nutzer zusaetzlich auf dem
+Stick. Beide Orte heissen gleich, das ist Stephans Wahl. Die Platte ist der
+fuehrende Ort; Begruendung bei ARCHIV weiter unten.
+
+Hier stand bis zum 2026-08-22 das Gegenteil ("auf dem Stick bewusst NICHT",
+weil DIALOS-DATA unverschluesseltes exFAT ist und derselbe Stick den
+LUKS-Schluessel traegt). Stephan hat anders entschieden, und sein Grund wiegt
+schwerer: Ein Archiv nur auf der Platte ist beim naechsten Plattenschaden weg,
+und der Nutzer kann es nicht selbst sichern. Der Datenschutz-Einwand ist damit
+nicht ausgeraeumt, nur entschieden - ausgefuehrt in
+docs/sicherheit-datenschutz.md.
 
 WARUM EIN EIGENER PDF-ERZEUGER UND NICHT LIBREOFFICE. Der Briefbogen ist mit
 LEERZEICHEN gesetzt - Absender und Datum stehen rechtsbuendig, weil die Zeile
@@ -27,6 +31,7 @@ Aufruf:
 """
 
 import os
+import pwd
 import subprocess
 import sys
 import time
@@ -50,6 +55,28 @@ HEIM = os.path.expanduser("~")
 # docs/sicherheit-datenschutz.md; Stephan kennt den Einwand und will es so.
 ARCHIV = os.path.join(HEIM, "Dokumente", "Archiv", "DialOS-DATA")
 STICK_KENNUNG = "DIALOS-DATA"
+
+# KONTEN OHNE STICK-ROLLE (Stephan, 2026-08-24): "Beim Admin brauchen wir den
+# Stick nicht, stell die Meldung ab. Und wir simulieren beim Admin den Stick
+# mit einem Verzeichnis unter Dokumente/Archiv/DialOS-DATA. Den haben wir ja
+# dafuer angelegt!"
+#
+# Fuer diese Konten ist der Ordner auf der Platte nicht die Vorstufe zum Stick,
+# sondern das Archiv selbst. Der Stick wird nicht gesucht und nicht bemaengelt.
+#
+# WARUM ES DIESE LISTE BRAUCHT: exFAT wird mit uid/gid dessen eingehaengt, der
+# es einhaengt. Auf dem Entwicklungsgeraet mit zwei Konten heisst das: Wer den
+# Stick zuerst einsteckt, besitzt ihn, und das andere Konto kommt nicht einmal
+# lesend hinein (gemessen am 2026-08-24: uid=1001,gid=1001,dmask=0022, fuer
+# dialosadmin "Keine Berechtigung"). Das ist keine Fehlkonfiguration, sondern
+# wie GNOME Wechseldatentraeger einhaengt. Ohne diese Liste schrieb
+# dialos-archiv.py deshalb alle 16 Minuten "nicht beschreibbar" ins Protokoll -
+# eine Meldung, die niemand liest und die nichts aendert.
+#
+# Fuer den NUTZER bleibt die Meldung bestehen. Dort ist ein nicht beschreibbarer
+# Stick ein echter Fehler: Seine Sicherungskopie entsteht dann nicht.
+OHNE_STICK = {"dialosadmin"}
+KONTO = pwd.getpwuid(os.getuid()).pw_name
 PROTOKOLL = os.path.join(HEIM, ".log", "dialos-archiv.log")
 
 # Seitenmasse in Punkt (1/72 Zoll). A4 = 595 x 842.
@@ -74,7 +101,7 @@ def melde(text):
     os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     try:
         with open(PROTOKOLL, "a", encoding="utf-8") as f:
-            f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")
+            f.write(f"{time.strftime('%m-%d %H:%M:%S')}  {text}\n")
     except OSError:
         pass
 
@@ -109,6 +136,12 @@ def stick():
     DIALOS-DATA vergibt dialos-setup-home-partition.sh und ist ueberall
     dieselbe.
     """
+    if KONTO in OHNE_STICK:
+        # Stumm, mit Absicht. Es ist kein Mangel, dass hier kein Stick ist -
+        # dieses Konto hat keine Stick-Rolle. Eine Meldung waere reines
+        # Rauschen, und Rauschen macht ein Protokoll unlesbar, in dem sonst
+        # echte Fehler stehen.
+        return None
     try:
         p = subprocess.run(["findmnt", "-rn", "--source",
                             f"LABEL={STICK_KENNUNG}", "-o", "TARGET"],
@@ -121,9 +154,9 @@ def stick():
         return None
     pfad = ziel[0]
     if not os.access(pfad, os.W_OK):
-        # Auf dem Entwicklungsgeraet gehoert der Stick "nutzer", und
-        # dialosadmin kommt nicht hinein. Das ist kein Fehler, nur eine
-        # Tatsache - gemeldet statt verschwiegen.
+        # Fuer ein Konto MIT Stick-Rolle ist das ein echter Fehler: Die
+        # Sicherungskopie entsteht nicht. Deshalb gemeldet, jedes Mal.
+        # Konten ohne Stick-Rolle kommen hier nicht mehr an (OHNE_STICK).
         melde(f"Stick unter {pfad}, aber nicht beschreibbar")
         return None
     return pfad
@@ -190,7 +223,12 @@ def ablegen(pfad, art):
 def zeigen():
     ort = stick()
     print(f"Platte: {ARCHIV}")
-    print(f"Stick:  {ort or 'nicht erreichbar'}")
+    # "nicht erreichbar" klingt nach Mangel. Fuer ein Konto ohne Stick-Rolle
+    # fehlt aber nichts - dort IST die Platte das Archiv.
+    if KONTO in OHNE_STICK:
+        print("Stick:  keiner fuer dieses Konto - die Platte ist das Archiv")
+    else:
+        print(f"Stick:  {ort or 'nicht erreichbar'}")
     if not os.path.isdir(ARCHIV):
         print(f"{ARCHIV} gibt es noch nicht.")
         return 0

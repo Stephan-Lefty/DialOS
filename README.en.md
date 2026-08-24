@@ -121,6 +121,96 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **When nothing matched, DialOS now says so** (2026-08-24, approved by
+  Stephan). Previously an utterance that was not a command did nothing, and
+  nothing was said either. On a strong match the announcement names the correct
+  sentence ("Ich habe verstanden: datum haben wir. Der Befehl heisst: welches
+  datum haben wir."), otherwise only what was heard. NO question form:
+  "Meintest du ...?" would have invited a "ja" that DialOS does not process - a
+  new silent failure built to heal an old one. Three numbers, all measured:
+  two-thirds word overlap (in 51 % of attempts only half matched), ten seconds
+  between announcements (48 % of occasions were under 5 seconds apart), at
+  least two words. Destructive commands are never suggested.
+
+- **A complete command with one word too many now counts** (2026-08-24).
+  Matching was an exact comparison; one extra word made the whole command fall
+  through. The basis is Stephan's verdict on the sample: all 283 recorded
+  command-less utterances were attempted commands. 21 of them contained the
+  complete command. The obvious loosening ("containing the command is enough")
+  was measured and REJECTED: it would have executed "einkauf erledigt" from word
+  salad four times. With a limit of two extra words: 8 cases rescued, no salad,
+  switching on and off deliberately excluded.
+
+- **Pronunciation of "DialOS" decided per voice** (2026-08-24, Stephan by ear):
+  Anna says "Dial O S", Michael stays with "Dial OS". The pronunciation rules
+  gained a fourth field for this - the voices they apply to. Measured and
+  documented so nobody works through it again: Piper knows no MIDDLE pause.
+  Comma, semicolon, colon, dash and multiple spaces all yield 0 ms of silence;
+  only sentence-ending punctuation produces any (period 220 ms). The period even
+  matched Stephan's own speaking pause - measured from a recording of his voice,
+  105 and 180 ms - but it turned the word into two sentences.
+- **At the end of a sentence the pronunciation rule did nothing at all**
+  (2026-08-24, surfaced during the rebuild). The lookahead (?!\.) was meant to
+  protect dialos.org but excluded any following period - including the full
+  stop. "Willkommen bei DialOS." was read as ONE word while "DialOS ist bereit."
+  came out right. The most common case was the broken one.
+
+- **A muted `paplay` made the device silent - with no error** (found and fixed
+  2026-08-24). It surfaced through a failed listening test: the paplay stream
+  was born muted because PipeWire remembers volume and mute PER APPLICATION.
+  DialOS plays the question tone, the probe tone AND cached announcements
+  through paplay - all of them were silent, at exit code 0, so aus_speicher()
+  never fell back to spd-say. Cause: dialos-say.py mutes other streams and
+  releases them in a finally - which does not run on SIGTERM, and with two
+  announcements in quick succession the second mutes the first's paplay. Fixed
+  by an exception for our own tones plus signal handlers (exit code 143
+  instead of -15 evidenced, and the speaking marker is no longer left behind).
+
+- **The level of every recognition is logged** (2026-08-24), together with a
+  measuring tool (`scripts/dialos-fehlstart-messen.py`). Twenty minutes of
+  listening ruled out one line of attack before it was built: Vosk returned
+  `sprachsteuerung` at level 30 with confidence 1.000 and `[unk] [unk] starten`
+  at level 28 with 0.979 - both QUIETER than the idle level of 52, while speech
+  sits between 3475 and 4196. Confidence cannot filter this: in a grammar with
+  one phrase the recogniser is confident by construction. None of the cases
+  would have switched on, the rule "core word AND no [unk]" held - the tool had
+  not reproduced that rule in its first draft and reported four "false starts"
+  that were none.
+
+- **Every announcement now appears in a log** (2026-08-24). `dialos-say.py`
+  writes to `~/.log/dialos-say.log`. The trigger was a gap in the evidence:
+  after the false start at 14:41:12 I claimed DialOS had not spoken, citing the
+  audio log - which only records device changes. The claim was not established,
+  merely not refuted. The text is truncated at 120 characters for data
+  protection: for a read-aloud command the announcement would be the whole
+  document.
+
+- **Logs now carry a date** (2026-08-24) - and the trigger was a false
+  conclusion of mine. Twelve scripts wrote the time only; logrotate rotates
+  daily but only while the device runs, so three days sat in one file. I
+  reconstructed a sequence "from today" out of it and described an incident to
+  Stephan that never happened that day. It surfaced only because he said he had
+  not spoken to the voice control at all.
+- **First false start of the voice control** (2026-08-24, cause unknown). At
+  14:41:12 Vosk recognised "sprachsteuerung starten" without anyone addressing
+  the device; its own announcement is ruled out, the audio log is empty for that
+  window. The documented "zero false starts" is therefore superseded. Its own
+  item in TODO.md - first establish what the microphone heard, then build.
+
+- **The voice choice was silently reset on install** (found and fixed
+  2026-08-24). `piper-generic.conf` holds both configuration and the voice the
+  user chose; `dialos-aufspielen` overwrote it with the repo's version.
+  Stephan's choice of Michael from 22 August was gone while the name file still
+  said "Michael" - the device would have introduced itself as Michael in Anna's
+  voice. The file is now in the exclusion list, and the script REPORTS what it
+  passed over: grouped by reason, because the first draft printed 29 lines and
+  buried the one that mattered under 20 lines of Python bytecode.
+- **No stick for the admin account** (2026-08-24, Stephan's decision). There the
+  folder `~/Dokumente/Archiv/DialOS-DATA/` is the archive itself. Before this
+  the archive reported an unwritable stick every 16 minutes - exFAT belongs to
+  the account that mounts it, and that was `nutzer`. For the user the message
+  stays: without the stick no backup copy comes into existence.
+
 - **Licence: GPL-3.0, plus an inventory of every third-party component**
   (2026-08-23, Stephan's decision). DialOS was public but had no licence
   file - and that does not mean "free", it means the opposite: full

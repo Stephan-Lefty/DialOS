@@ -12,7 +12,25 @@ Sprachsteuerung, Telefonie, Ersteinrichtung, offene Punkte). Diese
 Datei hier ist nur eine kurze Landkarte + der aktuelle Stand, keine
 Doppelung der eigentlichen Doku.
 
-**GitHub-Repo:** https://github.com/Stephan-Lefty/DialOS (privat).
+**GitHub-Repo:** https://github.com/Stephan-Lefty/DialOS - **ÖFFENTLICH.**
+Hier stand bis zum 2026-08-24 „(privat)", und das war falsch: Anonym
+abgefragt meldet die GitHub-API `private: False`. Aufgefallen ist es, als
+Stephan seine Anschrift und Telefonnummer für die zentralen Kundendaten
+durchgegeben hat - ein Commit hätte sie veröffentlicht. **Keine
+personenbezogenen Werte ins Repo**, nur Vorlagen mit leeren Feldern (siehe
+[docs/kundendaten-felder.md](docs/kundendaten-felder.md) und
+`Wordpressinstallation/.env.example`). Bereits öffentlich und nicht mehr
+rückholbar: `stephan.roesner@protonmail.com` in
+`scripts/dialos-claude-setup.sh` sowie vier Autoradressen in der
+Commit-Historie.
+
+> **Dauerregel (Stephan, 2026-08-24):** „Meine persönlichen Daten, die bereits
+> im Repo sind, die können dort bleiben. Bei allen neuen Daten, einfach
+> fragen." Also: nichts nachträglich entfernen und keine Historie umschreiben —
+> aber **jedes neue personenbezogene Datum vor dem Commit erfragen**, auch wenn
+> Stephan es selbst im Gespräch genannt hat. Ein Wert im Chat ist nicht
+> dasselbe wie ein Wert auf GitHub, und er hat den Unterschied ausdrücklich
+> gezogen.
 
 **Wichtig für Claude selbst:** Dein eigenes Memory-System
 (`~/.claude/...`) liegt auf der internen Platte des T490 und wird bei
@@ -48,7 +66,13 @@ steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
 
 - Sprachsteuerung mit 26 Grammatiksaetzen. Das Einschalten verlangt beide
   Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
-  Beinahe-Treffer, null Fehlstarts.
+  Beinahe-Treffer, null Fehlstarts. **Diese Zahl ist ueberholt:** Am
+  2026-08-24 um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet -
+  "sprachsteuerung starten" erkannt, obwohl Stephan an dem Tag kein Wort zu
+  ihr gesagt hatte und DialOS zu der Zeit selbst nichts sprach (im
+  Ton-Protokoll steht zwischen 14:35 und 14:42 keine Zeile). Erster
+  protokollierter Fehlstart. Ursache offen - Umgebungssprache ist die
+  naechstliegende Vermutung, aber eine Vermutung.
 - Anna (`de_DE-kerstin-low`) ist Auslieferungsstimme, **Tempo 0,95**, und
   spricht den Nutzer mit Namen an ("Steffan"). Beide Werte hat Stephan mit den
   Ohren entschieden.

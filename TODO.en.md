@@ -15,6 +15,198 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **FIRST THING TOMORROW: on 2026-08-24 the voice control could no longer
+  be switched on** - and a level hypothesis is open and untested.
+
+  **The finding.** Between 17:01 and 17:06 the log held only `starten`,
+  `[unk]` and `sprachsteuerung` - **not once `sprachsteuerung starten`**.
+  Thirteen attempts, none successful. So the new announcement never got its
+  turn either: it only applies in the switched-on state.
+
+  **The hypothesis, based on the new level column.** Peaks were **21935 to
+  30499** out of 32768 - 67 to 93 % of full scale. The service's saturation
+  threshold is 32000, so it never fired. But Vosk recognises speech by the
+  **pauses between words**; at that level they smear, and two words become one.
+  That very mechanism was already the cause on 2026-08-16 - back then through
+  "Capture +30 dB AND Internal Mic Boost +30 dB".
+
+  **What was changed on the evening of 2026-08-24 - RUNTIME ONLY, nothing in
+  the repo:** the volume of the source `alsa_input.pci-…analog-stereo` from
+  35 % to **18 %**. Effect measured: idle level from 52 to **17**, peak from 150
+  to 99. The echo source `dialos_mikrofon_ohne_echo` is itself at 100 % and
+  inherits from the raw signal, so the control does reach the service.
+  **A reboot resets this**, because `dialos-mikrofon-pegel.service` sets
+  `CAPTURE_PEGEL="100%"` again.
+
+  **A detour worth recording:** at first ALSA `Capture` was set directly to
+  50 %. That dropped the PipeWire volume from 35 to 13 % - the two controls are
+  coupled and were moved against each other. It would probably have been too
+  quiet. Everything now hangs on one control.
+
+  **Tomorrow, in this order:**
+  1. Say "Sprachsteuerung starten". Does the whole phrase come through?
+  2. Read the peaks in the log - are they now around 11000 to 15000?
+  3. **If it does not help, the diagnosis was wrong.** Then it is not the level,
+     and it gets measured differently: record Stephan's voice and check whether
+     the pause between "Sprachsteuerung" and "starten" arrives at all. A
+     plausible explanation is not yet a cause - that has been the mistake twice
+     already in this project.
+  4. Only then decide whether `CAPTURE_PEGEL` in the script changes.
+
+- [ ] **Customer data in ONE place - and not unencrypted** (Stephan's prompt of
+  2026-08-24: "wo wir zentral alle wichtigen Daten des Kunden einmalig ablegen
+  und die Mail, der Brief und das Diktat usw. greifen auf diese Daten immer
+  zu").
+
+  **How it looks today.** The same person appears in several places, each with
+  its own format:
+
+  | What | Where | Who reads it |
+  |---|---|---|
+  | Name, spoken and written | `/usr/local/share/dialos/nutzer-name.txt` | startup announcement, letterhead, salutation |
+  | Postal address | `/usr/local/share/dialos/absender.txt` | letterhead - **does not exist** |
+  | Footer text | `/usr/local/share/dialos/fusszeile.txt` | mail, letter, printout |
+  | Mail signature | `mail-signatur.txt` / `.html` | Thunderbird (generated) |
+  | Mailbox credentials | a file in `/home/nutzer`, 0600 | mail retrieval |
+
+  **The serious part is not the spread but the location.** Measured on
+  2026-08-24:
+
+      /usr/local/share/dialos/nutzer-name.txt  →  /dev/nvme0n1p1  ext4   0644
+      /home/nutzer                             →  nvme0n1p4       LUKS
+
+  The customer's name sits **unencrypted and world-readable** on the root
+  partition while their letters sit behind LUKS. The postal address is meant to
+  go to the same place. With a stolen laptop, exactly what identifies the person
+  is readable - and half the purpose of the encrypted home partition is void.
+  See `docs/sicherheit-datenschutz.en.md`.
+
+  **A second fault, same location:** the files are system-wide but the data is
+  personal. On the development machine `dialosadmin` and `nutzer` share the same
+  name - a letter from the admin account would carry the customer's name.
+
+  **To settle before building:**
+  1. **Where to?** `/home/nutzer/.config/dialos/` is on the encrypted partition
+     and is per-person - both correct. **The boot order is NOT an argument
+     against it**; that stood here first and was wrong (corrected 2026-08-24).
+     `dialos-stick-gate` runs `Before=display-manager.service`, mounts the
+     partition and only then enables autologin - without the stick it even locks
+     the account. Whenever `nutzer` has a session the partition is mounted. What
+     remains open: the ADMIN account would have no access
+     (`/home/dialosadmin` is on the root partition), and the gate itself could
+     never read the data should it ever need to speak.
+  2. **Which format?** Five files with five formats is today's state. One file
+     with clear fields (name spoken, name written, street, town, phone, mail
+     address) would be readable and extensible.
+  3. **What is NOT customer data?** `assistent-name.txt` (Michael/Anna) and
+     `fusszeile.txt` are system settings and do not belong there. That line has
+     to be drawn, or everything ends up in one file and nobody knows what to
+     delete when the device changes hands.
+  4. **What happens on handover?** A device going to a different person must
+     shed this data reliably. One central place makes that possible; five
+     scattered files make it unreliable.
+
+  **Only after that** is the guided dialogue for recipient and subject worth
+  building (see `docs/brief-vorlage.md`): it would otherwise build on a data
+  store that is in the middle of moving.
+
+- [ ] **Voice sample at first login - and delete the recording afterwards**
+  (Stephan's idea of 2026-08-24: "wenn alles funktioniert, dem neuen Benutzer
+  einen Text präsentieren … damit das System eine Stimmenprobe von der Person
+  hat, die dann mit DialOS kommuniziert").
+
+  **DO NOT START BEFORE** (Stephan, 2026-08-24): "Das sollten wir ja erst
+  angehen, wenn alles mit meiner Stimme reibungslos läuft" - only once
+  everything runs smoothly with his voice. That is the right order, and not
+  merely for reasons of time: the voice sample MEASURES against the existing
+  state. While thresholds, grammar and matching are still changing it measures a
+  moving target, and every number it produces would be wrong again after the
+  next rebuild. Only once it holds with Stephan's voice is the step to a
+  stranger's voice a step at all, rather than a second building site.
+
+  **What it is NOT good for, so nobody builds the wrong thing:** recognition
+  does not improve from it. Vosk is speaker-independent and learns nothing from
+  a sample; there is no speaker adaptation in this setup.
+
+  **What it is good for: replacing three guessed numbers with measured ones.**
+  All three are open items today:
+
+  - **This person's level.** DialOS works with thresholds measured on
+    Stephan's voice (speech 3475-4196 against noise 47-84). Anyone speaking
+    more quietly falls below them - and then nothing happens, with nobody
+    knowing why. See also the item on the missing self-check.
+  - **This person's speaking pauses.** Dictation splits entries after a 0.4 s
+    pause. That number is **guessed** - it says so explicitly in the "split
+    entries" item above. Someone speaking slowly gets their shopping list
+    broken into single words.
+  - **An acceptance test.** Are all command sentences recognised in THIS
+    voice? Today that only emerges once the user is alone with the device.
+
+  **How the text has to be built:** every command sentence exactly once, with
+  natural sentences in between for measuring pauses. No longer than a minute -
+  reading aloud is an examination for an inexperienced user anyway, and a long
+  examination on day one puts people off.
+
+  **The recording is deleted after the measurement** (Stephan's decision of
+  2026-08-24). Only the numbers are kept: level, pause lengths, hit rate per
+  command. That way no voice recording of the user sits on the device while the
+  values DialOS needs are still there. The deletion belongs in the same program
+  run as the measurement - a recording deleted "later" stays put.
+
+  **To settle first:**
+  1. Where do the numbers go? One file per account, or into the existing
+     configuration? They must survive a reinstall, or deliberately not.
+  2. What happens when the sample turns out poor - too quiet, too few commands
+     recognised? Repeat, try another microphone, or accept it and report to the
+     helper? A user who fails on the first attempt must not be left without a
+     way forward.
+  3. Does it run automatically at FIRST login, or does the helper start it?
+     Automatically means the user is tested at first contact, before knowing
+     what the device can do.
+
+- [ ] **No self-check on whether the device still speaks at all** (open since
+  2026-08-24, surfaced by the muted `paplay`). On 2026-08-24 every `paplay`
+  stream was muted because PipeWire remembers that per application. The
+  consequence: all **cached** announcements silent, plus the question tone and
+  the probe tone. `paplay` returns 0 while doing so, `aus_speicher()` considers
+  the announcement successful and does not fall back to `spd-say`.
+
+  **For a blind user this is the worst case there is:** the device is mute, no
+  error is recorded anywhere, and he cannot go and look. The cause is fixed
+  (see the changelog), but the **class** of fault is not: nothing anywhere
+  notices "I spoke, but nothing was audible".
+
+  **To settle before anything gets built:** how can this be measured at all?
+  Candidates: check our own stream for `Mute` right after it appears (cheap,
+  catches exactly this case), or read the sink's level during the announcement
+  (catches more, but is more work and doubtful with headphones). No guessing -
+  first find out what PipeWire actually offers.
+
+  **And how would it be reported?** Not by an announcement - that would be
+  silent too. What remains: the log, the transcript window, and a visible hint
+  for the helper at the next login.
+
+- [ ] **First false start of the voice control - cause unknown** (2026-08-24).
+  At 14:41:12 the voice control switched itself on: Vosk recognised
+  "sprachsteuerung starten", the transcript window opened, and then came
+  "datum vorlesen drucken" and "welchen". **Stephan had not said a word to the
+  voice control that day.**
+
+  **What is ruled out:** its own announcement. The audio log holds not a single
+  line between 14:35 and 14:42, so DialOS did not speak. The echo cancellation
+  was not even called upon.
+
+  **What is open:** what the microphone heard. Ambient speech (a conversation
+  in the room, radio, a video) is the obvious guess - but a guess, and this
+  project has twice measured past a plausible guess. The first thing to settle
+  with Stephan is whether anyone or anything was speaking in the room at 14:41.
+
+  **Why it matters:** the two-word rule exists precisely so that a passing word
+  triggers nothing. If ambient speech defeats it, the device can switch itself
+  on - window and executed commands included - without anyone addressing it.
+  For the blind user the window would be invisible; all he notices is that the
+  device is suddenly listening.
+
 - [ ] **Permitted word combinations that form no command fall through
   SILENTLY** (open since 2026-08-22, found during the print test). The most
   serious open item for the target group.
@@ -43,7 +235,8 @@ finished too, and then move down together. That way no reference breaks.
 
   The 345 in the OFF state are nearly all fragments of "sprachsteuerung
   starten". **Silence is correct there and must stay** - that is the two-word
-  rule that produced 60 near-misses and zero false starts. Only the 382 in the
+  rule that produced 60 near-misses and, for a long time, zero false starts -
+  the first one came on 2026-08-24 (see its own item above). Only the 382 in the
   ON state are the fault.
 
   **And that is where the dilemma sits:** 382 announcements would be
@@ -191,22 +384,16 @@ finished too, and then move down together. That way no reference breaks.
     only show in everyday use. Changing it is a one-liner:
     STIMMEN["kerstin"]["tempo"] in dialos-stimme.py, then `setzen kerstin`
     again.
-  - **The three pronunciation rules** ("Tas tatur", "Ei Di", "Dial OS") are
-    tuned to Thorsten and currently apply to every voice. Each was played with
-    and without; Stephan's verdict is outstanding. If Anna does not need one
-    of them she sounds wrongly split - the rules would then have to be per
-    voice, and that changes the structure of the table in dialos-say.py. The
-    three words occur rarely, so waiting is defensible here.
+  - **Pronunciation rules have been per voice since 2026-08-24** - the
+    structural question raised in this item is answered, and by the first real
+    case: Anna says "Dial O S" for "DialOS" while Michael stays with "Dial OS"
+    (Stephan's choice, by ear). Every rule now has a fourth field naming the
+    voices it applies to.
+    **Still open are "Tas tatur" and "Ei Di":** both are tuned to Thorsten and
+    still apply to every voice. Each was played with and without; Stephan's
+    verdict is outstanding. The rebuild that used to be the expensive part of
+    this is done - all that is left is listening.
 
-- [ ] **Decide how "DialOS" is pronounced** (open since 2026-08-22, Stephan's
-  wish: "bisher wird das System immer so gesprochen DIAL OS könen wir das auch
-  noch anpassen das es melodischer klingt dia los" - it should sound more
-  melodic). Affects the SPEECH OUTPUT only - "Das Wort selbst bleibt DialOS",
-  nothing changes in writing. Three variants were played, Stephan's decision
-  is outstanding. What would change is the first rule in AUSSPRACHE in
-  `dialos-say.py`, which currently reads "Dial OS". Until something is decided
-  it stays that way - and that is exactly why this item is here: so far it
-  existed only in conversation.
 
 - [ ] **Add a second voice early, the selection only at the end**
   (Stephan's question, 2026-08-18: "When do we want to add the other voices,
@@ -723,6 +910,24 @@ memory, not just a record of successes.
   2026-08-16 (sticky bit: one account can neither overwrite nor delete
   another's file). The marker now lives under `$XDG_RUNTIME_DIR`, this
   file does not.
+
+- ☑️ **2026-08-24** — **Pronunciation of "DialOS" decided** - by Stephan, by
+  ear, out of eight spellings. **Anna says "Dial O S", Michael stays with
+  "Dial OS"** ("Michael lassen wir wie bisher und bei Anne die Variante 2").
+  Affects the speech output only; the word itself stays DialOS everywhere.
+
+  Measured so nobody works through it again: **Piper knows no middle pause.**
+  Comma, semicolon, colon, ellipsis, dash and multiple spaces all yield exactly
+  0 ms of silence; only sentence-ending punctuation produces any (period
+  220 ms, question mark 230 ms, exclamation mark 290 ms). The period even
+  matched Stephan's own speaking pause - measured from a recording of his
+  voice: 105 and 180 ms - but it turned the word into two sentences. His
+  verdict: "das zweite ist ja alles aber nicht das Wort DialOS". "Dial O S"
+  therefore inserts no silence but speaks the letters singly: 0.47 to 0.64 s.
+
+  An old fault surfaced along the way: at the end of a sentence the rule did
+  **nothing at all**. The lookahead excluded any following period, the full
+  stop included - "Willkommen bei DialOS." was read as one word. Fixed.
 
 ### Audio: microphone and speaker
 

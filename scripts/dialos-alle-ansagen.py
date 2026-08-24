@@ -199,9 +199,18 @@ def abtastrate(modell):
         raise SystemExit(f"Abtastrate nicht lesbar: {pfad}")
 
 
-def erzeugen(datei, text, modell, tempo, aussprache):
-    """Dieselbe Kette wie speech-dispatcher - siehe dialos-sprachbeispiele.py."""
-    fuer_piper = aussprache(text)
+def erzeugen(datei, text, modell, tempo, aussprache, kennung):
+    """Dieselbe Kette wie speech-dispatcher - siehe dialos-sprachbeispiele.py.
+
+    "kennung" MUSS mitgegeben werden, seit die Aussprache-Regeln pro Stimme
+    gelten koennen (2026-08-24): Diese Funktion erzeugt Dateien fuer eine
+    BESTIMMTE Stimme, nicht fuer die gerade eingestellte. Ohne den Parameter
+    bekaeme Michaels Datei Annas Aussprache - und zwar unbemerkt, weil beide
+    fuer sich richtig klingen. Genau diese Verwechslung gab es hier schon
+    einmal, damals bei der Stimme selbst (siehe eingestellte_stimme() in
+    dialos-say.py).
+    """
+    fuer_piper = aussprache(text, kennung)
     befehl = (
         f"cd {shlex.quote(PIPER_DIR)} && "
         f"printf %s {shlex.quote(fuer_piper)} | "
@@ -252,7 +261,8 @@ def main():
             if text == BEGRUESSUNG_MARKE:
                 text = begruessung_fuer(angaben["name"])
             if erzeugen(os.path.join(ziel, basis), text, modell,
-                        angaben["tempo"], say.fuer_sprachausgabe):
+                        angaben["tempo"], say.fuer_sprachausgabe,
+                        angaben["kennung"]):
                 gemacht += 1
             else:
                 print(f"    FEHLGESCHLAGEN: {basis}")

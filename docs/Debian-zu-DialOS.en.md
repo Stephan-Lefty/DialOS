@@ -1755,6 +1755,53 @@ An archive that is usually not plugged in still cannot be written to — so
 always holds everything, the stick everything added since it was last
 plugged in.
 
+
+**The admin has no stick — and that is not a shortcoming.** Stephan's decision
+of 2026-08-24: "Beim Admin brauchen wir den Stick nicht, stell die Meldung ab.
+Und wir simulieren beim Admin den Stick mit einem Verzeichnis unter
+Dokumente/Archiv/DialOS-DATA. Den haben wir ja dafür angelegt!" So for
+`dialosadmin` the folder on disk is not a staging area for the stick but the
+archive itself. `dialos-archiv.py` neither looks for a stick there nor
+complains about one (list `OHNE_STICK` at the top of the script).
+
+**Why this was needed.** exFAT is mounted with the `uid`/`gid` of whoever
+mounts it. On a device with two accounts that means: whoever plugs the stick in
+first owns it, and the other account cannot even read it. Measured on
+2026-08-24: `uid=1001,gid=1001,dmask=0022`, for `dialosadmin` "permission
+denied". That is not a misconfiguration but how GNOME mounts removable media.
+Before this, the archive therefore wrote "Stick unter
+/media/nutzer/DIALOS-DATA, aber nicht beschreibbar" **every 16 minutes** — a
+message nobody reads and that changes nothing.
+
+**For the user the message stays.** There, a stick that cannot be written to is
+a real fault: their backup copy does not come into existence.
+
+### The voice choice is running state, not configuration
+
+**A mistake from 2026-08-24 that shows how easily this is missed.**
+`/etc/speech-dispatcher/modules/piper-generic.conf` holds two different things:
+how the Piper module is invoked — that is configuration and belongs in the repo
+— and `DefaultVoice` plus `GenericRateMultiply`, that is, the voice the user
+chose. `dialos-stimme.py` writes into exactly that file.
+
+On 2026-08-22 at 15:21 Stephan had switched to Michael with the keyboard
+shortcut. The next `dialos-aufspielen` silently reset that choice to the repo's
+version — while `assistent-name.txt` still said "Michael". The device would
+have introduced itself **as Michael in Anna's voice**. Precisely the fault that
+already happened on 2026-08-19.
+
+The file is therefore now in `dialos-aufspielen`'s `NIEMALS` exclusion list,
+alongside the Bluetooth pairing data for the same reason. Anyone who really
+wants to change it (a new Piper invocation, different module parameters)
+installs it deliberately by hand.
+
+**And the script now says what it passed over.** Until then, excluded files
+vanished silently — the same fault as a voice command without feedback: hear
+nothing, assume it worked. The message is grouped by **reason** and names at
+most three paths per reason; the first draft listed 29 files, 20 of them Python
+bytecode, and buried the one that mattered. That is why every `NIEMALS` entry
+now has a third column: *is this omission worth reporting?*
+
 **Why an own PDF writer and not LibreOffice.** The letterhead is laid out with
 **spaces**: sender and date are right-aligned because the line is padded to
 width 76. In a proportional font that falls apart immediately, and LibreOffice
@@ -1901,6 +1948,306 @@ review nobody can point to is not one.
 
 Measured on 2026-08-22: the voice switches in 4.4 seconds, announcing itself
 in the new voice, in both directions. The look switches without delay.
+
+
+
+
+
+
+
+
+### When nothing matched, DialOS now says so
+
+**Until 2026-08-24 an utterance that was not a command did nothing - and
+nothing was said either.** For a blind user that is the worst outcome: he has
+spoken, the device has listened, and nothing tells him that nothing happened.
+He does not even know whether he said it wrongly or the device is broken.
+
+**I argued against it** - 283 announcements would be nagging. Stephan went
+through the 283 recorded cases and refuted that: "Daran kann ich mich erinnern,
+das waren alles Befehsversuche" - all 283 were attempted commands. So the
+announcement would have been right in 283 out of 283 cases.
+
+**The form follows from his second sentence:** "Ich muss selbst die genauen
+Befehle erst lernen und dann wundere ich mich, dass ein anderer nicht
+funktioniert. Auch für mich eine Lernphase." So the announcement does not
+merely report a failure, it names the correct sentence:
+
+    Ich habe verstanden: datum haben wir.
+    Der Befehl heisst: welches datum haben wir.
+
+With a weak match, only the first half plus "Das war kein Befehl."
+
+**No question form, and that matters.** "Meintest du: welchen Tag haben wir?"
+invites a "ja" - and DialOS does not process that "ja". It would have built a
+new silent failure in order to heal an old one.
+
+**Three numbers, all measured and none chosen:**
+
+- **Two thirds** of a command's words must be present for it to be named. In
+  51 % of the 283 attempts only *half* matched - a suggestion from that little
+  overlap would often be wrong, and a wrong suggestion is not neutral for a
+  blind user: it **teaches** a command that does not exist. From two thirds
+  upwards it covers 34 % of cases.
+- **Ten seconds** between two announcements. Of 277 consecutive occasions,
+  **48 % were less than 5 seconds apart** and 68 % less than 10, median 6.
+  Without a brake the device would talk almost continuously through a failing
+  session, and since each announcement itself takes two to three seconds they
+  would pile up. Ten seconds lets roughly every third occasion through.
+- **At least two words**, no `[unk]`. Single-word fragments ("wir", "es",
+  "auf") are not attempted commands - those were not put to Stephan in the
+  sample either. An `[unk]` means something else was in the room; the device
+  would be talking into a conversation.
+
+**Destructive commands are never suggested.** `einkauf erledigt` and
+`einkaufszettel wegwerfen` are on an exception list. A suggestion is a
+recommendation, and for those the device must recommend nothing - least of all
+to someone still learning the commands who cannot read the consequence off a
+screen. Verified: `viel wegwerfen einkaufszettel` contains **both** words of the
+delete command and is still not named.
+
+Every announcement is logged, and so is every suppressed one - with the reason.
+
+### A complete command with one word too many now counts
+
+**Matching was an exact comparison** (`if satz in DRUCK_SAETZE`). One word too
+many and the complete command fell through. Measured against 283 recorded
+utterances - which Stephan **confirmed on 2026-08-24 were all attempted
+commands** ("das waren alles Befehsversuche") - 21 contained the complete
+command and still did nothing:
+
+    'auf windows umschalten windows'   →  auf windows umschalten
+    'notiz notiz drucken'              →  notiz drucken
+    'wir notiz aufnehmen'              →  notiz aufnehmen
+
+**Why the limit of two extra words is not negotiable.** Without a limit the same
+rule would have executed word salad four times, and the most sensitive command
+at that:
+
+    'es wir auf machen welchen tag haben tag haben wir einkauf erledigt
+     bildschirmfoto es drucken notiz uhr notiz datum gnome es uhr wir …'
+         →  einkauf erledigt      (the shopping list would be gone)
+
+| extra words allowed | rescued | of those, word salad |
+|---:|---:|---:|
+| 0 | 0 | 0 |
+| 1 | 8 | 0 |
+| **2** | **10** | **0** |
+| 3 | 13 | 0 |
+| 5 | 16 | 0 |
+| no limit | 21 | **4** ← tips over |
+
+Two is deliberately not an optimum but the conservative edge. At 5 there would
+have been no salad in *this* recording either - but a recording is no guarantee.
+Anyone raising the number should measure afresh: the expensive fault here is not
+the unrecognised command but the wrongly recognised one.
+
+**Three conditions, all required:**
+
+- **Contiguous**, not merely "all words occur". Otherwise
+  `wie viel wir viel wegwerfen` would count as "throw the shopping list away".
+- **Exactly one** match. With two it is unclear what was meant, and guessing
+  would be worse than doing nothing. That happened exactly once.
+- **No `[unk]`** - the same argument as in `ist_phrase()`.
+
+**Not applied to switching on and off.** Those two sentences keep their
+narrower check (`ist_phrase`), which has been adjusted repeatedly and brought
+false starts down from 30 to 7. That is why the new rule fires in 8 cases rather
+than 10: the two "Sprachsteuerung stoppen" are deliberately left out.
+
+Verified against all 283 recordings: 8 are matched; word salad, ambiguity and
+`[unk]` do not get through. Every match is logged - `als 'notiz drucken'
+zugeordnet (+1 Wort zu viel)` - so that what the loosening actually does stays
+traceable.
+
+### Pronunciation rules are now per voice
+
+**Stephan's decision of 2026-08-24:** "Michael lassen wir wie bisher und bei
+Anne die Variante 2" - Michael stays as he was, Anna gets variant 2. Every rule
+in `AUSSPRACHE` therefore has a fourth field: the voices it applies to, or
+`None` for all.
+
+| Voice | "DialOS" is read as | Word duration |
+|---|---|---|
+| Anna (`de_DE-kerstin-low`) | `Dial O S` | 0.47 → 0.64 s |
+| Michael (`de_DE-thorsten-high`) | `Dial OS` | unchanged, 0.98 s |
+| any other | `Dial OS` | fallback |
+
+The order in the list is **not arbitrary**: specific before general. For Anna
+the first rule fires, after which the general one finds nothing.
+
+**How the choice came about, so nobody works through it again.** Piper knows no
+*middle* pause. Measured on Anna's voice:
+
+| Spelling | Silence | Word duration |
+|---|---|---|
+| `Dial OS` | 0 ms | 0.47 s |
+| `Dial, OS` | 0 ms | 0.53 s |
+| `Dial - OS` | 0 ms | 0.46 s |
+| `Dial; OS` / `Dial: OS` / `Dial ... OS` | 0 ms | ~0.45 s |
+| `Dial O S` | 0 ms | **0.64 s** |
+| `Dial. OS` | **220 ms** | 0.70 s |
+| `Dial? OS` | 230 ms | 0.71 s |
+| `Dial! OS` | 290 ms | 0.69 s |
+
+Only sentence-ending punctuation produces silence. The period even matched
+Stephan's own speaking pause - measured from a recording of his voice: **105
+and 180 ms** - but it turned the word into two sentences, with the melody
+falling after "Dial". His verdict: "das zweite ist ja alles aber nicht das Wort
+DialOS". `Dial O S` therefore inserts no silence but speaks the letters singly.
+
+**The sample generators must pass the voice.** `fuer_sprachausgabe` now takes a
+second parameter. `dialos-alle-ansagen.py` and `dialos-vorstellung.py` pass the
+identifier through - without it Michael's file would get Anna's pronunciation,
+unnoticed, because both sound right on their own. That very confusion has
+happened here before, back then with the voice itself.
+
+### A fault the rebuild surfaced: at the end of a sentence the rule did nothing
+
+The lookahead was `(?!\.)` and was meant to protect `dialos.org`. But it
+excluded **any** following period - including the full stop of a sentence:
+
+    Willkommen bei DialOS.   →   unchanged, read as one word
+    DialOS ist bereit.       →   Dial OS ist bereit.
+
+The most common case was the broken one. It surfaced only because **both
+sentence positions** were checked while fitting the new rule. Now
+`(?!\.[A-Za-z])`: a period counts as part of the word only when a letter
+follows. That covers `dialos.org` and spares the full stop.
+
+### A muted paplay makes the device silent - with no error
+
+**Found on 2026-08-24 because Stephan said "ich höre nix" during a listening
+test.** The `paplay` stream was **born muted**:
+
+    Sink Input #602
+        Mute: yes
+        module-stream-restore.id = "sink-input-by-application-name:paplay"
+
+PipeWire remembers volume and mute **per application**, persistently and across
+reboots. Mute a `paplay` stream once without releasing it and every future
+`paplay` is silent.
+
+**Why this is more than a failed listening test.** DialOS plays via `paplay`:
+the question tone, the silent probe tone for output selection, **and cached
+announcements** (`dialos-say.py`, `aus_speicher`). All cached announcements
+would be silent. And `paplay` returns **0** in that case — `aus_speicher()`
+considers the announcement successful and does **not** fall back to `spd-say`.
+The device would be mute for a blind user without any error anywhere. He would
+have no way to find the cause, and we none to see it in the log.
+
+**How it happens.** `dialos-say.py` mutes other streams while it speaks and
+releases them in a `finally`. Two gaps:
+
+1. With two announcements in quick succession, the second sees the first's
+   `paplay` stream and mutes it.
+2. A `finally` does **not** run on SIGTERM - Python's default terminates the
+   process at once. Kill an announcement and the mute stays in PipeWire's
+   store.
+
+**Fixed in both directions:**
+
+- `ist_eigener_ton()` excludes streams of the application `paplay` from
+  muting. The price: were a foreign application playing music through
+  `paplay`, it would not duck during an announcement - the cheaper fault.
+- Signal handlers for SIGTERM, SIGINT and SIGHUP turn the signal into an
+  exception so the cleanup runs. Evidenced: exit code **143** instead of -15,
+  and the speaking marker is not left behind. That matters in its own right -
+  a stale marker keeps the voice-command service from listening for good.
+
+**Repair, should it recur** (the store can only be changed through a live
+stream):
+
+    paplay SOMEFILE.ogg &
+    pactl set-sink-input-mute $(pactl list sink-inputs | awk '/Sink Input #/{i=$3} /application.name = "paplay"/{print substr(i,2); exit}') 0
+
+**What stays open:** there is no self-check. A device that has stopped speaking
+does not report it - see `TODO.md`.
+
+### The level is now in the log for every recognition
+
+**Measured on 2026-08-24, after the voice control switched itself on.** Twenty
+minutes of listening on the same source with the same grammar as the service
+produced four notable results — and two numbers that rule out one line of
+attack before it gets built:
+
+| Time | Result | Level (RMS) | Confidence |
+|---|---|---|---|
+| 15:25:48 | `sprachsteuerung` | **30** | 1.000 |
+| 15:28:10 | `[unk] [unk] starten` | **28** | 0.979 |
+| 15:28:14 | `[unk] [unk] starten` | 5552 | 0.631 |
+
+This room idles at **52**, and speech measured between 3475 and 4196 in the
+dictation tests. So Vosk built whole command words out of something **quieter
+than silence** — and was more confident about those than about the loud case.
+
+**That disposes of confidence as a filter.** In a grammar holding a single
+phrase the recogniser is confident by construction: it has no alternative
+except `[unk]`. A confidence threshold would have discarded the loud, genuine
+case and let the quiet ghosts through — exactly backwards.
+
+**None of the four would have switched on**, and that is the good news:
+`sprachsteuerung` lacks its second word, and the others contain `[unk]`. The
+rule "core word AND no `[unk]`" held. The measuring tool did not reproduce that
+rule in its first draft and therefore reported four "false starts" that were
+none — since corrected; it now separates "notable" from "would have switched
+on".
+
+The service now records the **peak level since the previous result** with every
+recognition. When the next genuine false start happens, the log will show
+whether a level threshold would have prevented it. Until then none gets built.
+
+**Careful when comparing:** the service writes the PEAK amplitude, while the
+measuring tool and `dialos-diktat.py` compute RMS. The numbers are not
+comparable with each other; that is why the log says "Spitze".
+
+### What was spoken goes into the log
+
+**Since 2026-08-24 — and the trigger was a gap in my own reasoning.** After the
+false start at 14:41:12 I claimed DialOS had not spoken at that time, citing
+`dialos-ton-ausgabe.log`. But that only records **device changes**, not
+announcements. My statement was therefore not established, merely not
+refuted — a difference that has already been expensive twice in this project.
+
+`dialos-say.py` now writes to `~/.log/dialos-say.log`, with date and time, and
+questions marked `FRAGE`. Without that file the first suspect in any false
+start — the device's own announcement, should echo cancellation fail — can
+neither be confirmed nor ruled out.
+
+**The text is truncated at 120 characters**, and that is a data-protection
+decision, not thrift: for a read-aloud command the announcement would be the
+whole document. A full transcript of every announcement would be a verbatim
+record of the user, which nobody asked for. For the purpose — roughly when was
+roughly what said — 120 characters suffice.
+
+Logging never holds up speaking: if the write fails it is swallowed. An
+announcement lost to a full filesystem would be the worse fault.
+
+`logrotate` covers the file without any change — the rule matches
+`dialos-*.log`.
+
+### Logs carry a date, not just a time
+
+**Since 2026-08-24, and the trigger was a false conclusion of mine.** Every
+`melde()` wrote `%H:%M:%S` — the time only. logrotate rotates daily, but only
+while the device is running. Leave it off for two days and three days end up in
+**one** file, and nobody notices: the clock simply jumps backwards.
+
+That is exactly what caught me. From `~/.log/dialos-sprachbefehl.log` I
+reconstructed a sequence "from today", described an incident to Stephan —
+thirteen failed attempts to switch on, a triggered print job — and drew
+conclusions about usability from it. All of it was from **22 August**. It only
+surfaced because Stephan replied that he had not spoken to the voice control
+that day at all. Two backward jumps in the file (15:39 → 15:09 and
+15:21 → 10:23) prove the three days.
+
+Twelve scripts now write `%m-%d %H:%M:%S`. The format stays short enough for
+the live transcript and makes a change of day visible.
+
+**The lesson is not the format.** A log without a date is not a cosmetic flaw
+but a trap for exactly the person reading it during support — under time
+pressure. It cost me a whole line of analysis, and without Stephan's objection
+a wrong conclusion would have ended up in the documentation.
 
 ## 12. Security tools (encrypt nutzer's data + autologin gate)
 

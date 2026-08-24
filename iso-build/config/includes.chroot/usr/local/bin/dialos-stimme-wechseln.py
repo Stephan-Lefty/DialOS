@@ -40,7 +40,7 @@ PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-stimme-wechsel
 def melde(text):
     os.makedirs(os.path.dirname(PROTOKOLL), exist_ok=True)
     with open(PROTOKOLL, "a") as f:
-        f.write(f"{time.strftime('%H:%M:%S')}  {text}\n")
+        f.write(f"{time.strftime('%m-%d %H:%M:%S')}  {text}\n")
 
 
 def sprich(text):

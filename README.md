@@ -129,6 +129,104 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Wenn nichts gepasst hat, sagt DialOS es jetzt** (2026-08-24, Stephans
+  Freigabe). Vorher passierte bei einer Aeusserung, die kein Befehl ist,
+  nichts - und es wurde auch nichts gesagt. Die Ansage nennt bei starker
+  Uebereinstimmung den richtigen Satz ("Ich habe verstanden: datum haben wir.
+  Der Befehl heisst: welches datum haben wir."), sonst nur das Gehoerte. KEINE
+  Frageform: "Meintest du ...?" haette zu einem "ja" eingeladen, das DialOS
+  nicht verarbeitet - ein neuer lautloser Fehlschlag, um einen alten zu heilen.
+  Drei Zahlen, alle gemessen: zwei Drittel Wortuebereinstimmung (bei 51 % der
+  Versuche stimmte nur die Haelfte), zehn Sekunden Abstand (48 % der Anlaesse
+  lagen unter 5 Sekunden), mindestens zwei Woerter. Zerstoerende Befehle werden
+  nie vorgeschlagen.
+
+- **Ein vollstaendiger Befehl mit einem Wort zu viel gilt jetzt** (2026-08-24).
+  Die Zuordnung war ein exakter Vergleich; ein Wort zu viel liess den ganzen
+  Befehl durchfallen. Grundlage ist Stephans Urteil ueber die Stichprobe: Die
+  283 aufgezeichneten befehlslosen Aeusserungen waren ALLE Befehlsversuche.
+  21 davon enthielten den kompletten Befehl. Die naheliegende Lockerung
+  ("Befehl enthalten genuegt") ist gemessen und VERWORFEN: Sie haette viermal
+  aus Wortsalat "einkauf erledigt" ausgefuehrt. Mit einer Grenze von zwei
+  Zusatzwoertern: 8 Faelle gerettet, null Salat, Ein- und Ausschalten bewusst
+  ausgenommen.
+
+- **Aussprache von "DialOS" pro Stimme entschieden** (2026-08-24, Stephan nach
+  Gehoer): Anna sagt "Dial O S", Michael bleibt bei "Dial OS". Die
+  Aussprache-Regeln haben dafuer ein viertes Feld bekommen - die Stimmen, fuer
+  die sie gelten. Gemessen und dokumentiert, damit es niemand erneut
+  durchprobiert: Piper kennt keine MITTLERE Pause. Komma, Semikolon,
+  Doppelpunkt, Gedankenstrich und mehrere Leerzeichen ergeben 0 ms Stille, nur
+  Satzende-Zeichen erzeugen welche (Punkt 220 ms). Der Punkt traf sogar
+  Stephans eigene Sprechpause - an einer Aufnahme seiner Stimme gemessen, 105
+  und 180 ms -, machte aber aus dem Wort zwei Saetze.
+- **Am Satzende griff die Aussprache-Regel gar nicht** (2026-08-24, beim Umbau
+  aufgefallen). Der Lookahead (?!\.) sollte dialos.org schuetzen, schloss aber
+  jeden folgenden Punkt aus - also auch den Schlusspunkt. "Willkommen bei
+  DialOS." wurde als EIN Wort gelesen, "DialOS ist bereit." dagegen richtig.
+  Ausgerechnet der haeufigste Fall war der falsche.
+
+- **Ein stummer `paplay` machte das Geraet lautlos - ohne Fehlermeldung**
+  (2026-08-24 gefunden und behoben). Aufgefallen an einer misslungenen
+  Hoerprobe: Der paplay-Strom kam stummgeschaltet zur Welt, weil PipeWire
+  Lautstaerke und Stummschaltung JE ANWENDUNG merkt. DialOS spielt ueber
+  paplay den Frageton, den Testton UND die zwischengespeicherten Ansagen -
+  die waren damit alle lautlos, bei Rueckgabewert 0, also ohne dass
+  aus_speicher() auf spd-say zurueckgefallen waere. Ursache: dialos-say.py
+  schaltet fremde Stroeme stumm und gibt sie im finally frei - das laeuft bei
+  SIGTERM aber nicht, und bei zwei kurz aufeinanderfolgenden Ansagen schaltet
+  die zweite den paplay der ersten stumm. Behoben durch eine Ausnahme fuer
+  eigene Toene und Signalbehandler (Rueckgabewert 143 statt -15 belegt, die
+  Sprech-Markierung bleibt nicht mehr liegen).
+
+- **Pegel bei jeder Erkennung im Protokoll** (2026-08-24), und ein Messwerkzeug
+  dazu (`scripts/dialos-fehlstart-messen.py`). Zwanzig Minuten Mitschnitt haben
+  einen Loesungsweg ausgeschlossen, bevor er gebaut wurde: Vosk lieferte
+  `sprachsteuerung` bei Pegel 30 mit Konfidenz 1,000 und `[unk] [unk] starten`
+  bei Pegel 28 mit 0,979 - beides LEISER als der Leerlauf von 52, waehrend
+  Sprache bei 3475 bis 4196 liegt. Ueber die Konfidenz ist das nicht zu
+  filtern: In einer Grammatik mit einem Satz ist der Erkenner
+  konstruktionsbedingt sicher. Keiner der Faelle haette eingeschaltet, die
+  Regel "Kernwort UND kein [unk]" hat gehalten - das Werkzeug hatte sie im
+  ersten Entwurf nicht nachgebildet und vier "Fehlstarts" gemeldet, die keine
+  waren.
+
+- **Jede Ansage steht jetzt im Protokoll** (2026-08-24). `dialos-say.py`
+  schreibt nach `~/.log/dialos-say.log`. Anlass war eine Beweisluecke: Beim
+  Fehlstart um 14:41:12 habe ich behauptet, DialOS habe nicht gesprochen, und
+  das mit dem Ton-Protokoll belegt - das aber nur Geraetewechsel aufzeichnet.
+  Die Aussage war nicht belegt, nur nicht widerlegt. Der Text wird bei 120
+  Zeichen gekuerzt, und zwar aus Datenschutzgruenden: Bei einem
+  Vorlese-Befehl waere die Ansage das ganze Dokument.
+
+- **Protokolle tragen jetzt ein Datum** (2026-08-24) - und der Anlass war ein
+  Fehlschluss von mir. Zwoelf Skripte schrieben nur die Uhrzeit; logrotate
+  dreht taeglich, aber nur bei laufendem Geraet, also lagen drei Tage in einer
+  Datei. Ich habe daraus einen Verlauf "von heute" rekonstruiert und Stephan
+  einen Vorfall geschildert, den es an dem Tag nie gab. Aufgefallen ist es nur,
+  weil er sagte, er habe gar nicht mit der Sprachsteuerung gesprochen.
+- **Erster Fehlstart der Sprachsteuerung** (2026-08-24, Ursache offen). Um
+  14:41:12 erkannte Vosk "sprachsteuerung starten", ohne dass jemand mit dem
+  Geraet sprach; die eigene Ansage ist ausgeschlossen, das Ton-Protokoll ist in
+  dem Fenster leer. Die dokumentierten "null Fehlstarts" sind damit ueberholt.
+  Eigener Punkt in TODO.md - erst klaeren, was das Mikrofon gehoert hat, dann
+  bauen.
+
+- **Die Stimmwahl wurde beim Aufspielen stillschweigend zurueckgesetzt**
+  (2026-08-24 gefunden und behoben). `piper-generic.conf` enthaelt sowohl
+  Konfiguration als auch die vom Nutzer gewaehlte Stimme; `dialos-aufspielen`
+  ueberschrieb sie mit der Repo-Fassung. Stephans Wahl von Michael vom 22.08.
+  war damit weg, waehrend die Namensdatei weiter "Michael" sagte - das Geraet
+  haette sich mit Annas Stimme als Michael vorgestellt. Die Datei steht jetzt
+  in der Ausschlussliste, und das Skript MELDET, was es uebergangen hat: nach
+  Grund gruppiert, weil der erste Entwurf 29 Zeilen ausgab und die eine
+  wichtige unter 20 Zeilen Python-Bytecode begrub.
+- **Kein Stick fuer das Admin-Konto** (2026-08-24, Stephans Entscheidung). Der
+  Ordner `~/Dokumente/Archiv/DialOS-DATA/` ist dort das Archiv selbst. Vorher
+  meldete das Archiv alle 16 Minuten einen nicht beschreibbaren Stick - exFAT
+  gehoert dem Konto, das es einhaengt, und das war `nutzer`. Fuer den Nutzer
+  bleibt die Meldung: dort entsteht ohne Stick keine Sicherungskopie.
+
 - **Lizenz: GPL-3.0, dazu eine Bestandsaufnahme aller fremden Bestandteile**
   (2026-08-23, Stephans Entscheidung). DialOS war oeffentlich, aber ohne
   Lizenzdatei - und das heisst nicht "frei", sondern das Gegenteil: volles
@@ -457,6 +555,12 @@ abgeschlossen.*
       bestimmte Wörter hintereinander fallen im Gespräch praktisch nicht" hat
       im Feld gehalten. Das sind rund **26 Beinahe-Treffer je Stunde** -
       Umgebungsgeräusch, das die alte Regel eingeschaltet hätte.
+
+      **Nachtrag vom 2026-08-24:** Der erste Fehlstart ist da. Um 14:41:12
+      erkannte Vosk „sprachsteuerung starten", ohne dass jemand mit dem Gerät
+      gesprochen hatte. Die Messung oben bleibt richtig für ihr Fenster von
+      2 h 19 min - sie war nur zu kurz, um diesen Fall zu enthalten. Siehe
+      `TODO.md`.
     - **Auch die kurze Frist greift.** Am Vortag liefen **alle** sieben
       Einschaltungen in die 120 s. Jetzt endeten **6 von 8** nach 30 Sekunden
       und nur 2 nach 120 - das sind 9 Minuten weniger scharfe

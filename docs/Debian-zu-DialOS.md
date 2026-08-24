@@ -1831,6 +1831,54 @@ Ein Archiv, das meistens nicht steckt, kann trotzdem nicht beschrieben werden
 Auf der Platte liegt alles immer, auf dem Stick alles, was seit dem letzten
 Einstecken dazugekommen ist.
 
+
+**Beim Admin gibt es keinen Stick — und das ist kein Mangel.** Stephans
+Entscheidung vom 2026-08-24: „Beim Admin brauchen wir den Stick nicht, stell
+die Meldung ab. Und wir simulieren beim Admin den Stick mit einem Verzeichnis
+unter Dokumente/Archiv/DialOS-DATA. Den haben wir ja dafür angelegt!" Für
+`dialosadmin` ist der Ordner auf der Platte also nicht die Vorstufe zum Stick,
+sondern das Archiv selbst. `dialos-archiv.py` sucht dort keinen Stick und
+bemängelt keinen (Liste `OHNE_STICK` im Kopf des Skripts).
+
+**Warum das nötig war.** exFAT wird mit `uid`/`gid` dessen eingehängt, der es
+einhängt. Auf einem Gerät mit zwei Konten heißt das: Wer den Stick zuerst
+einsteckt, besitzt ihn, und das andere Konto kommt nicht einmal lesend hinein.
+Gemessen am 2026-08-24: `uid=1001,gid=1001,dmask=0022`, für `dialosadmin`
+„Keine Berechtigung". Das ist keine Fehlkonfiguration, sondern wie GNOME
+Wechseldatenträger einhängt. Vorher schrieb das Archiv deshalb **alle
+16 Minuten** „Stick unter /media/nutzer/DIALOS-DATA, aber nicht beschreibbar" —
+eine Meldung, die niemand liest und die nichts ändert.
+
+**Für den Nutzer bleibt die Meldung.** Dort ist ein nicht beschreibbarer Stick
+ein echter Fehler: Seine Sicherungskopie entsteht dann nicht.
+
+### Die Stimmwahl ist laufender Zustand, keine Konfiguration
+
+**Ein Fehler vom 2026-08-24, der zeigt, wie leicht das zu übersehen ist.** In
+`/etc/speech-dispatcher/modules/piper-generic.conf` stehen zwei verschiedene
+Dinge: wie das Piper-Modul aufgerufen wird — das ist Konfiguration und gehört
+ins Repo — und `DefaultVoice` plus `GenericRateMultiply`, also die Stimme, die
+der Nutzer gewählt hat. `dialos-stimme.py` schreibt genau dort hinein.
+
+Stephan hatte am 2026-08-22 um 15:21 per Tastendruck auf Michael umgestellt.
+Beim nächsten `dialos-aufspielen` setzte diese Datei die Wahl stillschweigend
+auf die Repo-Fassung zurück — während `assistent-name.txt` weiter „Michael"
+sagte. Das Gerät hätte sich mit **Annas Stimme als Michael** vorgestellt. Genau
+der Fehler, den es am 2026-08-19 schon einmal gab.
+
+Die Datei steht deshalb jetzt in der Ausschlussliste `NIEMALS` von
+`dialos-aufspielen`, wie die Bluetooth-Kopplungsdaten aus demselben Grund.
+Wer sie wirklich ändern will (neuer Piper-Aufruf, andere Modulparameter),
+spielt sie bewusst von Hand auf.
+
+**Und das Skript sagt jetzt an, was es übergangen hat.** Bis dahin
+verschwanden ausgeschlossene Dateien lautlos — derselbe Fehler wie ein
+Sprachbefehl ohne Rückmeldung: Wer nichts hört, hält es für erledigt. Die
+Meldung ist nach **Grund** gruppiert und nennt höchstens drei Pfade je Grund;
+der erste Entwurf listete 29 Dateien, davon 20 Python-Bytecode, und begrub die
+eine, auf die es ankam. Deshalb hat jeder Eintrag in `NIEMALS` jetzt eine
+dritte Spalte: *ist diese Auslassung meldenswert?*
+
 **Warum ein eigener PDF-Erzeuger und nicht LibreOffice.** Der Briefbogen ist
 mit **Leerzeichen** gesetzt: Absender und Datum stehen rechtsbündig, weil die
 Zeile auf Breite 76 aufgefüllt ist. In einer Proportionalschrift zerfällt das
@@ -1983,6 +2031,316 @@ Durchsicht, die niemand belegen kann, ist keine.
 
 Gemessen am 2026-08-22: Die Stimme steht nach 4,4 Sekunden um, mit Ansage in
 der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
+
+
+
+
+
+
+
+
+### Wenn nichts gepasst hat, sagt DialOS es jetzt
+
+**Bis zum 2026-08-24 passierte bei einer Äußerung, die kein Befehl ist,
+nichts — und es wurde auch nichts gesagt.** Für einen blinden Nutzer ist das
+der schlechteste Ausgang: Er hat gesprochen, das Gerät hat zugehört, und
+nichts sagt ihm, dass nichts geschah. Er weiß nicht einmal, ob er falsch
+gesprochen hat oder ob das Gerät kaputt ist.
+
+**Ich hatte dagegen argumentiert** — 283 Ansagen wären Nörgeln. Stephan hat die
+283 aufgezeichneten Fälle durchgesehen und das widerlegt: „Daran kann ich mich
+erinnern, das waren alles Befehsversuche." Alle 283. Die Ansage wäre also in
+283 von 283 Fällen richtig gewesen.
+
+**Die Form folgt aus seinem zweiten Satz:** „Ich muss selbst die genauen
+Befehle erst lernen und dann wundere ich mich, dass ein anderer nicht
+funktioniert. Auch für mich eine Lernphase." Die Ansage meldet deshalb nicht
+bloß einen Fehlschlag, sie nennt den richtigen Satz:
+
+    Ich habe verstanden: datum haben wir.
+    Der Befehl heisst: welches datum haben wir.
+
+Bei schwacher Übereinstimmung nur die erste Hälfte plus „Das war kein Befehl."
+
+**Keine Frageform, und das ist wichtig.** „Meintest du: welchen Tag haben wir?"
+lädt zu einem „ja" ein — und dieses „ja" verarbeitet DialOS nicht. Damit wäre
+ein neuer lautloser Fehlschlag gebaut worden, um einen alten zu heilen.
+
+**Drei Zahlen, alle gemessen und keine gewählt:**
+
+- **Zwei Drittel** der Wörter eines Befehls müssen vorkommen, damit er genannt
+  wird. Bei 51 % der 283 Versuche stimmte nur die *Hälfte* — ein Vorschlag aus
+  so wenig Übereinstimmung läge oft daneben, und ein falscher Vorschlag ist für
+  einen blinden Nutzer nicht neutral: Er **lehrt** einen Befehl, den es nicht
+  gibt. Ab zwei Dritteln sind es 34 % der Fälle.
+- **Zehn Sekunden** Abstand zwischen zwei Ansagen. Von 277 aufeinanderfolgenden
+  Anlässen lagen **48 % unter 5 Sekunden** und 68 % unter 10, Median 6. Ohne
+  Bremse redete das Gerät während einer misslingenden Sitzung fast durchgehend,
+  und da jede Ansage selbst zwei bis drei Sekunden dauert, würden sie sich
+  stauen. Zehn Sekunden lassen etwa jeden dritten Anlass durch.
+- **Mindestens zwei Wörter**, kein `[unk]`. Einwort-Bruchstücke („wir", „es",
+  „auf") sind keine Befehlsversuche — genau diese hat Stephan in der Stichprobe
+  auch nicht zu beurteilen bekommen. Ein `[unk]` heißt, dass noch etwas anderes
+  im Raum war; dann würde das Gerät in ein Gespräch hineinreden.
+
+**Zerstörende Befehle werden nie vorgeschlagen.** `einkauf erledigt` und
+`einkaufszettel wegwerfen` stehen auf einer Ausnahmeliste. Ein Vorschlag ist
+eine Empfehlung, und dafür darf das Gerät nichts empfehlen — schon gar nicht
+jemandem, der die Befehle noch lernt und die Folge nicht auf dem Schirm
+nachlesen kann. Gegengeprüft: `viel wegwerfen einkaufszettel` enthält **beide**
+Wörter des Löschbefehls und wird trotzdem nicht genannt.
+
+Jede Ansage steht im Protokoll, und jedes unterdrückte Mal auch — mit dem
+Grund.
+
+### Ein vollständiger Befehl mit einem Wort zu viel gilt jetzt
+
+**Die Zuordnung war ein exakter Vergleich** (`if satz in DRUCK_SAETZE`). Ein
+einziges Wort zu viel, und der vollständige Befehl fiel durch. Gemessen an 283
+aufgezeichneten Äußerungen — die Stephan am 2026-08-24 **alle als
+Befehlsversuche bestätigt** hat („das waren alles Befehsversuche") — enthielten
+21 den kompletten Befehl und lösten trotzdem nichts aus:
+
+    'auf windows umschalten windows'   →  auf windows umschalten
+    'notiz notiz drucken'              →  notiz drucken
+    'wir notiz aufnehmen'              →  notiz aufnehmen
+
+**Warum die Grenze von zwei Zusatzwörtern nicht verhandelbar ist.** Ohne Grenze
+hätte dieselbe Regel viermal Wortsalat ausgeführt, und zwar den heikelsten
+Befehl:
+
+    'es wir auf machen welchen tag haben tag haben wir einkauf erledigt
+     bildschirmfoto es drucken notiz uhr notiz datum gnome es uhr wir …'
+         →  einkauf erledigt      (der Einkaufszettel wäre weg)
+
+| erlaubte Zusatzwörter | gerettet | davon Wortsalat |
+|---:|---:|---:|
+| 0 | 0 | 0 |
+| 1 | 8 | 0 |
+| **2** | **10** | **0** |
+| 3 | 13 | 0 |
+| 5 | 16 | 0 |
+| ohne Grenze | 21 | **4** ← kippt |
+
+Zwei ist bewusst kein Optimum, sondern der konservative Rand. Bei 5 wäre in
+*dieser* Aufzeichnung ebenfalls kein Salat dabei gewesen — aber eine
+Aufzeichnung ist keine Garantie. Wer die Zahl erhöhen will, messe erst neu: Der
+teure Fehler ist hier nicht der nicht erkannte Befehl, sondern der falsch
+erkannte.
+
+**Drei Bedingungen, alle nötig:**
+
+- **Zusammenhängend**, nicht bloß „alle Wörter kommen vor". Sonst würde
+  `wie viel wir viel wegwerfen` als „Einkaufszettel wegwerfen" gelten.
+- **Genau ein** Treffer. Bei zweien ist unklar, was gemeint war, und Raten wäre
+  schlimmer als Nichtstun. Genau einmal kam das vor.
+- **Kein `[unk]`** — dasselbe Argument wie bei `ist_phrase()`.
+
+**Nicht angewandt auf das Ein- und Ausschalten.** Diese beiden Sätze behalten
+ihre engere Prüfung (`ist_phrase`), die mehrfach nachjustiert wurde und die
+Fehlstarts von 30 auf 7 gedrückt hat. Deshalb greift die neue Regel in 8 statt
+10 Fällen: Die zwei „Sprachsteuerung stoppen" bleiben bewusst außen vor.
+
+Gegengeprüft gegen alle 283 Aufzeichnungen: 8 werden zugeordnet, Wortsalat,
+Mehrdeutigkeit und `[unk]` kommen nicht durch. Jede Zuordnung steht mit im
+Protokoll — `als 'notiz drucken' zugeordnet (+1 Wort zu viel)` —, damit später
+nachvollziehbar ist, was die Lockerung tatsächlich tut.
+
+### Die Aussprache-Regeln gelten jetzt pro Stimme
+
+**Stephans Entscheidung vom 2026-08-24:** „Michael lassen wir wie bisher und
+bei Anne die Variante 2." Jede Regel in `AUSSPRACHE` hat deshalb ein viertes
+Feld — die Stimmen, für die sie gilt, oder `None` für alle.
+
+| Stimme | „DialOS" wird gelesen als | Wortdauer |
+|---|---|---|
+| Anna (`de_DE-kerstin-low`) | `Dial O S` | 0,47 → 0,64 s |
+| Michael (`de_DE-thorsten-high`) | `Dial OS` | unverändert 0,98 s |
+| jede andere | `Dial OS` | Rückfall |
+
+Die Reihenfolge in der Liste ist **nicht beliebig**: spezifisch vor allgemein.
+Bei Anna greift die erste Regel, danach findet die allgemeine nichts mehr.
+
+**Wie die Wahl zustande kam, damit es niemand erneut durchprobiert.** Piper
+kennt keine *mittlere* Pause. Gemessen an Annas Stimme:
+
+| Schreibweise | Stille | Wortdauer |
+|---|---|---|
+| `Dial OS` | 0 ms | 0,47 s |
+| `Dial, OS` | 0 ms | 0,53 s |
+| `Dial - OS` | 0 ms | 0,46 s |
+| `Dial; OS` / `Dial: OS` / `Dial ... OS` | 0 ms | ~0,45 s |
+| `Dial O S` | 0 ms | **0,64 s** |
+| `Dial. OS` | **220 ms** | 0,70 s |
+| `Dial? OS` | 230 ms | 0,71 s |
+| `Dial! OS` | 290 ms | 0,69 s |
+
+Nur Satzende-Zeichen erzeugen Stille. Der Punkt traf sogar Stephans eigene
+Sprechpause — an einer Aufnahme seiner Stimme gemessen: **105 und 180 ms** —
+machte aber aus dem Wort zwei Sätze, die Melodie fällt nach „Dial" ab. Sein
+Urteil: „das zweite ist ja alles aber nicht das Wort DialOS". `Dial O S` fügt
+deshalb keine Stille ein, sondern spricht die Buchstaben einzeln.
+
+**Die Erzeuger der Hörproben müssen die Stimme mitgeben.** `fuer_sprachausgabe`
+nimmt jetzt einen zweiten Parameter. `dialos-alle-ansagen.py` und
+`dialos-vorstellung.py` reichen die Kennung durch — ohne das bekäme Michaels
+Datei Annas Aussprache, unbemerkt, weil beide für sich richtig klingen. Genau
+diese Verwechslung gab es hier schon einmal, damals bei der Stimme selbst.
+
+### Ein Fehler, der beim Umbau auffiel: am Satzende griff die Regel nicht
+
+Der Lookahead hieß `(?!\.)` und sollte `dialos.org` schützen. Er schloss aber
+**jeden** folgenden Punkt aus — also auch den Schlusspunkt eines Satzes:
+
+    Willkommen bei DialOS.   →   unverändert, als ein Wort gelesen
+    DialOS ist bereit.       →   Dial OS ist bereit.
+
+Ausgerechnet der häufigste Fall war der falsche. Aufgefallen ist es nur, weil
+beim Einbau der neuen Regel **beide Satzstellungen** geprüft wurden. Jetzt
+`(?!\.[A-Za-z])`: Ein Punkt zählt nur als Teil des Wortes, wenn ein Buchstabe
+folgt. Das trifft `dialos.org` und verschont den Satzpunkt.
+
+### Ein stummer paplay macht das Gerät lautlos - ohne Fehlermeldung
+
+**Gefunden am 2026-08-24, weil Stephan bei einer Hörprobe „ich höre nix"
+sagte.** Der `paplay`-Strom kam **stummgeschaltet zur Welt**:
+
+    Sink Input #602
+        Mute: yes
+        module-stream-restore.id = "sink-input-by-application-name:paplay"
+
+PipeWire merkt sich Lautstärke und Stummschaltung **je Anwendung**, dauerhaft
+und über Neustarts hinweg. Wird ein `paplay`-Strom einmal stummgeschaltet und
+nicht wieder freigegeben, ist jeder künftige `paplay` stumm.
+
+**Warum das mehr ist als eine misslungene Hörprobe.** DialOS spielt über
+`paplay`: den Frageton, den stillen Testton der Ausgabewahl **und die
+zwischengespeicherten Ansagen** (`dialos-say.py`, `aus_speicher`). Damit wären
+alle gespeicherten Ansagen lautlos. Und `paplay` gibt in diesem Fall **0**
+zurück — `aus_speicher()` hält die Ansage für geglückt und fällt **nicht** auf
+`spd-say` zurück. Das Gerät wäre für einen blinden Nutzer stumm, ohne dass
+irgendwo ein Fehler stünde. Er hätte keine Möglichkeit, die Ursache zu finden,
+und wir keine, es aus dem Protokoll zu sehen.
+
+**Wie es dazu kommt.** `dialos-say.py` schaltet fremde Ströme stumm, solange es
+spricht, und gibt sie im `finally` wieder frei. Zwei Lücken:
+
+1. Laufen zwei Ansagen kurz hintereinander, sieht die zweite den
+   `paplay`-Strom der ersten und schaltet ihn stumm.
+2. Ein `finally` läuft bei **SIGTERM nicht** — Pythons Vorgabe beendet den
+   Prozess sofort. Wird eine Ansage abgeschossen, bleibt die Stummschaltung
+   in PipeWires Merkdatei stehen.
+
+**Behoben in beide Richtungen:**
+
+- `ist_eigener_ton()` nimmt Ströme der Anwendung `paplay` vom Stummschalten
+  aus. Der Preis: Spielte eine fremde Anwendung über `paplay` Musik, würde sie
+  während einer Ansage nicht leiser — der günstigere Fehler.
+- Signalbehandler für SIGTERM, SIGINT und SIGHUP wandeln das Signal in eine
+  Ausnahme, damit das Aufräumen läuft. Belegt: Rückgabewert **143** statt
+  −15, und die Sprech-Markierung bleibt nicht liegen. Das ist auch für sich
+  wichtig — eine liegengebliebene Markierung hält den Sprachbefehl-Dienst
+  dauerhaft vom Zuhören ab.
+
+**Reparatur, falls es doch wieder auftritt** (die Merkdatei lässt sich nur über
+einen laufenden Strom ändern):
+
+    paplay IRGENDEINE.ogg &
+    pactl set-sink-input-mute $(pactl list sink-inputs | awk '/Sink Input #/{i=$3} /application.name = "paplay"/{print substr(i,2); exit}') 0
+
+**Was offen bleibt:** Es gibt keine Selbstprüfung. Ein Gerät, das nicht mehr
+spricht, meldet das nicht — siehe `TODO.md`.
+
+### Beim Fehlstart steht jetzt der Pegel im Protokoll
+
+**Gemessen am 2026-08-24, nachdem die Sprachsteuerung sich selbst
+eingeschaltet hatte.** Zwanzig Minuten Mitschnitt mit derselben Quelle und
+derselben Grammatik wie der Dienst ergaben vier auffällige Ergebnisse — und
+zwei Zahlen, die einen Lösungsweg ausschließen, bevor er gebaut wird:
+
+| Zeit | Ergebnis | Pegel (RMS) | Konfidenz |
+|---|---|---|---|
+| 15:25:48 | `sprachsteuerung` | **30** | 1,000 |
+| 15:28:10 | `[unk] [unk] starten` | **28** | 0,979 |
+| 15:28:14 | `[unk] [unk] starten` | 5552 | 0,631 |
+
+Der Leerlauf dieses Raumes liegt bei **52**, Sprache lag bei der
+Diktat-Messung zwischen 3475 und 4196. Vosk hat also aus etwas, das **leiser
+als Stille** ist, ganze Befehlswörter gebaut — und war sich dabei sicherer als
+bei dem lauten Fall.
+
+**Damit ist die Konfidenz als Filter erledigt.** In einer Grammatik mit einem
+einzigen Satz ist der Erkenner konstruktionsbedingt sicher: Er hat keine
+Alternative außer `[unk]`. Eine Schwelle auf die Konfidenz hätte den lauten,
+echten Fall verworfen und die stillen Geister durchgelassen — genau falsch
+herum.
+
+**Keiner der vier hätte eingeschaltet**, und das ist die gute Nachricht:
+`sprachsteuerung` fehlt das zweite Wort, und die anderen enthalten `[unk]`.
+Die Regel „Kernwort UND kein `[unk]`" hat gehalten. Das Messwerkzeug hat sie
+im ersten Entwurf nicht nachgebildet und deshalb vier „Fehlstarts" gemeldet,
+die keine waren — inzwischen berichtigt, es unterscheidet jetzt „auffällig"
+von „hätte eingeschaltet".
+
+Der Dienst schreibt bei jeder Erkennung die **Pegelspitze seit dem letzten
+Ergebnis** mit. Beim nächsten echten Fehlstart steht damit im Protokoll, ob
+eine Pegelschwelle ihn verhindert hätte. Vorher wird keine gebaut.
+
+**Achtung beim Vergleichen:** Der Dienst schreibt den SPITZENWERT der
+Amplitude, das Messwerkzeug und `dialos-diktat.py` rechnen RMS. Die Zahlen
+sind nicht untereinander vergleichbar; deshalb heißt es im Protokoll „Spitze".
+
+### Was gesprochen wurde, steht im Protokoll
+
+**Seit dem 2026-08-24 — und der Anlass war eine Lücke in meiner eigenen
+Beweisführung.** Nach dem Fehlstart um 14:41:12 habe ich behauptet, DialOS
+habe zu der Zeit nicht gesprochen, und das mit `dialos-ton-ausgabe.log`
+belegt. Das protokolliert aber nur **Gerätewechsel**, keine Ansagen. Meine
+Aussage war damit nicht belegt, sondern nur nicht widerlegt — ein Unterschied,
+der in diesem Projekt schon zweimal teuer war.
+
+`dialos-say.py` schreibt jetzt nach `~/.log/dialos-say.log`, mit Datum und
+Uhrzeit, Fragen als `FRAGE` gekennzeichnet. Ohne diese Datei ist der erste
+Verdächtige bei jedem Fehlstart — die eigene Ansage, wenn die
+Echo-Unterdrückung versagt — weder zu bestätigen noch auszuräumen.
+
+**Der Text wird bei 120 Zeichen gekürzt**, und das ist eine
+Datenschutz-Entscheidung, kein Platzsparen: Bei einem Vorlese-Befehl wäre die
+Ansage das ganze Dokument. Ein vollständiger Mitschnitt jeder Ansage wäre ein
+Wortprotokoll des Nutzers, das niemand bestellt hat. Für den Zweck — wann
+wurde etwa was gesagt — reichen 120 Zeichen.
+
+Das Protokollieren hält das Sprechen nie auf: Schlägt das Schreiben fehl,
+wird es verschluckt. Eine Ansage, die wegen eines vollen Dateisystems
+ausfällt, wäre der schlechtere Fehler.
+
+`logrotate` erfasst die Datei ohne Änderung — die Regel greift auf
+`dialos-*.log`.
+
+### Protokolle tragen ein Datum, nicht nur eine Uhrzeit
+
+**Seit dem 2026-08-24, und der Anlass war ein Fehlschluss von mir.** Alle
+`melde()`-Funktionen schrieben `%H:%M:%S` — nur die Uhrzeit. logrotate dreht
+täglich, aber nur, wenn das Gerät läuft. Steht es zwei Tage, liegen drei Tage
+in **einer** Datei, und niemand sieht es: Die Uhrzeit springt einfach zurück.
+
+Genau daran bin ich gescheitert. Ich habe aus
+`~/.log/dialos-sprachbefehl.log` einen Verlauf „von heute" rekonstruiert,
+Stephan einen Vorfall geschildert — dreizehn vergebliche Einschaltversuche,
+ein ausgelöster Druck — und daraus Schlüsse über die Bedienbarkeit gezogen.
+Alles davon stammte vom **22.08.** Aufgefallen ist es nur, weil Stephan
+antwortete, er habe an diesem Tag gar nicht mit der Sprachsteuerung
+gesprochen. Zwei Rückwärtssprünge in der Datei (15:39 → 15:09 und
+15:21 → 10:23) belegen die drei Tage.
+
+Zwölf Skripte schreiben jetzt `%m-%d %H:%M:%S`. Das Format bleibt kurz genug
+für die Mitschrift und macht einen Tageswechsel sichtbar.
+
+**Die Lehre dahinter ist nicht das Format.** Ein Protokoll ohne Datum ist kein
+kleiner Schönheitsfehler, sondern eine Falle für genau die Person, die im
+Support hineinschaut — und die liest es unter Zeitdruck. Es hat mich einen
+kompletten Analyseweg gekostet, und ohne Stephans Einwand hätte eine falsche
+Schlussfolgerung in der Dokumentation gestanden.
 
 ## 12. Sicherheits-Werkzeuge (nutzers Daten verschlüsseln + Autologin-Gate)
 
