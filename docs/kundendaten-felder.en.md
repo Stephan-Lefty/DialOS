@@ -31,7 +31,7 @@ whether DialOS already knows the field somewhere.
 | `wohnort` (town) | no | letterhead, weather fallback |
 | `bundesland` (region) | no | letterhead for official post |
 | `land` (country) | no | letterhead for foreign post |
-| `laenderkennzeichen` (country code) | no | dialling code, letterhead |
+| `laenderkennzeichen` (country code) | no | letterhead for foreign post — belongs to the ADDRESS |
 | `festnetz` (landline) | no | letter ("reachable by phone"), telephony |
 | `handy_privat` (mobile, private) | no | ditto |
 | `handy_geschaeftlich` (mobile, work) | no | ditto |
@@ -50,6 +50,19 @@ written, spoken.
 
 Without this field the device mispronounces the user's name in every
 announcement. Whoever merges the files must not lose it.
+
+### The dialling code belongs to the number, not to the country field
+
+Stephan on 2026-08-24: "Ich habe ein deutsches Handy und ein
+österreichisches" - he has one German mobile and one Austrian. So
+`laenderkennzeichen` is **not** a dialling code: it belongs to the postal
+address (`AT` in Stephan's case), while each phone number carries its own
+country prefix - `0049…` for the German device, `0043…` for the Austrian one.
+
+Phone numbers are therefore stored **in full international form**, prefix
+included. Anyone deriving a dialling code from `laenderkennzeichen` will dial
+one of the two devices wrongly - and that only surfaces when somebody cannot be
+reached.
 
 ### Fields that deliberately do NOT belong here
 

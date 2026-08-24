@@ -2038,6 +2038,61 @@ der neuen Stimme, in beide Richtungen. Die Optik schaltet ohne Verzoegerung.
 
 
 
+
+### Wenn nichts gepasst hat, sagt DialOS es jetzt
+
+**Bis zum 2026-08-24 passierte bei einer Äußerung, die kein Befehl ist,
+nichts — und es wurde auch nichts gesagt.** Für einen blinden Nutzer ist das
+der schlechteste Ausgang: Er hat gesprochen, das Gerät hat zugehört, und
+nichts sagt ihm, dass nichts geschah. Er weiß nicht einmal, ob er falsch
+gesprochen hat oder ob das Gerät kaputt ist.
+
+**Ich hatte dagegen argumentiert** — 283 Ansagen wären Nörgeln. Stephan hat die
+283 aufgezeichneten Fälle durchgesehen und das widerlegt: „Daran kann ich mich
+erinnern, das waren alles Befehsversuche." Alle 283. Die Ansage wäre also in
+283 von 283 Fällen richtig gewesen.
+
+**Die Form folgt aus seinem zweiten Satz:** „Ich muss selbst die genauen
+Befehle erst lernen und dann wundere ich mich, dass ein anderer nicht
+funktioniert. Auch für mich eine Lernphase." Die Ansage meldet deshalb nicht
+bloß einen Fehlschlag, sie nennt den richtigen Satz:
+
+    Ich habe verstanden: datum haben wir.
+    Der Befehl heisst: welches datum haben wir.
+
+Bei schwacher Übereinstimmung nur die erste Hälfte plus „Das war kein Befehl."
+
+**Keine Frageform, und das ist wichtig.** „Meintest du: welchen Tag haben wir?"
+lädt zu einem „ja" ein — und dieses „ja" verarbeitet DialOS nicht. Damit wäre
+ein neuer lautloser Fehlschlag gebaut worden, um einen alten zu heilen.
+
+**Drei Zahlen, alle gemessen und keine gewählt:**
+
+- **Zwei Drittel** der Wörter eines Befehls müssen vorkommen, damit er genannt
+  wird. Bei 51 % der 283 Versuche stimmte nur die *Hälfte* — ein Vorschlag aus
+  so wenig Übereinstimmung läge oft daneben, und ein falscher Vorschlag ist für
+  einen blinden Nutzer nicht neutral: Er **lehrt** einen Befehl, den es nicht
+  gibt. Ab zwei Dritteln sind es 34 % der Fälle.
+- **Zehn Sekunden** Abstand zwischen zwei Ansagen. Von 277 aufeinanderfolgenden
+  Anlässen lagen **48 % unter 5 Sekunden** und 68 % unter 10, Median 6. Ohne
+  Bremse redete das Gerät während einer misslingenden Sitzung fast durchgehend,
+  und da jede Ansage selbst zwei bis drei Sekunden dauert, würden sie sich
+  stauen. Zehn Sekunden lassen etwa jeden dritten Anlass durch.
+- **Mindestens zwei Wörter**, kein `[unk]`. Einwort-Bruchstücke („wir", „es",
+  „auf") sind keine Befehlsversuche — genau diese hat Stephan in der Stichprobe
+  auch nicht zu beurteilen bekommen. Ein `[unk]` heißt, dass noch etwas anderes
+  im Raum war; dann würde das Gerät in ein Gespräch hineinreden.
+
+**Zerstörende Befehle werden nie vorgeschlagen.** `einkauf erledigt` und
+`einkaufszettel wegwerfen` stehen auf einer Ausnahmeliste. Ein Vorschlag ist
+eine Empfehlung, und dafür darf das Gerät nichts empfehlen — schon gar nicht
+jemandem, der die Befehle noch lernt und die Folge nicht auf dem Schirm
+nachlesen kann. Gegengeprüft: `viel wegwerfen einkaufszettel` enthält **beide**
+Wörter des Löschbefehls und wird trotzdem nicht genannt.
+
+Jede Ansage steht im Protokoll, und jedes unterdrückte Mal auch — mit dem
+Grund.
+
 ### Ein vollständiger Befehl mit einem Wort zu viel gilt jetzt
 
 **Die Zuordnung war ein exakter Vergleich** (`if satz in DRUCK_SAETZE`). Ein

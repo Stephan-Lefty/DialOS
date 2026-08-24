@@ -1955,6 +1955,59 @@ in the new voice, in both directions. The look switches without delay.
 
 
 
+
+### When nothing matched, DialOS now says so
+
+**Until 2026-08-24 an utterance that was not a command did nothing - and
+nothing was said either.** For a blind user that is the worst outcome: he has
+spoken, the device has listened, and nothing tells him that nothing happened.
+He does not even know whether he said it wrongly or the device is broken.
+
+**I argued against it** - 283 announcements would be nagging. Stephan went
+through the 283 recorded cases and refuted that: "Daran kann ich mich erinnern,
+das waren alles Befehsversuche" - all 283 were attempted commands. So the
+announcement would have been right in 283 out of 283 cases.
+
+**The form follows from his second sentence:** "Ich muss selbst die genauen
+Befehle erst lernen und dann wundere ich mich, dass ein anderer nicht
+funktioniert. Auch für mich eine Lernphase." So the announcement does not
+merely report a failure, it names the correct sentence:
+
+    Ich habe verstanden: datum haben wir.
+    Der Befehl heisst: welches datum haben wir.
+
+With a weak match, only the first half plus "Das war kein Befehl."
+
+**No question form, and that matters.** "Meintest du: welchen Tag haben wir?"
+invites a "ja" - and DialOS does not process that "ja". It would have built a
+new silent failure in order to heal an old one.
+
+**Three numbers, all measured and none chosen:**
+
+- **Two thirds** of a command's words must be present for it to be named. In
+  51 % of the 283 attempts only *half* matched - a suggestion from that little
+  overlap would often be wrong, and a wrong suggestion is not neutral for a
+  blind user: it **teaches** a command that does not exist. From two thirds
+  upwards it covers 34 % of cases.
+- **Ten seconds** between two announcements. Of 277 consecutive occasions,
+  **48 % were less than 5 seconds apart** and 68 % less than 10, median 6.
+  Without a brake the device would talk almost continuously through a failing
+  session, and since each announcement itself takes two to three seconds they
+  would pile up. Ten seconds lets roughly every third occasion through.
+- **At least two words**, no `[unk]`. Single-word fragments ("wir", "es",
+  "auf") are not attempted commands - those were not put to Stephan in the
+  sample either. An `[unk]` means something else was in the room; the device
+  would be talking into a conversation.
+
+**Destructive commands are never suggested.** `einkauf erledigt` and
+`einkaufszettel wegwerfen` are on an exception list. A suggestion is a
+recommendation, and for those the device must recommend nothing - least of all
+to someone still learning the commands who cannot read the consequence off a
+screen. Verified: `viel wegwerfen einkaufszettel` contains **both** words of the
+delete command and is still not named.
+
+Every announcement is logged, and so is every suppressed one - with the reason.
+
 ### A complete command with one word too many now counts
 
 **Matching was an exact comparison** (`if satz in DRUCK_SAETZE`). One word too

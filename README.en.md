@@ -121,6 +121,17 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **When nothing matched, DialOS now says so** (2026-08-24, approved by
+  Stephan). Previously an utterance that was not a command did nothing, and
+  nothing was said either. On a strong match the announcement names the correct
+  sentence ("Ich habe verstanden: datum haben wir. Der Befehl heisst: welches
+  datum haben wir."), otherwise only what was heard. NO question form:
+  "Meintest du ...?" would have invited a "ja" that DialOS does not process - a
+  new silent failure built to heal an old one. Three numbers, all measured:
+  two-thirds word overlap (in 51 % of attempts only half matched), ten seconds
+  between announcements (48 % of occasions were under 5 seconds apart), at
+  least two words. Destructive commands are never suggested.
+
 - **A complete command with one word too many now counts** (2026-08-24).
   Matching was an exact comparison; one extra word made the whole command fall
   through. The basis is Stephan's verdict on the sample: all 283 recorded

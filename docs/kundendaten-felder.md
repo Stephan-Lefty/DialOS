@@ -30,7 +30,7 @@ sagt, ob DialOS das Feld schon irgendwo kennt.
 | `wohnort` | nein | Briefkopf, Wetter als Rückfall |
 | `bundesland` | nein | Briefkopf bei Behördenpost |
 | `land` | nein | Briefkopf bei Auslandspost |
-| `laenderkennzeichen` | nein | Telefonvorwahl, Briefkopf |
+| `laenderkennzeichen` | nein | Briefkopf bei Auslandspost — gehört zur ANSCHRIFT |
 | `festnetz` | nein | Brief („telefonisch erreichbar"), Telefonie |
 | `handy_privat` | nein | dito |
 | `handy_geschaeftlich` | nein | dito |
@@ -51,6 +51,19 @@ gesprochen.
 
 Ohne dieses Feld spricht das Gerät den Nutzer bei jeder Ansage falsch an. Wer
 die Felder zusammenlegt, darf es nicht verlieren.
+
+### Die Vorwahl gehört zur Nummer, nicht zum Land
+
+Stephan am 2026-08-24: „Ich habe ein deutsches Handy und ein
+österreichisches." Damit ist `laenderkennzeichen` **nicht** die Vorwahl: Es
+gehört zur Postanschrift (bei Stephan `AT`), während jede Telefonnummer ihre
+eigene Länderkennung trägt — `0049…` für das deutsche Gerät, `0043…` für das
+österreichische.
+
+Telefonnummern werden deshalb **vollständig in internationaler Form**
+gespeichert, mit Vorwahl. Wer aus `laenderkennzeichen` eine Vorwahl ableitet,
+wählt bei einem der beiden Geräte falsch — und das fällt erst auf, wenn jemand
+nicht erreicht wird.
 
 ### Felder, die bewusst NICHT dazugehören
 

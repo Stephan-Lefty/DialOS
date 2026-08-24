@@ -537,6 +537,95 @@ def enthaltener_befehl(worte):
     return treffer[0] if len(treffer) == 1 else None
 
 
+# --- ANSAGE, WENN NICHTS GEPASST HAT (Stephans Freigabe vom 2026-08-24) ---
+#
+# WARUM ES DIE ANSAGE GIBT. Bis heute passierte bei einer Aeusserung, die kein
+# Befehl ist, NICHTS - und es wurde auch nichts gesagt. Fuer einen blinden
+# Nutzer ist das der schlechteste Ausgang: Er hat gesprochen, das Geraet hat
+# zugehoert, und nichts sagt ihm, dass nichts geschah. Er weiss nicht einmal,
+# ob er falsch gesprochen hat oder ob das Geraet kaputt ist.
+#
+# Ich hatte dagegen argumentiert, eine Ansage wuerde noergeln. Stephan hat die
+# 283 aufgezeichneten Faelle durchgesehen und das widerlegt: "Daran kann ich
+# mich erinnern, das waren alles Befehsversuche." Alle 283. Die Ansage waere
+# also in 283 von 283 Faellen richtig gewesen.
+#
+# Und sein zweiter Satz ist der Grund fuer die FORM der Ansage: "Ich muss
+# selbst die genauen Befehle erst lernen und dann wundere ich mich, dass ein
+# anderer nicht funktioniert. Auch fuer mich eine Lernphase." Die Ansage soll
+# also nicht bloss melden, dass etwas schiefging - sie soll den richtigen Satz
+# nennen.
+#
+# KEINE FRAGEFORM, und das ist wichtig. "Meintest du: welchen Tag haben wir?"
+# laedt zu einem "ja" ein, und dieses "ja" wuerde DialOS nicht verarbeiten -
+# damit waere ein neuer lautloser Fehlschlag gebaut, um einen alten zu heilen.
+# Der Vorschlag kommt deshalb als Aussage: "Der Befehl heisst ..."
+HINWEIS_ABSTAND_S = 10.0
+HINWEIS_ANTEIL = 2.0 / 3.0
+
+# ZERSTOERENDE BEFEHLE WERDEN NIE VORGESCHLAGEN. Ein Vorschlag ist eine
+# Empfehlung, und fuer "Einkaufszettel wegwerfen" darf das Geraet nichts
+# empfehlen - schon gar nicht jemandem, der die Befehle noch lernt und der die
+# Folge nicht auf dem Schirm nachlesen kann.
+NICHT_VORSCHLAGEN = ("einkauf erledigt", "einkaufszettel wegwerfen")
+
+
+def naechster_befehl(worte):
+    """Bester Befehl und der Anteil SEINER Woerter, die vorkommen.
+
+    Anteil an den Woertern des BEFEHLS, nicht an den gehoerten: Sonst waere
+    ein einzelnes Wort aus einem langen Befehl schon ein Volltreffer.
+    """
+    gehoert = set(worte)
+    beste, wert = None, 0.0
+    for satz in BEFEHLSSAETZE:
+        sw = set(satz.split())
+        anteil = len(gehoert & sw) / len(sw)
+        if anteil > wert:
+            wert, beste = anteil, satz
+    return beste, wert
+
+
+def hinweis_text(worte):
+    """Was gesagt wird - immer das Gehoerte, den Befehl nur bei starker Naehe.
+
+    DIE SCHWELLE IST GEMESSEN, nicht gewaehlt: Bei 51 Prozent der 283
+    aufgezeichneten Versuche stimmte nur die HAELFTE der Woerter. Ein Vorschlag
+    aus so wenig Uebereinstimmung laege oft daneben - und ein falscher
+    Vorschlag ist fuer einen blinden Nutzer nicht neutral, er LEHRT einen
+    Befehl, den es nicht gibt. Ab zwei Dritteln sind es 34 Prozent der Faelle;
+    darunter wird nur das Gehoerte genannt.
+    """
+    gehoert = " ".join(worte)
+    befehl, anteil = naechster_befehl(worte)
+    if befehl and anteil >= HINWEIS_ANTEIL and befehl not in NICHT_VORSCHLAGEN:
+        return (f"Ich habe verstanden: {gehoert}. "
+                f"Der Befehl heisst: {befehl}.")
+    return f"Ich habe verstanden: {gehoert}. Das war kein Befehl."
+
+
+def hinweis_faellig(worte, letzter):
+    """Lohnt sich eine Ansage - und ist die Bremse abgelaufen?
+
+    DREI BEDINGUNGEN:
+      - mindestens zwei Woerter. Einwort-Bruchstuecke ("wir", "es", "auf")
+        sind keine Befehlsversuche; genau diese hat Stephan in der Stichprobe
+        auch nicht zu beurteilen bekommen.
+      - kein "[unk]". Dann war noch etwas anderes im Raum, und das Geraet
+        wuerde in ein Gespraech hineinreden.
+      - Abstand zur letzten Ansage. DIE BREMSE IST GEMESSEN: Von 277
+        aufeinanderfolgenden Anlaessen lagen 48 Prozent unter 5 Sekunden und
+        68 Prozent unter 10, Median 6 Sekunden. Ohne Bremse redete das Geraet
+        waehrend einer misslingenden Sitzung fast durchgehend - und jede Ansage
+        dauert selbst zwei bis drei Sekunden, sie wuerden sich also stauen.
+        Zehn Sekunden lassen etwa jeden dritten Anlass durch: genug, um den
+        richtigen Satz zu lernen, wenig genug, um nicht zu noergeln.
+    """
+    if len(worte) < 2 or "[unk]" in worte:
+        return False
+    return letzter is None or (time.time() - letzter) >= HINWEIS_ABSTAND_S
+
+
 def ist_phrase(gehoert, phrase, kernwort):
     """Beendet/beginnt diese Aeusserung die Sprachsteuerung?
 
@@ -1085,6 +1174,7 @@ def main():
     aufnahme_verwerfen = False
     saettigungen = 0
     letzte_pegelkorrektur = 0.0
+    letzter_hinweis = None
     # PEGELSPITZE SEIT DEM LETZTEN ERGEBNIS (seit 2026-08-24). Gemessen am
     # selben Tag: Vosk baut aus etwas, das LEISER als Stille ist, ganze
     # Befehlswoerter - 'sprachsteuerung' bei Pegel 30 mit Konfidenz 1,000,
@@ -1437,15 +1527,29 @@ def main():
                 continue
 
             # --- Befehle: Schreibtisch ---
-            if AUSLOESER not in worte:
+            getroffen = False
+            if AUSLOESER in worte:
+                for wort in worte:
+                    ziel = ZIELE.get(wort)
+                    if ziel:
+                        umschalten(ziel)
+                        letzte_aktivitaet = time.time()
+                        erkenner.Reset()
+                        getroffen = True
+                        break
+            if getroffen:
                 continue
-            for wort in worte:
-                ziel = ZIELE.get(wort)
-                if ziel:
-                    umschalten(ziel)
-                    letzte_aktivitaet = time.time()
-                    erkenner.Reset()
-                    break
+
+            # --- Nichts hat gepasst: sagen, was gehoert wurde ---
+            # Vorher endete der Ablauf hier mit einem stummen "continue". Das
+            # war die Stelle, an der 283 Befehlsversuche lautlos verpufften.
+            if hinweis_faellig(worte, letzter_hinweis):
+                letzter_hinweis = time.time()
+                text_hinweis = hinweis_text(worte)
+                melde(f"  kein Befehl - Hinweis: {text_hinweis!r}")
+                sprich(text_hinweis)
+            else:
+                melde("  kein Befehl - kein Hinweis (zu kurz, [unk] oder Bremse)")
     except KeyboardInterrupt:
         pass
     finally:

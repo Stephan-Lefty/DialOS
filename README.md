@@ -129,6 +129,18 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Wenn nichts gepasst hat, sagt DialOS es jetzt** (2026-08-24, Stephans
+  Freigabe). Vorher passierte bei einer Aeusserung, die kein Befehl ist,
+  nichts - und es wurde auch nichts gesagt. Die Ansage nennt bei starker
+  Uebereinstimmung den richtigen Satz ("Ich habe verstanden: datum haben wir.
+  Der Befehl heisst: welches datum haben wir."), sonst nur das Gehoerte. KEINE
+  Frageform: "Meintest du ...?" haette zu einem "ja" eingeladen, das DialOS
+  nicht verarbeitet - ein neuer lautloser Fehlschlag, um einen alten zu heilen.
+  Drei Zahlen, alle gemessen: zwei Drittel Wortuebereinstimmung (bei 51 % der
+  Versuche stimmte nur die Haelfte), zehn Sekunden Abstand (48 % der Anlaesse
+  lagen unter 5 Sekunden), mindestens zwei Woerter. Zerstoerende Befehle werden
+  nie vorgeschlagen.
+
 - **Ein vollstaendiger Befehl mit einem Wort zu viel gilt jetzt** (2026-08-24).
   Die Zuordnung war ein exakter Vergleich; ein Wort zu viel liess den ganzen
   Befehl durchfallen. Grundlage ist Stephans Urteil ueber die Stichprobe: Die
