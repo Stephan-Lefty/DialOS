@@ -278,6 +278,10 @@ function dialos_child_ist_englisch() {
 add_filter( 'request', 'dialos_child_english_post_routing' );
 
 function dialos_child_english_post_routing( $query_vars ) {
+	if ( isset( $_GET['dialos_debug'] ) ) {
+		header( 'X-Dialos-QueryVars: ' . wp_json_encode( $query_vars ) );
+		header( 'X-Dialos-RequestUri: ' . ( $_SERVER['REQUEST_URI'] ?? '' ) );
+	}
 	if ( empty( $query_vars['pagename'] ) ) {
 		return $query_vars;
 	}
