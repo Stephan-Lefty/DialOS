@@ -26,6 +26,26 @@ function dialos_child_enqueue_styles() {
 }
 
 /**
+ * Seiten-Cache (WP Super Cache) bei jeder Aenderung an Seiten/
+ * Beitraegen vollstaendig leeren (Stephan, 2026-08-25, beim Einrichten
+ * des Cache-Plugins). Dessen eigene Einstellung dafuer
+ * ("clear_cache_on_post_edit") liess sich ueber die Plugin-eigene
+ * REST-API nicht setzen (mehrere Versuche, Ursache ohne Zugriff auf
+ * den Plugin-Quelltext nicht zu klaeren) - ohne diesen Hook waeren
+ * Inhalts-Aenderungen ueber die REST API, der uebliche Arbeitsweg
+ * dieses Projekts, bis zu 10 Minuten lang nicht sichtbar gewesen
+ * (siehe cache_time_interval). function_exists()-Absicherung, falls
+ * das Plugin einmal deaktiviert wird.
+ */
+add_action( 'save_post', 'dialos_child_cache_leeren' );
+
+function dialos_child_cache_leeren() {
+	if ( function_exists( 'wp_cache_clear_cache' ) ) {
+		wp_cache_clear_cache();
+	}
+}
+
+/**
  * Fusszeilen-Text anpassen (DialOS -> DialOS.org, Kontakt/Support-Mail).
  *
  * Bewusst per JavaScript nach dem Laden statt per footer.php-Override:
