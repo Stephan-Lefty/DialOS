@@ -313,13 +313,18 @@ function dialos_child_english_post_routing( $query_vars ) {
  * Navigiert bewusst nur innerhalb derselben Sprache (Erkennung wie
  * ueberall in dieser Datei ueber den ">Deutsch<"-Marker) - sonst
  * wuerde ein deutscher Leser unerwartet auf einen englischen Beitrag
- * springen. Ueber den Standard-Hook "comment_form_after" angehaengt
- * (nicht per JS-DOM-Einfuegung wie sonst in dieser Datei ueblich):
- * die genaue Position "nach dem Kommentarformular" ist damit exakt
- * und zuverlaessig, ohne die Kommentar-Markup-Struktur des Eltern-
- * Themes erraten zu muessen.
+ * springen.
+ *
+ * Ueber JS nach #comments eingefuegt statt per PHP-Hook
+ * "comment_form_after": Bei zwei Beitraegen (186, 209) zeigte die
+ * Live-Seite trotz comment_status=open weiterhin "Comments are
+ * closed" - vermutlich ein serverseitiger Cache, der auf diese beiden
+ * Felder nicht reagiert (Ursache ohne Datei-/Serverzugriff nicht
+ * abschliessend zu klaeren). Der Kommentarbereich #comments ist aber
+ * so oder so immer vorhanden, offen oder geschlossen - das Einfuegen
+ * direkt danach macht die Platzierung unabhaengig von diesem Problem.
  */
-add_action( 'comment_form_after', 'dialos_child_post_navigation' );
+add_action( 'wp_footer', 'dialos_child_post_navigation' );
 
 function dialos_child_post_navigation() {
 	if ( ! is_singular( 'post' ) ) {
@@ -369,18 +374,36 @@ function dialos_child_post_navigation() {
 	$vorheriger_titel = $ist_englisch ? 'Previous Post' : 'Vorheriger Beitrag';
 	$naechster_titel  = $ist_englisch ? 'Next Post' : 'Nächster Beitrag';
 
-	echo '<div class="dialos-post-nav">';
+	$html = '<div class="dialos-post-nav">';
 	if ( $vorheriger ) {
-		echo '<div class="dialos-post-nav-item"><h3>' . esc_html( $vorheriger_titel ) . '</h3><p><a href="' . esc_url( get_permalink( $vorheriger ) ) . '">' . esc_html( get_the_title( $vorheriger ) ) . '</a></p></div>';
+		$html .= '<div class="dialos-post-nav-item"><h3>' . esc_html( $vorheriger_titel ) . '</h3><p><a href="' . esc_url( get_permalink( $vorheriger ) ) . '">' . esc_html( get_the_title( $vorheriger ) ) . '</a></p></div>';
 	} else {
-		echo '<div class="dialos-post-nav-item"></div>';
+		$html .= '<div class="dialos-post-nav-item"></div>';
 	}
 	if ( $naechster ) {
-		echo '<div class="dialos-post-nav-item dialos-post-nav-next"><h3>' . esc_html( $naechster_titel ) . '</h3><p><a href="' . esc_url( get_permalink( $naechster ) ) . '">' . esc_html( get_the_title( $naechster ) ) . '</a></p></div>';
+		$html .= '<div class="dialos-post-nav-item dialos-post-nav-next"><h3>' . esc_html( $naechster_titel ) . '</h3><p><a href="' . esc_url( get_permalink( $naechster ) ) . '">' . esc_html( get_the_title( $naechster ) ) . '</a></p></div>';
 	} else {
-		echo '<div class="dialos-post-nav-item"></div>';
+		$html .= '<div class="dialos-post-nav-item"></div>';
 	}
-	echo '</div>';
+	$html .= '</div>';
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var kommentare = document.getElementById('comments');
+		var wrapper = document.createElement('div');
+		wrapper.innerHTML = <?php echo wp_json_encode( $html ); ?>;
+		var nav = wrapper.firstChild;
+		if (kommentare && kommentare.parentNode) {
+			kommentare.parentNode.insertBefore(nav, kommentare.nextSibling);
+		} else {
+			var artikel = document.querySelector('article') || document.getElementById('main');
+			if (artikel) {
+				artikel.appendChild(nav);
+			}
+		}
+	});
+	</script>
+	<?php
 }
 
 /**
