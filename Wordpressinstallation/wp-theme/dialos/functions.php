@@ -314,21 +314,29 @@ function dialos_child_english_post_link( $url, $post ) {
 }
 
 /**
- * DE/EN-Umschalter im Menue, zwei Flaggen-Symbole (Stephan, 2026-08-25).
- * Sucht auf der aktuellen Seite den bereits vorhandenen Sprachumschalter-
- * Link ("Deutsch"/"English", erste-Absatz-Konvention dieser Website) und
- * verwendet dessen Ziel-URL. Fuer Seiten ohne diesen Link (Impressum,
- * Kontakt, Neuigkeiten) faellt die andere Flagge auf die jeweilige
- * Sprach-Startseite zurueck, statt ins Leere zu verlinken.
+ * DE/EN-Umschalter im Menue, zwei Flaggen-Symbole nebeneinander direkt
+ * vor dem Barrierefrei-Button (Stephan, 2026-08-25 - urspruenglich als
+ * eigener Menuepunkt gebaut, dadurch landeten Suchfeld, Flaggen und
+ * Barrierefrei-Button auf drei verschiedenen, teils weit auseinander-
+ * gerissenen Zeilen; jetzt alle drei im selben Container wie Suche/
+ * Barrierefrei-Umschalter, damit sie als eine zusammenhaengende Gruppe
+ * direkt unter dem Suchfeld erscheinen). Sucht auf der aktuellen Seite
+ * den bereits vorhandenen Sprachumschalter-Link ("Deutsch"/"English",
+ * erste-Absatz-Konvention dieser Website) und verwendet dessen Ziel-
+ * URL. Fuer Seiten ohne diesen Link (Impressum, Kontakt, Neuigkeiten)
+ * faellt die andere Flagge auf die jeweilige Sprach-Startseite zurueck.
+ * Prioritaet 16, also NACH dialos_child_search_and_a11y (Prioritaet
+ * 10 = Standard) - deren <li> muss zuerst existieren, damit hier
+ * hineingehaengt werden kann.
  */
-add_action( 'wp_footer', 'dialos_child_language_switcher', 15 );
+add_action( 'wp_footer', 'dialos_child_language_switcher', 16 );
 
 function dialos_child_language_switcher() {
 	?>
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
-		var menu = document.getElementById('menu-seiten');
-		if (!menu) return;
+		var a11yButton = document.getElementById('dialos-a11y-button');
+		if (!a11yButton || !a11yButton.parentNode) return;
 
 		var links = document.querySelectorAll('a');
 		var partnerLink = null;
@@ -344,8 +352,8 @@ function dialos_child_language_switcher() {
 		var deHref = istEnglisch ? (partnerLink || 'https://dialos.org/') : window.location.href;
 		var enHref = istEnglisch ? window.location.href : (partnerLink || 'https://dialos.org/en/');
 
-		var li = document.createElement('li');
-		li.className = 'dialos-lang-switch';
+		var wrapper = document.createElement('span');
+		wrapper.className = 'dialos-lang-switch';
 
 		var de = document.createElement('a');
 		de.href = deHref;
@@ -363,9 +371,9 @@ function dialos_child_language_switcher() {
 			en.classList.add('dialos-lang-active');
 		}
 
-		li.appendChild(de);
-		li.appendChild(en);
-		menu.appendChild(li);
+		wrapper.appendChild(de);
+		wrapper.appendChild(en);
+		a11yButton.parentNode.insertBefore(wrapper, a11yButton);
 	});
 	</script>
 	<?php

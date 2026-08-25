@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.4.0
+Version: 1.4.1
 Text Domain: dialos
 */
 
@@ -383,15 +383,31 @@ body.dialos-a11y-mode *:focus {
 }
 
 /* ------------------------------------------------------------------
-   DE/EN-Flaggen-Umschalter im Menue (Stephan, 2026-08-25). Aktive
-   Sprache leicht hervorgehoben, die andere gedaempft, damit sofort
-   erkennbar ist, welche Version gerade angezeigt wird.
+   Der Deutsch/English-Verweis am Seiten-/Beitragsanfang ist seit dem
+   Flaggen-Umschalter im Menue doppelt (Stephan, 2026-08-25) - bleibt
+   im Inhalt stehen (die Flaggen und die lang-Attribut-/URL-Erkennung
+   lesen ihr Ziel genau daraus), wird aber komplett ausgeblendet: nicht
+   nur optisch wie ".dialos-visually-hidden", sondern auch fuer
+   Tastatur und Screenreader, weil die Flaggen dieselbe Funktion jetzt
+   fuer alle Nutzer sichtbar/erreichbar abdecken - ein zusaetzlicher,
+   aus dem Nichts kommender Tab-Stopp waere hier kein Gewinn.
+   ------------------------------------------------------------------ */
+.dialos-lang-marker {
+  display: none;
+}
+
+/* ------------------------------------------------------------------
+   DE/EN-Flaggen-Umschalter, direkt im Suche/Barrierefrei-Container
+   (Stephan, 2026-08-25) - liegt als <span> zwischen Suchfeld und
+   Barrierefrei-Button in .dialos-search-a11y-item, nicht als eigener
+   Menuepunkt (der hatte Suchfeld, Flaggen und Barrierefrei-Button auf
+   drei auseinandergerissene Zeilen verteilt). Aktive Sprache leicht
+   hervorgehoben, die andere gedaempft.
    ------------------------------------------------------------------ */
 .dialos-lang-switch {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 15px;
+  gap: 8px;
 }
 .dialos-lang-switch a {
   font-size: 20px;
