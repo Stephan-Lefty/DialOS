@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.3.0
+Version: 1.4.0
 Text Domain: dialos
 */
 
@@ -380,6 +380,29 @@ body.dialos-a11y-mode *:focus {
     flex: 1 1 auto;
     display: block !important;
   }
+}
+
+/* ------------------------------------------------------------------
+   DE/EN-Flaggen-Umschalter im Menue (Stephan, 2026-08-25). Aktive
+   Sprache leicht hervorgehoben, die andere gedaempft, damit sofort
+   erkennbar ist, welche Version gerade angezeigt wird.
+   ------------------------------------------------------------------ */
+.dialos-lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+}
+.dialos-lang-switch a {
+  font-size: 20px;
+  line-height: 1;
+  text-decoration: none;
+  opacity: 0.5;
+}
+.dialos-lang-switch a:hover,
+.dialos-lang-switch a:focus,
+.dialos-lang-switch a.dialos-lang-active {
+  opacity: 1;
 }
 
 /* ------------------------------------------------------------------

@@ -37,6 +37,7 @@ function dialos_child_enqueue_styles() {
 add_action( 'wp_footer', 'dialos_child_footer_text', 20 );
 
 function dialos_child_footer_text() {
+	$kontakt_label = dialos_child_ist_englisch() ? 'Contact' : 'Kontakt';
 	?>
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
@@ -44,7 +45,7 @@ function dialos_child_footer_text() {
 		if (footerText && footerText.textContent.indexOf('DialOS') !== -1) {
 			footerText.innerHTML =
 				'&copy; Copyright ' + new Date().getFullYear() + ' DialOS.org' +
-				' &ndash; Kontakt: <a href="mailto:kontakt@dialos.org">kontakt@dialos.org</a>' +
+				' &ndash; <?php echo esc_js( $kontakt_label ); ?>: <a href="mailto:kontakt@dialos.org">kontakt@dialos.org</a>' +
 				' &ndash; Support: <a href="mailto:service@dialos.org">service@dialos.org</a>';
 		}
 	});
@@ -127,6 +128,23 @@ add_action( 'wp_footer', 'dialos_child_search_and_a11y' );
 
 function dialos_child_search_and_a11y() {
 	$aktion = esc_url( home_url( '/' ) );
+	if ( dialos_child_ist_englisch() ) {
+		$text = array(
+			'suchen_label'   => 'Search',
+			'placeholder'    => 'Search …',
+			'suche_starten'  => 'Start search',
+			'a11y_aus'       => 'Accessibility Mode',
+			'a11y_an'        => 'Accessibility Mode: On',
+		);
+	} else {
+		$text = array(
+			'suchen_label'   => 'Suchen',
+			'placeholder'    => 'Suchen …',
+			'suche_starten'  => 'Suche starten',
+			'a11y_aus'       => 'Barrierefrei-Modus',
+			'a11y_an'        => 'Barrierefrei-Modus: An',
+		);
+	}
 	?>
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
@@ -142,9 +160,9 @@ function dialos_child_search_and_a11y() {
 		form.method = 'get';
 		form.action = '<?php echo $aktion; ?>';
 		form.innerHTML =
-			'<label class="dialos-visually-hidden" for="dialos-search-input">Suchen</label>' +
-			'<input type="search" id="dialos-search-input" name="s" placeholder="Suchen …" />' +
-			'<button type="submit" aria-label="Suche starten">&#128269;</button>';
+			'<label class="dialos-visually-hidden" for="dialos-search-input"><?php echo esc_js( $text['suchen_label'] ); ?></label>' +
+			'<input type="search" id="dialos-search-input" name="s" placeholder="<?php echo esc_js( $text['placeholder'] ); ?>" />' +
+			'<button type="submit" aria-label="<?php echo esc_js( $text['suche_starten'] ); ?>">&#128269;</button>';
 		li.appendChild(form);
 
 		var SCHLUESSEL = 'dialos-a11y-mode';
@@ -154,13 +172,13 @@ function dialos_child_search_and_a11y() {
 		btn.className = 'dialos-a11y-button';
 		var istAn = localStorage.getItem(SCHLUESSEL) === '1';
 		btn.setAttribute('aria-pressed', istAn ? 'true' : 'false');
-		btn.textContent = istAn ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
+		btn.textContent = istAn ? '<?php echo esc_js( $text['a11y_an'] ); ?>' : '<?php echo esc_js( $text['a11y_aus'] ); ?>';
 		btn.addEventListener('click', function () {
 			var an = !document.body.classList.contains('dialos-a11y-mode');
 			localStorage.setItem(SCHLUESSEL, an ? '1' : '0');
 			document.body.classList.toggle('dialos-a11y-mode', an);
 			btn.setAttribute('aria-pressed', an ? 'true' : 'false');
-			btn.textContent = an ? 'Barrierefrei-Modus: An' : 'Barrierefrei-Modus';
+			btn.textContent = an ? '<?php echo esc_js( $text['a11y_an'] ); ?>' : '<?php echo esc_js( $text['a11y_aus'] ); ?>';
 		});
 		li.appendChild(btn);
 
@@ -182,17 +200,25 @@ function dialos_child_search_and_a11y() {
 add_action( 'wp_footer', 'dialos_child_footer_links' );
 
 function dialos_child_footer_links() {
+	if ( dialos_child_ist_englisch() ) {
+		$html = '<p class="dialos-footer-links">' .
+			'<a href="https://dialos.org/impressum/">Legal Notice</a>' .
+			'<a href="https://dialos.org/datenschutzerklaerung/">Privacy Policy (Website)</a>' .
+			'<a href="https://dialos.org/dialos-mobil-datenschutz/">Privacy Policy (App)</a>' .
+			'</p>';
+	} else {
+		$html = '<p class="dialos-footer-links">' .
+			'<a href="https://dialos.org/impressum/">Impressum</a>' .
+			'<a href="https://dialos.org/datenschutzerklaerung/">Datenschutz (Website)</a>' .
+			'<a href="https://dialos.org/dialos-mobil-datenschutz/">Datenschutz (App)</a>' .
+			'</p>';
+	}
 	?>
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
 		var ziel = document.querySelector('.footer .col-md-6:last-child');
 		if (!ziel) return;
-		ziel.innerHTML =
-			'<p class="dialos-footer-links">' +
-			'<a href="https://dialos.org/impressum/">Impressum</a>' +
-			'<a href="https://dialos.org/datenschutzerklaerung/">Datenschutz (Website)</a>' +
-			'<a href="https://dialos.org/dialos-mobil-datenschutz/">Datenschutz (App)</a>' +
-			'</p>';
+		ziel.innerHTML = <?php echo wp_json_encode( $html ); ?>;
 	});
 	</script>
 	<?php
@@ -219,6 +245,173 @@ function dialos_child_language_attributes( $output ) {
 		}
 	}
 	return $output;
+}
+
+/**
+ * Erkennt, ob die aktuelle Anfrage auf der englischen Seite liegt
+ * (/en/ oder /en/irgendwas/). Gemeinsamer Helfer fuer Menue, Fusszeile
+ * und Suche/Barrierefrei-Umschalter - so muss die Pfadpruefung nicht an
+ * mehreren Stellen wiederholt werden.
+ */
+function dialos_child_ist_englisch() {
+	$pfad = trim( (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
+	return ( 'en' === $pfad || 0 === strpos( $pfad, 'en/' ) );
+}
+
+/**
+ * Englische Beitraege unter /en/ statt flach auf Root-Ebene (Stephan,
+ * 2026-08-25). Seiten liegen dank WordPress' eingebauter Seiten-
+ * Hierarchie schon sauber unter /en/ (z.B. /en/idea/) - Beitraege
+ * kennen aber kein "parent" und lagen bisher alle flach unter
+ * https://dialos.org/{slug}/, unabhaengig von der Sprache.
+ *
+ * Bewusst KEINE eigene add_rewrite_rule()+flush_rewrite_rules(): Eine
+ * neue Regel mit Prioritaet "top" wuerde vor WordPress' eigener,
+ * generischer Seiten-Regel geprueft und damit auch echte Seiten wie
+ * /en/idea/ abfangen, bevor WordPress sie als Seite aufloesen kann -
+ * das haette die vier bereits funktionierenden englischen Seiten
+ * kaputt gemacht. Stattdessen ueber das "request"-Filter NACH der
+ * normalen Aufloesung eingreifen: Nur wenn unter dem angefragten Pfad
+ * KEINE Seite existiert, aber ein Beitrag mit passendem Slug, wird auf
+ * diesen umgebogen - jede andere Anfrage bleibt unangetastet.
+ */
+add_filter( 'request', 'dialos_child_english_post_routing' );
+
+function dialos_child_english_post_routing( $query_vars ) {
+	if ( empty( $query_vars['pagename'] ) ) {
+		return $query_vars;
+	}
+	if ( ! preg_match( '#^en/([^/]+)$#', $query_vars['pagename'], $treffer ) ) {
+		return $query_vars;
+	}
+	if ( get_page_by_path( $query_vars['pagename'] ) ) {
+		return $query_vars; // echte Seite existiert - unveraendert lassen
+	}
+	$beitrag = get_page_by_path( $treffer[1], OBJECT, 'post' );
+	if ( $beitrag ) {
+		return array(
+			'name'      => $treffer[1],
+			'post_type' => 'post',
+		);
+	}
+	return $query_vars;
+}
+
+/**
+ * Zeigt fuer englische Beitraege die /en/-Adresse an (Permalink,
+ * interne Verlinkungen, Feeds usw.), passend zu obiger Routing-
+ * Aenderung. Erkennung ueber dieselbe Konvention wie beim lang-
+ * Attribut: Beitrag beginnt mit einem "Deutsch"-Link -> englischer
+ * Beitrag.
+ */
+add_filter( 'post_link', 'dialos_child_english_post_link', 10, 2 );
+
+function dialos_child_english_post_link( $url, $post ) {
+	if ( $post && 'post' === $post->post_type && strpos( $post->post_content, '>Deutsch<' ) !== false ) {
+		$url = home_url( '/en/' . $post->post_name . '/' );
+	}
+	return $url;
+}
+
+/**
+ * DE/EN-Umschalter im Menue, zwei Flaggen-Symbole (Stephan, 2026-08-25).
+ * Sucht auf der aktuellen Seite den bereits vorhandenen Sprachumschalter-
+ * Link ("Deutsch"/"English", erste-Absatz-Konvention dieser Website) und
+ * verwendet dessen Ziel-URL. Fuer Seiten ohne diesen Link (Impressum,
+ * Kontakt, Neuigkeiten) faellt die andere Flagge auf die jeweilige
+ * Sprach-Startseite zurueck, statt ins Leere zu verlinken.
+ */
+add_action( 'wp_footer', 'dialos_child_language_switcher', 15 );
+
+function dialos_child_language_switcher() {
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var menu = document.getElementById('menu-seiten');
+		if (!menu) return;
+
+		var links = document.querySelectorAll('a');
+		var partnerLink = null;
+		for (var i = 0; i < links.length; i++) {
+			var text = links[i].textContent.trim();
+			if (text === 'English' || text === 'Deutsch') {
+				partnerLink = links[i].getAttribute('href');
+				break;
+			}
+		}
+
+		var istEnglisch = window.location.pathname.indexOf('/en/') === 0;
+		var deHref = istEnglisch ? (partnerLink || 'https://dialos.org/') : window.location.href;
+		var enHref = istEnglisch ? window.location.href : (partnerLink || 'https://dialos.org/en/');
+
+		var li = document.createElement('li');
+		li.className = 'dialos-lang-switch';
+
+		var de = document.createElement('a');
+		de.href = deHref;
+		de.innerHTML = '<span aria-hidden="true">🇩🇪</span><span class="dialos-visually-hidden">Deutsch</span>';
+		if (!istEnglisch) {
+			de.setAttribute('aria-current', 'page');
+			de.classList.add('dialos-lang-active');
+		}
+
+		var en = document.createElement('a');
+		en.href = enHref;
+		en.innerHTML = '<span aria-hidden="true">🇬🇧</span><span class="dialos-visually-hidden">English</span>';
+		if (istEnglisch) {
+			en.setAttribute('aria-current', 'page');
+			en.classList.add('dialos-lang-active');
+		}
+
+		li.appendChild(de);
+		li.appendChild(en);
+		menu.appendChild(li);
+	});
+	</script>
+	<?php
+}
+
+/**
+ * Menue ins Englische uebersetzen, wenn eine Seite/ein Beitrag unter
+ * /en/ liegt (Stephan, 2026-08-25) - Folgeschritt zur URL-Struktur mit
+ * /en/-Praefix: Wer auf einer englischen Seite landet, soll auch ein
+ * englisches Menue sehen. Direkt an den Menue-Objekten geaendert
+ * (server-seitig, "wp_nav_menu_objects"), nicht per JS-Textersetzung
+ * wie bei anderen Anpassungen dieser Datei - robuster, weil es nicht
+ * vom Zeitpunkt des Ladens oder exaktem sichtbarem Text abhaengt.
+ * "Neuigkeiten" und "Kontakt" haben keine englische Entsprechung -
+ * dort wird nur die Beschriftung uebersetzt, das Ziel bleibt deutsch.
+ */
+add_filter( 'wp_nav_menu_objects', 'dialos_child_translate_menu' );
+
+function dialos_child_translate_menu( $items ) {
+	if ( ! dialos_child_ist_englisch() ) {
+		return $items;
+	}
+
+	$uebersetzungen = array(
+		'Sprachsteuerung'               => array( 'Voice Control', 'https://dialos.org/en/idea/' ),
+		'Idee'                           => array( 'Idea', 'https://dialos.org/en/idea/' ),
+		'Sprachsteuerungen im Vergleich' => array( 'Voice Control Compared', 'https://dialos.org/en/in-comparison/' ),
+		'Unterstützen'                   => array( 'Support', 'https://dialos.org/en/investors-sponsors/' ),
+		'Investoren & Sponsoring'        => array( 'Investors & Sponsoring', 'https://dialos.org/en/investors-sponsors/' ),
+		'Partner werden'                 => array( 'Become a Partner', 'https://dialos.org/en/become-a-partner/' ),
+		'Neuigkeiten'                     => array( 'News', null ),
+		'Kontakt'                         => array( 'Contact', null ),
+	);
+
+	foreach ( $items as $item ) {
+		if ( ! isset( $uebersetzungen[ $item->title ] ) ) {
+			continue;
+		}
+		list( $neuer_titel, $neue_url ) = $uebersetzungen[ $item->title ];
+		$item->title = $neuer_titel;
+		if ( $neue_url ) {
+			$item->url = $neue_url;
+		}
+	}
+
+	return $items;
 }
 
 /**
