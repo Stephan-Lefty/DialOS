@@ -202,9 +202,9 @@ add_action( 'wp_footer', 'dialos_child_footer_links' );
 function dialos_child_footer_links() {
 	if ( dialos_child_ist_englisch() ) {
 		$html = '<p class="dialos-footer-links">' .
-			'<a href="https://dialos.org/impressum/">Legal Notice</a>' .
-			'<a href="https://dialos.org/datenschutzerklaerung/">Privacy Policy (Website)</a>' .
-			'<a href="https://dialos.org/dialos-mobil-datenschutz/">Privacy Policy (App)</a>' .
+			'<a href="https://dialos.org/en/legal-notice/">Legal Notice</a>' .
+			'<a href="https://dialos.org/en/privacy-policy/">Privacy Policy (Website)</a>' .
+			'<a href="https://dialos.org/en/dialos-mobil-privacy-policy/">Privacy Policy (App)</a>' .
 			'</p>';
 	} else {
 		$html = '<p class="dialos-footer-links">' .
@@ -397,9 +397,8 @@ function dialos_child_language_switcher() {
  * (server-seitig, "wp_nav_menu_objects"), nicht per JS-Textersetzung
  * wie bei anderen Anpassungen dieser Datei - robuster, weil es nicht
  * vom Zeitpunkt des Ladens oder exaktem sichtbarem Text abhaengt.
- * "Kontakt" hat keine englische Entsprechung - dort wird nur die
- * Beschriftung uebersetzt, das Ziel bleibt deutsch. "Neuigkeiten"
- * zeigt seit 2026-08-25 auf die eigene englische Uebersicht /en/news/.
+ * "Neuigkeiten" und "Kontakt" zeigen seit 2026-08-25 auf eigene
+ * englische Seiten (/en/news/, /en/contact/) statt auf die deutschen.
  */
 add_filter( 'wp_nav_menu_objects', 'dialos_child_translate_menu' );
 
@@ -416,7 +415,7 @@ function dialos_child_translate_menu( $items ) {
 		'Investoren & Sponsoring'        => array( 'Investors & Sponsoring', 'https://dialos.org/en/investors-sponsors/' ),
 		'Partner werden'                 => array( 'Become a Partner', 'https://dialos.org/en/become-a-partner/' ),
 		'Neuigkeiten'                     => array( 'News', 'https://dialos.org/en/news/' ),
-		'Kontakt'                         => array( 'Contact', null ),
+		'Kontakt'                         => array( 'Contact', 'https://dialos.org/en/contact/' ),
 	);
 
 	foreach ( $items as $item ) {
