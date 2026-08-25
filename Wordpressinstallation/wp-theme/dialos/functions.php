@@ -433,6 +433,32 @@ function dialos_child_translate_menu( $items ) {
 }
 
 /**
+ * "DIALOS"-Markenlink oben links zeigt auf englischen Seiten auf /en/
+ * statt auf die deutsche Startseite (Stephan, 2026-08-25 - fiel auf,
+ * weil ein Klick darauf komplett aus dem englischen Bereich heraus
+ * fuehrte). Der Markenlink gehoert zum Kopfbereich des Eltern-Themes,
+ * nicht zum per REST API verwalteten Menue - deshalb hier wie bei
+ * anderen Kopf-/Fusszeilen-Anpassungen dieser Datei per JS geaendert.
+ */
+add_action( 'wp_footer', 'dialos_child_brand_link' );
+
+function dialos_child_brand_link() {
+	if ( ! dialos_child_ist_englisch() ) {
+		return;
+	}
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var marke = document.querySelector('.navbar-brand');
+		if (marke) {
+			marke.setAttribute('href', 'https://dialos.org/en/');
+		}
+	});
+	</script>
+	<?php
+}
+
+/**
  * "Zum Inhalt springen"-Link fuer Tastatur-/Screenreader-Nutzer.
  *
  * Per JS ganz an den Anfang von <body> gesetzt statt per header.php-
