@@ -387,8 +387,9 @@ function dialos_child_language_switcher() {
  * (server-seitig, "wp_nav_menu_objects"), nicht per JS-Textersetzung
  * wie bei anderen Anpassungen dieser Datei - robuster, weil es nicht
  * vom Zeitpunkt des Ladens oder exaktem sichtbarem Text abhaengt.
- * "Neuigkeiten" und "Kontakt" haben keine englische Entsprechung -
- * dort wird nur die Beschriftung uebersetzt, das Ziel bleibt deutsch.
+ * "Kontakt" hat keine englische Entsprechung - dort wird nur die
+ * Beschriftung uebersetzt, das Ziel bleibt deutsch. "Neuigkeiten"
+ * zeigt seit 2026-08-25 auf die eigene englische Uebersicht /en/news/.
  */
 add_filter( 'wp_nav_menu_objects', 'dialos_child_translate_menu' );
 
@@ -404,7 +405,7 @@ function dialos_child_translate_menu( $items ) {
 		'Unterstützen'                   => array( 'Support', 'https://dialos.org/en/investors-sponsors/' ),
 		'Investoren & Sponsoring'        => array( 'Investors & Sponsoring', 'https://dialos.org/en/investors-sponsors/' ),
 		'Partner werden'                 => array( 'Become a Partner', 'https://dialos.org/en/become-a-partner/' ),
-		'Neuigkeiten'                     => array( 'News', null ),
+		'Neuigkeiten'                     => array( 'News', 'https://dialos.org/en/news/' ),
 		'Kontakt'                         => array( 'Contact', null ),
 	);
 

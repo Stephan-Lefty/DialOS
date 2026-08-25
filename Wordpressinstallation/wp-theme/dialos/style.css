@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.4.1
+Version: 1.5.0
 Text Domain: dialos
 */
 
@@ -57,6 +57,71 @@ body.page-id-2 main#main {
   padding: 2rem !important;
   border-radius: 16px;
   margin-bottom: 2rem;
+}
+
+/* ------------------------------------------------------------------
+   Englische Startseite (/en/) im selben Stil wie die deutsche
+   (Stephan, 2026-08-25) - eigenes, textfreies Hintergrundbild statt
+   des deutschen (das hat den Slogan "Dein Alltag. Deine Stimme. Dein
+   System." fest ins Bild eingebrannt, waere auf einer englischen
+   Seite falsch).
+   ------------------------------------------------------------------ */
+body.page-id-135 {
+  background-image: url('https://dialos.org/wp-content/uploads/2026/08/wallpaper-startseite-en.png');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+body.page-id-135 .side-collapse-container,
+body.page-id-135 .side-collapse-content,
+body.page-id-135 .container,
+body.page-id-135 .row {
+  background: transparent !important;
+}
+body.page-id-135 main#main {
+  background: #fff !important;
+  padding: 2rem !important;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+}
+
+/* ------------------------------------------------------------------
+   Neuigkeiten/News-Liste: Ueberschrift links, Textschnipsel rechts
+   (Stephan, 2026-08-25) - seit Neuigkeiten (DE) und News (EN) auf
+   getrennten, einspaltigen Seiten stehen (vorher ein gemeinsames
+   Zweispalten-DE/EN-Layout), ist auf jeder Seite wieder Platz fuer
+   diese Anordnung statt Ueberschrift-ueber-Text.
+   ------------------------------------------------------------------ */
+.dialos-news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+.dialos-news-entry {
+  display: flex;
+  gap: 2rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.dialos-news-entry h3 {
+  flex: 0 0 320px;
+  max-width: 320px;
+  margin: 0;
+  font-size: 1.1rem;
+}
+.dialos-news-entry p {
+  flex: 1 1 300px;
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .dialos-news-entry {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .dialos-news-entry h3 {
+    max-width: none;
+  }
 }
 
 /* ------------------------------------------------------------------
