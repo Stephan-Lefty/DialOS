@@ -274,21 +274,27 @@ function dialos_child_ist_englisch() {
  * normalen Aufloesung eingreifen: Nur wenn unter dem angefragten Pfad
  * KEINE Seite existiert, aber ein Beitrag mit passendem Slug, wird auf
  * diesen umgebogen - jede andere Anfrage bleibt unangetastet.
+ *
+ * Pfad bewusst selbst aus REQUEST_URI gelesen statt aus
+ * $query_vars['pagename']: Testweise eingebauter Debug-Header (Version
+ * 1.5.1) zeigte, dass WordPress /en/{beitrag}/ ueberraschend als
+ * Anhang-URL aufloest (query_vars = ['attachment' => 'beitrag'], kein
+ * 'pagename' dabei) - offenbar eine eingebaute, hoeher priorisierte
+ * Regel fuer zweistufige Pfade nach dem Muster "elternseite/anhang".
+ * /en/idea/ (eine echte Seite) landet dagegen bei 'pagename' - warum
+ * genau dieselbe Pfadform je nach Ziel unterschiedliche eingebaute
+ * Regeln trifft, war ohne Datenbank-/Dateisystem-Zugriff nicht weiter
+ * aufzuloesen. Der eigene Pfad-Check umgeht das Problem vollstaendig,
+ * unabhaengig davon, welche Query-Var WordPress selbst gewaehlt hat.
  */
 add_filter( 'request', 'dialos_child_english_post_routing' );
 
 function dialos_child_english_post_routing( $query_vars ) {
-	if ( isset( $_GET['dialos_debug'] ) ) {
-		header( 'X-Dialos-QueryVars: ' . wp_json_encode( $query_vars ) );
-		header( 'X-Dialos-RequestUri: ' . ( $_SERVER['REQUEST_URI'] ?? '' ) );
-	}
-	if ( empty( $query_vars['pagename'] ) ) {
+	$pfad = trim( (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
+	if ( ! preg_match( '#^en/([^/]+)$#', $pfad, $treffer ) ) {
 		return $query_vars;
 	}
-	if ( ! preg_match( '#^en/([^/]+)$#', $query_vars['pagename'], $treffer ) ) {
-		return $query_vars;
-	}
-	if ( get_page_by_path( $query_vars['pagename'] ) ) {
+	if ( get_page_by_path( $pfad ) ) {
 		return $query_vars; // echte Seite existiert - unveraendert lassen
 	}
 	$beitrag = get_page_by_path( $treffer[1], OBJECT, 'post' );
