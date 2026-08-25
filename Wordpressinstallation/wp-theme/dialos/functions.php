@@ -308,6 +308,82 @@ function dialos_child_english_post_routing( $query_vars ) {
 }
 
 /**
+ * "Vorheriger Beitrag" / "Naechster Beitrag" unterhalb des Kommentar-
+ * bereichs jedes einzelnen Blogbeitrags (Stephan, 2026-08-25).
+ * Navigiert bewusst nur innerhalb derselben Sprache (Erkennung wie
+ * ueberall in dieser Datei ueber den ">Deutsch<"-Marker) - sonst
+ * wuerde ein deutscher Leser unerwartet auf einen englischen Beitrag
+ * springen. Ueber den Standard-Hook "comment_form_after" angehaengt
+ * (nicht per JS-DOM-Einfuegung wie sonst in dieser Datei ueblich):
+ * die genaue Position "nach dem Kommentarformular" ist damit exakt
+ * und zuverlaessig, ohne die Kommentar-Markup-Struktur des Eltern-
+ * Themes erraten zu muessen.
+ */
+add_action( 'comment_form_after', 'dialos_child_post_navigation' );
+
+function dialos_child_post_navigation() {
+	if ( ! is_singular( 'post' ) ) {
+		return;
+	}
+
+	global $post;
+	$ist_englisch = ( strpos( $post->post_content, '>Deutsch<' ) !== false );
+
+	$alle = get_posts(
+		array(
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'orderby'        => 'date',
+			'order'          => 'ASC',
+			'fields'         => 'all',
+		)
+	);
+
+	$gleiche_sprache = array();
+	foreach ( $alle as $p ) {
+		$ist_p_englisch = ( strpos( $p->post_content, '>Deutsch<' ) !== false );
+		if ( $ist_p_englisch === $ist_englisch ) {
+			$gleiche_sprache[] = $p;
+		}
+	}
+
+	$index = null;
+	foreach ( $gleiche_sprache as $i => $p ) {
+		if ( $p->ID === $post->ID ) {
+			$index = $i;
+			break;
+		}
+	}
+	if ( null === $index ) {
+		return;
+	}
+
+	$vorheriger = $index > 0 ? $gleiche_sprache[ $index - 1 ] : null;
+	$naechster  = isset( $gleiche_sprache[ $index + 1 ] ) ? $gleiche_sprache[ $index + 1 ] : null;
+
+	if ( ! $vorheriger && ! $naechster ) {
+		return;
+	}
+
+	$vorheriger_titel = $ist_englisch ? 'Previous Post' : 'Vorheriger Beitrag';
+	$naechster_titel  = $ist_englisch ? 'Next Post' : 'Nächster Beitrag';
+
+	echo '<div class="dialos-post-nav">';
+	if ( $vorheriger ) {
+		echo '<div class="dialos-post-nav-item"><h3>' . esc_html( $vorheriger_titel ) . '</h3><p><a href="' . esc_url( get_permalink( $vorheriger ) ) . '">' . esc_html( get_the_title( $vorheriger ) ) . '</a></p></div>';
+	} else {
+		echo '<div class="dialos-post-nav-item"></div>';
+	}
+	if ( $naechster ) {
+		echo '<div class="dialos-post-nav-item dialos-post-nav-next"><h3>' . esc_html( $naechster_titel ) . '</h3><p><a href="' . esc_url( get_permalink( $naechster ) ) . '">' . esc_html( get_the_title( $naechster ) ) . '</a></p></div>';
+	} else {
+		echo '<div class="dialos-post-nav-item"></div>';
+	}
+	echo '</div>';
+}
+
+/**
  * Zeigt fuer englische Beitraege die /en/-Adresse an (Permalink,
  * interne Verlinkungen, Feeds usw.), passend zu obiger Routing-
  * Aenderung. Erkennung ueber dieselbe Konvention wie beim lang-
