@@ -811,6 +811,55 @@ finished too, and then move down together. That way no reference breaks.
   conclusively confirmed over a longer period yet - check
   `/tmp/dialos-bluetooth-debug.log` if the problem recurs.
 
+- [ ] **Own server for dialos.org, Nextcloud, forum, RustDesk relay and
+  video conferencing** - sponsorship unsuccessful so far.
+
+  **Status.** Hetzner approached on 2026-08-17, follow-up question about
+  the concrete infrastructure on 2026-08-18, answered with specifics on
+  2026-08-25 (AX42, 24 months, including an offered quid pro quo),
+  closing mail on 2026-09-05. webgo approached as well; the request
+  ended up in their support ticket system (#48345) and was answered on
+  2026-08-25 asking for it to be forwarded to sales or management.
+  Neither had replied on the merits as of 2026-09-05.
+
+  **What it actually costs.** The need is smaller than what was
+  requested: a netcup RS 4000 G12 (12 vCores, 32 GB, 1 TB NVMe) at
+  roughly EUR 34 net per month covers the website, Nextcloud, forum and
+  RustDesk relay. Only regular group video conferences would need more.
+  The full provider comparison with prices and links is on Stephan's
+  desktop as `DialOS-Server-Anbietervergleich.docx` - deliberately not in
+  the repo, because it contains the history of the requests.
+
+  **There is no widespread "free server for open source" programme among
+  the German providers** - server.camp and Hostsharing eG are regular
+  paid offerings with an open-source focus, not sponsorship. Hetzner's
+  approach ("on an individual basis") is already the usual model.
+  Approaching further German providers therefore has little prospect.
+  Next attempt: Austrian providers, where the regional angle applies (an
+  Austrian project with an Austrian partner) and the companies are
+  smaller, so decisions are made more personally.
+
+- [ ] **Waiting list: funding programmes** - a far bigger lever than
+  server sponsorship, because the bottleneck for DialOS isn't the server
+  (about EUR 34 per month) but hardware, time and later certification.
+
+  **NLnet (NGI, EU)** - EUR 5,000 to 50,000, next submission deadline
+  **2026-11-03**. Austria is eligible, open licences are mandatory
+  (DialOS qualifies). Still to check: whether accessibility fits one of
+  the current theme funds. Note on wording: NLnet explicitly states it is
+  not interested in "AI-generated projects". That most likely means pure
+  AI-generated filler rather than AI-assisted development, but the
+  application needs to make clear that Stephan decides and tests on the
+  device - precisely because Claude's involvement is openly documented
+  (blog post "Who Is Claude, Anyway?", mention in the README).
+
+  **netidee (Internet Foundation Austria)** - up to EUR 60,000, strictly
+  open source, accessibility projects have been funded there before
+  (among them an accessible job search for people with disabilities). The
+  deadline for Call 2026 was 2026-07-07 and has passed; the next call is
+  expected in summer 2027. That timing actually works well, because
+  DialOS will be considerably more mature by then.
+
 ## Done (kept for traceability)
 
 Grouped by topic, chronological within each topic. The date is the day the

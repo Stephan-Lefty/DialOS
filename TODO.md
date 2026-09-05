@@ -923,6 +923,57 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   längeren Zeitraum endgültig bestätigt - `/tmp/dialos-bluetooth-debug.log`
   bei einem erneuten Auftreten des Problems prüfen.
 
+- [ ] **Eigener Server für dialos.org, Nextcloud, Forum, RustDesk-Relay
+  und Videokonferenzen** - Sponsoring bisher ohne Erfolg.
+
+  **Stand.** Hetzner angefragt am 2026-08-17, Rückfrage nach der konkreten
+  Infrastruktur am 2026-08-18, konkretisiert nachgefasst am 2026-08-25
+  (AX42, 24 Monate, mit angebotener Gegenleistung), Abschlussmail am
+  2026-09-05. webgo angefragt, landete im Support-Ticketsystem (#48345),
+  am 2026-08-25 mit Bitte um Weiterleitung an Vertrieb/Geschäftsleitung
+  geantwortet. Beide bis 2026-09-05 ohne inhaltliche Antwort.
+
+  **Was es tatsächlich kostet.** Der Bedarf ist kleiner als angefragt:
+  netcup RS 4000 G12 (12 vCore, 32 GB, 1 TB NVMe) für rund 34 EUR netto
+  im Monat deckt Website, Nextcloud, Forum und RustDesk-Relay ab. Erst
+  regelmäßige Gruppen-Videokonferenzen bräuchten mehr. Vollständiger
+  Anbietervergleich mit Preisen und Links liegt als
+  `DialOS-Server-Anbietervergleich.docx` auf Stephans Schreibtisch -
+  bewusst nicht im Repo, weil er den Verlauf der Anfragen enthält.
+
+  **Ein verbreitetes „Gratis-Server für Open Source"-Programm gibt es bei
+  den deutschen Anbietern nicht** - server.camp und Hostsharing eG sind
+  reguläre kostenpflichtige Angebote mit Open-Source-Schwerpunkt, kein
+  Sponsoring. Hetzners Ansatz („auf individueller Basis") ist bereits das
+  übliche Modell. Weitere deutsche Anbieter anzuschreiben hat deshalb
+  wenig Aussicht. Nächster Versuch: österreichische Anbieter, dort zieht
+  der regionale Bezug (österreichisches Projekt, österreichischer
+  Partner) und die Unternehmen sind kleiner, entscheiden also
+  persönlicher.
+
+- [ ] **Warteliste Förderprogramme** - deutlich größerer Hebel als
+  Server-Sponsoring, weil das Nadelöhr bei DialOS nicht der Server ist
+  (rund 34 EUR im Monat), sondern Hardware, Zeit und später
+  Zertifizierung.
+
+  **NLnet (NGI, EU)** - 5.000 bis 50.000 EUR, nächste Einreichfrist
+  **2026-11-03**. Österreich ist förderfähig, offene Lizenzen sind
+  Pflicht (erfüllt DialOS). Noch zu prüfen: ob Barrierefreiheit in einen
+  der aktuellen Themenfonds passt. Achtung bei der Formulierung: NLnet
+  schreibt ausdrücklich, an „AI-generated projects" nicht interessiert zu
+  sein. Gemeint ist damit vermutlich reine KI-Fließbandware, nicht
+  KI-gestützte Entwicklung - im Antrag muss aber klar werden, dass
+  Stephan entscheidet und am Gerät testet, gerade weil die Beteiligung
+  von Claude offen dokumentiert ist (Blogbeitrag „Wer ist eigentlich
+  Claude?", Erwähnung im README).
+
+  **netidee (Internet Stiftung Austria)** - bis 60.000 EUR, strikt Open
+  Source, Barrierefreiheits-Projekte wurden dort bereits gefördert (u. a.
+  barrierefreie Jobsuche für Menschen mit Behinderung). Frist für Call
+  2026 war der 2026-07-07 und ist verpasst; nächster Call voraussichtlich
+  Sommer 2027. Zeitlich passt das sogar gut, weil DialOS dann deutlich
+  reifer ist als heute.
+
 ## Erledigt (zur Nachvollziehbarkeit)
 
 Nach Thema gruppiert, innerhalb des Themas chronologisch. Das Datum ist
