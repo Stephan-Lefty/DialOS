@@ -834,31 +834,83 @@ finished too, and then move down together. That way no reference breaks.
   the German providers** - server.camp and Hostsharing eG are regular
   paid offerings with an open-source focus, not sponsorship. Hetzner's
   approach ("on an individual basis") is already the usual model.
-  Approaching further German providers therefore has little prospect.
-  Next attempt: Austrian providers, where the regional angle applies (an
-  Austrian project with an Austrian partner) and the companies are
-  smaller, so decisions are made more personally.
+  Approaching one provider after another only prolongs the pattern.
+
+  **An Austrian location needs no change of provider:** netcup runs its
+  own datacenter in Vienna and the location is selectable when ordering.
+  For comparison, what a purely Austrian provider costs - WUKOTEC
+  (Vienna) offers the PS 4000 G12 with exactly the same specification and
+  the same naming scheme as netcup's RS 4000 G12, but at EUR 57.56
+  instead of 39.92 gross, roughly 44 % more.
+
+  **Sent on 2026-09-09:** a request for a quote to web-crossing GmbH
+  (Innsbruck, DC3 datacenter, info@web-crossing.com, phone +43 512
+  206567, managing directors Ing. Martin Ennemoser and Stefan Ennemoser)
+  with concrete target specifications - deliberately framed as an
+  ordinary customer enquiry rather than a sponsorship request, with the
+  partnership idea only in the closing paragraph. Plus an enquiry to
+  netcup about whether they offer terms for open-source projects (netcup
+  publishes no general contact address; the route is the contact form or
+  a ticket in the customer account). Await replies; if nothing comes,
+  book regularly.
 
 - [ ] **Waiting list: funding programmes** - a far bigger lever than
   server sponsorship, because the bottleneck for DialOS isn't the server
   (about EUR 34 per month) but hardware, time and later certification.
+  Research status 2026-09-09.
 
-  **NLnet (NGI, EU)** - EUR 5,000 to 50,000, next submission deadline
-  **2026-11-03**. Austria is eligible, open licences are mandatory
-  (DialOS qualifies). Still to check: whether accessibility fits one of
-  the current theme funds. Note on wording: NLnet explicitly states it is
-  not interested in "AI-generated projects". That most likely means pure
-  AI-generated filler rather than AI-assisted development, but the
-  application needs to make clear that Stephan decides and tests on the
-  device - precisely because Claude's involvement is openly documented
-  (blog post "Who Is Claude, Anyway?", mention in the README).
+  **The legal form decides everything else.** As a private individual
+  almost nothing is accessible - the sole exception is netidee. A
+  non-profit association opens up Licht ins Dunkel and comparable funds,
+  founding a company opens up the FFG. That is the real fork in the road
+  and a decision with consequences far beyond funding.
 
   **netidee (Internet Foundation Austria)** - up to EUR 60,000, strictly
-  open source, accessibility projects have been funded there before
-  (among them an accessible job search for people with disabilities). The
+  open source, **private individuals resident in Austria are explicitly
+  eligible**. Accessibility projects have been funded there before (among
+  them an accessible job search for people with disabilities). The
   deadline for Call 2026 was 2026-07-07 and has passed; the next call is
   expected in summer 2027. That timing actually works well, because
-  DialOS will be considerably more mature by then.
+  DialOS will be considerably more mature by then. The best thematic fit.
+
+  **FFG Impact Innovation Social** - the largest single item: 70 % of
+  eligible costs, max. EUR 105,000 as de minimis aid, explicitly for
+  social innovation. Project size max. EUR 150,000 total costs. A
+  "company in formation" may apply, so an existing company isn't strictly
+  required - but an intention to found one is. The 2026 call has been
+  closed since 2026-03-12, budget exhausted; statements about rolling
+  submission are contradictory. **Ask the FFG directly**, don't rely on
+  secondary sources.
+
+  **Licht ins Dunkel** - only for non-profit associations (registered in
+  the ZVR, based in Austria), non-profit GmbHs, foundations or religious
+  communities. Not accessible as a private individual. The target groups
+  are explicitly people with physical, cognitive, psychological or
+  sensory disabilities - which fits DialOS precisely. Rolling submission
+  between 1 April and 31 December. Co-financing towards secured total
+  costs only, never full funding.
+
+  **NLnet - checked on 2026-09-09, does NOT fit.** The earlier note with
+  the 2026-11-03 deadline is therefore void. The currently open funds are
+  Restack (open internet infrastructure, standards, secure devices), the
+  Open Social Fund (decentralised social media via ActivityPub) and a
+  fund for research and education networks. Accessibility and assistive
+  technology are not a focus of any of them; the earlier NGI Zero funds
+  that did cover this have apparently ended. An application would be a
+  long shot and isn't worth the effort.
+
+- [ ] **Check whether DialOS can be classified as a recognised assistive
+  device** - a side finding of the funding research on 2026-09-09, and
+  possibly more valuable than any project grant.
+
+  The Sozialministeriumservice doesn't fund developers, but it does fund
+  those affected: there are subsidies for assistive devices, explicitly
+  including **communication aids**, as well as for workplace equipment
+  where it is needed to keep or obtain a job. Future customers could
+  therefore have a DialOS laptop partly subsidised. For the business
+  model that is potentially worth more than a one-off project grant,
+  because it lowers the purchasing hurdle precisely for the target group
+  that could otherwise not afford a device.
 
 ## Done (kept for traceability)
 

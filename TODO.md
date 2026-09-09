@@ -945,34 +945,83 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   den deutschen Anbietern nicht** - server.camp und Hostsharing eG sind
   reguläre kostenpflichtige Angebote mit Open-Source-Schwerpunkt, kein
   Sponsoring. Hetzners Ansatz („auf individueller Basis") ist bereits das
-  übliche Modell. Weitere deutsche Anbieter anzuschreiben hat deshalb
-  wenig Aussicht. Nächster Versuch: österreichische Anbieter, dort zieht
-  der regionale Bezug (österreichisches Projekt, österreichischer
-  Partner) und die Unternehmen sind kleiner, entscheiden also
-  persönlicher.
+  übliche Modell. Weitere Anbieter reihum anzuschreiben verlängert nur
+  das Muster.
+
+  **Standort Österreich braucht keinen Anbieterwechsel:** netcup betreibt
+  selbst ein Rechenzentrum in Wien, der Standort ist bei der Bestellung
+  wählbar. Zum Vergleich, was ein rein österreichischer Anbieter kostet -
+  WUKOTEC (Wien) hat mit dem PS 4000 G12 exakt dieselbe Ausstattung und
+  dieselbe Namenslogik wie netcups RS 4000 G12, aber für 57,56 statt
+  39,92 EUR brutto, also rund 44 % Aufschlag.
+
+  **Am 2026-09-09 verschickt:** Angebotsanfrage an web-crossing GmbH
+  (Innsbruck, Rechenzentrum DC3, info@web-crossing.com, Tel. +43 512
+  206567, Geschäftsführer Ing. Martin Ennemoser und Stefan Ennemoser) mit
+  konkreter Zielausstattung - bewusst als normale Kundenanfrage, nicht
+  als Sponsoring-Bitte, der Partnerschaftsgedanke steht nur im
+  Schlussabsatz. Dazu eine Anfrage an netcup, ob es Konditionen für
+  Open-Source-Projekte gibt (netcup veröffentlicht keine allgemeine
+  Kontaktadresse, Weg ist das Kontaktformular bzw. ein Ticket im
+  Kundenkonto). Rückmeldungen abwarten; kommt nichts, regulär buchen.
 
 - [ ] **Warteliste Förderprogramme** - deutlich größerer Hebel als
   Server-Sponsoring, weil das Nadelöhr bei DialOS nicht der Server ist
   (rund 34 EUR im Monat), sondern Hardware, Zeit und später
-  Zertifizierung.
+  Zertifizierung. Recherchestand 2026-09-09.
 
-  **NLnet (NGI, EU)** - 5.000 bis 50.000 EUR, nächste Einreichfrist
-  **2026-11-03**. Österreich ist förderfähig, offene Lizenzen sind
-  Pflicht (erfüllt DialOS). Noch zu prüfen: ob Barrierefreiheit in einen
-  der aktuellen Themenfonds passt. Achtung bei der Formulierung: NLnet
-  schreibt ausdrücklich, an „AI-generated projects" nicht interessiert zu
-  sein. Gemeint ist damit vermutlich reine KI-Fließbandware, nicht
-  KI-gestützte Entwicklung - im Antrag muss aber klar werden, dass
-  Stephan entscheidet und am Gerät testet, gerade weil die Beteiligung
-  von Claude offen dokumentiert ist (Blogbeitrag „Wer ist eigentlich
-  Claude?", Erwähnung im README).
+  **Die Rechtsform entscheidet über alles andere.** Als Privatperson ist
+  fast nichts zugänglich - die einzige Ausnahme ist netidee. Ein
+  gemeinnütziger Verein öffnet Licht ins Dunkel und vergleichbare Töpfe,
+  eine Unternehmensgründung öffnet die FFG. Das ist die eigentliche
+  Weiche und eine Entscheidung mit Folgen weit über Förderungen hinaus.
 
   **netidee (Internet Stiftung Austria)** - bis 60.000 EUR, strikt Open
-  Source, Barrierefreiheits-Projekte wurden dort bereits gefördert (u. a.
-  barrierefreie Jobsuche für Menschen mit Behinderung). Frist für Call
-  2026 war der 2026-07-07 und ist verpasst; nächster Call voraussichtlich
-  Sommer 2027. Zeitlich passt das sogar gut, weil DialOS dann deutlich
-  reifer ist als heute.
+  Source, **Privatpersonen mit österreichischem Wohnsitz ausdrücklich
+  zugelassen**. Barrierefreiheits-Projekte wurden dort bereits gefördert
+  (u. a. barrierefreie Jobsuche für Menschen mit Behinderung). Frist für
+  Call 2026 war der 2026-07-07 und ist verpasst; nächster Call
+  voraussichtlich Sommer 2027. Zeitlich passt das sogar gut, weil DialOS
+  dann deutlich reifer ist als heute. Inhaltlich die beste Passung.
+
+  **FFG Impact Innovation Social** - der größte Einzelposten: 70 % der
+  anerkennbaren Kosten, max. 105.000 EUR als De-minimis-Beihilfe,
+  ausdrücklich für soziale Innovation. Projektgröße max. 150.000 EUR
+  Gesamtkosten. Auch ein „Unternehmen in Gründung" darf einreichen, eine
+  bestehende Firma ist also nicht zwingend - eine Gründungsabsicht schon.
+  Call 2026 seit 2026-03-12 geschlossen, Budget ausgeschöpft; die Angaben
+  zur laufenden Einreichung sind widersprüchlich. **Direkt bei der FFG
+  erfragen**, nicht auf Zweitquellen verlassen.
+
+  **Licht ins Dunkel** - nur für gemeinnützige Vereine (ZVR-eingetragen,
+  Sitz in Österreich), gemeinnützige GmbHs, Stiftungen oder
+  Religionsgemeinschaften. Als Privatperson nicht zugänglich. Zielgruppe
+  sind ausdrücklich Menschen mit körperlichen, kognitiven, psychischen
+  oder Sinnesbehinderungen - trifft auf DialOS genau zu. Einreichung
+  laufend zwischen 1. April und 31. Dezember. Nur Kofinanzierung zu
+  gesicherten Gesamtkosten, nie Vollfinanzierung.
+
+  **NLnet - geprüft am 2026-09-09, passt NICHT.** Frühere Notiz mit der
+  Frist 2026-11-03 ist damit erledigt. Die aktuell offenen Fonds sind
+  Restack (offene Internet-Infrastruktur, Standards, sichere Geräte), der
+  Open Social Fund (dezentrale soziale Netzwerke über ActivityPub) und
+  ein Fonds für Wissenschaftsnetze. Barrierefreiheit oder assistive
+  Technik ist in keinem davon Schwerpunkt; die früheren NGI-Zero-Fonds,
+  die so etwas gefördert haben, sind offenbar ausgelaufen. Ein Antrag
+  wäre ein Langschuss und lohnt den Aufwand nicht.
+
+- [ ] **Prüfen, ob DialOS als anerkanntes Hilfsmittel eingestuft werden
+  kann** - Nebenfund der Förderrecherche vom 2026-09-09 und womöglich
+  wichtiger als jede Projektförderung.
+
+  Das Sozialministeriumservice fördert keine Entwickler, wohl aber
+  Betroffene: Es gibt Zuschüsse für Hilfsmittel, ausdrücklich auch für
+  **Kommunikationshilfen**, sowie für Arbeitsplatzausstattung, wenn sie
+  zum Erhalt oder zur Erlangung eines Arbeitsplatzes nötig ist. Spätere
+  Kunden könnten einen DialOS-Laptop also bezuschusst bekommen. Für das
+  Geschäftsmodell ist das potenziell mehr wert als eine einmalige
+  Projektförderung, weil es die Kaufhürde genau bei der Zielgruppe senkt,
+  die sich ein Gerät sonst nicht leisten kann.
 
 ## Erledigt (zur Nachvollziehbarkeit)
 
