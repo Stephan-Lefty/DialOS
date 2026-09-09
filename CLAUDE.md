@@ -32,6 +32,40 @@ Commit-Historie.
 > dasselbe wie ein Wert auf GitHub, und er hat den Unterschied ausdrücklich
 > gezogen.
 
+## Die DialOS-Familie (Regel seit 2026-08-24)
+
+Stephan führt nach und nach mehrere Programme und Apps zusammen, die
+Sprachsteuerung nutzen. Aktuell gehören dazu:
+
+| Projekt | Was es ist | Engine | Lizenz |
+|---|---|---|---|
+| **DialOS** | die Live-ISO selbst | Vosk | GPL-3.0 |
+| **DialOS-Mobil** | DialOS auf dem Handy, gleiche Zielgruppe | Vosk | Apache-2.0 |
+| **Denkzettel** | Sprachnotizbuch für Debian/Arch, freie Rede | whisper.cpp | MIT |
+
+**Neue Familienmitglieder werden NICHT umbenannt.** Die Frage stand am
+2026-08-24 im Raum („aus Denkzettel ein DialOS-Denkzettel machen, passend
+zu DialOS-Mobil") und wurde bewusst verneint: Die Familie wächst über
+Zugehörigkeit, nicht über Namenspräfixe. Jedes Programm behält seinen
+eigenen, kurzen Namen - auch weil er als Sprachbefehl taugen muss
+(„Denkzettel öffnen" schlägt „DialOS-Denkzettel öffnen"), und weil der
+Name in Konfigurationspfaden, Datenverzeichnissen, `.desktop`-Dateien und
+damit an registrierten Tastenkürzeln hängt.
+
+DialOS-Mobil trägt das Präfix zu Recht, weil es **dasselbe Produkt auf
+anderer Hardware** ist. Ein Programm mit anderer Engine, anderer
+Zielgruppe oder anderer Lizenz bekommt es nicht - sonst behauptet der
+Name eine Zusammengehörigkeit, die technisch und rechtlich nicht besteht.
+
+Stattdessen macht ein neues Familienmitglied fünf Dinge:
+
+1. Symbol vom DialOS-App-Icon ableiten, aber klar unterscheidbar
+   (Vorbild: `Denkzettel/assets/icon-bauen.py`)
+2. GitHub-Beschreibung mit „Aus der DialOS-Familie:" beginnen
+3. GitHub-Topic `dialos` setzen
+4. Im `.desktop`-Eintrag `GenericName` mit dem Zusatz „DialOS-Familie"
+5. Im README die Zugehörigkeit **und** die bewussten Unterschiede nennen
+
 **Wichtig für Claude selbst:** Dein eigenes Memory-System
 (`~/.claude/...`) liegt auf der internen Platte des T490 und wird bei
 jedem Reinstall gelöscht - genau wie der bisherige Chat und alle
