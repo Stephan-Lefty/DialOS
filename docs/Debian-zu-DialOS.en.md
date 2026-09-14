@@ -2810,6 +2810,12 @@ T490.
 dialos-systemupdate installieren`: "offen vor dem Lauf: 0 Paket(e), 1
 Firmware" → "Firmware eingespielt", return code 0; afterwards `pruefen` "0 0".
 fwupd reports "needs reboot" - the dbx takes effect at the next start.
+**After the reboot (13:26):** the device reports UEFI dbx **20260707** without
+an error, `pruefen` "0 0". The fwupd history still records the operation as
+"failed": `failed to run update on reboot: expected 20260707 and got (null)` -
+the check at boot apparently read the version too early. Treated as a false
+error entry, not a failed update. The sentence "Der Computer ist auf dem
+neuesten Stand." came once after the greeting for `dialosadmin` (13:29:28).
 
 **After login, not on a timer** (Stephan's decision after asking). A timer can
 fire in the middle of a dictation or a phone call, and the device drops out for

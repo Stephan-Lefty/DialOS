@@ -3043,6 +3043,13 @@ Boot auf diesem T490 aus.
 über `sudo dialos-systemupdate installieren`: „offen vor dem Lauf: 0 Paket(e),
 1 Firmware" → „Firmware eingespielt", Rückgabe 0; danach `pruefen` „0 0".
 fwupd meldet „Benötigt Neustart" - wirksam wird die dbx beim nächsten Start.
+**Nach dem Neustart (13:26):** Das Gerät meldet UEFI dbx **20260707** ohne
+Fehler, `pruefen` „0 0". Der Verlauf von fwupd trägt den Vorgang trotzdem als
+„Fehlgeschlagen" ein: `failed to run update on reboot: expected 20260707 and
+got (null)` - die Kontrolle beim Start hat die Version offenbar zu früh
+gelesen. Gewertet als falscher Fehlereintrag, nicht als gescheitertes Update.
+Der Satz „Der Computer ist auf dem neuesten Stand." kam bei `dialosadmin`
+einmal nach der Begrüßung (13:29:28).
 
 **Nach dem Anmelden, nicht auf einem Timer** (Stephans Entscheidung nach
 Rückfrage). Ein Timer kann mitten in ein Diktat oder ein Telefonat feuern, und
