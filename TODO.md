@@ -118,6 +118,17 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     **Stephans Einschätzung des Stands (2026-09-14):** „Aktuell funktioniert
     die Sprachsteuerung, wenn fast keine Umgebungsgeräusche vorhanden sind!"
     Für laute Umgebung sind C oder D die eigentliche Lösung.
+    **Am Gerät geprüft (12:58, nach Neuanmelden):** lauter Fernseher → Satz
+    verworfen (Werte danach bis 8000), Ansage „… zu laut …" kam; ohne bzw.
+    leiser Fernseher → eingeschaltet (Werte danach 0-1); leiser Fernseher
+    danach → nach 20 s Gesprächs-Erkennung, aus. Von Stephan bestätigt.
+  - **Verworfen vorerst: Mindestlautstärke für Befehle.** Spitzen am
+    2026-09-14: Stephans Befehle 47 x, leisester 7810; Film 76 x, Median
+    24188, nur 5 leise Fetzen unter 3000; Gespräch 253 x, leisester 4162.
+    Eine Schwelle hätte nur leisen Fernseher abgefangen (das erledigt A),
+    gegen lauten Film und Gespräch nichts. In den Vortagen gab es erkannte
+    Äußerungen ab 847 - ob echte Befehle darunter waren (Headset-Mikrofon),
+    ist nicht mehr zu klären. Wieder aufgreifen, wenn C/D stehen.
   - **C - Aufweckwort (openWakeWord):** planen - der Punkt steht schon weiter
     unten; mit den heutigen Protokollen als Prüfstein.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine

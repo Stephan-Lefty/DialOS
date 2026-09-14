@@ -117,6 +117,19 @@ finished too, and then move down together. That way no reference breaks.
     **Stephan's assessment of the state (2026-09-14):** the voice control
     currently works when there is almost no background noise. For a loud
     environment, C or D is the real solution.
+    **Checked on the device (12:58, after logging in again):** loud TV →
+    sentence rejected (values after it up to 8000), the "… zu laut …"
+    announcement came; no TV or a quiet TV → switched on (values after 0-1);
+    quiet TV afterwards → conversation detection after 20 s, off. Confirmed by
+    Stephan.
+  - **Set aside for now: minimum loudness for commands.** Peaks on
+    2026-09-14: Stephan's commands 47 times, quietest 7810; film 76 times,
+    median 24188, only 5 quiet fragments below 3000; conversation 253 times,
+    quietest 4162. A threshold would only have caught a quiet TV (A handles
+    that), nothing against a loud film or conversation. On earlier days there
+    were recognised utterances from 847 - whether real commands were among
+    them (headset microphone) can no longer be established. Revisit once C/D
+    are in place.
   - **C - wake word (openWakeWord):** plan - the item already exists further
     down; today's logs as the test bench.
   - **D - button instead of the switch-on sentence:** check whether the AIRHUG
