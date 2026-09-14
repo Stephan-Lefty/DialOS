@@ -3039,6 +3039,10 @@ Netz „0 1", ohne Netzteil und bei Akku unter der Grenze „0 0".
 Firmware-Stand am 2026-09-14: BIOS, Embedded Controller, Intel ME,
 Thunderbolt und SSD aktuell; offen nur UEFI dbx 20260402 → 20260707; Secure
 Boot auf diesem T490 aus.
+**Echter Lauf am 2026-09-14, 13:20** (Stephan: „Ja, spiel es jetzt ein"),
+über `sudo dialos-systemupdate installieren`: „offen vor dem Lauf: 0 Paket(e),
+1 Firmware" → „Firmware eingespielt", Rückgabe 0; danach `pruefen` „0 0".
+fwupd meldet „Benötigt Neustart" - wirksam wird die dbx beim nächsten Start.
 
 **Nach dem Anmelden, nicht auf einem Timer** (Stephans Entscheidung nach
 Rückfrage). Ein Timer kann mitten in ein Diktat oder ein Telefonat feuern, und

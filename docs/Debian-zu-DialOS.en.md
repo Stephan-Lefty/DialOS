@@ -2806,6 +2806,10 @@ nicht ab." The sudoers rule is unchanged - no new call. Dry-checked: on mains
 state on 2026-09-14: BIOS, embedded controller, Intel ME, Thunderbolt and SSD
 up to date; only UEFI dbx 20260402 → 20260707 pending; Secure Boot off on this
 T490.
+**Real run on 2026-09-14, 13:20** (Stephan: install it now), via `sudo
+dialos-systemupdate installieren`: "offen vor dem Lauf: 0 Paket(e), 1
+Firmware" → "Firmware eingespielt", return code 0; afterwards `pruefen` "0 0".
+fwupd reports "needs reboot" - the dbx takes effect at the next start.
 
 **After login, not on a timer** (Stephan's decision after asking). A timer can
 fire in the middle of a dictation or a phone call, and the device drops out for
