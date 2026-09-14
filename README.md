@@ -129,6 +129,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Startmenü der Windows-Optik aufgeräumt** (2026-09-14, Stephans Durchsicht).
+  Angeheftet stand ArcMenus Voreinstellung - darunter ein leerer Platz, weil
+  Firefox unter Debian `firefox-esr` heißt. Jetzt nur Alltagsprogramme
+  (Firefox, Thunderbird, Writer, Dateien, Texteditor, Rechner), „Häufig" aus,
+  die Liste aller Programme ohne Buchstaben-Zwischenüberschriften.
+- **„Bildschirmfoto aufnehmen" ist ein Befehl** (2026-09-14). Stephan hatte es
+  zweimal so gesagt, Vosk hatte es wörtlich erkannt - es war nur keiner.
+
 - **Bildschirmfoto auf Zuruf ging nach dem Neustart nicht mehr** (2026-09-14,
   Stephans Meldung). Das Portal gibt die Freigabe pro Programm, und
   gespeichert war sie nur für Claude - der Sprachdienst lief bei den Tests im

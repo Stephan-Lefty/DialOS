@@ -884,6 +884,19 @@ heiße Ecke oben links aus (wer Windows gewohnt ist, löst sie ständig
 versehentlich aus) und Datum neben der Uhr. `tiling-assistant` braucht
 keine Einstellung, es verhält sich ab Werk wie Windows-Snap.
 
+**Was im Startmenü steht** (seit 2026-09-14, nach Stephans Durchsicht: „Das
+sieht noch chaotisch aus"). Vorher setzte DialOS nur die Art des Menüs, der
+Inhalt waren ArcMenus Voreinstellungen. Die passten nicht: Angeheftet war
+`firefox.desktop` - unter Debian heißt Firefox `firefox-esr.desktop`, der Platz
+blieb leer, ohne Symbol und Namen -, dazu „ArcMenu-Einstellungen" ohne Symbol.
+Jetzt, von Stephan so gewählt:
+
+| Schlüssel | Wert | Warum |
+|---|---|---|
+| `pinned-apps` | Firefox, Thunderbird, Writer, Dateien, Texteditor, Rechner | nur Alltagsprogramme, für beide Konten gleich; alle sechs stehen in der Behalten-Liste von Schritt 13c |
+| `eleven-disable-frequent-apps` | `true` | „Häufig" wechselt mit der Nutzung - ein Helfer am Telefon muss sagen können, wo etwas steht |
+| `group-apps-alphabetically-list-layouts` | `false` | bei wenigen Programmen stand fast jedes allein unter seinem Buchstaben |
+
 Zurückschalten setzt alle berührten Schlüssel per `gsettings reset` auf
 den **Auslieferungszustand** zurück, nicht auf selbst gewählte
 "GNOME-artige" Werte - sonst wäre mehrfaches Hin- und Herschalten nicht

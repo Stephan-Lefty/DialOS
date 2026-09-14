@@ -843,6 +843,18 @@ off (people used to Windows trigger it constantly by accident) and the
 date next to the clock. `tiling-assistant` needs no settings; out of the
 box it behaves like Windows Snap.
 
+**What is in the start menu** (since 2026-09-14, after Stephan's review: it
+still looked chaotic). Before, DialOS only set the kind of menu; the content was
+ArcMenu's defaults. They did not fit: `firefox.desktop` was pinned - on Debian
+Firefox is `firefox-esr.desktop`, so the slot stayed empty, without icon or
+name - plus "ArcMenu-Einstellungen" without an icon. Now, as Stephan chose:
+
+| Key | Value | Why |
+|---|---|---|
+| `pinned-apps` | Firefox, Thunderbird, Writer, Files, Text Editor, Calculator | everyday programs only, the same for both accounts; all six are on the keep list of step 13c |
+| `eleven-disable-frequent-apps` | `true` | "Frequent" changes with use - a helper on the phone has to be able to say where something is |
+| `group-apps-alphabetically-list-layouts` | `false` | with few programs almost every one stood alone under its letter |
+
 Switching back resets every touched key to its **shipped default** via
 `gsettings reset`, not to hand-picked "GNOME-ish" values - otherwise
 switching back and forth repeatedly would not be lossless.

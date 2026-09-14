@@ -313,6 +313,24 @@ auf_windows() {
   setze "$a" position-in-panel "'Left'"
   setze "$a" dash-to-panel-standalone false
 
+  # Was IM Menue steht (Stephans Durchsicht der Windows-Optik, 2026-09-14:
+  # "Das sieht noch chaotisch aus"). Bis dahin setzte DialOS nur die ART des
+  # Menues, der Inhalt waren ArcMenus Voreinstellungen - und die passen nicht:
+  #
+  # - Angeheftet stand ab Werk "firefox.desktop". Unter Debian heisst Firefox
+  #   "firefox-esr.desktop" - der Platz blieb leer, ohne Symbol und Namen.
+  #   Dazu "ArcMenu-Einstellungen" ohne Symbol, ein Werkzeug fuer Bastler.
+  #   Jetzt nur Alltagsprogramme, fuer beide Konten gleich (Stephans Wahl
+  #   "Nur Alltagsprogramme") - alle sechs stehen auch in der Behalten-Liste
+  #   von dialos-menue-pro-konto.sh, sind fuer "nutzer" also sichtbar.
+  # - "Haeufig" aus: Der Inhalt wechselt mit der Nutzung. Ein Helfer am
+  #   Telefon muss sagen koennen, wo etwas steht - morgen noch genauso.
+  # - "Alle Anwendungen" ohne Buchstaben-Zwischenueberschriften: Bei wenigen
+  #   Programmen stand fast jedes allein unter seinem Buchstaben.
+  setze "$a" pinned-apps "[{'id': 'firefox-esr.desktop'}, {'id': 'thunderbird.desktop'}, {'id': 'libreoffice-writer.desktop'}, {'id': 'org.gnome.Nautilus.desktop'}, {'id': 'org.gnome.TextEditor.desktop'}, {'id': 'org.gnome.Calculator.desktop'}]"
+  setze "$a" eleven-disable-frequent-apps true
+  setze "$a" group-apps-alphabetically-list-layouts false
+
   # Startknopf-Symbol. Fehlt die Datei, bleibt es beim bisherigen Symbol -
   # ein Startknopf ohne Bild waere schlimmer als einer mit dem falschen.
   if [ -f "$STARTKNOPF_ICON" ]; then
@@ -386,7 +404,9 @@ auf_gnome() {
 
   local a="org.gnome.shell.extensions.arcmenu"
   for k in menu-layout position-in-panel dash-to-panel-standalone \
-           menu-button-icon custom-menu-button-icon; do
+           menu-button-icon custom-menu-button-icon \
+           pinned-apps eleven-disable-frequent-apps \
+           group-apps-alphabetically-list-layouts; do
     zuruecksetzen "$a" "$k"
   done
 

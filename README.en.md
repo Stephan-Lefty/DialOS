@@ -121,6 +121,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Start menu of the Windows look tidied up** (2026-09-14, Stephan's review).
+  What was pinned were ArcMenu's defaults - including an empty slot, because
+  Firefox is called `firefox-esr` on Debian. Now everyday programs only
+  (Firefox, Thunderbird, Writer, Files, Text Editor, Calculator), "Frequent"
+  off, the list of all programs without letter headings.
+- **"Bildschirmfoto aufnehmen" is a command** (2026-09-14). Stephan had said it
+  that way twice, Vosk had recognised it verbatim - it just was not one.
+
 - **Screenshot on request stopped working after the reboot** (2026-09-14,
   reported by Stephan). The portal grants permission per program, and it was
   only stored for Claude - during the August tests the voice service ran

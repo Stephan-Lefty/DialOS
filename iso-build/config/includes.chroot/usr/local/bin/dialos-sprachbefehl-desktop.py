@@ -177,6 +177,11 @@ GRAMMATIK_AN = json.dumps([
     # den sehenden Helfer und den Support: "Was steht da gerade?"
     "bildschirmfoto erstellen",
     "bildschirmfoto machen",
+    # Dritte Formulierung seit 2026-09-14: Stephan hat an dem Tag zweimal von
+    # sich aus "bildschirmfoto aufnehmen" gesagt, und Vosk hat den Satz beide
+    # Male woertlich erkannt - nur war er kein Befehl ("Das war kein Befehl").
+    # Passt zu "notiz aufnehmen". Stephans Freigabe: "Ja, dazunehmen".
+    "bildschirmfoto aufnehmen",
     # Drucken (Stephans Vorgabe vom 2026-08-21). Der Brief traegt seine
     # Fusszeile schon; Zettel und Notizen bekommen sie erst beim Drucken -
     # ein Blatt Papier verlaesst das Haus, eine Notiz auf dem Schirm nicht.
@@ -261,7 +266,8 @@ DRUCK_SAETZE = {
     "notiz drucken": "notizen",
 }
 FOTO_SKRIPT = "/usr/local/bin/dialos-bildschirmfoto.py"
-FOTO_SAETZE = ("bildschirmfoto erstellen", "bildschirmfoto machen")
+FOTO_SAETZE = ("bildschirmfoto erstellen", "bildschirmfoto machen",
+               "bildschirmfoto aufnehmen")
 AUSKUNFT_SKRIPT = "/usr/local/bin/dialos-auskunft.py"
 AUSKUNFT_SAETZE = {
     "wie viel uhr ist es": "uhrzeit",

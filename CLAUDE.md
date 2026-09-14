@@ -105,7 +105,7 @@ Entwicklung.
 
 **Laeuft und ist belegt:**
 
-- Sprachsteuerung mit 26 Grammatiksaetzen. Das Einschalten verlangt beide
+- Sprachsteuerung mit 27 Grammatiksaetzen (seit 2026-09-14 auch "bildschirmfoto aufnehmen"). Das Einschalten verlangt beide
   Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
   Beinahe-Treffer. **Die Zahl "null Fehlstarts" ist ueberholt:** Am 2026-08-24
   um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet, per Journal
