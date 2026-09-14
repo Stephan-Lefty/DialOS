@@ -804,8 +804,10 @@ finished too, and then move down together. That way no reference breaks.
     the Claude window in the screenshot.
   - ☑️ Back to GNOME: Stephan says it looks like before; checked that every
     key DialOS sets is back at its default and the three extensions are off.
-  - ☐ **Open:** window snapping at the screen edge not explicitly checked, and
-    the whole round as `nutzer`.
+  - ☑️ Window snapping at the screen edge: Stephan says it works - checked in
+    the Windows look (tiling-assistant active, GNOME's own `edge-tiling` off at
+    the time, so it really was the extension).
+  - ☐ **Open:** the whole round as `nutzer`.
 
 - [ ] **Test the microphone fallback without Bluetooth** (open since
   2026-08-16). The output side is proven - headset off, sound came from

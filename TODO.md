@@ -898,8 +898,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - ☑️ Zurück auf GNOME: Stephan „sieht wieder aus wie vorher"; nachgelesen,
     dass alle von DialOS gesetzten Schlüssel wieder auf Standard stehen und
     die drei Erweiterungen aus sind.
-  - ☐ **Offen:** Fenster-Andocken am Bildschirmrand nicht ausdrücklich
-    geprüft, und die ganze Runde als `nutzer`.
+  - ☑️ Fenster-Andocken am Bildschirmrand: Stephan „andocken funktioniert
+    auch" - geprüft in der Windows-Optik (tiling-assistant aktiv, GNOMEs
+    eigenes Andocken `edge-tiling` dabei aus, es war also wirklich die
+    Erweiterung).
+  - ☐ **Offen:** die ganze Runde als `nutzer`.
 
 - [ ] **Mikrofon-Fallback ohne Bluetooth testen** (offen seit
   2026-08-16). Die Ausgabeseite ist bewiesen - Headset aus, Ton kam aus
