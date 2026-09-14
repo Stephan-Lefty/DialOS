@@ -116,7 +116,7 @@ oder Knopf (TODO, C/D) die eigentliche Loesung.
 
 **Laeuft und ist belegt:**
 
-- Sprachsteuerung mit 27 Grammatiksaetzen (seit 2026-09-14 auch "bildschirmfoto aufnehmen"). Das Einschalten verlangt beide
+- Sprachsteuerung mit 28 Befehlssaetzen (am 2026-09-14 dazu: "bildschirmfoto aufnehmen", "wie spaet ist es", "einkaufszettel loeschen"). Das Einschalten verlangt beide
   Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
   Beinahe-Treffer. **Die Zahl "null Fehlstarts" ist ueberholt:** Am 2026-08-24
   um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet, per Journal
@@ -142,8 +142,8 @@ oder Knopf (TODO, C/D) die eigentliche Loesung.
 - Kein Standby am Netz, keine Bildschirmsperre fuer `nutzer`.
 - Unattended-upgrades, Protokoll-Aufbewahrung sieben Tage.
 - **Update-Automatik (2026-09-14):** alle 14 Tage montags nach dem Anmelden,
-  zehn Sekunden Widerspruch auf "nicht jetzt" ("spaeter fehlt im Wortschatz" war
-  ein Pruefehler, siehe unten),
+  zehn Sekunden Widerspruch auf "spaeter" oder "nicht jetzt" (seit dem Nachmittag;
+  "spaeter fehlt im Wortschatz" war ein Pruefehler, siehe unten),
   `apt-get upgrade` ohne autoremove, Neustart nur mit Stick (Pruefung im
   root-Teil) und nur nach einem echten Update seit dem letzten Start (Marke
   unter /run - schliesst Neustart-Schleifen und fremde Neustarts im root-Teil

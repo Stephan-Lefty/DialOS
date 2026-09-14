@@ -129,6 +129,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **„Wie spät ist es?", „Einkaufszettel löschen" und „später" beim Update**
+  (2026-09-14, Stephans Wahl nach Hörprobe). Alle drei galten seit August als
+  unmöglich - wegen des Umlaut-Prüffehlers. Piper → Vosk mit beiden Stimmen:
+  wörtlich erkannt, die übrigen Befehle unverändert fehlerfrei. Beim Update
+  sagt Anna jetzt „… sag: später."; „nicht jetzt" gilt weiter, wurde mit Annas
+  Stimme aber selbst nicht zuverlässig erkannt.
+
 - **Einschalten nur, wenn danach Stille ist** (2026-09-14). Gemessen: Nach
   Stephans „Sprachsteuerung starten" war es jedes Mal still, nach dem Satz aus
   einem Film lief der Ton weiter. Die letzte halbe Sekunde muss unter 3000

@@ -141,8 +141,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine
     Taste liefert, die sich abgreifen lässt (Medientaste über Bluetooth AVRCP).
 
-- [ ] **Umlaut-Wörter fehlen NICHT im Wortschatz - drei Entscheidungen sind
-  wieder offen** (gefunden 2026-09-14 bei Stephans Frage nach Dialekten).
+- [x] **Umlaut-Wörter fehlen NICHT im Wortschatz - drei Entscheidungen waren
+  wieder offen, alle drei am selben Tag entschieden** (gefunden 2026-09-14 bei Stephans Frage nach Dialekten).
   Jedes Wort, das Vosk seit August als „missing in vocabulary" gemeldet hat,
   enthielt ä, ö, ü oder ß. Ursache: `json.dumps` ohne `ensure_ascii=False`
   macht aus „ö" ein `\u00f6`. Richtig übergeben, nimmt das Modell „später",
@@ -156,6 +156,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   3. „Wie spät ist es?" zusätzlich zu den beiden Uhrzeit-Fragen.
   Dazu Mundart-Formen für die Rückfrage („jo", „joa", „nee", „nö") - siehe
   den Punkt zu Dialekten.
+  **Entschieden am 2026-09-14 nach Hörprobe (Piper → Vosk, Anna und
+  Michael):** alle drei eingebaut. „wie spät ist es" und „einkaufszettel
+  löschen" wörtlich erkannt, alle 28 Befehlssätze danach fehlerfrei;
+  „einkaufszettel löschen" wird nie vorgeschlagen. „später" beim Update
+  erkannt, „nicht jetzt" mit Anna dagegen nicht - „später" ist jetzt das
+  angesagte Wort, „nicht jetzt" gilt weiter. **Offen:** Probe mit echter
+  Stimme.
 
 - [ ] **Dialekte: Deutschland, Österreich, Schweiz** (Stephans Anforderung vom
   2026-09-14: „Wir müssen die Sprachsteuerung ja so sauber hinbekommen, dass

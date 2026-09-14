@@ -3000,8 +3000,8 @@ sudo visudo -cf $B/etc/sudoers.d/dialos-systemupdate \
 |---|---|
 | Wann | nach dem Anmelden, montags, alle 14 Tage |
 | Nachholen | war der Computer am Montag aus, beim ersten Start danach |
-| 1. Ansage | „Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern. Wenn das jetzt nicht passt, sag: nicht jetzt." |
-| Widerspruch | zehn Sekunden auf „nicht jetzt"; danach läuft es durch |
+| 1. Ansage | „Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern. Wenn das jetzt nicht passt, sag: später." (bis 2026-09-14 nachmittags: „… sag: nicht jetzt.") |
+| Widerspruch | zehn Sekunden auf „später" oder „nicht jetzt"; danach läuft es durch |
 | 2. Installieren | `apt-get upgrade` |
 | 3. Ansage | „Die Updates sind installiert. Der Computer startet jetzt neu." |
 | 4. Neustart | **nur mit Sicherheits-Stick** |
@@ -3056,6 +3056,14 @@ schreibt „ä" als `\u00e4`, und Vosk meldet dann jedes Umlaut-Wort als fehlend
 Richtig übergeben, nimmt das Modell „später" an. „Nicht jetzt" bleibt, bis
 Stephan neu entscheidet; ob „später" als EIN Wort gegen Nebengeräusche
 genauso sicher ist wie zwei, wäre vorher zu messen.
+
+**Gemessen und entschieden, noch am 2026-09-14:** Piper → Vosk mit Anna und
+Michael. „Später." wurde von beiden erkannt, „Nicht jetzt." mit Anna **nicht**
+(nur „jetzt"). Aus „gestern spät gegessen" wurde „später" - ein Wort entsteht
+also leichter zufällig. Das ist die ungefährliche Richtung: Ein falsches
+„später" verschiebt das Update um eine Sitzung, ein nicht ankommender
+Widerspruch startet den Rechner neu. Stephan hat „später" gewählt; „nicht
+jetzt" gilt weiter.
 
 **Ein Widerspruch merkt sich kein Datum.** Er verschiebt um **eine Sitzung**,
 nicht um vierzehn Tage - sonst könnte ein einziges „nicht jetzt" die

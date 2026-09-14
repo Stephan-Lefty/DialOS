@@ -121,6 +121,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **"Wie spät ist es?", "Einkaufszettel löschen" and "später" for the update**
+  (2026-09-14, Stephan's choice after a listening test). All three counted as
+  impossible since August - because of the umlaut checking error. Piper → Vosk
+  with both voices: recognised verbatim, the other commands still error-free.
+  For the update Anna now says "… sag: später."; "nicht jetzt" still counts, but
+  itself was not reliably recognised with Anna's voice.
+
 - **Switching on only when silence follows** (2026-09-14). Measured: after
   Stephan's "Sprachsteuerung starten" it was silent every time; after the
   sentence from a film the sound carried on. The last half second must stay

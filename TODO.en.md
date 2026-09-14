@@ -143,8 +143,8 @@ finished too, and then move down together. That way no reference breaks.
     or a headset provides a key that can be read (media key via Bluetooth
     AVRCP).
 
-- [ ] **Umlaut words are NOT missing from the vocabulary - three decisions
-  are open again** (found 2026-09-14 when Stephan asked about dialects). Every
+- [x] **Umlaut words are NOT missing from the vocabulary - three decisions
+  were open again, all three decided the same day** (found 2026-09-14 when Stephan asked about dialects). Every
   word Vosk reported as "missing in vocabulary" since August contained ä, ö,
   ü or ß. Cause: `json.dumps` without `ensure_ascii=False` turns "ö" into
   `\u00f6`. Passed correctly, the model accepts "später", "löschen",
@@ -158,6 +158,13 @@ finished too, and then move down together. That way no reference breaks.
   3. "Wie spät ist es?" in addition to the two time questions.
   Plus dialect forms for the confirmation ("jo", "joa", "nee", "nö") - see
   the dialect item.
+  **Decided on 2026-09-14 after a listening test (Piper → Vosk, Anna and
+  Michael):** all three built in. "wie spät ist es" and "einkaufszettel
+  löschen" recognised verbatim, all 28 command sentences error-free
+  afterwards; "einkaufszettel löschen" is never suggested. "später" for the
+  update recognised, "nicht jetzt" with Anna not - "später" is now the
+  announced word, "nicht jetzt" still counts. **Open:** test with a real
+  voice.
 
 - [ ] **Dialects: Germany, Austria, Switzerland** (Stephan's requirement of
   2026-09-14: the voice control has to be good enough to cope with dialects

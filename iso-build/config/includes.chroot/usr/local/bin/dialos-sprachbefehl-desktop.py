@@ -174,8 +174,14 @@ GRAMMATIK_AN = json.dumps([
     "brief vorlesen",
     "einkauf erledigt",
     "einkaufszettel wegwerfen",
+    # Seit 2026-09-14 (Stephans Wahl nach Hoerprobe). Beide galten seit August
+    # als "nicht im Wortschatz" - das war ein Pruefehler (Umlaute, siehe
+    # GRAMMATIK_AUS). Piper -> Vosk mit Anna und Michael: woertlich erkannt,
+    # alle 28 Saetze danach weiter fehlerfrei.
+    "einkaufszettel löschen",
     "wie viel uhr ist es",
     "wie ist die uhrzeit",
+    "wie spät ist es",
     "welchen tag haben wir",
     "welches datum haben wir",
     # Bildschirmfoto (Stephan, 2026-08-21). Zwei Formulierungen wie ueberall.
@@ -278,6 +284,7 @@ AUSKUNFT_SKRIPT = "/usr/local/bin/dialos-auskunft.py"
 AUSKUNFT_SAETZE = {
     "wie viel uhr ist es": "uhrzeit",
     "wie ist die uhrzeit": "uhrzeit",
+    "wie spät ist es": "uhrzeit",
     "welchen tag haben wir": "datum",
     "welches datum haben wir": "datum",
 }
@@ -290,6 +297,7 @@ NOTIZ_SAETZE = {
     "brief vorlesen": ("brief", "vorlesen"),
     "einkauf erledigt": ("einkaufszettel", "loeschen"),
     "einkaufszettel wegwerfen": ("einkaufszettel", "loeschen"),
+    "einkaufszettel löschen": ("einkaufszettel", "loeschen"),
 }
 
 # Fernwartung (neu 2026-08-19). Beide Woerter am selben Tag gegen den Wortschatz
@@ -647,7 +655,8 @@ HINWEIS_ANTEIL = 2.0 / 3.0
 # Empfehlung, und fuer "Einkaufszettel wegwerfen" darf das Geraet nichts
 # empfehlen - schon gar nicht jemandem, der die Befehle noch lernt und der die
 # Folge nicht auf dem Schirm nachlesen kann.
-NICHT_VORSCHLAGEN = ("einkauf erledigt", "einkaufszettel wegwerfen")
+NICHT_VORSCHLAGEN = ("einkauf erledigt", "einkaufszettel wegwerfen",
+                     "einkaufszettel löschen")
 
 
 def naechster_befehl(worte):

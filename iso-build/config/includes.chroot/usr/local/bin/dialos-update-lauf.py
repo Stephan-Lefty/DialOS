@@ -28,6 +28,11 @@ nein. Gewaehlt: "nicht jetzt" - zwei Woerter wie beim Einschalten, damit ein
 beilaeufiges Wort nicht dazwischenfunkt. "stopp" faellt aus, es gehoert schon
 zum Ausschalten der Sprachsteuerung.
 
+NACHTRAG 2026-09-14, NOCH AM SELBEN TAG: Die beiden Warnungen oben kamen von
+der Pruefung, nicht vom Modell - json.dumps schrieb das "ae" als \\u00e4. Das
+Wort steht im Wortschatz. Seitdem gilt "spaeter" (und "nicht jetzt" weiter),
+Begruendung bei WIDERSPRUCH.
+
 Aufruf:
     dialos-update-lauf.py            beim Anmelden (Autostart)
     dialos-update-lauf.py --pruefen  nur sagen, ob faellig - nichts tun
@@ -59,11 +64,21 @@ WIDERSPRUCH_S = 10.0
 # "Ignoring word missing in vocabulary" - fuer JEDES Wort mit Umlaut oder ß.
 # Genau daraus entstanden die Befunde "spaeter", "loeschen", "zuruecksetzen"
 # und "aufraeumen fehlen im Wortschatz". Sie fehlen nicht.
-WIDERSPRUCH = json.dumps(["nicht jetzt", "[unk]"], ensure_ascii=False)
+# "SPAETER" SEIT 2026-09-14 - Stephans urspruenglicher Wunsch, nach Hoerprobe
+# gewaehlt. Es galt als "nicht im Wortschatz"; das war ein Pruefehler (siehe
+# oben). Piper -> Vosk: "Spaeter." mit Anna und Michael erkannt - und "Nicht
+# jetzt." mit ANNA NICHT (nur "jetzt"). Zwei Woerter sind anfaelliger, als
+# gedacht. "nicht jetzt" gilt trotzdem weiter.
+#
+# Der Preis eines Worts: Es entsteht leichter zufaellig - aus "gestern spaet
+# gegessen" wurde "spaeter". Das ist die UNGEFAEHRLICHE Richtung: Ein falsches
+# "spaeter" verschiebt das Update um eine Sitzung. Ein Widerspruch, der nicht
+# ankommt, startet dagegen den Rechner neu.
+WIDERSPRUCH = json.dumps(["nicht jetzt", "später", "[unk]"], ensure_ascii=False)
 
 ANSAGE_START = ("Es müssen ein paar Updates installiert werden. "
                 "Das kann einige Minuten dauern. "
-                "Wenn das jetzt nicht passt, sag: nicht jetzt.")
+                "Wenn das jetzt nicht passt, sag: später.")
 ANSAGE_SPAETER = "Gut, dann später."
 ANSAGE_NEUSTART = "Die Updates sind installiert. Der Computer startet jetzt neu."
 ANSAGE_OHNE_STICK = ("Die Updates sind installiert. Der Computer wird beim "
@@ -182,7 +197,7 @@ def offene_pakete():
 
 
 def widerspruch_hoeren():
-    """Zehn Sekunden zuhoeren. True, wenn "nicht jetzt" kam.
+    """Zehn Sekunden zuhoeren. True, wenn "spaeter" oder "nicht jetzt" kam.
 
     Beide Woerter noetig und kein "[unk]" - dieselbe Bedingung wie beim
     Einschalten der Sprachsteuerung. Ein einzelnes "nicht" aus einem
@@ -230,7 +245,7 @@ def widerspruch_hoeren():
                 worte = gehoert.split()
                 if "[unk]" in worte:
                     continue
-                if "nicht" in worte and "jetzt" in worte:
+                if ("nicht" in worte and "jetzt" in worte) or "später" in worte:
                     return True
         finally:
             try:
@@ -275,7 +290,7 @@ def main():
     sprich(ANSAGE_START)
 
     if widerspruch_hoeren():
-        melde("Widerspruch: nicht jetzt")
+        melde("Widerspruch erkannt")
         sprich(ANSAGE_SPAETER)
         # KEIN Datum merken: Damit ist es beim naechsten Anmelden wieder
         # faellig. Ein Widerspruch verschiebt um eine Sitzung, nicht um

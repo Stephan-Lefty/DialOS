@@ -2769,8 +2769,8 @@ sudo visudo -cf $B/etc/sudoers.d/dialos-systemupdate \
 |---|---|
 | When | after login, on Mondays, every 14 days |
 | Catch-up | if the computer was off on Monday, at the first start afterwards |
-| 1. Announcement | "Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern. Wenn das jetzt nicht passt, sag: nicht jetzt." |
-| Objection | ten seconds for "nicht jetzt"; after that it proceeds |
+| 1. Announcement | "Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern. Wenn das jetzt nicht passt, sag: später." (until the afternoon of 2026-09-14: "… sag: nicht jetzt.") |
+| Objection | ten seconds for "später" or "nicht jetzt"; after that it proceeds |
 | 2. Install | `apt-get upgrade` |
 | 3. Announcement | "Die Updates sind installiert. Der Computer startet jetzt neu." |
 | 4. Reboot | **only with the security stick** |
@@ -2822,6 +2822,13 @@ writes "ä" as `\u00e4`, and Vosk then reports every umlaut word as missing.
 Passed correctly, the model accepts "später". "Nicht jetzt" stays until
 Stephan decides anew; whether "später" as ONE word is as safe against
 background noise as two would have to be measured first.
+
+**Measured and decided, still on 2026-09-14:** Piper → Vosk with Anna and
+Michael. "Später." was recognised with both, "Nicht jetzt." with Anna **not**
+(only "jetzt"). "gestern spät gegessen" became "später" - one word arises by
+chance more easily. That is the harmless direction: a false "später" postpones
+the update by one session, an objection that does not arrive reboots the
+machine. Stephan chose "später"; "nicht jetzt" still counts.
 
 **An objection stores no date.** It postpones by **one session**, not fourteen
 days - otherwise a single "nicht jetzt" could block the update for two weeks.
