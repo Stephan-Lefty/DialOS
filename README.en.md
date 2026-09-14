@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Firmware updates in the 14-day automation** (2026-09-14, Stephan's choice).
+  Via fwupd/LVFS, after the packages - but only on mains power and with at
+  least 50 % battery, checked again right before installing. The announcement
+  then says "Bitte ziehe dabei das Netzteil nicht ab." Triggered by a UEFI dbx
+  update that only GNOME Software had shown.
+
 - **"Wie spät ist es?", "Einkaufszettel löschen" and "später" for the update**
   (2026-09-14, Stephan's choice after a listening test). All three counted as
   impossible since August - because of the umlaut checking error. Piper → Vosk

@@ -3022,6 +3022,24 @@ Durchsicht kam die Neustart-Bedingung unten dazu. Bis zur Freigabe stand die
 Regel in der NIEMALS-Liste von `dialos-aufspielen`, jetzt wird sie normal
 aufgespielt.
 
+**Firmware gehört seit 2026-09-14 dazu** (Stephans Wahl: „In die
+14-Tage-Automatik, nur am Netzteil"). Anlass: GNOME-Software zeigte eine
+UEFI-dbx-Aktualisierung, die die Automatik nie gesehen hat - apt kennt keine
+Firmware, sie kommt über fwupd/LVFS. `pruefen` gibt jetzt zwei Zahlen aus
+(`<Pakete> <Firmware>`), `installieren` spielt nach den Paketen die Firmware
+ein (`fwupdmgr update --assume-yes --no-reboot-check`). **Nur wenn ein
+Netzteil (`type=Mains`, `online=1`) steckt und jeder Akku mindestens 50 %
+hat** - geprüft beim Zählen und unmittelbar vor dem Einspielen noch einmal.
+Ein BIOS-Update wird beim Neustart eingespielt; fällt dabei der Strom aus,
+kann das Gerät unbrauchbar werden, und ein blinder Nutzer merkt nicht, dass
+eines läuft. USB-C-Anschlüsse zählen bewusst nicht als Netzteil. Ist Firmware
+dabei, sagt die Ansage zusätzlich „Bitte ziehe dabei das Netzteil nicht ab."
+Die sudoers-Regel ist unverändert - kein neuer Aufruf. Trocken geprüft: am
+Netz „0 1", ohne Netzteil und bei Akku unter der Grenze „0 0".
+Firmware-Stand am 2026-09-14: BIOS, Embedded Controller, Intel ME,
+Thunderbolt und SSD aktuell; offen nur UEFI dbx 20260402 → 20260707; Secure
+Boot auf diesem T490 aus.
+
 **Nach dem Anmelden, nicht auf einem Timer** (Stephans Entscheidung nach
 Rückfrage). Ein Timer kann mitten in ein Diktat oder ein Telefonat feuern, und
 das Gerät fällt für Minuten aus, ohne dass der Nutzer versteht warum. Direkt

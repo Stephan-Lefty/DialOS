@@ -2790,6 +2790,23 @@ checked against the repo, checksum `afa162ca…9ffc`; the review added the reboo
 condition below. Until the approval the rule was on the NIEMALS list of
 `dialos-aufspielen`; now it is installed normally.
 
+**Firmware is included since 2026-09-14** (Stephan's choice: into the 14-day
+automation, only on mains power). Reason: GNOME Software showed a UEFI dbx
+update the automation never saw - apt knows no firmware, it comes via
+fwupd/LVFS. `pruefen` now prints two numbers (`<packages> <firmware>`),
+`installieren` installs firmware after the packages (`fwupdmgr update
+--assume-yes --no-reboot-check`). **Only when a mains adapter (`type=Mains`,
+`online=1`) is connected and every battery is at least 50 %** - checked when
+counting and once more right before installing. A BIOS update is applied on
+reboot; if power fails then, the device can be bricked, and a blind user does
+not notice one is running. USB-C ports deliberately do not count as mains. If
+firmware is included, the announcement adds "Bitte ziehe dabei das Netzteil
+nicht ab." The sudoers rule is unchanged - no new call. Dry-checked: on mains
+"0 1", without mains and with the battery below the limit "0 0". Firmware
+state on 2026-09-14: BIOS, embedded controller, Intel ME, Thunderbolt and SSD
+up to date; only UEFI dbx 20260402 → 20260707 pending; Secure Boot off on this
+T490.
+
 **After login, not on a timer** (Stephan's decision after asking). A timer can
 fire in the middle of a dictation or a phone call, and the device drops out for
 minutes without the user understanding why. Right after login they have not

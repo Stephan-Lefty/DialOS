@@ -144,7 +144,8 @@ oder Knopf (TODO, C/D) die eigentliche Loesung.
 - **Update-Automatik (2026-09-14):** alle 14 Tage montags nach dem Anmelden,
   zehn Sekunden Widerspruch auf "spaeter" oder "nicht jetzt" (seit dem Nachmittag;
   "spaeter fehlt im Wortschatz" war ein Pruefehler, siehe unten),
-  `apt-get upgrade` ohne autoremove, Neustart nur mit Stick (Pruefung im
+  `apt-get upgrade` ohne autoremove, seit dem Nachmittag auch Firmware ueber fwupd (nur
+  am Netzteil und mit mind. 50 % Akku), Neustart nur mit Stick (Pruefung im
   root-Teil) und nur nach einem echten Update seit dem letzten Start (Marke
   unter /run - schliesst Neustart-Schleifen und fremde Neustarts im root-Teil
   aus). Echter Lauf belegt. Der Satz "auf dem neuesten Stand" kam zuerst

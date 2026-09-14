@@ -17,8 +17,8 @@
 # ein Root-Zugang.
 #
 # Aufruf:
-#   dialos-systemupdate pruefen       Wie viele Pakete waeren zu aktualisieren?
-#   dialos-systemupdate installieren  apt update + apt upgrade
+#   dialos-systemupdate pruefen       "<pakete> <firmware>" - wie viel ist offen?
+#   dialos-systemupdate installieren  apt update + apt upgrade, dann Firmware
 #   dialos-systemupdate neustarten    Neustart - NUR mit Sicherheits-Stick
 set -uo pipefail
 
@@ -35,12 +35,60 @@ melde() {
     echo "$(date '+%m-%d %H:%M:%S')  $1" >> "$PROTOKOLL"
 }
 
+# ------------------------------------------------------------ Firmware ---
+# FIRMWARE GEHOERT SEIT 2026-09-14 DAZU (Stephans Wahl: "In die
+# 14-Tage-Automatik, nur am Netzteil"). Anlass: GNOME-Software zeigte eine
+# Firmware-Aktualisierung (UEFI dbx), die dieses Skript nie gesehen hat - apt
+# kennt keine Firmware, die kommt ueber fwupd/LVFS.
+#
+# NUR AM NETZTEIL UND MIT MINDESTENS 50 % AKKU. Ein BIOS-Update wird beim
+# Neustart eingespielt; faellt dabei der Strom aus, kann das Geraet unbrauchbar
+# werden - und ein blinder Nutzer merkt nicht, dass gerade eines laeuft. Gilt
+# die Bedingung nicht, wird Firmware weder gezaehlt noch eingespielt, sondern
+# beim naechsten Lauf wieder angefasst.
+#
+# Nur "Mains" zaehlt als Netzteil, nicht die USB-C-Anschluesse: Die melden auch
+# ein angeschlossenes Geraet, das selbst Strom zieht. Lieber einmal zu
+# vorsichtig als einmal mitten im Flashen ohne Strom.
+FIRMWARE_AKKU_MIN=50
+
+am_netz() {
+    local netz=0 d
+    for d in /sys/class/power_supply/*; do
+        [ "$(cat "$d/type" 2>/dev/null)" = "Mains" ] || continue
+        [ "$(cat "$d/online" 2>/dev/null)" = "1" ] && netz=1
+    done
+    [ "$netz" = "1" ] || return 1
+    for d in /sys/class/power_supply/*; do
+        [ "$(cat "$d/type" 2>/dev/null)" = "Battery" ] || continue
+        [ "$(cat "$d/capacity" 2>/dev/null || echo 0)" -ge "$FIRMWARE_AKKU_MIN" ] || return 1
+    done
+    return 0
+}
+
+firmware_offen() {
+    command -v fwupdmgr >/dev/null 2>&1 || { echo 0; return; }
+    am_netz || { echo 0; return; }
+    fwupdmgr get-updates --json --no-unreported-check 2>/dev/null | python3 -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    print(0); sys.exit()
+print(sum(1 for g in d.get("Devices", []) if g.get("Releases")))
+' 2>/dev/null || echo 0
+}
+
 # --------------------------------------------------------------- pruefen ---
-pruefen() {
+pakete_offen() {
     # Ohne "apt update": Die Frage ist, was mit dem VORHANDENEN Index offen
     # waere. Ein Index-Abruf gehoert zum Installieren, nicht zum Nachsehen -
     # sonst braucht schon das blosse Fragen Netz und Zeit.
     apt list --upgradable 2>/dev/null | tail -n +2 | wc -l
+}
+
+pruefen() {
+    echo "$(pakete_offen) $(firmware_offen)"
 }
 
 # ---------------------------------------------------------- installieren ---
@@ -54,12 +102,19 @@ installieren() {
         return 1
     fi
 
-    local vorher
-    vorher="$(pruefen)"
-    melde "offen vor dem Lauf: $vorher Paket(e)"
-    if [ "$vorher" -eq 0 ]; then
+    local vorher firmware eingespielt=0
+    vorher="$(pakete_offen)"
+    firmware="$(firmware_offen)"
+    melde "offen vor dem Lauf: $vorher Paket(e), $firmware Firmware"
+    if [ "$vorher" -eq 0 ] && [ "$firmware" -eq 0 ]; then
         melde "nichts zu tun"
         datum_merken
+        return 0
+    fi
+    if [ "$vorher" -eq 0 ]; then
+        firmware_einspielen || return 1
+        datum_merken
+        installiert_merken
         return 0
     fi
 
@@ -85,14 +140,38 @@ installieren() {
             -o Dpkg::Options::="--force-confold" \
             upgrade >>"$PROTOKOLL" 2>&1; then
         local nachher
-        nachher="$(pruefen)"
+        nachher="$(pakete_offen)"
         melde "fertig - vorher $vorher, jetzt noch $nachher offen"
+        # Firmware NACH den Paketen: Ein neues fwupd aus dem Paketlauf soll
+        # schon das sein, das die Firmware einspielt. Scheitert die Firmware,
+        # sind die Pakete trotzdem drin - das zaehlt als Installation.
+        firmware_einspielen || melde "Firmware nicht eingespielt - naechster Lauf"
         datum_merken
         installiert_merken
         return 0
     fi
 
     melde "apt upgrade fehlgeschlagen"
+    return 1
+}
+
+firmware_einspielen() {
+    local offen
+    # Die Bedingung wird HIER noch einmal geprueft, unmittelbar vor dem
+    # Einspielen - zwischen "pruefen" und diesem Moment kann jemand das
+    # Netzteil gezogen haben. Derselbe Gedanke wie bei der Stick-Pruefung.
+    if ! am_netz; then
+        melde "Firmware uebersprungen - kein Netzteil oder Akku unter ${FIRMWARE_AKKU_MIN} %"
+        return 0
+    fi
+    offen="$(firmware_offen)"
+    [ "$offen" -gt 0 ] || return 0
+    melde "Firmware: $offen Geraet(e)"
+    if fwupdmgr update --assume-yes --no-reboot-check --no-unreported-check >>"$PROTOKOLL" 2>&1; then
+        melde "Firmware eingespielt (wird ggf. beim Neustart wirksam)"
+        return 0
+    fi
+    melde "Firmware-Aktualisierung fehlgeschlagen"
     return 1
 }
 

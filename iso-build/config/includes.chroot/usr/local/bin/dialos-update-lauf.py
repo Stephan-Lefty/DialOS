@@ -79,6 +79,9 @@ WIDERSPRUCH = json.dumps(["nicht jetzt", "später", "[unk]"], ensure_ascii=False
 ANSAGE_START = ("Es müssen ein paar Updates installiert werden. "
                 "Das kann einige Minuten dauern. "
                 "Wenn das jetzt nicht passt, sag: später.")
+# Nur wenn Firmware dabei ist (seit 2026-09-14). Sie wird bloss am Netzteil
+# gezaehlt - der Satz kommt also genau dann, wenn Ziehen gefaehrlich waere.
+ANSAGE_NETZTEIL = "Bitte ziehe dabei das Netzteil nicht ab."
 ANSAGE_SPAETER = "Gut, dann später."
 ANSAGE_NEUSTART = "Die Updates sind installiert. Der Computer startet jetzt neu."
 ANSAGE_OHNE_STICK = ("Die Updates sind installiert. Der Computer wird beim "
@@ -187,13 +190,15 @@ def faellig(heute=None):
 
 
 def offene_pakete():
+    """(Pakete, Firmware) - "pruefen" gibt seit 2026-09-14 beide Zahlen aus."""
     try:
         p = subprocess.run(["sudo", "-n", SKRIPT, "pruefen"],
-                           capture_output=True, text=True, timeout=60)
-        return int(p.stdout.strip() or 0)
+                           capture_output=True, text=True, timeout=120)
+        teile = [int(x) for x in p.stdout.split()]
+        return (teile + [0, 0])[0], (teile + [0, 0])[1]
     except Exception as fehler:
         melde(f"pruefen fehlgeschlagen: {fehler}")
-        return 0
+        return 0, 0
 
 
 def widerspruch_hoeren():
@@ -268,14 +273,16 @@ def main():
         letzter = zuletzt_gelaufen()
         print(f"letzter Lauf: {letzter or '(keiner)'}")
         print(f"faellig:      {faellig()}")
-        print(f"offen:        {offene_pakete()} Paket(e)")
+        pakete, firmware = offene_pakete()
+        print(f"offen:        {pakete} Paket(e), {firmware} Firmware")
         return 0
 
     if "--jetzt" not in argv and not faellig():
         melde(f"nicht faellig (letzter Lauf {zuletzt_gelaufen()})")
         return 0
 
-    offen = offene_pakete()
+    pakete, firmware = offene_pakete()
+    offen = pakete + firmware
     if offen == 0:
         # Nichts zu tun - und BEWUSST ohne Ansage. Der Nutzer soll nicht
         # jeden zweiten Montag hoeren, dass nichts passiert ist.
@@ -284,10 +291,11 @@ def main():
                        capture_output=True, timeout=300)
         return 0
 
-    melde(f"=== faellig, {offen} Paket(e) offen ===")
+    melde(f"=== faellig, {pakete} Paket(e), {firmware} Firmware offen ===")
     if "--jetzt" not in argv:
         warten_bis_still()
-    sprich(ANSAGE_START)
+    sprich(ANSAGE_START if not firmware
+           else ANSAGE_START.replace(" Wenn das", f" {ANSAGE_NETZTEIL} Wenn das", 1))
 
     if widerspruch_hoeren():
         melde("Widerspruch erkannt")

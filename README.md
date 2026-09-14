@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Firmware-Updates in der 14-Tage-Automatik** (2026-09-14, Stephans Wahl).
+  Über fwupd/LVFS, nach den Paketen - aber nur am Netzteil und mit mindestens
+  50 % Akku, geprüft auch unmittelbar vor dem Einspielen. Die Ansage sagt dann
+  „Bitte ziehe dabei das Netzteil nicht ab." Anlass war eine UEFI-dbx-
+  Aktualisierung, die nur GNOME-Software angezeigt hatte.
+
 - **„Wie spät ist es?", „Einkaufszettel löschen" und „später" beim Update**
   (2026-09-14, Stephans Wahl nach Hörprobe). Alle drei galten seit August als
   unmöglich - wegen des Umlaut-Prüffehlers. Piper → Vosk mit beiden Stimmen:
