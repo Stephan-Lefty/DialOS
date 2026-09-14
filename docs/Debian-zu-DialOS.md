@@ -1959,6 +1959,60 @@ PDF, statt eine leere Seite zu erzeugen. Ein vollständiges Archiv gibt es
 erst mit dem eigenen IMAP-Weg.
 
 
+### Bildschirmfoto: Die Freigabe trägt DialOS selbst ein (2026-09-14)
+
+**Der Fehler.** Stephan am 2026-09-14: „ich wollte gerade Bildschirmfotos
+aufnehmen, ging aber nicht per Befehl!" Vier Mal erkannt, vier Mal „Ich konnte
+kein Bildschirmfoto machen", im Protokoll `Portal antwortete mit 2` oder gar
+nicht. Am 2026-08-21 und 22 hatte es sechsmal geklappt.
+
+**Die Ursache.** Das XDG-Portal liefert ein Bild ohne Rückfrage nur, wenn im
+Berechtigungsspeicher (Tabelle `screenshot`) eine Freigabe **für das
+aufrufende Programm** steht. Welches Programm das ist, liest es aus der
+systemd-Einheit des Prozesses. Gespeichert war genau eine Freigabe: für
+`com.anthropic.Claude`, angelegt am 2026-08-21 um 14:39 - eine Minute vor dem
+ersten gelungenen Foto. Der Sprachdienst lief damals in Claudes Einheit, weil
+er von dort neu gestartet worden war. Nach dem Neustart am 2026-09-14 startete
+ihn der Autostart, und das Portal führt ihn seitdem als
+`dialos-sprachbefehl-desktop`. Dafür gab es keine Freigabe, und die Rückfrage
+kann nie erscheinen:
+
+    Failed to show access dialog: ... Only the focused app is allowed to show
+    a system access dialog
+
+**Belegt, nicht vermutet** - mit einem stillen Portal-Aufruf, der das Testbild
+gleich wieder löscht:
+
+| Aufruf aus | Freigabe | Ergebnis |
+|---|---|---|
+| Claudes Einheit | `com.anthropic.Claude` | Bild |
+| Einheit `app-gnome-dialos\x2dsprachbefehl\x2ddesktop-…` | keine | Antwort 2 |
+| dieselbe | `dialos-sprachbefehl-desktop` | Bild |
+| dieselbe | `""` | Antwort 2 |
+
+**Die Reparatur.** `dialos-bildschirmfoto.py` ermittelt vor dem Aufruf die
+eigene Kennung aus `/proc/self/cgroup` und trägt die Freigabe ein, falls sie
+fehlt - **nur für Kennungen, die mit `dialos-` beginnen**. Der
+Berechtigungsspeicher gehört dem Konto und hat keine Zugriffskontrolle; das
+Eintragen entspricht dem Klick auf „Erlauben", den der Nutzer nicht machen
+kann. Geprüft: ohne Freigabe eingetragen und Bild; zweiter Aufruf trägt nichts
+doppelt ein; eine fremde Kennung bekommt nichts und scheitert weiter mit 2.
+Gilt sofort für den laufenden Sprachdienst, weil er das Skript bei jedem
+Befehl neu aufruft, und für jedes Konto beim ersten Foto.
+
+**Nebenbei behoben:** Der Sprachdienst schrieb `Bildschirmfoto erstellt` ins
+Protokoll, auch wenn kein Bild entstand. Jetzt richtet sich der Eintrag nach
+dem Rückgabewert.
+
+**Die Lehre, und sie reicht über das Foto hinaus: Ein Dienst, der aus Claudes
+Sitzung neu gestartet wird, ist kein Test unter Kundenbedingungen.** Er erbt
+Claudes Einheit und damit Claudes Freigaben. Den Beweis liefert erst ein
+Start über den Autostart - nach dem Anmelden oder einem Neustart. Im Code ist
+das Bildschirmfoto der einzige Weg über ein Portal (gesucht nach portal,
+PermissionStore, org.gnome.Shell, busctl, notify-send, secret-tool); die
+Standortabfrage der Begrüßung geht über geoclue mit fester Freigabe in
+`/etc/geoclue/geoclue.conf`, nicht über den Berechtigungsspeicher.
+
 ## Wo was liegt — für den sehenden Helfer (Stand 2026-08-22)
 
 Stephans Erinnerung am selben Tag: „immer dran denken, wir haben auch sehende

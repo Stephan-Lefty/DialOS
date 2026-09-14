@@ -1882,6 +1882,58 @@ instead of producing an empty page. A complete archive only comes with the own
 IMAP path.
 
 
+### Screenshot: DialOS enters the permission itself (2026-09-14)
+
+**The bug.** Stephan on 2026-09-14: he wanted to take screenshots, but the
+command did not work. Recognised four times, four times "Ich konnte kein
+Bildschirmfoto machen", in the log `Portal antwortete mit 2` or no answer at
+all. On 2026-08-21 and 22 it had worked six times.
+
+**The cause.** The XDG portal only delivers a picture without a prompt if the
+permission store (table `screenshot`) holds a permission **for the calling
+program**. It reads which program that is from the process's systemd unit.
+Exactly one permission was stored: for `com.anthropic.Claude`, created on
+2026-08-21 at 14:39 - one minute before the first successful screenshot. Back
+then the voice service ran inside Claude's unit, because it had been restarted
+from there. After the reboot on 2026-09-14 autostart launched it, and since
+then the portal knows it as `dialos-sprachbefehl-desktop`. There was no
+permission for that, and the prompt can never appear:
+
+    Failed to show access dialog: ... Only the focused app is allowed to show
+    a system access dialog
+
+**Proven, not assumed** - with a silent portal call that deletes the test
+picture right away:
+
+| Called from | Permission | Result |
+|---|---|---|
+| Claude's unit | `com.anthropic.Claude` | picture |
+| unit `app-gnome-dialos\x2dsprachbefehl\x2ddesktop-…` | none | response 2 |
+| same | `dialos-sprachbefehl-desktop` | picture |
+| same | `""` | response 2 |
+
+**The fix.** Before the call, `dialos-bildschirmfoto.py` determines its own ID
+from `/proc/self/cgroup` and enters the permission if it is missing - **only
+for IDs starting with `dialos-`**. The permission store belongs to the account
+and has no access control; entering it is the equivalent of clicking "Allow",
+which the user cannot do. Checked: without a permission it was entered and a
+picture came; a second call enters nothing twice; a foreign ID gets nothing
+and still fails with 2. Takes effect immediately for the running voice
+service, because it calls the script anew for every command, and for every
+account on its first screenshot.
+
+**Fixed on the side:** the voice service logged `Bildschirmfoto erstellt` even
+when no picture was taken. The entry now follows the return code.
+
+**The lesson, and it reaches beyond the screenshot: a service restarted from
+Claude's session is not a test under customer conditions.** It inherits
+Claude's unit and with it Claude's permissions. Proof only comes from a start
+via autostart - after login or a reboot. In the code the screenshot is the only
+path through a portal (searched for portal, PermissionStore, org.gnome.Shell,
+busctl, notify-send, secret-tool); the greeting's location lookup goes through
+geoclue with a fixed permission in `/etc/geoclue/geoclue.conf`, not through
+the permission store.
+
 ## Where things live — for the sighted helper (as of 2026-08-22)
 
 Stephan's reminder the same day: "always remember, we have sighted users too."

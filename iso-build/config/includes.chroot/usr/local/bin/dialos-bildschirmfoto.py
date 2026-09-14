@@ -20,6 +20,29 @@ Uebrig bleibt das XDG-Portal, und das ist ohnehin der vorgesehene Weg. Mit
 code 0. Das ist die entscheidende Eigenschaft: Ein Dialog, den der Nutzer
 bestaetigen muesste, waere auf diesem Geraet dasselbe wie gar keine Funktion.
 
+"OHNE RUECKFRAGE" GILT NUR MIT FREIGABE - und das stand hier bis zum
+2026-09-14 falsch. Das Portal fragt beim ersten Mal nach und merkt sich die
+Antwort PRO PROGRAMM im Berechtigungsspeicher (Tabelle "screenshot"). Die
+Probe vom 2026-08-21 lief aus Claudes Sitzung, und genau fuer
+"com.anthropic.Claude" wurde um 14:39 eine Freigabe gespeichert - eine Minute
+vor dem ersten Foto. Der Sprachdienst lief damals in Claudes Sitzung mit, weil
+er von dort neu gestartet worden war, und nutzte diese Freigabe.
+
+Nach dem Neustart am 2026-09-14 startete ihn der Autostart, und das Portal
+fuehrt ihn seitdem als "dialos-sprachbefehl-desktop" (aus dem Namen der
+systemd-Einheit, app-gnome-dialos\x2dsprachbefehl\x2ddesktop-<pid>.scope).
+Dafuer gab es keine Freigabe; die Rueckfrage scheiterte mit "Only the focused
+app is allowed to show a system access dialog" - ein Hintergrunddienst hat
+nie den Fokus. Stephan: "ich wollte gerade Bildschirmfotos aufnehmen, ging
+aber nicht per Befehl!" Vier Versuche, vier Mal "Portal antwortete mit 2"
+oder gar nicht.
+
+Deshalb traegt dieses Skript die Freigabe vor dem Aufruf selbst ein - NUR fuer
+DialOS-eigene Kennungen ("dialos-..."). Der Berechtigungsspeicher gehoert dem
+Konto und hat keine Zugriffskontrolle; das Eintragen entspricht dem Klick auf
+"Erlauben", den der Nutzer nicht machen kann. Fremde Programme bekommen hier
+nichts.
+
 DER NAME KOMMT VON UNS, nicht vom Portal. Das Portal legt "Screenshot.png" an
 und zaehlt hoch ("Screenshot-1.png"). Wer im Support drei Bilder bekommt, will
 wissen, welches wann entstand - deshalb Datum und Uhrzeit im Namen, und ab in
@@ -31,6 +54,7 @@ Aufruf:
 """
 
 import os
+import re
 import subprocess
 import sys
 import time
@@ -95,6 +119,57 @@ def bilderordner():
     return os.path.join(os.path.expanduser("~"), "Bilder")
 
 
+def eigene_kennung():
+    """Die Programmkennung, unter der das Portal diesen Prozess fuehrt.
+
+    Das Portal liest sie aus der systemd-Einheit, in der der Prozess laeuft -
+    bei Autostart-Programmen "app-gnome-<kennung>-<pid>.scope", bei anderen
+    "app-<kennung>-<pid>.scope". Bindestriche in der Kennung sind als \\x2d
+    maskiert, deshalb trennt ein echter Bindestrich Starter und Kennung.
+    Gemessen am 2026-09-14: Freigabe fuer "dialos-sprachbefehl-desktop" -> Bild,
+    Freigabe fuer "" -> Antwort 2.
+    """
+    try:
+        with open("/proc/self/cgroup", encoding="utf-8") as f:
+            einheit = f.read().strip().splitlines()[-1].rsplit("/", 1)[-1]
+    except (OSError, IndexError):
+        return ""
+    m = re.match(r"^app-(.+)-\d+\.scope$", einheit)
+    if not m:
+        return ""
+    teile = m.group(1).split("-")
+    roh = teile[-1] if len(teile) <= 2 else ""
+    return re.sub(r"\\x([0-9a-fA-F]{2})", lambda t: chr(int(t.group(1), 16)), roh)
+
+
+def freigabe_sicherstellen(bus):
+    """Traegt die Bildschirmfoto-Freigabe fuer DialOS selbst ein - siehe Kopf."""
+    from gi.repository import GLib, Gio
+    kennung = eigene_kennung()
+    if not kennung.startswith("dialos-"):
+        melde(f"keine DialOS-Kennung ({kennung!r}) - Freigabe nicht angefasst")
+        return
+    ziel = ("org.freedesktop.impl.portal.PermissionStore",
+            "/org/freedesktop/impl/portal/PermissionStore",
+            "org.freedesktop.impl.portal.PermissionStore")
+    try:
+        antwort = bus.call_sync(*ziel, "Lookup",
+                                GLib.Variant("(ss)", ("screenshot", "screenshot")),
+                                None, Gio.DBusCallFlags.NONE, 3000, None)
+        if antwort.unpack()[0].get(kennung) == ["yes"]:
+            return
+    except Exception:
+        pass            # Tabelle gibt es noch nicht - dann eben anlegen
+    try:
+        bus.call_sync(*ziel, "SetPermission",
+                      GLib.Variant("(sbssas)", ("screenshot", True, "screenshot",
+                                                kennung, ["yes"])),
+                      None, Gio.DBusCallFlags.NONE, 3000, None)
+        melde(f"Freigabe eingetragen fuer {kennung}")
+    except Exception as fehler:
+        melde(f"Freigabe nicht eintragbar: {fehler}")
+
+
 def aufnehmen():
     """Ruft das Portal und gibt den Pfad der entstandenen Datei zurueck.
 
@@ -108,6 +183,7 @@ def aufnehmen():
     from gi.repository import Gio, GLib
 
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    freigabe_sicherstellen(bus)
     schleife = GLib.MainLoop()
     ergebnis = {}
 

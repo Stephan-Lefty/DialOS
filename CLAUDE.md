@@ -143,7 +143,9 @@ Entwicklung.
   Doku: Schritt 13d.
 - **Bildschirmfoto auf Zuruf** ueber das XDG-Portal (die GNOME-Schnittstelle
   ist gesperrt, Werkzeuge sind keine installiert). Das Mitschrift-Fenster wird
-  vorher geschlossen.
+  vorher geschlossen. **Ging vom 21.08. bis 14.09. nur, weil der Sprachdienst
+  in Claudes Sitzung lief** und Claudes Portal-Freigabe erbte; seit 2026-09-14
+  traegt das Skript die Freigabe fuer DialOS-Kennungen selbst ein.
 - **Drucken per Sprache** fuer Brief, Zettel und Notizen - **auf Papier
   belegt am 2026-08-22**. Der Drucker wird gesucht, nicht vorausgesetzt (CUPS
   hat kein Standardziel), und Papier und Ausrichtung stehen ausdruecklich im
@@ -560,7 +562,20 @@ Ende einer Arbeitssitzung ausführen** - ein Commit beweist nur, dass die
 Änderung im Repo ist, nicht dass sie auf dem Gerät wirkt. Und ein Test gegen
 eine nicht installierte Änderung testet den alten Stand, ohne es zu sagen.
 
-## Arbeitsweise mit Stephan
+## Dienste nicht aus Claudes Sitzung heraus testen (Regel seit 2026-09-14)
+
+**Ein DialOS-Dienst, den Claude neu startet, laeuft in Claudes systemd-Einheit
+(`app-com.anthropic.Claude-….scope`) - und erbt damit alles, was an diese
+Einheit gebunden ist.** Am 2026-09-14 kam heraus, dass das Bildschirmfoto drei
+Wochen lang nur deshalb funktioniert hatte: Die Portal-Freigabe galt
+`com.anthropic.Claude`, nicht DialOS. Nach dem ersten echten Neustart startete
+der Autostart den Dienst unter eigenem Namen, und der Befehl war tot.
+
+Deshalb: **Ein Test gegen einen aus Claudes Sitzung gestarteten Dienst beweist
+nichts fuer den Kunden.** Den Beweis liefert erst ein Start ueber den Autostart
+(Ab- und Anmelden oder Neustart). Fuer stille Einzelproben die Einheit
+nachbilden: `systemd-run --user --scope --unit='app-gnome-dialos\x2d…-<nr>' …`.
+
 
 **Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,
 weil sie den Tag gekostet haben:**

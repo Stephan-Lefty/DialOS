@@ -1013,9 +1013,17 @@ def bildschirmfoto():
         mitschrift_schliessen()
         time.sleep(FOTO_NACHLAUF_S)
     try:
-        subprocess.run([FOTO_SKRIPT], stdout=subprocess.DEVNULL,
-                       stderr=subprocess.DEVNULL, timeout=60)
-        melde("Bildschirmfoto erstellt")
+        p = subprocess.run([FOTO_SKRIPT], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=60)
+        # Was WIRKLICH passiert ist (2026-09-14): Hier stand "Bildschirmfoto
+        # erstellt" auch dann, wenn das Skript "kein Bild entstanden" meldete.
+        # Die Ansage kommt vom Skript selbst; das Protokoll soll nicht
+        # widersprechen.
+        if p.returncode == 0:
+            melde("Bildschirmfoto erstellt")
+        else:
+            melde(f"Bildschirmfoto misslungen (Rueckgabe {p.returncode}) - "
+                  "Einzelheiten in dialos-bildschirmfoto.log")
     except Exception as fehler:
         melde(f"Bildschirmfoto liess sich nicht erstellen: {fehler}")
         sprich("Ich kann das nicht ausführen.")

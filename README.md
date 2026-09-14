@@ -129,6 +129,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Bildschirmfoto auf Zuruf ging nach dem Neustart nicht mehr** (2026-09-14,
+  Stephans Meldung). Das Portal gibt die Freigabe pro Programm, und
+  gespeichert war sie nur für Claude - der Sprachdienst lief bei den Tests im
+  August in Claudes Sitzung mit. Über den Autostart heißt er
+  `dialos-sprachbefehl-desktop`, und die Rückfrage kann ein Hintergrunddienst
+  nie zeigen. Jetzt trägt `dialos-bildschirmfoto.py` die Freigabe selbst ein,
+  nur für DialOS-eigene Kennungen. **Die Lehre:** Ein aus Claudes Sitzung neu
+  gestarteter Dienst ist kein Test unter Kundenbedingungen.
+
 - **Die Paketliste ließ sich seit dem 2026-08-16 nicht mehr installieren**
   (gefunden 2026-09-14). `xargs -a` gab die Wörter eines Kommentars als
   Paketnamen an apt, und apt installierte gar nichts - in Schritt 2 der

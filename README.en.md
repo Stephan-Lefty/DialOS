@@ -121,6 +121,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Screenshot on request stopped working after the reboot** (2026-09-14,
+  reported by Stephan). The portal grants permission per program, and it was
+  only stored for Claude - during the August tests the voice service ran
+  inside Claude's session. Via autostart it is called
+  `dialos-sprachbefehl-desktop`, and a background service can never show the
+  prompt. Now `dialos-bildschirmfoto.py` enters the permission itself, only for
+  DialOS's own IDs. **The lesson:** a service restarted from Claude's session is
+  not a test under customer conditions.
+
 - **The package list could not be installed since 2026-08-16** (found
   2026-09-14). `xargs -a` passed the words of a comment to apt as package
   names, and apt installed nothing - in step 2 of the guide and in
