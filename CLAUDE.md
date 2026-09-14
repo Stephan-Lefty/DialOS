@@ -133,7 +133,9 @@ Entwicklung.
 - **Update-Automatik (2026-09-14):** alle 14 Tage montags nach dem Anmelden,
   zehn Sekunden Widerspruch auf "nicht jetzt" ("spaeter" fehlt im Wortschatz),
   `apt-get upgrade` ohne autoremove, Neustart nur mit Stick (Pruefung im
-  root-Teil). Echter Lauf belegt. Der Satz "auf dem neuesten Stand" kam zuerst
+  root-Teil) und nur nach einem echten Update seit dem letzten Start (Marke
+  unter /run - schliesst Neustart-Schleifen und fremde Neustarts im root-Teil
+  aus). Echter Lauf belegt. Der Satz "auf dem neuesten Stand" kam zuerst
   nur beim ausloesenden Konto - jetzt Zeitstempel unter /var/lib/dialos und
   Quittung pro Person; der Beweis ueber zwei Konten am Geraet kommt mit dem
   naechsten echten Update. **sudoers-Regel dialos-systemupdate wartet auf

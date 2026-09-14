@@ -287,6 +287,13 @@ def main():
 
     n = subprocess.run(["sudo", "-n", SKRIPT, "neustarten"],
                        capture_output=True, text=True, timeout=60)
+    if n.returncode == 3 or "kein-update" in n.stdout:
+        # Installiert wurde nichts - etwa weil unattended-upgrades die Pakete
+        # zwischen Pruefen und Installieren schon eingespielt hatte. Dann gibt
+        # es auch nichts neu zu starten, und der Rechner IST aktuell.
+        melde("kein Update in diesem Start - kein Neustart")
+        sprich("Der Computer ist auf dem neuesten Stand.")
+        return 0
     if n.returncode == 2 or "kein-stick" in n.stdout:
         melde("kein Sicherheits-Stick - kein Neustart")
         sprich(ANSAGE_OHNE_STICK)

@@ -84,7 +84,10 @@ finished too, and then move down together. That way no reference breaks.
      (his rule of 2026-08-24). It is on the device anyway: the exclusion in the
      NIEMALS list of `dialos-aufspielen` only takes effect on the NEXT run,
      because the script replaces itself in the same run - same as on 08-24.
-     After the review, remove the NIEMALS entry.
+     After the review, remove the NIEMALS entry. **As of 2026-09-14:** Stephan
+     has looked at the rule (checksum device = repo, `afa162ca…9ffc`); at his
+     request `neustarten` now only reboots after a real update since the last
+     boot. The approval itself is still pending.
   2. **The sentence after the reboot across two accounts, on the device.** In
      the real run only `dialosadmin` (who triggered it) heard it, not `nutzer`.
      Fixed: timestamp on the machine, acknowledgement per person - checked in a

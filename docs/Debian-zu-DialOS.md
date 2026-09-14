@@ -2964,6 +2964,21 @@ Der Computer wird beim nächsten Start fertig." Einem Fehler im Aufrufer zu
 vertrauen hieße, den Zugang zu den Daten von einer vertauschten Bedingung
 abhängig zu machen.
 
+**Und neu gestartet wird nur nach einem echten Update in diesem Start**
+(nachgerüstet am 2026-09-14 bei Stephans Durchsicht der sudoers-Regel). Vorher
+konnte jedes Programm unter `nutzer` oder `dialosadmin` den Rechner ohne
+Passwort neu starten, sobald der Stick steckte - auch immer wieder. Jetzt legt
+eine echte Installation zusätzlich `/run/dialos-systemupdate-installiert` an,
+und `neustarten` lehnt ohne diese Datei ab (Rückgabe 3, `kein-update`). `/run`
+ist nach jedem Hochfahren leer: Die Bedingung hängt nicht an der Uhr, nur root
+kann die Datei anlegen, und **eine Neustart-Schleife ist im root-Teil selbst
+ausgeschlossen** - vorher verhinderte sie nur die Fälligkeitsrechnung im
+Programm ohne root. Kommt die Ablehnung im normalen Ablauf (etwa weil
+unattended-upgrades die Pakete zwischen Prüfen und Installieren schon
+eingespielt hat), sagt der Lauf „Der Computer ist auf dem neuesten Stand."
+Geprüft: in einer Kopie mit ersetztem `systemctl reboot` ohne Datei abgelehnt,
+mit Datei und Stick „würde neu starten"; danach am Gerät über sudo abgelehnt.
+
 **Der Schlusssatz überzeichnet leicht, und das ist entschieden.** „Auf dem
 neuesten Stand" gilt nur für die Debian-Pakete; Piper, Vosk und die Stimmen
 kommen nicht über apt. Stephan: „Satz so lassen". Der Vorbehalt steht hier,

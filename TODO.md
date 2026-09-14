@@ -87,7 +87,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      Ausnahme in der NIEMALS-Liste von `dialos-aufspielen` greift erst beim
      NÄCHSTEN Lauf, weil das Skript sich im selben Lauf selbst ersetzt -
      derselbe Ablauf wie am 24.08. Nach der Durchsicht den Eintrag in NIEMALS
-     entfernen.
+     entfernen. **Stand 2026-09-14:** Stephan hat die Regel angesehen (Prüfsumme
+     Gerät = Repo, `afa162ca…9ffc`); auf seinen Wunsch startet `neustarten` jetzt
+     nur noch nach einem echten Update seit dem letzten Start. Die Freigabe
+     selbst steht noch aus.
   2. **Der Satz nach dem Neustart über zwei Konten, am Gerät.** Im echten Lauf
      hörte ihn nur `dialosadmin` (der ausgelöst hatte), nicht `nutzer`.
      Repariert: Zeitstempel beim Rechner, Quittung pro Person - in einer

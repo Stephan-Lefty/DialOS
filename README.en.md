@@ -126,7 +126,8 @@ background) and `splash.png` (boot/login screen).
   object with "nicht jetzt" - "später" is not in the model's vocabulary and would
   never have arrived. `apt-get upgrade` without `dist-upgrade` and `autoremove`;
   the reboot checks in the root part itself whether the security stick is
-  present. Real run on 2026-09-14 completed, no loop after the reboot. **Found on
+  present, and only if an update was really installed since the last boot
+  (marker under `/run`). Real run on 2026-09-14 completed, no loop after the reboot. **Found on
   the way:** the sentence "Der Computer ist auf dem neuesten Stand" only reached
   the account that triggered the update, not `nutzer`. Now the timestamp
   belongs to the machine and each person acknowledges it. The sudoers rule is

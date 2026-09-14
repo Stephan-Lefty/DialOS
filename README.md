@@ -134,7 +134,8 @@ das Erfolg meldet, während es versagt.
   Widerspruch auf „nicht jetzt" - „später" steht nicht im Wortschatz des
   Modells und wäre nie angekommen. `apt-get upgrade` ohne `dist-upgrade` und
   `autoremove`; der Neustart prüft im root-Teil selbst, ob der Sicherheits-Stick
-  steckt. Echter Lauf am 2026-09-14 durchgelaufen, ohne Schleife nach dem
+  steckt, und nur, wenn seit dem letzten Start wirklich ein Update installiert
+  wurde (Marke unter `/run`). Echter Lauf am 2026-09-14 durchgelaufen, ohne Schleife nach dem
   Neustart. **Dabei gefunden:** Der Satz „Der Computer ist auf dem neuesten
   Stand" kam nur beim Konto, das das Update ausgelöst hatte, nicht bei `nutzer`.
   Jetzt gehört der Zeitstempel dem Rechner und jede Person quittiert ihn selbst.

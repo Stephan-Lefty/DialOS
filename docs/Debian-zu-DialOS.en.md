@@ -2731,6 +2731,21 @@ refuses if it is missing. The announcement then is: "Die Updates sind
 installiert. Der Computer wird beim nächsten Start fertig." Trusting the caller
 would make access to the user's data depend on a swapped condition.
 
+**And it only reboots after a real update during this boot** (added on
+2026-09-14 during Stephan's review of the sudoers rule). Before, any program
+running as `nutzer` or `dialosadmin` could reboot the machine without a password
+whenever the stick was present - repeatedly, too. Now a real installation also
+creates `/run/dialos-systemupdate-installiert`, and `neustarten` refuses without
+that file (return code 3, `kein-update`). `/run` is empty after every boot: the
+condition does not depend on the clock, only root can create the file, and **a
+reboot loop is ruled out in the root part itself** - before, only the due
+calculation in the unprivileged program prevented it. If the refusal happens in
+the normal sequence (e.g. because unattended-upgrades installed the packages
+between checking and installing), the run says "Der Computer ist auf dem
+neuesten Stand." Verified: in a copy with `systemctl reboot` replaced, refused
+without the file and "would reboot" with file and stick; then refused on the
+device via sudo.
+
 **The final sentence overstates slightly, and that is decided.** "Up to date"
 only applies to the Debian packages; Piper, Vosk and the voices do not come via
 apt. Stephan: keep the sentence. The caveat lives here, not in the announcement.

@@ -25,6 +25,10 @@ set -uo pipefail
 PROTOKOLL="/var/log/dialos-systemupdate.log"
 STICK_LABEL="DIALOS-KEY"
 ZULETZT="/var/lib/dialos/systemupdate-zuletzt"
+# Liegt unter /run, und das ist der ganze Trick: /run ist ein tmpfs und ist nach
+# jedem Hochfahren leer. Existiert die Datei, wurde SEIT DEM LETZTEN START ein
+# Update installiert. Unabhaengig von der Uhr, und nur root kann sie anlegen.
+IN_DIESEM_START="/run/dialos-systemupdate-installiert"
 
 melde() {
     mkdir -p "$(dirname "$PROTOKOLL")" 2>/dev/null
@@ -102,6 +106,7 @@ installiert_merken() {
     mkdir -p "$(dirname "$INSTALLIERT")" 2>/dev/null
     date '+%Y-%m-%dT%H:%M:%S' > "$INSTALLIERT"
     chmod 0644 "$INSTALLIERT"
+    touch "$IN_DIESEM_START"
 }
 
 datum_merken() {
@@ -112,6 +117,23 @@ datum_merken() {
 
 # ------------------------------------------------------------ neustarten ---
 neustarten() {
+    # NEUSTART NUR NACH EINEM ECHTEN UPDATE IN DIESEM START (Stephans Freigabe
+    # vom 2026-09-14, bei der Durchsicht der sudoers-Regel). Ohne diese
+    # Bedingung koennte jedes Programm, das unter nutzer oder dialosadmin
+    # laeuft, den Rechner ohne Passwort neu starten, sobald der Stick steckt -
+    # auch immer wieder. Jetzt muss vorher wirklich etwas installiert worden
+    # sein, und das geht nur, wenn Pakete offen sind.
+    #
+    # Nebenbei ist damit eine Neustart-Schleife an der Stelle ausgeschlossen,
+    # die root hat: Nach dem Neustart ist /run leer, ein zweiter Neustart wird
+    # abgelehnt. Vorher verhinderte das nur die Faelligkeitsrechnung im
+    # Programm ohne root.
+    if [ ! -e "$IN_DIESEM_START" ]; then
+        melde "Neustart ABGELEHNT - seit dem letzten Start kein Update installiert"
+        echo "kein-update"
+        return 3
+    fi
+
     # DIE PRUEFUNG STEHT HIER UND NICHT BEIM AUFRUFER, und das ist der
     # wichtigste Satz in dieser Datei.
     #
