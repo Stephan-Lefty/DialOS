@@ -121,6 +121,18 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **The package list could not be installed since 2026-08-16** (found
+  2026-09-14). `xargs -a` passed the words of a comment to apt as package
+  names, and apt installed nothing - in step 2 of the guide and in
+  `dialos-full-office-setup.sh`, which stopped there because of `set -e`.
+  Comment and blank lines are now stripped first. This device was not
+  affected; a freshly set-up one would have been.
+
+- **Spell-checking in the package list** (2026-09-14): `hunspell-de-de` and
+  `hunspell-en-us` are now listed explicitly in `desktop.list.chroot`. Before,
+  they only came in indirectly via `task-german-desktop`. `aspell` on purpose
+  not - no program on the device uses it.
+
 - **Update automation: every 14 days, on Mondays, with announcement and
   reboot** (2026-09-14, Stephan's requirement). After login, with ten seconds to
   object with "nicht jetzt" - "später" is not in the model's vocabulary and would

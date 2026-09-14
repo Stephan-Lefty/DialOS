@@ -59,6 +59,17 @@ cd "$REPO_ROOT"
 
 log() { echo; echo "=== [dialos-full-office-setup] $1 ==="; }
 
+# Die Paketliste OHNE Kommentar- und Leerzeilen (Fehler gefunden 2026-09-14).
+# "xargs -a" reicht jedes Wort weiter - auch die eines Kommentars. Seit am
+# 2026-08-16 der Kommentar zur Windows-Optik dazukam, bekam apt Woerter wie
+# "Optionale" als Paketnamen, brach ab und installierte GAR NICHTS. Mit
+# "set -e" endete dieses Skript damit schon in Schritt 2, und die
+# Wiederherstellung nach autoremove (Schritt 2b und 5) war wirkungslos.
+paketliste() {
+  grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' \
+    iso-build/config/package-lists/desktop.list.chroot
+}
+
 pruefe_netzwerk() {
   log "Netzwerk-Check"
   if ! curl -fsS --max-time 5 https://deb.debian.org >/dev/null 2>&1; then
@@ -84,7 +95,7 @@ pruefe_sudo() {
 schritt_02_paketliste() {
   log "Schritt 2: Paketliste installieren"
   sudo apt-get update
-  sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
+  paketliste | sudo xargs apt-get install -y
 }
 
 schritt_02b_sprachen_aufraeumen() {
@@ -132,7 +143,7 @@ schritt_02b_sprachen_aufraeumen() {
   # gilt anschliessend wieder als "manuell installiert" und ist damit vor
   # kuenftigem autoremove geschuetzt.
   echo "Stelle sicher, dass nichts aus der Paketliste mitentfernt wurde ..."
-  sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
+  paketliste | sudo xargs apt-get install -y
 
   # Der dauerhafte Teil der Loesung steckt in 01-dialos-defaults (Schritt
   # 3): dort ist die deutsche Tastatur als einzige Eingabequelle fuer JEDES
@@ -218,7 +229,7 @@ schritt_05_calamares_entfernen() {
   # Wie in Schritt 2b: nach autoremove die Paketliste erneut durchsetzen,
   # damit nichts Gewolltes mitgerissen wird.
   sudo apt-get autoremove --purge -y
-  sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
+  paketliste | sudo xargs apt-get install -y
 }
 
 schritt_06_rustdesk() {

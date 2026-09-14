@@ -352,8 +352,19 @@ Installieren mit:
 
 ```bash
 sudo apt-get update
-sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
+grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' iso-build/config/package-lists/desktop.list.chroot \
+  | sudo xargs apt-get install -y
 ```
+
+**Kommentarzeilen müssen vorher heraus** (Fehler gefunden am 2026-09-14). Bis
+dahin stand hier `sudo xargs -a …desktop.list.chroot apt-get install -y`.
+`xargs` reicht jedes Wort weiter, auch die eines Kommentars. Seit am 2026-08-16
+der Kommentar zur Windows-Optik in die Liste kam, bekam apt Wörter wie
+„Optionale" als Paketnamen, brach ab und installierte **kein einziges Paket**.
+Dasselbe galt für `scripts/dialos-full-office-setup.sh` (dort wegen `set -e`
+Abbruch in Schritt 2). Aufgefallen beim Ergänzen der Rechtschreibprüfung, per
+`apt-get install -s` nachgestellt. Dieses Gerät betraf es nicht: Die Simulation
+zeigt, dass alle Pakete der Liste installiert sind.
 
 Wichtige Gruppen darin (Reihenfolge wie in der Datei):
 - **Sprache/Desktop-Basis**: `task-german`, `task-german-desktop`,
@@ -362,7 +373,11 @@ Wichtige Gruppen darin (Reihenfolge wie in der Datei):
 - **Netzwerk/Firmware**: `network-manager` + GUI, Firmware-Pakete fürs
   T490 (WLAN/Mikrocode).
 - **Programme**: Firefox, Thunderbird, Shortwave (Radio), Rhythmbox,
-  GNOME Podcasts, LibreOffice Writer.
+  GNOME Podcasts, LibreOffice Writer. Dazu die Rechtschreibprüfung
+  `hunspell-de-de` + `hunspell-en-us` (ergänzt 2026-09-14): Sie kam vorher
+  nur indirekt über `task-german-desktop` und galt damit als „automatisch
+  installiert". `aspell` fehlt bewusst - kein Programm auf dem Gerät nutzt
+  es; LibreOffice, Firefox, Thunderbird und GNOME greifen auf hunspell.
 - **Terminal/Entwicklung**: `gnome-terminal`, `curl`, `wget`, `git`,
   `nodejs`/`npm` (für Claude Code CLI, Schritt 7), `dconf-cli`,
   `unzip` + `python3-pip` (beide für Schritt 15 nötig - ergänzt am

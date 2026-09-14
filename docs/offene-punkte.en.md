@@ -59,14 +59,11 @@ so nothing gets lost from the discussions.
   `nutzer` autologin.
 
 ## System
-- Spell-checking (hunspell-de-de/hunspell-en-us, aspell) is still
-  missing. **Rationale outdated (corrected 2026-08-16):** this used to
-  say `dictionaries-common` reproducibly fails inside the Docker chroot
-  build environment. That environment no longer exists since the move to
-  path A - the packages are installed today via `apt` on a running
-  system, where the problem doesn't occur. It is missing now simply
-  because it is in no package list. That makes it a concrete task rather
-  than an open question (see [TODO.en.md](../TODO.en.md)).
+- ~~Spell-checking is missing~~ **Done 2026-09-14:** `hunspell-de-de` and
+  `hunspell-en-us` are now in the package list. They were already on the
+  device, but only indirectly via `task-german-desktop`. `aspell` on purpose
+  not - no program on the device uses it. The old rationale (Docker chroot)
+  had been outdated since the move to path A anyway.
 - The single-instance lock of `dialos-start-ansage.py` uses a fixed path
   in shared `/tmp` (`/tmp/dialos-start-ansage.pid`). The same design
   caused trouble on 2026-08-16 with the speaking marker: because of the

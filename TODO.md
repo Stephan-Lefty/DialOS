@@ -544,8 +544,21 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Annahmen sammeln sich an, solange es nur eine Stimme gibt. Sie alle am
     Ende gleichzeitig zu finden ist der teure Weg.
 
-- [ ] **ZUERST MORGEN: Zwei Diktate haben nichts aufgenommen** (2026-08-18,
-  letzter Lauf). Im Protokoll `~/.log/dialos-diktat.log` steht zwischen „grosses
+- [ ] **Zwei Diktate haben am 2026-08-18 nichts aufgenommen - seitdem nicht
+  wieder aufgetreten, Ursache nie gefunden** (das Etikett „ZUERST MORGEN" ist
+  am 2026-09-14 entfernt).
+
+  **Nachtrag vom 2026-09-14, aus den Protokollen des Admin-Kontos.** Schon am
+  Tag danach nahm das Diktat auf: am 2026-08-19 dreimal „milch sechs eier
+  butter" in den Einkaufszettel, einmal als drei einzelne Äußerungen, danach
+  „vorlesen: 3 Einträge" und zweimal erfolgreich geleert; am 2026-08-21 zwei
+  Notizen mit Text. Läufe ohne `erkannt:`-Zeile gibt es weiter, sie dauern
+  aber nur 3 bis 8 Sekunden bis zum Schlusssatz - Tests des Schlusssatzes,
+  kein verlorenes Diktat. **Nicht gelöst, sondern nicht mehr beobachtet.**
+  Der nächste echte Beweis ist der Brief am 2026-09-15: Läuft er durch, wird
+  dieser Punkt abgehakt; bleibt er leer, stehen hier die Prüffragen.
+
+  Der ursprüngliche Befund (2026-08-18, letzter Lauf). Im Protokoll `~/.log/dialos-diktat.log` steht zwischen „grosses
   Modell geladen" und „Schlusssatz erkannt" **keine einzige** `erkannt:`-
   Zeile - beim zweiten Lauf über 26 Sekunden hinweg. Der Einkaufszettel
   blieb leer, „Einkaufszettel vorlesen" und „Einkauf erledigt" wurden
@@ -871,13 +884,6 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   gnome` und kontrollieren, dass wirklich alles wieder wie vorher
   aussieht. Anschließend dasselbe als `nutzer`.
 
-- [ ] **Rechtschreibprüfung nachrüsten** (`hunspell-de-de`,
-  `hunspell-en-us`, `aspell`). Steht in keiner Paketliste. Die frühere
-  Begründung in `docs/offene-punkte.md` ("scheitert in der
-  Docker-Chroot-Build-Umgebung") ist mit Weg A hinfällig - heute wird auf
-  einem laufenden System per `apt` installiert, wo das Problem nicht
-  auftritt. Gehört in `iso-build/config/package-lists/desktop.list.chroot`.
-
 - [ ] **Mikrofon-Fallback ohne Bluetooth testen** (offen seit
   2026-08-16). Die Ausgabeseite ist bewiesen - Headset aus, Ton kam aus
   dem eingebauten Lautsprecher. Die Eingabeseite fehlt noch: versteht das
@@ -1021,11 +1027,6 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   gewählt) - braucht eine echte Einstellmöglichkeit (z. B. GNOME-
   Barrierefreiheitseinstellungen oder eigener Sprachbefehl), nicht nur
   einen Config-Wert.
-
-- [ ] Echten End-to-End-Test von `dialos-vosk-test.py` durchführen
-  (tatsächlich reinsprechen, Erkennungsqualität beurteilen) - bisher nur
-  Installation + Modell-Laden technisch verifiziert, noch kein echter
-  Spracherkennungs-Test mit einer gesprochenen Aufnahme gelaufen.
 
 - [ ] Bluetooth-Audio-Fix in `dialos-start-ansage.py`
   (Ein-Instanz-Lock/`alte_instanz_beenden()`) ist noch nicht über einen
@@ -1180,6 +1181,13 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   **wie erfährt ein blinder Nutzer, in welchem Zustand er ist**? Ohne
   eine Antwort darauf ist der Schalter gefährlicher als kein Schalter:
   Wer nicht weiß, dass die Erkennung aus ist, hält das Gerät für kaputt.
+- ☑️ **2026-09-14** — **Erledigt durch den Betrieb: End-to-End-Test von
+  `dialos-vosk-test.py`.** Der Punkt stammte aus der Zeit, als nur Installation
+  und Laden der Modelle geprüft waren. Seitdem erkennt Vosk täglich echte
+  Stimme: 26 Grammatiksätze im Befehlsdienst, gemessene Beinahe-Treffer,
+  Diktate in Einkaufszettel und Notizen, die Messreihe in `docs/diktat.md`.
+  Ein eigener Test mit dem alten Skript würde nichts mehr zeigen, was der
+  Betrieb nicht schon belegt.
 
 ### Sprachausgabe und Ansagen
 
@@ -1406,6 +1414,12 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   Das kann nur Stephan entscheiden - es ist seine Sicherungsstrategie.
   Ursprünglicher Eintrag: liegt bisher nur lokal, noch in die Nextcloud
   hochladen (kein Claude-Zugriff darauf).
+- ☑️ **2026-09-14** — **Rechtschreibprüfung in der Paketliste:**
+  `hunspell-de-de` und `hunspell-en-us` in `desktop.list.chroot`. Nachgesehen:
+  Auf dem Gerät waren sie schon installiert, aber nur als „automatisch" über
+  `task-german-desktop` - ausdrücklich gelistet hängen sie nicht mehr an einem
+  Metapaket. `aspell` bewusst weggelassen: Kein Programm auf dem Gerät nutzt
+  es; LibreOffice, Firefox, Thunderbird und GNOME greifen auf hunspell.
 
 ### Verschlüsselung, Konten und Sicherheit
 

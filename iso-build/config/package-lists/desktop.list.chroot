@@ -24,6 +24,14 @@ shortwave
 rhythmbox
 gnome-podcasts
 libreoffice-writer
+# Rechtschreibpruefung (ergaenzt 2026-09-14). Kamen bisher nur indirekt ueber
+# task-german-desktop mit - als "automatisch installiert". Hier ausdruecklich,
+# damit sie nicht von einem Metapaket abhaengen, das beim Aufraeumen wegfallen
+# koennte. hunspell ist das, was LibreOffice, Firefox, Thunderbird und GNOME
+# benutzen; aspell steht bewusst NICHT hier - kein Programm auf dem Geraet
+# braucht es.
+hunspell-de-de
+hunspell-en-us
 
 gnome-terminal
 curl

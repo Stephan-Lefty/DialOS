@@ -527,8 +527,21 @@ finished too, and then move down together. That way no reference breaks.
     assumptions accumulate while there is only one voice. Finding them all
     at once at the end is the expensive way.
 
-- [ ] **FIRST THING TOMORROW: two dictations recorded nothing**
-  (2026-08-18, last run). In the log `~/dialos-diktat.log` there is **not a
+- [ ] **Two dictations recorded nothing on 2026-08-18 - not seen again since,
+  cause never found** (the "FIRST THING TOMORROW" label was removed on
+  2026-09-14).
+
+  **Addendum of 2026-09-14, from the admin account's logs.** Dictation was
+  recording again the next day: on 2026-08-19 "milch sechs eier butter" three
+  times into the shopping list, once as three separate utterances, then
+  "vorlesen: 3 Eintraege" and two successful clears; on 2026-08-21 two notes
+  with text. Runs without an `erkannt:` line still occur, but they take only
+  3 to 8 seconds until the stop phrase - tests of the stop phrase, not a lost
+  dictation. **Not solved, just not observed any more.** The next real proof
+  is the letter on 2026-09-15: if it runs through, this item gets ticked; if
+  it stays empty, the questions to check are here.
+
+  The original finding (2026-08-18, last run). In the log `~/dialos-diktat.log` there is **not a
   single** `erkannt:` line between "grosses Modell geladen" and "Schlusssatz
   erkannt" - on the second run across 26 seconds. The shopping list stayed
   empty, so "Einkaufszettel vorlesen" and "Einkauf erledigt" were never
@@ -778,13 +791,6 @@ finished too, and then move down together. That way no reference breaks.
   `dialos-desktop-stil.sh gnome` and verify everything really looks like
   before. Afterwards the same as `nutzer`.
 
-- [ ] **Add spell-checking** (`hunspell-de-de`, `hunspell-en-us`,
-  `aspell`). It is in no package list. The earlier rationale in
-  `docs/offene-punkte.en.md` ("fails inside the Docker chroot build
-  environment") is moot with path A - installation happens today via
-  `apt` on a running system, where the problem doesn't occur. Belongs in
-  `iso-build/config/package-lists/desktop.list.chroot`.
-
 - [ ] **Test the microphone fallback without Bluetooth** (open since
   2026-08-16). The output side is proven - headset off, sound came from
   the built-in speaker. The input side is still missing: does the
@@ -907,11 +913,6 @@ finished too, and then move down together. That way no reference breaks.
   Piper config, `0.85` chosen as Stephan's personal preference) - needs
   a real setting (e.g. GNOME accessibility settings or a dedicated voice
   command), not just a config value.
-
-- [ ] Run a real end-to-end test of `dialos-vosk-test.py` (actually
-  speak into it, judge recognition quality) - so far only installation +
-  model loading verified technically, no real speech recognition test
-  with an actual spoken recording has run yet.
 
 - [ ] The Bluetooth audio fix in `dialos-start-ansage.py`
   (single-instance lock/`alte_instanz_beenden()`) hasn't been
@@ -1066,6 +1067,13 @@ memory, not just a record of successes.
   in**? Without an answer to that, the switch is more dangerous than no
   switch: anyone who doesn't know recognition is off will think the
   device is broken.
+- ☑️ **2026-09-14** — **Done through daily use: end-to-end test of
+  `dialos-vosk-test.py`.** The item dates from when only installation and
+  model loading had been checked. Since then Vosk recognises a real voice
+  every day: 26 grammar sentences in the command service, measured near-hits,
+  dictations into the shopping list and notes, the test series in
+  `docs/diktat.en.md`. A separate test with the old script would show nothing
+  that daily use has not already proven.
 
 ### Speech output and announcements
 
@@ -1291,6 +1299,12 @@ memory, not just a record of successes.
   `DialOS-Live-0.5.1-clone.iso` currently only exists locally
   (`~/DialOS-Live-0.5.1-clone.iso`) - still needs to be uploaded to
   Nextcloud (only Stephan can do this, no Claude access to it).
+- ☑️ **2026-09-14** — **Spell-checking in the package list:**
+  `hunspell-de-de` and `hunspell-en-us` in `desktop.list.chroot`. Checked: they
+  were already installed on the device, but only as "automatic" via
+  `task-german-desktop` - listed explicitly they no longer hang on a
+  metapackage. `aspell` left out on purpose: no program on the device uses it;
+  LibreOffice, Firefox, Thunderbird and GNOME use hunspell.
 
 ### Encryption, accounts and security
 

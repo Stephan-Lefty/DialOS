@@ -330,8 +330,19 @@ Install with:
 
 ```bash
 sudo apt-get update
-sudo xargs -a iso-build/config/package-lists/desktop.list.chroot apt-get install -y
+grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' iso-build/config/package-lists/desktop.list.chroot \
+  | sudo xargs apt-get install -y
 ```
+
+**Comment lines have to be stripped first** (bug found on 2026-09-14). Until
+then this said `sudo xargs -a …desktop.list.chroot apt-get install -y`.
+`xargs` passes on every word, including those of a comment. Since the comment
+on the Windows look was added to the list on 2026-08-16, apt received words
+like "Optionale" as package names, aborted and installed **not a single
+package**. The same applied to `scripts/dialos-full-office-setup.sh` (which,
+because of `set -e`, stopped in step 2). Found while adding spell-checking,
+reproduced with `apt-get install -s`. This device was not affected: the
+simulation shows every package in the list is installed.
 
 Notable groups within it (in the order they appear in the file):
 - **Language/desktop base**: `task-german`, `task-german-desktop`,
@@ -340,7 +351,12 @@ Notable groups within it (in the order they appear in the file):
 - **Network/firmware**: `network-manager` + GUI, firmware packages for
   the T490 (WLAN/microcode).
 - **Applications**: Firefox, Thunderbird, Shortwave (radio), Rhythmbox,
-  GNOME Podcasts, LibreOffice Writer.
+  GNOME Podcasts, LibreOffice Writer. Plus spell-checking
+  `hunspell-de-de` + `hunspell-en-us` (added 2026-09-14): before, it only
+  came in indirectly via `task-german-desktop` and so counted as
+  "automatically installed". `aspell` is left out on purpose - no program on
+  the device uses it; LibreOffice, Firefox, Thunderbird and GNOME use
+  hunspell.
 - **Terminal/development**: `gnome-terminal`, `curl`, `wget`, `git`,
   `nodejs`/`npm` (for the Claude Code CLI, step 7), `dconf-cli`,
   `unzip` + `python3-pip` (both needed for step 15 - added on 2026-08-16

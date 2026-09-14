@@ -129,6 +129,18 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Die Paketliste ließ sich seit dem 2026-08-16 nicht mehr installieren**
+  (gefunden 2026-09-14). `xargs -a` gab die Wörter eines Kommentars als
+  Paketnamen an apt, und apt installierte gar nichts - in Schritt 2 der
+  Anleitung und in `dialos-full-office-setup.sh`, das wegen `set -e` dort
+  abbrach. Kommentar- und Leerzeilen werden jetzt vorher entfernt. Dieses
+  Gerät war nicht betroffen; ein frisch aufgesetztes wäre es gewesen.
+
+- **Rechtschreibprüfung in der Paketliste** (2026-09-14): `hunspell-de-de` und
+  `hunspell-en-us` stehen jetzt ausdrücklich in `desktop.list.chroot`. Vorher
+  kamen sie nur indirekt über `task-german-desktop`. `aspell` bewusst nicht -
+  kein Programm auf dem Gerät nutzt es.
+
 - **Update-Automatik: alle 14 Tage, montags, mit Ansage und Neustart**
   (2026-09-14, Stephans Vorgabe). Nach dem Anmelden, mit zehn Sekunden
   Widerspruch auf „nicht jetzt" - „später" steht nicht im Wortschatz des

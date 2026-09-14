@@ -60,15 +60,11 @@ damit nichts aus den Diskussionen verloren geht.
   `nutzer`-Autologins auslösen.
 
 ## System
-- Rechtschreibprüfung (hunspell-de-de/hunspell-en-us, aspell) fehlt
-  weiterhin. **Begründung überholt (korrigiert 2026-08-16):** Hier stand,
-  `dictionaries-common` scheitere reproduzierbar in der
-  Docker-Chroot-Build-Umgebung. Diese Umgebung gibt es seit dem Wechsel
-  auf Weg A nicht mehr - die Pakete werden heute auf einem laufenden
-  System per `apt` installiert, wo das Problem gar nicht auftritt. Es
-  fehlt jetzt schlicht, weil es in keiner Paketliste steht. Damit ist es
-  kein offener Punkt mehr, sondern eine konkrete Aufgabe (siehe
-  [TODO.md](../TODO.md)).
+- ~~Rechtschreibprüfung fehlt~~ **Erledigt 2026-09-14:** `hunspell-de-de` und
+  `hunspell-en-us` stehen jetzt in der Paketliste. Sie waren auf dem Gerät
+  schon da, aber nur indirekt über `task-german-desktop`. `aspell` bewusst
+  nicht - kein Programm auf dem Gerät nutzt es. Die alte Begründung
+  (Docker-Chroot) war seit dem Wechsel auf Weg A ohnehin überholt.
 - Die Ein-Instanz-Sperre von `dialos-start-ansage.py` liegt auf einem
   festen Pfad im geteilten `/tmp` (`/tmp/dialos-start-ansage.pid`).
   Dieselbe Bauart hat am 2026-08-16 bei der Sprechen-Markierung Ärger
