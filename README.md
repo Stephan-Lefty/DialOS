@@ -129,6 +129,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Vergleich der Spracherkenner fürs Diktat vorbereitet** (2026-09-14).
+  Befehle bleiben bei Vosk; für freien Text (Einkaufszettel, Notizen, Brief)
+  werden Whisper (whisper.cpp) und Parakeet TDT 0.6B v3 gemessen.
+  `scripts/dialos-erkenner-einrichten.sh` installiert nur zum Messen in einen
+  eigenen Ordner (Prüfsummen, Selbsttest), `scripts/dialos-erkenner-vergleich.py`
+  schickt dieselbe Aufnahme durch alle Erkenner, `docs/einkaufszettel-vorlage.md`
+  ist der Maßstab. Test mit Stephans Stimme am 2026-09-15.
+
 - **Firmware-Updates in der 14-Tage-Automatik** (2026-09-14, Stephans Wahl).
   Über fwupd/LVFS, nach den Paketen - aber nur am Netzteil und mit mindestens
   50 % Akku, geprüft auch unmittelbar vor dem Einspielen. Die Ansage sagt dann

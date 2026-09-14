@@ -121,6 +121,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Recogniser comparison for dictation prepared** (2026-09-14). Commands stay
+  with Vosk; for free text (shopping list, notes, letter) Whisper (whisper.cpp)
+  and Parakeet TDT 0.6B v3 are measured. `scripts/dialos-erkenner-einrichten.sh`
+  installs for measuring only into its own folder (checksums, self-test),
+  `scripts/dialos-erkenner-vergleich.py` sends the same recording through every
+  recogniser, `docs/einkaufszettel-vorlage.md` is the yardstick. Test with
+  Stephan's voice on 2026-09-15.
+
 - **Firmware updates in the 14-day automation** (2026-09-14, Stephan's choice).
   Via fwupd/LVFS, after the packages - but only on mains power and with at
   least 50 % battery, checked again right before installing. The announcement

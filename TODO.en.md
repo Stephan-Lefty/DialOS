@@ -148,6 +148,35 @@ finished too, and then move down together. That way no reference breaks.
     or a headset provides a key that can be read (media key via Bluetooth
     AVRCP).
 
+- [ ] **Recogniser comparison for dictation: Vosk against Whisper and
+  Parakeet - test on 2026-09-15** (Stephan on 2026-09-14: the shopping list
+  is still a headache; are there better speech systems - and: commands as
+  before, and Whisper for the user's texts?).
+
+  **The split, if the comparison supports it:** commands, yes/no, "später"
+  and "Diktat beenden" stay with Vosk (fixed grammar: fast, tightly bounded).
+  Only the big Vosk model in dictation would be replaced - for the shopping
+  list, notes and letter.
+
+  **Set up (2026-09-14)** with `scripts/dialos-erkenner-einrichten.sh`, for
+  measuring only, in `erkenner-vergleich/` next to the repo (nothing in the
+  system, no autostart): whisper.cpp v1.9.4 with the models small and
+  large-v3-turbo-q5_0, Parakeet TDT 0.6B v3 (CC-BY-4.0, German) via
+  sherpa-onnx 1.13.8. All checksums passed, self-test green. Hardware:
+  i7-8665U, 4 cores/8 threads, AVX2, 46 GB.
+
+  **Measuring** with `scripts/dialos-erkenner-vergleich.py`: template
+  `docs/einkaufszettel-vorlage.md` (20 items + letter text without spoken
+  punctuation), one recording, the same pause-cut pieces for every
+  recogniser; output: items verbatim, word error rate, load time and time
+  per piece. Recordings stay local, never in the repo.
+
+  **Open before any switch:** Whisper sometimes invents text in silence (only
+  pass pieces with speech); Whisper does not transcribe while you speak but
+  gets finished pieces; the waiting time per item on the T490. Punctuation
+  and capitalisation come along with Whisper and Parakeet - commas could
+  split entries like "Birnen, Äpfel".
+
 - [x] **Umlaut words are NOT missing from the vocabulary - three decisions
   were open again, all three decided the same day** (found 2026-09-14 when Stephan asked about dialects). Every
   word Vosk reported as "missing in vocabulary" since August contained ä, ö,

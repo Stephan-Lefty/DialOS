@@ -146,6 +146,36 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine
     Taste liefert, die sich abgreifen lässt (Medientaste über Bluetooth AVRCP).
 
+- [ ] **Erkenner-Vergleich fürs Diktat: Vosk gegen Whisper und Parakeet -
+  Test am 2026-09-15** (Stephan am 2026-09-14: „Was mir aktuell noch
+  Kopfzerbrechen macht ist der Einkaufszettel. Gibt es noch 'bessere'
+  Sprachsteuerungssysteme" - und: „Du meinst Befehle und Sprachbefehle wie
+  bisher und für 'Texte' vom Nutzer Whisper?").
+
+  **Die Aufteilung, falls der Vergleich es trägt:** Befehle, Ja/Nein,
+  „später" und „Diktat beenden" bleiben bei Vosk (feste Grammatik: schnell,
+  eng begrenzt). Nur das große Vosk-Modell im Diktat würde ersetzt - für
+  Einkaufszettel, Notizen und Brief.
+
+  **Eingerichtet (2026-09-14)** mit `scripts/dialos-erkenner-einrichten.sh`,
+  nur zum Messen, in `erkenner-vergleich/` neben dem Repo (nichts im System,
+  kein Autostart): whisper.cpp v1.9.4 mit den Modellen small und
+  large-v3-turbo-q5_0, Parakeet TDT 0.6B v3 (CC-BY-4.0, Deutsch) über
+  sherpa-onnx 1.13.8. Alle Prüfsummen bestanden, Selbsttest grün. Hardware:
+  i7-8665U, 4 Kerne/8 Threads, AVX2, 46 GB.
+
+  **Messen** mit `scripts/dialos-erkenner-vergleich.py`: Vorlage
+  `docs/einkaufszettel-vorlage.md` (20 Waren + Brieftext ohne gesprochene
+  Satzzeichen), eine Aufnahme, dieselben an Sprechpausen geschnittenen Stücke
+  für alle Erkenner; ausgegeben werden Waren wörtlich, Wortfehlerrate,
+  Ladezeit und Zeit je Stück. Aufnahmen bleiben lokal, nie im Repo.
+
+  **Offen, bevor gewechselt werden könnte:** Whisper erfindet in Stille
+  manchmal Text (nur Stücke mit Sprache übergeben); Whisper schreibt nicht
+  mit, sondern bekommt fertige Stücke; die Wartezeit je Ware auf dem T490.
+  Satzzeichen und Großschreibung kämen bei Whisper und Parakeet mit - an
+  Kommas ließen sich Einträge wie „Birnen, Äpfel" trennen.
+
 - [x] **Umlaut-Wörter fehlen NICHT im Wortschatz - drei Entscheidungen waren
   wieder offen, alle drei am selben Tag entschieden** (gefunden 2026-09-14 bei Stephans Frage nach Dialekten).
   Jedes Wort, das Vosk seit August als „missing in vocabulary" gemeldet hat,

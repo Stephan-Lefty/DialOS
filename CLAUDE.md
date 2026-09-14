@@ -114,6 +114,12 @@ Einschaetzung: "Aktuell funktioniert die Sprachsteuerung, wenn fast keine
 Umgebungsgeraeusche vorhanden sind!" - fuer laute Umgebung sind Aufweckwort
 oder Knopf (TODO, C/D) die eigentliche Loesung.
 
+**Fuer den 2026-09-15 vorbereitet:** Brief einsprechen (`docs/brief-vorlage.md`)
+und Erkenner-Vergleich fuers Diktat (`docs/einkaufszettel-vorlage.md`,
+`scripts/dialos-erkenner-vergleich.py`, Werkzeuge in `erkenner-vergleich/`
+neben dem Repo). Befehle bleiben bei Vosk; zur Wahl steht nur der Erkenner
+fuer freien Text. Einzelheiten im TODO-Punkt "Erkenner-Vergleich".
+
 **Laeuft und ist belegt:**
 
 - Sprachsteuerung mit 28 Befehlssaetzen (am 2026-09-14 dazu: "bildschirmfoto aufnehmen", "wie spaet ist es", "einkaufszettel loeschen"). Das Einschalten verlangt beide
