@@ -896,6 +896,15 @@ Jetzt, von Stephan so gewählt:
 | `pinned-apps` | Firefox, Thunderbird, Writer, Dateien, Texteditor, Rechner | nur Alltagsprogramme, für beide Konten gleich; alle sechs stehen in der Behalten-Liste von Schritt 13c |
 | `eleven-disable-frequent-apps` | `true` | „Häufig" wechselt mit der Nutzung - ein Helfer am Telefon muss sagen können, wo etwas steht |
 | `group-apps-alphabetically-list-layouts` | `false` | bei wenigen Programmen stand fast jedes allein unter seinem Buchstaben |
+| `menu-item-grid-icon-size` + `custom-grid-icon-size` | `'Custom'`, 170 × 130, Symbol 64 | drei große Symbole pro Zeile (Stephan: „Symbole etwas größer und dann die Programme auf 2 Zeilen verteilt") |
+
+**Warum die feste Größe nötig ist:** ArcMenu schätzt die Spalten aus der
+Menübreite mit Symbolbreite + 10 Punkten - im Layout `Eleven`
+(650 − 12) / (92 + 10) = 6. Tatsächlich war ein Symbol mit Beschriftung rund
+116 Punkte breit; sechs davon ragten links und rechts über den Rand („refox
+ESR", „Taschenrech|ner"). Mit 170 Punkten ergibt die Schätzung 3 Spalten, real
+etwa 3 × 194 = 582 von 638 - und ein siebtes Programm käme in eine neue Zeile
+statt überzulaufen.
 
 Zurückschalten setzt alle berührten Schlüssel per `gsettings reset` auf
 den **Auslieferungszustand** zurück, nicht auf selbst gewählte

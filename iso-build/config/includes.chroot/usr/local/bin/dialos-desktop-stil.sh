@@ -330,6 +330,23 @@ auf_windows() {
   setze "$a" pinned-apps "[{'id': 'firefox-esr.desktop'}, {'id': 'thunderbird.desktop'}, {'id': 'libreoffice-writer.desktop'}, {'id': 'org.gnome.Nautilus.desktop'}, {'id': 'org.gnome.TextEditor.desktop'}, {'id': 'org.gnome.Calculator.desktop'}]"
   setze "$a" eleven-disable-frequent-apps true
   setze "$a" group-apps-alphabetically-list-layouts false
+  # Groessere Symbole, drei pro Zeile (Stephans zweite Durchsicht,
+  # 2026-09-14: "Menue angeheftet ist noch nicht sauber" - "mache doch einfach
+  # die Symbole etwas groesser und dann die Programme auf 2 Zeilen verteilt").
+  #
+  # WARUM ES VORHER UEBERLIEF: ArcMenu schaetzt die Spalten aus der Breite,
+  # mit Symbolbreite + 10: (650 - 12) / (92 + 10) = 6. Tatsaechlich war ein
+  # Symbol mit Beschriftung rund 116 breit - sechs davon 696 in einem 638
+  # breiten Feld, das Raster ragte links und rechts ueber den Rand ("refox
+  # ESR", "Taschenrech|ner"). Die Schaetzung unterschlaegt den Innenabstand
+  # von gut 20 Punkten.
+  #
+  # Mit fester Groesse 170 x 130 und Symbolen von 64 statt 34 Punkten:
+  # (650 - 12) / (170 + 10) = 3 Spalten, tatsaechlich etwa 3 x 194 = 582 -
+  # passt, mit Luft. Sechs Programme ergeben zwei volle Zeilen; ein siebtes
+  # oder achtes kaeme in eine dritte Zeile, statt ueberzulaufen.
+  setze "$a" menu-item-grid-icon-size "'Custom'"
+  setze "$a" custom-grid-icon-size "{'width': 170, 'height': 130, 'iconSize': 64}"
 
   # Startknopf-Symbol. Fehlt die Datei, bleibt es beim bisherigen Symbol -
   # ein Startknopf ohne Bild waere schlimmer als einer mit dem falschen.
@@ -406,7 +423,8 @@ auf_gnome() {
   for k in menu-layout position-in-panel dash-to-panel-standalone \
            menu-button-icon custom-menu-button-icon \
            pinned-apps eleven-disable-frequent-apps \
-           group-apps-alphabetically-list-layouts; do
+           group-apps-alphabetically-list-layouts \
+           menu-item-grid-icon-size custom-grid-icon-size; do
     zuruecksetzen "$a" "$k"
   done
 

@@ -133,7 +133,9 @@ das Erfolg meldet, während es versagt.
   Angeheftet stand ArcMenus Voreinstellung - darunter ein leerer Platz, weil
   Firefox unter Debian `firefox-esr` heißt. Jetzt nur Alltagsprogramme
   (Firefox, Thunderbird, Writer, Dateien, Texteditor, Rechner), „Häufig" aus,
-  die Liste aller Programme ohne Buchstaben-Zwischenüberschriften.
+  die Liste aller Programme ohne Buchstaben-Zwischenüberschriften. Die
+  angehefteten Programme als große Symbole, drei pro Zeile - vorher ragte das
+  Raster über den Menürand, weil ArcMenu die Spaltenbreite unterschätzt.
 - **„Bildschirmfoto aufnehmen" ist ein Befehl** (2026-09-14). Stephan hatte es
   zweimal so gesagt, Vosk hatte es wörtlich erkannt - es war nur keiner.
 

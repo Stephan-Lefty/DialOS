@@ -854,6 +854,15 @@ name - plus "ArcMenu-Einstellungen" without an icon. Now, as Stephan chose:
 | `pinned-apps` | Firefox, Thunderbird, Writer, Files, Text Editor, Calculator | everyday programs only, the same for both accounts; all six are on the keep list of step 13c |
 | `eleven-disable-frequent-apps` | `true` | "Frequent" changes with use - a helper on the phone has to be able to say where something is |
 | `group-apps-alphabetically-list-layouts` | `false` | with few programs almost every one stood alone under its letter |
+| `menu-item-grid-icon-size` + `custom-grid-icon-size` | `'Custom'`, 170 × 130, icon 64 | three large icons per row (Stephan: make the icons a bit bigger and spread the programs over 2 rows) |
+
+**Why the fixed size is needed:** ArcMenu estimates the columns from the menu
+width using icon width + 10 points - in the `Eleven` layout
+(650 − 12) / (92 + 10) = 6. In reality an icon with its label was about 116
+points wide; six of them stuck out on the left and right ("refox ESR",
+"Taschenrech|ner"). With 170 points the estimate gives 3 columns, really about
+3 × 194 = 582 of 638 - and a seventh program would go into a new row instead of
+overflowing.
 
 Switching back resets every touched key to its **shipped default** via
 `gsettings reset`, not to hand-picked "GNOME-ish" values - otherwise

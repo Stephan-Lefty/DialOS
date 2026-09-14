@@ -125,7 +125,9 @@ background) and `splash.png` (boot/login screen).
   What was pinned were ArcMenu's defaults - including an empty slot, because
   Firefox is called `firefox-esr` on Debian. Now everyday programs only
   (Firefox, Thunderbird, Writer, Files, Text Editor, Calculator), "Frequent"
-  off, the list of all programs without letter headings.
+  off, the list of all programs without letter headings. The pinned programs
+  as large icons, three per row - before, the grid stuck out past the menu
+  edge because ArcMenu underestimates the column width.
 - **"Bildschirmfoto aufnehmen" is a command** (2026-09-14). Stephan had said it
   that way twice, Vosk had recognised it verbatim - it just was not one.
 
