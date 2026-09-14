@@ -145,6 +145,25 @@ finished too, and then move down together. That way no reference breaks.
   commands are settled.** Otherwise the speakers would have to record again
   after every change. Stephan knows people from Austria and Switzerland for it.
 
+  **What the recordings are integrated for** (Stephan, 2026-09-14: several
+  people could provide the commands, and we integrate them into our system -
+  then it is integrated cleanly):
+
+  | Use | Benefit |
+  |---|---|
+  | Test data in the test bench | Hit rate per command and dialect - shows where it fails |
+  | Tuning | Dialect variants in the grammar ("jo", "nee" …), adjusting thresholds |
+  | Training data for the wake word (measure C) | openWakeWord is trained with many different voices - more speakers from DE/AT/CH make it more robust, including against TV sound |
+
+  **Not planned:** retraining Vosk itself - that needs hours of material, not
+  a few dozen recordings.
+
+  **Prerequisite: written consent from every person.** Voice recordings are
+  personal data. The consent has to state what the recording is used for
+  (testing, training), whether a model trained from it ships with DialOS, and
+  how to withdraw it. The recordings themselves **never go into the public
+  repo**. The consent template is written when the recordings are due.
+
 - [ ] **The voice service survives logging out - afterwards TWO run**
   (found 2026-09-14, 12:13). After logging out and in,
   `dialos-sprachbefehl-desktop.py` from 11:49 (old version) and from 12:09

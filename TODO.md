@@ -147,6 +147,26 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Befehle stehen!". Sonst müssten die Sprecher nach jeder Änderung neu
   aufnehmen. Stephan kennt Leute aus Österreich und der Schweiz dafür.
 
+  **Wofür die Aufnahmen eingebunden werden** (Stephan, 2026-09-14: „Dann
+  können wir mehrere Personen die Befehle zur Verfügung stellen und dann in
+  unser System mit einbinden. Dann ist das sauber integriert"):
+
+  | Verwendung | Nutzen |
+  |---|---|
+  | Prüfdaten im Prüfstand | Trefferquote je Befehl und Mundart - zeigt, wo es hakt |
+  | Einstellen | Mundart-Varianten in die Grammatik („jo", „nee" …), Schwellen anpassen |
+  | Trainingsdaten fürs Aufweckwort (Maßnahme C) | openWakeWord wird mit vielen verschiedenen Stimmen trainiert - mehr Sprecher aus DE/AT/CH machen es robuster, auch gegen Fernsehton |
+
+  **Nicht vorgesehen:** Vosk selbst nachtrainieren - dafür braucht es Stunden
+  an Material, nicht einige Dutzend Aufnahmen.
+
+  **Voraussetzung: schriftliche Einwilligung jeder Person.** Stimmaufnahmen
+  sind personenbezogene Daten. Die Einwilligung muss nennen, wofür die
+  Aufnahme verwendet wird (Prüfung, Training), ob ein daraus trainiertes
+  Modell mit DialOS ausgeliefert wird, und wie man sie zurückzieht. Die
+  Aufnahmen selbst kommen **nie ins öffentliche Repo**. Die
+  Einwilligungsvorlage wird geschrieben, wenn die Aufnahmen anstehen.
+
 - [ ] **Der Sprachdienst überlebt das Abmelden - danach laufen ZWEI**
   (gefunden 2026-09-14, 12:13). Nach Ab- und Anmelden liefen
   `dialos-sprachbefehl-desktop.py` von 11:49 (alte Fassung) und von 12:09
