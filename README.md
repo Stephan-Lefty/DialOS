@@ -129,6 +129,10 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Längere Pausen zwischen den Sätzen** (2026-09-14, Stephans Wahl im
+  Hörvergleich, für Anna und Michael). `--sentence_silence 0.5`: rund 0,78 statt
+  0,45 Sekunden zwischen zwei Sätzen. Die Pause gab es schon - sie war nur kurz.
+
 - **Startmenü der Windows-Optik aufgeräumt** (2026-09-14, Stephans Durchsicht).
   Angeheftet stand ArcMenus Voreinstellung - darunter ein leerer Platz, weil
   Firefox unter Debian `firefox-esr` heißt. Jetzt nur Alltagsprogramme

@@ -141,7 +141,7 @@ def main():
         befehl = (
             f"cd {shlex.quote(PIPER_DIR)} && "
             f"printf %s {shlex.quote(say.fuer_sprachausgabe(text, a['kennung']))} | "
-            f"./piper/piper --model {shlex.quote(modell)} --noise_w 0 "
+            f"./piper/piper --model {shlex.quote(modell)} --noise_w 0 --sentence_silence 0.5 "
             f"--output_raw 2>/dev/null | "
             f"sox -r {beispiele.abtastrate(modell)} -c 1 -b 16 "
             f"-e signed-integer -t raw - -r 22050 {shlex.quote(roh)} "

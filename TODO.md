@@ -746,15 +746,6 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   der unabhängig vom Skriptende greift - etwa eine Prüfung beim Anmelden
   oder ein `trap` auf das Skriptende.
 
-- [ ] **Pausen zwischen den Sätzen der Ansage prüfen** (offen seit
-  2026-08-17). Michael klang „hektisch", gewählt wurde dann aber ein
-  schnelleres Tempo - das spricht dafür, dass die fehlenden Atempausen
-  zwischen den Sätzen das eigentliche Problem sind, nicht die
-  Geschwindigkeit. Piper hängt Sätze fast ohne Pause aneinander. Eine
-  kurze Pause je Satzende, zentral in `dialos-say.py`, würde die Ansage
-  ruhiger machen, ohne einzelne Wörter schleppen zu lassen. Vorher eine
-  Hörprobe bauen: gleiches Tempo, nur mit Pausen.
-
 - [ ] **Aufweckwort mit openWakeWord bauen** (entschieden 2026-08-17).
   Die Vosk-Grammatik scheidet aus - sie presst jede Äußerung in die
   nächstliegende Phrase, weshalb "ich rufe michael an" als `hallo
@@ -1273,6 +1264,15 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   Dabei fiel ein alter Fehler auf: Am Satzende griff die Regel **gar nicht**.
   Der Lookahead schloss jeden folgenden Punkt aus, also auch den Schlusspunkt -
   „Willkommen bei DialOS." wurde als ein Wort gelesen. Behoben.
+- ☑️ **2026-09-14** — **Längere Pausen zwischen den Sätzen** (offen seit
+  2026-08-17). Hörprobe mit drei Fassungen derselben Ansage; Stephan wählte
+  zweimal „Variante B" - erst für Anna, dann nach eigener Hörprobe auch für
+  Michael. `--sentence_silence 0.5` in `piper-generic.conf` und
+  `dialos-say.py`. **Die Annahme des Punkts war falsch:** Piper hing die Sätze
+  nicht „fast ohne Pause" aneinander - gemessen waren es schon rund 0,45 s,
+  jetzt rund 0,78 s. Am Gerät nachgemessen (760/940 ms). Die Hörbeispiele unter
+  `docs/sprachbeispiele/` sind noch mit der alten Pause erzeugt; die Skripte
+  dafür sind nachgezogen.
 
 ### Audio: Mikrofon und Lautsprecher
 

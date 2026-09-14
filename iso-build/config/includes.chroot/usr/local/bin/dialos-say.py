@@ -318,7 +318,9 @@ def speicher_fuellen(text):
             # sonst klingt eine gespeicherte Ansage anders als dieselbe
             # frisch gesprochene. Genau daran ist es am 2026-08-18
             # aufgefallen (siehe Kommentar in piper-generic.conf).
-            f"--model {shlex.quote(stimme)} --noise_w 0 --output_raw 2>/dev/null | "
+            # Dasselbe gilt fuer "--sentence_silence 0.5" (2026-09-14).
+            f"--model {shlex.quote(stimme)} --noise_w 0 --sentence_silence 0.5 "
+            f"--output_raw 2>/dev/null | "
             # "-t wav" ist Pflicht: sox bestimmt das Ausgabeformat sonst an
             # der Dateiendung, und die Zwischendatei heisst ".teil". Ohne
             # die Angabe bricht sox ab - der Speicher blieb dadurch beim

@@ -214,7 +214,7 @@ def erzeugen(datei, text, modell, tempo, aussprache, kennung):
     befehl = (
         f"cd {shlex.quote(PIPER_DIR)} && "
         f"printf %s {shlex.quote(fuer_piper)} | "
-        f"./piper/piper --model {shlex.quote(modell)} --noise_w 0 --output_raw 2>/dev/null | "
+        f"./piper/piper --model {shlex.quote(modell)} --noise_w 0 --sentence_silence 0.5 --output_raw 2>/dev/null | "
         f"sox -r {abtastrate(modell)} -c 1 -b 16 -e signed-integer -t raw - "
         f"-C 3 {shlex.quote(datei)} tempo {tempo} norm 2>/dev/null")
     subprocess.run(["sh", "-c", befehl], check=False)

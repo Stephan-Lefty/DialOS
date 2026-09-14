@@ -1405,6 +1405,16 @@ belegt am 2026-08-18 mit Zeitstempeln in beiden Protokollen.
 17 % anderer Dauer, und eine gespeicherte Ansage klang hoerbar anders als
 dieselbe frisch gesprochene.
 
+**`--sentence_silence 0.5` in der Sprechkette** (2026-09-14, Stephans Wahl
+„Variante B" im Hörvergleich, für Anna und Michael). Die Pause nach jedem
+Satz: ab Werk 0,2 s, gemessen rund 0,45 s zwischen zwei Sätzen; jetzt rund
+0,78 s. Variante C (0,75 → rund 1,04 s) schleppte. Die Pause am Komma bleibt.
+Steht in `piper-generic.conf` **und** in `dialos-say.py` (Speicher), aus
+demselben Grund wie `noise_w`. Die Konfigurationsdatei spielt
+`dialos-aufspielen` nicht auf - von Hand mit `sudo install` und danach
+`systemctl --user restart speech-dispatcher.service`. Am Gerät nachgemessen:
+Pausen 760 und 940 ms in einer frisch gespeicherten Ansage.
+
 ### 11i. Fusszeile, Mitschrift und halbtransparente Leisten (neu 2026-08-19)
 
 Drei Wuensche von Stephan, die nichts miteinander zu tun haben ausser dem

@@ -121,6 +121,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Longer pauses between sentences** (2026-09-14, Stephan's choice in a
+  listening comparison, for Anna and Michael). `--sentence_silence 0.5`: about
+  0.78 instead of 0.45 seconds between two sentences. The pause already
+  existed - it was just short.
+
 - **Start menu of the Windows look tidied up** (2026-09-14, Stephan's review).
   What was pinned were ArcMenu's defaults - including an empty slot, because
   Firefox is called `firefox-esr` on Debian. Now everyday programs only

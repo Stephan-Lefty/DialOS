@@ -1346,6 +1346,16 @@ timestamps in both logs.
 to 17 % different duration, and a cached announcement sounded audibly
 different from the same one freshly spoken.
 
+**`--sentence_silence 0.5` in the speech chain** (2026-09-14, Stephan chose
+"Variante B" in a listening comparison, for Anna and Michael). The pause after
+each sentence: 0.2 s by default, measured at about 0.45 s between two
+sentences; now about 0.78 s. Variant C (0.75 → about 1.04 s) dragged. The pause
+at a comma stays the same. It is in `piper-generic.conf` **and** in
+`dialos-say.py` (cache), for the same reason as `noise_w`. `dialos-aufspielen`
+does not install the configuration file - do it by hand with `sudo install`,
+then `systemctl --user restart speech-dispatcher.service`. Measured on the
+device: pauses of 760 and 940 ms in a freshly cached announcement.
+
 ### 11i. Footer, live transcript and half-transparent bars (new 2026-08-19)
 
 Three wishes of Stephan's that have nothing in common except the day.

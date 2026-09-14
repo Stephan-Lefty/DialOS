@@ -655,15 +655,6 @@ finished too, and then move down together. That way no reference breaks.
   works independently of the script finishing - e.g. a check at login or
   a `trap` on script exit.
 
-- [ ] **Check pauses between the sentences of the announcement** (open
-  since 2026-08-17). Michael sounded "hectic", yet the tempo chosen was
-  faster - which suggests the missing breaths between sentences are the
-  real problem, not the speed. Piper strings sentences together almost
-  without a pause. A short pause per sentence end, centrally in
-  `dialos-say.py`, would calm the announcement without making individual
-  words drag. Build a listening sample first: same tempo, only with
-  pauses.
-
 - [ ] **Build the wake word with openWakeWord** (decided 2026-08-17).
   The Vosk grammar is ruled out - it forces every utterance into the
   nearest phrase, which is why "ich rufe michael an" came through as
@@ -1162,6 +1153,15 @@ memory, not just a record of successes.
   An old fault surfaced along the way: at the end of a sentence the rule did
   **nothing at all**. The lookahead excluded any following period, the full
   stop included - "Willkommen bei DialOS." was read as one word. Fixed.
+- ☑️ **2026-09-14** — **Longer pauses between sentences** (open since
+  2026-08-17). Listening test with three versions of the same announcement;
+  Stephan chose "Variante B" twice - first for Anna, then after his own
+  listening test for Michael too. `--sentence_silence 0.5` in
+  `piper-generic.conf` and `dialos-say.py`. **The item's assumption was
+  wrong:** Piper did not join sentences "almost without a pause" - it was
+  already about 0.45 s, now about 0.78 s. Measured on the device (760/940 ms).
+  The audio samples under `docs/sprachbeispiele/` still use the old pause; the
+  scripts that generate them are updated.
 
 ### Audio: microphone and speaker
 
