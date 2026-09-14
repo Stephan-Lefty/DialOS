@@ -115,7 +115,12 @@ DEBUG = "--debug" in sys.argv
 
 # Grammatik der Rueckfrage. Winzig, und genau darum verlaesslich - dasselbe
 # Prinzip wie bei der Befehlserkennung und beim Schlusssatz des Diktats.
-GRAMMATIK_JA_NEIN = json.dumps(["ja", "nein", "[unk]"])
+# ensure_ascii=False IST PFLICHT (Fehler gefunden 2026-09-14). Ohne das schreibt
+# json.dumps ein "ö" als "\\u00f6", Vosk liest das woertlich und meldet
+# "Ignoring word missing in vocabulary" - fuer JEDES Wort mit Umlaut oder ß.
+# Genau daraus entstanden die Befunde "spaeter", "loeschen", "zuruecksetzen"
+# und "aufraeumen fehlen im Wortschatz". Sie fehlen nicht.
+GRAMMATIK_JA_NEIN = json.dumps(["ja", "nein", "[unk]"], ensure_ascii=False)
 ANTWORT_ZEITGRENZE_S = 8.0
 
 # Zweiter Versuch, wenn die erste Antwort nicht ankam (Stephan, 2026-08-19: sein

@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Umlaut-Wörter fehlten nie im Wortschatz** (2026-09-14). Seit August galten
+  „löschen", „später", „spät", „zurücksetzen" und „aufräumen" als unbekannt.
+  Tatsächlich schrieb `json.dumps` jedes „ö" als `\u00f6`, und Vosk meldete
+  deshalb jedes Umlaut-Wort als fehlend. Alle Grammatiken übergeben jetzt mit
+  `ensure_ascii=False`; die darauf beruhenden Entscheidungen sind wieder offen.
+
 - **Gesprächs-Erkennung** (2026-09-14, nach Gespräch und Fernsehfilm im Raum).
   Fünf Äußerungen ohne Befehl in 30 Sekunden schalten die Sprachsteuerung aus:
   „Hier wird gerade viel gesprochen. Ich höre Dir nicht mehr zu." An allen

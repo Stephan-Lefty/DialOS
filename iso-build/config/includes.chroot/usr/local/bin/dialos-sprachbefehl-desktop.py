@@ -147,7 +147,12 @@ STIL_DATEI = os.path.join(
 STARTSATZ = "sprachsteuerung starten"
 STOPPSATZ = "sprachsteuerung stoppen"
 
-GRAMMATIK_AUS = json.dumps([STARTSATZ, "[unk]"])
+# ensure_ascii=False IST PFLICHT (Fehler gefunden 2026-09-14). Ohne das schreibt
+# json.dumps ein "ö" als "\\u00f6", Vosk liest das woertlich und meldet
+# "Ignoring word missing in vocabulary" - fuer JEDES Wort mit Umlaut oder ß.
+# Genau daraus entstanden die Befunde "spaeter", "loeschen", "zuruecksetzen"
+# und "aufraeumen fehlen im Wortschatz". Sie fehlen nicht.
+GRAMMATIK_AUS = json.dumps([STARTSATZ, "[unk]"], ensure_ascii=False)
 GRAMMATIK_AN = json.dumps([
     STARTSATZ,
     STOPPSATZ,
@@ -214,7 +219,7 @@ GRAMMATIK_AN = json.dumps([
     #   "hilfe rufen",
     #   "fernwartung beenden",
     "[unk]",
-])
+], ensure_ascii=False)
 
 BEFEHLSSAETZE = tuple(x for x in json.loads(GRAMMATIK_AN)
                       if x not in ("[unk]", STARTSATZ, STOPPSATZ))

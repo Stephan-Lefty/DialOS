@@ -110,6 +110,39 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine
     Taste liefert, die sich abgreifen lässt (Medientaste über Bluetooth AVRCP).
 
+- [ ] **Umlaut-Wörter fehlen NICHT im Wortschatz - drei Entscheidungen sind
+  wieder offen** (gefunden 2026-09-14 bei Stephans Frage nach Dialekten).
+  Jedes Wort, das Vosk seit August als „missing in vocabulary" gemeldet hat,
+  enthielt ä, ö, ü oder ß. Ursache: `json.dumps` ohne `ensure_ascii=False`
+  macht aus „ö" ein `\u00f6`. Richtig übergeben, nimmt das Modell „später",
+  „löschen", „zurücksetzen", „aufräumen", „nö", „tschüss" an. **Behoben** in
+  allen Grammatiken (am Verhalten ändert das heute nichts - es gab bisher
+  kein Umlaut-Wort in einer Grammatik, eben wegen des falschen Befunds).
+  **Neu zu entscheiden (Stephan), jeweils mit Hörprobe Piper → Vosk vorher:**
+  1. „später" als Widerspruch beim Update - Stephans ursprünglicher Wunsch.
+     Ein Wort ist anfälliger für Nebengeräusche als zwei.
+  2. „Einkaufszettel löschen" zusätzlich zu „wegwerfen"/„Einkauf erledigt".
+  3. „Wie spät ist es?" zusätzlich zu den beiden Uhrzeit-Fragen.
+  Dazu Mundart-Formen für die Rückfrage („jo", „joa", „nee", „nö") - siehe
+  den Punkt zu Dialekten.
+
+- [ ] **Dialekte: Deutschland, Österreich, Schweiz** (Stephans Anforderung vom
+  2026-09-14: „Wir müssen die Sprachsteuerung ja so sauber hinbekommen, dass
+  auch sowas wie Dialekte Deutschland/Österreich/Schweiz auch mit
+  aufgefangen werden"). **Lage:** Das große Modell ist laut README auf
+  Tuda-de, SWC, M-AILABS und Common Voice trainiert - überwiegend
+  vorgelesenes Hochdeutsch; Common Voice bringt Sprecher aus Österreich und
+  der Schweiz mit. Schweizerdeutsch als Mundart ist praktisch nicht abgedeckt.
+  **Die Befehlserkennung ist toleranter als das Diktat:** Sie muss nur
+  zwischen 27 Sätzen wählen. **Geprüft ist bisher nichts** - Piper spricht nur
+  Hochdeutsch, als Prüfung taugt es hier nicht. **Vorschlag:** ein Prüfstand,
+  der aufgenommene Sprechproben durch genau die Erkennung und Zuordnung des
+  Dienstes schickt und die Trefferquote ausgibt (derselbe Prüfstand dient B
+  und C); Aufnahmen der Befehle von einigen Menschen aus AT, CH und
+  deutschen Mundartregionen - mit Einwilligung, nur lokal, nie im Repo;
+  danach entscheiden: Mundart-Varianten in der Grammatik oder ein anderes
+  Modell (z. B. Whisper - robuster bei Akzenten, aber auf dem T490 langsamer).
+
 - [ ] **Der Sprachdienst überlebt das Abmelden - danach laufen ZWEI**
   (gefunden 2026-09-14, 12:13). Nach Ab- und Anmelden liefen
   `dialos-sprachbefehl-desktop.py` von 11:49 (alte Fassung) und von 12:09

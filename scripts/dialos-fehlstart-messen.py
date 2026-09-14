@@ -37,7 +37,12 @@ import time
 MODELL = "/usr/local/share/vosk-model-de-small"
 ABTASTRATE = 16000
 STARTSATZ = "sprachsteuerung starten"
-GRAMMATIK_AUS = json.dumps([STARTSATZ, "[unk]"])
+# ensure_ascii=False IST PFLICHT (Fehler gefunden 2026-09-14). Ohne das schreibt
+# json.dumps ein "ö" als "\\u00f6", Vosk liest das woertlich und meldet
+# "Ignoring word missing in vocabulary" - fuer JEDES Wort mit Umlaut oder ß.
+# Genau daraus entstanden die Befunde "spaeter", "loeschen", "zuruecksetzen"
+# und "aufraeumen fehlen im Wortschatz". Sie fehlen nicht.
+GRAMMATIK_AUS = json.dumps([STARTSATZ, "[unk]"], ensure_ascii=False)
 QUELLE = "dialos_mikrofon_ohne_echo"
 BLOCK = 4000                      # Bytes, wie im Dienst: 2000 Proben = 125 ms
 

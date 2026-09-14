@@ -2816,6 +2816,13 @@ DialOS removed on 2026-08-24, only more expensive. Chosen: **"nicht jetzt"**
 ("not now"): two words like switching on, both required, no `[unk]`. `stopp`
 was ruled out, it belongs to switching voice control off.
 
+**CORRECTION OF 2026-09-14: "später" is in the vocabulary after all.** The
+warning above came from the check: `json.dumps` without `ensure_ascii=False`
+writes "ä" as `\u00e4`, and Vosk then reports every umlaut word as missing.
+Passed correctly, the model accepts "später". "Nicht jetzt" stays until
+Stephan decides anew; whether "später" as ONE word is as safe against
+background noise as two would have to be measured first.
+
 **An objection stores no date.** It postpones by **one session**, not fourteen
 days - otherwise a single "nicht jetzt" could block the update for two weeks.
 

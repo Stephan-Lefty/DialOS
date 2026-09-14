@@ -138,7 +138,8 @@ Sprachsteuerung ist gegen Gespraeche in der Naehe NICHT sicher.
 - Kein Standby am Netz, keine Bildschirmsperre fuer `nutzer`.
 - Unattended-upgrades, Protokoll-Aufbewahrung sieben Tage.
 - **Update-Automatik (2026-09-14):** alle 14 Tage montags nach dem Anmelden,
-  zehn Sekunden Widerspruch auf "nicht jetzt" ("spaeter" fehlt im Wortschatz),
+  zehn Sekunden Widerspruch auf "nicht jetzt" ("spaeter fehlt im Wortschatz" war
+  ein Pruefehler, siehe unten),
   `apt-get upgrade` ohne autoremove, Neustart nur mit Stick (Pruefung im
   root-Teil) und nur nach einem echten Update seit dem letzten Start (Marke
   unter /run - schliesst Neustart-Schleifen und fremde Neustarts im root-Teil
@@ -568,6 +569,15 @@ vergleicht alles und gibt bei Abweichung gleich den `install`-Befehl aus. **Am
 Ende einer Arbeitssitzung ausführen** - ein Commit beweist nur, dass die
 Änderung im Repo ist, nicht dass sie auf dem Gerät wirkt. Und ein Test gegen
 eine nicht installierte Änderung testet den alten Stand, ohne es zu sagen.
+
+## Wortschatz-Pruefung: Umlaute nur mit ensure_ascii=False (Regel seit 2026-09-14)
+
+**`json.dumps(grammatik)` ohne `ensure_ascii=False` macht aus "ö" ein
+`\u00f6` - und Vosk meldet dann JEDES Umlaut-Wort als "missing in
+vocabulary".** Seit August wurden so "loeschen", "spaeter", "spaet",
+"zuruecksetzen" und "aufraeumen" faelschlich als unbekannt verworfen. Jede
+Grammatik und jede Wortschatz-Pruefung uebergibt mit `ensure_ascii=False`.
+Eine Warnung zu einem Wort mit ae/oe/ue/ss-Laut zuerst DARAUF pruefen.
 
 ## Dienste nicht aus Claudes Sitzung heraus testen (Regel seit 2026-09-14)
 

@@ -237,6 +237,15 @@ einmal aufgetreten ist:
     gestanden. Ebenfalls nicht enthalten: „zurücksetzen", „aufräumen" - und **„spät"**,
     weshalb aus „Wie spät ist es?" die geprüften Formulierungen „Wie viel Uhr
     ist es?" und „Wie ist die Uhrzeit?" wurden (2026-08-19).
+  - **KORREKTUR VOM 2026-09-14: Diese Wörter fehlen NICHT.** Die Warnung kam
+    von der Prüfung selbst. `json.dumps` schreibt ein „ö" ohne
+    `ensure_ascii=False` als `\u00f6`, Vosk liest das wörtlich - und meldet
+    **jedes** Wort mit Umlaut oder ß als fehlend. Mit `ensure_ascii=False`
+    nimmt das kleine Modell „später", „löschen", „zurücksetzen", „aufräumen",
+    „nö" und „tschüss" ohne Warnung an. Alle Grammatiken übergeben seitdem so.
+    Die Entscheidungen, die auf dem falschen Befund beruhten („wegwerfen"
+    statt „löschen", keine Frage „Wie spät ist es?", „nicht jetzt" statt
+    „später"), sind damit wieder offen - siehe TODO.md.
   - **Wird der ganze Satz richtig erkannt?** Piper spricht ihn, Vosk hört
     zu - und zwar mit der **vollständigen** Befehlsgrammatik, nicht nur mit
     dem neuen Satz allein. Erst dann zeigt sich, ob er mit einem

@@ -54,7 +54,12 @@ WOCHENTAG = 0                       # 0 = Montag
 
 # Zehn Sekunden Widerspruch - Stephans Vorgabe. Danach laeuft es durch.
 WIDERSPRUCH_S = 10.0
-WIDERSPRUCH = json.dumps(["nicht jetzt", "[unk]"])
+# ensure_ascii=False IST PFLICHT (Fehler gefunden 2026-09-14). Ohne das schreibt
+# json.dumps ein "ö" als "\\u00f6", Vosk liest das woertlich und meldet
+# "Ignoring word missing in vocabulary" - fuer JEDES Wort mit Umlaut oder ß.
+# Genau daraus entstanden die Befunde "spaeter", "loeschen", "zuruecksetzen"
+# und "aufraeumen fehlen im Wortschatz". Sie fehlen nicht.
+WIDERSPRUCH = json.dumps(["nicht jetzt", "[unk]"], ensure_ascii=False)
 
 ANSAGE_START = ("Es müssen ein paar Updates installiert werden. "
                 "Das kann einige Minuten dauern. "

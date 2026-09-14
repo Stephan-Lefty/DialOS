@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Umlaut words were never missing from the vocabulary** (2026-09-14). Since
+  August "löschen", "später", "spät", "zurücksetzen" and "aufräumen" counted as
+  unknown. In fact `json.dumps` wrote every "ö" as `\u00f6`, so Vosk reported
+  every umlaut word as missing. All grammars now pass words with
+  `ensure_ascii=False`; the decisions based on this are open again.
+
 - **Conversation detection** (2026-09-14, after a conversation and a TV film
   in the room). Five utterances without a command within 30 seconds switch the
   voice control off: "Hier wird gerade viel gesprochen. Ich höre Dir nicht mehr

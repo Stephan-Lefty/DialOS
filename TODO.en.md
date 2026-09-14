@@ -110,6 +110,38 @@ finished too, and then move down together. That way no reference breaks.
     or a headset provides a key that can be read (media key via Bluetooth
     AVRCP).
 
+- [ ] **Umlaut words are NOT missing from the vocabulary - three decisions
+  are open again** (found 2026-09-14 when Stephan asked about dialects). Every
+  word Vosk reported as "missing in vocabulary" since August contained ä, ö,
+  ü or ß. Cause: `json.dumps` without `ensure_ascii=False` turns "ö" into
+  `\u00f6`. Passed correctly, the model accepts "später", "löschen",
+  "zurücksetzen", "aufräumen", "nö", "tschüss". **Fixed** in all grammars (no
+  change in behaviour today - no grammar contained an umlaut word so far,
+  precisely because of the wrong finding). **To decide anew (Stephan), each
+  with a Piper → Vosk listening test first:**
+  1. "später" as the update objection - Stephan's original wish. One word is
+     more prone to background noise than two.
+  2. "Einkaufszettel löschen" in addition to "wegwerfen"/"Einkauf erledigt".
+  3. "Wie spät ist es?" in addition to the two time questions.
+  Plus dialect forms for the confirmation ("jo", "joa", "nee", "nö") - see
+  the dialect item.
+
+- [ ] **Dialects: Germany, Austria, Switzerland** (Stephan's requirement of
+  2026-09-14: the voice control has to be good enough to cope with dialects
+  from Germany, Austria and Switzerland). **Situation:** according to its
+  README the big model is trained on Tuda-de, SWC, M-AILABS and Common Voice -
+  mostly read standard German; Common Voice brings speakers from Austria and
+  Switzerland. Swiss German as a dialect is practically not covered.
+  **Command recognition is more tolerant than dictation:** it only has to
+  choose between 27 sentences. **Nothing has been tested yet** - Piper only
+  speaks standard German, so it is no test here. **Proposal:** a test bench
+  that sends recorded speech samples through exactly the service's
+  recognition and matching and reports the hit rate (the same bench serves B
+  and C); recordings of the commands from a few people from AT, CH and German
+  dialect regions - with consent, local only, never in the repo; then decide:
+  dialect variants in the grammar or a different model (e.g. Whisper - more
+  robust with accents, but slower on the T490).
+
 - [ ] **The voice service survives logging out - afterwards TWO run**
   (found 2026-09-14, 12:13). After logging out and in,
   `dialos-sprachbefehl-desktop.py` from 11:49 (old version) and from 12:09

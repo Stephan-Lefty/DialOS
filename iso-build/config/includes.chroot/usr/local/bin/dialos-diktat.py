@@ -88,7 +88,12 @@ PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-diktat.log")
 # gesamte Aeusserung ist - sonst koennte man ihn in einem Brief nicht
 # erwaehnen, ohne das Diktat abzubrechen.
 SCHLUSSSATZ = "diktat beenden"
-GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, "[unk]"])
+# ensure_ascii=False IST PFLICHT (Fehler gefunden 2026-09-14). Ohne das schreibt
+# json.dumps ein "ö" als "\\u00f6", Vosk liest das woertlich und meldet
+# "Ignoring word missing in vocabulary" - fuer JEDES Wort mit Umlaut oder ß.
+# Genau daraus entstanden die Befunde "spaeter", "loeschen", "zuruecksetzen"
+# und "aufraeumen fehlen im Wortschatz". Sie fehlen nicht.
+GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, "[unk]"], ensure_ascii=False)
 SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 
 # SPERRFRIST FUER DEN SCHLUSS (2026-08-21). Am selben Tag endete ein Diktat

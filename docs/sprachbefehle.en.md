@@ -191,6 +191,15 @@ occurred:
     "einkaufszettel". Also absent: "zurücksetzen", "aufräumen" - and **"spät"** (late), which is
     why "Wie spät ist es?" became the tested phrasings "Wie viel Uhr ist
     es?" and "Wie ist die Uhrzeit?" (2026-08-19).
+  - **CORRECTION OF 2026-09-14: these words are NOT missing.** The warning
+    came from the check itself. Without `ensure_ascii=False`, `json.dumps`
+    writes an "ö" as `\u00f6`, Vosk reads that literally - and reports
+    **every** word with an umlaut or ß as missing. With `ensure_ascii=False`
+    the small model accepts "später", "löschen", "zurücksetzen", "aufräumen",
+    "nö" and "tschüss" without a warning. All grammars pass words that way
+    since. The decisions based on the wrong finding ("wegwerfen" instead of
+    "löschen", no "Wie spät ist es?", "nicht jetzt" instead of "später") are
+    open again - see TODO.en.md.
   - **Is the whole sentence recognized correctly?** Piper says it, Vosk
     listens - and with the **complete** command grammar, not just the new
     sentence on its own. Only then does it show whether it gets confused

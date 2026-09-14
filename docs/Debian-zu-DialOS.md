@@ -3050,6 +3050,13 @@ Fehlschlag, den DialOS am 2026-08-24 abgeschafft hat, nur teurer. Gewählt ist
 **„nicht jetzt"**: zwei Wörter wie beim Einschalten, beide nötig, kein `[unk]`
 dabei. `stopp` fiel aus, es gehört zum Ausschalten der Sprachsteuerung.
 
+**KORREKTUR VOM 2026-09-14: „später" steht doch im Wortschatz.** Die Warnung
+oben entstand durch die Prüfung: `json.dumps` ohne `ensure_ascii=False`
+schreibt „ä" als `\u00e4`, und Vosk meldet dann jedes Umlaut-Wort als fehlend.
+Richtig übergeben, nimmt das Modell „später" an. „Nicht jetzt" bleibt, bis
+Stephan neu entscheidet; ob „später" als EIN Wort gegen Nebengeräusche
+genauso sicher ist wie zwei, wäre vorher zu messen.
+
 **Ein Widerspruch merkt sich kein Datum.** Er verschiebt um **eine Sitzung**,
 nicht um vierzehn Tage - sonst könnte ein einziges „nicht jetzt" die
 Aktualisierung zwei Wochen lang verhindern.
