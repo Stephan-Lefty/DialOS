@@ -105,6 +105,19 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - **B - Einschalten nur mit Stille davor und danach: erst gemessen.** Bei
     jedem „sprachsteuerung …" steht jetzt der Pegelverlauf der letzten 4 s im
     Protokoll. Schwelle erst nach echten Zahlen mit und ohne Fernseher.
+    **Film-Probe 12:43-12:50:** Der Film schaltete in 5 min einmal ein, danach
+    kam „brief schreiben" nach nur 3 Fetzen durch (die Rückfrage hielt mit
+    einem „nein" aus dem Film), A griff erst nach 2 min. **A allein reicht gegen
+    Fernsehton nicht.** **Messung:** Stille DAVOR trennt nicht (der Film hatte
+    selbst eine ruhige Stelle), Stille DANACH trennt - Stephan 5 x letzte
+    Werte 0, Film 11-27. **B gebaut** (Stephan: „Ja, bau B so ein"): letzte
+    0,5 s nach dem Satz unter 3000, sonst verworfen mit Ansage „… es ist zu
+    laut …" (höchstens einmal pro Minute). **Preis, bewusst angenommen:** Bei
+    lautem Fernseher lässt sich die Steuerung auch vom Nutzer nicht
+    einschalten. Datenlage dünn - nachprüfen.
+    **Stephans Einschätzung des Stands (2026-09-14):** „Aktuell funktioniert
+    die Sprachsteuerung, wenn fast keine Umgebungsgeräusche vorhanden sind!"
+    Für laute Umgebung sind C oder D die eigentliche Lösung.
   - **C - Aufweckwort (openWakeWord):** planen - der Punkt steht schon weiter
     unten; mit den heutigen Protokollen als Prüfstein.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine

@@ -108,7 +108,11 @@ Stephans Pause): Sprachsteuerung sechsmal selbst eingeschaltet, ein Brief-
 und ein Einkaufszettel-Diktat aus dem Gespraech, Archiv-PDF, viermal Drucken
 (zweimal das mitgeschriebene Gespraech). Aufgeraeumt, Einzelheiten und die
 vier Schwachstellen im obersten TODO-Punkt. Bis das geloest ist, gilt: Die
-Sprachsteuerung ist gegen Gespraeche in der Naehe NICHT sicher.
+Sprachsteuerung ist gegen Gespraeche in der Naehe NICHT sicher. Seit dem Nachmittag: Gespraechs-Erkennung (5 Fetzen
+ohne Befehl in 30 s -> aus) und Einschalten nur mit Stille danach. Stephans
+Einschaetzung: "Aktuell funktioniert die Sprachsteuerung, wenn fast keine
+Umgebungsgeraeusche vorhanden sind!" - fuer laute Umgebung sind Aufweckwort
+oder Knopf (TODO, C/D) die eigentliche Loesung.
 
 **Laeuft und ist belegt:**
 

@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Einschalten nur, wenn danach Stille ist** (2026-09-14). Gemessen: Nach
+  Stephans „Sprachsteuerung starten" war es jedes Mal still, nach dem Satz aus
+  einem Film lief der Ton weiter. Die letzte halbe Sekunde muss unter 3000
+  bleiben, sonst sagt DialOS „… es ist zu laut …". Preis: Bei lautem Fernseher
+  lässt sich die Sprachsteuerung auch vom Nutzer nicht einschalten.
+
 - **Umlaut-Wörter fehlten nie im Wortschatz** (2026-09-14). Seit August galten
   „löschen", „später", „spät", „zurücksetzen" und „aufräumen" als unbekannt.
   Tatsächlich schrieb `json.dumps` jedes „ö" als `\u00f6`, und Vosk meldete

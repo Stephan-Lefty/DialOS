@@ -104,6 +104,19 @@ finished too, and then move down together. That way no reference breaks.
   - **B - switch on only with silence before and after: measured only for
     now.** For every "sprachsteuerung …" the level curve of the last 4 s is
     logged. Threshold only after real numbers with and without the TV.
+    **Film test 12:43-12:50:** the film switched on once in 5 min, then "brief
+    schreiben" got through after only 3 fragments (the confirmation held with a
+    "nein" from the film), A only kicked in after 2 min. **A alone is not
+    enough against TV sound.** **Measurement:** silence BEFORE does not
+    separate (the film had a quiet spot itself), silence AFTER does - Stephan
+    5 times last values 0, film 11-27. **B built** (Stephan: build B that
+    way): the last 0.5 s after the sentence below 3000, otherwise rejected
+    with the announcement "… es ist zu laut …" (at most once a minute).
+    **Price, accepted deliberately:** with a loud TV the user cannot switch it
+    on either. Thin data - re-check.
+    **Stephan's assessment of the state (2026-09-14):** the voice control
+    currently works when there is almost no background noise. For a loud
+    environment, C or D is the real solution.
   - **C - wake word (openWakeWord):** plan - the item already exists further
     down; today's logs as the test bench.
   - **D - button instead of the switch-on sentence:** check whether the AIRHUG

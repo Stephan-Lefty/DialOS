@@ -378,6 +378,43 @@ ANSAGE_GESPRAECH = ("Hier wird gerade viel gesprochen. Ich höre Dir nicht mehr 
 # diesem Verlauf ablesen; eine Schwelle wird erst festgelegt, wenn echte
 # Zahlen mit und ohne Fernseher vorliegen. 32 Bloecke = 4 Sekunden.
 PEGEL_VERLAUF_BLOECKE = 32
+
+# EINSCHALTEN NUR MIT STILLE DANACH (Massnahme B, Stephans Freigabe vom
+# 2026-09-14: "Ja, bau B so ein").
+#
+# Gemessen am 2026-09-14 mit dem Pegelverlauf oben, Werte in Tausend je 1/8 s,
+# die letzten Bloecke liegen NACH dem Satz:
+#
+#     Stephan, 4 x "Sprachsteuerung starten"   letzte 6: 0 0 0 0 0 0 (jedes Mal)
+#     Film, hat eingeschaltet (12:47:52)       letzte 6: 27 27 19 1 11 25
+#     Film, nur "sprachsteuerung"              letzte 6: 0 0 12 18 27 27 / 15 8 8 15 10 15
+#
+# "Stille DAVOR" trennt NICHT - der Film hatte vor seinem Satz selbst eine
+# ruhige Stelle (1-3). "Stille DANACH" trennt: Wer die Sprachsteuerung wirklich
+# einschaltet, schweigt und wartet auf "Ich hoere Dir zu". Ein Film redet weiter.
+#
+# DER PREIS, und Stephan hat ihn bewusst angenommen: Laeuft der Fernseher laut,
+# laesst sich die Sprachsteuerung auch vom Nutzer nicht einschalten. Deshalb
+# eine Ansage statt Stille - ein Satz, der nicht wirkt, ohne dass jemand es
+# sagt, waere derselbe lautlose Fehlschlag, den DialOS am 2026-08-24
+# abgeschafft hat. Hoechstens einmal pro Minute, damit ein Film sie nicht in
+# Dauerschleife ausloest.
+#
+# Datenlage duenn (5 echte Saetze, 1 vollstaendiger aus dem Film). Die
+# Messzeile bleibt im Protokoll, damit die Schwelle nachgeprueft werden kann.
+STILLE_DANACH_BLOECKE = 4          # eine halbe Sekunde
+STILLE_DANACH_GRENZE = 3000
+ANSAGE_ZU_LAUT = ("Ich habe Sprachsteuerung starten gehört, aber es ist zu laut. "
+                  "Bitte stelle den Ton leiser und sage es noch einmal.")
+ZU_LAUT_ABSTAND_S = 60.0
+
+
+def still_danach(verlauf):
+    """War es nach dem Einschaltsatz eine halbe Sekunde lang still?"""
+    letzte = list(verlauf)[-STILLE_DANACH_BLOECKE:]
+    if len(letzte) < STILLE_DANACH_BLOECKE:
+        return True             # zu wenig Daten - nicht blockieren
+    return max(letzte) < STILLE_DANACH_GRENZE
 # "Ich höre Dir nicht mehr zu." statt "Ich höre nicht mehr." (Stephan,
 # 2026-08-19). Der kuerzere Satz ist zweideutig: Er kann auch heissen,
 # dass das Geraet nichts mehr hoert - also kaputt ist. Mit "Dir" ist klar,
@@ -1282,6 +1319,7 @@ def main():
     letzte_aktivitaet = time.time()
     leer_zeiten = collections.deque()
     pegel_verlauf = collections.deque(maxlen=PEGEL_VERLAUF_BLOECKE)
+    zu_laut_gesagt = 0.0
     # Gleich gesetzt: Es kam noch kein Befehl. Bewegt sich
     # letzte_aktivitaet spaeter darueber hinaus, war einer dabei - daran
     # haengt, welche der beiden Fristen gilt.
@@ -1535,6 +1573,18 @@ def main():
             # weil die Gegenrechnung inzwischen gemessen vorliegt. Wiederholen
             # ist eine Unbequemlichkeit; ein Mikrofon, das sich von selbst
             # scharf schaltet, ist es nicht.
+            if (not hoert_zu
+                    and ist_phrase(satz, STARTSATZ, ("sprachsteuerung", "starten"))
+                    and not still_danach(pegel_verlauf)):
+                # Massnahme B - Begruendung bei STILLE_DANACH_GRENZE.
+                melde("  Einschaltsatz verworfen - danach nicht still "
+                      f"(letzte {STILLE_DANACH_BLOECKE} Bloecke bis "
+                      f"{max(list(pegel_verlauf)[-STILLE_DANACH_BLOECKE:])})")
+                if time.time() - zu_laut_gesagt > ZU_LAUT_ABSTAND_S:
+                    zu_laut_gesagt = time.time()
+                    sprich(ANSAGE_ZU_LAUT)
+                continue
+
             if (ist_phrase(satz, STARTSATZ, ("sprachsteuerung", "starten"))
                     if not hoert_zu else STARTSATZ in satz):
                 # In BEIDEN Faellen, und VOR der Ansage. Vor der Ansage, weil

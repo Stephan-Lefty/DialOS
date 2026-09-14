@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Switching on only when silence follows** (2026-09-14). Measured: after
+  Stephan's "Sprachsteuerung starten" it was silent every time; after the
+  sentence from a film the sound carried on. The last half second must stay
+  below 3000, otherwise DialOS says "… es ist zu laut …". Price: with a loud TV
+  the user cannot switch the voice control on either.
+
 - **Umlaut words were never missing from the vocabulary** (2026-09-14). Since
   August "löschen", "später", "spät", "zurücksetzen" and "aufräumen" counted as
   unknown. In fact `json.dumps` wrote every "ö" as `\u00f6`, so Vosk reported
