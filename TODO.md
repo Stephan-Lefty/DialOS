@@ -56,7 +56,14 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      Ja/Nein-Frage wie das Löschen. Still mit Attrappen geprüft (ja, nein,
      nichts verstanden, leerer Zettel; Marke nur während der Frage). **Offen:**
      Probe am Gerät mit echter Stimme - und sie wirkt erst nach dem nächsten
-     Anmelden, weil der Befehlsdienst neu starten muss. Umschalten fragt
+     Anmelden, weil der Befehlsdienst neu starten muss.
+     **Probe gemacht (2026-09-14, 11:50):** Die Frage kam, „nein" verhinderte
+     den Druck, „ja" startete das Diktat. Aber Stephan musste beide Antworten
+     zweimal geben - gemessen 2,03 s parec-Puffer plus Mikrofon erst nach der
+     Frage. Behoben (offenes Mikrofon während der Ansage, 30 ms Puffer), am
+     rohen Mikrofon geprüft. **Offen:** dieselbe Probe noch einmal mit echter
+     Stimme nach dem Neuanmelden, dazu ein Einkaufszettel-Diktat (Wortanfang,
+     „Diktat beenden" nicht mehr als Eintrag). Umschalten fragt
      weiterhin nicht (es richtet keinen Schaden an und ist sofort umkehrbar).
   3. **Die Zusatzwort-Regel vom 2026-08-24** (bis zu zwei Wörter zu viel)
      hat drei der vier Druckaufträge erst ermöglicht. Sie war an Stephans

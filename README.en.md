@@ -121,6 +121,18 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Confirmations and dictation react immediately** (2026-09-14, Stephan's
+  test: he had to say "nein" twice and "ja" twice). Measured: parec buffers
+  2.03 seconds by default before the first audio arrives, and the microphone
+  only opened after the question. Answering right away lost the start of the
+  word. Now the microphone is already open during the announcement (evaluated
+  from 0.3 s before its end, still inside the silence after the last syllable),
+  and every DialOS recording runs with a 30 ms buffer. Checked on the raw
+  microphone: an immediate "nein" recognised on the first attempt, Anna's own
+  "ja oder nein" not recognised twice. Same fix for dictation ("Bananen" arrived
+  as "erahnen"), and "Diktat beenden" is now cut off by word timestamps - it had
+  landed on the shopping list as "Der cat".
+
 - **Confirmation before printing and dictation** (2026-09-14, Stephan's
   requirement after the incident in which a conversation in the room operated
   DialOS). "Soll ich den Brief drucken? Sage ja oder nein." - the same question

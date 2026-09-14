@@ -129,6 +129,18 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Rückfragen und Diktat reagieren sofort** (2026-09-14, Stephans Test: „ich
+  musste zwei mal nein und zweimal ja sagen"). Gemessen: parec puffert ab Werk
+  2,03 Sekunden, bevor der erste Ton ankommt, und das Mikrofon öffnete erst nach
+  der Frage. Wer gleich antwortete, verlor den Wortanfang. Jetzt ist das
+  Mikrofon schon während der Ansage offen (ausgewertet ab 0,3 s vor ihrem Ende,
+  also noch in der Stille nach der letzten Silbe), und alle DialOS-Aufnahmen
+  laufen mit 30 ms Puffer. Am rohen Mikrofon geprüft: sofortiges „nein“ beim
+  ersten Versuch erkannt, Annas eigenes „ja oder nein“ zweimal nicht. Beim
+  Diktat dieselbe Lösung („Bananen“ kam als „erahnen“ an), und „Diktat beenden“
+  wird jetzt nach Zeitmarken abgeschnitten - es stand als „Der cat“ auf dem
+  Einkaufszettel.
+
 - **Rückfrage vor Drucken und Diktat** (2026-09-14, Stephans Vorgabe nach dem
   Vorfall, bei dem ein Gespräch im Raum DialOS bedient hat). „Soll ich den Brief
   drucken? Sage ja oder nein." - dieselbe Frage und Auswertung wie beim

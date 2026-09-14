@@ -61,6 +61,7 @@ import re
 import subprocess
 import sys
 import textwrap
+import threading
 import time
 import urllib.parse
 import urllib.request
@@ -636,11 +637,51 @@ def waehle_mikrofon():
     return eingebaut[0] if eingebaut else None
 
 
+# "--latency-msec=30" (2026-09-14): Ohne die Angabe puffert parec rund ZWEI
+# SEKUNDEN, bevor der erste Block ankommt - gemessen 2,03 s gegen 0,10 s mit
+# 30 ms. Verloren geht dabei nichts, aber jede Reaktion kommt zwei Sekunden zu
+# spaet, und ein Zeitfenster, das beim Start des Prozesses zu zaehlen beginnt,
+# ist in Wahrheit zwei Sekunden kuerzer.
 def aufnahme_starten(quelle):
     return subprocess.Popen(
         ["parec", "-d", quelle, "--format=s16le",
-         f"--rate={ABTASTRATE}", "--channels=1"],
+         f"--rate={ABTASTRATE}", "--channels=1", "--latency-msec=30"],
         stdout=subprocess.PIPE)
+
+
+# DIE AUFNAHME LAEUFT SCHON WAEHREND "ICH SCHREIBE MIT" (2026-09-14).
+#
+# Vorher startete parec erst NACH der Ansage. Wer direkt losdiktierte, verlor
+# den Wortanfang - Stephans erste Ware "Bananen" kam als "erahnen" an. Jetzt
+# wird waehrend der Ansage mitgelesen und verworfen; ausgewertet wird ab
+# VORLAUF_S vor ihrem Ende, also noch in der Stille hinter der letzten Silbe.
+# Dieselbe Loesung wie bei der Rueckfrage in dialos-notiz.py.
+VORLAUF_S = 0.3
+
+
+def sprechen_bei_offener_aufnahme(text, prozess):
+    """Spricht und liest dabei mit. Gibt die letzten VORLAUF_S zurueck."""
+    fertig = threading.Event()
+
+    def ansage():
+        try:
+            sprich(text)
+        finally:
+            fertig.set()
+
+    threading.Thread(target=ansage, daemon=True).start()
+    zuletzt = collections.deque()
+    while not fertig.is_set():
+        block = prozess.stdout.read(800)
+        if not block:
+            break
+        jetzt = time.time()
+        zuletzt.append((jetzt, block))
+        while zuletzt and zuletzt[0][0] < jetzt - 2.0:
+            zuletzt.popleft()
+    fertig.wait()
+    grenze = time.time() - VORLAUF_S
+    return b"".join(b for t, b in zuletzt if t >= grenze)
 
 
 # ----------------------------------------------------------------- Ablauf
@@ -912,12 +953,22 @@ def diktat_fuehren(zweck, name, quelle):
     prozess = None
     gesammelt = []
     letzte_aeusserung = time.time()
+    # Wo der Schlusssatz in der Aufnahme BEGINNT, in Sekunden. Beide Erkenner
+    # bekommen dieselben Bloecke vom selben Anfang an, ihre Zeitmarken sind
+    # also vergleichbar (gemessen 2026-09-14: "beenden" bei beiden 2,64-3,15 s).
+    schluss_beginn = None
     try:
         erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
         schluss = (vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_SCHLUSS)
                    if modell_klein else None)
-        sprich(ANSAGE_BEREIT_LISTE if name in LISTEN_ZIELE else ANSAGE_BEREIT)
+        # Zeitmarken je Wort - fuer das Abschneiden des Schlusssatzes am Ende,
+        # siehe schluss_beginn.
+        erkenner.SetWords(True)
+        if schluss is not None:
+            schluss.SetWords(True)
         prozess = aufnahme_starten(quelle)
+        vorrat = sprechen_bei_offener_aufnahme(
+            ANSAGE_BEREIT_LISTE if name in LISTEN_ZIELE else ANSAGE_BEREIT, prozess)
         # Beginn der AUFNAHME, nicht der Funktion: Davor liegen rund neun
         # Sekunden Modellladezeit, in denen niemand sprechen kann.
         aufnahme_seit = time.time()
@@ -935,7 +986,10 @@ def diktat_fuehren(zweck, name, quelle):
                 sprich(ANSAGE_ZEITGRENZE)
                 break
 
-            block = prozess.stdout.read(4000)
+            if vorrat:
+                block, vorrat = vorrat[:4000], vorrat[4000:]
+            else:
+                block = prozess.stdout.read(4000)
             if not block:
                 time.sleep(0.5)
                 prozess = aufnahme_starten(quelle)
@@ -948,7 +1002,8 @@ def diktat_fuehren(zweck, name, quelle):
             # ist, dass der Schlusssatz nicht erst durch die freie
             # Erkennung muss, wo er verloren geht.
             if schluss is not None and schluss.AcceptWaveform(block):
-                gehoert = json.loads(schluss.Result()).get("text", "").strip()
+                ergebnis_schluss = json.loads(schluss.Result())
+                gehoert = ergebnis_schluss.get("text", "").strip()
                 mittel = ((sum(pegel_puffer) / len(pegel_puffer))
                           if pegel_puffer else 0.0)
                 if ist_schluss(gehoert):
@@ -977,6 +1032,10 @@ def diktat_fuehren(zweck, name, quelle):
                     melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r} "
                           f"nach {seit_start:.1f} s, "
                           f"{anzahl_aeusserungen} Aeusserungen, Pegel {mittel:.0f}")
+                    worte_schluss = [w for w in ergebnis_schluss.get("result", [])
+                                     if w.get("word") in SCHLUSS_WOERTER]
+                    if worte_schluss:
+                        schluss_beginn = worte_schluss[0].get("start")
                     break
                 if ist_halber_schluss(gehoert):
                     # NUR DAS HALBE WORT - kein Schluss, aber der Nutzer muss es
@@ -1068,9 +1127,26 @@ def diktat_fuehren(zweck, name, quelle):
     #
     # Die Schlussworte muessen weg: Die freie Erkennung hoert "diktat beenden"
     # mit, und es gehoert nicht in den Brief.
+    #
+    # UND NICHT NUR DIE EXAKTEN SCHLUSSWORTE (2026-09-14). Die freie Erkennung
+    # versteht "diktat beenden" nicht zwingend als diese Woerter: Bei Stephans
+    # Einkaufszettel kam es als "der cat" an und stand als eigener Eintrag auf
+    # dem Zettel. Deshalb wird jetzt nach ZEIT geschnitten: Alles, was die freie
+    # Erkennung ab dem Beginn des Schlusssatzes gehoert hat, faellt weg - egal,
+    # was sie daraus gemacht hat. Die Wortliste bleibt als Rueckfall, falls
+    # keine Zeitmarken vorliegen.
     rest = ""
     try:
-        rest = json.loads(erkenner.FinalResult()).get("text", "").strip()
+        ergebnis_rest = json.loads(erkenner.FinalResult())
+        rest = ergebnis_rest.get("text", "").strip()
+        if rest and schluss_beginn is not None and ergebnis_rest.get("result"):
+            behalten = [w["word"] for w in ergebnis_rest["result"]
+                        if w.get("end", 0) <= schluss_beginn + 0.05]
+            weg = len(ergebnis_rest["result"]) - len(behalten)
+            if weg:
+                melde(f"  vom Resttext {weg} Wort/Woerter ab dem Schlusssatz "
+                      f"abgeschnitten (ab {schluss_beginn:.2f} s)")
+            rest = " ".join(behalten).strip()
     except Exception as fehler:
         melde(f"  Resttext nicht lesbar: {fehler}")
     if rest:

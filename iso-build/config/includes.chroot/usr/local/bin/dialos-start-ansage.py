@@ -328,8 +328,10 @@ def frage_lautstaerke():
             vosk.SetLogLevel(-1)
             modell = vosk.Model(LAUTSTAERKE_VOSK_MODELL)
             erkenner = vosk.KaldiRecognizer(modell, LAUTSTAERKE_ABTASTRATE)
+            # "--latency-msec=30" (2026-09-14): sonst gingen vom
+            # Aufnahmefenster rund zwei Sekunden an den Puffer von parec.
             befehl = ["parec", f"--rate={LAUTSTAERKE_ABTASTRATE}",
-                      "--channels=1", "--format=s16le"]
+                      "--channels=1", "--format=s16le", "--latency-msec=30"]
             if quelle:
                 befehl.append(f"--device={quelle}")
             prozess = subprocess.Popen(befehl, stdout=subprocess.PIPE)

@@ -55,7 +55,14 @@ finished too, and then move down together. That way no reference breaks.
      question as deleting. Checked silently with stubs (yes, no, nothing
      understood, empty list; marker only during the question). **Open:** a
      test on the device with a real voice - and it only takes effect after the
-     next login, because the command service has to restart. Switching the
+     next login, because the command service has to restart.
+     **Test done (2026-09-14, 11:50):** the question came, "nein" prevented the
+     print, "ja" started the dictation. But Stephan had to give both answers
+     twice - measured 2.03 s parec buffer plus the microphone only opening after
+     the question. Fixed (microphone open during the announcement, 30 ms
+     buffer), checked on the raw microphone. **Open:** the same test again with a
+     real voice after logging in again, plus a shopping-list dictation (word
+     start, "Diktat beenden" no longer an entry). Switching the
      look still does not ask (it does no harm and is instantly reversible).
   3. **The extra-word rule of 2026-08-24** (up to two words too many) made
      three of the four print jobs possible. It was measured on Stephan's real

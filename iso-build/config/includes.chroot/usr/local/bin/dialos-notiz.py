@@ -47,11 +47,13 @@ Aufruf:
     dialos-notiz.py --debug ...
 """
 
+import collections
 import json
 import os
 import re
 import subprocess
 import sys
+import threading
 import time
 
 MODELL_KLEIN = "/usr/local/share/vosk-model-de-small"
@@ -232,18 +234,27 @@ def ja_oder_nein(frage):
     liegt das Vorbereiten jetzt zwingend VOR der Frage, und zwar dadurch, dass
     die Funktion beides selbst in der Hand hat.
 
-    Aufgenommen wird bewusst NICHT waehrend der Frage. Die Grammatik kennt nur
+    AUSGEWERTET wird bewusst NICHT waehrend der Frage. Die Grammatik kennt nur
     "ja", "nein" und "[unk]" - die eigene Stimme des Systems koennte darin als
     "ja" landen, und das wuerde den Zettel loeschen, ohne dass jemand etwas
     gesagt hat. Ein Loeschen ohne Zustimmung ist der schlimmere Fehler.
+
+    AUFGENOMMEN wird seit 2026-09-14 schon waehrend der Frage - und verworfen,
+    bis auf die letzten VORLAUF_S. Siehe _sprechen_bei_offenem_mikrofon().
+    Geprueft am ROHEN Laptop-Mikrofon ohne Echo-Unterdrueckung, also im
+    schlimmsten Fall: Frage mit sofort abgespieltem "nein" -> beim ersten
+    Versuch erkannt; Frage ohne Antwort, zweimal gestellt -> beide Male nichts
+    erkannt, obwohl das Mikrofon Annas "ja oder nein" laut gehoert hat.
     """
     bereit = _antwort_vorbereiten()
     if not bereit:
         return None
     modell, quelle = bereit
     for versuch in range(1, VERSUCHE + 1):
-        sprich(frage if versuch == 1 else ANSAGE_NOCHMAL, frage=True)
-        antwort = _antwort_hoeren(modell, quelle)
+        prozess = _mikrofon_oeffnen(quelle)
+        vorrat = _sprechen_bei_offenem_mikrofon(
+            frage if versuch == 1 else ANSAGE_NOCHMAL, prozess)
+        antwort = _antwort_hoeren(modell, prozess, vorrat)
         if antwort is not None:
             return antwort
         melde(f"  Versuch {versuch} von {VERSUCHE}: keine verwertbare Antwort")
@@ -268,18 +279,79 @@ def _antwort_vorbereiten():
     return modell, quelle
 
 
-def _antwort_hoeren(modell, quelle):
+# "--latency-msec=30" (2026-09-14): Ohne die Angabe puffert parec rund ZWEI
+# SEKUNDEN, bevor der erste Block ankommt - gemessen 2,03 s gegen 0,10 s mit
+# 30 ms. Verloren geht dabei nichts, aber jede Reaktion kommt zwei Sekunden zu
+# spaet, und ein Zeitfenster, das beim Start des Prozesses zu zaehlen beginnt,
+# ist in Wahrheit zwei Sekunden kuerzer.
+def _mikrofon_oeffnen(quelle):
+    return subprocess.Popen(
+        ["parec", "-d", quelle, "--format=s16le",
+         f"--rate={ABTASTRATE}", "--channels=1", "--latency-msec=30"],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+
+
+# DAS MIKROFON IST SCHON OFFEN, WAEHREND DIE FRAGE GESTELLT WIRD (2026-09-14).
+#
+# Stephan nach dem ersten Test der Rueckfrage vor Drucken und Diktat: "Kann es
+# sein, dass zwischen den Fragen ... und der Aufnahmemoeglichkeit gefuehlt 5
+# Sekunden liegen. Ich musste zwei mal nein und zweimal ja sagen." Gemessen:
+# Die Frage klingt 3,5 s, danach 0,7 s Stille (die Satzpause steht auch hinter
+# dem letzten Satz), und erst DANN wurde parec gestartet - das seine ersten
+# Daten weitere 2,0 s spaeter lieferte. Wer direkt nach "ja oder nein"
+# antwortete, sprach ins Leere; der Anfang seines Worts fehlte, und es kam
+# "nicht verstanden".
+#
+# Jetzt laeuft die Aufnahme schon waehrend der Frage mit, wird aber VERWORFEN.
+# Ausgewertet wird ab VORLAUF_S vor dem Ende der Ansage - das liegt noch in
+# der Stille hinter der letzten Silbe. Die eigene Stimme bleibt damit weiter
+# draussen, und das ist hier nicht verhandelbar: Die Frage ENDET auf "ja oder
+# nein". Warum das zaehlt, steht bei ja_oder_nein().
+VORLAUF_S = 0.3
+
+
+def _sprechen_bei_offenem_mikrofon(text, prozess):
+    """Spricht die Frage und liest dabei mit. Gibt die letzten VORLAUF_S zurueck.
+
+    Gelesen werden MUSS waehrend der Ansage: Liest niemand, laeuft der Puffer
+    der Pipe nach rund zwei Sekunden voll, und parec verliert Daten.
+    """
+    fertig = threading.Event()
+
+    def ansage():
+        try:
+            sprich(text, frage=True)
+        finally:
+            fertig.set()
+
+    threading.Thread(target=ansage, daemon=True).start()
+    zuletzt = collections.deque()
+    while not fertig.is_set():
+        block = prozess.stdout.read(800)
+        if not block:
+            break
+        jetzt = time.time()
+        zuletzt.append((jetzt, block))
+        while zuletzt and zuletzt[0][0] < jetzt - 2.0:
+            zuletzt.popleft()
+    fertig.wait()
+    grenze = time.time() - VORLAUF_S
+    return b"".join(b for t, b in zuletzt if t >= grenze)
+
+
+def _antwort_hoeren(modell, prozess, vorrat=b""):
     """Einmal zuhoeren. True, False oder None."""
     import vosk
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_JA_NEIN)
-    prozess = subprocess.Popen(
-        ["parec", "-d", quelle, "--format=s16le",
-         f"--rate={ABTASTRATE}", "--channels=1"],
-        stdout=subprocess.PIPE)
+    # Die Zeitgrenze zaehlt ab JETZT - ab dem Moment, ab dem wirklich
+    # ausgewertet wird, nicht ab dem Start der Aufnahme.
     ende = time.time() + ANTWORT_ZEITGRENZE_S
     try:
         while time.time() < ende:
-            block = prozess.stdout.read(4000)
+            if vorrat:
+                block, vorrat = vorrat[:4000], vorrat[4000:]
+            else:
+                block = prozess.stdout.read(4000)
             if not block:
                 break
             if not erkenner.AcceptWaveform(block):

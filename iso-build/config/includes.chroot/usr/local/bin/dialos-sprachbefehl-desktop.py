@@ -1134,7 +1134,12 @@ def pegel_richten():
 
 
 def aufnahme_starten(quelle):
-    befehl = ["parec", f"--rate={ABTASTRATE}", "--channels=1", "--format=s16le"]
+    # "--latency-msec=30" (2026-09-14): ohne die Angabe kam jeder Befehl rund
+    # zwei Sekunden spaeter an - parec puffert ab Werk so lange (gemessen
+    # 2,03 s gegen 0,10 s). Nach jeder eigenen Ansage wird die Aufnahme neu
+    # gestartet, und auch dieser Neustart brauchte jedes Mal zwei Sekunden.
+    befehl = ["parec", f"--rate={ABTASTRATE}", "--channels=1", "--format=s16le",
+              "--latency-msec=30"]
     if quelle:
         befehl.append(f"--device={quelle}")
     p = subprocess.Popen(befehl, stdout=subprocess.PIPE,

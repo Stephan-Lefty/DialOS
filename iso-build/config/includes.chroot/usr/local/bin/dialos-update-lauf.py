@@ -197,7 +197,10 @@ def widerspruch_hoeren():
                              capture_output=True, text=True, timeout=10).stdout
     quelle = ("dialos_mikrofon_ohne_echo"
               if "dialos_mikrofon_ohne_echo" in quellen else None)
-    befehl = ["parec", "--format=s16le", f"--rate={ABTASTRATE}", "--channels=1"]
+    # "--latency-msec=30" (2026-09-14): sonst gingen von den zehn Sekunden
+    # Widerspruch rund zwei an den Puffer von parec verloren.
+    befehl = ["parec", "--format=s16le", f"--rate={ABTASTRATE}", "--channels=1",
+              "--latency-msec=30"]
     if quelle:
         befehl += ["-d", quelle]
 
