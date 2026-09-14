@@ -176,6 +176,28 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Satzzeichen und Großschreibung kämen bei Whisper und Parakeet mit - an
   Kommas ließen sich Einträge wie „Birnen, Äpfel" trennen.
 
+  **Probe mit Annas Stimme (2026-09-14, 14:26) - Ablauf geprüft, Genauigkeit
+  NICHT verwertbar.** Alle vier Erkenner scheiterten gleich an den kurzen
+  Waren („Bananen" → „fein"/„Dann…"/„Nein."), nur lange Waren wie „zwei Liter
+  Milch" kamen an. Gegenprobe: auch ungeschnitten und mit angeglichener
+  Lautstärke versteht Vosk aus „Bananen." nur „ein". `kerstin-low` taugt als
+  Sprecherin für einzelne Wörter in freier Erkennung nicht - für Befehle in
+  fester Grammatik schon. **Die Zeiten sind aber echt:**
+
+  | Erkenner | Laden | je Stück (≈1 s Sprache) |
+  |---|---|---|
+  | Vosk groß (heute) | 11,8 s | 0,30 s |
+  | Parakeet v3 | **1,9 s** | **0,26 s** |
+  | Whisper small | 12,6 s | **7,05 s** |
+  | Whisper turbo q5 | 43,6 s | **40,77 s** |
+
+  **Whisper ist in dieser Form auf dem T490 zu langsam** - vermutlich, weil
+  whisper.cpp jedes Stück auf ein 30-Sekunden-Fenster auffüllt und die
+  Rechenzeit damit je Stück fast gleich bleibt, egal wie kurz es ist. Zu
+  prüfen: die Option `--audio-ctx` (kürzeres Fenster). **Parakeet ist so
+  schnell wie Vosk und lädt sechsmal schneller.** Welcher Stephan am besten
+  versteht, zeigt erst seine Aufnahme am 2026-09-15.
+
 - [x] **Umlaut-Wörter fehlen NICHT im Wortschatz - drei Entscheidungen waren
   wieder offen, alle drei am selben Tag entschieden** (gefunden 2026-09-14 bei Stephans Frage nach Dialekten).
   Jedes Wort, das Vosk seit August als „missing in vocabulary" gemeldet hat,

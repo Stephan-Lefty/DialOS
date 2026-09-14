@@ -177,6 +177,28 @@ finished too, and then move down together. That way no reference breaks.
   and capitalisation come along with Whisper and Parakeet - commas could
   split entries like "Birnen, Äpfel".
 
+  **Probe with Anna's voice (2026-09-14, 14:26) - pipeline checked, accuracy
+  NOT usable.** All four recognisers failed alike on the short items
+  ("Bananen" → "fein"/"Dann…"/"Nein."), only long items like "zwei Liter
+  Milch" arrived. Cross-check: even uncut and with levelled loudness Vosk
+  hears only "ein" in "Bananen.". `kerstin-low` is unsuitable as a speaker for
+  single words in free recognition - fine for commands in a fixed grammar.
+  **The timings are real, though:**
+
+  | Recogniser | Load | per piece (≈1 s speech) |
+  |---|---|---|
+  | Vosk big (today) | 11.8 s | 0.30 s |
+  | Parakeet v3 | **1.9 s** | **0.26 s** |
+  | Whisper small | 12.6 s | **7.05 s** |
+  | Whisper turbo q5 | 43.6 s | **40.77 s** |
+
+  **Whisper in this form is too slow on the T490** - presumably because
+  whisper.cpp pads every piece to a 30-second window, so compute time per
+  piece stays almost the same however short it is. To check: the option
+  `--audio-ctx` (shorter window). **Parakeet is as fast as Vosk and loads six
+  times faster.** Which one understands Stephan best only his recording on
+  2026-09-15 will show.
+
 - [x] **Umlaut words are NOT missing from the vocabulary - three decisions
   were open again, all three decided the same day** (found 2026-09-14 when Stephan asked about dialects). Every
   word Vosk reported as "missing in vocabulary" since August contained ä, ö,
