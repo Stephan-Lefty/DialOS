@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Gesprächs-Erkennung** (2026-09-14, nach Gespräch und Fernsehfilm im Raum).
+  Fünf Äußerungen ohne Befehl in 30 Sekunden schalten die Sprachsteuerung aus:
+  „Hier wird gerade viel gesprochen. Ich höre Dir nicht mehr zu." An allen
+  bisherigen Sitzungen durchgespielt: Stephans echte bleiben an, alle aus
+  Gespräch und Film gehen aus, bevor ein Fehlbefehl durchkommt.
+
 - **Das Diktat beendet sich nur noch bei genau „Diktat beenden"** (2026-09-14).
   Ein Einkaufszettel brach nach einem Eintrag ab, weil das kleine Modell in
   „Bananen" ein „diktat beenden beenden" hörte. Bisher genügten beide Wörter

@@ -113,6 +113,7 @@ automatisch in jeder Sitzung. Von Hand zum Testen einfach starten;
 beenden mit Strg+C.
 """
 
+import collections
 import json
 import os
 import signal
@@ -341,6 +342,37 @@ ZIELE = {"linux": "gnome", "gnome": "gnome", "windows": "windows"}
 # Dir zu." ist eine Zusage. Fuer jemanden, der das Geraet nur hoert, ist das
 # der Unterschied zwischen einem Apparat und einem Gegenueber.
 ANSAGE_AN = "Ich höre Dir zu."
+
+# GESPRAECHS-ERKENNUNG (Stephans Freigabe vom 2026-09-14, Massnahme A).
+#
+# Anlass: Ein Gespraech im Raum und spaeter ein Fernsehfilm haben die
+# Sprachsteuerung bedient - Diktate, Druckauftraege, ein Bildschirmfoto. Die
+# Grammatik presst jeden Ton in Befehlswoerter, und weil jeder Wortfetzen als
+# Aktivitaet galt, blieb die Steuerung minutenlang an. Stephan: "wenn z.B.
+# parallel ein Film im TV laeuft, dann will die Sprachsteuerung staendig
+# etwas machen".
+#
+# Die Regel: GESPRAECH_GRENZE Aeusserungen ohne Befehl innerhalb von
+# GESPRAECH_FENSTER_S -> ausschalten, mit Ansage. Durchgespielt an ALLEN
+# Sitzungen der Protokolle bis zum 2026-09-14 mittags:
+#
+#     Stephans echte Sitzungen (12)    hoechstens 2-4 in 30 s  -> alle bleiben an
+#     Gespraech und Fernseher (7)      6-13 in 30 s            -> alle nach 14-23 s aus,
+#                                                                 BEVOR ein Fehlbefehl durchkam
+#
+# Mit 4 waere eine echte Sitzung beendet worden, 5 und 6 wirken gleich.
+# Die beiden Briefe aus Gespraech und Film (11:15 und 12:24) waeren nicht
+# entstanden.
+GESPRAECH_GRENZE = 5
+GESPRAECH_FENSTER_S = 30.0
+ANSAGE_GESPRAECH = ("Hier wird gerade viel gesprochen. Ich höre Dir nicht mehr zu. "
+                    "Wenn Du mich brauchst, sage: Sprachsteuerung starten.")
+
+# PEGELVERLAUF BEIM EINSCHALTSATZ - vorerst NUR GEMESSEN (Massnahme B).
+# Ob "Sprachsteuerung starten" von Stille eingerahmt war, laesst sich an
+# diesem Verlauf ablesen; eine Schwelle wird erst festgelegt, wenn echte
+# Zahlen mit und ohne Fernseher vorliegen. 32 Bloecke = 4 Sekunden.
+PEGEL_VERLAUF_BLOECKE = 32
 # "Ich höre Dir nicht mehr zu." statt "Ich höre nicht mehr." (Stephan,
 # 2026-08-19). Der kuerzere Satz ist zweideutig: Er kann auch heissen,
 # dass das Geraet nichts mehr hoert - also kaputt ist. Mit "Dir" ist klar,
@@ -1243,6 +1275,8 @@ def main():
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
     prozess = aufnahme_starten(quelle)
     letzte_aktivitaet = time.time()
+    leer_zeiten = collections.deque()
+    pegel_verlauf = collections.deque(maxlen=PEGEL_VERLAUF_BLOECKE)
     # Gleich gesetzt: Es kam noch kein Befehl. Bewegt sich
     # letzte_aktivitaet spaeter darueber hinaus, war einer dabei - daran
     # haengt, welche der beiden Fristen gilt.
@@ -1397,6 +1431,7 @@ def main():
             pegel = max(abs(int.from_bytes(block[i:i + 2], "little", signed=True))
                         for i in range(0, len(block) - 1, 2))
             pegel_spitze = max(pegel_spitze, pegel)
+            pegel_verlauf.append(pegel)
             gesaettigt = pegel >= 32000
             if DEBUG:
                 print(f"\rPegel {100 * pegel / 32768:5.1f} %"
@@ -1437,6 +1472,12 @@ def main():
             # Fehlersuchen braucht.
             if text:
                 melde(f"erkannt: {text!r}  (Spitze {pegel_spitze})")
+                if "sprachsteuerung" in text.split():
+                    # In Tausendern, je 1/8 s, der letzte Wert zuletzt. Vosk
+                    # liefert erst nach einer kurzen Pause ab - das Ende des
+                    # Verlaufs ist also schon die Zeit NACH dem Satz.
+                    melde("  Pegelverlauf 4 s: " + " ".join(
+                        str(round(x / 1000)) for x in pegel_verlauf))
             pegel_spitze = 0
             if not text:
                 continue
@@ -1505,6 +1546,7 @@ def main():
                     sprich(ANSAGE_LAEUFT_SCHON)
                 else:
                     hoert_zu = True
+                    leer_zeiten.clear()
                     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AN)
                     sprich(ANSAGE_AN)
                 # KEINE Sperrfrist hier - siehe Kommentar bei
@@ -1614,6 +1656,24 @@ def main():
                         getroffen = True
                         break
             if getroffen:
+                continue
+
+            # --- Nichts hat gepasst: erst pruefen, ob hier gesprochen wird ---
+            # VOR dem Hinweis: Die Aeusserung, die die Grenze erreicht, soll
+            # keinen Hinweis mehr in den Raum sprechen. Begruendung bei
+            # GESPRAECH_GRENZE.
+            jetzt = time.time()
+            leer_zeiten.append(jetzt)
+            while leer_zeiten and jetzt - leer_zeiten[0] > GESPRAECH_FENSTER_S:
+                leer_zeiten.popleft()
+            if len(leer_zeiten) >= GESPRAECH_GRENZE:
+                melde(f"Gespraech erkannt: {len(leer_zeiten)} Aeusserungen ohne Befehl "
+                      f"in {GESPRAECH_FENSTER_S:.0f} s - Sprachsteuerung aus")
+                hoert_zu = False
+                leer_zeiten.clear()
+                erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
+                sprich(ANSAGE_GESPRAECH)
+                mitschrift_schliessen()
                 continue
 
             # --- Nichts hat gepasst: sagen, was gehoert wurde ---

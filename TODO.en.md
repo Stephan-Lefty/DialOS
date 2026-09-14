@@ -90,6 +90,26 @@ finished too, and then move down together. That way no reference breaks.
   The item "First false start" below is the same mechanism, now with
   consequences.
 
+  **Repeated at 12:24-12:29 with a TV film** (Stephan: when a film is running
+  on TV, the voice control keeps wanting to do something): letter dictation
+  despite the confirmation (a "ja" in the film), switching three times, a
+  screenshot. The letter is in the trash, the previous one is back.
+
+  **Stephan's decision (2026-09-14): build A and B, plan C, check D.**
+  - **A - conversation detection: built.** 5 utterances without a command
+    within 30 s → off, with an announcement. Replayed against all sessions: 12
+    genuine ones stay on, 7 from conversation/film switch off after 14-23 s,
+    before any false command got through. **Open:** test with the TV after
+    logging in again.
+  - **B - switch on only with silence before and after: measured only for
+    now.** For every "sprachsteuerung …" the level curve of the last 4 s is
+    logged. Threshold only after real numbers with and without the TV.
+  - **C - wake word (openWakeWord):** plan - the item already exists further
+    down; today's logs as the test bench.
+  - **D - button instead of the switch-on sentence:** check whether the AIRHUG
+    or a headset provides a key that can be read (media key via Bluetooth
+    AVRCP).
+
 - [ ] **The voice service survives logging out - afterwards TWO run**
   (found 2026-09-14, 12:13). After logging out and in,
   `dialos-sprachbefehl-desktop.py` from 11:49 (old version) and from 12:09

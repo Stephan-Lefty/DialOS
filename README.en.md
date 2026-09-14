@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Conversation detection** (2026-09-14, after a conversation and a TV film
+  in the room). Five utterances without a command within 30 seconds switch the
+  voice control off: "Hier wird gerade viel gesprochen. Ich höre Dir nicht mehr
+  zu." Replayed against all sessions so far: Stephan's genuine ones stay on, all
+  from conversation and film switch off before a false command gets through.
+
 - **Dictation now only ends on exactly "Diktat beenden"** (2026-09-14). A
   shopping list broke off after one entry because the small model heard
   "diktat beenden beenden" in "Bananen". Until now both words plus further

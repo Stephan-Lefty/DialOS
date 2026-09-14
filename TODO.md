@@ -91,6 +91,25 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Der Punkt „Erster Fehlstart" unten ist damit derselbe Mechanismus, jetzt mit
   Folgen.
 
+  **Wiederholt um 12:24-12:29 mit einem Fernsehfilm** (Stephan: „wenn z.B.
+  parallel ein Film im TV läuft, dann will die Sprachsteuerung ständig etwas
+  machen"): Brief-Diktat trotz Rückfrage (ein „ja" im Film), dreimal
+  Umschalten, ein Bildschirmfoto. Der Brief liegt im Papierkorb, der vorige
+  ist zurück.
+
+  **Stephans Entscheidung (2026-09-14): A und B bauen, C planen, D prüfen.**
+  - **A - Gesprächs-Erkennung: gebaut.** 5 Äußerungen ohne Befehl in 30 s →
+    aus, mit Ansage. An allen Sitzungen durchgespielt: 12 echte bleiben an, 7
+    aus Gespräch/Film gehen nach 14-23 s aus, bevor ein Fehlbefehl durchkam.
+    **Offen:** Probe mit Fernseher nach dem Neuanmelden.
+  - **B - Einschalten nur mit Stille davor und danach: erst gemessen.** Bei
+    jedem „sprachsteuerung …" steht jetzt der Pegelverlauf der letzten 4 s im
+    Protokoll. Schwelle erst nach echten Zahlen mit und ohne Fernseher.
+  - **C - Aufweckwort (openWakeWord):** planen - der Punkt steht schon weiter
+    unten; mit den heutigen Protokollen als Prüfstein.
+  - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine
+    Taste liefert, die sich abgreifen lässt (Medientaste über Bluetooth AVRCP).
+
 - [ ] **Der Sprachdienst überlebt das Abmelden - danach laufen ZWEI**
   (gefunden 2026-09-14, 12:13). Nach Ab- und Anmelden liefen
   `dialos-sprachbefehl-desktop.py` von 11:49 (alte Fassung) und von 12:09
