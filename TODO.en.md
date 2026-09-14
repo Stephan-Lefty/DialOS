@@ -791,6 +791,22 @@ finished too, and then move down together. That way no reference breaks.
   `dialos-desktop-stil.sh gnome` and verify everything really looks like
   before. Afterwards the same as `nutzer`.
 
+  **As of 2026-09-14 - largely signed off as `dialosadmin`.** Stephan switched
+  and sent screenshots:
+  - ☑️ Taskbar at the bottom, icons centered, start button on the left.
+  - ☑️ Start menu - after two rounds of tidying: the pinned items were
+    ArcMenu's defaults, including an empty slot (`firefox.desktop` does not
+    exist on Debian) and an overflowing grid. Now six everyday programs as
+    large icons, three per row, "Frequent" off, list without letters. Labels
+    are left-aligned under centered icons - not configurable in ArcMenu,
+    Stephan: leave it.
+  - ☑️ Window buttons on the right (minimize, maximize, close) - visible on
+    the Claude window in the screenshot.
+  - ☑️ Back to GNOME: Stephan says it looks like before; checked that every
+    key DialOS sets is back at its default and the three extensions are off.
+  - ☐ **Open:** window snapping at the screen edge not explicitly checked, and
+    the whole round as `nutzer`.
+
 - [ ] **Test the microphone fallback without Bluetooth** (open since
   2026-08-16). The output side is proven - headset off, sound came from
   the built-in speaker. The input side is still missing: does the

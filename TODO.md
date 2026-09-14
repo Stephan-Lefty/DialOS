@@ -884,6 +884,23 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   gnome` und kontrollieren, dass wirklich alles wieder wie vorher
   aussieht. Anschließend dasselbe als `nutzer`.
 
+  **Stand 2026-09-14 - als `dialosadmin` weitgehend abgenommen.** Stephan hat
+  umgeschaltet und Bildschirmfotos geschickt:
+  - ☑️ Taskleiste unten, Symbole mittig, Startknopf links.
+  - ☑️ Startmenü - nach zwei Runden Aufräumen: Angeheftet waren ArcMenus
+    Voreinstellungen, darunter ein leerer Platz (`firefox.desktop` gibt es
+    unter Debian nicht) und ein überlaufendes Raster. Jetzt sechs
+    Alltagsprogramme als große Symbole, drei pro Zeile, „Häufig" aus, Liste
+    ohne Buchstaben. Beschriftungen stehen linksbündig unter mittigen
+    Symbolen - in ArcMenu nicht einstellbar, Stephan: „So lassen".
+  - ☑️ Fensterknöpfe rechts (Minimieren, Maximieren, Schließen) - im Foto am
+    Claude-Fenster zu sehen.
+  - ☑️ Zurück auf GNOME: Stephan „sieht wieder aus wie vorher"; nachgelesen,
+    dass alle von DialOS gesetzten Schlüssel wieder auf Standard stehen und
+    die drei Erweiterungen aus sind.
+  - ☐ **Offen:** Fenster-Andocken am Bildschirmrand nicht ausdrücklich
+    geprüft, und die ganze Runde als `nutzer`.
+
 - [ ] **Mikrofon-Fallback ohne Bluetooth testen** (offen seit
   2026-08-16). Die Ausgabeseite ist bewiesen - Headset aus, Ton kam aus
   dem eingebauten Lautsprecher. Die Eingabeseite fehlt noch: versteht das
