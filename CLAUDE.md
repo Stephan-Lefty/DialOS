@@ -91,22 +91,36 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-08-22, abends)
+## Aktueller Stand (Stand: 2026-09-14)
 
-**Wo das Projekt am Abend des 2026-08-22 steht.** Der ausfuehrliche Verlauf
-steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
+**Wo das Projekt am 2026-09-14 steht.** Der ausfuehrliche Verlauf steht im
+Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
+
+**ZWISCHEN DEM 2026-08-24 UND DEM 2026-09-14 LAG EINE PAUSE VON DREI WOCHEN.**
+Am Geraet wurde in dieser Zeit nichts geaendert; Stephan hat am 25.08. sowie am
+05. und 09.09. an der WordPress-Seite und an der Foerderrecherche gearbeitet
+(siehe TODO.md). Wer hier weiterliest, sollte wissen: Die Lage unten ist der
+Stand vom 24.08. plus das, was der 14.09. dazu ergeben hat - nicht drei Wochen
+Entwicklung.
 
 **Laeuft und ist belegt:**
 
 - Sprachsteuerung mit 26 Grammatiksaetzen. Das Einschalten verlangt beide
   Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
-  Beinahe-Treffer, null Fehlstarts. **Diese Zahl ist ueberholt:** Am
-  2026-08-24 um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet -
-  "sprachsteuerung starten" erkannt, obwohl Stephan an dem Tag kein Wort zu
-  ihr gesagt hatte und DialOS zu der Zeit selbst nichts sprach (im
-  Ton-Protokoll steht zwischen 14:35 und 14:42 keine Zeile). Erster
-  protokollierter Fehlstart. Ursache offen - Umgebungssprache ist die
-  naechstliegende Vermutung, aber eine Vermutung.
+  Beinahe-Treffer. **Die Zahl "null Fehlstarts" ist ueberholt:** Am 2026-08-24
+  um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet, per Journal
+  belegt (ein gnome-terminal "DialOS - Mitschrift" wurde wirklich gestartet).
+  Stephan hatte an dem Tag kein Wort zu ihr gesagt, DialOS selbst sprach nicht
+  (dialos-say.log leer), und auf die Frage nach Umgebungssprache: nein. Also
+  hat ein GERAEUSCH einen ganzen Satz ergeben. Ursache offen.
+- **Am Abend des 2026-08-24 liess sich die Sprachsteuerung umgekehrt gar nicht
+  mehr einschalten** - dreizehn Versuche, im Protokoll nur 'starten' und
+  'sprachsteuerung'. Mein Verdacht war ein zu hoher Aufnahmepegel. **Am
+  2026-09-14 nicht mehr nachstellbar:** Stephan hat zweimal "Sprachsteuerung
+  starten" gesprochen, beide Male kam der ganze Satz - bei zurueckgesetztem
+  Pegel und mit Spitzen (27663, 15257) im selben Bereich wie an dem Abend, an
+  dem es NICHT ging. Der Pegel ist damit als Ursache so gut wie aus dem
+  Rennen. Nicht geloest, sondern nicht mehr beobachtbar.
 - Anna (`de_DE-kerstin-low`) ist Auslieferungsstimme, **Tempo 0,95**, und
   spricht den Nutzer mit Namen an ("Steffan"). Beide Werte hat Stephan mit den
   Ohren entschieden.
@@ -148,6 +162,58 @@ steht im Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.
   `docs/video/dialos-vorstellung.ogg`, erzeugt von
   `scripts/dialos-vorstellung.py`.
 
+**Ausserdem neu am 2026-08-24:**
+
+- **Ein stummer `paplay` machte das Geraet lautlos - ohne Fehlermeldung.**
+  PipeWire merkt sich Stummschaltung JE ANWENDUNG, dauerhaft. Da DialOS die
+  zwischengespeicherten Ansagen, den Frageton und den Testton ueber paplay
+  abspielt, waren alle gespeicherten Ansagen stumm - bei Rueckgabewert 0, also
+  ohne dass aus_speicher() auf spd-say zurueckgefallen waere. Zwei Ursachen,
+  beide behoben: dialos-say.py schaltete fremde Stroeme stumm und gab sie im
+  "finally" frei - das laeuft bei SIGTERM NICHT -, und bei zwei Ansagen kurz
+  hintereinander schaltete die zweite den paplay der ersten stumm.
+- **Alle Protokolle tragen ein Datum** (`%m-%d %H:%M:%S`). Vorher nur die
+  Uhrzeit - und logrotate dreht nur bei laufendem Geraet, also lagen drei Tage
+  in einer Datei. Ich habe daraus einen Vorfall rekonstruiert, den es an dem Tag
+  nie gab; aufgefallen ist es nur, weil Stephan sagte, er habe gar nicht mit dem
+  Geraet gesprochen.
+- **Jede Ansage steht im Protokoll** (`~/.log/dialos-say.log`), auf 120 Zeichen
+  gekuerzt - das ist eine Datenschutz-Entscheidung, kein Platzsparen: Bei einem
+  Vorlese-Befehl waere die Ansage das ganze Dokument.
+- **Der Pegel steht bei jeder Erkennung im Protokoll.** Gemessen: Vosk baut aus
+  etwas, das LEISER als Stille ist, ganze Befehlswoerter - 'sprachsteuerung' bei
+  Pegel 30 mit Konfidenz 1,000 - und ist sich dabei SICHERER als im lauten Fall.
+  Damit ist die Konfidenz als Filter erledigt, bevor sie gebaut wurde.
+- **Kein Stick beim Admin-Konto.** Dort ist der Plattenordner das Archiv. Vorher
+  meldete es alle 16 Minuten einen nicht beschreibbaren Stick: exFAT gehoert dem
+  Konto, das es einhaengt.
+- **Die Stimmwahl wird beim Aufspielen nicht mehr ueberschrieben.**
+  piper-generic.conf enthaelt Konfiguration UND die gewaehlte Stimme; sie steht
+  jetzt in der Ausschlussliste von dialos-aufspielen, und das Skript MELDET, was
+  es uebergangen hat.
+- **Brief-Vorlage zum Einsprechen** unter `docs/brief-vorlage.md` - Zielbild,
+  was DialOS davon heute kann, und der Diktattext Wort fuer Wort.
+- **Feldstruktur der Kundendaten** unter `docs/kundendaten-felder.md` - die
+  FELDER, nicht die Werte.
+
+**Drei Befunde vom 2026-08-24, die vorher niemand kannte:**
+
+1. **Die Kundendaten liegen unverschluesselt.**
+   `/usr/local/share/dialos/nutzer-name.txt` steht mit 0644 auf der
+   unverschluesselten Wurzelpartition, waehrend `/home/nutzer` LUKS ist. Bei
+   einem gestohlenen Laptop ist genau das lesbar, was die Person identifiziert.
+   Der Umzug ist moeglich - die Startreihenfolge steht ihm NICHT entgegen, das
+   war ein Irrtum von mir und ist berichtigt.
+2. **Das Repo ist OEFFENTLICH**, nicht privat wie hier lange behauptet.
+   Aufgefallen, als Stephan seine Anschrift fuer die Kundendaten durchgegeben
+   hat - ein Commit haette sie veroeffentlicht. Siehe die Dauerregel oben.
+3. **Der erste Fehlstart** (siehe die Liste oben).
+
+**Am 2026-09-14 entschieden:** "Tas tatur" und "Ei Di" bleiben auch bei Anna -
+beide im echten Satz vorgespielt, Urteil "mit Regel". Damit ist die Aussprache
+fuer beide Stimmen vollstaendig, und die zwei Regeln brauchen KEIN
+Stimmen-Feld.
+
 **Der Brief - fast fertig.** Der ganze Weg steht: "Brief schreiben" nimmt auf,
 gesprochene Satzzeichen ("Komma setzen", "neuer Absatz") werden umgesetzt, der
 Text landet als Briefbogen nach DIN 5008 in `~/Dokumente/brief.txt` mit Datum,
@@ -163,17 +229,37 @@ Anfang bis Ende durchlaeuft. Erst danach ist der Brief-Weg fertig. Ausserdem
 fragt DIN 5008 nach Empfaenger und Betreff - der gefuehrte Dialog dafuer ist
 noch nicht gebaut.
 
-**Ein Fehlermuster, das offen ist und Vorrang verdient.** Die eingeschraenkte
-Grammatik ist eine Liste von SAETZEN, aber Vosk baut daraus ein WORTNETZ. Es
-darf Woerter aus verschiedenen Saetzen kombinieren. Kommt dabei etwas heraus,
-das kein Befehl ist ("notiz drucken", "wie viel uhr schreiben", "linux auf tag
-einkauf auf einkauf" - alle drei am 2026-08-22 im Protokoll), passiert
-**nichts, und es wird auch nichts gesagt**. Fuer einen blinden Nutzer ist das
-der schlechteste Ausgang: Er hat gesprochen, das Geraet hat zugehoert, und
-nichts sagt ihm, dass nichts geschah. Eine Fehlermeldung waere besser als
-Stille. **Eigener Punkt in TODO.md**, mit den Zahlen vom 2026-08-22: 382
-solche Aeusserungen im eingeschalteten Zustand - deshalb ist "einfach eine
-Ansage einbauen" keine Loesung, sondern der naechste Fehler.
+**Das Fehlermuster "lautlos durchgefallen" ist am 2026-08-24 von BEIDEN
+Seiten angegangen worden** - es stand hier vorher als offener Punkt mit
+Vorrang. Die eingeschraenkte Grammatik ist eine Liste von SAETZEN, aber Vosk
+baut daraus ein WORTNETZ und darf Woerter aus verschiedenen Saetzen
+kombinieren. Kam dabei etwas heraus, das kein Befehl ist, passierte nichts -
+und es wurde auch nichts gesagt.
+
+**Grundlage war Stephans Urteil ueber die Stichprobe**, um die er zweimal
+gebeten hatte: "das waren alles Befehsversuche." Alle 283. Damit war meine
+Sorge widerlegt, eine Ansage wuerde noergeln. Und sein zweiter Satz gab die
+Form vor: "Ich muss selbst die genauen Befehle erst lernen und dann wundere ich
+mich, dass ein anderer nicht funktioniert. Auch fuer mich eine Lernphase."
+
+1. **Tolerantere Zuordnung.** Die Zuordnung war ein EXAKTER Vergleich; 21 der
+   283 Aeusserungen enthielten den kompletten Befehl und loesten trotzdem
+   nichts aus ('notiz notiz drucken', 'wir notiz aufnehmen'). Jetzt gilt ein
+   Befehl, der als zusammenhaengende Wortfolge darin steckt - mit hoechstens
+   ZWEI Zusatzwoertern. Ohne diese Grenze haette dieselbe Regel viermal aus
+   Wortsalat "einkauf erledigt" ausgefuehrt und den Einkaufszettel abgeraeumt.
+2. **Ansage, wenn nichts passt.** Nennt bei starker Uebereinstimmung den
+   richtigen Satz, sonst nur das Gehoerte. KEINE Frageform - ein "ja" wuerde
+   DialOS nicht verarbeiten, das waere ein neuer lautloser Fehlschlag gewesen.
+   Zerstoerende Befehle werden nie vorgeschlagen.
+
+**Am 2026-09-14 im Betrieb geprueft, mit einem Vorbehalt:** Die Ansage hat in
+Stephans Sitzung fuenfmal ausgeloest und die Bremse hat gegriffen - aber KEIN
+EINZIGES MAL wurde ein Befehl vorgeschlagen, immer nur "Das war kein Befehl".
+Die Zwei-Drittel-Schwelle war in einer echten Sitzung nie erreicht ('vorlesen
+uhrzeit' liegt beim naechsten Befehl bei 50 %). Damit fehlt genau die Haelfte,
+die beim Lernen helfen soll. Die Schwelle gehoert an Stephans echten
+Aeusserungen durchgerechnet - nicht geraten.
 
 **Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, geprueft, bewusst
 nicht installiert - siehe die Ausschlussliste in `dialos-aufspielen`),
