@@ -121,6 +121,18 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Update automation: every 14 days, on Mondays, with announcement and
+  reboot** (2026-09-14, Stephan's requirement). After login, with ten seconds to
+  object with "nicht jetzt" - "später" is not in the model's vocabulary and would
+  never have arrived. `apt-get upgrade` without `dist-upgrade` and `autoremove`;
+  the reboot checks in the root part itself whether the security stick is
+  present. Real run on 2026-09-14 completed, no loop after the reboot. **Found on
+  the way:** the sentence "Der Computer ist auf dem neuesten Stand" only reached
+  the account that triggered the update, not `nutzer`. Now the timestamp
+  belongs to the machine and each person acknowledges it. The sudoers rule is
+  still awaiting Stephan's review. Details in step 13d of
+  [Debian-zu-DialOS](docs/Debian-zu-DialOS.en.md).
+
 - **When nothing matched, DialOS now says so** (2026-08-24, approved by
   Stephan). Previously an utterance that was not a command did nothing, and
   nothing was said either. On a strong match the announcement names the correct

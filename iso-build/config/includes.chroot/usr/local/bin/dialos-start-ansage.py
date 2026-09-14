@@ -664,33 +664,62 @@ def netzwerk_ueberwachung(letzter_status):
 # und der Begruessung dann noch der Hinweis kommt, der Computer ist auf den
 # neuesten Stand!"
 #
-# Die Merkdatei schreibt dialos-update-lauf.py VOR dem Neustart und liegt beim
-# Nutzer, nicht unter /var/lib - damit dieser Lauf hier sie auch LOESCHEN kann.
-# Eine root-eigene Datei koennte er nur lesen, und der Satz kaeme jeden Morgen
-# erneut.
+# DAS EREIGNIS GEHOERT DEM RECHNER, DIE QUITTUNG JEDER PERSON (Fehler vom
+# 2026-09-14, am ersten echten Lauf gefunden). Die erste Fassung schrieb die
+# Merkdatei ins Heimatverzeichnis dessen, der das Update ausgeloest hatte.
+# Stephan hat den Lauf als dialosadmin gestartet; nach dem Neustart meldete
+# sich zuerst "nutzer" an - und hoerte den Satz NICHT, weil in seinem
+# Verzeichnis nichts lag. Erst dialosadmin fand "seine" Datei. Stephans
+# Rueckmeldung: "beim Benutzer Nutzer kam nach der Begruessung nicht die Info
+# ... Als ich mich abgemeldet und als Dialos-admin angemeldet habe, da kam die
+# komplette Ansage." Im Betrieb hiesse das: Stoesst der Helfer das Update an,
+# erfaehrt der Kunde nie davon.
 #
-# GELOESCHT WIRD VOR DEM SPRECHEN, nicht danach. Bleibt die Ansage haengen oder
-# wird die Sitzung abgebrochen, ist die Datei trotzdem weg - ein Satz, der
-# einmal ausfaellt, ist besser als einer, der sich taeglich wiederholt und den
-# niemand abstellen kann.
-UPDATE_MARKE = os.path.join(
+# Jetzt schreibt dialos-systemupdate nach einer ECHTEN Installation einen
+# Zeitstempel nach /var/lib/dialos/systemupdate-installiert (fuer alle lesbar).
+# Jede Person merkt sich in ihrem eigenen Verzeichnis, welchen Stand sie schon
+# gemeldet bekommen hat. Neuer Stand -> einmal sagen. So hoeren Kunde UND Helfer
+# den Satz je genau einmal, egal wer das Update ausgeloest hat und wer sich
+# zuerst anmeldet.
+#
+# Das loest nebenbei den Grund, aus dem die Datei urspruenglich beim Nutzer lag:
+# Eine root-eigene Datei kann diese Ansage nicht loeschen, und der Satz kaeme
+# jeden Morgen. Geloescht wird jetzt gar nichts - die Quittung pro Person
+# verhindert die Wiederholung.
+#
+# DIE QUITTUNG WIRD VOR DEM SPRECHEN GESCHRIEBEN, nicht danach. Bleibt die
+# Ansage haengen, ist sie trotzdem vermerkt. Und laesst sie sich gar nicht
+# schreiben, bleibt der Satz AUS: Ein Satz, der einmal ausfaellt, ist besser als
+# einer, der sich jeden Morgen wiederholt und den niemand abstellen kann.
+UPDATE_INSTALLIERT = "/var/lib/dialos/systemupdate-installiert"
+UPDATE_GEMELDET = os.path.join(
     os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
-    "dialos", "update-fertig")
+    "dialos", "update-gemeldet")
+UPDATE_SATZ = "Der Computer ist auf dem neuesten Stand."
 
 
 def update_meldung():
-    """Sagt einmal, dass das Geraet aktualisiert wurde - oder nichts."""
+    """Sagt jeder Person genau einmal, dass der Rechner aktualisiert wurde."""
     try:
-        with open(UPDATE_MARKE, encoding="utf-8") as f:
-            text = f.read().strip()
+        with open(UPDATE_INSTALLIERT, encoding="utf-8") as f:
+            stand = f.read().strip()
     except OSError:
         return
+    if not stand:
+        return
     try:
-        os.unlink(UPDATE_MARKE)
+        with open(UPDATE_GEMELDET, encoding="utf-8") as f:
+            if f.read().strip() == stand:
+                return
     except OSError:
         pass
-    if text:
-        spd_say(text)
+    try:
+        os.makedirs(os.path.dirname(UPDATE_GEMELDET), exist_ok=True)
+        with open(UPDATE_GEMELDET, "w", encoding="utf-8") as f:
+            f.write(stand + "\n")
+    except OSError:
+        return
+    spd_say(UPDATE_SATZ)
 
 
 def main():

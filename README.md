@@ -129,6 +129,18 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Update-Automatik: alle 14 Tage, montags, mit Ansage und Neustart**
+  (2026-09-14, Stephans Vorgabe). Nach dem Anmelden, mit zehn Sekunden
+  Widerspruch auf „nicht jetzt" - „später" steht nicht im Wortschatz des
+  Modells und wäre nie angekommen. `apt-get upgrade` ohne `dist-upgrade` und
+  `autoremove`; der Neustart prüft im root-Teil selbst, ob der Sicherheits-Stick
+  steckt. Echter Lauf am 2026-09-14 durchgelaufen, ohne Schleife nach dem
+  Neustart. **Dabei gefunden:** Der Satz „Der Computer ist auf dem neuesten
+  Stand" kam nur beim Konto, das das Update ausgelöst hatte, nicht bei `nutzer`.
+  Jetzt gehört der Zeitstempel dem Rechner und jede Person quittiert ihn selbst.
+  Die sudoers-Regel wartet noch auf Stephans Durchsicht. Einzelheiten in
+  Schritt 13d von [Debian-zu-DialOS](docs/Debian-zu-DialOS.md).
+
 - **Wenn nichts gepasst hat, sagt DialOS es jetzt** (2026-08-24, Stephans
   Freigabe). Vorher passierte bei einer Aeusserung, die kein Befehl ist,
   nichts - und es wurde auch nichts gesagt. Die Ansage nennt bei starker

@@ -84,11 +84,24 @@ installieren() {
         nachher="$(pruefen)"
         melde "fertig - vorher $vorher, jetzt noch $nachher offen"
         datum_merken
+        installiert_merken
         return 0
     fi
 
     melde "apt upgrade fehlgeschlagen"
     return 1
+}
+
+# DIE MELDUNG FUER DIE BEGRUESSUNG GEHOERT DEM RECHNER (Fehler vom 2026-09-14).
+# Nur nach einer ECHTEN Installation - im Zweig "nichts zu tun" wird sie nicht
+# geschrieben, sonst hoerte jede Person alle vierzehn Tage "auf dem neuesten
+# Stand", obwohl nichts passiert ist. Die Start-Ansage jeder Person vergleicht
+# den Zeitstempel mit dem, was sie schon gemeldet hat; Begruendung dort.
+INSTALLIERT="/var/lib/dialos/systemupdate-installiert"
+installiert_merken() {
+    mkdir -p "$(dirname "$INSTALLIERT")" 2>/dev/null
+    date '+%Y-%m-%dT%H:%M:%S' > "$INSTALLIERT"
+    chmod 0644 "$INSTALLIERT"
 }
 
 datum_merken() {

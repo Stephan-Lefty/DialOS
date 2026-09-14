@@ -69,67 +69,36 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      Drucken. Ein Rechteentzug, der erst drei Wochen später auffällt, ist
      schlimmer als der heutige Zustand.
 
-- [ ] **Update-Automatik alle 14 Tage, montags beim ersten Start** (Stephans
-  Vorgabe vom 2026-09-14, Bau auf später verschoben: „ok das später einbauen").
+- [ ] **Update-Automatik: gebaut und am Gerät gelaufen - zwei Dinge fehlen
+  noch** (Stephans Vorgabe vom 2026-09-14, am selben Tag gebaut: „Ich würde das
+  mit dem Update gerne jetzt einbauen").
 
-  **Warum überhaupt:** „Irgendwann haben wir ja DialOS fertig und dann sollten
-  auch immer die Pakete, die wir für einen reibungslosen Lauf von DialOS
-  benötigen, auf dem aktuellen Stand sein." Heute laufen nur
-  **Sicherheits**updates automatisch (`52dialos-unattended-upgrades`); alles
-  andere wartet auf jemanden mit Terminal — und das kann der blinde Nutzer
-  nicht. Am 2026-09-14 lagen dadurch **94 Pakete** aus Debian 13.7 bereit, ohne
-  dass irgendetwas passierte.
+  Alle 14 Tage, montags nach dem Anmelden, mit Nachholen; zehn Sekunden
+  Widerspruch auf **„nicht jetzt"** („später" fehlt im Wortschatz des Modells);
+  Neustart nur mit Sicherheits-Stick; danach „Der Computer ist auf dem neuesten
+  Stand." Der echte Lauf am 2026-09-14 ist durchgelaufen, ohne Schleife nach dem
+  Neustart. Aufbau, Begründungen und Prüfprotokoll: Schritt 13d in
+  [docs/Debian-zu-DialOS.md](docs/Debian-zu-DialOS.md).
 
-  **Der Ablauf, wie von Stephan entschieden:**
+  **Offen:**
 
-  | | |
-  |---|---|
-  | Auslöser | montags beim ersten Start, aber nur alle 14 Tage |
-  | Nachholen | war der Computer aus, beim nächsten Start |
-  | 1. Ansage | „Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern." |
-  | Widerspruch | zehn Sekunden; danach läuft es durch |
-  | 2. Installieren | `apt upgrade`, **ohne** `autoremove` |
-  | 3. Ansage | „Die Updates sind installiert. Der Computer startet jetzt neu." |
-  | 4. Neustart | **nur wenn der Sicherheits-Stick steckt** |
-  | 5. Nach dem Start | Begrüßung wie immer, danach „Der Computer ist auf dem neuesten Stand." |
+  1. **Stephans Durchsicht der sudoers-Regel** `/etc/sudoers.d/dialos-systemupdate`
+     (seine Regel vom 2026-08-24). Sie ist trotzdem schon auf dem Gerät: Die
+     Ausnahme in der NIEMALS-Liste von `dialos-aufspielen` greift erst beim
+     NÄCHSTEN Lauf, weil das Skript sich im selben Lauf selbst ersetzt -
+     derselbe Ablauf wie am 24.08. Nach der Durchsicht den Eintrag in NIEMALS
+     entfernen.
+  2. **Der Satz nach dem Neustart über zwei Konten, am Gerät.** Im echten Lauf
+     hörte ihn nur `dialosadmin` (der ausgelöst hatte), nicht `nutzer`.
+     Repariert: Zeitstempel beim Rechner, Quittung pro Person - in einer
+     Sandbox mit zwei Heimatverzeichnissen geprüft. Für den Lauf vom 14.09.
+     gibt es keinen Zeitstempel; **beim nächsten echten Update** zuerst als
+     `nutzer`, dann als `dialosadmin` anmelden - beide müssen den Satz genau
+     einmal hören.
 
-  **Das Widerspruchswort ist NICHT „später".** Am 2026-09-14 gegen das Modell
-  geprüft, und es fällt durch:
-
-      WARNING  Ignoring word missing in vocabulary: 'später'
-      WARNING  Ignoring word missing in vocabulary: 'spät'
-
-  Ein Befehl mit diesem Wort käme nie an — der Nutzer sagt „später", und das
-  Gerät startet trotzdem neu. Vorhanden sind `warten`, `moment`, `nicht jetzt`,
-  `stopp`, `gleich`, `abbrechen`, `weiter`, `pause`, `ja`, `nein`.
-  **Vorgeschlagen: „nicht jetzt"** — zwei Wörter wie beim Einschalten, damit ein
-  beiläufiges Wort nicht dazwischenfunkt. `stopp` fällt aus, es gehört schon zum
-  Ausschalten der Sprachsteuerung. Stephans Zustimmung dazu steht noch aus.
-
-  **Der Neustart ist der gefährliche Teil.** `dialos-stick-gate` sperrt das
-  Konto `nutzer`, wenn der Sicherheits-Stick beim Booten fehlt. Ein Neustart
-  ohne Stick sperrt den Nutzer aus seinem eigenen Gerät aus, und er kann nicht
-  nachsehen, warum. Genau deshalb steht heute `Automatic-Reboot "false"` in der
-  Konfiguration. Die Prüfung ist Pflicht, nicht Kür — `stick_present()` gibt es
-  im Gate schon. Fehlt der Stick: installieren ja, neu starten nein, und sagen
-  „Der Computer wird beim nächsten Start fertig."
-
-  **Braucht eine sudoers-Regel, und die gehört angesehen.** `apt upgrade` ist
-  root. Wie bei der Stimme: ein eng gefasstes `/usr/local/sbin/dialos-systemupdate`
-  **ohne Argumente**, und eine Regel auf genau diesen Pfad. Kein Platzhalter.
-  Nach Stephans Regel vom 2026-08-24 kommt sie nicht ohne seinen Blick auf das
-  Gerät.
-
-  **Der Schlusssatz überzeichnet leicht, und das ist entschieden.** „Auf dem
-  neuesten Stand" gilt nur für die Debian-Pakete. Piper, Vosk, die Sprachmodelle
-  und die Stimmen kommen nicht über apt — die Piper-Binärdatei ist vom
-  14.11.2023. Stephan: „Satz so lassen". Richtig so: Für den Nutzer sagt er das
-  Richtige. Der Vorbehalt steht hier und gehört nicht in die Ansage.
-
-  **Noch zu klären:** Der Sprachbefehl „System aktualisieren" steht in
-  `docs/sprachbefehle.md` als vorgesehen und ist nicht gebaut. Er und diese
-  Automatik sind dasselbe Werkzeug mit zwei Auslösern — beim Bauen zusammen
-  denken, nicht zweimal.
+  **Nebenbei zu klären:** Der Sprachbefehl „System aktualisieren" steht in
+  `docs/sprachbefehle.md` als vorgesehen. Er wäre ein zweiter Auslöser für
+  dasselbe Werkzeug - `dialos-update-lauf.py --jetzt` gibt es schon.
 
 - [ ] **Brief einsprechen - geplant für Dienstag, 2026-09-15** (Stephan am
   2026-09-14: „Punkt 1 bitte auf Dienstag legen"). Die Vorlage liegt fertig in

@@ -130,6 +130,15 @@ Entwicklung.
 - Akkuwarnung bei 25/15/5 %, Ansagen von Stephan abgenommen.
 - Kein Standby am Netz, keine Bildschirmsperre fuer `nutzer`.
 - Unattended-upgrades, Protokoll-Aufbewahrung sieben Tage.
+- **Update-Automatik (2026-09-14):** alle 14 Tage montags nach dem Anmelden,
+  zehn Sekunden Widerspruch auf "nicht jetzt" ("spaeter" fehlt im Wortschatz),
+  `apt-get upgrade` ohne autoremove, Neustart nur mit Stick (Pruefung im
+  root-Teil). Echter Lauf belegt. Der Satz "auf dem neuesten Stand" kam zuerst
+  nur beim ausloesenden Konto - jetzt Zeitstempel unter /var/lib/dialos und
+  Quittung pro Person; der Beweis ueber zwei Konten am Geraet kommt mit dem
+  naechsten echten Update. **sudoers-Regel dialos-systemupdate wartet auf
+  Stephans Durchsicht** (liegt trotzdem schon auf dem Geraet, siehe TODO.md).
+  Doku: Schritt 13d.
 - **Bildschirmfoto auf Zuruf** ueber das XDG-Portal (die GNOME-Schnittstelle
   ist gesperrt, Werkzeuge sind keine installiert). Das Mitschrift-Fenster wird
   vorher geschlossen.

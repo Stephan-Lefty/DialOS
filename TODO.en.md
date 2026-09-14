@@ -67,64 +67,34 @@ finished too, and then move down together. That way no reference breaks.
      — log in, switch voice, update, dictate, print. A loss of rights that only
      surfaces three weeks later is worse than today's state.
 
-- [ ] **Automatic updates every 14 days, Mondays at first start** (Stephan's
-  specification of 2026-09-14; building deferred: "ok das später einbauen").
+- [ ] **Automatic updates: built and run on the device - two things still
+  missing** (Stephan's specification of 2026-09-14, built the same day: "Ich
+  würde das mit dem Update gerne jetzt einbauen").
 
-  **Why at all:** "Irgendwann haben wir ja DialOS fertig und dann sollten auch
-  immer die Pakete, die wir für einen reibungslosen Lauf von DialOS benötigen,
-  auf dem aktuellen Stand sein." Today only **security** updates run
-  automatically (`52dialos-unattended-upgrades`); everything else waits for
-  somebody with a terminal - which the blind user is not. On 2026-09-14 that
-  left **94 packages** from Debian 13.7 sitting there with nothing happening.
+  Every 14 days, Mondays after login, with catch-up; ten seconds to object with
+  **"nicht jetzt"** ("später" is missing from the model's vocabulary); reboot
+  only with the security stick; then "Der Computer ist auf dem neuesten Stand."
+  The real run on 2026-09-14 completed, no loop after the reboot. Design,
+  reasoning and test record: step 13d in
+  [docs/Debian-zu-DialOS.en.md](docs/Debian-zu-DialOS.en.md).
 
-  **The sequence, as decided by Stephan:**
+  **Open:**
 
-  | | |
-  |---|---|
-  | Trigger | Mondays at first start, but only every 14 days |
-  | Catch-up | if the computer was off, at the next start |
-  | 1st announcement | "Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern." |
-  | Objection | ten seconds; after that it proceeds |
-  | 2. Install | `apt upgrade`, **without** `autoremove` |
-  | 3rd announcement | "Die Updates sind installiert. Der Computer startet jetzt neu." |
-  | 4. Reboot | **only if the security stick is inserted** |
-  | 5. After boot | the usual greeting, then "Der Computer ist auf dem neuesten Stand." |
+  1. **Stephan's review of the sudoers rule** `/etc/sudoers.d/dialos-systemupdate`
+     (his rule of 2026-08-24). It is on the device anyway: the exclusion in the
+     NIEMALS list of `dialos-aufspielen` only takes effect on the NEXT run,
+     because the script replaces itself in the same run - same as on 08-24.
+     After the review, remove the NIEMALS entry.
+  2. **The sentence after the reboot across two accounts, on the device.** In
+     the real run only `dialosadmin` (who triggered it) heard it, not `nutzer`.
+     Fixed: timestamp on the machine, acknowledgement per person - checked in a
+     sandbox with two home directories. There is no timestamp for the 09-14
+     run; **at the next real update** log in as `nutzer` first, then as
+     `dialosadmin` - both must hear the sentence exactly once.
 
-  **The objection word is NOT "später".** Checked against the model on
-  2026-09-14, and it fails:
-
-      WARNING  Ignoring word missing in vocabulary: 'später'
-      WARNING  Ignoring word missing in vocabulary: 'spät'
-
-  A command using that word would never arrive - the user says "später" and the
-  device reboots anyway. Available are `warten`, `moment`, `nicht jetzt`,
-  `stopp`, `gleich`, `abbrechen`, `weiter`, `pause`, `ja`, `nein`.
-  **Proposed: "nicht jetzt"** - two words as for switching on, so that a passing
-  word cannot interfere. `stopp` is out, it already belongs to switching the
-  voice control off. Stephan's agreement is still outstanding.
-
-  **The reboot is the dangerous part.** `dialos-stick-gate` locks the account
-  `nutzer` when the security stick is missing at boot. A reboot without the stick
-  locks the user out of his own device, and he cannot go and look why. That is
-  exactly why `Automatic-Reboot "false"` is in the configuration today. The check
-  is mandatory, not optional - `stick_present()` already exists in the gate. With
-  the stick missing: install yes, reboot no, and say "Der Computer wird beim
-  nächsten Start fertig."
-
-  **Needs a sudoers rule, and that has to be looked at.** `apt upgrade` is root.
-  As with the voice: a narrowly scoped `/usr/local/sbin/dialos-systemupdate`
-  **without arguments**, and a rule on exactly that path. No wildcard. Per
-  Stephan's rule of 2026-08-24 it does not reach the device without his review.
-
-  **The closing sentence slightly overstates, and that is decided.** "Auf dem
-  neuesten Stand" holds for the Debian packages only. Piper, Vosk, the speech
-  models and the voices do not come through apt - the Piper binary is dated
-  2023-11-14. Stephan: "Satz so lassen". Rightly so: for the user it says the
-  right thing. The caveat belongs here, not in the announcement.
-
-  **Still to settle:** the voice command "System aktualisieren" is listed in
-  `docs/sprachbefehle.md` as planned and is not built. It and this automation are
-  the same tool with two triggers - think them together when building, not twice.
+  **To settle on the side:** the voice command "System aktualisieren" is listed
+  in `docs/sprachbefehle.md` as planned. It would be a second trigger for the
+  same tool - `dialos-update-lauf.py --jetzt` already exists.
 
 - [ ] **Dictate the letter - planned for Tuesday, 2026-09-15** (Stephan on
   2026-09-14: "Punkt 1 bitte auf Dienstag legen"). The template is ready in

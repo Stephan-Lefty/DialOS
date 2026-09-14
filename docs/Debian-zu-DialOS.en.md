@@ -2646,7 +2646,129 @@ overrides for Evolution and Calendar. It is additionally written to `/etc/skel`
 so a later account gets the same view - with `chown` to the respective account,
 because a file owned by `root` can no longer be changed by the user.
 
- (optional, device-specific)
+## 13d. Update automation: every 14 days, on Mondays, with announcement (new 2026-09-14)
+
+Stephan's requirement from 2026-09-14: at some point DialOS will be finished,
+and then the packages it needs to run smoothly should always be up to date.
+Step 13a only installs **security** updates; everything else waited for someone
+with a terminal. On 2026-09-14 that meant **94 packages** from Debian 13.7 were
+pending.
+
+```bash
+B=iso-build/config/includes.chroot
+sudo install -m 0755 $B/usr/local/sbin/dialos-systemupdate /usr/local/sbin/
+sudo install -m 0755 $B/usr/local/bin/dialos-update-lauf.py /usr/local/bin/
+sudo install -m 0755 $B/usr/local/bin/dialos-start-ansage.py /usr/local/bin/
+sudo install -m 0644 $B/etc/xdg/autostart/dialos-update-lauf.desktop /etc/xdg/autostart/
+sudo visudo -cf $B/etc/sudoers.d/dialos-systemupdate \
+  && sudo install -m 0440 -o root -g root $B/etc/sudoers.d/dialos-systemupdate /etc/sudoers.d/
+```
+
+**The sequence, as Stephan decided it:**
+
+| | |
+|---|---|
+| When | after login, on Mondays, every 14 days |
+| Catch-up | if the computer was off on Monday, at the first start afterwards |
+| 1. Announcement | "Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern. Wenn das jetzt nicht passt, sag: nicht jetzt." |
+| Objection | ten seconds for "nicht jetzt"; after that it proceeds |
+| 2. Install | `apt-get upgrade` |
+| 3. Announcement | "Die Updates sind installiert. Der Computer startet jetzt neu." |
+| 4. Reboot | **only with the security stick** |
+| 5. After start | greeting, then "Der Computer ist auf dem neuesten Stand." |
+
+**Four parts, and the split is deliberate.**
+`/usr/local/sbin/dialos-systemupdate` runs as root and can do exactly three
+things: `pruefen`, `installieren`, `neustarten`. Decision, announcements and
+listening live in `/usr/local/bin/dialos-update-lauf.py`, which runs **without**
+root. Plus an autostart entry and the rule `/etc/sudoers.d/dialos-systemupdate`,
+which names the three calls **literally**, for both `nutzer` and `dialosadmin`.
+Same split as for the voice: whatever goes through sudo should be as small and
+as literal as possible. A `dialos-systemupdate *` would practically be root
+access. **The rule is still awaiting Stephan's review** (his rule from
+2026-08-24); it is therefore on the NIEMALS list of `dialos-aufspielen`.
+
+**After login, not on a timer** (Stephan's decision after asking). A timer can
+fire in the middle of a dictation or a phone call, and the device drops out for
+minutes without the user understanding why. Right after login they have not
+started anything yet. The run waits until the greeting has finished (marker
+`dialos-sprachausgabe-aktiv`, at most three minutes) - otherwise two voices
+would talk at once, one of them expecting an answer.
+
+**The due calculation.** It becomes due 14 days after the last successful run
+(`/var/lib/dialos/systemupdate-zuletzt`), it is done on the first Monday from
+that day, and if "today" is already later, it catches up. Without a last run it
+is due immediately: a freshly set-up device should not stay on its delivery
+state for weeks. If nothing is pending there is **no** announcement - the user
+should not hear every other Monday that nothing happened.
+
+**"Später" does not work.** Stephan wanted "später" ("later") as the objection.
+Checked against the model:
+
+    WARNING  Ignoring word missing in vocabulary: 'später'
+    WARNING  Ignoring word missing in vocabulary: 'spät'
+
+The word is not in the small Vosk model's vocabulary. The user would have said
+"später" and the device would have rebooted anyway - the same silent failure
+DialOS removed on 2026-08-24, only more expensive. Chosen: **"nicht jetzt"**
+("not now"): two words like switching on, both required, no `[unk]`. `stopp`
+was ruled out, it belongs to switching voice control off.
+
+**An objection stores no date.** It postpones by **one session**, not fourteen
+days - otherwise a single "nicht jetzt" could block the update for two weeks.
+
+**`upgrade`, not `dist-upgrade`, and no `autoremove`.** `dist-upgrade` may
+remove packages to resolve dependencies; after step 13b `autoremove` would offer
+to remove the desktop and the audio stack (reasoning in 13a).
+`--force-confdef --force-confold` keeps changed configuration files - otherwise
+apt would stop at a prompt nobody can answer.
+
+**The stick check lives in the privileged part, not in the caller.**
+`dialos-stick-gate` locks `nutzer` if the security stick is missing at boot. A
+reboot without the stick locks the user out of their own device. So
+`dialos-systemupdate neustarten` checks itself with `blkid -L DIALOS-KEY` and
+refuses if it is missing. The announcement then is: "Die Updates sind
+installiert. Der Computer wird beim nächsten Start fertig." Trusting the caller
+would make access to the user's data depend on a swapped condition.
+
+**The final sentence overstates slightly, and that is decided.** "Up to date"
+only applies to the Debian packages; Piper, Vosk and the voices do not come via
+apt. Stephan: keep the sentence. The caveat lives here, not in the announcement.
+
+**Verified on 2026-09-14, in three stages:**
+
+| Stage | Result |
+|---|---|
+| Dry | due calculation correct in six cases (never / 1 / 13 / 14 / 15 / 30 days ago); catch-up on Tuesday after a missed Monday; a wrong argument to `dialos-systemupdate` is rejected by sudo |
+| Listening | 09:30:30 `'[unk] jetzt'` - **not** counted as objection; 09:30:36 `'nicht jetzt'` - recognised |
+| Real run | 09:32:00 due, 1 package pending (`claude-desktop`; Stephan had installed the 94 by hand beforehand); 09:32:19-09:32:26 installed; stick present, reboot; 09:35:29 after the reboot "not due" - **no loop** |
+
+**A bug only the real run showed: the sentence after the reboot reached only
+the account that triggered it.** The first version wrote the marker into the
+home directory of whoever started the update - here `dialosadmin`. After the
+reboot `nutzer` logged in first and did not hear the sentence; only after
+logging in as `dialosadmin` did Stephan hear the full announcement. In real use
+that would mean: if the helper triggers the update, the customer never learns
+about it.
+
+**The fix: the event belongs to the machine, the acknowledgement to each
+person.** After a **real** installation `dialos-systemupdate` writes a timestamp
+to `/var/lib/dialos/systemupdate-installiert` (0644; not in the "nothing to do"
+branch). `dialos-start-ansage.py` compares it with
+`~/.config/dialos/update-gemeldet` and speaks the sentence when the state is
+new. Every person hears it exactly once, no matter who triggered the update or
+who logs in first. Nothing is deleted any more - the acknowledgement prevents
+repetition. **The acknowledgement is written before speaking**, and if it cannot
+be written the sentence stays off: a sentence that is missed once is better
+than one that comes every morning and nobody can switch off.
+
+Checked in a sandbox with two home directories: first login speaks, second
+login of the same person stays silent, the other person speaks once; a new
+timestamp speaks again for both; an unwritable acknowledgement stays silent.
+**Proof on the device across two accounts is still pending** - there is no
+timestamp for the 2026-09-14 run; it comes with the next real update.
+
+## 14. Bake in Bluetooth pairing data (optional, device-specific)
 
 Only relevant if you stay on the **same** test device (the built-in
 Bluetooth adapter has to stay the same, since the pairing data is tied

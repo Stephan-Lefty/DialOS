@@ -67,14 +67,12 @@ ANSAGE_FEHLER = "Die Updates konnten nicht installiert werden."
 
 PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-update.log")
 
-# DIE MERKDATEI FUER DEN SATZ NACH DEM NEUSTART liegt beim NUTZER, nicht unter
-# /var/lib. Zwei Gruende: Die Start-Ansage laeuft als Nutzer und kann sie
-# selbst loeschen - eine root-eigene Datei koennte sie nur lesen, nie
-# abraeumen, und der Satz kaeme jeden Morgen erneut. Und sie gehoert zur
-# Sitzung dieses Menschen, nicht zum System.
-FERTIG_MARKE = os.path.join(
-    os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
-    "dialos", "update-fertig")
+# KEINE MERKDATEI MEHR HIER (seit 2026-09-14). Die erste Fassung schrieb sie
+# ins Heimatverzeichnis dessen, der das Update ausloeste - und wer sich nach
+# dem Neustart als Erster unter einem ANDEREN Konto anmeldete, hoerte den Satz
+# nie. Den Zeitstempel schreibt jetzt dialos-systemupdate nach
+# /var/lib/dialos/systemupdate-installiert, und jede Start-Ansage quittiert ihn
+# pro Person. Begruendung in dialos-start-ansage.py bei update_meldung().
 
 # Dieselbe Marke wie beim Diktat und bei der Ja/Nein-Rueckfrage. Sie bedeutet
 # nicht "ein Diktat laeuft", sondern "ein anderer Dienst hoert gerade zu" -
@@ -241,15 +239,6 @@ def widerspruch_hoeren():
     return False
 
 
-def fertig_merken(text):
-    try:
-        os.makedirs(os.path.dirname(FERTIG_MARKE), exist_ok=True)
-        with open(FERTIG_MARKE, "w", encoding="utf-8") as f:
-            f.write(text + "\n")
-    except OSError as fehler:
-        melde(f"Merkdatei nicht schreibbar: {fehler}")
-
-
 def main():
     argv = sys.argv[1:]
     if "--pruefen" in argv:
@@ -295,7 +284,6 @@ def main():
         return 1
 
     melde("installiert - Neustart wird versucht")
-    fertig_merken("Der Computer ist auf dem neuesten Stand.")
 
     n = subprocess.run(["sudo", "-n", SKRIPT, "neustarten"],
                        capture_output=True, text=True, timeout=60)

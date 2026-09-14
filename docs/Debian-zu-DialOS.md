@@ -2875,6 +2875,135 @@ später angelegtes Konto dieselbe Sicht bekommt - mit `chown` auf das jeweilige
 Konto, weil eine Datei, die `root` gehört, vom Nutzer nicht mehr geändert werden
 kann.
 
+## 13d. Update-Automatik: alle 14 Tage, montags, mit Ansage (neu 2026-09-14)
+
+Stephans Vorgabe vom 2026-09-14: „Irgendwann haben wir ja DialOS fertig und
+dann sollten auch immer die Pakete, die wir für einen reibungslosen Lauf von
+DialOS benötigen, auf dem aktuellen Stand sein." Schritt 13a spielt nur
+**Sicherheits**updates ein; alles andere wartete auf jemanden mit Terminal. Am
+2026-09-14 lagen dadurch **94 Pakete** aus Debian 13.7 bereit.
+
+```bash
+B=iso-build/config/includes.chroot
+sudo install -m 0755 $B/usr/local/sbin/dialos-systemupdate /usr/local/sbin/
+sudo install -m 0755 $B/usr/local/bin/dialos-update-lauf.py /usr/local/bin/
+sudo install -m 0755 $B/usr/local/bin/dialos-start-ansage.py /usr/local/bin/
+sudo install -m 0644 $B/etc/xdg/autostart/dialos-update-lauf.desktop /etc/xdg/autostart/
+sudo visudo -cf $B/etc/sudoers.d/dialos-systemupdate \
+  && sudo install -m 0440 -o root -g root $B/etc/sudoers.d/dialos-systemupdate /etc/sudoers.d/
+```
+
+**Der Ablauf, wie Stephan ihn festgelegt hat:**
+
+| | |
+|---|---|
+| Wann | nach dem Anmelden, montags, alle 14 Tage |
+| Nachholen | war der Computer am Montag aus, beim ersten Start danach |
+| 1. Ansage | „Es müssen ein paar Updates installiert werden. Das kann einige Minuten dauern. Wenn das jetzt nicht passt, sag: nicht jetzt." |
+| Widerspruch | zehn Sekunden auf „nicht jetzt"; danach läuft es durch |
+| 2. Installieren | `apt-get upgrade` |
+| 3. Ansage | „Die Updates sind installiert. Der Computer startet jetzt neu." |
+| 4. Neustart | **nur mit Sicherheits-Stick** |
+| 5. Nach dem Start | Begrüßung, danach „Der Computer ist auf dem neuesten Stand." |
+
+**Vier Teile, und die Trennung ist Absicht.**
+`/usr/local/sbin/dialos-systemupdate` läuft als root und kann genau drei Dinge:
+`pruefen`, `installieren`, `neustarten`. Entscheidung, Ansagen und Zuhören
+liegen in `/usr/local/bin/dialos-update-lauf.py`, das **ohne** root läuft.
+Dazu ein Autostart-Eintrag und die Regel `/etc/sudoers.d/dialos-systemupdate`,
+die die drei Aufrufe **wörtlich** nennt, je für `nutzer` und `dialosadmin`.
+Dieselbe Aufteilung wie bei der Stimme: Was über sudo geht, soll so klein und
+so wörtlich sein wie möglich. Ein `dialos-systemupdate *` wäre praktisch ein
+Root-Zugang. **Die Regel wartet noch auf Stephans Durchsicht** (seine Regel vom
+2026-08-24); sie steht deshalb in der NIEMALS-Liste von `dialos-aufspielen`.
+
+**Nach dem Anmelden, nicht auf einem Timer** (Stephans Entscheidung nach
+Rückfrage). Ein Timer kann mitten in ein Diktat oder ein Telefonat feuern, und
+das Gerät fällt für Minuten aus, ohne dass der Nutzer versteht warum. Direkt
+nach dem Anmelden hat er noch nichts angefangen. Der Lauf wartet, bis die
+Begrüßung zu Ende gesprochen ist (Markierung `dialos-sprachausgabe-aktiv`,
+höchstens drei Minuten) - sonst redeten zwei Stimmen gleichzeitig, von denen
+eine eine Antwort will.
+
+**Die Fälligkeitsrechnung.** Fällig wird es 14 Tage nach dem letzten
+erfolgreichen Lauf (`/var/lib/dialos/systemupdate-zuletzt`), getan wird es am
+ersten Montag ab diesem Tag, und ist „heute" schon später, läuft es nach. Ohne
+einen letzten Lauf ist es sofort fällig: Ein frisch aufgesetztes Gerät soll
+nicht wochenlang auf dem Auslieferungsstand bleiben. Ist nichts offen, gibt es
+**keine** Ansage - der Nutzer soll nicht jeden zweiten Montag hören, dass nichts
+passiert ist.
+
+**„Später" geht nicht.** Stephan wollte „später" als Widerspruch. Gegen das
+Modell geprüft:
+
+    WARNING  Ignoring word missing in vocabulary: 'später'
+    WARNING  Ignoring word missing in vocabulary: 'spät'
+
+Das Wort steht nicht im Wortschatz des kleinen Vosk-Modells. Der Nutzer hätte
+„später" gesagt, und das Gerät wäre trotzdem neu gestartet - derselbe lautlose
+Fehlschlag, den DialOS am 2026-08-24 abgeschafft hat, nur teurer. Gewählt ist
+**„nicht jetzt"**: zwei Wörter wie beim Einschalten, beide nötig, kein `[unk]`
+dabei. `stopp` fiel aus, es gehört zum Ausschalten der Sprachsteuerung.
+
+**Ein Widerspruch merkt sich kein Datum.** Er verschiebt um **eine Sitzung**,
+nicht um vierzehn Tage - sonst könnte ein einziges „nicht jetzt" die
+Aktualisierung zwei Wochen lang verhindern.
+
+**`upgrade`, nicht `dist-upgrade`, und kein `autoremove`.** `dist-upgrade` darf
+Pakete entfernen, um Abhängigkeiten aufzulösen; `autoremove` würde nach Schritt
+13b den Desktop und den Ton-Unterbau anbieten (Begründung in 13a).
+`--force-confdef --force-confold` behält geänderte Konfigurationsdateien -
+sonst bliebe apt an einer Rückfrage stehen, die niemand beantworten kann.
+
+**Die Stick-Prüfung steht im privilegierten Teil, nicht beim Aufrufer.**
+`dialos-stick-gate` sperrt `nutzer`, wenn der Sicherheits-Stick beim Booten
+fehlt. Ein Neustart ohne Stick sperrt den Nutzer aus seinem Gerät aus. Deshalb
+prüft `dialos-systemupdate neustarten` selbst mit `blkid -L DIALOS-KEY` und
+lehnt ab, wenn er fehlt. Dann heißt die Ansage: „Die Updates sind installiert.
+Der Computer wird beim nächsten Start fertig." Einem Fehler im Aufrufer zu
+vertrauen hieße, den Zugang zu den Daten von einer vertauschten Bedingung
+abhängig zu machen.
+
+**Der Schlusssatz überzeichnet leicht, und das ist entschieden.** „Auf dem
+neuesten Stand" gilt nur für die Debian-Pakete; Piper, Vosk und die Stimmen
+kommen nicht über apt. Stephan: „Satz so lassen". Der Vorbehalt steht hier,
+nicht in der Ansage.
+
+**Geprüft am 2026-09-14, in drei Stufen:**
+
+| Stufe | Ergebnis |
+|---|---|
+| Trocken | Fälligkeit in sechs Fällen richtig (nie / vor 1 / 13 / 14 / 15 / 30 Tagen); Nachholen am Dienstag nach einem verpassten Montag; ein falsches Argument an `dialos-systemupdate` wird von sudo abgewiesen |
+| Zuhören | 09:30:30 `'[unk] jetzt'` - **nicht** als Widerspruch gewertet; 09:30:36 `'nicht jetzt'` - erkannt |
+| Echter Lauf | 09:32:00 fällig, 1 Paket offen (`claude-desktop`; die 94 hatte Stephan vorher von Hand eingespielt); 09:32:19-09:32:26 installiert; Stick vorhanden, Neustart; 09:35:29 nach dem Neustart „nicht fällig" - **keine Schleife** |
+
+**Ein Fehler, den erst der echte Lauf gezeigt hat: Der Satz nach dem Neustart
+kam nur beim Auslösenden.** Die erste Fassung schrieb die Merkdatei ins
+Heimatverzeichnis dessen, der das Update gestartet hatte - hier `dialosadmin`.
+Nach dem Neustart meldete sich zuerst `nutzer` an und hörte den Satz nicht.
+Stephan: „beim Benutzer Nutzer kam nach der Begrüßung nicht die Info … Als ich
+mich abgemeldet und als Dialos-admin angemeldet habe, da kam die komplette
+Ansage." Im Betrieb hieße das: Stößt der Helfer das Update an, erfährt der
+Kunde nie davon.
+
+**Die Reparatur: Das Ereignis gehört dem Rechner, die Quittung jeder Person.**
+`dialos-systemupdate` schreibt nach einer **echten** Installation einen
+Zeitstempel nach `/var/lib/dialos/systemupdate-installiert` (0644; im Zweig
+„nichts zu tun" nicht). `dialos-start-ansage.py` vergleicht ihn mit
+`~/.config/dialos/update-gemeldet` und sagt den Satz, wenn der Stand neu ist.
+So hört jede Person ihn genau einmal, egal wer das Update ausgelöst hat und wer
+sich zuerst anmeldet. Gelöscht wird nichts mehr - die Quittung verhindert die
+Wiederholung. **Die Quittung wird vor dem Sprechen geschrieben**, und lässt sie
+sich nicht schreiben, bleibt der Satz aus: Ein Satz, der einmal ausfällt, ist
+besser als einer, der jeden Morgen kommt und den niemand abstellen kann.
+
+In einer Sandbox mit zwei Heimatverzeichnissen geprüft: erste Anmeldung
+spricht, zweite Anmeldung derselben Person schweigt, die andere Person spricht
+einmal; ein neuer Zeitstempel spricht bei beiden wieder; eine nicht schreibbare
+Quittung schweigt. **Der Beweis am Gerät über zwei Konten steht noch aus** - für
+den Lauf vom 2026-09-14 gibt es keinen Zeitstempel, er kommt mit dem nächsten
+echten Update.
+
 ## 14. Bluetooth-Kopplungsdaten fest einbauen (optional, geräte­spezifisch)
 
 Nur relevant, wenn du auf **demselben** Testgerät bleibst (der
