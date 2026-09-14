@@ -411,10 +411,14 @@ finished too, and then move down together. That way no reference breaks.
     case: Anna says "Dial O S" for "DialOS" while Michael stays with "Dial OS"
     (Stephan's choice, by ear). Every rule now has a fourth field naming the
     voices it applies to.
-    **Still open are "Tas tatur" and "Ei Di":** both are tuned to Thorsten and
-    still apply to every voice. Each was played with and without; Stephan's
-    verdict is outstanding. The rebuild that used to be the expensive part of
-    this is done - all that is left is listening.
+    **"Tas tatur" and "Ei Di" were confirmed on 2026-09-14** - both played in
+    Anna's voice, inside the real sentence ("Akku-Stand Tastatur: achtzig
+    Prozent." and "Die Fernwartung laeuft. Die ID ist: ..."), each with and
+    without the rule. Stephan's verdict: "mit Regel" - keep them. No code
+    change needed, the rules already applied to every voice - and so they need
+    NO per-voice field either, contrary to what still seemed possible during
+    the rebuild on 2026-08-24. Pronunciation is thereby fully decided for both
+    voices.
 
 
 - [ ] **Add a second voice early, the selection only at the end**

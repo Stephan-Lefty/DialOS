@@ -179,11 +179,15 @@ Ansage einbauen" keine Loesung, sondern der naechste Fehler.
 nicht installiert - siehe die Ausschlussliste in `dialos-aufspielen`),
 Aufweckwort (Lizenz der fertigen Modelle ist nicht kommerziell).
 
-**Offen aus Stephans Wuenschen:** die Aussprache von "DialOS" in der
-Sprachausgabe - er wollte es melodischer ("dia los"), drei Varianten sind
-vorgespielt, die Wahl steht aus. Im Code steht weiterhin "Dial OS", und dabei
-bleibt es, solange nichts entschieden ist. Ausserdem: ob PDF-ANHAENGE aus
-Mails ebenfalls ins Archiv sollen.
+**Die Aussprache ist entschieden, fuer beide Stimmen.** Am 2026-08-24 hat
+Stephan aus acht Schreibweisen gewaehlt: Anna sagt "Dial O S", Michael bleibt
+bei "Dial OS". Die Regeln in AUSSPRACHE haben dafuer ein viertes Feld - die
+Stimmen, fuer die sie gelten. Am 2026-09-14 kamen "Tas tatur" und "Ei Di" dazu,
+beide mit Anna im echten Satz vorgespielt, Urteil "mit Regel" - sie gelten also
+weiter fuer alle Stimmen und brauchen kein eigenes Feld.
+
+**Offen aus Stephans Wuenschen:** ob PDF-ANHAENGE aus Mails ebenfalls ins
+Archiv sollen.
 
 
 ## Frueherer Stand (2026-08-19)

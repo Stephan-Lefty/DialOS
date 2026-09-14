@@ -423,10 +423,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     ersten echten Fall: "DialOS" spricht Anna als "Dial O S", Michael bleibt
     bei "Dial OS" (Stephans Wahl nach Gehoer). Jede Regel hat ein viertes
     Feld fuer die Stimmen, fuer die sie gilt.
-    **Offen bleiben "Tas tatur" und "Ei Di":** beide sind auf Thorsten
-    abgestimmt und gelten weiterhin fuer alle Stimmen. Vorgespielt wurde jede
-    mit und ohne; Stephans Urteil dazu steht aus. Der Umbau, der frueher der
-    teure Teil daran war, ist jetzt erledigt - es fehlt nur noch das Hoeren.
+    **„Tas tatur" und „Ei Di" sind am 2026-09-14 bestaetigt** - beide mit
+    Anna vorgespielt, im echten Satz („Akku-Stand Tastatur: achtzig Prozent."
+    und „Die Fernwartung laeuft. Die ID ist: ..."), jeweils mit und ohne
+    Regel. Stephans Urteil: „mit Regel". Keine Codeaenderung noetig, die
+    Regeln galten schon fuer alle Stimmen - und sie brauchen damit AUCH KEIN
+    Stimmen-Feld, anders als es beim Umbau am 2026-08-24 noch moeglich schien.
+    Damit ist die Aussprache fuer beide Stimmen vollstaendig entschieden.
 
 
 - [ ] **Zweite Stimme früh dazulegen, Auswahl erst zum Schluss**
