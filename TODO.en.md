@@ -94,6 +94,13 @@ finished too, and then move down together. That way no reference breaks.
   not end it at logout (the "manager" session remained), and a single-instance
   lock as in `dialos-start-ansage.py`. Also open whether this played a part in
   earlier tests.
+  **Built on 2026-09-14** (Stephan: the voice command has to be reset at
+  logout too): at start the service ends every older instance of the same
+  account (SIGTERM, SIGKILL after 3 s) - at start rather than at logout,
+  because logout is exactly what proved unreliable. Checked with stubs,
+  including one that ignores SIGTERM; the running service was untouched.
+  **Open:** proof at the next logout/login ("aeltere Instanz beendet" in the
+  log, or only one process) - and the cause at logout.
 
 - [ ] **Announcements from other services interrupt dictation** (2026-09-14,
   12:11:29). In the middle of a shopping-list dictation the network monitor

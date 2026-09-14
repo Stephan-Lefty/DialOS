@@ -121,6 +121,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Only one voice service per account** (2026-09-14). After logging out and
+  in, two were running - the old one had survived logout, and both were
+  listening. Now the service ends every older instance of the same account at
+  start.
+
 - **Confirmations and dictation react immediately** (2026-09-14, Stephan's
   test: he had to say "nein" twice and "ja" twice). Measured: parec buffers
   2.03 seconds by default before the first audio arrives, and the microphone

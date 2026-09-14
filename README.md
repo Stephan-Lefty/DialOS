@@ -129,6 +129,10 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Nur noch ein Sprachdienst je Konto** (2026-09-14). Nach Ab- und Anmelden
+  liefen zwei - der alte hatte das Abmelden überlebt, beide hörten zu. Jetzt
+  beendet der Dienst beim Start jede ältere Instanz desselben Kontos.
+
 - **Rückfragen und Diktat reagieren sofort** (2026-09-14, Stephans Test: „ich
   musste zwei mal nein und zweimal ja sagen"). Gemessen: parec puffert ab Werk
   2,03 Sekunden, bevor der erste Ton ankommt, und das Mikrofon öffnete erst nach

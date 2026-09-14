@@ -94,6 +94,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   warum GNOME sie beim Abmelden nicht beendet (die Sitzung „manager" blieb
   bestehen), und eine Ein-Instanz-Sperre wie bei `dialos-start-ansage.py`.
   Offen auch, ob das bei früheren Tests mitgespielt hat.
+  **Gebaut am 2026-09-14** (Stephan: „Dann musst du beim Abmelden den
+  Sprachbefehl auch resetten"): Beim Start beendet der Dienst jede ältere
+  Instanz desselben Kontos (SIGTERM, nach 3 s SIGKILL) - beim Start statt beim
+  Abmelden, weil genau das Abmelden unzuverlässig war. Mit Attrappen geprüft,
+  auch mit einer, die SIGTERM ignoriert; der laufende Dienst blieb unberührt.
+  **Offen:** Beweis beim nächsten Ab- und Anmelden („aeltere Instanz beendet"
+  im Protokoll oder nur ein Prozess) - und die Ursache beim Abmelden.
 
 - [ ] **Ansagen anderer Dienste unterbrechen das Diktat** (2026-09-14, 12:11:29).
   Mitten im Einkaufszettel-Diktat sagte die Netzwerküberwachung „Die

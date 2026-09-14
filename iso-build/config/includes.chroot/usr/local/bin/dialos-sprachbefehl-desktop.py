@@ -1151,7 +1151,57 @@ def aufnahme_starten(quelle):
     return p
 
 
+# NUR EIN SPRACHDIENST JE KONTO (Fehler vom 2026-09-14).
+#
+# Nach Ab- und Anmelden liefen zwei: der von 11:49 hatte das Abmelden
+# ueberlebt, der neue kam um 12:09 dazu. Beide hoerten zu - ein Befehl konnte
+# doppelt ausgefuehrt werden, und der alte lief mit der Fassung von VOR dem
+# Aufspielen weiter. Stephan: "Dann musst du beim Abmelden den Sprachbefehl
+# auch resetten."
+#
+# Erledigt wird es beim START, nicht beim Abmelden: Auf das Abmelden ist kein
+# Verlass - genau dort ist es schiefgegangen. Beim Start ist dagegen sicher,
+# dass diese Instanz die richtige ist: die neueste, aus dem Autostart der
+# aktuellen Sitzung.
+#
+# Gesucht wird in /proc und nicht ueber eine Sperrdatei: Eine Datei unter
+# XDG_RUNTIME_DIR ueberlebt das Abmelden ebenso wie der alte Prozess, und ihr
+# Inhalt beweist nichts. Nur Prozesse DESSELBEN Kontos werden beendet.
+def alte_instanzen_beenden():
+    eigene = os.getpid()
+    uid = os.getuid()
+    alte = []
+    for eintrag in os.listdir("/proc"):
+        if not eintrag.isdigit() or int(eintrag) == eigene:
+            continue
+        try:
+            if os.stat(f"/proc/{eintrag}").st_uid != uid:
+                continue
+            with open(f"/proc/{eintrag}/cmdline", "rb") as f:
+                teile = f.read().split(b"\0")
+        except OSError:
+            continue
+        if any(t.endswith(b"dialos-sprachbefehl-desktop.py") for t in teile[:3]):
+            alte.append(int(eintrag))
+    for pid in alte:
+        try:
+            os.kill(pid, signal.SIGTERM)
+            melde(f"aeltere Instanz beendet (PID {pid})")
+        except (ProcessLookupError, PermissionError):
+            pass
+    if alte:
+        ende = time.time() + 3.0
+        while time.time() < ende and any(os.path.exists(f"/proc/{p}") for p in alte):
+            time.sleep(0.1)
+        for pid in alte:
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+
+
 def main():
+    alte_instanzen_beenden()
     try:
         import vosk
     except ImportError:
