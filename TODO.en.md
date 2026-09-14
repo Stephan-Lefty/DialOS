@@ -50,6 +50,13 @@ finished too, and then move down together. That way no reference breaks.
   2. **No confirmation before consequential actions.** Printing, dictation
      (overwrites the letter, files a PDF) and switching run immediately. Only
      deleting asks - and that question held, narrowly.
+     **Fixed on 2026-09-14** (Stephan: build a confirmation before printing
+     and dictation): both now go through `dialos-notiz.py` with the same yes/no
+     question as deleting. Checked silently with stubs (yes, no, nothing
+     understood, empty list; marker only during the question). **Open:** a
+     test on the device with a real voice - and it only takes effect after the
+     next login, because the command service has to restart. Switching the
+     look still does not ask (it does no harm and is instantly reversible).
   3. **The extra-word rule of 2026-08-24** (up to two words too many) made
      three of the four print jobs possible. It was measured on Stephan's real
      voice, not on a conversation.

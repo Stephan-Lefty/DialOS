@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Rückfrage vor Drucken und Diktat** (2026-09-14, Stephans Vorgabe nach dem
+  Vorfall, bei dem ein Gespräch im Raum DialOS bedient hat). „Soll ich den Brief
+  drucken? Sage ja oder nein." - dieselbe Frage und Auswertung wie beim
+  Löschen, die an dem Tag als einzige gehalten hatte. Bei „nein" oder nichts
+  Verstandenem passiert nichts. Ist nichts zu drucken, entfällt die Frage.
+
 - **Längere Pausen zwischen den Sätzen** (2026-09-14, Stephans Wahl im
   Hörvergleich, für Anna und Michael). `--sentence_silence 0.5`: rund 0,78 statt
   0,45 Sekunden zwischen zwei Sätzen. Die Pause gab es schon - sie war nur kurz.

@@ -121,6 +121,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Confirmation before printing and dictation** (2026-09-14, Stephan's
+  requirement after the incident in which a conversation in the room operated
+  DialOS). "Soll ich den Brief drucken? Sage ja oder nein." - the same question
+  and evaluation as for deleting, which was the only one that held that day. On
+  "nein" or nothing understood, nothing happens. If there is nothing to print,
+  the question is skipped.
+
 - **Longer pauses between sentences** (2026-09-14, Stephan's choice in a
   listening comparison, for Anna and Michael). `--sentence_silence 0.5`: about
   0.78 instead of 0.45 seconds between two sentences. The pause already

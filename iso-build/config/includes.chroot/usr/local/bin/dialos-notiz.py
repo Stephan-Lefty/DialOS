@@ -30,9 +30,20 @@ zurueckholen. Es kostet nichts und deckt genau den Fall ab, den eine
 Rueckfrage nicht abdeckt: dass der Nutzer "ja" sagt und es hinterher
 bedauert.
 
+RUECKFRAGE AUCH VOR DRUCKEN UND DIKTAT (seit 2026-09-14, Stephans Vorgabe
+"Bau eine Rueckfrage vor Drucken und Diktat ein"). Anlass: In Stephans Pause
+hat ein Gespraech im Raum die Sprachsteuerung eingeschaltet und daraus
+"diktat brief schreiben" und dreimal "... drucken" gemacht - 97 Sekunden
+Gespraech wurden als Brief geschrieben, ins Archiv gelegt und zweimal
+ausgedruckt. Die Loeschfrage hat an dem Tag als einzige gehalten. Deshalb
+laufen Drucken und Diktat jetzt ueber dieses Skript und dieselbe Frage; der
+Befehlsdienst startet sie nicht mehr selbst. Einzelheiten in TODO.md.
+
 Aufruf:
     dialos-notiz.py einkaufszettel vorlesen
     dialos-notiz.py einkaufszettel loeschen
+    dialos-notiz.py brief drucken      Rueckfrage, dann dialos-drucken.py
+    dialos-notiz.py brief diktat       Rueckfrage, dann dialos-diktat.py
     dialos-notiz.py --debug ...
 """
 
@@ -434,11 +445,96 @@ def _loeschen(name):
     return 0
 
 
+# ------------------------------------------- Rueckfrage vor Drucken/Diktat
+
+DRUCK_SKRIPT = "/usr/local/bin/dialos-drucken.py"
+DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
+
+# Akkusativ fuer die Frage. Unbekannte Namen bekommen wie bei benennen() eine
+# neutrale Form, die immer aufgeht.
+AKKUSATIV = {
+    "einkaufszettel": "den Einkaufszettel",
+    "notizen": "die Notizen",
+    "brief": "den Brief",
+}
+
+# OHNE Namen in der Frage - anders als beim Loeschen. Dort steht der Name, weil
+# etwas verloren geht; hier soll die Frage kurz sein, denn sie kommt jetzt vor
+# jedem Druck und jedem Diktat.
+#
+# Der Brief fragt nach einem NEUEN Brief: Das Diktat legt den vorigen beiseite
+# und schreibt einen neuen - "aufnehmen" allein verschwiege das.
+DIKTAT_FRAGEN = {
+    "brief": "Soll ich einen neuen Brief schreiben? Sage ja oder nein.",
+    "einkaufszettel": "Soll ich etwas in den Einkaufszettel schreiben? Sage ja oder nein.",
+    "notizen": "Soll ich eine Notiz aufnehmen? Sage ja oder nein.",
+}
+
+
+def _ist_leer(name):
+    if name in BRIEF_ZIELE:
+        _, text, _ = briefteile(pfad_fuer(name))
+        return not any(z.strip() for z in text)
+    return not eintraege_lesen(name)
+
+
+def mit_rueckfrage(frage, bei_nein, bei_nichts):
+    """Stellt die Frage unter der Marke. True nur bei einem klaren "ja".
+
+    Die Marke gilt nur fuer die Dauer der Frage - der Befehlsdienst haelt sich
+    so lange heraus. Die Auswertung ist dieselbe wie beim Loeschen: "ja" zaehlt
+    nur ohne "nein" und ohne "[unk]" in derselben Aeusserung. Am 2026-09-14
+    hat genau das gehalten: Aus dem Gespraech kam "nein nein ja", und der
+    Zettel blieb stehen.
+    """
+    open(FREMDE_AUFNAHME_MARKE, "w").close()
+    try:
+        antwort = ja_oder_nein(frage)
+    finally:
+        try:
+            os.unlink(FREMDE_AUFNAHME_MARKE)
+        except OSError:
+            pass
+    if antwort is True:
+        melde("  Rueckfrage: ja")
+        return True
+    melde(f"  Rueckfrage: {'nein' if antwort is False else 'nichts verstanden'} - nicht ausgefuehrt")
+    sprich(bei_nein if antwort is False else bei_nichts)
+    return False
+
+
+def drucken(name):
+    # Leer? Dann gar nicht erst fragen - das Druckskript sagt selbst, dass es
+    # nichts zu drucken gibt. Eine Frage, auf die "ja" nur "ist leer" folgt,
+    # waere eine Frage zu viel.
+    if not _ist_leer(name):
+        akk = AKKUSATIV.get(name, f"die Notiz {name}")
+        if not mit_rueckfrage(f"Soll ich {akk} drucken? Sage ja oder nein.",
+                              "Gut, ich drucke nicht.",
+                              "Ich habe nichts verstanden. Ich drucke nicht."):
+            return 0
+    return subprocess.run([DRUCK_SKRIPT, name]).returncode
+
+
+def diktat(name):
+    frage = DIKTAT_FRAGEN.get(name, f"Soll ich in die Notiz {name} schreiben? Sage ja oder nein.")
+    if not mit_rueckfrage(frage, "Gut, ich schreibe nicht mit.",
+                          "Ich habe nichts verstanden. Ich schreibe nicht mit."):
+        return 0
+    # Das Diktat legt dieselbe Marke selbst an, bevor es sein Modell laedt.
+    # Zwischen dem Ende der Frage und diesem Moment liegen Sekunden, in denen
+    # der Befehlsdienst wieder zuhoert - das ist derselbe Zustand wie vorher
+    # nach "Diktat starten", also nichts Neues. Gewartet wird auf das Diktat,
+    # damit dieser Prozess nicht vorher endet; der Befehlsdienst wartet auf
+    # diesen hier ohnehin nicht.
+    return subprocess.run([DIKTAT_SKRIPT, "notiz", name]).returncode
+
+
 def main():
     argumente = [a for a in sys.argv[1:] if not a.startswith("--")]
     if len(argumente) < 2:
         print(__doc__.strip().splitlines()[-4], file=sys.stderr)
-        print("Aufruf: dialos-notiz.py NAME vorlesen|loeschen", file=sys.stderr)
+        print("Aufruf: dialos-notiz.py NAME vorlesen|loeschen|drucken|diktat", file=sys.stderr)
         return 2
     name, was = argumente[0], argumente[1]
     melde(f"=== {was} {name} ===")
@@ -446,6 +542,10 @@ def main():
         return vorlesen(name)
     if was in ("loeschen", "löschen"):
         return loeschen(name)
+    if was == "drucken":
+        return drucken(name)
+    if was == "diktat":
+        return diktat(name)
     print(f"Unbekannt: {was}", file=sys.stderr)
     return 2
 

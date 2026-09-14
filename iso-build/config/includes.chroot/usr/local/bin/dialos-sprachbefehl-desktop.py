@@ -936,7 +936,7 @@ def diktat_starten(notiz):
     diese Reihenfolge waeren die ersten diktierten Saetze hier als Befehle
     ausgewertet worden.
     """
-    if not os.access(DIKTAT_SKRIPT, os.X_OK):
+    if not os.access(DIKTAT_SKRIPT, os.X_OK) or not os.access(NOTIZ_SKRIPT, os.X_OK):
         sprich("Ich kann das Diktat nicht finden.")
         return
     if diktat_laeuft():
@@ -956,11 +956,16 @@ def diktat_starten(notiz):
         # jede Zeile doppelt erscheinen, einmal mit und einmal ohne Uhrzeit.
         # Ein Protokoll, das jede Zeile zweimal zeigt, laedt zu falschen
         # Schluessen ein.
-        subprocess.Popen([DIKTAT_SKRIPT, "notiz", notiz],
+        # MIT RUECKFRAGE (seit 2026-09-14): gestartet wird dialos-notiz.py,
+        # das "Soll ich ...? Sage ja oder nein." fragt und erst bei einem
+        # klaren "ja" das Diktat startet. Anlass: Ein Gespraech im Raum hat
+        # "diktat brief schreiben" ergeben und 97 Sekunden als Brief
+        # geschrieben, archiviert und gedruckt. Begruendung in dialos-notiz.py.
+        subprocess.Popen([NOTIZ_SKRIPT, notiz, "diktat"],
                          stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL,
                          start_new_session=True)
-        melde(f"Diktat gestartet fuer Notiz {notiz!r}")
+        melde(f"Rueckfrage vor Diktat gestartet fuer Notiz {notiz!r}")
     except Exception as fehler:
         melde(f"Diktat liess sich nicht starten: {fehler}")
         sprich("Ich kann das Diktat nicht starten.")
@@ -979,15 +984,17 @@ def drucken(was):
     Der Druckauftrag ist in Millisekunden abgegeben, aber die Ansage danach
     dauert - und der Drucker braucht ohnehin laenger als jede Schleife.
     """
-    if not os.access(DRUCK_SKRIPT, os.X_OK):
+    if not os.access(DRUCK_SKRIPT, os.X_OK) or not os.access(NOTIZ_SKRIPT, os.X_OK):
         sprich("Ich kann das Drucken nicht finden.")
         return
     try:
-        subprocess.Popen([DRUCK_SKRIPT, was],
+        # MIT RUECKFRAGE (seit 2026-09-14) - wie beim Diktat, siehe dort.
+        # Am 2026-09-14 kamen aus einem Gespraech vier Druckauftraege.
+        subprocess.Popen([NOTIZ_SKRIPT, was, "drucken"],
                          stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL,
                          start_new_session=True)
-        melde(f"Druck {was!r} gestartet")
+        melde(f"Rueckfrage vor Druck {was!r} gestartet")
     except Exception as fehler:
         melde(f"Druck liess sich nicht starten: {fehler}")
         sprich("Ich kann das nicht ausführen.")

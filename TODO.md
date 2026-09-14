@@ -51,6 +51,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   2. **Kein Nachfragen vor Folgenreichem.** Drucken, Diktat (überschreibt den
      Brief, legt ein PDF ab) und Umschalten laufen sofort. Nur das Löschen
      fragt - und die Frage hat gehalten, knapp.
+     **Behoben am 2026-09-14** (Stephan: „Bau eine Rückfrage vor Drucken und
+     Diktat ein"): Beide laufen jetzt über `dialos-notiz.py` mit derselben
+     Ja/Nein-Frage wie das Löschen. Still mit Attrappen geprüft (ja, nein,
+     nichts verstanden, leerer Zettel; Marke nur während der Frage). **Offen:**
+     Probe am Gerät mit echter Stimme - und sie wirkt erst nach dem nächsten
+     Anmelden, weil der Befehlsdienst neu starten muss. Umschalten fragt
+     weiterhin nicht (es richtet keinen Schaden an und ist sofort umkehrbar).
   3. **Die Zusatzwort-Regel vom 2026-08-24** (bis zu zwei Wörter zu viel)
      hat drei der vier Druckaufträge erst ermöglicht. Sie war an Stephans
      echter Stimme gemessen, nicht an einem Gespräch.
