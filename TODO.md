@@ -69,8 +69,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      Drucken. Ein Rechteentzug, der erst drei Wochen später auffällt, ist
      schlimmer als der heutige Zustand.
 
-- [ ] **Update-Automatik: gebaut und am Gerät gelaufen - zwei Dinge fehlen
-  noch** (Stephans Vorgabe vom 2026-09-14, am selben Tag gebaut: „Ich würde das
+- [ ] **Update-Automatik: gebaut und am Gerät gelaufen - eins fehlt noch** (Stephans Vorgabe vom 2026-09-14, am selben Tag gebaut: „Ich würde das
   mit dem Update gerne jetzt einbauen").
 
   Alle 14 Tage, montags nach dem Anmelden, mit Nachholen; zehn Sekunden
@@ -82,15 +81,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
   **Offen:**
 
-  1. **Stephans Durchsicht der sudoers-Regel** `/etc/sudoers.d/dialos-systemupdate`
-     (seine Regel vom 2026-08-24). Sie ist trotzdem schon auf dem Gerät: Die
-     Ausnahme in der NIEMALS-Liste von `dialos-aufspielen` greift erst beim
-     NÄCHSTEN Lauf, weil das Skript sich im selben Lauf selbst ersetzt -
-     derselbe Ablauf wie am 24.08. Nach der Durchsicht den Eintrag in NIEMALS
-     entfernen. **Stand 2026-09-14:** Stephan hat die Regel angesehen (Prüfsumme
-     Gerät = Repo, `afa162ca…9ffc`); auf seinen Wunsch startet `neustarten` jetzt
-     nur noch nach einem echten Update seit dem letzten Start. Die Freigabe
-     selbst steht noch aus.
+  1. ~~Stephans Durchsicht der sudoers-Regel~~ **Erledigt 2026-09-14:** Stephan
+     hat `/etc/sudoers.d/dialos-systemupdate` angesehen (Prüfsumme Gerät =
+     Repo, `afa162ca…9ffc`) und freigegeben: „Ja, ich gebe die Regel frei". Bei
+     der Durchsicht kam dazu, dass `neustarten` nur nach einem echten Update
+     seit dem letzten Start neu startet. Der Eintrag in der NIEMALS-Liste von
+     `dialos-aufspielen` ist entfernt.
   2. **Der Satz nach dem Neustart über zwei Konten, am Gerät.** Im echten Lauf
      hörte ihn nur `dialosadmin` (der ausgelöst hatte), nicht `nutzer`.
      Repariert: Zeitstempel beim Rechner, Quittung pro Person - in einer

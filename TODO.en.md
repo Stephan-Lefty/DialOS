@@ -67,7 +67,7 @@ finished too, and then move down together. That way no reference breaks.
      — log in, switch voice, update, dictate, print. A loss of rights that only
      surfaces three weeks later is worse than today's state.
 
-- [ ] **Automatic updates: built and run on the device - two things still
+- [ ] **Automatic updates: built and run on the device - one thing still
   missing** (Stephan's specification of 2026-09-14, built the same day: "Ich
   würde das mit dem Update gerne jetzt einbauen").
 
@@ -80,14 +80,11 @@ finished too, and then move down together. That way no reference breaks.
 
   **Open:**
 
-  1. **Stephan's review of the sudoers rule** `/etc/sudoers.d/dialos-systemupdate`
-     (his rule of 2026-08-24). It is on the device anyway: the exclusion in the
-     NIEMALS list of `dialos-aufspielen` only takes effect on the NEXT run,
-     because the script replaces itself in the same run - same as on 08-24.
-     After the review, remove the NIEMALS entry. **As of 2026-09-14:** Stephan
-     has looked at the rule (checksum device = repo, `afa162ca…9ffc`); at his
-     request `neustarten` now only reboots after a real update since the last
-     boot. The approval itself is still pending.
+  1. ~~Stephan's review of the sudoers rule~~ **Done 2026-09-14:** Stephan
+     looked at `/etc/sudoers.d/dialos-systemupdate` (checksum device = repo,
+     `afa162ca…9ffc`) and approved it: "Ja, ich gebe die Regel frei". The review
+     added that `neustarten` only reboots after a real update since the last
+     boot. The entry in the NIEMALS list of `dialos-aufspielen` is removed.
   2. **The sentence after the reboot across two accounts, on the device.** In
      the real run only `dialosadmin` (who triggered it) heard it, not `nutzer`.
      Fixed: timestamp on the machine, acknowledgement per person - checked in a

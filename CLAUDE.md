@@ -138,8 +138,8 @@ Entwicklung.
   aus). Echter Lauf belegt. Der Satz "auf dem neuesten Stand" kam zuerst
   nur beim ausloesenden Konto - jetzt Zeitstempel unter /var/lib/dialos und
   Quittung pro Person; der Beweis ueber zwei Konten am Geraet kommt mit dem
-  naechsten echten Update. **sudoers-Regel dialos-systemupdate wartet auf
-  Stephans Durchsicht** (liegt trotzdem schon auf dem Geraet, siehe TODO.md).
+  naechsten echten Update. **sudoers-Regel dialos-systemupdate von Stephan
+  am 2026-09-14 freigegeben** (Pruefsumme Geraet = Repo), nicht mehr in NIEMALS.
   Doku: Schritt 13d.
 - **Bildschirmfoto auf Zuruf** ueber das XDG-Portal (die GNOME-Schnittstelle
   ist gesperrt, Werkzeuge sind keine installiert). Das Mitschrift-Fenster wird

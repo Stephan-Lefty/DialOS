@@ -130,8 +130,7 @@ background) and `splash.png` (boot/login screen).
   (marker under `/run`). Real run on 2026-09-14 completed, no loop after the reboot. **Found on
   the way:** the sentence "Der Computer ist auf dem neuesten Stand" only reached
   the account that triggered the update, not `nutzer`. Now the timestamp
-  belongs to the machine and each person acknowledges it. The sudoers rule is
-  still awaiting Stephan's review. Details in step 13d of
+  belongs to the machine and each person acknowledges it. Stephan reviewed and approved the sudoers rule the same day. Details in step 13d of
   [Debian-zu-DialOS](docs/Debian-zu-DialOS.en.md).
 
 - **When nothing matched, DialOS now says so** (2026-08-24, approved by

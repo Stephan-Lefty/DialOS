@@ -139,7 +139,7 @@ das Erfolg meldet, während es versagt.
   Neustart. **Dabei gefunden:** Der Satz „Der Computer ist auf dem neuesten
   Stand" kam nur beim Konto, das das Update ausgelöst hatte, nicht bei `nutzer`.
   Jetzt gehört der Zeitstempel dem Rechner und jede Person quittiert ihn selbst.
-  Die sudoers-Regel wartet noch auf Stephans Durchsicht. Einzelheiten in
+  Die sudoers-Regel hat Stephan am selben Tag durchgesehen und freigegeben. Einzelheiten in
   Schritt 13d von [Debian-zu-DialOS](docs/Debian-zu-DialOS.md).
 
 - **Wenn nichts gepasst hat, sagt DialOS es jetzt** (2026-08-24, Stephans

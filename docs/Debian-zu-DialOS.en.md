@@ -2685,8 +2685,11 @@ root. Plus an autostart entry and the rule `/etc/sudoers.d/dialos-systemupdate`,
 which names the three calls **literally**, for both `nutzer` and `dialosadmin`.
 Same split as for the voice: whatever goes through sudo should be as small and
 as literal as possible. A `dialos-systemupdate *` would practically be root
-access. **The rule is still awaiting Stephan's review** (his rule from
-2026-08-24); it is therefore on the NIEMALS list of `dialos-aufspielen`.
+access. **Reviewed and approved by Stephan on 2026-09-14** (his rule from
+2026-08-24: no sudoers rule without his review). The file on the device was
+checked against the repo, checksum `afa162ca…9ffc`; the review added the reboot
+condition below. Until the approval the rule was on the NIEMALS list of
+`dialos-aufspielen`; now it is installed normally.
 
 **After login, not on a timer** (Stephan's decision after asking). A timer can
 fire in the middle of a dictation or a phone call, and the device drops out for

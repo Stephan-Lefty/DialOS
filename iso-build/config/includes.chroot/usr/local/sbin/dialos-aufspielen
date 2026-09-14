@@ -114,14 +114,6 @@ NIEMALS = [
     # Fehler.
     ("etc/speech-dispatcher/modules/piper-generic.conf",
      "enthaelt die vom Nutzer gewaehlte Stimme - laufender Zustand", True),
-    # WARTET AUF DURCHSICHT (2026-09-14). Die Regel erlaubt "apt upgrade" ohne
-    # Passwort - das ist deutlich mehr als die Stimm-Regel, auch wenn sie eng
-    # gefasst ist (drei woertliche Aufrufe, keine Argumente an apt, kein
-    # dist-upgrade, kein autoremove, Stick-Pruefung im privilegierten Teil).
-    # Stephans Regel vom 2026-08-24: eine sudoers-Regel gehoert nicht ohne
-    # seinen Blick auf das Geraet. Nach der Durchsicht: diese Zeile loeschen.
-    ("etc/sudoers.d/dialos-systemupdate",
-     "wartet auf Durchsicht, siehe TODO.md", True),
 ]
 
 

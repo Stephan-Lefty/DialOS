@@ -2914,8 +2914,12 @@ Dazu ein Autostart-Eintrag und die Regel `/etc/sudoers.d/dialos-systemupdate`,
 die die drei Aufrufe **wörtlich** nennt, je für `nutzer` und `dialosadmin`.
 Dieselbe Aufteilung wie bei der Stimme: Was über sudo geht, soll so klein und
 so wörtlich sein wie möglich. Ein `dialos-systemupdate *` wäre praktisch ein
-Root-Zugang. **Die Regel wartet noch auf Stephans Durchsicht** (seine Regel vom
-2026-08-24); sie steht deshalb in der NIEMALS-Liste von `dialos-aufspielen`.
+Root-Zugang. **Von Stephan am 2026-09-14 durchgesehen und freigegeben** (seine
+Regel vom 2026-08-24: keine sudoers-Regel ohne seinen Blick). Geprüft wurde die
+Datei auf dem Gerät gegen das Repo, Prüfsumme `afa162ca…9ffc`; bei der
+Durchsicht kam die Neustart-Bedingung unten dazu. Bis zur Freigabe stand die
+Regel in der NIEMALS-Liste von `dialos-aufspielen`, jetzt wird sie normal
+aufgespielt.
 
 **Nach dem Anmelden, nicht auf einem Timer** (Stephans Entscheidung nach
 Rückfrage). Ein Timer kann mitten in ein Diktat oder ein Telefonat feuern, und
