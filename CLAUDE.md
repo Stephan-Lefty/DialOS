@@ -576,6 +576,7 @@ nichts fuer den Kunden.** Den Beweis liefert erst ein Start ueber den Autostart
 (Ab- und Anmelden oder Neustart). Fuer stille Einzelproben die Einheit
 nachbilden: `systemd-run --user --scope --unit='app-gnome-dialos\x2d…-<nr>' …`.
 
+## Arbeitsweise mit Stephan
 
 **Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,
 weil sie den Tag gekostet haben:**
