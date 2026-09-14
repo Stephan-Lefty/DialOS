@@ -2923,8 +2923,9 @@ than one that comes every morning and nobody can switch off.
 Checked in a sandbox with two home directories: first login speaks, second
 login of the same person stays silent, the other person speaks once; a new
 timestamp speaks again for both; an unwritable acknowledgement stays silent.
-**Proof on the device across two accounts is still pending** - there is no
-timestamp for the 2026-09-14 run; it comes with the next real update.
+**Proven on the device across two accounts on 2026-09-14, 13:26-13:29:**
+after the firmware update via the automation and a reboot, the sentence came
+first for `nutzer` (autologin), then for `dialosadmin` - once each.
 
 ## 14. Bake in Bluetooth pairing data (optional, device-specific)
 

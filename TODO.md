@@ -288,7 +288,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      Drucken. Ein Rechteentzug, der erst drei Wochen später auffällt, ist
      schlimmer als der heutige Zustand.
 
-- [ ] **Update-Automatik: gebaut und am Gerät gelaufen - eins fehlt noch** (Stephans Vorgabe vom 2026-09-14, am selben Tag gebaut: „Ich würde das
+- [x] **Update-Automatik: gebaut und am Gerät gelaufen - vollständig belegt (2026-09-14)** (Stephans Vorgabe vom 2026-09-14, am selben Tag gebaut: „Ich würde das
   mit dem Update gerne jetzt einbauen").
 
   Alle 14 Tage, montags nach dem Anmelden, mit Nachholen; zehn Sekunden
@@ -313,6 +313,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      gibt es keinen Zeitstempel; **beim nächsten echten Update** zuerst als
      `nutzer`, dann als `dialosadmin` anmelden - beide müssen den Satz genau
      einmal hören.
+     **Erledigt am 2026-09-14, 13:26-13:29** - früher als gedacht, weil das
+     Firmware-Update (UEFI dbx) über die Automatik einen echten Zeitstempel
+     geschrieben hat. Nach dem Neustart zuerst `nutzer` (Autologin): Satz kam
+     nach der Begrüßung (Stephan: „Der Eintrag war dort auch richtig"). Dann
+     `dialosadmin`: Satz einmal, 13:29:28. Stephans übliche Reihenfolge („Ich
+     starte ja immer mit dem Nutzer und melde mich dann ab und DialOS-Admin
+     an") ist genau die, die am Vormittag gescheitert war.
 
   **Nebenbei zu klären:** Der Sprachbefehl „System aktualisieren" steht in
   `docs/sprachbefehle.md` als vorgesehen. Er wäre ein zweiter Auslöser für

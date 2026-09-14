@@ -3164,9 +3164,9 @@ besser als einer, der jeden Morgen kommt und den niemand abstellen kann.
 In einer Sandbox mit zwei Heimatverzeichnissen geprüft: erste Anmeldung
 spricht, zweite Anmeldung derselben Person schweigt, die andere Person spricht
 einmal; ein neuer Zeitstempel spricht bei beiden wieder; eine nicht schreibbare
-Quittung schweigt. **Der Beweis am Gerät über zwei Konten steht noch aus** - für
-den Lauf vom 2026-09-14 gibt es keinen Zeitstempel, er kommt mit dem nächsten
-echten Update.
+Quittung schweigt. **Am Gerät über zwei Konten belegt am 2026-09-14, 13:26-13:29:** Nach dem
+Firmware-Update über die Automatik und einem Neustart kam der Satz zuerst bei
+`nutzer` (Autologin), danach bei `dialosadmin` - je einmal.
 
 ## 14. Bluetooth-Kopplungsdaten fest einbauen (optional, geräte­spezifisch)
 

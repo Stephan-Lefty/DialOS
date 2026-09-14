@@ -286,8 +286,8 @@ finished too, and then move down together. That way no reference breaks.
      — log in, switch voice, update, dictate, print. A loss of rights that only
      surfaces three weeks later is worse than today's state.
 
-- [ ] **Automatic updates: built and run on the device - one thing still
-  missing** (Stephan's specification of 2026-09-14, built the same day: "Ich
+- [x] **Automatic updates: built and run on the device - fully proven
+  (2026-09-14)** (Stephan's specification of 2026-09-14, built the same day: "Ich
   würde das mit dem Update gerne jetzt einbauen").
 
   Every 14 days, Mondays after login, with catch-up; ten seconds to object with
@@ -310,6 +310,12 @@ finished too, and then move down together. That way no reference breaks.
      sandbox with two home directories. There is no timestamp for the 09-14
      run; **at the next real update** log in as `nutzer` first, then as
      `dialosadmin` - both must hear the sentence exactly once.
+     **Done on 2026-09-14, 13:26-13:29** - sooner than expected, because the
+     firmware update (UEFI dbx) via the automation wrote a real timestamp.
+     After the reboot `nutzer` first (autologin): the sentence came after the
+     greeting (Stephan confirmed). Then `dialosadmin`: the sentence once,
+     13:29:28. Stephan's usual order (always `nutzer` first, then log out and
+     into DialOS-Admin) is exactly the one that failed in the morning.
 
   **To settle on the side:** the voice command "System aktualisieren" is listed
   in `docs/sprachbefehle.md` as planned. It would be a second trigger for the
