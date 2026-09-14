@@ -15,6 +15,58 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **The customer account `nutzer` has full root rights** (found on
+  2026-09-14, when Stephan asked whether the new update rule takes anything
+  away from the accounts).
+
+  **The finding.** `sudo -l -U nutzer` says:
+
+      (ALL : ALL) ALL
+
+  `nutzer` is a member of the group `sudo` — alongside `cdrom`, `audio`,
+  `video`, `plugdev`, `users`, `netdev`, `scanner`, `bluetooth`, `lpadmin`. So
+  with a password the customer account may do **anything**, not just the
+  narrowly scoped NOPASSWD calls.
+
+  **Why it is not burning today:** the password was randomly generated during
+  setup and is known to nobody. So the door is pulled shut. **It is not
+  locked:** whoever sets that password — a helper, a repair shop, somebody with
+  brief physical access — has root on the device of a blind user who cannot
+  notice it.
+
+  **CLAUDE.md has long listed this as "still open"**, and that wording is
+  misleading: it sounds as if nothing had been decided. The actual state is
+  **full administrator** — a decision, even if nobody made it.
+
+  **Do not simply remove the group.** What would break is unmeasured. All that
+  is measured so far is what DialOS calls through `sudo` as `nutzer` — and that
+  is little, because everything runs through NOPASSWD rules on fixed paths:
+
+  | Script | Call |
+  |---|---|
+  | `dialos-stimme-wechseln.py` | `dialos-stimme.py setzen <voice>` |
+  | `dialos-update-lauf.py` | `dialos-systemupdate pruefen/installieren/neustarten` |
+
+  Neither needs the `sudo` group — a NOPASSWD rule works regardless. So the
+  suspicion is that the membership was merely carried along because
+  `dialos-setup-nutzer.sh` created the account like an ordinary desktop
+  account.
+
+  **To settle before anything changes:**
+  1. Where does the membership come from? Review
+     `scripts/dialos-setup-nutzer.sh` and
+     `dialos-buero-setup-abschliessen.sh`. If it is set deliberately there,
+     there may have been a reason.
+  2. Which of the other groups does `nutzer` really need? `audio`, `video`,
+     `bluetooth`, `lpadmin` (printing), `netdev` (Wi-Fi) are plausible;
+     `cdrom`, `scanner`, `plugdev` need checking.
+  3. What happens to the keyboard shortcuts, remote support and
+     `dialos-aufspielen` when it is removed? The latter is for the development
+     device only anyway.
+  4. **And do not skip the counter-check:** after removal a full run is needed
+     — log in, switch voice, update, dictate, print. A loss of rights that only
+     surfaces three weeks later is worse than today's state.
+
 - [ ] **Automatic updates every 14 days, Mondays at first start** (Stephan's
   specification of 2026-09-14; building deferred: "ok das später einbauen").
 

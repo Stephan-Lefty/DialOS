@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Systemaktualisierung
+Comment=Prueft nach dem Anmelden, ob Updates faellig sind (alle 14 Tage, montags)
+Exec=/usr/local/bin/dialos-update-lauf.py
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

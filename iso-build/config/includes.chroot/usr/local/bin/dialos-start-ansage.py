@@ -660,6 +660,39 @@ def netzwerk_ueberwachung(letzter_status):
             )
 
 
+# UPDATE-MELDUNG NACH DER BEGRUESSUNG (Stephan, 2026-09-14): "nach dem Neustart
+# und der Begruessung dann noch der Hinweis kommt, der Computer ist auf den
+# neuesten Stand!"
+#
+# Die Merkdatei schreibt dialos-update-lauf.py VOR dem Neustart und liegt beim
+# Nutzer, nicht unter /var/lib - damit dieser Lauf hier sie auch LOESCHEN kann.
+# Eine root-eigene Datei koennte er nur lesen, und der Satz kaeme jeden Morgen
+# erneut.
+#
+# GELOESCHT WIRD VOR DEM SPRECHEN, nicht danach. Bleibt die Ansage haengen oder
+# wird die Sitzung abgebrochen, ist die Datei trotzdem weg - ein Satz, der
+# einmal ausfaellt, ist besser als einer, der sich taeglich wiederholt und den
+# niemand abstellen kann.
+UPDATE_MARKE = os.path.join(
+    os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config")),
+    "dialos", "update-fertig")
+
+
+def update_meldung():
+    """Sagt einmal, dass das Geraet aktualisiert wurde - oder nichts."""
+    try:
+        with open(UPDATE_MARKE, encoding="utf-8") as f:
+            text = f.read().strip()
+    except OSError:
+        return
+    try:
+        os.unlink(UPDATE_MARKE)
+    except OSError:
+        pass
+    if text:
+        spd_say(text)
+
+
 def main():
     alte_instanz_beenden()
 
@@ -773,6 +806,10 @@ def main():
             # und damit auch nie wieder diese Frage. Ein blinder Nutzer
             # haette dann ohne fremde Hilfe keinen Weg zurueck.
             spd_say("Alles klar, für diesmal bin ich still.")
+
+    # Als LETZTES gesprochen - Stephans Vorgabe war ausdruecklich "nach dem
+    # Neustart und der Begruessung".
+    update_meldung()
 
     netzwerk_ueberwachung(hat_internet)
 

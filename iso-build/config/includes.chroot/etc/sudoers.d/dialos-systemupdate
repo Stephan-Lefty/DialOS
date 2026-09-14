@@ -1,0 +1,37 @@
+# DialOS: Systemaktualisierung ohne Passwortabfrage.
+#
+# WARUM: Die Aktualisierung laeuft nach dem Anmelden, mit Ansage und
+# Ja/Nein-Widerspruch (dialos-update-lauf.py). Eine Passwortabfrage waere dort
+# keine Sicherheit, sondern ein Abbruch: Der Nutzer sieht den Bildschirm nicht,
+# kann das Fenster nicht finden und hat kein Passwort-Terminal. Ohne diese
+# Regel wartet das Geraet auf einen Helfer - und genau das soll es nicht.
+#
+# WARUM ES TROTZDEM VERTRETBAR IST, und das ist hier ernster als bei der
+# Stimme, weil "apt upgrade" viel mehr kann als eine Zeile in einer
+# Konfigurationsdatei:
+#
+#   1. DREI WOERTLICHE AUFRUFE, kein Platzhalter. "installieren" und
+#      "neustarten" sind feste Woerter; ein "dialos-systemupdate *" waere
+#      praktisch ein Root-Zugang.
+#   2. Das Skript nimmt keine weiteren Argumente entgegen und reicht auch
+#      keine an apt durch. Es gibt also keinen Weg, ueber diesen Aufruf ein
+#      beliebiges Paket zu installieren oder zu entfernen.
+#   3. Es ruft "apt-get upgrade" auf, NICHT "dist-upgrade" und NICHT
+#      "autoremove". Damit kann es nichts entfernen - die Begruendung steht im
+#      Skript und in /etc/apt/apt.conf.d/52dialos-unattended-upgrades.
+#   4. Der Neustart prueft SELBST, ob der Sicherheits-Stick steckt. Diese
+#      Pruefung steht bewusst im privilegierten Teil und nicht beim Aufrufer.
+#   5. Das Skript gehoert root und liegt in einem root-eigenen /usr/local/sbin.
+#      Waere es beschreibbar, waere die Regel selbst der Weg zu root.
+#
+# FUER BEIDE KONTEN. "nutzer" braucht sie im Betrieb; "dialosadmin" braucht
+# sie zum Pruefen, sonst wird die Automatik nie unter denselben Bedingungen
+# getestet, unter denen sie spaeter laeuft.
+#
+# Muss mit 0440 root:root installiert werden, sonst ignoriert sudo sie.
+nutzer       ALL=(root) NOPASSWD: /usr/local/sbin/dialos-systemupdate pruefen
+nutzer       ALL=(root) NOPASSWD: /usr/local/sbin/dialos-systemupdate installieren
+nutzer       ALL=(root) NOPASSWD: /usr/local/sbin/dialos-systemupdate neustarten
+dialosadmin  ALL=(root) NOPASSWD: /usr/local/sbin/dialos-systemupdate pruefen
+dialosadmin  ALL=(root) NOPASSWD: /usr/local/sbin/dialos-systemupdate installieren
+dialosadmin  ALL=(root) NOPASSWD: /usr/local/sbin/dialos-systemupdate neustarten

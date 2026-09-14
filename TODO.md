@@ -16,6 +16,59 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Das Kundenkonto `nutzer` hat volle Root-Rechte** (gefunden am
+  2026-09-14, als Stephan fragte, ob die neue Update-Regel den Konten etwas
+  wegnimmt).
+
+  **Der Befund.** `sudo -l -U nutzer` sagt:
+
+      (ALL : ALL) ALL
+
+  `nutzer` ist Mitglied der Gruppe `sudo` — zusammen mit `cdrom`, `audio`,
+  `video`, `plugdev`, `users`, `netdev`, `scanner`, `bluetooth`, `lpadmin`.
+  Damit darf das Kundenkonto mit Passwort **alles**, nicht nur die eng
+  gefassten NOPASSWD-Aufrufe.
+
+  **Warum es heute nicht brennt:** Das Passwort wurde bei der Einrichtung
+  zufällig erzeugt und ist niemandem bekannt. Die Tür ist also zugezogen.
+  **Abgeschlossen ist sie nicht:** Wer das Passwort setzt — ein Helfer, ein
+  Reparaturdienst, jemand mit kurzem physischem Zugang —, hat root auf dem
+  Gerät eines blinden Nutzers, der das nicht bemerken kann.
+
+  **In CLAUDE.md steht das seit Langem als „noch offen"**, und diese
+  Formulierung ist irreführend: Sie klingt, als sei noch nichts entschieden.
+  Der tatsächliche Zustand ist **voller Administrator** — eine Entscheidung,
+  auch wenn sie niemand getroffen hat.
+
+  **Nicht einfach die Gruppe entfernen.** Was dann bricht, ist ungemessen.
+  Gemessen ist bisher nur, was DialOS als `nutzer` über `sudo` aufruft — und
+  das ist wenig, weil alles über NOPASSWD-Regeln auf feste Pfade läuft:
+
+  | Skript | Aufruf |
+  |---|---|
+  | `dialos-stimme-wechseln.py` | `dialos-stimme.py setzen <stimme>` |
+  | `dialos-update-lauf.py` | `dialos-systemupdate pruefen/installieren/neustarten` |
+
+  Beide brauchen die Gruppe `sudo` **nicht** — eine NOPASSWD-Regel wirkt
+  unabhängig davon. Der Verdacht ist also, dass die Mitgliedschaft nur
+  mitgeschleppt wurde, weil `dialos-setup-nutzer.sh` das Konto wie ein
+  normales Desktop-Konto angelegt hat.
+
+  **Zu klären, bevor etwas geändert wird:**
+  1. Woher kommt die Mitgliedschaft? `scripts/dialos-setup-nutzer.sh` bzw.
+     `dialos-buero-setup-abschliessen.sh` durchsehen. Wenn sie dort
+     ausdrücklich gesetzt wird, gab es vielleicht einen Grund.
+  2. Welche der übrigen Gruppen braucht `nutzer` wirklich? `audio`, `video`,
+     `bluetooth`, `lpadmin` (Drucken), `netdev` (WLAN) sind plausibel;
+     `cdrom`, `scanner`, `plugdev` sind zu prüfen.
+  3. Was passiert beim Entfernen mit den Tastenkürzeln, der Fernwartung und
+     `dialos-aufspielen`? Letzteres ist ohnehin nur für das
+     Entwicklungsgerät.
+  4. **Und die Gegenprobe nicht vergessen:** Nach dem Entfernen muss ein
+     vollständiger Durchlauf her — anmelden, Stimme wechseln, Update, Diktat,
+     Drucken. Ein Rechteentzug, der erst drei Wochen später auffällt, ist
+     schlimmer als der heutige Zustand.
+
 - [ ] **Update-Automatik alle 14 Tage, montags beim ersten Start** (Stephans
   Vorgabe vom 2026-09-14, Bau auf später verschoben: „ok das später einbauen").
 

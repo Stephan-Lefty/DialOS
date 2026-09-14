@@ -466,9 +466,13 @@ nicht hier - so bleibt der Stand an einer einzigen Stelle aktuell.
 
 ## Offene Entscheidungen (siehe auch [docs/offene-punkte.md](docs/offene-punkte.md))
 
-- Sudo-Rechte für den Standard-Benutzer "nutzer" (Platzhalter-Passwort
-  aktuell zufällig generiert, echte Policy für die spätere
-  sprachgesteuerte Wartung noch offen).
+- Sudo-Rechte für den Standard-Benutzer "nutzer". **Der Zustand ist nicht
+  „offen", sondern VOLLER ADMINISTRATOR** - am 2026-09-14 nachgesehen:
+  `sudo -l -U nutzer` meldet `(ALL : ALL) ALL`, weil das Konto in der Gruppe
+  `sudo` steckt. Praktisch greift das heute nicht, weil das Passwort zufällig
+  erzeugt wurde und niemand es kennt - aber die Tür ist nur zugezogen, nicht
+  abgeschlossen. Eigener Punkt in TODO.md, mit dem, was vor einer Änderung zu
+  klären ist.
 - Referenz-Hardware final festlegen: Bluetooth-Lautsprecher ist seit
   2026-08-16 entschieden (AIRHUG 01), Laptop und Sicherheits-Stick noch
   offen (siehe `docs/hardware.md`). **Beim Mikrofon ist die Frage seit

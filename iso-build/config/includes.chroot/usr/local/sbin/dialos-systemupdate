@@ -1,0 +1,137 @@
+#!/bin/bash
+# DialOS: Systemaktualisierung - der Teil, der root braucht.
+#
+# Stephans Vorgabe vom 2026-09-14: "Irgendwann haben wir ja DialOS fertig und
+# dann sollten auch immer die Pakete, die wir fuer einen reibungslosen Lauf von
+# DialOS benoetigen, auf dem aktuellen Stand sein." Alle 14 Tage, montags beim
+# ersten Start, mit Ansage und Neustart.
+#
+# WARUM UEBERHAUPT ZWEI SKRIPTE. Dieses hier laeuft als root und tut nur die
+# drei Dinge, die root brauchen. Die Entscheidung, die Ansagen und das Zuhoeren
+# liegen in dialos-update-lauf.py, das OHNE root laeuft. Dieselbe Aufteilung
+# wie bei dialos-aufspielen und dialos-stimme-wechseln: Was ueber sudo geht,
+# soll so klein und so woertlich sein wie moeglich.
+#
+# DREI FESTE AKTIONEN, KEINE ARGUMENTE DARUEBER HINAUS. Die sudoers-Regel
+# nennt sie einzeln und woertlich. Ein "dialos-systemupdate *" waere praktisch
+# ein Root-Zugang.
+#
+# Aufruf:
+#   dialos-systemupdate pruefen       Wie viele Pakete waeren zu aktualisieren?
+#   dialos-systemupdate installieren  apt update + apt upgrade
+#   dialos-systemupdate neustarten    Neustart - NUR mit Sicherheits-Stick
+set -uo pipefail
+
+PROTOKOLL="/var/log/dialos-systemupdate.log"
+STICK_LABEL="DIALOS-KEY"
+ZULETZT="/var/lib/dialos/systemupdate-zuletzt"
+
+melde() {
+    mkdir -p "$(dirname "$PROTOKOLL")" 2>/dev/null
+    echo "$(date '+%m-%d %H:%M:%S')  $1" >> "$PROTOKOLL"
+}
+
+# --------------------------------------------------------------- pruefen ---
+pruefen() {
+    # Ohne "apt update": Die Frage ist, was mit dem VORHANDENEN Index offen
+    # waere. Ein Index-Abruf gehoert zum Installieren, nicht zum Nachsehen -
+    # sonst braucht schon das blosse Fragen Netz und Zeit.
+    apt list --upgradable 2>/dev/null | tail -n +2 | wc -l
+}
+
+# ---------------------------------------------------------- installieren ---
+installieren() {
+    melde "=== Installieren angefordert ==="
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    if ! apt-get update >>"$PROTOKOLL" 2>&1; then
+        melde "apt update fehlgeschlagen - nichts installiert"
+        return 1
+    fi
+
+    local vorher
+    vorher="$(pruefen)"
+    melde "offen vor dem Lauf: $vorher Paket(e)"
+    if [ "$vorher" -eq 0 ]; then
+        melde "nichts zu tun"
+        datum_merken
+        return 0
+    fi
+
+    # KEIN "dist-upgrade" UND KEIN "autoremove", und beides mit Absicht:
+    #
+    # "upgrade" installiert nur, was sich ohne Entfernen aktualisieren laesst.
+    # "dist-upgrade" darf Pakete ENTFERNEN, um Abhaengigkeiten aufzuloesen -
+    # unbeaufsichtigt, auf einem Geraet, das ein blinder Nutzer allein bedient.
+    #
+    # "autoremove" waere noch schlimmer. Gemessen am 2026-08-19: Sobald
+    # dialos-aufraeumen.sh einen GNOME-Bestandteil entfernt hat, gelten 49
+    # Pakete als "automatisch installiert", darunter gnome-shell und
+    # pipewire-audio. Ein autoremove wuerde also anbieten, Desktop und
+    # Ton-Unterbau zu entfernen. Steht so auch in
+    # /etc/apt/apt.conf.d/52dialos-unattended-upgrades, und dort heisst es
+    # ausdruecklich "die wichtigste Zeile in dieser Datei".
+    #
+    # -o Dpkg::Options: bestehende Konfigurationsdateien behalten. Ohne das
+    # bleibt apt bei einer geaenderten Datei mit einer Rueckfrage stehen, die
+    # niemand beantworten kann - und der Lauf haengt bis zur Zeitgrenze.
+    if apt-get -y \
+            -o Dpkg::Options::="--force-confdef" \
+            -o Dpkg::Options::="--force-confold" \
+            upgrade >>"$PROTOKOLL" 2>&1; then
+        local nachher
+        nachher="$(pruefen)"
+        melde "fertig - vorher $vorher, jetzt noch $nachher offen"
+        datum_merken
+        return 0
+    fi
+
+    melde "apt upgrade fehlgeschlagen"
+    return 1
+}
+
+datum_merken() {
+    mkdir -p "$(dirname "$ZULETZT")" 2>/dev/null
+    date '+%Y-%m-%d' > "$ZULETZT"
+    chmod 0644 "$ZULETZT"
+}
+
+# ------------------------------------------------------------ neustarten ---
+neustarten() {
+    # DIE PRUEFUNG STEHT HIER UND NICHT BEIM AUFRUFER, und das ist der
+    # wichtigste Satz in dieser Datei.
+    #
+    # dialos-stick-gate sperrt das Konto "nutzer" mit "usermod -L", wenn der
+    # Sicherheits-Stick beim Booten fehlt - sonst liefe die Sitzung gegen ein
+    # Verzeichnis auf der UNVERSCHLUESSELTEN root-Partition. Ein Neustart ohne
+    # Stick sperrt den Nutzer also aus seinem eigenen Geraet aus, und er kann
+    # nicht nachsehen, warum. Genau deshalb steht in der
+    # unattended-upgrades-Konfiguration "Automatic-Reboot false".
+    #
+    # Dem Aufrufer zu vertrauen waere hier falsch: Ein Fehler dort - eine
+    # vertauschte Bedingung, ein nicht abgefangener Ausnahmefall - kostet den
+    # Nutzer den Zugang zu seinen Daten. Die Pruefung gehoert an die Stelle,
+    # die den Neustart wirklich ausloest.
+    udevadm settle --timeout=2 >/dev/null 2>&1 || true
+    if ! blkid -L "$STICK_LABEL" >/dev/null 2>&1; then
+        melde "Neustart ABGELEHNT - kein Sicherheits-Stick ($STICK_LABEL)"
+        echo "kein-stick"
+        return 2
+    fi
+    melde "Neustart - Sicherheits-Stick vorhanden"
+    # Kurzer Vorlauf, damit die Ansage des Aufrufers noch zu Ende gesprochen
+    # wird. "systemctl reboot" wuerde sie mitten im Satz abschneiden.
+    sleep 4
+    systemctl reboot
+}
+
+case "${1:-}" in
+    pruefen)      pruefen ;;
+    installieren) installieren ;;
+    neustarten)   neustarten ;;
+    *)
+        echo "Aufruf: $0 pruefen|installieren|neustarten" >&2
+        exit 1
+        ;;
+esac
