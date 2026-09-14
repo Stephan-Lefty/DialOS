@@ -16,8 +16,31 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
-- [ ] **ZUERST MORGEN: Die Sprachsteuerung ließ sich am 2026-08-24 nicht mehr
-  einschalten** — und ein Pegelverdacht ist ungeprüft offen.
+- [ ] **Brief einsprechen - geplant für Dienstag, 2026-09-15** (Stephan am
+  2026-09-14: „Punkt 1 bitte auf Dienstag legen"). Die Vorlage liegt fertig in
+  [docs/brief-vorlage.md](docs/brief-vorlage.md): Zielbild, was DialOS davon
+  heute kann, und der Diktattext Wort für Wort mit den gesprochenen
+  Satzzeichen. Nichts zu bauen — es ist der fehlende **Beweis am Gerät**, dass
+  ein Diktat mit echter Stimme von Anfang bis Ende durchläuft.
+
+  Vorher lohnt sich `absender.txt` (siehe Abschnitt 2 der Vorlage): Sonst steht
+  im Briefkopf nur „Stephan" ohne Straße und Ort.
+
+- [ ] **Die Sprachsteuerung ließ sich am 2026-08-24 einmalig nicht einschalten
+  - am 2026-09-14 nicht mehr nachstellbar** — und ein Pegelverdacht ist ungeprüft offen.
+
+  **NACHTRAG VOM 2026-09-14, und er entkräftet den Verdacht.** Stephan hat um
+  08:16 und 08:17 zweimal „Sprachsteuerung starten" gesprochen, und **beide Male
+  ist der ganze Satz angekommen** — bei ZURÜCKGESETZTEM Pegel, denn der Neustart
+  hat die Absenkung vom 24.08. verworfen (Quelle wieder bei 32 %, `Capture` bei
+  100 %). Die Spitzen lagen bei 27663 und 15257, also im selben Bereich wie an
+  dem Abend, an dem es NICHT ging.
+
+  **Damit ist der Pegel als Ursache so gut wie ausgeschlossen.** Es war
+  offenbar ein vorübergehender Zustand an diesem einen Abend. Was übrig bleibt:
+  Der Punkt ist nicht gelöst, sondern nicht mehr beobachtbar — und das ist ein
+  Unterschied. Tritt es wieder auf, steht jetzt die Pegelspalte im Protokoll
+  und lässt sich sofort mit diesen Zahlen vergleichen.
 
   **Der Befund.** Zwischen 17:01 und 17:06 stand im Protokoll ausschließlich
   `starten`, `[unk]` und `sprachsteuerung` — **kein einziges Mal

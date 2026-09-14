@@ -15,8 +15,30 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
-- [ ] **FIRST THING TOMORROW: on 2026-08-24 the voice control could no longer
-  be switched on** - and a level hypothesis is open and untested.
+- [ ] **Dictate the letter - planned for Tuesday, 2026-09-15** (Stephan on
+  2026-09-14: "Punkt 1 bitte auf Dienstag legen"). The template is ready in
+  [docs/brief-vorlage.md](docs/brief-vorlage.md): the target, what DialOS can do
+  of it today, and the dictation text word for word with the spoken punctuation.
+  Nothing to build - it is the missing **proof on the device** that a dictation
+  in a real voice runs from beginning to end.
+
+  Worth doing first: `absender.txt` (see section 2 of the template). Otherwise
+  the letterhead shows only "Stephan", without street and town.
+
+- [ ] **On 2026-08-24 the voice control could not be switched on once - not
+  reproducible on 2026-09-14** - and a level hypothesis is open and untested.
+
+  **ADDENDUM OF 2026-09-14, and it undermines the hypothesis.** At 08:16 and
+  08:17 Stephan said "Sprachsteuerung starten" twice and **both times the whole
+  phrase arrived** - with the level RESET, because the reboot discarded the
+  reduction of 24 August (source back at 32 %, `Capture` at 100 %). The peaks
+  were 27663 and 15257, that is, the same range as on the evening when it did
+  NOT work.
+
+  **So the level is all but ruled out as the cause.** It was evidently a
+  transient state on that one evening. What remains: the item is not solved but
+  no longer observable - and that is a difference. Should it recur, the level
+  column is now in the log and can be compared against these numbers at once.
 
   **The finding.** Between 17:01 and 17:06 the log held only `starten`,
   `[unk]` and `sprachsteuerung` - **not once `sprachsteuerung starten`**.
