@@ -414,15 +414,29 @@ STILLE_DANACH_BLOECKE = 4          # eine halbe Sekunde
 STILLE_DANACH_GRENZE = 3000
 ANSAGE_ZU_LAUT = ("Ich habe Sprachsteuerung starten gehört, aber es ist zu laut. "
                   "Bitte stelle den Ton leiser und sage es noch einmal.")
-ZU_LAUT_ABSTAND_S = 60.0
+# EIN AUSSCHLAG IST ERLAUBT, UND DIE ANSAGE KOMMT ALLE 15 S (beides noch am
+# 2026-09-14, nach Stephans erstem Alltagsversuch). Um 13:09:26 hat Stephan bei
+# laufendem, aber gerade leisem Fernseher "Sprachsteuerung starten" gesagt -
+# davor und danach Pegel 1, nach dem Satz EIN Block mit 3149. Verworfen, und
+# weil die Ansage da noch fuer 60 s gesperrt war, OHNE ein Wort. Genau der
+# lautlose Fehlschlag, den die Ansage verhindern sollte. Durchgespielt an allen
+# 13 Einschaltsaetzen des Tages: Die neue Fassung aendert nur diesen einen Fall;
+# jeder Film-Verlauf hat mindestens zwei laute Bloecke danach.
+ZU_LAUT_ABSTAND_S = 15.0
+STILLE_DANACH_AUSSCHLAEGE = 1
 
 
 def still_danach(verlauf):
-    """War es nach dem Einschaltsatz eine halbe Sekunde lang still?"""
+    """War es nach dem Einschaltsatz eine halbe Sekunde lang still?
+
+    Hoechstens STILLE_DANACH_AUSSCHLAEGE laute Bloecke - ein Atemzug oder ein
+    Klicken soll das Einschalten nicht verhindern.
+    """
     letzte = list(verlauf)[-STILLE_DANACH_BLOECKE:]
     if len(letzte) < STILLE_DANACH_BLOECKE:
         return True             # zu wenig Daten - nicht blockieren
-    return max(letzte) < STILLE_DANACH_GRENZE
+    laut = sum(1 for x in letzte if x >= STILLE_DANACH_GRENZE)
+    return laut <= STILLE_DANACH_AUSSCHLAEGE
 # "Ich höre Dir nicht mehr zu." statt "Ich höre nicht mehr." (Stephan,
 # 2026-08-19). Der kuerzere Satz ist zweideutig: Er kann auch heissen,
 # dass das Geraet nichts mehr hoert - also kaputt ist. Mit "Dir" ist klar,

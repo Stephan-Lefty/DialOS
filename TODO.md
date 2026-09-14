@@ -122,6 +122,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     verworfen (Werte danach bis 8000), Ansage „… zu laut …" kam; ohne bzw.
     leiser Fernseher → eingeschaltet (Werte danach 0-1); leiser Fernseher
     danach → nach 20 s Gesprächs-Erkennung, aus. Von Stephan bestätigt.
+    **Nachgebessert (13:09):** Stephan bei laufendem, aber gerade leisem
+    Fernseher - ein einzelner Block mit 3149 nach dem Satz, verworfen, und
+    wegen der 60-s-Sperre OHNE Ansage. Jetzt ist ein Ausschlag erlaubt, die
+    Ansage höchstens alle 15 s. An allen 14 Einschaltsätzen geprüft: nur
+    dieser Fall ändert sich.
   - **Verworfen vorerst: Mindestlautstärke für Befehle.** Spitzen am
     2026-09-14: Stephans Befehle 47 x, leisester 7810; Film 76 x, Median
     24188, nur 5 leise Fetzen unter 3000; Gespräch 253 x, leisester 4162.

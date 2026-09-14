@@ -122,6 +122,11 @@ finished too, and then move down together. That way no reference breaks.
     announcement came; no TV or a quiet TV → switched on (values after 0-1);
     quiet TV afterwards → conversation detection after 20 s, off. Confirmed by
     Stephan.
+    **Refined (13:09):** Stephan with the TV on but quiet at that moment - one
+    block of 3149 after the sentence, rejected, and because of the 60 s lock
+    WITHOUT an announcement. Now one spike is allowed, the announcement at
+    most every 15 s. Checked against all 14 switch-on sentences: only this
+    case changes.
   - **Set aside for now: minimum loudness for commands.** Peaks on
     2026-09-14: Stephan's commands 47 times, quietest 7810; film 76 times,
     median 24188, only 5 quiet fragments below 3000; conversation 253 times,
