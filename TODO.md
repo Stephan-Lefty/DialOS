@@ -129,6 +129,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     gegen lauten Film und Gespräch nichts. In den Vortagen gab es erkannte
     Äußerungen ab 847 - ob echte Befehle darunter waren (Headset-Mikrofon),
     ist nicht mehr zu klären. Wieder aufgreifen, wenn C/D stehen.
+  - **Aufbau der Messungen vom 2026-09-14** (Stephan: „Der TV-Lautsprecher ist
+    in etwa genauso weit weg wie ich"): Fernseher und Nutzer gleich weit vom
+    Laptop-Mikrofon. Deshalb kamen Film und Stimme mit fast gleichem Pegel an
+    - über die Lautstärke ist beides nicht zu trennen. B wirkt über den
+    Ablauf (Nutzer schweigt nach dem Satz, Film nicht), nicht über den
+    Abstand. Für C ist genau das der Prüffall: gleiche Lautstärke, gleiche
+    Entfernung.
   - **C - Aufweckwort (openWakeWord):** planen - der Punkt steht schon weiter
     unten; mit den heutigen Protokollen als Prüfstein.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine

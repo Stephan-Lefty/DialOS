@@ -130,6 +130,13 @@ finished too, and then move down together. That way no reference breaks.
     were recognised utterances from 847 - whether real commands were among
     them (headset microphone) can no longer be established. Revisit once C/D
     are in place.
+  - **Setup of the measurements on 2026-09-14** (Stephan: the TV speaker is
+    about as far away as he is): TV and user at the same distance from the
+    laptop microphone. That is why film and voice arrived at almost the same
+    level - loudness cannot separate them. B works through the sequence (the
+    user is silent after the sentence, the film is not), not through
+    distance. For C this is exactly the test case: same loudness, same
+    distance.
   - **C - wake word (openWakeWord):** plan - the item already exists further
     down; today's logs as the test bench.
   - **D - button instead of the switch-on sentence:** check whether the AIRHUG
