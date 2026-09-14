@@ -137,7 +137,9 @@ das Erfolg meldet, während es versagt.
   angehefteten Programme als große Symbole, drei pro Zeile - vorher ragte das
   Raster über den Menürand, weil ArcMenu die Spaltenbreite unterschätzt.
 - **„Bildschirmfoto aufnehmen" ist ein Befehl** (2026-09-14). Stephan hatte es
-  zweimal so gesagt, Vosk hatte es wörtlich erkannt - es war nur keiner.
+  zweimal so gesagt, Vosk hatte es wörtlich erkannt - es war nur keiner. Nach
+  dem Neuanmelden am Gerät belegt (10:44): erkannt, Foto gespeichert - mit dem
+  Sprachdienst im eigenen Autostart-Rahmen, also unter Kundenbedingungen.
 
 - **Bildschirmfoto auf Zuruf ging nach dem Neustart nicht mehr** (2026-09-14,
   Stephans Meldung). Das Portal gibt die Freigabe pro Programm, und

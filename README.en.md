@@ -129,7 +129,9 @@ background) and `splash.png` (boot/login screen).
   as large icons, three per row - before, the grid stuck out past the menu
   edge because ArcMenu underestimates the column width.
 - **"Bildschirmfoto aufnehmen" is a command** (2026-09-14). Stephan had said it
-  that way twice, Vosk had recognised it verbatim - it just was not one.
+  that way twice, Vosk had recognised it verbatim - it just was not one. Proven
+  on the device after logging in again (10:44): recognised, screenshot saved -
+  with the voice service in its own autostart unit, i.e. customer conditions.
 
 - **Screenshot on request stopped working after the reboot** (2026-09-14,
   reported by Stephan). The portal grants permission per program, and it was
