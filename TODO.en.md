@@ -15,6 +15,56 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **A CONVERSATION IN THE ROOM OPERATED DIALOS - with printing,
+  dictation and archive** (2026-09-14, 11:01-11:31, during Stephan's break).
+  The most serious finding so far, because it does not just annoy but
+  **writes down, files and prints other people's conversations**.
+
+  **What happened** (account `dialosadmin`, laptop microphone and speaker,
+  AIRHUG off). People were talking loudly and at length nearby, peaks
+  27000-30000. Stephan when asked: a conversation in the room.
+
+  | Time | What DialOS did |
+  |---|---|
+  | from 11:01 | switched voice control on by itself six times |
+  | 11:15:47 | "brief schreiben" (+1 word) - 97 s of conversation as a letter, previous letter set aside, **PDF into the archive** |
+  | 11:18:47 | switched to the Windows look |
+  | 11:19:53 | "notiz drucken" - printed |
+  | 11:20:12 | "brief brief brief drucken" (+2) - **printed the conversation** |
+  | 11:24:52 | "einkauf wir brief drucken" (+2) - **printed the conversation again** |
+  | 11:24:53 | "einkaufszettel aufnehmen" - 50 s of conversation as 8 entries |
+  | 11:30:26 | "einkauf erledigt" (+2) - delete question, heard "nein nein ja", not deleted |
+  | 11:30:53 | "notizen drucken" (+2) - stuck in the queue, cancelled |
+
+  **Cleaned up** (Stephan chose "restore the old state"): previous letter back,
+  shopping list empty again, the conversation versions (letter, archive PDF,
+  list) moved into a folder readable only by the account, to review and
+  delete. Print job 8 cancelled. Two pages with the conversation were in the
+  printer. **The logs under `~/.log/` still contain fragments of the
+  conversation** - not in the repo, and deliberately not quoted here.
+
+  **What failed - four places:**
+  1. **Switching on.** "Both words" is not enough against a long
+     conversation: the grammar forces every utterance into its words, and at
+     some point "sprachsteuerung" and "starten" stand next to each other.
+  2. **No confirmation before consequential actions.** Printing, dictation
+     (overwrites the letter, files a PDF) and switching run immediately. Only
+     deleting asks - and that question held, narrowly.
+  3. **The extra-word rule of 2026-08-24** (up to two words too many) made
+     three of the four print jobs possible. It was measured on Stephan's real
+     voice, not on a conversation.
+  4. **The spoken hints** ("Der Befehl heisst: notiz drucken") say command
+     words into the room. Notable timing: 11:18:50 hint "notiz drucken",
+     11:19:53 recognised "notiz drucken". **Not proven** that it was the
+     echo - people were talking in the room after all.
+
+  **Not decided yet, only directions:** confirmation before printing and
+  dictation; no extra-word rule for consequential commands; a conversation
+  detector (many utterances without a command in a short time -> switch off
+  instead of speaking hints); wake word instead of grammar (already an item).
+  The item "First false start" below is the same mechanism, now with
+  consequences.
+
 - [ ] **The customer account `nutzer` has full root rights** (found on
   2026-09-14, when Stephan asked whether the new update rule takes anything
   away from the accounts).

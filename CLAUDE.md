@@ -103,6 +103,13 @@ Am Geraet wurde in dieser Zeit nichts geaendert; Stephan hat am 25.08. sowie am
 Stand vom 24.08. plus das, was der 14.09. dazu ergeben hat - nicht drei Wochen
 Entwicklung.
 
+**AM 2026-09-14 HAT EIN GESPRAECH IM RAUM DIALOS BEDIENT** (11:01-11:31,
+Stephans Pause): Sprachsteuerung sechsmal selbst eingeschaltet, ein Brief-
+und ein Einkaufszettel-Diktat aus dem Gespraech, Archiv-PDF, viermal Drucken
+(zweimal das mitgeschriebene Gespraech). Aufgeraeumt, Einzelheiten und die
+vier Schwachstellen im obersten TODO-Punkt. Bis das geloest ist, gilt: Die
+Sprachsteuerung ist gegen Gespraeche in der Naehe NICHT sicher.
+
 **Laeuft und ist belegt:**
 
 - Sprachsteuerung mit 27 Grammatiksaetzen (seit 2026-09-14 auch "bildschirmfoto aufnehmen"). Das Einschalten verlangt beide

@@ -16,6 +16,56 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **EIN GESPRÄCH IM RAUM HAT DIALOS BEDIENT - mit Druck, Diktat und
+  Archiv** (2026-09-14, 11:01-11:31, während Stephans Pause). Der
+  schwerwiegendste Befund bisher, weil er nicht nur stört, sondern **fremde
+  Gespräche aufschreibt, ablegt und ausdruckt**.
+
+  **Was passiert ist** (Konto `dialosadmin`, Laptop-Mikrofon und
+  -Lautsprecher, AIRHUG aus). In der Nähe wurde laut und länger gesprochen,
+  Spitzen 27000-30000. Stephan auf Nachfrage: „Gespräch im Raum".
+
+  | Zeit | Was DialOS tat |
+  |---|---|
+  | ab 11:01 | Sprachsteuerung sechsmal selbst eingeschaltet |
+  | 11:15:47 | „brief schreiben" (+1 Wort) - 97 s Gespräch als Brief, voriger Brief beiseitegelegt, **PDF ins Archiv** |
+  | 11:18:47 | auf Windows-Optik umgeschaltet |
+  | 11:19:53 | „notiz drucken" - gedruckt |
+  | 11:20:12 | „brief brief brief drucken" (+2) - **das Gespräch gedruckt** |
+  | 11:24:52 | „einkauf wir brief drucken" (+2) - **das Gespräch noch einmal gedruckt** |
+  | 11:24:53 | „einkaufszettel aufnehmen" - 50 s Gespräch als 8 Einträge |
+  | 11:30:26 | „einkauf erledigt" (+2) - Löschfrage, gehört „nein nein ja", nicht gelöscht |
+  | 11:30:53 | „notizen drucken" (+2) - hing in der Warteschlange, abgebrochen |
+
+  **Aufgeräumt** (Stephans Wahl „Alten Stand wiederherstellen"): voriger Brief
+  zurück, Einkaufszettel wieder leer, die Gesprächsfassungen (Brief, Archiv-PDF,
+  Zettel) nur für das Konto lesbar in einen eigenen Ordner zum Ansehen und
+  Löschen. Druckauftrag 8 abgebrochen. Zwei Seiten mit dem Gespräch lagen im
+  Drucker. **Die Protokolle unter `~/.log/` enthalten weiter Gesprächsfetzen**
+  - nicht im Repo, bewusst auch hier nicht zitiert.
+
+  **Was dabei versagt hat - vier Stellen:**
+  1. **Einschalten.** „Beide Wörter" genügt nicht gegen ein langes Gespräch:
+     Die Grammatik presst jede Äußerung in ihre Wörter, und irgendwann stehen
+     „sprachsteuerung" und „starten" nebeneinander.
+  2. **Kein Nachfragen vor Folgenreichem.** Drucken, Diktat (überschreibt den
+     Brief, legt ein PDF ab) und Umschalten laufen sofort. Nur das Löschen
+     fragt - und die Frage hat gehalten, knapp.
+  3. **Die Zusatzwort-Regel vom 2026-08-24** (bis zu zwei Wörter zu viel)
+     hat drei der vier Druckaufträge erst ermöglicht. Sie war an Stephans
+     echter Stimme gemessen, nicht an einem Gespräch.
+  4. **Die gesprochenen Hinweise** („Der Befehl heisst: notiz drucken")
+     sprechen Befehlswörter in den Raum. Zeitlich auffällig: 11:18:50 Hinweis
+     „notiz drucken", 11:19:53 erkannt „notiz drucken". **Nicht belegt**, dass
+     es das Echo war - im Raum wurde ja gesprochen.
+
+  **Noch nicht entschieden, nur Richtungen:** Rückfrage vor Drucken und Diktat;
+  Zusatzwort-Regel nicht für folgenreiche Befehle; ein Gesprächs-Erkenner
+  (viele Äußerungen ohne Befehl in kurzer Zeit -> ausschalten statt
+  Hinweise sprechen); Aufweckwort statt Grammatik (steht schon als Punkt).
+  Der Punkt „Erster Fehlstart" unten ist damit derselbe Mechanismus, jetzt mit
+  Folgen.
+
 - [ ] **Das Kundenkonto `nutzer` hat volle Root-Rechte** (gefunden am
   2026-09-14, als Stephan fragte, ob die neue Update-Regel den Konten etwas
   wegnimmt).
