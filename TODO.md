@@ -142,6 +142,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   deutschen Mundartregionen - mit Einwilligung, nur lokal, nie im Repo;
   danach entscheiden: Mundart-Varianten in der Grammatik oder ein anderes
   Modell (z. B. Whisper - robuster bei Akzenten, aber auf dem T490 langsamer).
+  **Zeitpunkt, von Stephan entschieden (2026-09-14): ganz zum Schluss, wenn
+  alle Befehle stehen** - „das würde ich ganz zum Schluss machen, wenn alle
+  Befehle stehen!". Sonst müssten die Sprecher nach jeder Änderung neu
+  aufnehmen. Stephan kennt Leute aus Österreich und der Schweiz dafür.
 
 - [ ] **Der Sprachdienst überlebt das Abmelden - danach laufen ZWEI**
   (gefunden 2026-09-14, 12:13). Nach Ab- und Anmelden liefen

@@ -141,6 +141,9 @@ finished too, and then move down together. That way no reference breaks.
   dialect regions - with consent, local only, never in the repo; then decide:
   dialect variants in the grammar or a different model (e.g. Whisper - more
   robust with accents, but slower on the T490).
+  **Timing, decided by Stephan (2026-09-14): at the very end, once all
+  commands are settled.** Otherwise the speakers would have to record again
+  after every change. Stephan knows people from Austria and Switzerland for it.
 
 - [ ] **The voice service survives logging out - afterwards TWO run**
   (found 2026-09-14, 12:13). After logging out and in,
