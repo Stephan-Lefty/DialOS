@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Dictation now only ends on exactly "Diktat beenden"** (2026-09-14). A
+  shopping list broke off after one entry because the small model heard
+  "diktat beenden beenden" in "Bananen". Until now both words plus further
+  closing words were enough. Counted: exactly two words 14 times, genuine;
+  three-word variants 3 times, one of them provably wrong.
+
 - **Only one voice service per account** (2026-09-14). After logging out and
   in, two were running - the old one had survived logout, and both were
   listening. Now the service ends every older instance of the same account at

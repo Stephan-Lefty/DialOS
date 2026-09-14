@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Das Diktat beendet sich nur noch bei genau „Diktat beenden"** (2026-09-14).
+  Ein Einkaufszettel brach nach einem Eintrag ab, weil das kleine Modell in
+  „Bananen" ein „diktat beenden beenden" hörte. Bisher genügten beide Wörter
+  plus weitere Schlusswörter. Ausgezählt: genau zwei Wörter 14 x, echt;
+  Dreiwort-Varianten 3 x, davon einmal nachweislich falsch.
+
 - **Nur noch ein Sprachdienst je Konto** (2026-09-14). Nach Ab- und Anmelden
   liefen zwei - der alte hatte das Abmelden überlebt, beide hörten zu. Jetzt
   beendet der Dienst beim Start jede ältere Instanz desselben Kontos.

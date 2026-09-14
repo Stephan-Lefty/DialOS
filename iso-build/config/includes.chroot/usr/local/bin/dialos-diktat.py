@@ -231,17 +231,23 @@ def ist_schluss(gehoert):
     ANSAGE_SCHLUSS_UNKLAR). Der Nutzer spricht also nie ins Leere, ohne es zu
     merken - das war der eigentliche Schaden der alten Regel.
 
-    Die Bedingungen im Einzelnen:
-      - kein "[unk]" (da wurde noch etwas anderes gesprochen),
-      - BEIDE Woerter des Schlusssatzes kommen vor,
-      - und ausser Woertern des Schlusssatzes nichts weiter.
+    SEIT 2026-09-14 NUR NOCH GENAU "diktat beenden" - zwei Woerter, in dieser
+    Reihenfolge. Vorher genuegten beide Woerter plus beliebig viele weitere
+    Schlusswoerter. Bei der dritten Probe des Tages beendete sich ein
+    Einkaufszettel nach "Rote Aepfel" von selbst: Das kleine Modell hoerte in
+    "Bananen" ein "diktat beenden beenden", und die Ware war verloren. Stephan:
+    "nach einem Eintrag brach der Einkaufszettel ab". Die Auszaehlung aller
+    Protokolle bis dahin:
+
+        genau 'diktat beenden'          14 x, soweit nachvollziehbar echt
+        'diktat beenden beenden'         2 x, einmal nachweislich falsch
+        'beenden diktat beenden'         1 x, nach 10 s ohne ein Wort - verdaechtig
+
+    Der Preis: Kommt ein echtes Ende einmal als drei Woerter an, muss der
+    Nutzer den Satz wiederholen. Das kostet einen Satz; ein falsches Ende
+    kostet, was er als Naechstes diktiert.
     """
-    worte = gehoert.split()
-    if not worte or "[unk]" in worte:
-        return False
-    if not SCHLUSS_WOERTER <= set(worte):
-        return False
-    return set(worte) <= SCHLUSS_WOERTER
+    return gehoert.split() == SCHLUSSSATZ.split()
 
 
 def ist_halber_schluss(gehoert):
@@ -666,6 +672,45 @@ VORLAUF_S = 0.3
 # unmittelbar davor. Die Zeiten stehen im Protokoll; der Wert ist vorlaeufig.
 SCHLUSS_SPIELRAUM_S = 0.35
 
+# Wie lang "Diktat beenden" hoechstens dauert. Liegen die letzten zwei
+# Schlusswoerter weiter auseinander, gehoert das vordere nicht zum Satz.
+SCHLUSS_HOECHSTENS_S = 2.0
+
+
+def schluss_beginn_aus(worte):
+    """Wo "Diktat beenden" beginnt - aus den Woertern des kleinen Erkenners.
+
+    MASSGEBLICH SIND DIE LETZTEN ZWEI WOERTER, nicht das erste (Fehler vom
+    2026-09-14, dritte Probe). Das kleine Modell kennt nur den Schlusssatz und
+    presst alles in dessen Woerter. Aus "Rote Aepfel. Bananen. Diktat beenden."
+    wurde "diktat beenden beenden" - das erste "diktat" bei 1,14 s lag mitten in
+    "Rote Aepfel". Mit dem ersten Wort als Beginn wurde "Bananen" (3,75 s)
+    abgeschnitten, und die Ware war weg. Der Schlusssatz steht aber immer am
+    ENDE; seine zwei Woerter sind die letzten zwei.
+    """
+    if not worte:
+        return None
+    ende = worte[-1].get("end")
+    kandidat = worte[-2] if len(worte) >= 2 else worte[-1]
+    beginn = kandidat.get("start")
+    if beginn is None or ende is None:
+        return None
+    if ende - beginn > SCHLUSS_HOECHSTENS_S:
+        beginn = worte[-1].get("start", beginn)
+    return beginn
+
+
+def rest_kuerzen(worte, schluss_beginn):
+    """Behaelt die Woerter des Rests, die deutlich VOR dem Schlusssatz BEGINNEN.
+
+    Nach dem Beginn und nicht nach dem Ende: Ein echtes letztes Wort beginnt
+    lange vor dem Schlusssatz - es hat seine eigene Dauer, und pause_davor()
+    verlangt danach noch eine Sprechpause. Ein Bruchstueck des Schlusssatzes
+    wie "Den" beginnt dagegen unmittelbar davor oder mittendrin.
+    """
+    grenze = schluss_beginn - SCHLUSS_SPIELRAUM_S
+    return [w["word"] for w in worte if w.get("start", 0) < grenze], grenze
+
 
 def sprechen_bei_offener_aufnahme(text, prozess):
     """Spricht und liest dabei mit. Gibt die letzten VORLAUF_S zurueck."""
@@ -1040,10 +1085,11 @@ def diktat_fuehren(zweck, name, quelle):
                     melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r} "
                           f"nach {seit_start:.1f} s, "
                           f"{anzahl_aeusserungen} Aeusserungen, Pegel {mittel:.0f}")
-                    worte_schluss = [w for w in ergebnis_schluss.get("result", [])
-                                     if w.get("word") in SCHLUSS_WOERTER]
-                    if worte_schluss:
-                        schluss_beginn = worte_schluss[0].get("start")
+                    schluss_beginn = schluss_beginn_aus(ergebnis_schluss.get("result", []))
+                    melde("  Schlusssatz mit Zeiten: " + ", ".join(
+                        f"{w.get('word')} {w.get('start', 0):.2f}-{w.get('end', 0):.2f}"
+                        for w in ergebnis_schluss.get("result", []))
+                          + (f" | Beginn {schluss_beginn:.2f}" if schluss_beginn is not None else ""))
                     break
                 if ist_halber_schluss(gehoert):
                     # NUR DAS HALBE WORT - kein Schluss, aber der Nutzer muss es
@@ -1155,9 +1201,7 @@ def diktat_fuehren(zweck, name, quelle):
                 f"{w['word']} {w.get('start', 0):.2f}-{w.get('end', 0):.2f}"
                 for w in ergebnis_rest["result"])
                   + f" | Schlusssatz ab {schluss_beginn:.2f}")
-            grenze = schluss_beginn - SCHLUSS_SPIELRAUM_S
-            behalten = [w["word"] for w in ergebnis_rest["result"]
-                        if w.get("end", 0) <= grenze]
+            behalten, grenze = rest_kuerzen(ergebnis_rest["result"], schluss_beginn)
             weg = len(ergebnis_rest["result"]) - len(behalten)
             if weg:
                 melde(f"  vom Resttext {weg} Wort/Woerter ab dem Schlusssatz "

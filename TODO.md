@@ -67,7 +67,14 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      **Zweite Probe (12:10):** „nein" und „ja" je beim ersten Versuch, „Bananen"
      direkt nach „Ich schreibe mit" vollständig. „Diktat beenden" nur teilweise
      abgeschnitten, „Den" blieb als Eintrag - Schnitt jetzt 0,35 s früher, die
-     Zeitmarken stehen ab sofort im Diktat-Protokoll. **Offen:** dritte Probe. Umschalten fragt
+     Zeitmarken stehen ab sofort im Diktat-Protokoll.
+     **Dritte Probe (12:22):** „ja" beim ersten Versuch. Aber das Diktat endete
+     nach „Rote Äpfel" von selbst - das kleine Modell hörte in „Bananen" ein
+     „diktat beenden beenden". Auszählung aller Protokolle: genau „diktat
+     beenden" 14 x (soweit nachvollziehbar echt), Dreiwort-Varianten 3 x (davon
+     einmal nachweislich falsch). Jetzt gilt nur noch genau „diktat beenden".
+     Der Rest wird nach dem BEGINN der Wörter geschnitten, nicht nach dem Ende.
+     **Offen:** vierte Probe - echte Zeitmarken für den Schnitt fehlen noch. Umschalten fragt
      weiterhin nicht (es richtet keinen Schaden an und ist sofort umkehrbar).
   3. **Die Zusatzwort-Regel vom 2026-08-24** (bis zu zwei Wörter zu viel)
      hat drei der vier Druckaufträge erst ermöglicht. Sie war an Stephans

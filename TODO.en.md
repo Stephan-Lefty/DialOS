@@ -67,7 +67,13 @@ finished too, and then move down together. That way no reference breaks.
      "Bananen" complete right after "Ich schreibe mit". "Diktat beenden" only
      partly cut off, "Den" remained as an entry - the cut is now 0.35 s earlier,
      and the timestamps are logged in the dictation log from now on.
-     **Open:** a third test. Switching the
+     **Third test (12:22):** "ja" on the first attempt. But the dictation ended
+     by itself after "Rote Äpfel" - the small model heard "diktat beenden
+     beenden" in "Bananen". Count across all logs: exactly "diktat beenden" 14
+     times (genuine as far as traceable), three-word variants 3 times (one
+     provably wrong). Now only exactly "diktat beenden" counts. The rest is cut
+     by where words START, not where they end.
+     **Open:** a fourth test - real timestamps for the cut are still missing. Switching the
      look still does not ask (it does no harm and is instantly reversible).
   3. **The extra-word rule of 2026-08-24** (up to two words too many) made
      three of the four print jobs possible. It was measured on Stephan's real
