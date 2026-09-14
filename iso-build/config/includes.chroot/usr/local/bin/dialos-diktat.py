@@ -658,6 +658,14 @@ def aufnahme_starten(quelle):
 # Dieselbe Loesung wie bei der Rueckfrage in dialos-notiz.py.
 VORLAUF_S = 0.3
 
+# SPIELRAUM BEIM ABSCHNEIDEN DES SCHLUSSSATZES (2026-09-14). Mit genau dem
+# Beginn laut kleinem Modell blieb beim ersten echten Test "Den" stehen: Das
+# grosse Modell laesst den Satz offenbar etwas frueher beginnen. 0,35 s frueher
+# schneiden kostet nichts Echtes - vor dem Schlusssatz verlangt pause_davor()
+# ohnehin eine Sprechpause, ein echtes letztes Wort endet also nicht
+# unmittelbar davor. Die Zeiten stehen im Protokoll; der Wert ist vorlaeufig.
+SCHLUSS_SPIELRAUM_S = 0.35
+
 
 def sprechen_bei_offener_aufnahme(text, prozess):
     """Spricht und liest dabei mit. Gibt die letzten VORLAUF_S zurueck."""
@@ -1140,12 +1148,20 @@ def diktat_fuehren(zweck, name, quelle):
         ergebnis_rest = json.loads(erkenner.FinalResult())
         rest = ergebnis_rest.get("text", "").strip()
         if rest and schluss_beginn is not None and ergebnis_rest.get("result"):
+            # Die Zeitmarken ins Protokoll - nur die des Rests. Beim ersten
+            # echten Test blieb "Den" stehen, und ohne Zahlen war nicht zu
+            # sagen, wo das grosse Modell den Schlusssatz hingelegt hatte.
+            melde("  Resttext mit Zeiten: " + ", ".join(
+                f"{w['word']} {w.get('start', 0):.2f}-{w.get('end', 0):.2f}"
+                for w in ergebnis_rest["result"])
+                  + f" | Schlusssatz ab {schluss_beginn:.2f}")
+            grenze = schluss_beginn - SCHLUSS_SPIELRAUM_S
             behalten = [w["word"] for w in ergebnis_rest["result"]
-                        if w.get("end", 0) <= schluss_beginn + 0.05]
+                        if w.get("end", 0) <= grenze]
             weg = len(ergebnis_rest["result"]) - len(behalten)
             if weg:
                 melde(f"  vom Resttext {weg} Wort/Woerter ab dem Schlusssatz "
-                      f"abgeschnitten (ab {schluss_beginn:.2f} s)")
+                      f"abgeschnitten (ab {grenze:.2f} s)")
             rest = " ".join(behalten).strip()
     except Exception as fehler:
         melde(f"  Resttext nicht lesbar: {fehler}")

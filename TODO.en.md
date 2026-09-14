@@ -62,7 +62,12 @@ finished too, and then move down together. That way no reference breaks.
      the question. Fixed (microphone open during the announcement, 30 ms
      buffer), checked on the raw microphone. **Open:** the same test again with a
      real voice after logging in again, plus a shopping-list dictation (word
-     start, "Diktat beenden" no longer an entry). Switching the
+     start, "Diktat beenden" no longer an entry).
+     **Second test (12:10):** "nein" and "ja" each on the first attempt,
+     "Bananen" complete right after "Ich schreibe mit". "Diktat beenden" only
+     partly cut off, "Den" remained as an entry - the cut is now 0.35 s earlier,
+     and the timestamps are logged in the dictation log from now on.
+     **Open:** a third test. Switching the
      look still does not ask (it does no harm and is instantly reversible).
   3. **The extra-word rule of 2026-08-24** (up to two words too many) made
      three of the four print jobs possible. It was measured on Stephan's real
@@ -78,6 +83,24 @@ finished too, and then move down together. That way no reference breaks.
   instead of speaking hints); wake word instead of grammar (already an item).
   The item "First false start" below is the same mechanism, now with
   consequences.
+
+- [ ] **The voice service survives logging out - afterwards TWO run**
+  (found 2026-09-14, 12:13). After logging out and in,
+  `dialos-sprachbefehl-desktop.py` from 11:49 (old version) and from 12:09
+  ran side by side, each in its own autostart unit. The log showed
+  "anderer Dienst hoert zu" and "fertig" twice each. Two services listening
+  can execute a command twice - and after an update the old version silently
+  keeps running. The old instance was stopped. **To clarify:** why GNOME does
+  not end it at logout (the "manager" session remained), and a single-instance
+  lock as in `dialos-start-ansage.py`. Also open whether this played a part in
+  earlier tests.
+
+- [ ] **Announcements from other services interrupt dictation** (2026-09-14,
+  12:11:29). In the middle of a shopping-list dictation the network monitor
+  said "Die Internetverbindung wurde gerade unterbrochen …". Dictation listens
+  through echo cancellation, but the user is pulled out of dictating. The
+  marker "another service is listening" should also hold back notices like
+  this until the dictation has finished.
 
 - [ ] **The customer account `nutzer` has full root rights** (found on
   2026-09-14, when Stephan asked whether the new update rule takes anything

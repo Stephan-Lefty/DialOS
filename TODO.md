@@ -63,7 +63,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      Frage. Behoben (offenes Mikrofon während der Ansage, 30 ms Puffer), am
      rohen Mikrofon geprüft. **Offen:** dieselbe Probe noch einmal mit echter
      Stimme nach dem Neuanmelden, dazu ein Einkaufszettel-Diktat (Wortanfang,
-     „Diktat beenden" nicht mehr als Eintrag). Umschalten fragt
+     „Diktat beenden" nicht mehr als Eintrag).
+     **Zweite Probe (12:10):** „nein" und „ja" je beim ersten Versuch, „Bananen"
+     direkt nach „Ich schreibe mit" vollständig. „Diktat beenden" nur teilweise
+     abgeschnitten, „Den" blieb als Eintrag - Schnitt jetzt 0,35 s früher, die
+     Zeitmarken stehen ab sofort im Diktat-Protokoll. **Offen:** dritte Probe. Umschalten fragt
      weiterhin nicht (es richtet keinen Schaden an und ist sofort umkehrbar).
   3. **Die Zusatzwort-Regel vom 2026-08-24** (bis zu zwei Wörter zu viel)
      hat drei der vier Druckaufträge erst ermöglicht. Sie war an Stephans
@@ -79,6 +83,24 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Hinweise sprechen); Aufweckwort statt Grammatik (steht schon als Punkt).
   Der Punkt „Erster Fehlstart" unten ist damit derselbe Mechanismus, jetzt mit
   Folgen.
+
+- [ ] **Der Sprachdienst überlebt das Abmelden - danach laufen ZWEI**
+  (gefunden 2026-09-14, 12:13). Nach Ab- und Anmelden liefen
+  `dialos-sprachbefehl-desktop.py` von 11:49 (alte Fassung) und von 12:09
+  nebeneinander, beide in eigenen Autostart-Einheiten. Im Protokoll standen
+  „anderer Dienst hoert zu" und „fertig" je doppelt. Zwei Dienste, die
+  zuhören, können einen Befehl doppelt ausführen - und nach einem Update läuft
+  still die alte Fassung weiter. Die alte Instanz ist beendet. **Zu klären:**
+  warum GNOME sie beim Abmelden nicht beendet (die Sitzung „manager" blieb
+  bestehen), und eine Ein-Instanz-Sperre wie bei `dialos-start-ansage.py`.
+  Offen auch, ob das bei früheren Tests mitgespielt hat.
+
+- [ ] **Ansagen anderer Dienste unterbrechen das Diktat** (2026-09-14, 12:11:29).
+  Mitten im Einkaufszettel-Diktat sagte die Netzwerküberwachung „Die
+  Internetverbindung wurde gerade unterbrochen …". Das Diktat hört über die
+  Echo-Unterdrückung, aber der Nutzer wird aus dem Diktieren gerissen. Die
+  Marke „ein anderer Dienst hört zu" müsste auch Hinweise wie diesen
+  zurückhalten, bis das Diktat fertig ist.
 
 - [ ] **Das Kundenkonto `nutzer` hat volle Root-Rechte** (gefunden am
   2026-09-14, als Stephan fragte, ob die neue Update-Regel den Konten etwas
