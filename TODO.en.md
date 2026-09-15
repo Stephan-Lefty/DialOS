@@ -257,6 +257,15 @@ finished too, and then move down together. That way no reference breaks.
     worked. **"Brief erstellen" has been a third phrase since 2026-09-15**
     (Stephan's approval, all 29 sentences checked against Piper); test on the
     device after the next login pending. "Sprachsteuerung beenden" stays open.
+  - **"Brief als PDF speichern" proven on the device (2026-09-15, 13:44)**, as
+    are "Brief erstellen" and the new closing announcement. And for the first
+    time voice control SUGGESTED a command: "als pdf speichern" -> "Der Befehl
+    heisst: brief als pdf speichern". **Found and fixed in the same letter:** a
+    "Diktat beenden" right after the name (small model: "[unk] diktat beenden",
+    no end) stayed at the end of the letter, because only the second one after
+    a pause ended dictation. Such a remnant at the end of the text is now
+    removed. More from Vosk: "Koffer Absatz", "neue teile" (the second time for
+    "neue Zeile"), "Ausrufezeichen" without "setzen" stays a word.
   - **"Brief als PDF speichern" (2026-09-15, built):** Stephan's choice "put
     the PDF where it is visible" and "name all three". Checked offline (PDF,
     empty letter, shopping list, announcement), 30 sentences against Piper.

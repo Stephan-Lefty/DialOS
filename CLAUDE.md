@@ -291,7 +291,10 @@ EINZIGES MAL wurde ein Befehl vorgeschlagen, immer nur "Das war kein Befehl".
 Die Zwei-Drittel-Schwelle war in einer echten Sitzung nie erreicht ('vorlesen
 uhrzeit' liegt beim naechsten Befehl bei 50 %). Damit fehlt genau die Haelfte,
 die beim Lernen helfen soll. Die Schwelle gehoert an Stephans echten
-Aeusserungen durchgerechnet - nicht geraten.
+Aeusserungen durchgerechnet - nicht geraten. **Nachtrag 2026-09-15, 13:44:** der
+erste echte Vorschlag - "als pdf speichern" -> "Der Befehl heisst: brief als pdf
+speichern". Bei langen Befehlen reicht die Schwelle also; bei kurzen bleibt die
+Frage offen.
 
 **Zurueckgestellt:** RustDesk-Fernwartung (Code fertig, geprueft, bewusst
 nicht installiert - siehe die Ausschlussliste in `dialos-aufspielen`),

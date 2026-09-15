@@ -255,6 +255,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     „stoppen" ging. **„Brief erstellen" ist seit 2026-09-15 dritter Satz**
     (Stephans Freigabe, alle 29 Sätze gegen Piper geprüft); Test am Gerät nach
     dem nächsten Anmelden steht aus. „Sprachsteuerung beenden" bleibt offen.
+  - **„Brief als PDF speichern" am Gerät belegt (2026-09-15, 13:44)**, ebenso
+    „Brief erstellen" und die neue Schlussansage. Und zum ersten Mal hat die
+    Sprachsteuerung einen Befehl VORGESCHLAGEN: „als pdf speichern" -> „Der
+    Befehl heisst: brief als pdf speichern". **Im selben Brief gefunden und
+    behoben:** Ein „Diktat beenden" direkt hinter dem Namen (kleines Modell:
+    „[unk] diktat beenden", kein Schluss) stand am Ende im Brief, weil erst das
+    zweite nach einer Pause beendete. Ein solcher Rest am Textende wird jetzt
+    entfernt. Weiter von Vosk: „Koffer Absatz", „neue teile" (zum zweiten Mal
+    für „neue Zeile"), „Ausrufezeichen" ohne „setzen" bleibt Wort.
   - **„Brief als PDF speichern" (2026-09-15, gebaut):** Stephans Wahl
     „PDF sichtbar ablegen" und „alle drei nennen". Offline geprüft (PDF,
     leerer Brief, Einkaufszettel, Ansage), 30 Sätze gegen Piper. Test am Gerät

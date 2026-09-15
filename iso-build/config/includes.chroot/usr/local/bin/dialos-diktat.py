@@ -921,6 +921,31 @@ class Aeusserungen:
         if entfernt:
             melde(f"  Rest eines Befehlsversuchs entfernt: {entfernt!r}")
 
+    def schlussrest_entfernen(self):
+        """Streicht ein gescheitertes "Diktat beenden" am Textende.
+
+        Brief vom 2026-09-15, 13:43: Stephan sagte "... Stefan Roesner Diktat
+        beenden" ohne Pause - das kleine Modell hoerte "[unk] diktat beenden",
+        kein Schluss. Beim zweiten Mal, nach einer Pause, endete das Diktat -
+        und im Brief stand "Stefan Roesner Diktat beenden". Das zweite wurde
+        nach Zeit abgeschnitten, das erste war da laengst geschrieben.
+        """
+        while self.liste and not self.liste[-1]["eintraege"]:
+            self.liste.pop()
+        if not self.liste:
+            return
+        a = self.liste[-1]
+        e = a["eintraege"][-1]
+        worte = list(re.finditer(r"\S+", e))
+        klein = [re.sub(r"[^\wäöüß]", "", w.group().lower()) for w in worte]
+        if len(klein) >= 2 and klein[-2:] == SCHLUSSSATZ.split():
+            vorne = e[:worte[-2].start()].rstrip(" ")
+            melde(f"  gescheitertes 'Diktat beenden' am Textende entfernt: {e[worte[-2].start():]!r}")
+            if vorne.strip():
+                a["eintraege"][-1] = vorne
+            else:
+                a["eintraege"].pop()
+
     def satz_entfernen(self):
         """Streicht den letzten Satz (Liste: die letzte Ware); gibt ihn zurueck."""
         while self.liste and not self.liste[-1]["eintraege"]:
@@ -1633,6 +1658,7 @@ def diktat_fuehren(zweck, name, quelle):
             except Exception:
                 pass
 
+    aeusserungen.schlussrest_entfernen()
     gesammelt = aeusserungen.eintraege()
 
     # DER REST IM ERKENNER - gefunden am 2026-08-21 durch Stephans Test.
