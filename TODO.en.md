@@ -305,7 +305,19 @@ finished too, and then move down together. That way no reference breaks.
     bench (needs short command recordings with consent, not continuous).
     **Prepared 2026-09-15:** recording with a switch, labelling,
     re-recognition, microphone choice for the service. Measurement session
-    pending. **Fundamental question (Stephan):** does DialOS only work in
+    running (parts 1/2 built-in without/with TV done, 47 recordings; parts 3/4
+    TONOR). Found: false trigger "auf Windows umschalten" from word salad (old
+    desktop-look rule without the extra-word limit) - fix after the
+    measurement. **Stephan, 2026-09-15: between Anna's announcement and his
+    answer he always has to wait about 1.5 seconds, otherwise the first word is
+    swallowed.** Fits the "tag haben wir"/"haben wir" pattern. Cause in the
+    service: after every announcement parec is stopped, 0.7 s of reverberation
+    waited (NACHHALL_WARTEN_S), plus the 0.3 s polling interval and parec's
+    start. Dictation has solved this since 09-14 with the microphone open
+    during the announcement and 0.3 s lead-in - build the same here AFTER the
+    measurement session (otherwise parts 3/4 are not comparable with 1/2);
+    with the raw TONOR without echo cancellation make sure Anna's own words
+    ("Der Befehl heisst: …") do not count as a command. **Fundamental question (Stephan):** does DialOS only work in
     silence - and is it therefore unsuitable outdoors? When building it
     in: model (465 MB) and sherpa-onnx
     for all accounts under /usr/local, sort out packaging and licence (model
