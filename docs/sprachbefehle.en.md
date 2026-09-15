@@ -236,3 +236,28 @@ whenever he says something, always with "zu laut"):
   "zu laut".
 - **Microphone for comparison:** `~/.config/dialos/befehl-mikrofon` with a source
   name; effective after logging out and in.
+
+**First measurement session (2026-09-15, 17:28-17:52):** 15 given commands plus
+two non-commands, four runs, 90 recordings (67 labelled from sequence and log, 10
+by Stephan, 13 left open). Counted: the service's live decision per recording:
+
+| Run | Command attempts | right | missed | rejected "zu laut" | false trigger |
+|---|---|---|---|---|---|
+| built-in, quiet | 21 | 18 | 3 | 0 | 0 |
+| built-in, TV | 18 | 17 | 1 | 0 | 0 |
+| TONOR, quiet | 17 | 16 | 1 | 0 | 0 |
+| TONOR, TV | 19 | 18 | 0 | 1 | 0 |
+
+- **No executed false trigger** among the labelled recordings; Anna's own words
+  reached the service via the TONOR as "speichern"/"löschen" but triggered
+  nothing.
+- **The misses are almost all swallowed beginnings** ("tag haben wir", "datum
+  haben wir", "haben sprachsteuerung stoppen"). Stephan: between Anna's
+  announcement and his answer he always has to wait about 1.5 seconds - in the
+  fourth run he deliberately waited a second, and no beginning was lost there.
+  The microphone comparison is therefore biased in favour of the TONOR.
+- **The TV hardly disturbed commands** - unlike dictation.
+- **TONOR at 100 % clips:** every utterance reached the maximum 32768.
+- Caveat: small numbers, in the first run the order partly deviated from the
+  list, and automatic labelling assumes that a list command recognised exactly
+  and executed was also said.

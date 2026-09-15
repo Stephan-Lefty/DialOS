@@ -282,3 +282,29 @@ reagiert immer, wenn ich was sage … und immer mit es ist zu laut"):
   Einschaltsatz als „zu laut" verworfen.
 - **Mikrofon zum Vergleich:** `~/.config/dialos/befehl-mikrofon` mit dem Namen
   einer Quelle; wirkt nach Ab- und Anmelden.
+
+**Erste Messsitzung (2026-09-15, 17:28-17:52):** 15 vorgegebene Befehle plus zwei
+Nicht-Befehle, vier Durchgänge, 90 Mitschnitte (67 aus Ablauf und Protokoll
+beschriftet, 10 von Stephan, 13 offen gelassen). Gezählt die Live-Entscheidung
+des Dienstes je Mitschnitt:
+
+| Durchgang | Befehlsversuche | richtig | verpasst | „zu laut" verworfen | falsch ausgelöst |
+|---|---|---|---|---|---|
+| eingebaut, ruhig | 21 | 18 | 3 | 0 | 0 |
+| eingebaut, Fernseher | 18 | 17 | 1 | 0 | 0 |
+| TONOR, ruhig | 17 | 16 | 1 | 0 | 0 |
+| TONOR, Fernseher | 19 | 18 | 0 | 1 | 0 |
+
+- **Kein ausgeführter Fehlauslöser** unter den beschrifteten Mitschnitten; Annas
+  eigene Worte kamen über das TONOR als „speichern"/„löschen" an, lösten aber
+  nichts aus.
+- **Die Verpasser sind fast alle verschluckte Anfänge** („tag haben wir",
+  „datum haben wir", „haben sprachsteuerung stoppen"). Stephan: „Zwischen der
+  Ansage von Anna und meiner Antwort muss ich immer so 1,5 Sekunden warten" - im
+  vierten Durchgang wartete er bewusst eine Sekunde, und dort fehlte kein
+  Anfang. Der Mikrofon-Vergleich ist deshalb zugunsten des TONOR verzerrt.
+- **Der Fernseher störte die Befehle kaum** - anders als beim Diktat.
+- **TONOR bei 100 % übersteuert:** jede Äußerung erreichte den Höchstwert 32768.
+- Vorbehalt: kleine Zahlen, im ersten Durchgang wich die Reihenfolge teils von
+  der Liste ab, und die automatische Beschriftung setzt voraus, dass ein genau
+  erkannter und ausgeführter Listenbefehl auch gesagt wurde.
