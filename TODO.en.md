@@ -209,7 +209,39 @@ finished too, and then move down together. That way no reference breaks.
   and after "neuer Absatz"/"neue Zeile" the next word is capitalised ("Mit
   freundlichen Grüßen"). Checked offline in real time with exactly this
   sequence: remnant removed, the Meier sentence deleted, only the last sentence
-  taken from the long chunk. **Test with a real voice pending.**
+  taken from the long chunk.
+
+  **Second test with a real voice (2026-09-15, 13:02):** "Satz löschen"
+  correctly deleted the Meier sentence. Newly found and fixed:
+  1. **"Satz wiederholen" read out "Satz wiederholen Jax".** The large model
+     heard "jax wiederholen" and placed "jax" more than 0.35 s before the start
+     given by the small model - it stayed. Now removed is what ENDS after 0.35 s
+     before the command (before: what BEGINS). The first attempt before it stood
+     in the text as a chunk of its own and is now recognised as a remnant.
+  2. **The first "Satz wiederholen" counted as "not silent before"** - after a
+     five-second pause. Measured offline: the small model places the word start
+     about 0.16 s after the sound begins. Margin before the command 0.15 → 0.25
+     s; levels are now logged with every such rejection.
+  3. **"Kommas" + "Setzen" across a chunk boundary.** Vosk cuts long speech
+     even without a pause. If a chunk starts with the second word of a
+     punctuation phrase and the previous ended with the first, both are
+     processed together; "kommas setzen" counts as a comma.
+
+  **Found and fixed offline along the way:**
+  4. **A standalone "Punkt setzen" became "Satz löschen"** - with silence before
+     and after, so accepted; the sentence just dictated was gone. Now a
+     **cross-check:** the command only counts if the free recogniser heard
+     "lösch…"/"wiederhol…" in the same period. In three runs three false
+     triggers rejected that way ("punkt setzen" twice, "umsetzen"), all genuine
+     commands accepted.
+  5. **Without recognised punctuation "Satz löschen" deleted back to the start
+     of the text**, salutation included. Now at most the last two spoken chunks
+     (chunks consisting only of punctuation do not count).
+
+  **Still open, not fixed:** a chunk after a pause always starts with a capital
+  ("Ich bitte Sie, Wir diesen Betrag"); a standalone "Punkt setzen" often
+  reaches the large model as "und setzen"/"umsetzen" (with Michael offline; with
+  Stephan on the device correct so far). **Test with a real voice pending.**
 
 - [ ] **Letter dictated in DialOS (2026-09-15, 11:46) - three program bugs
   found and fixed, proof with a complete letter still pending.**

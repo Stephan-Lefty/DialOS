@@ -130,7 +130,11 @@ background) and `splash.png` (boot/login screen).
   voice** the commands act on the last SENTENCE (back to the previous sentence
   end; on the list the last item) instead of the last recognition chunk,
   remnants of a failed command attempt are removed first, and the word after a
-  paragraph/line break is capitalised.
+  paragraph/line break is capitalised. **After the second test:** cross-check
+  with the free recogniser (a standalone "Punkt setzen" had passed as "Satz
+  löschen" offline), at most two chunks per deletion, command words cut by
+  their end ("Satz wiederholen Jax"), punctuation across chunk boundaries
+  ("Kommas" + "Setzen").
 
 - **Letter dictation: three bugs from the first complete letter fixed**
   (2026-09-15). A "diktat … beenden" with a 1.24 s gap (from "bis Ende") ended

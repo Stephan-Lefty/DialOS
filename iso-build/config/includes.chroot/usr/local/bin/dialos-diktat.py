@@ -555,7 +555,13 @@ SATZZEICHEN = [
     ("ausrufezeichen setzen", "!"),
     ("doppelpunkt setzen", ":"),
     ("gedankenstrich setzen", " - "),
+    # So hoerte das grosse Modell "komma setzen" in der Brief-Probe vom
+    # 2026-09-15 - im Text stand "Kommas Setzen".
+    ("kommas setzen", ","),
 ]
+# Erstes Wort -> zweites Wort, fuer Satzzeichen ueber eine Stueckgrenze
+# (Aeusserungen.hinzu).
+SATZZEICHEN_FORTSETZUNG = {w.split()[0]: w.split()[1] for w, _ in SATZZEICHEN}
 
 
 def satzzeichen_setzen(satz):
@@ -723,14 +729,21 @@ SCHLUSS_LUECKE_MAX_S = 0.6
 # 0,5 s - wer einen Befehl gibt, wartet auf die Antwort.
 BEFEHL_RUHE_DAVOR_S = 0.4
 BEFEHL_RUHE_DANACH_S = 0.5
-# Woerter der freien Erkennung, die so kurz vor dem Befehl beginnen, gehoeren
-# zum Befehl (dasselbe Mass wie SCHLUSS_SPIELRAUM_S beim Schluss).
+# Woerter der freien Erkennung, die nach diesem Zeitpunkt vor dem Befehl ENDEN,
+# gehoeren zum Befehl (bis 2026-09-15: die danach BEGINNEN - siehe Aufruf).
 BEFEHL_SPIELRAUM_S = 0.35
 # ABSTAND ZU DEN WORTMARKEN beim Pruefen der Ruhe. Offline gefunden, bevor
 # Stephan testen musste: Vosk setzte das Ende von "loeschen" auf 4,23 s, das
 # Wort klang aber bis 4,25 s aus - in den Block ab 4,125 s (Pegel 2615). Ohne
 # Abstand galt der echte Befehl als "danach nicht still".
 BEFEHL_RAND_S = 0.15
+# VOR DEM BEFEHL ETWAS MEHR ABSTAND (2026-09-15). Das kleine Modell setzt den
+# Wortanfang spaeter als der Ton beginnt: offline "satz" bei 9,03 s, laut ab
+# 8,875 s - mit 0,15 s lag der Tonbeginn im Ruhefenster, und der Befehl galt als
+# "davor nicht still". Am Geraet wurde so vermutlich Stephans erstes "Satz
+# wiederholen" nach fuenf Sekunden Pause verworfen. Seit der Gegenprobe mit der
+# freien Erkennung ist dieser Abstand vertretbar.
+BEFEHL_RAND_DAVOR_S = 0.25
 
 
 def ruhig(verlauf, von_s, bis_s):
@@ -758,15 +771,40 @@ class Aeusserungen:
         text = text if text is not None else " ".join(w["word"] for w in worte)
         if not text.strip():
             return []
+        # EIN GESPROCHENES SATZZEICHEN UEBER DIE STUECKGRENZE (2026-09-15,
+        # zweite Brief-Probe). Vosk schneidet lange Rede auch ohne Pause - einmal
+        # genau zwischen "kommas" und "setzen". Das eine Stueck endete auf
+        # "Kommas", das naechste begann mit "Setzen", und beide standen so im
+        # Brief. Beginnt ein Stueck mit dem zweiten Wort eines Satzzeichens und
+        # endete das vorige mit dem ersten, wird beides zusammen neu verarbeitet.
+        vorher = self.liste[-1] if self.liste else None
+        erstes = text.split()[0].lower()
+        if (vorher and self.name not in LISTEN_ZIELE and vorher["epoche"] == epoche
+                and vorher.get("text")
+                and SATZZEICHEN_FORTSETZUNG.get(vorher["text"].split()[-1].lower()) == erstes):
+            self.liste.pop()
+            melde(f"  Satzzeichen ueber die Stueckgrenze - mit dem vorigen Stueck "
+                  f"zusammengefasst: {vorher['text'].split()[-1]!r} + {erstes!r}")
+            text = vorher["text"] + " " + text
+            worte = list(vorher["worte"]) + list(worte)
         eintraege = aeusserung_verarbeiten(self.name, text)
-        self.liste.append({"epoche": epoche, "worte": list(worte), "eintraege": eintraege})
+        self.liste.append({"epoche": epoche, "worte": list(worte), "eintraege": eintraege,
+                           "text": text})
         return eintraege
 
-    def ab_zeit_entfernen(self, epoche, ab_s):
-        """Entfernt alle Woerter dieser Epoche, die ab ab_s beginnen (Befehlswoerter)."""
+    def ab_zeit_entfernen(self, epoche, ab_s, nach_ende=False):
+        """Entfernt alle Woerter dieser Epoche, die ab ab_s beginnen (Befehlswoerter).
+
+        nach_ende: stattdessen alle, die nach ab_s ENDEN - siehe BEFEHL_RAND_S
+        am Aufruf fuer "Satz loeschen"/"Satz wiederholen".
+        """
         while self.liste and self.liste[-1]["epoche"] == epoche and self.liste[-1]["worte"]:
             letzte = self.liste[-1]
-            bleiben = [w for w in letzte["worte"] if w.get("start", 0) < ab_s]
+            if nach_ende:
+                bleiben = [w for w in letzte["worte"]
+                           if w.get("end", w.get("start", 0)) <= ab_s]
+            else:
+                bleiben = [w for w in letzte["worte"] if w.get("start", 0) < ab_s]
             if len(bleiben) == len(letzte["worte"]):
                 return
             self.liste.pop()
@@ -800,11 +838,38 @@ class Aeusserungen:
                 text += e
         return teile, text
 
-    def _satz_anfang(self, text):
+    # HOECHSTENS DIE LETZTEN ZWEI GESPROCHENEN STUECKE (2026-09-15, offline
+    # gefunden). Hatte der Erkenner Punkt und Absatz nicht verstanden ("neue
+    # Apps", "Umsetzen"), gab es kein Satzende, und "Satz loeschen" strich bis zum
+    # Textanfang - samt Anrede. Zu wenig gestrichen holt ein zweites "Satz
+    # loeschen" nach, zu viel holt nichts zurueck. Stuecke nur aus Satzzeichen
+    # zaehlen nicht mit: "Ich bitte Sie" / "," / "mir diesen Betrag" / "." ist
+    # EIN Satz.
+    STUECKE_HOECHSTENS = 2
+
+    def _satz_anfang(self, text, teile):
         rest = text.rstrip()
         if rest and rest[-1] in ".?!":
             rest = rest[:-1]
-        return max(rest.rfind(z) for z in self.SATZ_ENDE) + 1
+        satzende = max(rest.rfind(z) for z in self.SATZ_ENDE) + 1
+        anfaenge = []
+        for i, a in enumerate(self.liste):
+            if any(re.search(r"\w", e) for e in a["eintraege"]):
+                anfaenge.append(min(p for k, _, p in teile if k == i))
+        grenze = anfaenge[-self.STUECKE_HOECHSTENS] if len(anfaenge) >= self.STUECKE_HOECHSTENS else 0
+        return max(satzende, grenze)
+
+    def worte_nach(self, epoche, ab_s):
+        """Woerter dieser Epoche, die nach ab_s enden (fuer die Gegenprobe)."""
+        worte = []
+        for a in reversed(self.liste):
+            if a["epoche"] != epoche:
+                break
+            spaeter = [w for w in a["worte"] if w.get("end", w.get("start", 0)) > ab_s]
+            if not spaeter:
+                break
+            worte = spaeter + worte
+        return worte
 
     def befehlsrest_entfernen(self):
         """Streicht den Rest eines gescheiterten Befehlsversuchs am Textende.
@@ -858,7 +923,7 @@ class Aeusserungen:
             weg = self.liste[-1]["eintraege"].pop()
             return weg.strip()
         teile, text = self._flach()
-        schnitt = self._satz_anfang(text)
+        schnitt = self._satz_anfang(text, teile)
         for i, j, anfang in reversed(teile):
             e = self.liste[i]["eintraege"][j]
             if anfang >= schnitt:
@@ -879,8 +944,8 @@ class Aeusserungen:
             return ""
         if self.name in LISTEN_ZIELE:
             return eintraege[-1].strip()
-        _, text = self._flach()
-        return text[self._satz_anfang(text):].strip()
+        teile, text = self._flach()
+        return text[self._satz_anfang(text, teile):].strip()
 
     def eintraege(self):
         return [e for a in self.liste for e in a["eintraege"]]
@@ -1336,35 +1401,61 @@ def diktat_fuehren(zweck, name, quelle):
                             aeusserungen.hinzu(epoche, rest["result"])
                     except Exception as fehler:
                         melde(f"  Rest vor dem Befehl nicht lesbar: {fehler}")
-                    aeusserungen.ab_zeit_entfernen(epoche, b["start"] - BEFEHL_SPIELRAUM_S)
-                    aeusserungen.befehlsrest_entfernen()
-                    if b["satz"] == BEFEHL_LOESCHEN:
-                        weg = aeusserungen.satz_entfernen()
-                        melde(f"  SATZ LOESCHEN: gestrichen {weg!r}")
-                        antwort = (f"Gestrichen: {zum_vorlesen(weg)}" if weg
-                                   else "Es gibt noch nichts zu streichen.")
+                    # GEGENPROBE MIT DER FREIEN ERKENNUNG (2026-09-15, offline
+                    # gefunden). Ein einzeln gesprochenes "punkt setzen" hoerte das
+                    # kleine Modell als "satz loeschen" - mit Ruhe davor und danach,
+                    # also angenommen, und der gerade diktierte Satz war weg. Das
+                    # grosse Modell hoerte dort "umsetzen". Bei jedem echten Befehl
+                    # bisher hatte es das zweite Wort: "Satz loeschen" (2x), "jax
+                    # wiederholen", "satz wiederholen". Also gilt der Befehl nur,
+                    # wenn die freie Erkennung im selben Zeitraum "loesch..." bzw.
+                    # "wiederhol..." gehoert hat.
+                    stamm = "lösch" if b["satz"] == BEFEHL_LOESCHEN else "wiederhol"
+                    gegen = aeusserungen.worte_nach(epoche, b["start"] - BEFEHL_SPIELRAUM_S)
+                    if not any(stamm in w.get("word", "") for w in gegen):
+                        melde(f"  {b['satz']!r} verworfen - die freie Erkennung hoerte "
+                              f"{' '.join(w.get('word', '') for w in gegen)!r}")
                     else:
-                        zuletzt = aeusserungen.satz()
-                        melde(f"  SATZ WIEDERHOLEN: {zuletzt!r}")
-                        antwort = (f"Zuletzt: {zum_vorlesen(zuletzt)}" if zuletzt
-                                   else "Ich habe noch nichts geschrieben.")
-                    # Waehrend der Antwort mitlesen und verwerfen, danach beide
-                    # Erkenner frisch - die eigene Stimme soll nicht im Text landen.
-                    vorrat = sprechen_bei_offener_aufnahme(antwort, prozess)
-                    erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
-                    erkenner.SetWords(True)
-                    schluss = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_SCHLUSS)
-                    schluss.SetWords(True)
-                    epoche += 1
-                    zeitverlauf = []
-                    pegel_puffer = []
-                    letzte_aeusserung = time.time()
-                    # Die Sperrfrist fuer den Schluss gilt nach jedem Befehl neu:
-                    # Offline gefunden - direkt nach "Satz loeschen" machte das
-                    # frische kleine Modell aus "die Rechnung liegt dem Schreiben
-                    # bei" ein "diktat beenden" (0,41 s Luecke) nach 1,9 s.
-                    aufnahme_seit = time.time()
-                    continue
+                        # NACH DEM WORTENDE SCHNEIDEN, NICHT NACH DEM ANFANG (2026-09-15,
+                        # zweite Brief-Probe). Das grosse Modell hoerte "jax wiederholen"
+                        # und liess "jax" mehr als 0,35 s vor dem "satz" des kleinen
+                        # beginnen - "Jax" blieb stehen, Anna las "Satz wiederholen Jax".
+                        # Vor dem Befehl ist es nachweislich still (0,65 s bis 0,25 s vor
+                        # seinem Beginn, siehe oben); ein echtes Wort davor endet also
+                        # frueher. Was spaeter endet, gehoert zum Befehl. Die Grenze liegt
+                        # mitten im Ruhefenster (0,35 s vor dem Beginn): Ein echtes Wort
+                        # endet vor 0,65 s, das grosse Modell setzt Marken bis 0,5 s
+                        # frueher als das kleine - sein "satz" endet also nach -0,2 s.
+                        aeusserungen.ab_zeit_entfernen(epoche, b["start"] - BEFEHL_SPIELRAUM_S,
+                                                       nach_ende=True)
+                        aeusserungen.befehlsrest_entfernen()
+                        if b["satz"] == BEFEHL_LOESCHEN:
+                            weg = aeusserungen.satz_entfernen()
+                            melde(f"  SATZ LOESCHEN: gestrichen {weg!r}")
+                            antwort = (f"Gestrichen: {zum_vorlesen(weg)}" if weg
+                                       else "Es gibt noch nichts zu streichen.")
+                        else:
+                            zuletzt = aeusserungen.satz()
+                            melde(f"  SATZ WIEDERHOLEN: {zuletzt!r}")
+                            antwort = (f"Zuletzt: {zum_vorlesen(zuletzt)}" if zuletzt
+                                       else "Ich habe noch nichts geschrieben.")
+                        # Waehrend der Antwort mitlesen und verwerfen, danach beide
+                        # Erkenner frisch - die eigene Stimme soll nicht im Text landen.
+                        vorrat = sprechen_bei_offener_aufnahme(antwort, prozess)
+                        erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
+                        erkenner.SetWords(True)
+                        schluss = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_SCHLUSS)
+                        schluss.SetWords(True)
+                        epoche += 1
+                        zeitverlauf = []
+                        pegel_puffer = []
+                        letzte_aeusserung = time.time()
+                        # Die Sperrfrist fuer den Schluss gilt nach jedem Befehl neu:
+                        # Offline gefunden - direkt nach "Satz loeschen" machte das
+                        # frische kleine Modell aus "die Rechnung liegt dem Schreiben
+                        # bei" ein "diktat beenden" (0,41 s Luecke) nach 1,9 s.
+                        aufnahme_seit = time.time()
+                        continue
 
             # ZUERST den Schluss-Erkenner fragen. Er bekommt denselben
             # Block; wer zuerst fertig ist, ist unerheblich - entscheidend
@@ -1381,9 +1472,16 @@ def diktat_fuehren(zweck, name, quelle):
                     anfang, ende = worte_befehl[0].get("start", 0), worte_befehl[1].get("end", 0)
                     if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
                         melde(f"  {gehoert!r} verworfen - Woerter nicht zusammenhaengend ({luecke:.2f} s)")
-                    elif not ruhig(zeitverlauf, anfang - BEFEHL_RAND_S - BEFEHL_RUHE_DAVOR_S,
-                                   anfang - BEFEHL_RAND_S):
-                        melde(f"  {gehoert!r} verworfen - davor nicht still")
+                    elif not ruhig(zeitverlauf, anfang - BEFEHL_RAND_DAVOR_S - BEFEHL_RUHE_DAVOR_S,
+                                   anfang - BEFEHL_RAND_DAVOR_S):
+                        # Mit Pegeln: Am 2026-09-15 wurde ein echtes "Satz
+                        # wiederholen" nach fuenf Sekunden Pause so verworfen, und
+                        # ohne Zahlen war nicht zu sagen, was davor laut war.
+                        a_i = max(0, int((anfang - BEFEHL_RAND_DAVOR_S - BEFEHL_RUHE_DAVOR_S) / BLOCK_S) - 2)
+                        b_i = int(math.ceil(anfang / BLOCK_S)) + 1
+                        melde(f"  {gehoert!r} verworfen - davor nicht still "
+                              f"({anfang:.2f} s, Pegel ab {a_i * BLOCK_S:.2f} s: "
+                              f"{[round(x) for x in zeitverlauf[a_i:b_i]]})")
                     else:
                         melde(f"  {gehoert!r} erkannt ({anfang:.2f}-{ende:.2f} s) - warte auf Ruhe danach")
                         befehl_offen = {"satz": gehoert, "start": anfang, "ende": ende}

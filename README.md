@@ -138,7 +138,11 @@ das Erfolg meldet, während es versagt.
   Befehle den letzten SATZ (bis zum vorigen Satzende; auf dem Zettel die letzte
   Ware) statt des letzten Erkennungsstücks, Reste eines gescheiterten
   Befehlsversuchs werden vorher entfernt, und nach Absatz/Zeile wird
-  großgeschrieben.
+  großgeschrieben. **Nach der zweiten Probe:** Gegenprobe mit der freien
+  Erkennung (ein einzelnes „Punkt setzen" war offline als „Satz löschen"
+  durchgegangen), höchstens zwei Stücke je Streichen, Befehlswörter nach ihrem
+  Ende abgeschnitten („Satz wiederholen Jax"), Satzzeichen über Stückgrenzen
+  („Kommas" + „Setzen").
 
 - **Brief-Diktat: drei Fehler aus dem ersten ganzen Brief behoben** (2026-09-15).
   Ein „diktat … beenden" mit 1,24 s Lücke (aus „bis Ende") beendete das Diktat

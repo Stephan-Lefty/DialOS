@@ -207,8 +207,40 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Dazu: kein „Müller ." mehr (Satzzeichen-Stück hängt am Wort davor), und nach
   „neuer Absatz"/„neue Zeile" wird großgeschrieben („Mit freundlichen Grüßen").
   Offline in Echtzeit mit genau diesem Ablauf geprüft: Rest entfernt, der
-  Meier-Satz gestrichen, aus dem langen Stück nur der letzte Satz. **Probe mit
-  echter Stimme steht aus.**
+  Meier-Satz gestrichen, aus dem langen Stück nur der letzte Satz.
+
+  **Zweite Probe mit echter Stimme (2026-09-15, 13:02):** „Satz löschen" hat den
+  Meier-Satz richtig gestrichen. Neu gefunden und behoben:
+  1. **„Satz wiederholen" las „Satz wiederholen Jax".** Das große Modell hörte
+     „jax wiederholen" und setzte „jax" mehr als 0,35 s vor den Beginn laut
+     kleinem Modell - es blieb stehen. Jetzt fällt weg, was nach 0,35 s vor dem
+     Befehl ENDET (vorher: BEGINNT). Der erste Versuch davor stand als eigenes
+     Stück im Text und wird jetzt als Rest erkannt.
+  2. **Das erste „Satz wiederholen" galt als „davor nicht still"** - nach fünf
+     Sekunden Pause. Offline gemessen: Das kleine Modell setzt den Wortanfang
+     rund 0,16 s nach dem Tonbeginn. Abstand vor dem Befehl 0,15 → 0,25 s; die
+     Pegel stehen jetzt bei jeder solchen Ablehnung im Protokoll.
+  3. **„Kommas" + „Setzen" über eine Stückgrenze.** Vosk schneidet lange Rede
+     auch ohne Pause. Beginnt ein Stück mit dem zweiten Wort eines Satzzeichens
+     und endete das vorige mit dem ersten, werden beide zusammen verarbeitet;
+     „kommas setzen" gilt als Komma.
+
+  **Offline dabei gefunden und behoben:**
+  4. **Ein einzeln gesprochenes „Punkt setzen" wurde zu „Satz löschen"** - mit
+     Ruhe davor und danach, also angenommen; der eben diktierte Satz war weg.
+     Jetzt **Gegenprobe:** Der Befehl gilt nur, wenn die freie Erkennung im
+     selben Zeitraum „lösch…"/„wiederhol…" gehört hat. In drei Läufen drei
+     Fehlauslöser so verworfen („punkt setzen", 2x; „umsetzen"), alle echten
+     Befehle angenommen.
+  5. **Ohne erkannte Satzzeichen strich „Satz löschen" bis zum Textanfang**,
+     samt Anrede. Jetzt höchstens die letzten zwei gesprochenen Stücke
+     (Stücke nur aus Satzzeichen zählen nicht).
+
+  **Noch offen, nicht behoben:** Ein Stück nach einer Pause beginnt immer groß
+  („Ich bitte Sie, Wir diesen Betrag"); einzeln gesprochenes „Punkt setzen"
+  kommt beim großen Modell oft als „und setzen"/„umsetzen" an (mit Michael
+  offline; bei Stephan am Gerät bisher richtig). **Probe mit echter Stimme
+  steht aus.**
 
 - [ ] **Brief in DialOS eingesprochen (2026-09-15, 11:46) - drei Programmfehler
   gefunden und behoben, Beweis mit vollständigem Brief steht aus.** Rückfrage
