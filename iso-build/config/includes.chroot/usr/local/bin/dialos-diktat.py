@@ -786,7 +786,8 @@ class Aeusserungen:
         # "Kommas", das naechste begann mit "Setzen", und beide standen so im
         # Brief. Beginnt ein Stueck mit dem zweiten Wort eines Satzzeichens und
         # endete das vorige mit dem ersten, wird beides zusammen neu verarbeitet.
-        vorher = self.liste[-1] if self.liste else None
+        # Beim Parakeet-Test sind die Satzzeichen schon umgesetzt - nichts zu verbinden.
+        vorher = self.liste[-1] if self.liste and self.umschreiben is None else None
         erstes = text.split()[0].lower()
         if (vorher and self.name not in LISTEN_ZIELE and vorher["epoche"] == epoche
                 and vorher.get("text")
@@ -796,7 +797,7 @@ class Aeusserungen:
                   f"zusammengefasst: {vorher['text'].split()[-1]!r} + {erstes!r}")
             text = vorher["text"] + " " + text
             worte = list(vorher["worte"]) + list(worte)
-        eintraege = aeusserung_verarbeiten(self.name, text)
+        eintraege = aeusserung_verarbeiten(self.name, text, self.umschreiben is not None)
         self.liste.append({"epoche": epoche, "worte": list(worte), "eintraege": eintraege,
                            "text": text})
         return eintraege
@@ -864,7 +865,8 @@ class Aeusserungen:
         rest = text.rstrip()
         if rest and rest[-1] in ".?!":
             rest = rest[:-1]
-        satzende = max(rest.rfind(z) for z in self.SATZ_ENDE) + 1
+        stellen = satzenden(rest)
+        satzende = (stellen[-1] + 1) if stellen else 0
         anfaenge = []
         for i, a in enumerate(self.liste):
             if any(re.search(r"\w", e) for e in a["eintraege"]):
@@ -987,6 +989,26 @@ class Aeusserungen:
 
     def eintraege(self):
         return [e for a in self.liste for e in a["eintraege"]]
+
+
+# KEIN SATZENDE: Punkt nach Abkuerzung oder Ordnungszahl (2026-09-15, Weg 3).
+# Parakeet schreibt "Am 12. August" und "Frau Dr. Muster" - mit Vosk kamen
+# Punkte nur aus "punkt setzen", jetzt setzt der Erkenner sie selbst.
+ABKUERZUNGEN = ("dr", "prof", "nr", "str", "st", "bzw", "usw", "ca", "z", "b", "evtl",
+                "ggf", "inkl", "tel", "hr", "fr", "jan", "feb", "febr", "aug", "sept",
+                "okt", "nov", "dez", "vgl", "etc", "u", "a", "d", "h", "i")
+
+
+def satzenden(text):
+    """Positionen der Zeichen, die einen Satz beenden (. ? ! und Zeilenwechsel)."""
+    stellen = []
+    for m in re.finditer(r"[.?!\n]", text):
+        if m.group() == ".":
+            davor = re.search(r"([\wäöüÄÖÜß]+)$", text[:m.start()])
+            if davor and (davor.group(1).isdigit() or davor.group(1).lower() in ABKUERZUNGEN):
+                continue
+        stellen.append(m.start())
+    return stellen
 
 
 def zusammenziehen(eintraege):
@@ -1370,7 +1392,7 @@ def woerterbuch_anwenden(text, eintraege=None):
     return text
 
 
-def aeusserung_verarbeiten(name, text):
+def aeusserung_verarbeiten(name, text, satzzeichen_fertig=False):
     """Der Weg jeder Aeusserung: Satzzeichen, Schreibung, Zerlegung.
 
     Herausgeloest, damit der Resttext nach dem Schluss GENAU denselben Weg
@@ -1391,7 +1413,10 @@ def aeusserung_verarbeiten(name, text):
     bleiben aussen vor - auf einem Einkaufszettel waere "Butter." keine
     Verbesserung.
     """
-    mit_zeichen = text if name in LISTEN_ZIELE else satzzeichen_setzen(text)
+    # satzzeichen_fertig: Parakeet-Text (Weg 3) - dort sind Zeichen, Absaetze und
+    # Zeilen schon gesetzt; satzzeichen_setzen() wuerde die Zeilenwechsel beim
+    # Zerlegen in Woerter verlieren.
+    mit_zeichen = text if (name in LISTEN_ZIELE or satzzeichen_fertig) else satzzeichen_setzen(text)
     if mit_zeichen != text:
         melde(f"  Satzzeichen:  {mit_zeichen!r}")
     gefasst = schreibung_richten(mit_zeichen)
@@ -1478,6 +1503,41 @@ def parakeet_bereinigen(text):
     return " ".join(text.split())
 
 
+def parakeet_natuerlich(text):
+    """Weg 3 (Stephan, 2026-09-15): Parakeets eigene Satzzeichen bleiben.
+
+    Nach der Probe mit gesprochenen Satzzeichen (Parakeet 14,9 % gegen Vosk
+    9,9 %, das Befehlswort kam als "Saetzen") und dem Vergleich vom Morgen ohne
+    sie (3,0 % gegen 7,6 %): Der Nutzer spricht natuerlich, Parakeet setzt Punkt
+    und Komma. Gesprochen bleiben nur Absatz und Zeile - und wer aus Gewohnheit
+    doch "Komma setzen" sagt, bekommt trotzdem das Zeichen, nicht die Woerter.
+    """
+    text = re.sub(r"\bs[äa]tzen\b", "setzen", text, flags=re.IGNORECASE)
+    zeichen = {"komma": ",", "punkt": ".", "fragezeichen": "?", "ausrufezeichen": "!",
+               "doppelpunkt": ":"}
+    # Gesprochenes Satzzeichen samt der Zeichen, die Parakeet drumherum setzte
+    # ("dankbar, Punkt setzen." -> "dankbar.").
+    text = re.sub(r"\s*[,;:.!?]?\s*\b(komma|punkt|fragezeichen|ausrufezeichen|doppelpunkt)"
+                  r"\s*[,.]?\s+setzen\b[,;:.!?]*",
+                  lambda m: zeichen[m.group(1).lower()], text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*\bgedankenstrich\s+setzen\b[,;:.!?]*", " -", text, flags=re.IGNORECASE)
+    # Absatz und Zeile: die Zeichen danach fallen weg. Vor dem Absatz bleibt ein
+    # Komma ("Herren,\n\n" - die Anrede braucht es), vor der Zeile nicht
+    # ("Gruessen, neue Zeile, Stefan" -> "Gruessen\nStefan").
+    text = re.sub(r"\s*\bneuer\s*[,.]?\s*absatz\b[,;:.!?]*\s*", "\n\n", text,
+                  flags=re.IGNORECASE)
+    text = re.sub(r"[,;]?\s*\bneue\s*[,.]?\s*zeile\b[,;:.!?]*\s*", "\n", text,
+                  flags=re.IGNORECASE)
+    # Die Anrede endet mit Komma, auch wenn Parakeet keins oder einen Punkt setzte.
+    text = re.sub(r"^((?:sehr geehrte|liebe|lieber|hallo)\b[^\n.,]*)[.]?\n\n", r"\1,\n\n",
+                  text, flags=re.IGNORECASE)
+    # Kurze Zeile nach einem Zeilenwechsel (Name unter dem Gruss) ohne den Punkt,
+    # den Parakeet ans Ende jedes Stuecks setzt: "Gruessen\nMax Muster."
+    text = re.sub(r"(\n(?!\n)[^\n.?!]{1,40}?)\.\s*$", r"\1", text)
+    text = re.sub(r"[ \t]+", " ", text)
+    return text.strip(" ")
+
+
 def parakeet_erkennen(erkenner, audio, worte):
     """Erkennt die Zeitspanne der Vosk-Woerter aus der Aufnahme dieser Epoche."""
     if not worte:
@@ -1523,25 +1583,30 @@ def diktat_fuehren(zweck, name, quelle):
 
     def frei_text(worte, vosk_text):
         """Text fuer den Brief: Parakeets, falls eingeschaltet, sonst Vosks."""
-        if parakeet is None or not worte:
+        if parakeet is None:
             return vosk_text
+        if not worte:
+            # Rueckfall im Parakeet-Test: Die Aeusserung gilt als fertig
+            # gesetzt, also die gesprochenen Satzzeichen hier umsetzen.
+            return satzzeichen_setzen(vosk_text)
         t0 = time.time()
         try:
             roh = parakeet_erkennen(parakeet, epoche_audio, worte)
         except Exception as fehler:
             melde(f"  PARAKEET-TEST: Fehler, Vosk-Text bleibt ({fehler})")
-            return vosk_text
+            return satzzeichen_setzen(vosk_text)
         if not roh:
-            return vosk_text
+            return satzzeichen_setzen(vosk_text)
         melde(f"  VOSK:        {vosk_text!r}")
         melde(f"  PARAKEET:    {roh!r} ({time.time()-t0:.2f} s)")
-        return parakeet_bereinigen(roh) or vosk_text
+        return parakeet_natuerlich(roh) or satzzeichen_setzen(vosk_text)
 
     prozess = None
     gesammelt = []
     aeusserungen = Aeusserungen(name)
-    aeusserungen.umschreiben = lambda worte: frei_text(
-        worte, " ".join(w["word"] for w in worte))
+    if parakeet is not None:
+        aeusserungen.umschreiben = lambda worte: frei_text(
+            worte, " ".join(w["word"] for w in worte))
     letzte_aeusserung = time.time()
     # Wo der Schlusssatz in der Aufnahme BEGINNT, in Sekunden. Beide Erkenner
     # bekommen dieselben Bloecke vom selben Anfang an, ihre Zeitmarken sind
@@ -1900,7 +1965,7 @@ def diktat_fuehren(zweck, name, quelle):
             rest = frei_text(rest_worte, rest)
     if rest:
         melde(f"  Resttext aus dem Erkenner: {rest!r}")
-        gesammelt += aeusserung_verarbeiten(name, rest)
+        gesammelt += aeusserung_verarbeiten(name, rest, parakeet is not None)
     gesammelt = zusammenziehen(gesammelt)
 
     if not gesammelt:
@@ -1915,7 +1980,8 @@ def diktat_fuehren(zweck, name, quelle):
     anzahl = len(gesammelt)
     if name in BRIEF_ZIELE:
         text = " ".join(gesammelt).strip()
-        anzahl = len(re.findall(r"[.?!](?=\s|$)", text)) + (0 if text[-1:] in ".?!" else 1)
+        ende = [i for i in satzenden(text) if text[i] != "\n"]
+        anzahl = len(ende) + (0 if ende and ende[-1] == len(text) - 1 else 1)
     sprich(ansage_ende(name, anzahl))
     # KEIN Vorlesen mehr an dieser Stelle (Stephan, 2026-08-19) - siehe
     # VORLESEN_HINWEIS oben. Das Vorlesen mit Satzzeichen lebt unveraendert in

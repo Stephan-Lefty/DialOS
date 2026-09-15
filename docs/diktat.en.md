@@ -813,3 +813,22 @@ vs 7.6 %. So Parakeet is strong with natural speech and sets punctuation itself
 the letter. Vosk heard "Diktat" as "ekd" and placed it 0.75 s earlier than the
 small model; the rest was cut by word START, and "ekd" started just before.
 Now by word END (`rest_kuerzen`).
+
+### Option 3: speak naturally, Parakeet sets the punctuation (2026-09-15)
+
+Stephan's choice after the test: "build option 3 for testing". In the Parakeet
+test, Parakeet's own full stops, commas and question marks stay
+(`parakeet_natuerlich`), `satzzeichen_setzen()` is skipped for this text. Only
+**"neuer Absatz"** and **"neue Zeile"** are still spoken; anyone who says "Komma
+setzen" out of habit still gets the symbol ("Sätzen" is read as "setzen").
+
+- **The salutation** ends with a comma even if Parakeet set none or a full stop;
+  a comma before "neue Zeile" is dropped ("Grüßen" / name), and the full stop
+  Parakeet puts at the end of every chunk is dropped on a short line after a
+  line break (name under the closing).
+- **"12." and "Dr." are not sentence ends** (`satzenden()` with an abbreviation
+  list) - for "Satz löschen", "Satz wiederholen" and the sentence count.
+- Offline (Michael, speaking naturally): slip deleted, "Satz wiederholen" read
+  the last sentence, salutation with comma, name without full stop, 6 sentences
+  counted. Word beginnings right after Anna's answer were lost ("Am", "Neuer") -
+  in the simulation Michael spoke before Anna had finished.

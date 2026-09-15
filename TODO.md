@@ -280,7 +280,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - **Parakeet-Test im Diktat (2026-09-15, gebaut, Schalter im Admin-Konto
     gesetzt):** Probe mit Stephans Stimme steht aus. Danach entscheiden: fest
     einbauen (Modell nach /usr/local/share, sherpa-onnx für alle Konten) oder
-    verwerfen. Offen: Ziffern ohne Punkt („Am 12 August", „Dr Muster").
+    verwerfen. **Probe 14:32 mit gesprochenen Satzzeichen: Parakeet 14,9 %,
+    Vosk 9,9 %** („Sätzen"). **Weg 3 gebaut (Stephans Wahl):** natürlich
+    sprechen, Parakeet setzt die Satzzeichen, gesprochen nur Absatz/Zeile;
+    „12." und „Dr." kein Satzende. Offline geprüft, Probe mit Stephans Stimme
+    steht aus.
   - **„Brief als PDF speichern" am Gerät belegt (2026-09-15, 13:44)**, ebenso
     „Brief erstellen" und die neue Schlussansage. Und zum ersten Mal hat die
     Sprachsteuerung einen Befehl VORGESCHLAGEN: „als pdf speichern" -> „Der

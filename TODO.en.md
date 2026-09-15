@@ -281,7 +281,10 @@ finished too, and then move down together. That way no reference breaks.
   - **Parakeet test in dictation (2026-09-15, built, switch set in the admin
     account):** test with Stephan's voice pending. Then decide: build in for
     good (model to /usr/local/share, sherpa-onnx for all accounts) or drop.
-    Open: digits without full stop ("Am 12 August", "Dr Muster").
+    **Test 14:32 with spoken punctuation: Parakeet 14.9 %, Vosk 9.9 %**
+    ("Sätzen"). **Option 3 built (Stephan's choice):** speak naturally,
+    Parakeet sets punctuation, only paragraph/line spoken; "12." and "Dr." are
+    no sentence end. Checked offline, test with Stephan's voice pending.
   - **"Brief als PDF speichern" proven on the device (2026-09-15, 13:44)**, as
     are "Brief erstellen" and the new closing announcement. And for the first
     time voice control SUGGESTED a command: "als pdf speichern" -> "Der Befehl

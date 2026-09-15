@@ -837,3 +837,22 @@ selbst - schwach genau bei den Befehlswörtern, die Vosk braucht.
 „Okay" im Brief. Vosk hörte „Diktat" als „ekd" und setzte es 0,75 s früher als
 das kleine Modell; der Rest wurde nach dem Wort-BEGINN abgeschnitten, „ekd"
 begann knapp davor. Jetzt nach dem Wort-ENDE (`rest_kuerzen`).
+
+### Weg 3: natürlich sprechen, Parakeet setzt die Satzzeichen (2026-09-15)
+
+Stephans Wahl nach der Probe: „Bau Weg 3 zum Testen". Im Parakeet-Test bleiben
+Parakeets eigene Punkte, Kommas und Fragezeichen stehen (`parakeet_natuerlich`),
+`satzzeichen_setzen()` wird für diesen Text übersprungen. Gesprochen werden nur
+noch **„neuer Absatz"** und **„neue Zeile"**; wer aus Gewohnheit „Komma setzen"
+sagt, bekommt trotzdem das Zeichen („Sätzen" wird als „setzen" gelesen).
+
+- **Die Anrede** endet mit Komma, auch wenn Parakeet keins oder einen Punkt
+  setzte; vor „neue Zeile" fällt ein Komma weg („Grüßen" / Name), und der Punkt,
+  den Parakeet ans Ende jedes Stücks setzt, fällt bei einer kurzen Zeile nach
+  dem Zeilenwechsel weg (Name unter dem Gruß).
+- **„12." und „Dr." sind kein Satzende** (`satzenden()` mit Abkürzungsliste) -
+  für „Satz löschen", „Satz wiederholen" und die Satzzahl in der Ansage.
+- Offline (Michael, natürlich gesprochen): Versprecher gestrichen, „Satz
+  wiederholen" las den letzten Satz, Anrede mit Komma, Name ohne Punkt, 6 Sätze
+  gezählt. Wortanfänge direkt nach Annas Antwort gingen verloren („Am", „Neuer")
+  - in der Nachbildung sprach Michael, bevor Anna fertig war.
