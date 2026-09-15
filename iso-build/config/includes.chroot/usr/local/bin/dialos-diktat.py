@@ -665,11 +665,20 @@ def schreibung_richten(satz):
 
 # -------------------------------------------------------------- Aufnahme
 
+# MIKROFON FUER DEN VERGLEICH (2026-09-15). Stephan hat ein USB-Tischmikrofon
+# (TONOR TC30) angeschlossen, um es auf dem Pruefstand gegen das eingebaute zu
+# messen. Die Festlegung "immer das eingebaute" vom 2026-08-17 gilt weiter - nur
+# wenn diese Datei eine vorhandene Quelle nennt, nimmt das DIKTAT diese. Der
+# Befehlsdienst bleibt unberuehrt. Ohne Echo-Unterdrueckung ist das hier
+# unkritisch: Waehrend Anna spricht, wird ohnehin verworfen.
+MIKROFON_WAHL = os.path.join(os.path.expanduser("~"), ".config", "dialos", "diktat-mikrofon")
+
+
 def waehle_mikrofon():
     """Wie im Befehlsdienst: bereinigte Quelle, sonst das eingebaute.
 
     Kein Bluetooth und kein USB - Stephans Festlegung vom 2026-08-17,
-    Begruendung in docs/hardware.md.
+    Begruendung in docs/hardware.md. Ausnahme zum Messen: MIKROFON_WAHL.
     """
     try:
         roh = subprocess.run(["pactl", "-f", "json", "list", "sources"],
@@ -679,6 +688,15 @@ def waehle_mikrofon():
         return None
     namen = [q.get("name", "") for q in quellen
              if q.get("name") and not q["name"].endswith(".monitor")]
+    try:
+        with open(MIKROFON_WAHL, encoding="utf-8") as f:
+            gewuenscht = f.read().strip()
+        if gewuenscht in namen:
+            return gewuenscht
+        if gewuenscht:
+            melde(f"  gewuenschtes Mikrofon nicht da: {gewuenscht!r} - nehme das uebliche")
+    except OSError:
+        pass
     if ECHO_QUELLE in namen:
         return ECHO_QUELLE
     eingebaut = [n for n in namen if n.startswith("alsa_input.pci-")]
@@ -1571,6 +1589,50 @@ def parakeet_erkennen(erkenner, audio, worte):
     return strom.result.text.strip()
 
 
+# MITSCHNITT FUER DEN PRUEFSTAND (Stephan, 2026-09-15: "Ja, einverstanden, bau
+# den Pruefstand"). Jede Probe mit echter Stimme soll ein Pruef-Fall werden, der
+# nach jeder Aenderung wieder durchlaeuft - statt einer Verbesserung, die an
+# EINEM Versuch beurteilt wird.
+#
+# GESPEICHERT WIRD GENAU DAS, WAS DIE ERKENNER BEKOMMEN HABEN - jeder Block in
+# Reihenfolge, inklusive des Vorlaufs nach Annas Antworten, ohne das, was waehrend
+# ihrer Antworten verworfen wurde. Nur so laeuft die Wiederholung
+# (scripts/dialos-pruefstand.py) durch dieselben Entscheidungen.
+#
+# NUR MIT SCHALTER UND NUR AUF DIE EXTERNE PLATTE, nie ins Repo: Es ist die
+# Stimme des Sprechers. Fehlt der Ordner (Nutzerkonto, Platte nicht da), wird
+# nichts aufgenommen.
+MITSCHNITT_SCHALTER = os.path.join(os.path.expanduser("~"), ".config", "dialos", "pruefstand")
+MITSCHNITT_ORDNER = "/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich/pruefstand/mitschnitte"
+
+
+def mitschnitt_speichern(ton, epochen, kurz, name, protokoll_ab, ergebnis, pfad, quelle=None):
+    try:
+        import wave
+        os.makedirs(MITSCHNITT_ORDNER, exist_ok=True)
+        stamm = os.path.join(MITSCHNITT_ORDNER, time.strftime("%Y-%m-%d-%H%M%S") + f"-{name}")
+        with wave.open(stamm + ".wav", "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(ABTASTRATE)
+            w.writeframes(bytes(ton))
+        try:
+            with open(PROTOKOLL, encoding="utf-8") as f:
+                f.seek(protokoll_ab)
+                protokoll = f.read()
+        except OSError:
+            protokoll = ""
+        with open(stamm + ".json", "w", encoding="utf-8") as f:
+            json.dump({"name": name, "epochen_ab_s": [e / (2 * ABTASTRATE) for e in epochen],
+                       "kurze_bloecke": kurz, "quelle": quelle,
+                       "dauer_s": len(ton) / (2 * ABTASTRATE), "ergebnis": ergebnis,
+                       "datei": pfad, "parakeet": os.path.exists(PARAKEET_SCHALTER),
+                       "protokoll": protokoll}, f, ensure_ascii=False, indent=1)
+        melde(f"  Mitschnitt fuer den Pruefstand: {stamm}.wav")
+    except Exception as fehler:
+        melde(f"  Mitschnitt nicht gespeichert: {fehler}")
+
+
 def diktat_fuehren(zweck, name, quelle):
     import vosk
     vosk.SetLogLevel(-1)
@@ -1596,6 +1658,14 @@ def diktat_fuehren(zweck, name, quelle):
     # beides sind ganze Saetze. Der Einkaufszettel bleibt bei Vosk: Einzelne
     # Waren traf Vosk 16 von 20, Parakeet 11 (es kippte bei Einzelwoertern ins
     # Englische).
+    mitschnitt = (bytearray() if os.path.exists(MITSCHNITT_SCHALTER)
+                  and os.path.isdir(os.path.dirname(MITSCHNITT_ORDNER)) else None)
+    mitschnitt_epochen = [0]
+    mitschnitt_kurz = []
+    try:
+        protokoll_ab = os.path.getsize(PROTOKOLL)
+    except OSError:
+        protokoll_ab = 0
     parakeet = (parakeet_laden()
                 if name not in LISTEN_ZIELE and os.path.exists(PARAKEET_SCHALTER) else None)
     # Aufnahme der aktuellen Epoche - gleiche Zeitachse wie die Vosk-Woerter.
@@ -1676,6 +1746,12 @@ def diktat_fuehren(zweck, name, quelle):
                 prozess = aufnahme_starten(quelle)
                 continue
             pegel_puffer.append(pegel(block))
+            if mitschnitt is not None:
+                # Kurze Bloecke (Rest des Vorlaufs) merken - die Wiederholung
+                # liefert dieselben Stuecke, Vosk schneidet sonst minimal anders.
+                if len(block) != 4000:
+                    mitschnitt_kurz.append([len(mitschnitt), len(block)])
+                mitschnitt.extend(block)
             pegel_verlauf.append(pegel_puffer[-1])
             zeitverlauf.append(pegel_puffer[-1])
             if parakeet is not None:
@@ -1766,6 +1842,8 @@ def diktat_fuehren(zweck, name, quelle):
                         epoche += 1
                         zeitverlauf = []
                         del epoche_audio[:]
+                        if mitschnitt is not None:
+                            mitschnitt_epochen.append(len(mitschnitt))
                         pegel_puffer = []
                         letzte_aeusserung = time.time()
                         # Die Sperrfrist fuer den Schluss gilt nach jedem Befehl neu:
@@ -1989,12 +2067,16 @@ def diktat_fuehren(zweck, name, quelle):
     gesammelt = zusammenziehen(gesammelt)
 
     if not gesammelt:
+        if mitschnitt is not None:
+            mitschnitt_speichern(mitschnitt, mitschnitt_epochen, mitschnitt_kurz, name, protokoll_ab, [], None, quelle)
         sprich(ANSAGE_LEER)
         return 0
 
     pfad = (brief_schreiben(gesammelt) if name in BRIEF_ZIELE
             else notiz_schreiben(name, gesammelt))
     melde(f"  geschrieben nach {pfad}")
+    if mitschnitt is not None:
+        mitschnitt_speichern(mitschnitt, mitschnitt_epochen, mitschnitt_kurz, name, protokoll_ab, gesammelt, pfad, quelle)
     # SAETZE ZAEHLEN, NICHT STUECKE (2026-09-15): Der Brief mit elf Saetzen
     # meldete "3 Sätze" - gezaehlt wurden die Stuecke der Erkennung.
     anzahl = len(gesammelt)

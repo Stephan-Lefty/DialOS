@@ -129,6 +129,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Prüfstand für Diktat und Befehle** (2026-09-15, Stephans Zustimmung zu
+  Aufnahmen seiner Stimme). Das Diktat schneidet mit Schalter genau den Ton mit,
+  den die Erkenner bekamen (nur externe Platte, nie im Repo);
+  `scripts/dialos-pruefstand.py` macht daraus Fälle, spielt sie durch das echte
+  Diktat mit Vosk und Parakeet und misst Wortfehler, Satzzeichen und Befehle;
+  `befehle` wertet die Protokolle der Sprachsteuerung aus. Dazu die Wahl eines
+  anderen Diktat-Mikrofons zum Vergleich. Beschrieben in `docs/diktat.md`.
+
 - **Parakeet-Test im echten Brief-Diktat** (2026-09-15, abschaltbarer
   Messaufbau). Vosk steuert weiter, Parakeet erkennt jedes Stück noch einmal aus
   derselben Aufnahme und liefert den Brieftext; beide Texte im Protokoll. Nur

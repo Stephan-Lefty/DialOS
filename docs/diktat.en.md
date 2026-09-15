@@ -857,3 +857,35 @@ notes; the shopping list stays with Vosk (single words: Vosk 16 of 20, Parakeet
 löschen" deleted the note, "neue Zeile" at the start of an entry no longer gives
 a double blank line. **Two tests before building it in:** a freely worded letter
 (not read out) and one with a TV playing quietly.
+
+## Test bench (2026-09-15)
+
+Stephan: we need a system that executes commands cleanly and on the other side
+puts German text on paper cleanly - and on the proposal to measure instead of
+judging by feel: "yes, agreed, build the test bench".
+
+- **Recording:** with `~/.config/dialos/pruefstand` dictation stores exactly the
+  audio the recognisers received (every block in order, short blocks and epochs
+  noted), plus log excerpt, result and microphone - to
+  `erkenner-vergleich/pruefstand/mitschnitte/` on the external disk, **never into
+  the repo** (voice, personal texts; Stephan's consent covers his own
+  recordings).
+- **Case:** `scripts/dialos-pruefstand.py uebernehmen NAME` - recording, metadata,
+  `referenz.txt` (correct by hand to what was really said, with punctuation and
+  paragraphs) and `erwartet.json` (commands).
+- **Check:** `scripts/dialos-pruefstand.py pruefen --beide` plays every case through
+  the **real** `dialos-diktat.py` (Vosk and Parakeet) and measures word errors,
+  wrong punctuation (at every word present in both, the mark after it) and
+  whether the same commands fired. Checked offline on a Michael recording: Vosk
+  12.7 % / 8 of 9 marks wrong, Parakeet 7.3 % / 1 of 9, commands as recorded for
+  both.
+- **Commands:** `scripts/dialos-pruefstand.py befehle` counts per day from the
+  voice-control logs: switched on, switch-on rejected, utterances, commands
+  executed, "no command" with and without hint, conversation shut-off, time
+  limit. The command service **deliberately does not record** - it listens all
+  the time, a recording would be every conversation in the room.
+- **Microphone for comparison:** if `~/.config/dialos/diktat-mikrofon` names an
+  existing source, dictation uses it (for comparing the USB desk microphone
+  TONOR TC30). Otherwise the "built-in microphone" decision stands, the command
+  service is not affected. Noise floor measured (3 s, simultaneously): built-in
+  with echo cancellation RMS 68, TONOR at 100 % RMS 293.

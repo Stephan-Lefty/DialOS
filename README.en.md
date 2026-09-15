@@ -121,6 +121,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Test bench for dictation and commands** (2026-09-15, Stephan's consent to
+  recordings of his voice). With a switch, dictation records exactly the audio
+  the recognisers got (external disk only, never in the repo);
+  `scripts/dialos-pruefstand.py` turns recordings into cases, plays them through
+  the real dictation with Vosk and Parakeet and measures word errors,
+  punctuation and commands; `befehle` evaluates the voice-control logs. Plus a
+  choice of another dictation microphone for comparison. Described in
+  `docs/diktat.en.md`.
+
 - **Parakeet test in real letter dictation** (2026-09-15, switchable
   measurement setup). Vosk keeps control, Parakeet recognises each chunk again
   from the same recording and supplies the letter text; both texts in the log.

@@ -288,7 +288,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Vosk 4,9 %, Parakeet 6,2 %, aber nur Parakeet liefert Satzzeichen.
     **Entschieden (Stephan):** Weg 3 für Brief und Notizen, Vosk für Befehle
     und Einkaufszettel - **nach zwei Proben:** frei formulierter Brief, Brief
-    mit leise laufendem Fernseher. Notizen seit 15:02 im Test. Beim festen
+    mit leise laufendem Fernseher. Notizen seit 15:02 im Test.
+  - **Prüfstand (2026-09-15, gebaut, Mitschnitt im Admin-Konto an):** erste
+    echte Fälle stehen aus. Geplant: derselbe Brief mit eingebautem Mikrofon und
+    mit dem USB-Tischmikrofon TONOR TC30, dann die zwei Parakeet-Proben. TONOR
+    rauscht bei 100 % deutlich stärker (RMS 293 gegen 68) - vor dem Vergleich
+    Pegel mit Sprache prüfen. Beim festen
     Einbau: Modell (465 MB) und
     sherpa-onnx für alle Konten nach /usr/local, Paketierung und Lizenz
     (Modell CC-BY-4.0, Namensnennung) klären.

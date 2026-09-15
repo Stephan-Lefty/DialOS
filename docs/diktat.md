@@ -881,3 +881,37 @@ Parakeet 11). Offline geprüft (Michael): „10 Uhr", Kommas und Punkte gesetzt,
 „Satz löschen" strich die Notiz, „neue Zeile" am Anfang eines Eintrags gibt
 keine doppelte Leerzeile mehr. **Vor dem festen Einbau zwei Proben:** ein frei
 formulierter Brief (nicht vorgelesen) und einer mit leise laufendem Fernseher.
+
+## Prüfstand (2026-09-15)
+
+Stephan: „Wir müssen ein System hinbekommen, was sauber die Befehle umsetzt und
+auf der anderen Seite auch einen Text in deutscher Sprache sauber zu Papier
+bringt" - und auf den Vorschlag, dafür zu messen statt nach Gefühl zu urteilen:
+„Ja, einverstanden, bau den Prüfstand".
+
+- **Mitschnitt:** Mit `~/.config/dialos/pruefstand` speichert das Diktat genau den
+  Ton, den die Erkenner bekommen haben (jeder Block in Reihenfolge, kurze Blöcke
+  und Epochen vermerkt), dazu Protokollausschnitt, Ergebnis und Mikrofon - nach
+  `erkenner-vergleich/pruefstand/mitschnitte/` auf der externen Platte, **nie ins
+  Repo** (Stimme, persönliche Texte; Stephans Zustimmung gilt für seine eigenen
+  Aufnahmen).
+- **Fall:** `scripts/dialos-pruefstand.py uebernehmen NAME` - Aufnahme,
+  Mitschnitt, `referenz.txt` (von Hand auf das wirklich Gesagte korrigieren, mit
+  Satzzeichen und Absätzen) und `erwartet.json` (Befehle).
+- **Prüfen:** `scripts/dialos-pruefstand.py pruefen --beide` spielt jeden Fall durch
+  das **echte** `dialos-diktat.py` (Vosk und Parakeet) und misst Wortfehler,
+  falsche Satzzeichen (an jedem Wort, das in beiden steht, das Zeichen danach) und
+  ob dieselben Befehle ausgelöst wurden. Offline an einem Mitschnitt mit Michael
+  geprüft: Vosk 12,7 % / 8 von 9 Satzzeichen falsch, Parakeet 7,3 % / 1 von 9,
+  Befehle bei beiden wie aufgenommen.
+- **Befehle:** `scripts/dialos-pruefstand.py befehle` zählt aus den Protokollen der
+  Sprachsteuerung je Tag: eingeschaltet, Einschalten verworfen, Äußerungen,
+  ausgeführte Befehle, „kein Befehl" mit und ohne Hinweis, Gesprächs-Abschaltung,
+  Zeitgrenze. Der Befehlsdienst schneidet **bewusst nicht** mit - er hört dauernd
+  zu, ein Mitschnitt wäre jedes Gespräch im Raum.
+- **Mikrofon zum Vergleich:** Nennt `~/.config/dialos/diktat-mikrofon` eine
+  vorhandene Quelle, nimmt das Diktat diese (für den Vergleich mit dem
+  USB-Tischmikrofon TONOR TC30). Die Festlegung „eingebautes Mikrofon" gilt
+  sonst weiter, der Befehlsdienst ist nicht betroffen. Grundrauschen gemessen
+  (3 s, gleichzeitig): eingebaut mit Echo-Unterdrückung RMS 68, TONOR bei 100 %
+  RMS 293.

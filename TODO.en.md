@@ -289,7 +289,12 @@ finished too, and then move down together. That way no reference breaks.
     Vosk 4.9 %, Parakeet 6.2 %, but only Parakeet delivers punctuation.
     **Decided (Stephan):** option 3 for letters and notes, Vosk for commands
     and the shopping list - **after two tests:** freely worded letter, letter
-    with a TV playing quietly. Notes in the test since 15:02. When building it
+    with a TV playing quietly. Notes in the test since 15:02.
+  - **Test bench (2026-09-15, built, recording on in the admin account):** first
+    real cases pending. Planned: the same letter with the built-in microphone
+    and with the USB desk microphone TONOR TC30, then the two Parakeet tests.
+    TONOR is clearly noisier at 100 % (RMS 293 vs 68) - check levels with speech
+    before comparing. When building it
     in: model (465 MB) and sherpa-onnx
     for all accounts under /usr/local, sort out packaging and licence (model
     CC-BY-4.0, attribution).
