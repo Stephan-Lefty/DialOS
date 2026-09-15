@@ -304,9 +304,12 @@ finished too, and then move down together. That way no reference breaks.
     off. Next step: TONOR and noise floor for the command service on the test
     bench (needs short command recordings with consent, not continuous).
     **Prepared 2026-09-15:** recording with a switch, labelling,
-    re-recognition, microphone choice for the service. Measurement session
-    running (parts 1/2 built-in without/with TV done, 47 recordings; parts 3/4
-    TONOR). Found: false trigger "auf Windows umschalten" from word salad (old
+    re-recognition, microphone choice for the service. **Measurement session
+    done 17:52** (90 recordings, table in docs/sprachbefehle.en.md): right
+    18/21, 17/18, 16/17, 18/19; no executed false trigger; misses almost only
+    swallowed beginnings. **Order afterwards:** 1. close the gap after Anna's
+    announcement, 2. desktop-look rule under the extra-word limit, 3. lower the
+    TONOR gain (100 % clips), then measure the same 15 commands again. Found: false trigger "auf Windows umschalten" from word salad (old
     desktop-look rule without the extra-word limit) - fix after the
     measurement. **Stephan, 2026-09-15: between Anna's announcement and his
     answer he always has to wait about 1.5 seconds, otherwise the first word is

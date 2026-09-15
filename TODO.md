@@ -304,8 +304,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Rauschboden für den Befehlsdienst auf dem Prüfstand (braucht kurze
     Befehls-Mitschnitte mit Zustimmung, nicht dauernd). **Vorbereitet
     2026-09-15:** Mitschnitt mit Schalter, Beschriften, Neu-Erkennen,
-    Mikrofonwahl für den Dienst. Messsitzung läuft (Teil 1/2 eingebaut ohne/mit
-    Fernseher erledigt, 47 Mitschnitte; Teil 3/4 TONOR). Gefunden: Fehlauslöser
+    Mikrofonwahl für den Dienst. **Messsitzung erledigt 17:52** (90 Mitschnitte,
+    Tabelle in docs/sprachbefehle.md): richtig 18/21, 17/18, 16/17, 18/19;
+    kein ausgeführter Fehlauslöser; Verpasser fast nur verschluckte Anfänge.
+    **Reihenfolge danach:** 1. Lücke nach Annas Ansage schließen, 2.
+    Optik-Regel an die Zusatzwort-Grenze, 3. TONOR-Verstärkung senken (100 %
+    übersteuert), dann dieselben 15 Befehle erneut messen. Gefunden: Fehlauslöser
     „auf Windows umschalten" aus Wortsalat (alte Optik-Regel ohne
     Zusatzwort-Grenze) - nach der Messung reparieren.
     **Stephan, 2026-09-15: „Zwischen der Ansage von Anna und meiner Antwort muss
