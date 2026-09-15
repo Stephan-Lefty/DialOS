@@ -247,6 +247,24 @@ def aufnehmen(name):
     befehl = ["parec", "--format=s16le", f"--rate={RATE}", "--channels=1", "--latency-msec=30"]
     if quelle:
         befehl += ["-d", quelle]
+    # DIESELBE MARKE WIE DAS DIKTAT (2026-09-15). Ohne sie hoerte der
+    # Sprachdienst beim Vorlesen des Briefs mit, hoerte dreimal
+    # "sprachsteuerung starten" heraus und unterbrach Stephan jedes Mal mit der
+    # Zu-laut-Ansage. Beim echten Diktat haelt er sich wegen dieser Marke heraus.
+    laufzeit = os.environ.get("XDG_RUNTIME_DIR")
+    marke = (os.path.join(laufzeit, "dialos-diktat-aktiv") if laufzeit and os.path.isdir(laufzeit)
+             else f"/tmp/dialos-diktat-aktiv-{os.getuid()}")
+    open(marke, "w").close()
+    try:
+        return _aufnehmen(pfad, befehl, quelle)
+    finally:
+        try:
+            os.unlink(marke)
+        except OSError:
+            pass
+
+
+def _aufnehmen(pfad, befehl, quelle):
     print(f"Aufnahme laeuft -> {pfad}")
     print(f"Quelle: {quelle or 'Standard-Mikrofon'}")
     print("Jetzt vorlesen. Danach die EINGABETASTE druecken.")

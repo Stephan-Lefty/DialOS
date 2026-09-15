@@ -127,6 +127,16 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     wegen der 60-s-Sperre OHNE Ansage. Jetzt ist ein Ausschlag erlaubt, die
     Ansage höchstens alle 15 s. An allen 14 Einschaltsätzen geprüft: nur
     dieser Fall ändert sich.
+    **Befund 2026-09-15, 10:51-10:52:** Beim Vorlesen des Brief-Absatzes für
+    den Erkenner-Vergleich (das Aufnahmeprogramm setzte noch keine Marke) hat
+    Vosk in 40 s **dreimal „sprachsteuerung starten"** aus normalem Vorlesen
+    herausgehört - B hat alle drei verworfen (Stephan las weiter). **Aber die
+    Ansage „… es ist zu laut …" kam alle drei Mal** und unterbrach ihn: Sie
+    kommt per Definition genau dann, wenn jemand weiterspricht. **Offen, zu
+    entscheiden:** Ansage seltener (z. B. einmal je 5 min), nur bei Stille
+    VOR dem Satz, oder nur bei genau zwei Wörtern ohne weitere Fetzen. Die
+    60-s-Sperre war am 14.09. gerade wegen eines stummen Fehlschlags auf 15 s
+    gesenkt worden - beides gegeneinander abwägen.
   - **Verworfen vorerst: Mindestlautstärke für Befehle.** Spitzen am
     2026-09-14: Stephans Befehle 47 x, leisester 7810; Film 76 x, Median
     24188, nur 5 leise Fetzen unter 3000; Gespräch 253 x, leisester 4162.

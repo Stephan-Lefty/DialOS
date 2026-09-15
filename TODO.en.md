@@ -127,6 +127,16 @@ finished too, and then move down together. That way no reference breaks.
     WITHOUT an announcement. Now one spike is allowed, the announcement at
     most every 15 s. Checked against all 14 switch-on sentences: only this
     case changes.
+    **Finding 2026-09-15, 10:51-10:52:** while reading the letter paragraph
+    for the recogniser comparison (the recording tool did not set the marker
+    yet) Vosk heard **"sprachsteuerung starten" three times in 40 s** in
+    ordinary reading - B rejected all three (Stephan kept reading). **But the
+    "… es ist zu laut …" announcement came all three times** and interrupted
+    him: by definition it comes exactly when someone keeps talking. **Open, to
+    decide:** announce less often (e.g. once per 5 min), only with silence
+    BEFORE the sentence, or only for exactly two words without further
+    fragments. The 60 s lock was lowered to 15 s on 09-14 precisely because of
+    a silent failure - weigh both.
   - **Set aside for now: minimum loudness for commands.** Peaks on
     2026-09-14: Stephan's commands 47 times, quietest 7810; film 76 times,
     median 24188, only 5 quiet fragments below 3000; conversation 253 times,
