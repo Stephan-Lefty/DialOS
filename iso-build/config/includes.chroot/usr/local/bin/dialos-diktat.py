@@ -1040,15 +1040,21 @@ def schluss_beginn_aus(worte):
 
 
 def rest_kuerzen(worte, schluss_beginn):
-    """Behaelt die Woerter des Rests, die deutlich VOR dem Schlusssatz BEGINNEN.
+    """Behaelt die Woerter des Rests, die deutlich VOR dem Schlusssatz ENDEN.
 
-    Nach dem Beginn und nicht nach dem Ende: Ein echtes letztes Wort beginnt
-    lange vor dem Schlusssatz - es hat seine eigene Dauer, und pause_davor()
-    verlangt danach noch eine Sprechpause. Ein Bruchstueck des Schlusssatzes
-    wie "Den" beginnt dagegen unmittelbar davor oder mittendrin.
+    Bis 2026-09-15 galt der Beginn (ein Bruchstueck wie "Den" beginnt
+    unmittelbar davor oder mittendrin). Das reichte nicht, siehe unten.
     """
+    # SEIT 2026-09-15 NACH DEM ENDE (Parakeet-Brief, 14:33). Das grosse Modell
+    # hoerte "Diktat" als "ekd" (59,34-59,88 s), das kleine setzte den Schluss
+    # auf 60,09 s - 0,75 s spaeter. "ekd" BEGANN vor der Grenze (59,74), blieb
+    # stehen und wurde als "Okay" in den Brief geschrieben. Ein echtes letztes
+    # Wort ENDET vor der Sprechpause, die pause_davor() verlangt; was nach der
+    # Grenze endet, gehoert zum Schlusssatz. Nachgerechnet an den Schluessen vom
+    # 2026-09-15 (12:29, 13:43): dort fiel auch vorher schon alles Richtige weg.
     grenze = schluss_beginn - SCHLUSS_SPIELRAUM_S
-    return [w["word"] for w in worte if w.get("start", 0) < grenze], grenze
+    return [w["word"] for w in worte
+            if w.get("end", w.get("start", 0)) <= grenze], grenze
 
 
 def sprechen_bei_offener_aufnahme(text, prozess):

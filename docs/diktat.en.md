@@ -793,3 +793,23 @@ one below the other. Enabled only for letters and only via the switch file
   and "Dr." is removed with the other symbols. Open.
 - Offline (Michael, real time): commands, deleting and repeating worked as with
   Vosk; Parakeet 0.12-0.52 s per chunk, loading 2.1 s.
+
+**First test with Stephan's voice (2026-09-15, 14:32), letter template WITH
+spoken punctuation.** Word errors against the spoken text (101 words, numbers
+normalised): **Vosk 9.9 %, Parakeet 14.9 %** - and 8.9 % if Parakeet's
+"Sätzen" counts as "setzen". Parakeet almost always wrote the command word as
+"Sätzen", so hardly any full stop took effect, and the letter came out worse
+than with Vosk. Also: the name as "Stefan Röst" (the dictionary only knows
+"Rößner"), "Teil Sie" instead of "teilen Sie", at one chunk boundary "Komma
+setzen" was lost entirely. Better than Vosk: "Ende des Monats" (Vosk: "eines
+Monats"), "diesen" (Vosk: "diesem"), no "Kammer"/"komme" for "Komma". Both
+heard "Beitrag" instead of "Betrag".
+
+**Compared with the morning:** without spoken punctuation Parakeet was at 3.0 %
+vs 7.6 %. So Parakeet is strong with natural speech and sets punctuation itself
+- weak exactly at the command words Vosk needs.
+
+**Also found and fixed (applies to Vosk as well):** "Okay" stayed at the end of
+the letter. Vosk heard "Diktat" as "ekd" and placed it 0.75 s earlier than the
+small model; the rest was cut by word START, and "ekd" started just before.
+Now by word END (`rest_kuerzen`).

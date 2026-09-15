@@ -817,3 +817,23 @@ untereinander. Eingeschaltet nur für den Brief und nur über die Schalterdatei
   und „Dr." fällt mit den übrigen Zeichen weg. Offen.
 - Offline (Michael, Echtzeit): Befehle, Streichen und Wiederholen liefen wie mit
   Vosk; Parakeet 0,12-0,52 s je Stück, Laden 2,1 s.
+
+**Erste Probe mit Stephans Stimme (2026-09-15, 14:32), Brief-Vorlage MIT
+gesprochenen Satzzeichen.** Wortfehler gegen den gesprochenen Text (101 Wörter,
+Zahlen angeglichen): **Vosk 9,9 %, Parakeet 14,9 %** - und 8,9 %, wenn man
+Parakeets „Sätzen" als „setzen" zählt. Parakeet schrieb das Befehlswort
+fast immer „Sätzen", deshalb griff kaum ein Punkt, und der Brief war
+schlechter als mit Vosk. Dazu: Name als „Stefan Röst" (das Wörterbuch kennt
+nur „Rößner"), „Teil Sie" statt „teilen Sie", an einer Stückgrenze ging „Komma
+setzen" ganz verloren. Besser als Vosk: „Ende des Monats" (Vosk: „eines
+Monats"), „diesen" (Vosk: „diesem"), keine „Kammer"/„komme" für „Komma".
+Beide hörten „Beitrag" statt „Betrag".
+
+**Vergleich mit dem Morgen:** Ohne gesprochene Satzzeichen lag Parakeet bei 3,0
+% gegen 7,6 %. Parakeet ist also stark bei natürlicher Rede und setzt Satzzeichen
+selbst - schwach genau bei den Befehlswörtern, die Vosk braucht.
+
+**Ebenfalls gefunden und behoben (gilt für Vosk genauso):** Am Schluss blieb
+„Okay" im Brief. Vosk hörte „Diktat" als „ekd" und setzte es 0,75 s früher als
+das kleine Modell; der Rest wurde nach dem Wort-BEGINN abgeschnitten, „ekd"
+begann knapp davor. Jetzt nach dem Wort-ENDE (`rest_kuerzen`).
