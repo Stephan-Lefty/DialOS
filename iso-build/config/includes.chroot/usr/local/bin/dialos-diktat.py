@@ -382,6 +382,10 @@ def ansage_ende(name, anzahl):
     if name in BRIEF_ZIELE:
         satz = ("Der Brief ist geschrieben, ein Satz." if anzahl == 1
                 else f"Der Brief ist geschrieben, {anzahl} Sätze.")
+        # ALLE DREI WEGE NENNEN (Stephan, 2026-09-15: "muss es nicht nur
+        # Vorlesen oder Drucken als Option geben"). Vorlesen zuerst - es ist
+        # die einzige Kontrolle auf Erkennungsfehler.
+        return satz + " Du kannst sagen: Brief vorlesen, Brief drucken oder Brief als PDF speichern."
     else:
         satz = ("Diktat beendet, ein Eintrag geschrieben." if anzahl == 1
                 else f"Diktat beendet, {anzahl} Einträge geschrieben.")
@@ -1180,15 +1184,24 @@ def brief_schreiben(zeilen):
     """
     os.makedirs(DOKUMENT_ORDNER, exist_ok=True)
     pfad = os.path.join(DOKUMENT_ORDNER, "brief.txt")
+    stempel = time.strftime("%Y-%m-%d-%H%M%S")
     if os.path.exists(pfad) and os.path.getsize(pfad) > 0:
-        beiseite = os.path.join(
-            DOKUMENT_ORDNER,
-            "brief-" + time.strftime("%Y-%m-%d-%H%M%S") + ".txt")
+        beiseite = os.path.join(DOKUMENT_ORDNER, f"brief-{stempel}.txt")
         try:
             os.replace(pfad, beiseite)
             melde(f"  vorigen Brief beiseitegelegt: {beiseite}")
         except OSError as fehler:
             melde(f"  konnte den vorigen Brief nicht beiseitelegen: {fehler}")
+    # DAS PDF DES VORIGEN BRIEFS GEHT MIT (2026-09-15, "Brief als PDF
+    # speichern"). Bliebe "brief.pdf" liegen, gehoerte es zu einem anderen
+    # Brief als "brief.txt" - und ein Helfer haengte den falschen an die Mail.
+    pdf_alt = os.path.join(DOKUMENT_ORDNER, "brief.pdf")
+    if os.path.exists(pdf_alt):
+        try:
+            os.replace(pdf_alt, os.path.join(DOKUMENT_ORDNER, f"brief-{stempel}.pdf"))
+            melde(f"  PDF des vorigen Briefs beiseitegelegt: brief-{stempel}.pdf")
+        except OSError as fehler:
+            melde(f"  konnte das vorige PDF nicht beiseitelegen: {fehler}")
     with open(pfad, "w", encoding="utf-8") as f:
         # MIT LEERZEICHEN VERBINDEN, NICHT MIT ZEILENUMBRUCH (2026-09-15). Jede
         # Aeusserung ist ein Stueck desselben Fliesstexts. Mit "\n" verbunden

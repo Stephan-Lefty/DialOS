@@ -257,6 +257,12 @@ finished too, and then move down together. That way no reference breaks.
     worked. **"Brief erstellen" has been a third phrase since 2026-09-15**
     (Stephan's approval, all 29 sentences checked against Piper); test on the
     device after the next login pending. "Sprachsteuerung beenden" stays open.
+  - **"Brief als PDF speichern" (2026-09-15, built):** Stephan's choice "put
+    the PDF where it is visible" and "name all three". Checked offline (PDF,
+    empty letter, shopping list, announcement), 30 sentences against Piper.
+    Test on the device after the next login pending; the audio samples in
+    `docs/sprachbeispiele/alle-ansagen/` do not know the new closing
+    announcement yet.
 
   **Still open, not fixed:** a chunk after a pause always starts with a capital
   ("Ich bitte Sie, Wir diesen Betrag"); a standalone "Punkt setzen" often

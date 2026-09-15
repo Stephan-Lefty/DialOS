@@ -1811,6 +1811,13 @@ Dokumente/Archiv/DialOS-DATA. Den haben wir ja dafür angelegt!" So for
 archive itself. `dialos-archiv.py` neither looks for a stick there nor
 complains about one (list `OHNE_STICK` at the top of the script).
 
+**"Brief als PDF speichern" (since 2026-09-15)** uses the same PDF generator
+but without archiving: `dialos-archiv.py pdf FILE TARGET`, called by
+`dialos-notiz.py brief pdf`. The target is `~/Dokumente/brief.pdf` next to
+`brief.txt`; when dictation writes a new letter, the old PDF is set aside with
+the same timestamp as the old text. Nothing to install - the three scripts come
+with `dialos-aufspielen` or the office setup.
+
 **Why this was needed.** exFAT is mounted with the `uid`/`gid` of whoever
 mounts it. On a device with two accounts that means: whoever plugs the stick in
 first owns it, and the other account cannot even read it. Measured on

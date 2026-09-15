@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **„Brief als PDF speichern"** (2026-09-15, Stephans Wunsch: „Können wir pdf
+  erstellen hinzufügen?"). Legt `~/Dokumente/brief.pdf` neben den Brief, ohne
+  Rückfrage; nach „Diktat beenden" nennt Anna jetzt alle drei Wege: „Du kannst
+  sagen: Brief vorlesen, Brief drucken oder Brief als PDF speichern." Dasselbe
+  PDF wie im Archiv (`dialos-archiv.py pdf`). Alle 30 Sätze gegen Piper geprüft.
+
 - **„Brief erstellen" als dritter Satz für den Brief** (2026-09-15). Stephan
   sagte ihn vor der dritten Brief-Probe von sich aus, Vosk erkannte ihn
   wörtlich - und es kam nur „Das war kein Befehl". Piper -> Vosk über die volle

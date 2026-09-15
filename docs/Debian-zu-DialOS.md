@@ -1887,6 +1887,13 @@ unter Dokumente/Archiv/DialOS-DATA. Den haben wir ja dafür angelegt!" Für
 sondern das Archiv selbst. `dialos-archiv.py` sucht dort keinen Stick und
 bemängelt keinen (Liste `OHNE_STICK` im Kopf des Skripts).
 
+**„Brief als PDF speichern" (seit 2026-09-15)** nutzt denselben PDF-Erzeuger,
+aber ohne zu archivieren: `dialos-archiv.py pdf DATEI ZIEL`, aufgerufen von
+`dialos-notiz.py brief pdf`. Ziel ist `~/Dokumente/brief.pdf` neben
+`brief.txt`; schreibt das Diktat einen neuen Brief, wandert das alte PDF mit
+demselben Zeitstempel beiseite wie der alte Text. Nichts zu installieren - die
+drei Skripte kommen mit `dialos-aufspielen` bzw. dem Office-Setup.
+
 **Warum das nötig war.** exFAT wird mit `uid`/`gid` dessen eingehängt, der es
 einhängt. Auf einem Gerät mit zwei Konten heißt das: Wer den Stick zuerst
 einsteckt, besitzt ihn, und das andere Konto kommt nicht einmal lesend hinein.

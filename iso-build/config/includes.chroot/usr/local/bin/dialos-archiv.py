@@ -28,6 +28,8 @@ schneller: kein Bueroprogramm, das erst startet.
 Aufruf:
     dialos-archiv.py ablegen DATEI [--art brief|mail|notiz]
     dialos-archiv.py zeigen                 was im Archiv liegt
+    dialos-archiv.py pdf DATEI ZIEL         nur umwandeln, nicht archivieren
+                                            (fuer "Brief als PDF speichern")
 """
 
 import os
@@ -247,6 +249,34 @@ def main():
     argumente = sys.argv[1:]
     if argumente and argumente[0] == "zeigen":
         return zeigen()
+    # NUR UMWANDELN (2026-09-15, "Brief als PDF speichern"). Derselbe Erzeuger
+    # wie fuers Archiv - eine zweite PDF-Erzeugung saehe beim naechsten
+    # Aendern anders aus als die archivierte. Geschrieben wird erst in eine
+    # Zwischendatei: Ein halbes PDF unter dem richtigen Namen waere schlimmer
+    # als keines.
+    if argumente and argumente[0] == "pdf":
+        if len(argumente) != 3:
+            print("Aufruf: dialos-archiv.py pdf DATEI ZIEL", file=sys.stderr)
+            return 2
+        quelle, ziel = argumente[1], argumente[2]
+        with open(quelle, encoding="utf-8") as f:
+            text = f.read()
+        zwischen = ziel + ".entsteht"
+        try:
+            if not als_pdf(text, zwischen):
+                melde(f"PDF blieb leer: {ziel}")
+                return 1
+            os.replace(zwischen, ziel)
+        except Exception as fehler:
+            melde(f"PDF fehlgeschlagen ({ziel}): {fehler}")
+            try:
+                os.unlink(zwischen)
+            except OSError:
+                pass
+            return 1
+        melde(f"als PDF gespeichert: {ziel} ({os.path.getsize(ziel)/1024:.0f} kB)")
+        print(ziel)
+        return 0
     art = "brief"
     if "--art" in argumente:
         i = argumente.index("--art")

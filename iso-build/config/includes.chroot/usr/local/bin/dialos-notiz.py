@@ -44,6 +44,7 @@ Aufruf:
     dialos-notiz.py einkaufszettel loeschen
     dialos-notiz.py brief drucken      Rueckfrage, dann dialos-drucken.py
     dialos-notiz.py brief diktat       Rueckfrage, dann dialos-diktat.py
+    dialos-notiz.py brief pdf          ~/Dokumente/brief.pdf, ohne Rueckfrage
     dialos-notiz.py --debug ...
 """
 
@@ -607,11 +608,45 @@ def diktat(name):
     return subprocess.run([DIKTAT_SKRIPT, "notiz", name]).returncode
 
 
+ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
+
+
+def pdf(name):
+    """Legt den Brief als PDF sichtbar in Dokumente ab (Stephan, 2026-09-15).
+
+    "Wenn man den Brief fertig hat und Diktat beenden sagt, dann muss es nicht
+    nur Vorlesen oder Drucken als Option geben." Eine PDF entstand schon
+    vorher bei jedem Brief - aber im Archiv, ohne Ansage und per Sprache nicht
+    erreichbar. "brief.pdf" liegt neben "brief.txt", wo ein Helfer sie findet
+    oder an eine Mail haengt.
+
+    OHNE RUECKFRAGE, anders als beim Drucken: Hier verlaesst nichts das Haus,
+    und nichts geht verloren. Ein versehentliches PDF kostet nichts.
+    """
+    if name not in BRIEF_ZIELE:
+        sprich("Als PDF speichern kann ich nur den Brief.")
+        return 2
+    quelle = pfad_fuer(name)
+    if _ist_leer(name):
+        melde(f"  pdf: kein Brief in {quelle}")
+        sprich("Es gibt noch keinen Brief.")
+        return 0
+    ziel = os.path.join(DOKUMENT_ORDNER, "brief.pdf")
+    r = subprocess.run([ARCHIV_SKRIPT, "pdf", quelle, ziel], capture_output=True, text=True)
+    if r.returncode != 0:
+        melde(f"  pdf fehlgeschlagen: {r.stderr.strip()[-300:]}")
+        sprich("Das PDF ließ sich nicht erstellen.")
+        return 1
+    melde(f"  pdf: {ziel}")
+    sprich("Der Brief liegt jetzt als PDF in Deinen Dokumenten.")
+    return 0
+
+
 def main():
     argumente = [a for a in sys.argv[1:] if not a.startswith("--")]
     if len(argumente) < 2:
         print(__doc__.strip().splitlines()[-4], file=sys.stderr)
-        print("Aufruf: dialos-notiz.py NAME vorlesen|loeschen|drucken|diktat", file=sys.stderr)
+        print("Aufruf: dialos-notiz.py NAME vorlesen|loeschen|drucken|diktat|pdf", file=sys.stderr)
         return 2
     name, was = argumente[0], argumente[1]
     melde(f"=== {was} {name} ===")
@@ -623,6 +658,8 @@ def main():
         return drucken(name)
     if was == "diktat":
         return diktat(name)
+    if was == "pdf":
+        return pdf(name)
     print(f"Unbekannt: {was}", file=sys.stderr)
     return 2
 

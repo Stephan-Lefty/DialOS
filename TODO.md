@@ -255,6 +255,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     „stoppen" ging. **„Brief erstellen" ist seit 2026-09-15 dritter Satz**
     (Stephans Freigabe, alle 29 Sätze gegen Piper geprüft); Test am Gerät nach
     dem nächsten Anmelden steht aus. „Sprachsteuerung beenden" bleibt offen.
+  - **„Brief als PDF speichern" (2026-09-15, gebaut):** Stephans Wahl
+    „PDF sichtbar ablegen" und „alle drei nennen". Offline geprüft (PDF,
+    leerer Brief, Einkaufszettel, Ansage), 30 Sätze gegen Piper. Test am Gerät
+    nach dem nächsten Anmelden steht aus; die Hörproben in
+    `docs/sprachbeispiele/alle-ansagen/` kennen die neue Schlussansage noch
+    nicht.
 
   **Noch offen, nicht behoben:** Ein Stück nach einer Pause beginnt immer groß
   („Ich bitte Sie, Wir diesen Betrag"); einzeln gesprochenes „Punkt setzen"

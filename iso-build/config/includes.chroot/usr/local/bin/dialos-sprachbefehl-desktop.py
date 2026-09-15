@@ -203,6 +203,10 @@ GRAMMATIK_AN = json.dumps([
     # Fusszeile schon; Zettel und Notizen bekommen sie erst beim Drucken -
     # ein Blatt Papier verlaesst das Haus, eine Notiz auf dem Schirm nicht.
     "brief drucken",
+    # PDF sichtbar ablegen (Stephan, 2026-09-15: "Koennen wir pdf erstellen
+    # hinzufuegen?"). "pdf" steht im Wortschatz des kleinen Modells (geprueft).
+    # Die Formulierung ist dieselbe, die Anna nach dem Diktat nennt.
+    "brief als pdf speichern",
     "einkaufszettel drucken",
     "notizen drucken",
     # Einzahl als zweite Formulierung: Am 2026-08-22 hat Vosk beim Test
@@ -301,6 +305,7 @@ NOTIZ_SAETZE = {
     "einkaufszettel vorlesen": ("einkaufszettel", "vorlesen"),
     "notizen vorlesen": ("notizen", "vorlesen"),
     "brief vorlesen": ("brief", "vorlesen"),
+    "brief als pdf speichern": ("brief", "pdf"),
     "einkauf erledigt": ("einkaufszettel", "loeschen"),
     "einkaufszettel wegwerfen": ("einkaufszettel", "loeschen"),
     "einkaufszettel löschen": ("einkaufszettel", "loeschen"),

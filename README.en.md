@@ -121,6 +121,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **"Brief als PDF speichern"** (2026-09-15, Stephan asked to add PDF
+  creation). Puts `~/Dokumente/brief.pdf` next to the letter, without a
+  confirmation; after "Diktat beenden" Anna now names all three options: "Du
+  kannst sagen: Brief vorlesen, Brief drucken oder Brief als PDF speichern."
+  The same PDF as in the archive (`dialos-archiv.py pdf`). All 30 sentences
+  checked against Piper.
+
 - **"Brief erstellen" as a third phrase for the letter** (2026-09-15). Stephan
   said it unprompted before the third letter test, Vosk recognised it verbatim -
   and all that came was "Das war kein Befehl". Piper -> Vosk over the full
