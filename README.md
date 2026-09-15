@@ -129,6 +129,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Dateinamen mit Datum und Uhrzeit** (2026-09-15, Stephans Vorgabe: „nicht
+  Brief.pdf ... sondern immer noch das Datum und die Uhrzeit ... wegen der
+  Suche"). `2026-09-15-1343-Brief.txt/.pdf`, `2026-09-14-1018-Bildschirmfoto.png`,
+  `-2` bei zwei in einer Minute; „der Brief" ist der neueste, nichts wird mehr
+  beiseitegelegt oder überschrieben. Neue Datei `dialos-dateiname.py`; alte
+  Namen werden beim ersten Zugriff umgestellt (am Gerät: 13 Briefe, 16 Fotos).
+  Offline dabei gefunden: Ein zweiter Brief derselben Minute galt nicht als
+  neuester.
+
 - **„Brief als PDF speichern"** (2026-09-15, Stephans Wunsch: „Können wir pdf
   erstellen hinzufügen?"). Legt `~/Dokumente/brief.pdf` neben den Brief, ohne
   Rückfrage; nach „Diktat beenden" nennt Anna jetzt alle drei Wege: „Du kannst

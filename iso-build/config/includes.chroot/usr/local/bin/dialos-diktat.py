@@ -1085,6 +1085,9 @@ def aufzaehlen(zeilen):
     return " ".join(saubern(z) + "." for z in zeilen if saubern(z))
 
 
+DATEINAME_SKRIPT = "/usr/local/bin/dialos-dateiname.py"
+
+
 def holen(pfad, name, ersatz=None):
     """Holt eine Funktion oder einen Wert aus einem anderen DialOS-Skript.
 
@@ -1198,35 +1201,28 @@ def briefbogen(text):
 
 
 def brief_schreiben(zeilen):
-    """Schreibt den Brief - und legt einen vorhandenen zur Seite, statt ihn
-    zu ueberschreiben.
+    """Schreibt den Brief unter einem eigenen Namen mit Datum und Uhrzeit.
 
-    "brief.txt" bleibt der eine Brief, den der Nutzer meint, wenn er "Brief
-    vorlesen" sagt. Der vorige wandert mit Datum und Uhrzeit im Namen daneben.
-    Ueberschreiben waere hier schlimmer als bei einer Notiz: Ein Brief ist
-    Arbeit von Minuten, und wer ihn verliert, merkt es erst, wenn er ihn
-    braucht.
+    JEDER BRIEF BEHAELT SEINEN NAMEN (Stephan, 2026-09-15): "2026-09-15-1343-
+    Brief.txt" statt "brief.txt". Vorher gab es genau eine brief.txt, und der
+    vorige Brief wurde mit Stempel beiseitegelegt - jetzt wird nichts mehr
+    verschoben, und "Brief vorlesen" meint den neuesten. Die Regel fuer Namen
+    und Reihenfolge steht in dialos-dateiname.py und nur dort.
+
+    Ueberschreiben kann dabei nichts: Zwei Briefe in derselben Minute bekommen
+    "-2" angehaengt. Ein Brief ist Arbeit von Minuten, und wer ihn verliert,
+    merkt es erst, wenn er ihn braucht.
     """
-    os.makedirs(DOKUMENT_ORDNER, exist_ok=True)
-    pfad = os.path.join(DOKUMENT_ORDNER, "brief.txt")
-    stempel = time.strftime("%Y-%m-%d-%H%M%S")
-    if os.path.exists(pfad) and os.path.getsize(pfad) > 0:
-        beiseite = os.path.join(DOKUMENT_ORDNER, f"brief-{stempel}.txt")
-        try:
-            os.replace(pfad, beiseite)
-            melde(f"  vorigen Brief beiseitegelegt: {beiseite}")
-        except OSError as fehler:
-            melde(f"  konnte den vorigen Brief nicht beiseitelegen: {fehler}")
-    # DAS PDF DES VORIGEN BRIEFS GEHT MIT (2026-09-15, "Brief als PDF
-    # speichern"). Bliebe "brief.pdf" liegen, gehoerte es zu einem anderen
-    # Brief als "brief.txt" - und ein Helfer haengte den falschen an die Mail.
-    pdf_alt = os.path.join(DOKUMENT_ORDNER, "brief.pdf")
-    if os.path.exists(pdf_alt):
-        try:
-            os.replace(pdf_alt, os.path.join(DOKUMENT_ORDNER, f"brief-{stempel}.pdf"))
-            melde(f"  PDF des vorigen Briefs beiseitegelegt: brief-{stempel}.pdf")
-        except OSError as fehler:
-            melde(f"  konnte das vorige PDF nicht beiseitelegen: {fehler}")
+    namen = holen(DATEINAME_SKRIPT, "dateiname")
+    if namen:
+        namen.umstellen(DOKUMENT_ORDNER, melde)
+        pfad = namen.neuer_pfad(DOKUMENT_ORDNER, namen.BRIEF, "txt")
+    else:
+        # Ohne das Hilfsskript derselbe Name, nur ohne Kollisionsschutz -
+        # lieber das als gar kein Brief.
+        os.makedirs(DOKUMENT_ORDNER, exist_ok=True)
+        pfad = os.path.join(DOKUMENT_ORDNER, time.strftime("%Y-%m-%d-%H%M") + "-Brief.txt")
+        melde("  ACHTUNG: dialos-dateiname.py fehlt")
     with open(pfad, "w", encoding="utf-8") as f:
         # MIT LEERZEICHEN VERBINDEN, NICHT MIT ZEILENUMBRUCH (2026-09-15). Jede
         # Aeusserung ist ein Stueck desselben Fliesstexts. Mit "\n" verbunden

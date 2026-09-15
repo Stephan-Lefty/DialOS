@@ -229,8 +229,20 @@ def einordnen(quelle):
     """Datum und Uhrzeit in den Namen, ab in den Bildschirmfoto-Ordner."""
     ordner = os.path.join(bilderordner(), "Bildschirmfotos")
     os.makedirs(ordner, exist_ok=True)
-    ziel = os.path.join(ordner,
-                        "bildschirmfoto-" + time.strftime("%Y-%m-%d-%H%M%S") + ".png")
+    # "2026-09-14-1018-Bildschirmfoto.png" seit 2026-09-15 (Stephan: Datum und
+    # Uhrzeit ohne Sekunden vorne, "wegen der Suche"). Mehrere in einer Minute
+    # bekommen "-2", "-3"; alte Namen stellt dialos-dateiname.py dabei um.
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "dateiname", "/usr/local/bin/dialos-dateiname.py")
+        namen = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(namen)
+        namen.umstellen(ordner, melde)
+        ziel = namen.neuer_pfad(ordner, namen.BILDSCHIRMFOTO, "png")
+    except Exception as fehler:
+        melde(f"dialos-dateiname.py nicht nutzbar: {fehler}")
+        ziel = os.path.join(ordner, time.strftime("%Y-%m-%d-%H%M%S") + "-Bildschirmfoto.png")
     try:
         os.replace(quelle, ziel)
         return ziel

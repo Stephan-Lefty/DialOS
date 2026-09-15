@@ -121,6 +121,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **File names with date and time** (2026-09-15, Stephan's requirement: not
+  "Brief.pdf" but always date and time, "for searching").
+  `2026-09-15-1343-Brief.txt/.pdf`, `2026-09-14-1018-Bildschirmfoto.png`, `-2`
+  for two in one minute; "the letter" is the newest, nothing is set aside or
+  overwritten any more. New file `dialos-dateiname.py`; old names are converted
+  on first access (on the device: 13 letters, 16 screenshots). Found offline
+  along the way: a second letter in the same minute did not count as the newest.
+
 - **"Brief als PDF speichern"** (2026-09-15, Stephan asked to add PDF
   creation). Puts `~/Dokumente/brief.pdf` next to the letter, without a
   confirmation; after "Diktat beenden" Anna now names all three options: "Du

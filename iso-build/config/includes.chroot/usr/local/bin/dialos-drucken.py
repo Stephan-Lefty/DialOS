@@ -58,7 +58,8 @@ HEIM = os.path.expanduser("~")
 #
 # Felder: Pfad, Bezeichnung, "wird/werden", "ist/sind", Fusszeile noetig?
 ZIELE = {
-    "brief": (os.path.join(HEIM, "Dokumente", "brief.txt"),
+    # Platzhalter - gedruckt wird der neueste "...-Brief.txt" (aktueller_pfad).
+    "brief": (os.path.join(HEIM, "Dokumente", "kein-Brief.txt"),
               "Der Brief", "wird", "ist", False),
     "notizen": (os.path.join(HEIM, "Notizen", "notizen.txt"),
                 "Die Notizen", "werden", "sind", True),
@@ -131,9 +132,28 @@ def drucker():
     return namen[0]
 
 
+DATEINAME_SKRIPT = "/usr/local/bin/dialos-dateiname.py"
+
+
+def aktueller_pfad(name, pfad):
+    """Beim Brief der neueste mit Datum im Namen (seit 2026-09-15, dialos-dateiname.py)."""
+    if name != "brief":
+        return pfad
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dateiname", DATEINAME_SKRIPT)
+        namen = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(namen)
+        return namen.neuester(os.path.dirname(pfad), namen.BRIEF, "txt") or pfad
+    except Exception as fehler:
+        melde(f"dialos-dateiname.py nicht nutzbar: {fehler}")
+        return pfad
+
+
 def text_fuer(name):
     """Der zu druckende Text - mit Fusszeile, wo sie fehlt."""
     pfad, bezeichnung, _wird, _ist, braucht_fusszeile = ZIELE[name]
+    pfad = aktueller_pfad(name, pfad)
     if not os.path.exists(pfad) or os.path.getsize(pfad) == 0:
         return None, bezeichnung
     if not braucht_fusszeile:

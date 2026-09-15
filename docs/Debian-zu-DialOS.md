@@ -1889,10 +1889,22 @@ bemängelt keinen (Liste `OHNE_STICK` im Kopf des Skripts).
 
 **„Brief als PDF speichern" (seit 2026-09-15)** nutzt denselben PDF-Erzeuger,
 aber ohne zu archivieren: `dialos-archiv.py pdf DATEI ZIEL`, aufgerufen von
-`dialos-notiz.py brief pdf`. Ziel ist `~/Dokumente/brief.pdf` neben
-`brief.txt`; schreibt das Diktat einen neuen Brief, wandert das alte PDF mit
-demselben Zeitstempel beiseite wie der alte Text. Nichts zu installieren - die
-drei Skripte kommen mit `dialos-aufspielen` bzw. dem Office-Setup.
+`dialos-notiz.py brief pdf`. Ziel ist das PDF mit demselben Namen neben dem
+neuesten Brief.
+
+**Dateinamen mit Datum und Uhrzeit (seit 2026-09-15, Stephans Vorgabe „wegen
+der Suche").** Briefe heißen `2026-09-15-1343-Brief.txt` (und `.pdf`),
+Bildschirmfotos `2026-09-14-1018-Bildschirmfoto.png`; zwei in einer Minute
+bekommen `-2`. „Der Brief" ist der neueste. Die Regel steht in EINER Datei,
+`dialos-dateiname.py`, die Diktat, Notiz-Verwaltung, Drucken und Bildschirmfoto
+laden. Alte Namen (`brief.txt`, `brief-STEMPEL.txt`, `bildschirmfoto-…png`,
+GNOMEs `Bildschirmfoto vom …png`) stellt sie beim ersten Zugriff selbst um -
+auch im verschlüsselten Nutzerkonto, in das ein Admin-Skript nicht hineinkäme.
+Von Hand: `dialos-dateiname.py umstellen`.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-dateiname.py /usr/local/bin/
+```
 
 **Warum das nötig war.** exFAT wird mit `uid`/`gid` dessen eingehängt, der es
 einhängt. Auf einem Gerät mit zwei Konten heißt das: Wer den Stick zuerst

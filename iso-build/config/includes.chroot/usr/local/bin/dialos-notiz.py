@@ -44,7 +44,7 @@ Aufruf:
     dialos-notiz.py einkaufszettel loeschen
     dialos-notiz.py brief drucken      Rueckfrage, dann dialos-drucken.py
     dialos-notiz.py brief diktat       Rueckfrage, dann dialos-diktat.py
-    dialos-notiz.py brief pdf          ~/Dokumente/brief.pdf, ohne Rueckfrage
+    dialos-notiz.py brief pdf          PDF neben den neuesten Brief, ohne Rueckfrage
     dialos-notiz.py --debug ...
 """
 
@@ -158,13 +158,36 @@ def sprich(text, frage=False):
     subprocess.run(befehl, capture_output=True, timeout=120)
 
 
+DATEINAME_SKRIPT = "/usr/local/bin/dialos-dateiname.py"
+
+
+def brief_pfad():
+    """Der neueste Brief ("2026-09-15-1343-Brief.txt"), sonst ein Pfad, den es nicht gibt.
+
+    Seit 2026-09-15 behaelt jeder Brief seinen Namen mit Datum und Uhrzeit;
+    "der Brief" ist der juengste. Die Regel steht in dialos-dateiname.py.
+    Gibt es keinen, kommt ein nicht vorhandener Pfad zurueck - alle Aufrufer
+    behandeln das schon als "leer".
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dateiname", DATEINAME_SKRIPT)
+        namen = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(namen)
+        return namen.neuester(DOKUMENT_ORDNER, namen.BRIEF, "txt") or \
+            os.path.join(DOKUMENT_ORDNER, "kein-Brief.txt")
+    except Exception as fehler:
+        melde(f"  dialos-dateiname.py nicht nutzbar: {fehler}")
+        return os.path.join(DOKUMENT_ORDNER, "kein-Brief.txt")
+
+
 def pfad_fuer(name):
     sicher = re.sub(r"[^\w -]", "", name).strip() or "notizen"
     # Der Brief liegt bei den Dokumenten, nicht bei den Notizen - er ist ein
     # fertiges Stueck und kein Arbeitszettel. Geschrieben wird er von
     # dialos-diktat.py, gelesen hier; beide muessen denselben Ort meinen.
     if sicher in BRIEF_ZIELE:
-        return os.path.join(DOKUMENT_ORDNER, sicher + ".txt")
+        return brief_pfad()
     return os.path.join(NOTIZ_ORDNER, sicher + ".txt")
 
 
@@ -617,8 +640,9 @@ def pdf(name):
     "Wenn man den Brief fertig hat und Diktat beenden sagt, dann muss es nicht
     nur Vorlesen oder Drucken als Option geben." Eine PDF entstand schon
     vorher bei jedem Brief - aber im Archiv, ohne Ansage und per Sprache nicht
-    erreichbar. "brief.pdf" liegt neben "brief.txt", wo ein Helfer sie findet
-    oder an eine Mail haengt.
+    erreichbar. Das PDF liegt neben dem Brief und traegt denselben Namen
+    ("2026-09-15-1343-Brief.pdf" neben "...-Brief.txt"), wo ein Helfer es
+    findet oder an eine Mail haengt.
 
     OHNE RUECKFRAGE, anders als beim Drucken: Hier verlaesst nichts das Haus,
     und nichts geht verloren. Ein versehentliches PDF kostet nichts.
@@ -631,7 +655,7 @@ def pdf(name):
         melde(f"  pdf: kein Brief in {quelle}")
         sprich("Es gibt noch keinen Brief.")
         return 0
-    ziel = os.path.join(DOKUMENT_ORDNER, "brief.pdf")
+    ziel = os.path.splitext(quelle)[0] + ".pdf"
     r = subprocess.run([ARCHIV_SKRIPT, "pdf", quelle, ziel], capture_output=True, text=True)
     if r.returncode != 0:
         melde(f"  pdf fehlgeschlagen: {r.stderr.strip()[-300:]}")

@@ -61,7 +61,7 @@ unterschrieben.
 ## 2. Was DialOS heute davon kann — und was nicht
 
 Geprüft am 2026-08-24 an `briefbogen()` in `dialos-diktat.py` und an dem
-zuletzt erzeugten `~/Dokumente/brief.txt`.
+zuletzt erzeugten Brief in `~/Dokumente/` (bis 2026-09-15 `brief.txt`, seither `JJJJ-MM-TT-HHMM-Brief.txt`).
 
 | Teil | heute | Anmerkung |
 |---|---|---|
@@ -135,7 +135,7 @@ seit dem 2026-08-22 verlangt der Schluss sie ausdrücklich, weil sonst ein
 ## 4. Nach jedem Versuch
 
 ```bash
-cat ~/Dokumente/brief.txt
+cat "$(ls ~/Dokumente/*-Brief*.txt | tail -1)"
 ```
 
 Der vorige Brief wird nicht überschrieben, sondern als

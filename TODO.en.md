@@ -257,6 +257,14 @@ finished too, and then move down together. That way no reference breaks.
     worked. **"Brief erstellen" has been a third phrase since 2026-09-15**
     (Stephan's approval, all 29 sentences checked against Piper); test on the
     device after the next login pending. "Sprachsteuerung beenden" stays open.
+  - **File names with date and time (2026-09-15, built):** Stephan's choice
+    `2026-09-15-1343-Brief.txt/.pdf` and `…-Bildschirmfoto.png`, existing
+    files renamed (13 letters, 16 screenshots on the admin account). The user
+    account converts itself on the first letter/screenshot. Archive PDFs keep
+    their names (not chosen). Test on the device pending.
+  - **Next (Stephan's choice):** personal dictionary on the device only (his
+    name arrives as "Stefan Rößner" - sounds the same, no recogniser can hear
+    the spelling), then Parakeet as the recogniser for letters.
   - **"Brief als PDF speichern" proven on the device (2026-09-15, 13:44)**, as
     are "Brief erstellen" and the new closing announcement. And for the first
     time voice control SUGGESTED a command: "als pdf speichern" -> "Der Befehl

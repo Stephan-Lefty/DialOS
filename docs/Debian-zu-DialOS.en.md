@@ -1813,10 +1813,22 @@ complains about one (list `OHNE_STICK` at the top of the script).
 
 **"Brief als PDF speichern" (since 2026-09-15)** uses the same PDF generator
 but without archiving: `dialos-archiv.py pdf FILE TARGET`, called by
-`dialos-notiz.py brief pdf`. The target is `~/Dokumente/brief.pdf` next to
-`brief.txt`; when dictation writes a new letter, the old PDF is set aside with
-the same timestamp as the old text. Nothing to install - the three scripts come
-with `dialos-aufspielen` or the office setup.
+`dialos-notiz.py brief pdf`. The target is the PDF with the same name next to
+the newest letter.
+
+**File names with date and time (since 2026-09-15, Stephan's requirement "for
+searching").** Letters are named `2026-09-15-1343-Brief.txt` (and `.pdf`),
+screenshots `2026-09-14-1018-Bildschirmfoto.png`; two in one minute get `-2`.
+"The letter" is the newest. The rule lives in ONE file, `dialos-dateiname.py`,
+loaded by dictation, note handling, printing and screenshots. Old names
+(`brief.txt`, `brief-STAMP.txt`, `bildschirmfoto-…png`, GNOME's `Bildschirmfoto
+vom …png`) are converted on first access - also in the encrypted user account,
+which an admin script could not get into. By hand: `dialos-dateiname.py
+umstellen`.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-dateiname.py /usr/local/bin/
+```
 
 **Why this was needed.** exFAT is mounted with the `uid`/`gid` of whoever
 mounts it. On a device with two accounts that means: whoever plugs the stick in
