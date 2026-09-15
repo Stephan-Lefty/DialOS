@@ -1658,8 +1658,14 @@ def diktat_fuehren(zweck, name, quelle):
     # beides sind ganze Saetze. Der Einkaufszettel bleibt bei Vosk: Einzelne
     # Waren traf Vosk 16 von 20, Parakeet 11 (es kippte bei Einzelwoertern ins
     # Englische).
+    # Geprueft wird der Messordner (erkenner-vergleich), nicht "pruefstand" darin -
+    # den legt erst der erste Mitschnitt an. So stand es zuerst, und Stephans
+    # erste Aufnahme am 2026-09-15 (15:20) wurde deshalb nicht gespeichert.
     mitschnitt = (bytearray() if os.path.exists(MITSCHNITT_SCHALTER)
-                  and os.path.isdir(os.path.dirname(MITSCHNITT_ORDNER)) else None)
+                  and os.path.isdir(os.path.dirname(os.path.dirname(MITSCHNITT_ORDNER)))
+                  else None)
+    if os.path.exists(MITSCHNITT_SCHALTER) and mitschnitt is None:
+        melde("  ACHTUNG: Mitschnitt eingeschaltet, aber Messordner fehlt - keine Aufnahme")
     mitschnitt_epochen = [0]
     mitschnitt_kurz = []
     try:
