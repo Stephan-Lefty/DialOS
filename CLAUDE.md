@@ -122,7 +122,7 @@ fuer freien Text. Einzelheiten im TODO-Punkt "Erkenner-Vergleich".
 
 **Laeuft und ist belegt:**
 
-- Sprachsteuerung mit 28 Befehlssaetzen (am 2026-09-14 dazu: "bildschirmfoto aufnehmen", "wie spaet ist es", "einkaufszettel loeschen"). Das Einschalten verlangt beide
+- Sprachsteuerung mit 29 Befehlssaetzen (am 2026-09-14 dazu: "bildschirmfoto aufnehmen", "wie spaet ist es", "einkaufszettel loeschen"; am 2026-09-15 "brief erstellen"). Das Einschalten verlangt beide
   Woerter ("Sprachsteuerung starten") - im Betrieb gemessen: 60
   Beinahe-Treffer. **Die Zahl "null Fehlstarts" ist ueberholt:** Am 2026-08-24
   um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet, per Journal

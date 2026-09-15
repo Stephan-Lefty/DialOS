@@ -254,7 +254,9 @@ finished too, and then move down together. That way no reference breaks.
     setzen" (across a chunk boundary, therefore not merged).
   - Voice control: "Brief erstellen" is not a command, and no suggestion came.
     "Sprachsteuerung beenden" arrived as "welchen"/"windows", only "stoppen"
-    worked. **To decide:** "Brief erstellen" as a second phrase?
+    worked. **"Brief erstellen" has been a third phrase since 2026-09-15**
+    (Stephan's approval, all 29 sentences checked against Piper); test on the
+    device after the next login pending. "Sprachsteuerung beenden" stays open.
 
   **Still open, not fixed:** a chunk after a pause always starts with a capital
   ("Ich bitte Sie, Wir diesen Betrag"); a standalone "Punkt setzen" often

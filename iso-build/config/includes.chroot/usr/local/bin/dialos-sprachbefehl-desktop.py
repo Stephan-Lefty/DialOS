@@ -169,6 +169,11 @@ GRAMMATIK_AN = json.dumps([
     # geprueft, ebenso "brief vorlesen" und "brief wegwerfen" fuer spaeter.
     "brief aufnehmen",
     "brief schreiben",
+    # Dritte Formulierung seit 2026-09-15: Stephan sagte vor seiner dritten
+    # Brief-Probe von sich aus "brief erstellen", Vosk erkannte den Satz
+    # woertlich - und es kam nur "Das war kein Befehl". Stephans Freigabe:
+    # "Ja, nimm Brief erstellen dazu". Passt zu "bildschirmfoto erstellen".
+    "brief erstellen",
     "einkaufszettel vorlesen",
     "notizen vorlesen",
     "brief vorlesen",
@@ -245,6 +250,7 @@ DIKTAT_SAETZE = {
     "einkaufszettel aufnehmen": "einkaufszettel",
     "brief aufnehmen": "brief",
     "brief schreiben": "brief",
+    "brief erstellen": "brief",
 }
 DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 

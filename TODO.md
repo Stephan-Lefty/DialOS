@@ -252,7 +252,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     setzen" (über eine Stückgrenze, deshalb nicht zusammengefasst).
   - Sprachsteuerung: „Brief erstellen" ist kein Befehl, und ein Vorschlag kam
     nicht. „Sprachsteuerung beenden" kam als „welchen"/„windows", erst
-    „stoppen" ging. **Zu entscheiden:** „Brief erstellen" als zweiter Satz?
+    „stoppen" ging. **„Brief erstellen" ist seit 2026-09-15 dritter Satz**
+    (Stephans Freigabe, alle 29 Sätze gegen Piper geprüft); Test am Gerät nach
+    dem nächsten Anmelden steht aus. „Sprachsteuerung beenden" bleibt offen.
 
   **Noch offen, nicht behoben:** Ein Stück nach einer Pause beginnt immer groß
   („Ich bitte Sie, Wir diesen Betrag"); einzeln gesprochenes „Punkt setzen"

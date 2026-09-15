@@ -121,6 +121,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **"Brief erstellen" as a third phrase for the letter** (2026-09-15). Stephan
+  said it unprompted before the third letter test, Vosk recognised it verbatim -
+  and all that came was "Das war kein Befehl". Piper -> Vosk over the full
+  grammar: all 29 sentences recognised verbatim.
+
 - **"Satz löschen" and "Satz wiederholen" in dictation** (2026-09-15, Stephan's
   wish). A slip of the tongue can be removed ("Gestrichen: …"), the last
   recognised text read back ("Zuletzt: …"). Both only count with silence before

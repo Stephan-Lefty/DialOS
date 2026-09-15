@@ -129,6 +129,11 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **„Brief erstellen" als dritter Satz für den Brief** (2026-09-15). Stephan
+  sagte ihn vor der dritten Brief-Probe von sich aus, Vosk erkannte ihn
+  wörtlich - und es kam nur „Das war kein Befehl". Piper -> Vosk über die volle
+  Grammatik: alle 29 Sätze wörtlich erkannt.
+
 - **„Satz löschen" und „Satz wiederholen" im Diktat** (2026-09-15, Stephans
   Wunsch). Ein Versprecher lässt sich streichen („Gestrichen: …"), das zuletzt
   Erkannte vorlesen („Zuletzt: …"). Beide gelten nur mit Ruhe davor und danach -

@@ -87,8 +87,8 @@ printf 'Musterweg 12\n6100 Seefeld in Tirol\n' | sudo tee /usr/local/share/dialo
 
 ## 3. Der Diktattext — Wort für Wort so sprechen
 
-**Vorher:** „Sprachsteuerung starten", dann „Brief aufnehmen" (oder „Brief
-schreiben").
+**Vorher:** „Sprachsteuerung starten", dann „Brief schreiben" (oder „Brief
+aufnehmen" oder „Brief erstellen").
 
 Die **fett** gesetzten Stellen sind gesprochene Befehle, kein Brieftext. Nach
 jedem Absatz eine kurze Atempause — nicht nötig, aber es hilft dem Erkenner.
