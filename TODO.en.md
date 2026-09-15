@@ -233,6 +233,32 @@ finished too, and then move down together. That way no reference breaks.
   speaker. Open: letter paragraph (whole sentences - where Whisper and
   Parakeet are stronger).
 
+  **Stephan's letter paragraph (2026-09-15, 10:55) - PARAKEET AHEAD.** Second
+  recording (the first was interrupted three times by the too-loud
+  announcement, see measure B). 40 s, 7 sentence pieces (pause threshold
+  0.45 s, longest 9.2 s). Stephan spoke "Komma"/"Punkt" as he is used to in
+  DialOS dictation - word errors are therefore computed WITHOUT these words:
+
+  | Recogniser | Word errors | per sentence | Load | disturbed recording |
+  |---|---|---|---|---|
+  | **Parakeet v3** | **3.0 %** | **0.47 s** | 1.8 s | 37.9 % |
+  | Vosk big (today) | 7.6 % | 0.88 s | 9.5 s | 60.6 % |
+  | Whisper small | 18.2 % | 5.50 s | 11.6 s | 39.4 % |
+  | Whisper small `-ac 512` | 25.8 % | 1.76 s | 6.0 s | 63.6 % |
+  | Whisper turbo `-ac 512` | 39.4 % | 13.54 s | 13.4 s | 45.5 % |
+
+  Parakeet: whole paragraph with one error ("teilen das bitte mit"), with
+  punctuation and capitalisation; copes with disturbance clearly better than
+  Vosk. Whisper: invents (turbo wrote one sentence three times), small dropped
+  the last sentence - last in both tests on the T490.
+
+  **Possible split (to decide):** Vosk for commands, shopping list and notes;
+  Parakeet for the letter. **Consequence:** Parakeet punctuates itself -
+  spoken "Punkt"/"Komma" would give "Muster. Punkt.". For the letter the user
+  would then speak naturally, without punctuation commands (simpler, but
+  without control over every comma). One speaker, one undisturbed recording
+  per kind, quiet room - a clear indication, not proof.
+
 - [x] **Umlaut words are NOT missing from the vocabulary - three decisions
   were open again, all three decided the same day** (found 2026-09-14 when Stephan asked about dialects). Every
   word Vosk reported as "missing in vocabulary" since August contained ä, ö,

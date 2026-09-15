@@ -232,6 +232,32 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   14.09. behoben. Eine Aufnahme, ein Sprecher. Offen: Brief-Absatz (ganze
   Sätze - dort sind Whisper und Parakeet stärker).
 
+  **Stephans Brief-Absatz (2026-09-15, 10:55) - PARAKEET VORN.** Zweite
+  Aufnahme (die erste wurde dreimal von der Zu-laut-Ansage unterbrochen, siehe
+  Maßnahme B). 40 s, 7 Satz-Stücke (Pausengrenze 0,45 s, längstes 9,2 s).
+  Stephan sprach „Komma"/„Punkt" mit, wie im DialOS-Diktat gewohnt - die
+  Wortfehler sind deshalb OHNE diese Wörter gerechnet:
+
+  | Erkenner | Wortfehler | je Satz | Laden | gestörte Aufnahme |
+  |---|---|---|---|---|
+  | **Parakeet v3** | **3,0 %** | **0,47 s** | 1,8 s | 37,9 % |
+  | Vosk groß (heute) | 7,6 % | 0,88 s | 9,5 s | 60,6 % |
+  | Whisper small | 18,2 % | 5,50 s | 11,6 s | 39,4 % |
+  | Whisper small `-ac 512` | 25,8 % | 1,76 s | 6,0 s | 63,6 % |
+  | Whisper turbo `-ac 512` | 39,4 % | 13,54 s | 13,4 s | 45,5 % |
+
+  Parakeet: ganzer Absatz mit einem Fehler („teilen das bitte mit"), mit
+  Satzzeichen und Großschreibung; verkraftet Störungen deutlich besser als
+  Vosk. Whisper: erfindet (turbo schrieb einen Satz dreimal), small ließ den
+  letzten Satz weg - auf dem T490 in beiden Tests hinten.
+
+  **Mögliche Aufteilung (zu entscheiden):** Vosk für Befehle, Einkaufszettel
+  und Notizen; Parakeet für den Brief. **Folge:** Parakeet setzt Satzzeichen
+  selbst - gesprochene „Punkt"/„Komma" ergäben „Muster. Punkt.". Beim Brief
+  spräche der Nutzer dann natürlich, ohne Satzzeichen-Befehle (einfacher,
+  aber ohne Kontrolle über jedes Komma). Ein Sprecher, eine ungestörte
+  Aufnahme je Art, ruhiger Raum - deutlicher Hinweis, kein Beweis.
+
 - [x] **Umlaut-Wörter fehlen NICHT im Wortschatz - drei Entscheidungen waren
   wieder offen, alle drei am selben Tag entschieden** (gefunden 2026-09-14 bei Stephans Frage nach Dialekten).
   Jedes Wort, das Vosk seit August als „missing in vocabulary" gemeldet hat,
