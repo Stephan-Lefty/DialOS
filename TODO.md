@@ -188,6 +188,28 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   „Satz wiederholen" las den letzten Satz ohne Löschen, Schluss sauber, keine
   Befehlswörter im Brief.
 
+  **Erste Probe mit echter Stimme (2026-09-15, 12:27) - zwei Schwächen, beide
+  behoben.** Beide Befehle wurden erkannt, drei Fehlauslöser im Fließtext
+  verworfen, „bis Ende des Monats" löste nichts aus. Aber:
+  1. **Gestrichen wurde der gescheiterte erste Versuch, nicht der Versprecher.**
+     Stephan sprach die fett gedruckten Wörter meiner Anleitung mit („Pause
+     Satz löschen") - das kleine Modell hörte drei Wörter, kein Befehl, der
+     Text landete im Brief. Das zweite „Satz löschen" strich dann genau diesen
+     Rest („Gestrichen: Pause Satz löschen"), „Satz wiederholen" las „Absatz
+     sagt wiederholen" vor. **Jetzt:** Ein Rest am Textende (letztes Wort
+     löschen/wiederholen, „satz" in den zwei Wörtern davor, im Brief samt einem
+     einzelnen Wort davor wie „Also") wird vorher entfernt.
+  2. **Gestrichen wurde ein Erkennungsstück, kein Satz.** „punkt setzen" kam
+     als eigenes Stück, und „Ich bitte Sie … wäre ich dankbar" als EIN Stück
+     mit 60 Wörtern. **Jetzt:** Ein Satz reicht bis zum vorletzten Punkt,
+     Frage-, Ausrufezeichen oder Zeilenwechsel; ein angefangener Satz ist er
+     selbst. Auf dem Einkaufszettel: die letzte Ware.
+  Dazu: kein „Müller ." mehr (Satzzeichen-Stück hängt am Wort davor), und nach
+  „neuer Absatz"/„neue Zeile" wird großgeschrieben („Mit freundlichen Grüßen").
+  Offline in Echtzeit mit genau diesem Ablauf geprüft: Rest entfernt, der
+  Meier-Satz gestrichen, aus dem langen Stück nur der letzte Satz. **Probe mit
+  echter Stimme steht aus.**
+
 - [ ] **Brief in DialOS eingesprochen (2026-09-15, 11:46) - drei Programmfehler
   gefunden und behoben, Beweis mit vollständigem Brief steht aus.** Rückfrage
   „ja" beim ersten Versuch; Diktat nach Brief-Vorlage mit gesprochenen

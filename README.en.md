@@ -126,7 +126,11 @@ background) and `splash.png` (boot/login screen).
   recognised text read back ("Zuletzt: …"). Both only count with silence before
   and after - against Piper they otherwise arose from ordinary letter text.
   "Diktat beenden" now also waits for silence afterwards. Checked offline in
-  real time through the real dictation.
+  real time through the real dictation. **After the first test with a real
+  voice** the commands act on the last SENTENCE (back to the previous sentence
+  end; on the list the last item) instead of the last recognition chunk,
+  remnants of a failed command attempt are removed first, and the word after a
+  paragraph/line break is capitalised.
 
 - **Letter dictation: three bugs from the first complete letter fixed**
   (2026-09-15). A "diktat … beenden" with a 1.24 s gap (from "bis Ende") ended

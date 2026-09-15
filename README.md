@@ -134,7 +134,11 @@ das Erfolg meldet, während es versagt.
   Erkannte vorlesen („Zuletzt: …"). Beide gelten nur mit Ruhe davor und danach -
   gegen Piper entstanden sie sonst aus normalem Brieftext. Auch „Diktat
   beenden" wartet jetzt auf Ruhe danach. Offline in Echtzeit durch das echte
-  Diktat geprüft.
+  Diktat geprüft. **Nach der ersten Probe mit echter Stimme** streichen die
+  Befehle den letzten SATZ (bis zum vorigen Satzende; auf dem Zettel die letzte
+  Ware) statt des letzten Erkennungsstücks, Reste eines gescheiterten
+  Befehlsversuchs werden vorher entfernt, und nach Absatz/Zeile wird
+  großgeschrieben.
 
 - **Brief-Diktat: drei Fehler aus dem ersten ganzen Brief behoben** (2026-09-15).
   Ein „diktat … beenden" mit 1,24 s Lücke (aus „bis Ende") beendete das Diktat

@@ -189,6 +189,28 @@ finished too, and then move down together. That way no reference breaks.
   announced, "Satz wiederholen" read the last sentence without deleting,
   clean end, no command words in the letter.
 
+  **First test with a real voice (2026-09-15, 12:27) - two weaknesses, both
+  fixed.** Both commands were recognised, three false triggers in running text
+  rejected, "bis Ende des Monats" triggered nothing. But:
+  1. **The failed first attempt was deleted, not the slip.** Stephan read out
+     the bold words of my instructions ("Pause Satz löschen") - the small model
+     heard three words, no command, the text went into the letter. The second
+     "Satz löschen" then deleted exactly that remnant ("Gestrichen: Pause Satz
+     löschen"), "Satz wiederholen" read out "Absatz sagt wiederholen".
+     **Now:** a remnant at the end of the text (last word löschen/wiederholen,
+     "satz" within the two words before, in letters including a single word
+     before it such as "Also") is removed first.
+  2. **A recognition chunk was deleted, not a sentence.** "punkt setzen" came
+     as a chunk of its own, and "Ich bitte Sie … wäre ich dankbar" as ONE chunk
+     of 60 words. **Now:** a sentence reaches back to the previous full stop,
+     question mark, exclamation mark or line break; an unfinished sentence is
+     the sentence itself. On the shopping list: the last item.
+  Also: no more "Müller ." (a punctuation chunk attaches to the word before),
+  and after "neuer Absatz"/"neue Zeile" the next word is capitalised ("Mit
+  freundlichen Grüßen"). Checked offline in real time with exactly this
+  sequence: remnant removed, the Meier sentence deleted, only the last sentence
+  taken from the long chunk. **Test with a real voice pending.**
+
 - [ ] **Letter dictated in DialOS (2026-09-15, 11:46) - three program bugs
   found and fixed, proof with a complete letter still pending.**
   Confirmation "ja" on the first attempt; dictation from the letter template

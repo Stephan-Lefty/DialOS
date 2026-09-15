@@ -644,6 +644,11 @@ def schreibung_richten(satz):
     neu = satz
     for o, l, wort in sorted(aenderungen, reverse=True):
         neu = neu[:o] + wort + neu[o + l:]
+    # GROSS NACH SATZENDE UND ZEILENWECHSEL (2026-09-15): Im Brief stand
+    # "\n\nmit freundlichen Gruessen" - LanguageTool macht Satzanfaenge nur
+    # hinter einem Punkt gross, nicht hinter einem gesprochenen "neuer absatz".
+    # Punkte kommen im Diktat nur aus "punkt setzen", Abkuerzungen gibt es nicht.
+    neu = re.sub(r"([.?!][ \n]+|\n\s*)([a-zäöü])", lambda m: m.group(1) + m.group(2).upper(), neu)
     return neu[:1].upper() + neu[1:]
 
 
@@ -772,18 +777,132 @@ class Aeusserungen:
                 return
             melde("  Aeusserung bestand nur aus Befehlswoertern - entfernt")
 
-    def letzte_entfernen(self):
-        return self.liste.pop()["eintraege"] if self.liste else None
+    # EIN SATZ IST EIN SATZ, KEIN STUECK DER ERKENNUNG (2026-09-15, Stephans
+    # Brief mit Versprecher). Zuerst strichen die Befehle die letzte
+    # AEUSSERUNG - das, was Vosk an einer Sprechpause abliefert. Das passt nicht
+    # zu Saetzen: "punkt setzen" kam als eigenes Stueck (gestrichen waere nur
+    # der Punkt), und von "Ich bitte Sie" bis "waere ich dankbar" kam EIN Stueck
+    # mit 60 Woertern (gestrichen waeren drei Saetze). Jetzt gilt: der Text seit
+    # dem vorletzten Satzende - Punkt, Frage-, Ausrufezeichen oder Zeilenwechsel.
+    # Ist der letzte Satz noch nicht beendet, ist er es selbst. Auf einer Liste
+    # ist der "Satz" die letzte Ware.
+    SATZ_ENDE = ".?!\n"
 
-    def letzte(self):
-        return self.liste[-1]["eintraege"] if self.liste else None
+    def _flach(self):
+        """(Aeusserung, Eintrag, Anfang im Gesamttext) und der Gesamttext."""
+        teile, text = [], ""
+        for i, a in enumerate(self.liste):
+            for j, e in enumerate(a["eintraege"]):
+                if text and not text.endswith((" ", "\n")) and not e.startswith(
+                        (" ", "\n") + tuple(",.?!:;")):
+                    text += " "
+                teile.append((i, j, len(text)))
+                text += e
+        return teile, text
+
+    def _satz_anfang(self, text):
+        rest = text.rstrip()
+        if rest and rest[-1] in ".?!":
+            rest = rest[:-1]
+        return max(rest.rfind(z) for z in self.SATZ_ENDE) + 1
+
+    def befehlsrest_entfernen(self):
+        """Streicht den Rest eines gescheiterten Befehlsversuchs am Textende.
+
+        Am 2026-09-15 kam "Satz loeschen" zweimal: Der erste Versuch ging
+        unter (das kleine Modell hoerte "satz satz loeschen") und stand als
+        "Pause Satz loeschen" im Text; der zweite wurde erkannt - und strich
+        genau diesen Rest statt des Versprechers. Bei "Satz wiederholen" las
+        Anna "Absatz sagt wiederholen" vor. Erkannt wird ein Rest am letzten
+        Wort (loeschen/wiederholen) UND einem "satz" in den zwei Woertern davor;
+        "die Daten loeschen" bleibt also stehen.
+        """
+        entfernt = []
+        while self.liste:
+            a = self.liste[-1]
+            if not a["eintraege"]:
+                self.liste.pop()
+                continue
+            e = a["eintraege"][-1]
+            worte = list(re.finditer(r"\S+", e))
+            klein = [re.sub(r"[^\wäöüß]", "", w.group().lower()) for w in worte]
+            if not klein or klein[-1] not in ("löschen", "wiederholen"):
+                break
+            ab = next((k for k in range(len(klein) - 2, max(-1, len(klein) - 4), -1)
+                       if "satz" in klein[k]), None)
+            if ab is None:
+                break
+            # EIN EINZELNES WORT DAVOR GEHOERT ZUM VERSUCH ("Also, Satz
+            # loeschen"). Offline gefunden: Aus "Pause Satz loeschen" blieb
+            # "Hause" stehen, und der naechste Befehl strich nur dieses Wort
+            # statt des Versprechers davor. Nicht auf Listen - dort kann das
+            # eine Wort eine Ware sein ("Bananen, Satz loeschen").
+            if ab == 1 and self.name not in LISTEN_ZIELE:
+                ab = 0
+            entfernt.append(e[worte[ab].start():].strip())
+            e = e[:worte[ab].start()].rstrip(" ")
+            if e.strip():
+                a["eintraege"][-1] = e
+                break
+            a["eintraege"].pop()
+        if entfernt:
+            melde(f"  Rest eines Befehlsversuchs entfernt: {entfernt!r}")
+
+    def satz_entfernen(self):
+        """Streicht den letzten Satz (Liste: die letzte Ware); gibt ihn zurueck."""
+        while self.liste and not self.liste[-1]["eintraege"]:
+            self.liste.pop()
+        if not self.liste:
+            return ""
+        if self.name in LISTEN_ZIELE:
+            weg = self.liste[-1]["eintraege"].pop()
+            return weg.strip()
+        teile, text = self._flach()
+        schnitt = self._satz_anfang(text)
+        for i, j, anfang in reversed(teile):
+            e = self.liste[i]["eintraege"][j]
+            if anfang >= schnitt:
+                self.liste[i]["eintraege"].pop(j)
+            elif anfang + len(e) > schnitt:
+                vorne = e[:schnitt - anfang].rstrip(" ")
+                if vorne:
+                    self.liste[i]["eintraege"][j] = vorne
+                else:
+                    self.liste[i]["eintraege"].pop(j)
+        self.liste = [a for a in self.liste if a["eintraege"]]
+        return text[schnitt:].strip()
+
+    def satz(self):
+        """Der letzte Satz (Liste: die letzte Ware), ohne etwas zu streichen."""
+        eintraege = self.eintraege()
+        if not eintraege:
+            return ""
+        if self.name in LISTEN_ZIELE:
+            return eintraege[-1].strip()
+        _, text = self._flach()
+        return text[self._satz_anfang(text):].strip()
 
     def eintraege(self):
         return [e for a in self.liste for e in a["eintraege"]]
 
 
-def zum_vorlesen(eintraege):
-    text = " ".join(" ".join(e.split()) for e in eintraege)
+def zusammenziehen(eintraege):
+    """Haengt Eintraege, die mit einem Satzzeichen beginnen, an den vorigen.
+
+    Kam "punkt setzen" als eigene Aeusserung, stand im Brief "Mueller ." -
+    brief_schreiben verbindet die Eintraege mit Leerzeichen (2026-09-15).
+    """
+    ergebnis = []
+    for e in eintraege:
+        if ergebnis and e[:1] in ",.?!:;":
+            ergebnis[-1] = ergebnis[-1].rstrip(" ") + e
+        elif e.strip() or "\n" in e:
+            ergebnis.append(e)
+    return ergebnis
+
+
+def zum_vorlesen(text):
+    text = " ".join(text.split())
     return text if len(text) <= 300 else text[:300].rsplit(" ", 1)[0] + " ..."
 
 
@@ -1218,13 +1337,14 @@ def diktat_fuehren(zweck, name, quelle):
                     except Exception as fehler:
                         melde(f"  Rest vor dem Befehl nicht lesbar: {fehler}")
                     aeusserungen.ab_zeit_entfernen(epoche, b["start"] - BEFEHL_SPIELRAUM_S)
+                    aeusserungen.befehlsrest_entfernen()
                     if b["satz"] == BEFEHL_LOESCHEN:
-                        weg = aeusserungen.letzte_entfernen()
+                        weg = aeusserungen.satz_entfernen()
                         melde(f"  SATZ LOESCHEN: gestrichen {weg!r}")
                         antwort = (f"Gestrichen: {zum_vorlesen(weg)}" if weg
                                    else "Es gibt noch nichts zu streichen.")
                     else:
-                        zuletzt = aeusserungen.letzte()
+                        zuletzt = aeusserungen.satz()
                         melde(f"  SATZ WIEDERHOLEN: {zuletzt!r}")
                         antwort = (f"Zuletzt: {zum_vorlesen(zuletzt)}" if zuletzt
                                    else "Ich habe noch nichts geschrieben.")
@@ -1443,7 +1563,8 @@ def diktat_fuehren(zweck, name, quelle):
     if rest:
         melde(f"  Resttext aus dem Erkenner: {rest!r}")
         gesammelt += aeusserung_verarbeiten(name, rest)
-    
+    gesammelt = zusammenziehen(gesammelt)
+
     if not gesammelt:
         sprich(ANSAGE_LEER)
         return 0
