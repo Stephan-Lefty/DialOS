@@ -304,7 +304,20 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Rauschboden für den Befehlsdienst auf dem Prüfstand (braucht kurze
     Befehls-Mitschnitte mit Zustimmung, nicht dauernd). **Vorbereitet
     2026-09-15:** Mitschnitt mit Schalter, Beschriften, Neu-Erkennen,
-    Mikrofonwahl für den Dienst. Messsitzung steht aus. **Grundsatzfrage
+    Mikrofonwahl für den Dienst. Messsitzung läuft (Teil 1/2 eingebaut ohne/mit
+    Fernseher erledigt, 47 Mitschnitte; Teil 3/4 TONOR). Gefunden: Fehlauslöser
+    „auf Windows umschalten" aus Wortsalat (alte Optik-Regel ohne
+    Zusatzwort-Grenze) - nach der Messung reparieren.
+    **Stephan, 2026-09-15: „Zwischen der Ansage von Anna und meiner Antwort muss
+    ich immer so 1,5 Sekunden warten. Sonst wird das erste Wort verschluckt!"**
+    Passt zum Muster „tag haben wir"/„haben wir" (Teil 1 und 2). Ursache im
+    Dienst: Nach jeder Ansage wird parec beendet, 0,7 s Nachhall abgewartet
+    (NACHHALL_WARTEN_S), dazu 0,3 s Abfragetakt und der Start von parec. Das
+    Diktat löst dasselbe seit dem 14.09. mit offenem Mikrofon während der
+    Ansage und 0,3 s Vorlauf - dasselbe hier bauen, NACH der Messsitzung
+    (sonst sind Teil 3/4 nicht mit 1/2 vergleichbar); beim rohen TONOR ohne
+    Echo-Unterdrückung darauf achten, dass Annas eigene Worte („Der Befehl
+    heisst: …") nicht als Befehl zählen. **Grundsatzfrage
     (Stephan):** Taugt DialOS nur bei Stille - und damit nicht für draußen? Beim festen
     Einbau: Modell (465 MB) und
     sherpa-onnx für alle Konten nach /usr/local, Paketierung und Lizenz
