@@ -838,14 +838,18 @@ class Aeusserungen:
                 text += e
         return teile, text
 
-    # HOECHSTENS DIE LETZTEN ZWEI GESPROCHENEN STUECKE (2026-09-15, offline
-    # gefunden). Hatte der Erkenner Punkt und Absatz nicht verstanden ("neue
-    # Apps", "Umsetzen"), gab es kein Satzende, und "Satz loeschen" strich bis zum
+    # HOECHSTENS DAS LETZTE GESPROCHENE STUECK (2026-09-15, offline gefunden).
+    # Hatte der Erkenner Punkt und Absatz nicht verstanden ("neue Apps",
+    # "Umsetzen"), gab es kein Satzende, und "Satz loeschen" strich bis zum
     # Textanfang - samt Anrede. Zu wenig gestrichen holt ein zweites "Satz
     # loeschen" nach, zu viel holt nichts zurueck. Stuecke nur aus Satzzeichen
-    # zaehlen nicht mit: "Ich bitte Sie" / "," / "mir diesen Betrag" / "." ist
-    # EIN Satz.
-    STUECKE_HOECHSTENS = 2
+    # zaehlen nicht mit: "Am zwoelften ... Meier" / "." ist ein Stueck.
+    #
+    # EINS, NICHT ZWEI: Mit zwei Stuecken strich der naechste Offline-Lauf
+    # wieder die Anrede mit, weil dort "komma setzen neuer absatz" als "komma neue
+    # apps" ankam. Der Preis: "Ich bitte Sie" / "," / "mir diesen Betrag" / "."
+    # braucht zweimal "Satz loeschen".
+    STUECKE_HOECHSTENS = 1
 
     def _satz_anfang(self, text, teile):
         rest = text.rstrip()
@@ -1381,7 +1385,15 @@ def diktat_fuehren(zweck, name, quelle):
                 b, befehl_offen = befehl_offen, None
                 if not ruhig(zeitverlauf, b["ende"] + BEFEHL_RAND_S,
                              b["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S):
-                    melde(f"  {b['satz']!r} verworfen - danach nicht still (Fliesstext)")
+                    # Mit Pegeln (2026-09-15): Stephans echtes "Diktat beenden" wurde
+                    # so verworfen - beendet hat nur die Rueckfallebene der freien
+                    # Erkennung. Ohne Zahlen ist nicht zu sagen, ob das Wortende zu
+                    # frueh gesetzt war oder danach wirklich etwas laut war.
+                    a_i = max(0, int(b["ende"] / BLOCK_S) - 1)
+                    b_i = int(math.ceil((b["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S) / BLOCK_S)) + 1
+                    melde(f"  {b['satz']!r} verworfen - danach nicht still (Fliesstext) "
+                          f"(Ende {b['ende']:.2f} s, Pegel ab {a_i * BLOCK_S:.2f} s: "
+                          f"{[round(x) for x in zeitverlauf[a_i:b_i]]})")
                 elif b["satz"] == SCHLUSSSATZ:
                     melde(f"  Schlusssatz erkannt (kleines Modell): {b['gehoert']!r} "
                           f"nach {b['seit_start']:.1f} s, "
@@ -1670,7 +1682,13 @@ def diktat_fuehren(zweck, name, quelle):
     pfad = (brief_schreiben(gesammelt) if name in BRIEF_ZIELE
             else notiz_schreiben(name, gesammelt))
     melde(f"  geschrieben nach {pfad}")
-    sprich(ansage_ende(name, len(gesammelt)))
+    # SAETZE ZAEHLEN, NICHT STUECKE (2026-09-15): Der Brief mit elf Saetzen
+    # meldete "3 Sätze" - gezaehlt wurden die Stuecke der Erkennung.
+    anzahl = len(gesammelt)
+    if name in BRIEF_ZIELE:
+        text = " ".join(gesammelt).strip()
+        anzahl = len(re.findall(r"[.?!](?=\s|$)", text)) + (0 if text[-1:] in ".?!" else 1)
+    sprich(ansage_ende(name, anzahl))
     # KEIN Vorlesen mehr an dieser Stelle (Stephan, 2026-08-19) - siehe
     # VORLESEN_HINWEIS oben. Das Vorlesen mit Satzzeichen lebt unveraendert in
     # dialos-notiz.py weiter, wo es auf Ansage geschieht; die dort gemessene

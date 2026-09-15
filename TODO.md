@@ -233,8 +233,26 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
      Fehlauslöser so verworfen („punkt setzen", 2x; „umsetzen"), alle echten
      Befehle angenommen.
   5. **Ohne erkannte Satzzeichen strich „Satz löschen" bis zum Textanfang**,
-     samt Anrede. Jetzt höchstens die letzten zwei gesprochenen Stücke
-     (Stücke nur aus Satzzeichen zählen nicht).
+     samt Anrede. Jetzt höchstens das letzte gesprochene Stück (Stücke nur aus
+     Satzzeichen zählen nicht). Zuerst zwei Stücke - der nächste Offline-Lauf
+     strich damit wieder die Anrede mit („komma neue apps" statt „komma setzen
+     neuer absatz"). Preis: Ein Satz, der über mehrere Pausen gesprochen wurde,
+     braucht mehrmals „Satz löschen".
+
+  **Dritte Probe (2026-09-15, 13:21), Brief ohne Versprecher:** Zwei „satz
+  löschen" im Fließtext richtig verworfen, „Kommas"-Zusammenfassung griff
+  („komma" + „setzen"). Aufgefallen:
+  - **Das echte „Diktat beenden" galt als „danach nicht still"** - beendet hat
+    nur die Rückfallebene (die freie Erkennung lieferte genau „diktat beenden").
+    Pegel werden jetzt bei jeder solchen Ablehnung protokolliert; Ursache offen,
+    nicht geraten.
+  - **Anna meldete „3 Sätze"** bei acht - gezählt wurden Erkennungsstücke. Jetzt
+    werden Satzenden gezählt.
+  - Vosk: „neuer Abschluss" statt „neuer Absatz", „kommen ersetzen" statt „komma
+    setzen" (über eine Stückgrenze, deshalb nicht zusammengefasst).
+  - Sprachsteuerung: „Brief erstellen" ist kein Befehl, und ein Vorschlag kam
+    nicht. „Sprachsteuerung beenden" kam als „welchen"/„windows", erst
+    „stoppen" ging. **Zu entscheiden:** „Brief erstellen" als zweiter Satz?
 
   **Noch offen, nicht behoben:** Ein Stück nach einer Pause beginnt immer groß
   („Ich bitte Sie, Wir diesen Betrag"); einzeln gesprochenes „Punkt setzen"

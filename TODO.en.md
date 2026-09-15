@@ -235,8 +235,26 @@ finished too, and then move down together. That way no reference breaks.
      triggers rejected that way ("punkt setzen" twice, "umsetzen"), all genuine
      commands accepted.
   5. **Without recognised punctuation "Satz löschen" deleted back to the start
-     of the text**, salutation included. Now at most the last two spoken chunks
-     (chunks consisting only of punctuation do not count).
+     of the text**, salutation included. Now at most the last spoken chunk
+     (chunks consisting only of punctuation do not count). First two chunks -
+     the next offline run again deleted the salutation with it ("komma neue
+     apps" instead of "komma setzen neuer absatz"). The price: a sentence spoken
+     across several pauses needs "Satz löschen" several times.
+
+  **Third test (2026-09-15, 13:21), letter without a slip:** two "satz löschen"
+  in running text correctly rejected, the "Kommas" merge worked ("komma" +
+  "setzen"). Noticed:
+  - **The genuine "Diktat beenden" counted as "not silent afterwards"** - only
+    the fallback ended it (the free recogniser returned exactly "diktat
+    beenden"). Levels are now logged with every such rejection; cause open, not
+    guessed.
+  - **Anna reported "3 Sätze"** for eight - recognition chunks were counted.
+    Sentence ends are counted now.
+  - Vosk: "neuer Abschluss" for "neuer Absatz", "kommen ersetzen" for "komma
+    setzen" (across a chunk boundary, therefore not merged).
+  - Voice control: "Brief erstellen" is not a command, and no suggestion came.
+    "Sprachsteuerung beenden" arrived as "welchen"/"windows", only "stoppen"
+    worked. **To decide:** "Brief erstellen" as a second phrase?
 
   **Still open, not fixed:** a chunk after a pause always starts with a capital
   ("Ich bitte Sie, Wir diesen Betrag"); a standalone "Punkt setzen" often

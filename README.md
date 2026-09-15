@@ -140,7 +140,7 @@ das Erfolg meldet, während es versagt.
   Befehlsversuchs werden vorher entfernt, und nach Absatz/Zeile wird
   großgeschrieben. **Nach der zweiten Probe:** Gegenprobe mit der freien
   Erkennung (ein einzelnes „Punkt setzen" war offline als „Satz löschen"
-  durchgegangen), höchstens zwei Stücke je Streichen, Befehlswörter nach ihrem
+  durchgegangen), höchstens ein Stück je Streichen, Befehlswörter nach ihrem
   Ende abgeschnitten („Satz wiederholen Jax"), Satzzeichen über Stückgrenzen
   („Kommas" + „Setzen").
 
