@@ -1296,7 +1296,12 @@ def notiz_schreiben(name, zeilen):
     pfad = os.path.join(NOTIZ_ORDNER, sicher + ".txt")
     with open(pfad, "a", encoding="utf-8") as f:
         for z in zeilen:
-            f.write(z + "\n")
+            # Jeder Eintrag steht ohnehin auf einer eigenen Zeile - ein "neue
+            # zeile" am Anfang (Parakeet-Test, 2026-09-15) gaebe sonst eine
+            # Leerzeile zu viel; aus "neuer absatz" wird genau eine.
+            if z.startswith("\n"):
+                z = z[1:]
+            f.write(z.rstrip(" ") + "\n")
     return pfad
 
 
@@ -1458,7 +1463,7 @@ def aeusserung_verarbeiten(name, text, satzzeichen_fertig=False):
 # erkennt jedes Stueck, das Vosk abliefert, noch einmal aus DERSELBEN Aufnahme,
 # und sein Text kommt in den Brief. Beide Texte stehen im Protokoll.
 #
-# EINGESCHALTET NUR UEBER DIE SCHALTERDATEI, und nur fuer den Brief. Modell und
+# EINGESCHALTET NUR UEBER DIE SCHALTERDATEI, fuer Brief und Notizen. Modell und
 # sherpa-onnx liegen im Messordner auf der externen Platte (eingerichtet von
 # scripts/dialos-erkenner-einrichten.sh) - im Nutzerkonto gibt es sie nicht.
 # Fehlt etwas, laeuft das Diktat wie bisher mit Vosk.
@@ -1587,8 +1592,12 @@ def diktat_fuehren(zweck, name, quelle):
     else:
         melde("  ACHTUNG: kleines Modell fehlt - Schluss nur mit Strg+C")
 
+    # Brief UND Notizen (Stephan, 2026-09-15: "Ja, Notizen auch zu Parakeet") -
+    # beides sind ganze Saetze. Der Einkaufszettel bleibt bei Vosk: Einzelne
+    # Waren traf Vosk 16 von 20, Parakeet 11 (es kippte bei Einzelwoertern ins
+    # Englische).
     parakeet = (parakeet_laden()
-                if name in BRIEF_ZIELE and os.path.exists(PARAKEET_SCHALTER) else None)
+                if name not in LISTEN_ZIELE and os.path.exists(PARAKEET_SCHALTER) else None)
     # Aufnahme der aktuellen Epoche - gleiche Zeitachse wie die Vosk-Woerter.
     epoche_audio = bytearray()
 

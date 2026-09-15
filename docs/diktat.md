@@ -873,3 +873,11 @@ Dabei gefunden und behoben:
 - **Vorlesen zählte 10 Sätze, das Diktat 8** - „12." und „Dr." zählten beim
   Vorlesen als Satzende. `dialos-notiz.py` holt jetzt `satzenden()` aus dem
   Diktat.
+
+**Notizen auch mit Parakeet** (Stephan, 2026-09-15: „Ja, Notizen auch zu
+Parakeet, Proben machen wir"). Der Parakeet-Test gilt jetzt für Brief und
+Notizen; der Einkaufszettel bleibt bei Vosk (Einzelwörter: Vosk 16 von 20,
+Parakeet 11). Offline geprüft (Michael): „10 Uhr", Kommas und Punkte gesetzt,
+„Satz löschen" strich die Notiz, „neue Zeile" am Anfang eines Eintrags gibt
+keine doppelte Leerzeile mehr. **Vor dem festen Einbau zwei Proben:** ein frei
+formulierter Brief (nicht vorgelesen) und einer mit leise laufendem Fernseher.

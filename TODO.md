@@ -286,7 +286,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     „12." und „Dr." kein Satzende. **Probe 14:47 mit Stephans Stimme: Brief
     praktisch fertig** (alle Satzzeichen, Absätze, Anrede, Gruß); Wortfehler
     Vosk 4,9 %, Parakeet 6,2 %, aber nur Parakeet liefert Satzzeichen.
-    **Zu entscheiden:** Weg 3 fest einbauen - dann Modell (465 MB) und
+    **Entschieden (Stephan):** Weg 3 für Brief und Notizen, Vosk für Befehle
+    und Einkaufszettel - **nach zwei Proben:** frei formulierter Brief, Brief
+    mit leise laufendem Fernseher. Notizen seit 15:02 im Test. Beim festen
+    Einbau: Modell (465 MB) und
     sherpa-onnx für alle Konten nach /usr/local, Paketierung und Lizenz
     (Modell CC-BY-4.0, Namensnennung) klären.
   - **„Brief als PDF speichern" am Gerät belegt (2026-09-15, 13:44)**, ebenso

@@ -849,3 +849,11 @@ Found and fixed along the way:
 - **Reading out counted 10 sentences, dictation 8** - "12." and "Dr." counted as
   sentence ends when reading out. `dialos-notiz.py` now takes `satzenden()` from
   dictation.
+
+**Notes with Parakeet as well** (Stephan, 2026-09-15: yes, notes to Parakeet
+too, and we will run the tests). The Parakeet test now covers letters and
+notes; the shopping list stays with Vosk (single words: Vosk 16 of 20, Parakeet
+11). Checked offline (Michael): "10 Uhr", commas and full stops set, "Satz
+löschen" deleted the note, "neue Zeile" at the start of an entry no longer gives
+a double blank line. **Two tests before building it in:** a freely worded letter
+(not read out) and one with a TV playing quietly.
