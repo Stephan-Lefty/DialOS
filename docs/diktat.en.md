@@ -889,3 +889,25 @@ judging by feel: "yes, agreed, build the test bench".
   TONOR TC30). Otherwise the "built-in microphone" decision stands, the command
   service is not affected. Noise floor measured (3 s, simultaneously): built-in
   with echo cancellation RMS 68, TONOR at 100 % RMS 293.
+
+**First real test case: letter into the TONOR TC30 (2026-09-15, 15:24).** On the
+device dictation hung: the TONOR's noise is 220-330, the fixed thresholds
+expected silence below 150 - "Diktat beenden" was rejected three times ("no
+speech pause before"), and the time limit never ran out because every bit of
+noise counted as a sign of life. Ended by interrupt (letter and recording were
+written). The voice arrived louder than on the built-in microphone.
+
+On the test bench, same recording, Parakeet:
+
+| State | Word errors | Punctuation wrong | End |
+|---|---|---|---|
+| before (fixed thresholds) | 9.9 % | 1 of 11 | **not recognised** |
+| threshold from noise floor | 8.5 % | 1 of 11 | recognised |
+| + split "neue Zeile" | **4.2 %** | **0 of 11** | recognised |
+
+- **Noise floor:** 5 % quantile of the last 30 s, thresholds 2.5 times that,
+  never below 150 (text) or 400 (silence around commands) - on the built-in
+  microphone practically nothing changes.
+- **Split "neue Zeile":** Vosk cut between "Zeil" and "Zeile"; Parakeet wrote
+  "neue Zeil." and "Zeile Stephan". "zeil" now counts too, and a "Zeile"/"Absatz"
+  at the start of a chunk after a break is dropped.

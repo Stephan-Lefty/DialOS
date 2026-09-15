@@ -915,3 +915,25 @@ bringt" - und auf den Vorschlag, dafür zu messen statt nach Gefühl zu urteilen
   sonst weiter, der Befehlsdienst ist nicht betroffen. Grundrauschen gemessen
   (3 s, gleichzeitig): eingebaut mit Echo-Unterdrückung RMS 68, TONOR bei 100 %
   RMS 293.
+
+**Erster echter Prüffall: Brief ins TONOR TC30 (2026-09-15, 15:24).** Am Gerät
+hing das Diktat: Das TONOR rauscht bei 220-330, die festen Schwellen erwarteten
+Stille unter 150 - „Diktat beenden" wurde dreimal verworfen („keine Sprechpause
+davor"), und die Zeitgrenze lief nie ab, weil jedes Rauschen als Lebenszeichen
+galt. Beendet per Unterbrechung (Brief und Mitschnitt wurden geschrieben).
+Die Stimme kam lauter an als am eingebauten Mikrofon.
+
+Auf dem Prüfstand, derselbe Mitschnitt, Parakeet:
+
+| Stand | Wortfehler | Satzzeichen falsch | Schluss |
+|---|---|---|---|
+| vorher (feste Schwellen) | 9,9 % | 1 von 11 | **nicht erkannt** |
+| Schwelle nach Rauschboden | 8,5 % | 1 von 11 | erkannt |
+| + geteiltes „neue Zeile" | **4,2 %** | **0 von 11** | erkannt |
+
+- **Rauschboden:** 5-%-Quantil der letzten 30 s, Schwellen das 2,5-Fache, nie
+  unter 150 (Text) bzw. 400 (Ruhe um Befehle) - am eingebauten Mikrofon bleibt
+  es praktisch beim Alten.
+- **Geteiltes „neue Zeile":** Vosk schnitt zwischen „Zeil" und „Zeile";
+  Parakeet schrieb „neue Zeil." und „Zeile Stephan". „zeil" gilt jetzt mit, und
+  ein „Zeile"/„Absatz" am Stückanfang nach einem Umbruch fällt weg.

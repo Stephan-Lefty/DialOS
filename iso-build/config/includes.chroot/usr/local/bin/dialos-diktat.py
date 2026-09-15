@@ -192,6 +192,39 @@ RUHE_MINDESTENS_S = 0.4
 BLOCK_S = 4000 / 2 / 16000.0
 
 
+# DIE SCHWELLEN RICHTEN SICH NACH DEM GEMESSENEN RAUSCHEN (2026-09-15, Pruefstand).
+# 150 fuer Text und 400 fuer die Ruhe um Befehle waren am eingebauten Mikrofon
+# mit Echo-Unterdrueckung gemessen - Rauschen dort 28 bis 68. Stephans erster
+# Brief ins USB-Tischmikrofon TONOR TC30 hing: Rauschen 220-330 (5-%-Quantil
+# 222), also NIE eine "Sprechpause" unter 150 - "Diktat beenden" wurde dreimal
+# verworfen, und weil jedes Rauschen als Lebenszeichen galt, lief auch die
+# Zeitgrenze nie ab. Die Stimme kam dabei LAUTER an (80-%-Quantil 6632).
+#
+# Jetzt: Rauschboden = 5-%-Quantil der letzten 30 s, Schwelle = das 2,5-Fache,
+# aber nie unter den bisherigen festen Werten. Am eingebauten Mikrofon aendert
+# sich damit nichts (2,5 x 68 = 170 kaum ueber 150, Befehlsruhe bleibt 400).
+RAUSCH_FENSTER_S = 30.0
+RAUSCH_QUANTIL = 0.05
+RAUSCH_FAKTOR = 2.5
+
+
+class Rauschboden:
+    def __init__(self):
+        self.werte = collections.deque(maxlen=int(RAUSCH_FENSTER_S / BLOCK_S))
+
+    def neu(self, pegel_wert):
+        self.werte.append(pegel_wert)
+
+    def boden(self):
+        if len(self.werte) < 8:
+            return 0.0
+        geordnet = sorted(self.werte)
+        return geordnet[int(len(geordnet) * RAUSCH_QUANTIL)]
+
+    def schwelle(self, mindestens):
+        return max(mindestens, RAUSCH_FAKTOR * self.boden())
+
+
 def pause_davor(verlauf, fenster_s=RUHE_FENSTER_S,
                 mindestens_s=RUHE_MINDESTENS_S, schwelle=PEGEL_SCHWELLE):
     """Lag in den letzten Sekunden eine Sprechpause?
@@ -780,12 +813,12 @@ BEFEHL_RAND_DAVOR_S = 0.25
 BEFEHL_RUHE_SCHWELLE = 400.0
 
 
-def ruhig(verlauf, von_s, bis_s):
+def ruhig(verlauf, von_s, bis_s, schwelle=BEFEHL_RUHE_SCHWELLE):
     """War es im Zeitraum [von_s, bis_s) still? verlauf = Pegel je Block ab 0 s."""
     a = max(0, int(von_s / BLOCK_S))
     b = max(a + 1, int(math.ceil(bis_s / BLOCK_S)))
     stueck = verlauf[a:b]
-    return bool(stueck) and max(stueck) < BEFEHL_RUHE_SCHWELLE
+    return bool(stueck) and max(stueck) < schwelle
 
 
 class Aeusserungen:
@@ -826,6 +859,16 @@ class Aeusserungen:
                   f"zusammengefasst: {vorher['text'].split()[-1]!r} + {erstes!r}")
             text = vorher["text"] + " " + text
             worte = list(vorher["worte"]) + list(worte)
+        # Rest eines geteilten "neue Zeile"/"neuer Absatz" am Stueckanfang (Parakeet):
+        # Endete das vorige Stueck schon mit dem Umbruch, faellt das Wort weg.
+        if (self.umschreiben is not None and self.liste and self.liste[-1]["eintraege"]
+                and self.liste[-1]["eintraege"][-1].endswith("\n")):
+            ohne = re.sub(r"^(zeile|absatz)\b[,.;:]?\s*", "", text, flags=re.IGNORECASE)
+            if ohne != text:
+                melde(f"  Rest eines geteilten Umbruchs am Stueckanfang entfernt: {text[:len(text)-len(ohne)]!r}")
+                text = ohne
+            if not text.strip():
+                return []
         eintraege = aeusserung_verarbeiten(self.name, text, self.umschreiben is not None)
         self.liste.append({"epoche": epoche, "worte": list(worte), "eintraege": eintraege,
                            "text": text})
@@ -1560,7 +1603,9 @@ def parakeet_natuerlich(text):
     # ("Gruessen, neue Zeile, Stefan" -> "Gruessen\nStefan").
     text = re.sub(r"\s*\bneuer\s*[,.]?\s*absatz\b[,;:.!?]*\s*", "\n\n", text,
                   flags=re.IGNORECASE)
-    text = re.sub(r"[,;]?\s*\bneue\s*[,.]?\s*zeile\b[,;:.!?]*\s*", "\n", text,
+    # "zeil" auch: Am 2026-09-15 (TONOR) teilte Vosk genau in "neue Zeile" -
+    # Parakeet schrieb "neue Zeil." und im naechsten Stueck "Zeile Stephan".
+    text = re.sub(r"[,;]?\s*\bneue\s*[,.]?\s*zeile?\b[,;:.!?]*\s*", "\n", text,
                   flags=re.IGNORECASE)
     # Die Anrede endet mit Komma, auch wenn Parakeet keins oder einen Punkt setzte.
     text = re.sub(r"^((?:sehr geehrte|liebe|lieber|hallo)\b[^\n.,]*)[.]?\n\n", r"\1,\n\n",
@@ -1729,6 +1774,7 @@ def diktat_fuehren(zweck, name, quelle):
         # jeder Aeusserung gehoert. Er beantwortet eine andere Frage: War es
         # kurz vorher still?
         pegel_verlauf = collections.deque(maxlen=int(RUHE_FENSTER_S / BLOCK_S) + 8)
+        rauschen = Rauschboden()
         # Pegel je Block ab dem Start des aktuellen Erkenner-Paars - fuer die
         # Ruhe vor und nach einem Befehl, gemessen an den Wort-Zeitmarken.
         # Nach jedem Befehl beginnen beide Erkenner neu, dann auch dieser Verlauf.
@@ -1760,6 +1806,9 @@ def diktat_fuehren(zweck, name, quelle):
                 mitschnitt.extend(block)
             pegel_verlauf.append(pegel_puffer[-1])
             zeitverlauf.append(pegel_puffer[-1])
+            rauschen.neu(pegel_puffer[-1])
+            text_schwelle = rauschen.schwelle(PEGEL_SCHWELLE)
+            ruhe_schwelle = rauschen.schwelle(BEFEHL_RUHE_SCHWELLE)
             if parakeet is not None:
                 epoche_audio.extend(block)
 
@@ -1771,7 +1820,7 @@ def diktat_fuehren(zweck, name, quelle):
                     >= befehl_offen["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S):
                 b, befehl_offen = befehl_offen, None
                 if not ruhig(zeitverlauf, b["ende"] + BEFEHL_RAND_S,
-                             b["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S):
+                             b["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S, ruhe_schwelle):
                     # Mit Pegeln (2026-09-15): Stephans echtes "Diktat beenden" wurde
                     # so verworfen - beendet hat nur die Rueckfallebene der freien
                     # Erkennung. Ohne Zahlen ist nicht zu sagen, ob das Wortende zu
@@ -1875,7 +1924,7 @@ def diktat_fuehren(zweck, name, quelle):
                     if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
                         melde(f"  {gehoert!r} verworfen - Woerter nicht zusammenhaengend ({luecke:.2f} s)")
                     elif not ruhig(zeitverlauf, anfang - BEFEHL_RAND_DAVOR_S - BEFEHL_RUHE_DAVOR_S,
-                                   anfang - BEFEHL_RAND_DAVOR_S):
+                                   anfang - BEFEHL_RAND_DAVOR_S, ruhe_schwelle):
                         # Mit Pegeln: Am 2026-09-15 wurde ein echtes "Satz
                         # wiederholen" nach fuenf Sekunden Pause so verworfen, und
                         # ohne Zahlen war nicht zu sagen, was davor laut war.
@@ -1892,17 +1941,17 @@ def diktat_fuehren(zweck, name, quelle):
                     # ZU LEISE IST KEIN SCHLUSS - ein Stoergeraeusch hat nicht den
                     # Pegel einer Stimme. Dieselbe Schwelle wie bei der freien
                     # Erkennung weiter unten.
-                    if mittel < PEGEL_SCHWELLE:
+                    if mittel < text_schwelle:
                         melde(f"  Schluss {gehoert!r} verworfen - zu leise "
-                              f"(Pegel {mittel:.0f} unter {PEGEL_SCHWELLE:.0f})")
+                              f"(Pegel {mittel:.0f} unter {text_schwelle:.0f})")
                         continue
                     # KEIN SCHLUSS OHNE SPRECHPAUSE DAVOR - siehe pause_davor().
                     # Das ist die Regel, die die vier vorherigen Reparaturen nicht
                     # geschafft haben: Bruchstuecke entstehen MITTEN im Redefluss, ein
                     # echtes 'Diktat beenden' folgt auf eine Pause.
-                    if not pause_davor(pegel_verlauf):
+                    if not pause_davor(pegel_verlauf, schwelle=text_schwelle):
                         melde(f"  Schluss {gehoert!r} verworfen - keine Sprechpause davor "
-                              f"(Pegel {mittel:.0f})")
+                              f"(Pegel {mittel:.0f}, Pausen-Schwelle {text_schwelle:.0f})")
                         continue
                     luecke = schluss_luecke(ergebnis_schluss.get("result", []))
                     if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
@@ -1968,7 +2017,7 @@ def diktat_fuehren(zweck, name, quelle):
                     #
                     # Dieselbe Schwelle wie ueberall: Was zu leise fuer den Text ist, ist
                     # auch zu leise, um als Lebenszeichen zu gelten.
-                    if mittel >= PEGEL_SCHWELLE:
+                    if mittel >= text_schwelle:
                         letzte_aeusserung = time.time()
 
             if not erkenner.AcceptWaveform(block):
@@ -1985,7 +2034,7 @@ def diktat_fuehren(zweck, name, quelle):
             # (Aeusserungen.ab_zeit_entfernen).
             if not text:
                 continue
-            if mittel < PEGEL_SCHWELLE:
+            if mittel < text_schwelle:
                 # Protokolliert und nicht stillschweigend verworfen: Faellt hier
                 # echte Sprache hinein, sieht man es sofort - und die Schwelle
                 # gehoert dann nach unten.
