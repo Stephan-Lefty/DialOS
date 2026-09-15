@@ -32,7 +32,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 
 | Sprachbefehl | Aktion |
 |---|---|
-| **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre Dir zu." Läuft sie schon: „Ich höre Dir schon zu." Öffnet zugleich das [Mitschrift-Fenster](Debian-zu-DialOS.md) für sehende Zuschauer - einmal, nicht bei jedem Befehl. |
+| **„Sprachsteuerung starten"** | Schaltet die Befehlserkennung ein, Antwort: „Ich höre Dir zu." Läuft sie schon: „Ich höre Dir schon zu." Öffnet zugleich das [Mitschrift-Fenster](Debian-zu-DialOS.md) für sehende Zuschauer - einmal, nicht bei jedem Befehl. **Gilt nur mit Stille danach**; ist es nicht still, wird das erste Mal lautlos verworfen, erst ein zweites Mal binnen 20 s bekommt „… es ist zu laut …" (seit 2026-09-15 - vorher kam die Ansage auch bei Geräuschen, die niemand gesagt hatte). Nach dem Anmelden ist die Sprachsteuerung in Bereitschaft; die Begrüßung nennt diesen Satz. |
 | **„Sprachsteuerung stoppen"** | Schaltet sie wieder aus, Antwort: „Ich höre Dir nicht mehr zu." Von selbst geschieht das nach **30 Sekunden**, wenn überhaupt kein Befehl kam, und nach **zwei Minuten** im laufenden Gespräch - mit unterschiedlicher Ansage: die lange Begründung nur dann, wenn wirklich ein Gespräch lief. Das Mitschrift-Fenster geht in beiden Fällen mit zu. |
 | „auf Windows umschalten" | Schaltet den Schreibtisch auf die Windows-11-Optik um (Taskleiste unten, Startmenü links, Fensterknöpfe rechts). Antwort: „Windows Desktop." Steht er schon so: „Der Schreibtisch steht schon auf Windows Desktop." |
 | „auf Linux umschalten" | Schaltet zurück auf den GNOME-Standard. Antwort: „Linux Desktop." bzw. „Der Schreibtisch steht schon auf Linux Desktop." |

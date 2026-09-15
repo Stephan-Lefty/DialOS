@@ -129,6 +129,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **„… zu laut …" erst beim zweiten Mal, Begrüßung nennt das Einschalten**
+  (2026-09-15). Stephan: Die Ansage kam ständig, „und niemand hat
+  Sprachsteuerung gesagt!" - Geräusche ergaben den Einschaltsatz, die
+  Stille-Prüfung schaltete richtig nicht ein, erst die Ansage störte. Jetzt
+  wird das erste Mal still verworfen (nachgerechnet: zwei statt acht Ansagen am
+  Tag). Die Begrüßung endet mit „Wenn Du etwas möchtest, sage: Sprachsteuerung
+  starten." - nach dem Start bleibt sie bewusst in Bereitschaft.
+
 - **Dateinamen mit Datum und Uhrzeit** (2026-09-15, Stephans Vorgabe: „nicht
   Brief.pdf ... sondern immer noch das Datum und die Uhrzeit ... wegen der
   Suche"). `2026-09-15-1343-Brief.txt/.pdf`, `2026-09-14-1018-Bildschirmfoto.png`,

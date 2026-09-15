@@ -434,6 +434,17 @@ ANSAGE_ZU_LAUT = ("Ich habe Sprachsteuerung starten gehört, aber es ist zu laut
 # 13 Einschaltsaetzen des Tages: Die neue Fassung aendert nur diesen einen Fall;
 # jeder Film-Verlauf hat mindestens zwei laute Bloecke danach.
 ZU_LAUT_ABSTAND_S = 15.0
+# DIE ANSAGE ERST BEIM ZWEITEN MAL (Stephan, 2026-09-15: "die Sprachsteuerung
+# meldet sich immer mit dem Hinweis ... zu laut" - "und niemand hat
+# Sprachsteuerung gesagt!"). An dem Tag achtmal: Jedes Mal hatte ein Geraeusch
+# den ganzen Einschaltsatz ergeben, und die Stille-Pruefung hat richtig NICHT
+# eingeschaltet - erst die Ansage machte aus dem abgewehrten Fehlalarm eine
+# Stoerung. Jetzt wird das erste Mal still verworfen. Wer wirklich einschalten
+# will und keine Antwort bekommt, sagt es noch einmal; zwei ganze Einschaltsaetze
+# aus Geraeusch binnen 20 s sind selten. Nachgerechnet an den zehn Ablehnungen
+# vom 2026-09-15 (acht davon mit Ansage): Sie waere zweimal gekommen - bei drei
+# Einschaltsaetzen binnen 37 s (10:51:31, 10:51:49, 10:52:08).
+ZU_LAUT_WIEDERHOLUNG_S = 20.0
 STILLE_DANACH_AUSSCHLAEGE = 1
 
 
@@ -1354,6 +1365,7 @@ def main():
     leer_zeiten = collections.deque()
     pegel_verlauf = collections.deque(maxlen=PEGEL_VERLAUF_BLOECKE)
     zu_laut_gesagt = 0.0
+    zu_laut_verworfen = 0.0
     # Gleich gesetzt: Es kam noch kein Befehl. Bewegt sich
     # letzte_aktivitaet spaeter darueber hinaus, war einer dabei - daran
     # haengt, welche der beiden Fristen gilt.
@@ -1614,9 +1626,13 @@ def main():
                 melde("  Einschaltsatz verworfen - danach nicht still "
                       f"(letzte {STILLE_DANACH_BLOECKE} Bloecke bis "
                       f"{max(list(pegel_verlauf)[-STILLE_DANACH_BLOECKE:])})")
-                if time.time() - zu_laut_gesagt > ZU_LAUT_ABSTAND_S:
-                    zu_laut_gesagt = time.time()
+                jetzt = time.time()
+                if jetzt - zu_laut_verworfen > ZU_LAUT_WIEDERHOLUNG_S:
+                    melde("  (erstes Mal - still verworfen, siehe ZU_LAUT_WIEDERHOLUNG_S)")
+                elif jetzt - zu_laut_gesagt > ZU_LAUT_ABSTAND_S:
+                    zu_laut_gesagt = jetzt
                     sprich(ANSAGE_ZU_LAUT)
+                zu_laut_verworfen = jetzt
                 continue
 
             if (ist_phrase(satz, STARTSATZ, ("sprachsteuerung", "starten"))

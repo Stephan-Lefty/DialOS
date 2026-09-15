@@ -121,6 +121,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **"… zu laut …" only the second time, greeting names how to switch on**
+  (2026-09-15). Stephan: the announcement came constantly, "and nobody said
+  Sprachsteuerung!" - noises produced the start sentence, the silence check
+  correctly did not switch on, only the announcement disturbed. Now the first
+  time is rejected silently (recomputed: two instead of eight announcements that
+  day). The greeting ends with "Wenn Du etwas möchtest, sage: Sprachsteuerung
+  starten." - after start-up it deliberately stays on standby.
+
 - **File names with date and time** (2026-09-15, Stephan's requirement: not
   "Brief.pdf" but always date and time, "for searching").
   `2026-09-15-1343-Brief.txt/.pdf`, `2026-09-14-1018-Bildschirmfoto.png`, `-2`

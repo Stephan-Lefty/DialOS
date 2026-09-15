@@ -724,6 +724,9 @@ def update_meldung():
     spd_say(UPDATE_SATZ)
 
 
+SPRACHBEFEHL_DIENST = "/usr/local/bin/dialos-sprachbefehl-desktop.py"
+
+
 def main():
     alte_instanz_beenden()
 
@@ -806,6 +809,13 @@ def main():
             "Internetverbindung her."
         )
 
+    # HINWEIS AUF DAS EINSCHALTEN (Stephan, 2026-09-15). Die Sprachsteuerung
+    # startet bewusst in Bereitschaft, nicht eingeschaltet - sonst loesen
+    # Gespraech und Fernseher Befehle aus (14.09.). Damit ein Nutzer ohne
+    # Handbuch weiss, wie es losgeht, sagt es die Begruessung. Nur wenn es den
+    # Dienst gibt: einen Satz zu nennen, der nichts tut, waere schlimmer.
+    if os.path.exists(SPRACHBEFEHL_DIENST):
+        text += " Wenn Du etwas möchtest, sage: Sprachsteuerung starten."
     text += " Ich wünsche Dir einen schönen Tag!"
 
     if lautstaerke_prozent > 0:

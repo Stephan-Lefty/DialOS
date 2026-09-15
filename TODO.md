@@ -137,6 +137,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     VOR dem Satz, oder nur bei genau zwei Wörtern ohne weitere Fetzen. Die
     60-s-Sperre war am 14.09. gerade wegen eines stummen Fehlschlags auf 15 s
     gesenkt worden - beides gegeneinander abwägen.
+    **Entschieden 2026-09-15 (Stephan: „meldet sich immer mit dem Hinweis …
+    zu laut" - „und niemand hat Sprachsteuerung gesagt!"):** Das erste Mal
+    wird still verworfen, die Ansage kommt erst, wenn der Satz binnen 20 s
+    erneut verworfen wird. An den zehn Ablehnungen des Tages nachgerechnet:
+    zwei Ansagen statt acht (beide beim Vorlesen um 10:51). Dazu nennt die
+    Begrüßung jetzt „Wenn Du etwas möchtest, sage: Sprachsteuerung starten." -
+    die Sprachsteuerung startet bewusst in Bereitschaft, nicht eingeschaltet.
+    Wirksam nach dem nächsten Anmelden; Hörproben der Begrüßung nicht
+    nachgezogen.
   - **Verworfen vorerst: Mindestlautstärke für Befehle.** Spitzen am
     2026-09-14: Stephans Befehle 47 x, leisester 7810; Film 76 x, Median
     24188, nur 5 leise Fetzen unter 3000; Gespräch 253 x, leisester 4162.

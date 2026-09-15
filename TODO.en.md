@@ -137,6 +137,14 @@ finished too, and then move down together. That way no reference breaks.
     BEFORE the sentence, or only for exactly two words without further
     fragments. The 60 s lock was lowered to 15 s on 09-14 precisely because of
     a silent failure - weigh both.
+    **Decided 2026-09-15 (Stephan: it "always" announces "… zu laut" - "and
+    nobody said Sprachsteuerung!"):** the first time is rejected silently; the
+    announcement only comes if the sentence is rejected again within 20 s.
+    Recomputed on the ten rejections of that day: two announcements instead of
+    eight (both while reading aloud at 10:51). The greeting now also says
+    "Wenn Du etwas möchtest, sage: Sprachsteuerung starten." - voice control
+    deliberately starts on standby, not switched on. Effective after the next
+    login; audio samples of the greeting not updated.
   - **Set aside for now: minimum loudness for commands.** Peaks on
     2026-09-14: Stephan's commands 47 times, quietest 7810; film 76 times,
     median 24188, only 5 quiet fragments below 3000; conversation 253 times,
