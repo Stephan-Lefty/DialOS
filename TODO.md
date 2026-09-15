@@ -156,6 +156,38 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine
     Taste liefert, die sich abgreifen lässt (Medientaste über Bluetooth AVRCP).
 
+- [ ] **Versprecher im Diktat: „Satz löschen" und „Satz wiederholen" - gebaut,
+  offline geprüft, Probe mit echter Stimme steht aus** (Stephan am 2026-09-15:
+  „wie bauen wir 'Versprecher' ein, also das die Sprachsteuerung weiß, das ich
+  einen Satz neu einsprechen muss"; seine Wahl: „Satz löschen", dazu „Satz
+  wiederholen").
+
+  **Aufbau:** Beide Sätze stehen in der Grammatik des kleinen Schluss-Erkenners.
+  Das Diktat merkt sich jede Äußerung als Einheit mit Wort-Zeitmarken
+  (`Aeusserungen`). „Satz löschen" streicht die letzte und sagt „Gestrichen:
+  …", „Satz wiederholen" liest sie vor („Zuletzt: …"). Während Anna antwortet,
+  wird mitgelesen und verworfen, danach beginnen beide Erkenner neu.
+
+  **Sicherungen, alle gemessen:** Gegen Piper ergab normaler Brieftext ein
+  zusammenhängendes „satz wiederholen" und „satz löschen". Getrennt hat die
+  Ruhe - echter Befehl: 0,5 s davor/danach still (Spitze 24/18 und 1), Fehler:
+  laut (32653/22769, 27990/22874). Deshalb: genau zwei Wörter, höchstens 0,6 s
+  Lücke, 0,4 s Ruhe davor, 0,5 s Ruhe danach, mit 0,15 s Abstand zu den
+  Wortmarken (ohne den Abstand galt ein echter Befehl als „danach nicht
+  still" - Vosk setzt das Wortende etwas zu früh). Befehlswörter werden erst
+  bei Bestätigung aus dem Text genommen.
+
+  **Dabei am Schluss mitgeändert:** Auch „Diktat beenden" wartet jetzt auf
+  Ruhe danach, und nach jedem Befehl gilt die 3-s-Sperrfrist neu. Anlass: Im
+  Offline-Test machte das frische kleine Modell nach „Satz löschen" aus „die
+  Rechnung liegt dem Schreiben bei" ein „diktat beenden" (0,41 s Lücke) - und
+  am Vormittag „bis Ende des Monats".
+
+  **Offline in Echtzeit durch das echte Diktat geprüft** (Michael, nachgebildetes
+  Mikrofon): zwei Fehlauslöser verworfen, Versprecher gestrichen und angesagt,
+  „Satz wiederholen" las den letzten Satz ohne Löschen, Schluss sauber, keine
+  Befehlswörter im Brief.
+
 - [ ] **Brief in DialOS eingesprochen (2026-09-15, 11:46) - drei Programmfehler
   gefunden und behoben, Beweis mit vollständigem Brief steht aus.** Rückfrage
   „ja" beim ersten Versuch; Diktat nach Brief-Vorlage mit gesprochenen

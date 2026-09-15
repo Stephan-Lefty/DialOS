@@ -121,6 +121,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **"Satz löschen" and "Satz wiederholen" in dictation** (2026-09-15, Stephan's
+  wish). A slip of the tongue can be removed ("Gestrichen: …"), the last
+  recognised text read back ("Zuletzt: …"). Both only count with silence before
+  and after - against Piper they otherwise arose from ordinary letter text.
+  "Diktat beenden" now also waits for silence afterwards. Checked offline in
+  real time through the real dictation.
+
 - **Letter dictation: three bugs from the first complete letter fixed**
   (2026-09-15). A "diktat … beenden" with a 1.24 s gap (from "bis Ende") ended
   dictation mid-text - the words now have to follow each other directly.

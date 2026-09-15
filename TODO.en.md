@@ -158,6 +158,37 @@ finished too, and then move down together. That way no reference breaks.
     or a headset provides a key that can be read (media key via Bluetooth
     AVRCP).
 
+- [ ] **Slips of the tongue in dictation: "Satz löschen" and "Satz
+  wiederholen" - built, checked offline, test with a real voice pending**
+  (Stephan on 2026-09-15 asked how dictation can know that a sentence has to
+  be spoken again; his choice: "Satz löschen", plus "Satz wiederholen").
+
+  **Design:** both sentences are in the grammar of the small closing-phrase
+  recogniser. Dictation keeps every utterance as a unit with word timestamps
+  (`Aeusserungen`). "Satz löschen" removes the last one and says "Gestrichen:
+  …", "Satz wiederholen" reads it out ("Zuletzt: …"). While Anna answers, audio
+  is read and discarded, then both recognisers start afresh.
+
+  **Safeguards, all measured:** against Piper, ordinary letter text produced a
+  connected "satz wiederholen" and "satz löschen". Silence separated them -
+  genuine command: silent 0.5 s before/after (peak 24/18 and 1), errors: loud
+  (32653/22769, 27990/22874). Therefore: exactly two words, gap at most 0.6 s,
+  0.4 s silence before, 0.5 s silence after, with a 0.15 s margin to the word
+  timestamps (without it a genuine command counted as "not silent afterwards" -
+  Vosk sets the word end slightly early). Command words are only removed from
+  the text once confirmed.
+
+  **Changed at the closing phrase along the way:** "Diktat beenden" now also
+  waits for silence afterwards, and the 3 s lock applies again after every
+  command. Reason: in the offline test the fresh small model turned "die
+  Rechnung liegt dem Schreiben bei" into "diktat beenden" (0.41 s gap) right
+  after "Satz löschen" - and in the morning "bis Ende des Monats".
+
+  **Checked offline in real time through the real dictation** (Michael,
+  simulated microphone): two false triggers rejected, slip deleted and
+  announced, "Satz wiederholen" read the last sentence without deleting,
+  clean end, no command words in the letter.
+
 - [ ] **Letter dictated in DialOS (2026-09-15, 11:46) - three program bugs
   found and fixed, proof with a complete letter still pending.**
   Confirmation "ja" on the first attempt; dictation from the letter template

@@ -129,6 +129,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **„Satz löschen" und „Satz wiederholen" im Diktat** (2026-09-15, Stephans
+  Wunsch). Ein Versprecher lässt sich streichen („Gestrichen: …"), das zuletzt
+  Erkannte vorlesen („Zuletzt: …"). Beide gelten nur mit Ruhe davor und danach -
+  gegen Piper entstanden sie sonst aus normalem Brieftext. Auch „Diktat
+  beenden" wartet jetzt auf Ruhe danach. Offline in Echtzeit durch das echte
+  Diktat geprüft.
+
 - **Brief-Diktat: drei Fehler aus dem ersten ganzen Brief behoben** (2026-09-15).
   Ein „diktat … beenden" mit 1,24 s Lücke (aus „bis Ende") beendete das Diktat
   mitten im Text - die Wörter müssen jetzt unmittelbar aufeinander folgen.

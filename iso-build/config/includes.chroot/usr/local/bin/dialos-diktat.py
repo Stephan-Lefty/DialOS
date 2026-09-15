@@ -93,7 +93,21 @@ SCHLUSSSATZ = "diktat beenden"
 # "Ignoring word missing in vocabulary" - fuer JEDES Wort mit Umlaut oder ß.
 # Genau daraus entstanden die Befunde "spaeter", "loeschen", "zuruecksetzen"
 # und "aufraeumen fehlen im Wortschatz". Sie fehlen nicht.
-GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, "[unk]"], ensure_ascii=False)
+#
+# "SATZ LOESCHEN" UND "SATZ WIEDERHOLEN" (Stephan, 2026-09-15: "wie bauen wir
+# 'Versprecher' ein, also das die Sprachsteuerung weiss, das ich einen Satz neu
+# einsprechen muss"). Sie laufen ueber denselben kleinen Erkenner wie der
+# Schluss. Gegen Piper geprueft: Beide werden mit Anna und Michael erkannt -
+# aber auch aus normalem Text: "Ich bitte Sie, mir diesen Betrag zu erstatten.
+# Die Rechnung liegt ..." ergab ein zusammenhaengendes "satz wiederholen", "Den
+# ersten Satz habe ich geloescht" ein "satz loeschen". Getrennt hat sie die
+# Stille: Beim echten Befehl war es 0,5 s davor und danach still (Spitze 24 und
+# 1), bei beiden Fehlausloesern laut (32653/22769 und 27990/22874). Deshalb
+# gelten die Befehle nur mit Ruhe davor UND danach - siehe BEFEHL_*.
+BEFEHL_LOESCHEN = "satz löschen"
+BEFEHL_WIEDERHOLEN = "satz wiederholen"
+GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, "[unk]"],
+                               ensure_ascii=False)
 SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 
 # SPERRFRIST FUER DEN SCHLUSS (2026-08-21). Am selben Tag endete ein Diktat
@@ -699,6 +713,79 @@ SCHLUSS_HOECHSTENS_S = 2.0
 # fuer ein langsames "Diktat - beenden".
 SCHLUSS_LUECKE_MAX_S = 0.6
 
+# Ruhe vor und nach "Satz loeschen"/"Satz wiederholen" (Messung bei
+# GRAMMATIK_SCHLUSS). Davor 0,4 s wie beim Schluss (RUHE_MINDESTENS_S), danach
+# 0,5 s - wer einen Befehl gibt, wartet auf die Antwort.
+BEFEHL_RUHE_DAVOR_S = 0.4
+BEFEHL_RUHE_DANACH_S = 0.5
+# Woerter der freien Erkennung, die so kurz vor dem Befehl beginnen, gehoeren
+# zum Befehl (dasselbe Mass wie SCHLUSS_SPIELRAUM_S beim Schluss).
+BEFEHL_SPIELRAUM_S = 0.35
+# ABSTAND ZU DEN WORTMARKEN beim Pruefen der Ruhe. Offline gefunden, bevor
+# Stephan testen musste: Vosk setzte das Ende von "loeschen" auf 4,23 s, das
+# Wort klang aber bis 4,25 s aus - in den Block ab 4,125 s (Pegel 2615). Ohne
+# Abstand galt der echte Befehl als "danach nicht still".
+BEFEHL_RAND_S = 0.15
+
+
+def ruhig(verlauf, von_s, bis_s):
+    """War es im Zeitraum [von_s, bis_s) still? verlauf = Pegel je Block ab 0 s."""
+    a = max(0, int(von_s / BLOCK_S))
+    b = max(a + 1, int(math.ceil(bis_s / BLOCK_S)))
+    stueck = verlauf[a:b]
+    return bool(stueck) and max(stueck) < PEGEL_SCHWELLE
+
+
+class Aeusserungen:
+    """Das Diktat als Folge von Aeusserungen - damit sich die letzte streichen laesst.
+
+    Jede Aeusserung behaelt ihre Woerter mit Zeitmarken (je Erkenner-Durchgang,
+    "epoche") und die Eintraege, die daraus geworden sind. Vorher war das Diktat
+    nur eine flache Liste von Eintraegen; welcher Eintrag zu welcher Aeusserung
+    gehoerte - bei Listen koennen es mehrere sein -, war nicht mehr zu sagen.
+    """
+
+    def __init__(self, name):
+        self.name = name
+        self.liste = []          # dicts: epoche, worte, eintraege
+
+    def hinzu(self, epoche, worte, text=None):
+        text = text if text is not None else " ".join(w["word"] for w in worte)
+        if not text.strip():
+            return []
+        eintraege = aeusserung_verarbeiten(self.name, text)
+        self.liste.append({"epoche": epoche, "worte": list(worte), "eintraege": eintraege})
+        return eintraege
+
+    def ab_zeit_entfernen(self, epoche, ab_s):
+        """Entfernt alle Woerter dieser Epoche, die ab ab_s beginnen (Befehlswoerter)."""
+        while self.liste and self.liste[-1]["epoche"] == epoche and self.liste[-1]["worte"]:
+            letzte = self.liste[-1]
+            bleiben = [w for w in letzte["worte"] if w.get("start", 0) < ab_s]
+            if len(bleiben) == len(letzte["worte"]):
+                return
+            self.liste.pop()
+            if bleiben:
+                melde(f"  Befehlswoerter aus der Aeusserung entfernt, bleibt: "
+                      f"{' '.join(w['word'] for w in bleiben)!r}")
+                self.hinzu(epoche, bleiben)
+                return
+            melde("  Aeusserung bestand nur aus Befehlswoertern - entfernt")
+
+    def letzte_entfernen(self):
+        return self.liste.pop()["eintraege"] if self.liste else None
+
+    def letzte(self):
+        return self.liste[-1]["eintraege"] if self.liste else None
+
+    def eintraege(self):
+        return [e for a in self.liste for e in a["eintraege"]]
+
+
+def zum_vorlesen(eintraege):
+    text = " ".join(" ".join(e.split()) for e in eintraege)
+    return text if len(text) <= 300 else text[:300].rsplit(" ", 1)[0] + " ..."
+
 
 def schluss_luecke(worte):
     """Luecke zwischen "diktat" und "beenden" in Sekunden, oder None."""
@@ -1048,6 +1135,7 @@ def diktat_fuehren(zweck, name, quelle):
 
     prozess = None
     gesammelt = []
+    aeusserungen = Aeusserungen(name)
     letzte_aeusserung = time.time()
     # Wo der Schlusssatz in der Aufnahme BEGINNT, in Sekunden. Beide Erkenner
     # bekommen dieselben Bloecke vom selben Anfang an, ihre Zeitmarken sind
@@ -1074,6 +1162,12 @@ def diktat_fuehren(zweck, name, quelle):
         # jeder Aeusserung gehoert. Er beantwortet eine andere Frage: War es
         # kurz vorher still?
         pegel_verlauf = collections.deque(maxlen=int(RUHE_FENSTER_S / BLOCK_S) + 8)
+        # Pegel je Block ab dem Start des aktuellen Erkenner-Paars - fuer die
+        # Ruhe vor und nach einem Befehl, gemessen an den Wort-Zeitmarken.
+        # Nach jedem Befehl beginnen beide Erkenner neu, dann auch dieser Verlauf.
+        zeitverlauf = []
+        epoche = 0
+        befehl_offen = None
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -1092,6 +1186,65 @@ def diktat_fuehren(zweck, name, quelle):
                 continue
             pegel_puffer.append(pegel(block))
             pegel_verlauf.append(pegel_puffer[-1])
+            zeitverlauf.append(pegel_puffer[-1])
+
+            # EIN BEFEHL WARTET AUF SEINE RUHE DANACH. Erst wenn die halbe
+            # Sekunde nach dem letzten Befehlswort aufgenommen ist, wird
+            # entschieden - bis dahin laeuft alles normal weiter, nichts geht
+            # verloren.
+            if (befehl_offen and len(zeitverlauf) * BLOCK_S
+                    >= befehl_offen["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S):
+                b, befehl_offen = befehl_offen, None
+                if not ruhig(zeitverlauf, b["ende"] + BEFEHL_RAND_S,
+                             b["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S):
+                    melde(f"  {b['satz']!r} verworfen - danach nicht still (Fliesstext)")
+                elif b["satz"] == SCHLUSSSATZ:
+                    melde(f"  Schlusssatz erkannt (kleines Modell): {b['gehoert']!r} "
+                          f"nach {b['seit_start']:.1f} s, "
+                          f"{anzahl_aeusserungen} Aeusserungen, Pegel {b['mittel']:.0f}")
+                    schluss_beginn = schluss_beginn_aus(b["worte"])
+                    if schluss_beginn is not None:
+                        aeusserungen.ab_zeit_entfernen(epoche, schluss_beginn - SCHLUSS_SPIELRAUM_S)
+                    melde("  Schlusssatz mit Zeiten: " + ", ".join(
+                        f"{w.get('word')} {w.get('start', 0):.2f}-{w.get('end', 0):.2f}"
+                        for w in b["worte"])
+                          + (f" | Beginn {schluss_beginn:.2f}" if schluss_beginn is not None else ""))
+                    break
+                else:
+                    try:
+                        rest = json.loads(erkenner.FinalResult())
+                        if rest.get("result"):
+                            aeusserungen.hinzu(epoche, rest["result"])
+                    except Exception as fehler:
+                        melde(f"  Rest vor dem Befehl nicht lesbar: {fehler}")
+                    aeusserungen.ab_zeit_entfernen(epoche, b["start"] - BEFEHL_SPIELRAUM_S)
+                    if b["satz"] == BEFEHL_LOESCHEN:
+                        weg = aeusserungen.letzte_entfernen()
+                        melde(f"  SATZ LOESCHEN: gestrichen {weg!r}")
+                        antwort = (f"Gestrichen: {zum_vorlesen(weg)}" if weg
+                                   else "Es gibt noch nichts zu streichen.")
+                    else:
+                        zuletzt = aeusserungen.letzte()
+                        melde(f"  SATZ WIEDERHOLEN: {zuletzt!r}")
+                        antwort = (f"Zuletzt: {zum_vorlesen(zuletzt)}" if zuletzt
+                                   else "Ich habe noch nichts geschrieben.")
+                    # Waehrend der Antwort mitlesen und verwerfen, danach beide
+                    # Erkenner frisch - die eigene Stimme soll nicht im Text landen.
+                    vorrat = sprechen_bei_offener_aufnahme(antwort, prozess)
+                    erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
+                    erkenner.SetWords(True)
+                    schluss = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_SCHLUSS)
+                    schluss.SetWords(True)
+                    epoche += 1
+                    zeitverlauf = []
+                    pegel_puffer = []
+                    letzte_aeusserung = time.time()
+                    # Die Sperrfrist fuer den Schluss gilt nach jedem Befehl neu:
+                    # Offline gefunden - direkt nach "Satz loeschen" machte das
+                    # frische kleine Modell aus "die Rechnung liegt dem Schreiben
+                    # bei" ein "diktat beenden" (0,41 s Luecke) nach 1,9 s.
+                    aufnahme_seit = time.time()
+                    continue
 
             # ZUERST den Schluss-Erkenner fragen. Er bekommt denselben
             # Block; wer zuerst fertig ist, ist unerheblich - entscheidend
@@ -1102,6 +1255,19 @@ def diktat_fuehren(zweck, name, quelle):
                 gehoert = ergebnis_schluss.get("text", "").strip()
                 mittel = ((sum(pegel_puffer) / len(pegel_puffer))
                           if pegel_puffer else 0.0)
+                worte_befehl = ergebnis_schluss.get("result", [])
+                if gehoert in (BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN) and len(worte_befehl) == 2:
+                    luecke = schluss_luecke(worte_befehl)
+                    anfang, ende = worte_befehl[0].get("start", 0), worte_befehl[1].get("end", 0)
+                    if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
+                        melde(f"  {gehoert!r} verworfen - Woerter nicht zusammenhaengend ({luecke:.2f} s)")
+                    elif not ruhig(zeitverlauf, anfang - BEFEHL_RAND_S - BEFEHL_RUHE_DAVOR_S,
+                                   anfang - BEFEHL_RAND_S):
+                        melde(f"  {gehoert!r} verworfen - davor nicht still")
+                    else:
+                        melde(f"  {gehoert!r} erkannt ({anfang:.2f}-{ende:.2f} s) - warte auf Ruhe danach")
+                        befehl_offen = {"satz": gehoert, "start": anfang, "ende": ende}
+                    continue
                 if ist_schluss(gehoert):
                     # ZU LEISE IST KEIN SCHLUSS - ein Stoergeraeusch hat nicht den
                     # Pegel einer Stimme. Dieselbe Schwelle wie bei der freien
@@ -1130,15 +1296,19 @@ def diktat_fuehren(zweck, name, quelle):
                         melde(f"  Schluss {gehoert!r} nach nur {seit_start:.1f} s "
                               f"- Sperrfrist, wird verworfen")
                         continue
-                    melde(f"  Schlusssatz erkannt (kleines Modell): {gehoert!r} "
-                          f"nach {seit_start:.1f} s, "
-                          f"{anzahl_aeusserungen} Aeusserungen, Pegel {mittel:.0f}")
-                    schluss_beginn = schluss_beginn_aus(ergebnis_schluss.get("result", []))
-                    melde("  Schlusssatz mit Zeiten: " + ", ".join(
-                        f"{w.get('word')} {w.get('start', 0):.2f}-{w.get('end', 0):.2f}"
-                        for w in ergebnis_schluss.get("result", []))
-                          + (f" | Beginn {schluss_beginn:.2f}" if schluss_beginn is not None else ""))
-                    break
+                    # AUCH DER SCHLUSS WARTET AUF RUHE DANACH (2026-09-15). Zweimal
+                    # an einem Tag entstand ein vollstaendiges "diktat beenden"
+                    # mitten im Fliesstext ("bis Ende des Monats", und nach "Satz
+                    # loeschen" aus "die Rechnung liegt dem Schreiben bei"). Wer
+                    # "Diktat beenden" sagt, schweigt danach; ein Fliesstext geht
+                    # weiter. Dieselbe Pruefung wie bei den beiden Befehlen.
+                    worte_s = ergebnis_schluss.get("result", [])
+                    ende_s = worte_s[-1].get("end", 0) if worte_s else len(zeitverlauf) * BLOCK_S
+                    melde(f"  {gehoert!r} gehoert - warte auf Ruhe danach")
+                    befehl_offen = {"satz": SCHLUSSSATZ, "gehoert": gehoert, "worte": worte_s,
+                                    "start": worte_s[0].get("start", 0) if worte_s else ende_s,
+                                    "ende": ende_s, "mittel": mittel, "seit_start": seit_start}
+                    continue
                 if ist_halber_schluss(gehoert):
                     # NUR DAS HALBE WORT - kein Schluss, aber der Nutzer muss es
                     # HOEREN. Wer 'beenden' sagt und nichts passiert, wiederholt
@@ -1183,10 +1353,16 @@ def diktat_fuehren(zweck, name, quelle):
 
             if not erkenner.AcceptWaveform(block):
                 continue
-            text = json.loads(erkenner.Result()).get("text", "").strip()
+            ergebnis_frei = json.loads(erkenner.Result())
+            text = ergebnis_frei.get("text", "").strip()
+            worte_frei = ergebnis_frei.get("result", [])
             mittel = ((sum(pegel_puffer) / len(pegel_puffer))
                       if pegel_puffer else 0.0)
             pegel_puffer = []
+            # Waehrend ein Befehl auf seine Ruhe wartet, wird hier NICHTS
+            # herausgenommen: Stellt er sich als Fehlausloeser heraus, waeren
+            # echte Woerter weg. Entfernt wird erst bei der Bestaetigung
+            # (Aeusserungen.ab_zeit_entfernen).
             if not text:
                 continue
             if mittel < PEGEL_SCHWELLE:
@@ -1204,7 +1380,7 @@ def diktat_fuehren(zweck, name, quelle):
                 # das kleine Modell fehlt.
                 melde("  -> Schlusssatz in der freien Erkennung, Diktat endet")
                 break
-            gesammelt += aeusserung_verarbeiten(name, text)
+            aeusserungen.hinzu(epoche, worte_frei, text)
     except KeyboardInterrupt:
         pass
     finally:
@@ -1213,6 +1389,8 @@ def diktat_fuehren(zweck, name, quelle):
                 prozess.terminate()
             except Exception:
                 pass
+
+    gesammelt = aeusserungen.eintraege()
 
     # DER REST IM ERKENNER - gefunden am 2026-08-21 durch Stephans Test.
     #
