@@ -275,7 +275,10 @@ finished too, and then move down together. That way no reference breaks.
     Stephan's name and checked against the installed dictation. **Open:**
     entries in the user account (someone logged in there has to create them),
     entries by voice ("Wort merken"?), filling from the customer data (depends
-    on their encryption). **Next:** Parakeet as the recogniser for letters.
+    on their encryption). **Postponed (Stephan, 2026-09-15: the letter and
+    entering the customer data come later):** letter test with the name on the
+    device, entering the customer data. Open after that: Parakeet as the
+    recogniser for letters.
   - **"Brief als PDF speichern" proven on the device (2026-09-15, 13:44)**, as
     are "Brief erstellen" and the new closing announcement. And for the first
     time voice control SUGGESTED a command: "als pdf speichern" -> "Der Befehl

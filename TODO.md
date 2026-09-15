@@ -274,7 +274,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     angelegt und am installierten Diktat geprüft. **Offen:** Einträge im
     Nutzerkonto (dort muss es jemand angemeldet anlegen), Einträge per Sprache
     („Wort merken"?), Füllen aus den Kundendaten (hängt an deren
-    Verschlüsselung). **Als Nächstes:** Parakeet als Erkenner für den Brief.
+    Verschlüsselung). **Zurückgestellt (Stephan, 2026-09-15: „Das mit dem Brief
+    und den Kundendaten eintragen machen wir später"):** Brief-Test mit dem
+    Namen am Gerät, Kundendaten eintragen. Danach offen: Parakeet als Erkenner
+    für den Brief.
   - **„Brief als PDF speichern" am Gerät belegt (2026-09-15, 13:44)**, ebenso
     „Brief erstellen" und die neue Schlussansage. Und zum ersten Mal hat die
     Sprachsteuerung einen Befehl VORGESCHLAGEN: „als pdf speichern" -> „Der
