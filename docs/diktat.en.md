@@ -911,3 +911,19 @@ On the test bench, same recording, Parakeet:
 - **Split "neue Zeile":** Vosk cut between "Zeil" and "Zeile"; Parakeet wrote
   "neue Zeil." and "Zeile Stephan". "zeil" now counts too, and a "Zeile"/"Absatz"
   at the start of a chunk after a break is dropped.
+
+**Microphone comparison on the test bench (2026-09-15, 15:41)** - the same
+letter, spoken naturally, one recording each, both played through today's
+program state (71 words, 11 punctuation marks/paragraphs):
+
+| Microphone | Vosk | Parakeet |
+|---|---|---|
+| built-in (with echo cancellation) | 12.7 %, 5 of 11 marks wrong | **2.8 %, 0 of 11** |
+| TONOR TC30 (USB, desk) | 8.5 %, 5 of 11 | 4.2 %, 0 of 11 |
+
+Vosk benefits from the desk microphone, Parakeet does not - and Parakeet on the
+built-in microphone is the best combination. For Vosk the 5 wrong marks are the
+full stops and commas missing without spoken punctuation (paragraphs are right).
+One recording per microphone: the difference between 2.8 and 4.2 % is one and a
+half words and not yet a finding. Open: what the desk microphone brings with
+noise in the room - that is where its real advantage lies.

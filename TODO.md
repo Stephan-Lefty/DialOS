@@ -293,7 +293,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     echte Fälle stehen aus. Geplant: derselbe Brief mit eingebautem Mikrofon und
     mit dem USB-Tischmikrofon TONOR TC30, dann die zwei Parakeet-Proben. TONOR
     rauscht bei 100 % deutlich stärker (RMS 293 gegen 68) - vor dem Vergleich
-    Pegel mit Sprache prüfen. Beim festen
+    Pegel mit Sprache prüfen. **Erledigt 15:41:** zwei Fälle, Parakeet eingebaut
+    2,8 % / TONOR 4,2 %, Vosk 12,7 % / 8,5 % (Tabelle in docs/diktat.md);
+    Schwellen richten sich jetzt nach dem Rauschboden (TONOR hing vorher).
+    **Nächste Fälle:** frei formulierter Brief, Brief mit leisem Fernseher -
+    der Fernseher mit beiden Mikrofonen. Beim festen
     Einbau: Modell (465 MB) und
     sherpa-onnx für alle Konten nach /usr/local, Paketierung und Lizenz
     (Modell CC-BY-4.0, Namensnennung) klären.

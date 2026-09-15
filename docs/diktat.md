@@ -937,3 +937,19 @@ Auf dem Prüfstand, derselbe Mitschnitt, Parakeet:
 - **Geteiltes „neue Zeile":** Vosk schnitt zwischen „Zeil" und „Zeile";
   Parakeet schrieb „neue Zeil." und „Zeile Stephan". „zeil" gilt jetzt mit, und
   ein „Zeile"/„Absatz" am Stückanfang nach einem Umbruch fällt weg.
+
+**Mikrofon-Vergleich auf dem Prüfstand (2026-09-15, 15:41)** - derselbe Brief,
+natürlich gesprochen, je ein Mitschnitt, beide mit dem heutigen Programmstand
+durchgespielt (71 Wörter, 11 Satzzeichen/Absätze):
+
+| Mikrofon | Vosk | Parakeet |
+|---|---|---|
+| eingebaut (mit Echo-Unterdrückung) | 12,7 %, 5 von 11 Zeichen falsch | **2,8 %, 0 von 11** |
+| TONOR TC30 (USB, Tisch) | 8,5 %, 5 von 11 | 4,2 %, 0 von 11 |
+
+Vosk profitiert vom Tischmikrofon, Parakeet nicht - und Parakeet am eingebauten
+Mikrofon ist die beste Kombination. Bei Vosk sind die 5 falschen Zeichen die
+Punkte und Kommas, die ohne gesprochene Satzzeichen fehlen (Absätze stimmen).
+Je Mikrofon ein Mitschnitt: Der Unterschied zwischen 2,8 und 4,2 % sind
+eineinhalb Wörter und noch keine Aussage. Offen ist, was das Tischmikrofon bei
+Geräuschen im Raum bringt - dort liegt sein eigentlicher Vorteil.
