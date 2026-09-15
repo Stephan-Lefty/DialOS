@@ -392,25 +392,32 @@ def befehle_beschriften():
             if json.load(f).get("gesagt") is None:
                 offen.append(d)
     print(f"{len(offen)} unbeschriftete Mitschnitte von {len(dateien)}.")
-    print("Antwort: der gesagte Befehlssatz, 'nichts' (kein Befehl gesagt),")
-    print("Eingabetaste = nochmal anhoeren, 'w' = weiter ohne Beschriftung, 'q' = aufhoeren.\n")
+    print("Antwort: der gesagte Befehlssatz oder 'nichts' (kein Befehl gesagt).")
+    print("Eingabetaste = Vorschlag uebernehmen (ohne Vorschlag: nochmal anhoeren),")
+    print("'n' = nochmal anhoeren, 'w' = weiter ohne Beschriftung, 'q' = aufhoeren.\n")
     for d in offen:
         with open(d, encoding="utf-8") as f:
             info = json.load(f)
+        vorschlag = info.get("vorschlag")
+        subprocess.run(["paplay", d[:-5] + ".wav"])
         while True:
-            print(f"{os.path.basename(d)[:-5]}  erkannt: {info['erkannt']!r}")
-            subprocess.run(["paplay", d[:-5] + ".wav"])
+            print(f"{os.path.basename(d)[:-5]}  erkannt: {info['erkannt']!r}"
+                  + (f"   Vorschlag: {vorschlag!r}" if vorschlag else ""))
             antwort = input("  gesagt: ").strip().lower()
             if antwort == "q":
                 return 0
             if antwort == "w":
                 break
-            if not antwort:
+            if antwort == "n" or (not antwort and not vorschlag):
+                subprocess.run(["paplay", d[:-5] + ".wav"])
                 continue
+            if not antwort:
+                antwort = vorschlag
             if antwort not in erlaubt:
-                print(f"  unbekannt - einer der Befehlssaetze oder 'nichts'")
+                print("  unbekannt - einer der Befehlssaetze oder 'nichts'")
                 continue
             info["gesagt"] = antwort
+            info["beschriftet"] = "von Hand"
             with open(d, "w", encoding="utf-8") as f:
                 json.dump(info, f, ensure_ascii=False, indent=1)
             break
