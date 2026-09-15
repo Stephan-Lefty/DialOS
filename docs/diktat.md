@@ -856,3 +856,20 @@ sagt, bekommt trotzdem das Zeichen („Sätzen" wird als „setzen" gelesen).
   wiederholen" las den letzten Satz, Anrede mit Komma, Name ohne Punkt, 6 Sätze
   gezählt. Wortanfänge direkt nach Annas Antwort gingen verloren („Am", „Neuer")
   - in der Nachbildung sprach Michael, bevor Anna fertig war.
+
+**Probe mit Stephans Stimme (2026-09-15, 14:47), natürlich gesprochen.** Der
+Brief kam praktisch fertig heraus: Anrede mit Komma, alle Punkte und Kommas an
+der richtigen Stelle, vier Absätze, „12. August", „Dr. Muster", „240 Euro",
+Gruß und Name in zwei Zeilen. Wortfehler (81 Wörter): **Vosk 4,9 %, Parakeet 6,2
+%** - die Wortgenauigkeit ist bei deutlicher Aussprache also ähnlich (Parakeet:
+„teilen das" ohne „Sie", der Name; Vosk: „war in" ohne „ich", „musste" für
+„Muster", der Name). **Der Unterschied ist der Brief:** Vosk liefert ohne
+gesprochene Satzzeichen keinen einzigen Punkt, Parakeet alle.
+
+Dabei gefunden und behoben:
+- **„Diktat beenden" galt als „danach nicht still"** (Nachhall 131-166 über der
+  Text-Schwelle 150) - beendet hatte nur die Rückfallebene. Für die Ruhe vor und
+  nach Befehlen gilt jetzt `BEFEHL_RUHE_SCHWELLE` 400.
+- **Vorlesen zählte 10 Sätze, das Diktat 8** - „12." und „Dr." zählten beim
+  Vorlesen als Satzende. `dialos-notiz.py` holt jetzt `satzenden()` aus dem
+  Diktat.

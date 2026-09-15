@@ -832,3 +832,20 @@ setzen" out of habit still gets the symbol ("Sätzen" is read as "setzen").
   the last sentence, salutation with comma, name without full stop, 6 sentences
   counted. Word beginnings right after Anna's answer were lost ("Am", "Neuer") -
   in the simulation Michael spoke before Anna had finished.
+
+**Test with Stephan's voice (2026-09-15, 14:47), spoken naturally.** The letter
+came out practically finished: salutation with comma, every full stop and comma
+in place, four paragraphs, "12. August", "Dr. Muster", "240 Euro", closing and
+name on two lines. Word errors (81 words): **Vosk 4.9 %, Parakeet 6.2 %** - so
+with clear speech word accuracy is similar (Parakeet: "teilen das" without
+"Sie", the name; Vosk: "war in" without "ich", "musste" for "Muster", the name).
+**The difference is the letter:** without spoken punctuation Vosk delivers not a
+single full stop, Parakeet all of them.
+
+Found and fixed along the way:
+- **"Diktat beenden" counted as "not silent afterwards"** (reverberation 131-166
+  above the text threshold 150) - only the fallback ended it. Silence before and
+  after commands now uses `BEFEHL_RUHE_SCHWELLE` 400.
+- **Reading out counted 10 sentences, dictation 8** - "12." and "Dr." counted as
+  sentence ends when reading out. `dialos-notiz.py` now takes `satzenden()` from
+  dictation.

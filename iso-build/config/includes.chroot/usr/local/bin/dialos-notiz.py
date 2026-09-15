@@ -443,6 +443,33 @@ def vorlesen(name):
     return _vorlesen_liste(name)
 
 
+DIKTAT_MODUL = "/usr/local/bin/dialos-diktat.py"
+
+
+def saetze_zaehlen(fliesstext):
+    """Saetze wie beim Diktat gezaehlt - "12." und "Dr." beenden keinen Satz.
+
+    Geholt aus dialos-diktat.py (satzenden), nicht nachgebaut: Am 2026-09-15
+    sagte das Diktat "8 Saetze" und das Vorlesen desselben Briefs "10 Saetze",
+    weil hier jeder Punkt zaehlte. Zwei Zaehlweisen fuer denselben Brief sind
+    fuer einen blinden Nutzer eine falsche Auskunft.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("diktat_geholt", DIKTAT_MODUL)
+        diktat = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(diktat)
+        stellen = [i for i in diktat.satzenden(fliesstext) if fliesstext[i] != "\n"]
+        teile, anfang = [], 0
+        for i in stellen:
+            teile.append(fliesstext[anfang:i + 1])
+            anfang = i + 1
+        teile.append(fliesstext[anfang:])
+        return [t for t in teile if t.strip()]
+    except Exception:
+        return [s for s in re.split(r"(?<=[.!?])\s+", fliesstext) if s.strip()]
+
+
 def brief_vorlesen(name):
     """Liest den Brief am Stueck vor - alles, mit benannten Teilen.
 
@@ -463,7 +490,7 @@ def brief_vorlesen(name):
         sprich(f"{bez} {ist} leer.")
         return 0
     fliesstext = " ".join(z for z in text if z)
-    saetze = [s for s in re.split(r"(?<=[.!?])\s+", fliesstext) if s.strip()]
+    saetze = saetze_zaehlen(fliesstext)
 
     teile = ["Ein Satz." if len(saetze) == 1 else f"{len(saetze)} Sätze."]
     if kopf:

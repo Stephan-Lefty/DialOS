@@ -751,12 +751,23 @@ BEFEHL_RAND_S = 0.15
 BEFEHL_RAND_DAVOR_S = 0.25
 
 
+# WAS "STILL" VOR UND NACH EINEM BEFEHL HEISST (2026-09-15, Brief mit Weg 3).
+# Bis dahin galt PEGEL_SCHWELLE (150), die Grenze fuer TEXT. Stephans echtes
+# "Diktat beenden" wurde damit als "danach nicht still" verworfen - gemessen nach
+# dem Wort: 131, 166, 102, 81, 56. Das ist Nachhall und Atem, keine Sprache;
+# Sprache lag in allen protokollierten Ablehnungen bei ueber 1000 (Fliesstext
+# nach einem Fehlausloeser: 3035-9308). 400 laesst dazwischen Abstand nach beiden
+# Seiten. Beendet hatte an dem Tag zweimal nur die Rueckfallebene der freien
+# Erkennung.
+BEFEHL_RUHE_SCHWELLE = 400.0
+
+
 def ruhig(verlauf, von_s, bis_s):
     """War es im Zeitraum [von_s, bis_s) still? verlauf = Pegel je Block ab 0 s."""
     a = max(0, int(von_s / BLOCK_S))
     b = max(a + 1, int(math.ceil(bis_s / BLOCK_S)))
     stueck = verlauf[a:b]
-    return bool(stueck) and max(stueck) < PEGEL_SCHWELLE
+    return bool(stueck) and max(stueck) < BEFEHL_RUHE_SCHWELLE
 
 
 class Aeusserungen:

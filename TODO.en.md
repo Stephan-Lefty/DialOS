@@ -284,7 +284,12 @@ finished too, and then move down together. That way no reference breaks.
     **Test 14:32 with spoken punctuation: Parakeet 14.9 %, Vosk 9.9 %**
     ("Sätzen"). **Option 3 built (Stephan's choice):** speak naturally,
     Parakeet sets punctuation, only paragraph/line spoken; "12." and "Dr." are
-    no sentence end. Checked offline, test with Stephan's voice pending.
+    no sentence end. **Test 14:47 with Stephan's voice: letter practically
+    finished** (all punctuation, paragraphs, salutation, closing); word errors
+    Vosk 4.9 %, Parakeet 6.2 %, but only Parakeet delivers punctuation. **To
+    decide:** build option 3 in for good - then model (465 MB) and sherpa-onnx
+    for all accounts under /usr/local, sort out packaging and licence (model
+    CC-BY-4.0, attribution).
   - **"Brief als PDF speichern" proven on the device (2026-09-15, 13:44)**, as
     are "Brief erstellen" and the new closing announcement. And for the first
     time voice control SUGGESTED a command: "als pdf speichern" -> "Der Befehl

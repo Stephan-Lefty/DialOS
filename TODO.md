@@ -283,8 +283,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     verwerfen. **Probe 14:32 mit gesprochenen Satzzeichen: Parakeet 14,9 %,
     Vosk 9,9 %** („Sätzen"). **Weg 3 gebaut (Stephans Wahl):** natürlich
     sprechen, Parakeet setzt die Satzzeichen, gesprochen nur Absatz/Zeile;
-    „12." und „Dr." kein Satzende. Offline geprüft, Probe mit Stephans Stimme
-    steht aus.
+    „12." und „Dr." kein Satzende. **Probe 14:47 mit Stephans Stimme: Brief
+    praktisch fertig** (alle Satzzeichen, Absätze, Anrede, Gruß); Wortfehler
+    Vosk 4,9 %, Parakeet 6,2 %, aber nur Parakeet liefert Satzzeichen.
+    **Zu entscheiden:** Weg 3 fest einbauen - dann Modell (465 MB) und
+    sherpa-onnx für alle Konten nach /usr/local, Paketierung und Lizenz
+    (Modell CC-BY-4.0, Namensnennung) klären.
   - **„Brief als PDF speichern" am Gerät belegt (2026-09-15, 13:44)**, ebenso
     „Brief erstellen" und die neue Schlussansage. Und zum ersten Mal hat die
     Sprachsteuerung einen Befehl VORGESCHLAGEN: „als pdf speichern" -> „Der
