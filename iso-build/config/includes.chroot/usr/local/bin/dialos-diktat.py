@@ -58,6 +58,7 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -1299,6 +1300,66 @@ def main():
             pass
 
 
+# PERSOENLICHES WOERTERBUCH (Stephan, 2026-09-15: "mein Name Stephan Roesner
+# wird zu Stefan Roessner"). Beide klingen gleich - kein Erkenner kann die
+# Schreibweise hoeren, auch Whisper oder Parakeet nicht. Also wird NACH der
+# Erkennung korrigiert, mit Eintraegen "gehoert = geschrieben".
+#
+# NUR AUF DEM GERAET, im eigenen Konto (Stephans Wahl): Die Datei enthaelt
+# Namen. Ins oeffentliche Repo kommt nur die Vorlage mit erfundenen Beispielen.
+WOERTERBUCH = os.path.join(os.path.expanduser("~"), ".config", "dialos", "woerterbuch.txt")
+WOERTERBUCH_VORLAGE = "/usr/local/share/dialos/woerterbuch-vorlage.txt"
+_WORTZEICHEN = r"[\wäöüÄÖÜß]"
+
+
+def woerterbuch_laden():
+    """[(Muster, Ersatz, gehoert)], laengste Eintraege zuerst.
+
+    Fehlt die Datei, wird die Vorlage hineinkopiert - dann weiss ein Helfer, wo
+    er Eintraege machen kann, ohne eine Anleitung zu suchen.
+    """
+    if not os.path.exists(WOERTERBUCH) and os.path.exists(WOERTERBUCH_VORLAGE):
+        try:
+            os.makedirs(os.path.dirname(WOERTERBUCH), exist_ok=True)
+            shutil.copyfile(WOERTERBUCH_VORLAGE, WOERTERBUCH)
+        except OSError:
+            pass
+    eintraege = []
+    try:
+        with open(WOERTERBUCH, encoding="utf-8") as f:
+            for zeile in f:
+                zeile = zeile.strip()
+                if not zeile or zeile.startswith("#") or "=" not in zeile:
+                    continue
+                gehoert, geschrieben = (t.strip() for t in zeile.split("=", 1))
+                worte = gehoert.split()
+                if not worte or not geschrieben:
+                    continue
+                # Zwischen den Woertern jeder Leerraum, auch ein Zeilenwechsel
+                # ("Gruessen\nMax Maier"); davor und danach kein Wortzeichen,
+                # damit "maier" nicht in "Maierhof" greift.
+                muster = re.compile(
+                    rf"(?<!{_WORTZEICHEN})" + r"\s+".join(re.escape(w) for w in worte)
+                    + rf"(?!{_WORTZEICHEN})", re.IGNORECASE)
+                eintraege.append((muster, geschrieben, gehoert))
+    except OSError:
+        return []
+    eintraege.sort(key=lambda e: len(e[2]), reverse=True)
+    return eintraege
+
+
+def woerterbuch_anwenden(text, eintraege=None):
+    eintraege = woerterbuch_laden() if eintraege is None else eintraege
+    for muster, geschrieben, _ in eintraege:  # _ = der gehoerte Wortlaut
+        # Ersatz als Funktion, nicht als Zeichenkette: Sonst liest re.sub einen
+        # Backslash oder "\\1" im Eintrag als Rueckverweis.
+        neu = muster.sub(lambda _m, g=geschrieben: g, text)
+        if neu != text:
+            melde(f"  Woerterbuch: {_!r} -> {geschrieben!r}")
+            text = neu
+    return text
+
+
 def aeusserung_verarbeiten(name, text):
     """Der Weg jeder Aeusserung: Satzzeichen, Schreibung, Zerlegung.
 
@@ -1326,6 +1387,13 @@ def aeusserung_verarbeiten(name, text):
     gefasst = schreibung_richten(mit_zeichen)
     if gefasst.lower() != mit_zeichen.lower():
         melde("  ACHTUNG: Schreibhilfe hat mehr als die Schreibung geaendert")
+    # NACH der Schreibhilfe: Sie wuerde eine gewollte Schreibweise sonst wieder
+    # "verbessern". Steht der Eintrag am Satzanfang und ist klein geschrieben,
+    # bleibt der Anfang gross (schreibung_richten hat ihn schon gross gemacht).
+    mit_buch = woerterbuch_anwenden(gefasst)
+    if mit_buch != gefasst and gefasst[:1].isupper():
+        mit_buch = mit_buch[:1].upper() + mit_buch[1:]
+    gefasst = mit_buch
     melde(f"  geschrieben: {gefasst!r}")
     neue = eintraege_aus(name, gefasst)
     if len(neue) > 1:

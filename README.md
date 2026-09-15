@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Persönliches Wörterbuch fürs Diktat** (2026-09-15, Stephans Wahl: nur auf
+  dem Gerät). Ein Name, der gleich klingt, aber anders geschrieben wird, kommt
+  falsch an - das kann kein Erkenner hören. `~/.config/dialos/woerterbuch.txt`
+  mit Zeilen `gehört = geschrieben`, angewendet nach der Schreibhilfe; im Repo
+  nur die Vorlage. Beschrieben in `docs/diktat.md`.
+
 - **„… zu laut …" erst beim zweiten Mal, Begrüßung nennt das Einschalten**
   (2026-09-15). Stephan: Die Ansage kam ständig, „und niemand hat
   Sprachsteuerung gesagt!" - Geräusche ergaben den Einschaltsatz, die

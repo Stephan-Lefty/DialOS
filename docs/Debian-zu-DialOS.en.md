@@ -1281,7 +1281,12 @@ sudo systemctl --global enable dialos-languagetool.service
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-auskunft.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/woerterbuch-vorlage.txt /usr/local/share/dialos/
 ```
+
+`woerterbuch-vorlage.txt` (since 2026-09-15) is the template for dictation's
+personal dictionary; dictation copies it to `~/.config/dialos/woerterbuch.txt`
+the first time. Details in [diktat.en.md](diktat.en.md).
 
 `dialos-auskunft.py` announces the time and the date. It imports the speech
 building blocks from `dialos-start-ansage.py` - weekday, ordinal, number as

@@ -748,3 +748,30 @@ pause still gets through. Together with the three other conditions - both
 words, level above the threshold, not within the first three seconds - the
 residual risk is small, but it is not zero. The proof is still outstanding: a
 dictation with a real voice that runs from beginning to end.
+
+## Personal dictionary (2026-09-15)
+
+Stephan: his name arrived with a wrong spelling - a name that **sounds**
+exactly the same. That is not a recognition error a better model fixes: no
+recogniser (Vosk, Whisper, Parakeet) can hear whether "Stephan" or "Stefan" is
+meant. So the correction happens **after** recognition.
+
+- **File:** `~/.config/dialos/woerterbuch.txt`, per account, on the device only
+  (Stephan's choice - it contains names). If missing, dictation copies the
+  template `/usr/local/share/dialos/woerterbuch-vorlage.txt` there; only this
+  template with invented examples goes into the public repo.
+- **Format:** `heard = written`, one line per entry, `#` for comments. The left
+  side is case-insensitive, the right side exactly as it should appear; several
+  words work, longer entries first.
+- **Where:** in `aeusserung_verarbeiten()`, **after** LanguageTool - otherwise
+  the writing aid would "correct" a deliberate spelling again. Whole words
+  ("maier" does not hit "Maierhof"), a line break also counts between words.
+- **No full stops in the replacement:** a full stop counts as a sentence end in
+  dictation, "Satz löschen" would cut there.
+- **Limit:** if Vosk splits a name across a speech pause, a two-word entry does
+  not match - single-word entries cover that.
+
+**Not for fixed data.** The sender in the letterhead and the Thunderbird
+signature are not recognised but written - they belong, correct, in the
+customer data and are taken from there. The dictionary is only for what
+someone speaks.

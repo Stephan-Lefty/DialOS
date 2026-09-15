@@ -1339,7 +1339,12 @@ sudo systemctl --global enable dialos-languagetool.service
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-auskunft.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/woerterbuch-vorlage.txt /usr/local/share/dialos/
 ```
+
+`woerterbuch-vorlage.txt` (seit 2026-09-15) ist die Vorlage für das persönliche
+Wörterbuch des Diktats; das Diktat kopiert sie beim ersten Mal nach
+`~/.config/dialos/woerterbuch.txt`. Einzelheiten in [diktat.md](diktat.md).
 
 `dialos-auskunft.py` sagt Uhrzeit und Datum. Es holt die Sprech-Bausteine
 per Import aus `dialos-start-ansage.py` - Wochentag, Ordinalzahl,

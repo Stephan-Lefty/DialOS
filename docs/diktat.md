@@ -771,3 +771,31 @@ Sprechpause entsteht, kommt weiterhin durch. Zusammen mit den drei anderen
 Bedingungen - beide Wörter, Pegel über der Schwelle, nicht in den ersten drei
 Sekunden - ist das Restrisiko klein, aber es ist nicht null. Der Beweis dafür
 steht noch aus: ein Diktat mit echter Stimme, das von Anfang bis Ende durchläuft.
+
+## Persönliches Wörterbuch (2026-09-15)
+
+Stephan: Sein Name kam als falsche Schreibweise an - ein Name, der genau gleich
+**klingt**. Das ist kein Erkennungsfehler, den ein besseres Modell behebt: Kein
+Erkenner (Vosk, Whisper, Parakeet) kann hören, ob „Stephan" oder „Stefan"
+gemeint ist. Deshalb wird **nach** der Erkennung korrigiert.
+
+- **Datei:** `~/.config/dialos/woerterbuch.txt`, je Konto, nur auf dem Gerät
+  (Stephans Wahl - sie enthält Namen). Fehlt sie, kopiert das Diktat die
+  Vorlage `/usr/local/share/dialos/woerterbuch-vorlage.txt` hinein; ins
+  öffentliche Repo kommt nur diese Vorlage mit erfundenen Beispielen.
+- **Format:** `gehört = geschrieben`, eine Zeile je Eintrag, `#` für
+  Kommentare. Links egal ob groß oder klein, rechts genau so, wie es im Text
+  stehen soll; mehrere Wörter gehen, längere Einträge zuerst.
+- **Wo:** in `aeusserung_verarbeiten()`, **nach** LanguageTool - sonst würde die
+  Schreibhilfe eine gewollte Schreibweise wieder „verbessern". Ganze Wörter
+  („maier" greift nicht in „Maierhof"), zwischen den Wörtern auch ein
+  Zeilenwechsel („Grüßen" / neue Zeile / Name).
+- **Keine Punkte im Ersatz:** Ein Punkt gilt beim Diktieren als Satzende, „Satz
+  löschen" würde dort schneiden.
+- **Grenze:** Teilt Vosk einen Namen über eine Sprechpause, trifft ein
+  Eintrag aus zwei Wörtern nicht - dafür gibt es Einträge aus einem Wort.
+
+**Nicht für feste Daten.** Absender im Briefbogen und die Thunderbird-Signatur
+werden nicht erkannt, sondern geschrieben - sie gehören richtig in die
+Kundendaten und werden von dort übernommen. Das Wörterbuch ist nur für das, was
+jemand spricht.

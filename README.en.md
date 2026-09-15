@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Personal dictionary for dictation** (2026-09-15, Stephan's choice: on the
+  device only). A name that sounds the same but is spelled differently arrives
+  wrong - no recogniser can hear that. `~/.config/dialos/woerterbuch.txt` with
+  lines `heard = written`, applied after the writing aid; the repo only holds
+  the template. Described in `docs/diktat.en.md`.
+
 - **"… zu laut …" only the second time, greeting names how to switch on**
   (2026-09-15). Stephan: the announcement came constantly, "and nobody said
   Sprachsteuerung!" - noises produced the start sentence, the silence check

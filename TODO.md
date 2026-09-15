@@ -269,9 +269,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Dateien umbenannt (13 Briefe, 16 Fotos am Admin-Konto). Das Nutzerkonto
     stellt sich beim ersten Brief/Foto selbst um. Archiv-PDFs behalten ihre
     Namen (nicht gewählt). Test am Gerät steht aus.
-  - **Als Nächstes (Stephans Wahl):** persönliches Wörterbuch nur auf dem Gerät
-    (sein Name kommt als „Stefan Rößner" an - klingt gleich, kein Erkenner kann
-    die Schreibweise hören), danach Parakeet als Erkenner für den Brief.
+  - **Persönliches Wörterbuch (2026-09-15, gebaut):** `~/.config/dialos/
+    woerterbuch.txt`, nur auf dem Gerät; im Admin-Konto mit Stephans Namen
+    angelegt und am installierten Diktat geprüft. **Offen:** Einträge im
+    Nutzerkonto (dort muss es jemand angemeldet anlegen), Einträge per Sprache
+    („Wort merken"?), Füllen aus den Kundendaten (hängt an deren
+    Verschlüsselung). **Als Nächstes:** Parakeet als Erkenner für den Brief.
   - **„Brief als PDF speichern" am Gerät belegt (2026-09-15, 13:44)**, ebenso
     „Brief erstellen" und die neue Schlussansage. Und zum ersten Mal hat die
     Sprachsteuerung einen Befehl VORGESCHLAGEN: „als pdf speichern" -> „Der

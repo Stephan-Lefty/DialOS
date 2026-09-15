@@ -1,0 +1,24 @@
+# DialOS - persönliches Wörterbuch fürs Diktat
+#
+# Die Spracherkennung hört, wie ein Wort KLINGT, nicht wie es geschrieben wird.
+# Ein Name wie "Meier" kommt deshalb auch als "Maier" oder "Mayer" an. Hier
+# steht, wie etwas richtig geschrieben wird:
+#
+#     gehört = geschrieben
+#
+# Links steht, was die Erkennung schreibt (Groß- und Kleinschreibung egal),
+# rechts, was im Text stehen soll - genau so. Mehrere Wörter gehen auch.
+# Längere Einträge werden zuerst angewendet. Zeilen mit # sind Kommentare.
+#
+# Beispiele (ohne # davor wirken sie):
+#
+# max maier = Max Meier
+# maier = Meier
+# müller lüdenscheid = Müller-Lüdenscheid
+#
+# Keine Punkte im Ersatz ("Dr." statt "Doktor"): Ein Punkt gilt beim
+# Diktieren als Satzende - "Satz löschen" würde dort schneiden.
+#
+# Diese Datei liegt nur auf diesem Gerät, im eigenen Konto
+# (~/.config/dialos/woerterbuch.txt). Sie enthält persönliche Daten und
+# gehört in keine Sicherung, die Fremde sehen.
