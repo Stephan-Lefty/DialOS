@@ -953,3 +953,25 @@ Punkte und Kommas, die ohne gesprochene Satzzeichen fehlen (Absätze stimmen).
 Je Mikrofon ein Mitschnitt: Der Unterschied zwischen 2,8 und 4,2 % sind
 eineinhalb Wörter und noch keine Aussage. Offen ist, was das Tischmikrofon bei
 Geräuschen im Raum bringt - dort liegt sein eigentlicher Vorteil.
+
+**Mit leise laufendem Fernseher (2026-09-15, 15:49 und 16:34)** - derselbe Brief,
+Fernseher mit Sprache, Lautstärke und Platz unverändert. Alle vier echten Fälle
+mit dem Stand von 16:49:
+
+| Mikrofon | ruhig: Vosk | ruhig: Parakeet | Fernseher: Vosk | Fernseher: Parakeet |
+|---|---|---|---|---|
+| eingebaut | 12,7 % | **2,8 %** | 16,9 % | 9,9 % |
+| TONOR TC30 | 8,5 % | 4,2 % | 8,5 % | **4,2 %** |
+
+Satzzeichen: Parakeet in allen vier Fällen 0 von 11 falsch, Vosk 5-6 von 11.
+Befehle in allen Fällen wie aufgenommen. **Das Tischmikrofon hält die Qualität
+bei Fernseher, das eingebaute nicht** - und am Gerät nahm mit dem TONOR der
+Schluss-Erkenner „Diktat beenden" selbst an, am eingebauten nur die
+Rückfallebene (danach nicht still).
+
+Der Prüfstand fand dabei zwei Fehler, bevor sie jemand am Gerät erlebt hätte:
+Ein „Neuer Absatz" als eigenes Stück fiel bei Parakeet weg (nach der
+Umwandlung war der Text nur „\n\n" und galt als leer), und die erste
+Reparatur dafür hätte das Diktat abstürzen lassen (leerer Text in der
+Stückgrenzen-Prüfung). Außerdem: kurze Zeile vor einem Zeilenwechsel ohne
+Punkt („Mit freundlichen Grüßen." / Name).

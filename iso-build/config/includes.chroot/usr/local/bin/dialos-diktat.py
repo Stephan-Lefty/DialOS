@@ -840,7 +840,10 @@ class Aeusserungen:
         if text is None:
             text = (self.umschreiben(worte) if self.umschreiben
                     else " ".join(w["word"] for w in worte))
-        if not text.strip():
+        # Ein Stueck, das NUR aus einem Umbruch besteht, ist nicht leer (Pruefstand,
+        # 2026-09-15): Parakeets "Neuer Absatz." wird schon vorher zu "\n\n" - mit
+        # der blossen strip()-Pruefung fiel dieser Absatz weg.
+        if not text.strip() and "\n" not in text:
             return []
         # EIN GESPROCHENES SATZZEICHEN UEBER DIE STUECKGRENZE (2026-09-15,
         # zweite Brief-Probe). Vosk schneidet lange Rede auch ohne Pause - einmal
@@ -850,7 +853,7 @@ class Aeusserungen:
         # endete das vorige mit dem ersten, wird beides zusammen neu verarbeitet.
         # Beim Parakeet-Test sind die Satzzeichen schon umgesetzt - nichts zu verbinden.
         vorher = self.liste[-1] if self.liste and self.umschreiben is None else None
-        erstes = text.split()[0].lower()
+        erstes = text.split()[0].lower() if text.split() else ""
         if (vorher and self.name not in LISTEN_ZIELE and vorher["epoche"] == epoche
                 and vorher.get("text")
                 and SATZZEICHEN_FORTSETZUNG.get(vorher["text"].split()[-1].lower()) == erstes):
@@ -867,8 +870,16 @@ class Aeusserungen:
             if ohne != text:
                 melde(f"  Rest eines geteilten Umbruchs am Stueckanfang entfernt: {text[:len(text)-len(ohne)]!r}")
                 text = ohne
-            if not text.strip():
+            if not text.strip() and "\n" not in text:
                 return []
+            # Beginnt das Stueck mit einer neuen Zeile, verliert eine kurze Zeile
+            # davor ihren Punkt ("Mit freundlichen Gruessen." | "\nStephan"),
+            # dieselbe Regel wie innerhalb eines Stuecks.
+            if text.startswith("\n") and not text.startswith("\n\n"):
+                vorige = self.liste[-1]["eintraege"][-1]
+                neu = kurze_zeile_ohne_punkt(vorige.rstrip() + "\n")[:-1]
+                if neu != vorige.rstrip():
+                    self.liste[-1]["eintraege"][-1] = neu
         eintraege = aeusserung_verarbeiten(self.name, text, self.umschreiben is not None)
         self.liste.append({"epoche": epoche, "worte": list(worte), "eintraege": eintraege,
                            "text": text})
@@ -1580,6 +1591,16 @@ def parakeet_bereinigen(text):
     return " ".join(text.split())
 
 
+def kurze_zeile_ohne_punkt(text, hoechstens=4):
+    """Streicht den Punkt am Ende kurzer Zeilen vor einem einfachen Zeilenwechsel."""
+    def weg(m):
+        zeile = m.group(1)
+        if len(zeile.split()) <= hoechstens:
+            return zeile.rstrip(". ") + m.group(2)
+        return m.group(0)
+    return re.sub(r"(?m)([^\n]*?\.)[ \t]*(\n)(?!\n)", weg, text)
+
+
 def parakeet_natuerlich(text):
     """Weg 3 (Stephan, 2026-09-15): Parakeets eigene Satzzeichen bleiben.
 
@@ -1607,6 +1628,9 @@ def parakeet_natuerlich(text):
     # Parakeet schrieb "neue Zeil." und im naechsten Stueck "Zeile Stephan".
     text = re.sub(r"[,;]?\s*\bneue\s*[,.]?\s*zeile?\b[,;:.!?]*\s*", "\n", text,
                   flags=re.IGNORECASE)
+    # Kurze Zeile vor einem Zeilenwechsel ohne Punkt ("Mit freundlichen Gruessen.
+    # neue Zeile" -> "...Gruessen\n"): Gruss und Anschriftzeilen enden nicht mit Punkt.
+    text = kurze_zeile_ohne_punkt(text)
     # Die Anrede endet mit Komma, auch wenn Parakeet keins oder einen Punkt setzte.
     text = re.sub(r"^((?:sehr geehrte|liebe|lieber|hallo)\b[^\n.,]*)[.]?\n\n", r"\1,\n\n",
                   text, flags=re.IGNORECASE)

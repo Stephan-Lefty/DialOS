@@ -297,7 +297,12 @@ finished too, and then move down together. That way no reference breaks.
     before comparing. **Done 15:41:** two cases, Parakeet built-in 2.8 % /
     TONOR 4.2 %, Vosk 12.7 % / 8.5 % (table in docs/diktat.en.md); thresholds
     now follow the noise floor (the TONOR hung before). **Next cases:** freely
-    worded letter, letter with a quiet TV - the TV with both microphones. When building it
+    worded letter, letter with a quiet TV - the TV with both microphones. **TV
+    done 16:49:** TONOR 4.2 % (same as quiet), built-in 9.9 % with Parakeet.
+    **Open:** voice control with the TV - genuine switch-on attempts are
+    rejected (fixed limit 3000 for "silent afterwards"), false alarms while
+    off. Next step: TONOR and noise floor for the command service on the test
+    bench (needs short command recordings with consent, not continuous). When building it
     in: model (465 MB) and sherpa-onnx
     for all accounts under /usr/local, sort out packaging and licence (model
     CC-BY-4.0, attribution).

@@ -927,3 +927,24 @@ full stops and commas missing without spoken punctuation (paragraphs are right).
 One recording per microphone: the difference between 2.8 and 4.2 % is one and a
 half words and not yet a finding. Open: what the desk microphone brings with
 noise in the room - that is where its real advantage lies.
+
+**With a TV playing quietly (2026-09-15, 15:49 and 16:34)** - the same letter,
+TV with speech, volume and position unchanged. All four real cases with the
+16:49 state:
+
+| Microphone | quiet: Vosk | quiet: Parakeet | TV: Vosk | TV: Parakeet |
+|---|---|---|---|---|
+| built-in | 12.7 % | **2.8 %** | 16.9 % | 9.9 % |
+| TONOR TC30 | 8.5 % | 4.2 % | 8.5 % | **4.2 %** |
+
+Punctuation: Parakeet 0 of 11 wrong in all four cases, Vosk 5-6 of 11. Commands
+as recorded in every case. **The desk microphone keeps the quality with the TV
+on, the built-in one does not** - and on the device the closing recogniser
+itself accepted "Diktat beenden" with the TONOR, with the built-in one only the
+fallback did (not silent afterwards).
+
+The test bench found two bugs before anyone met them on the device: a "Neuer
+Absatz" as a chunk of its own was lost with Parakeet (after conversion the text
+was only "\n\n" and counted as empty), and the first fix would have crashed
+dictation (empty text in the chunk-boundary check). Also: a short line before a
+line break without a full stop ("Mit freundlichen Grüßen." / name).

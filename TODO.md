@@ -297,7 +297,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     2,8 % / TONOR 4,2 %, Vosk 12,7 % / 8,5 % (Tabelle in docs/diktat.md);
     Schwellen richten sich jetzt nach dem Rauschboden (TONOR hing vorher).
     **Nächste Fälle:** frei formulierter Brief, Brief mit leisem Fernseher -
-    der Fernseher mit beiden Mikrofonen. Beim festen
+    der Fernseher mit beiden Mikrofonen. **Fernseher erledigt 16:49:** TONOR
+    4,2 % (wie ruhig), eingebaut 9,9 % mit Parakeet. **Offen:** Sprachsteuerung
+    mit Fernseher - echte Einschaltversuche werden verworfen (feste Grenze 3000
+    für „danach still"), Fehlalarme im Aus-Zustand. Nächster Schritt: TONOR und
+    Rauschboden für den Befehlsdienst auf dem Prüfstand (braucht kurze
+    Befehls-Mitschnitte mit Zustimmung, nicht dauernd). Beim festen
     Einbau: Modell (465 MB) und
     sherpa-onnx für alle Konten nach /usr/local, Paketierung und Lizenz
     (Modell CC-BY-4.0, Namensnennung) klären.
