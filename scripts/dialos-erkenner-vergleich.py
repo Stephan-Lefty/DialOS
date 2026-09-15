@@ -45,10 +45,16 @@ RATE = 16000
 
 VOSK_GROSS = "/usr/local/share/vosk-model-de-big"
 WHISPER_CLI = os.path.join(ZIEL, "whisper.cpp/build/bin/whisper-cli")
-WHISPER_MODELLE = {"whisper-small": "ggml-small.bin",
-                   "whisper-turbo": "ggml-large-v3-turbo-q5_0.bin"}
+# (Kennung, Modell, zusaetzliche Optionen). "-ac 512" verkuerzt das
+# Rechenfenster von 30 s auf rund 10 s: Am 2026-09-14 brauchte Whisper je Ware
+# (~1 s Sprache) 7 s (small) bzw. 41 s (turbo), weil jedes Stueck auf 30 s
+# aufgefuellt wird. Turbo ohne -ac ist damit schon verworfen und fehlt hier.
+WHISPER_LAEUFE = [("whisper-small", "ggml-small.bin", []),
+                  ("whisper-small -ac 512", "ggml-small.bin", ["-ac", "512"]),
+                  ("whisper-turbo -ac 512", "ggml-large-v3-turbo-q5_0.bin", ["-ac", "512"])]
 PARAKEET = os.path.join(ZIEL, "modelle", "sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8")
 THREADS = int(os.environ.get("DIALOS_THREADS", "4"))     # 4 echte Kerne im T490
+PAUSE_S = float(os.environ.get("DIALOS_PAUSE", "0.2"))
 
 
 # ------------------------------------------------------------- Vorlage ---
@@ -131,8 +137,13 @@ def stuecke(werte):
     """Schneidet an Sprechpausen - wie das Diktat: eine Ware, ein Stueck.
 
     Rahmen 30 ms; Sprache ist, was deutlich ueber dem Grundrauschen liegt
-    (4 x das 20-%-Quantil, mindestens 300). Luecken unter 0,45 s gehoeren zum
+    (4 x das 20-%-Quantil, mindestens 300). Luecken unter PAUSE_S gehoeren zum
     Stueck; Stuecke unter 0,25 s fallen weg; 0,2 s Rand davor und danach.
+
+    PAUSE_S 0,2 statt 0,45 (2026-09-15, Stephans erste Aufnahme): Er sprach
+    zuegig, zwischen den Waren lagen gegen Ende nur 0,24-0,45 s - bei 0,45
+    kamen 14 statt 20 Stuecke heraus, das letzte 6,9 s lang. Innerhalb einer
+    Ware ("sechs Eier") lagen die Luecken unter 0,15 s. Mit 0,2 s: genau 20.
     """
     rahmen = int(RATE * 0.03)
     rms = []
@@ -145,7 +156,7 @@ def stuecke(werte):
     schwelle = max(grund * 4, 300)
     sprache = [x > schwelle for x in rms]
     teile, start, stille = [], None, 0
-    luecke = int(0.45 / 0.03)
+    luecke = int(PAUSE_S / 0.03)
     for i, s in enumerate(sprache + [False] * (luecke + 1)):
         if s:
             if start is None:
@@ -176,7 +187,7 @@ def mit_vosk(teile):
     return texte, laden, time.time() - t0
 
 
-def mit_whisper(teile, datei):
+def mit_whisper(teile, datei, extra=()):
     modell = os.path.join(ZIEL, "modelle", datei)
     with tempfile.TemporaryDirectory() as tmp:
         # Ladezeit getrennt messen: ein halbe Sekunde Stille allein.
@@ -184,12 +195,12 @@ def mit_whisper(teile, datei):
         wav_schreiben(stille, array.array("h", [0] * (RATE // 2)))
         t0 = time.time()
         subprocess.run([WHISPER_CLI, "-m", modell, "-f", stille, "-l", "de", "-nt", "-np",
-                        "-t", str(THREADS)], capture_output=True)
+                        "-t", str(THREADS), *extra], capture_output=True)
         laden = time.time() - t0
         pfade = []
         for i, s in enumerate(teile):
             p = os.path.join(tmp, f"s{i:03d}.wav"); wav_schreiben(p, s); pfade.append(p)
-        befehl = [WHISPER_CLI, "-m", modell, "-l", "de", "-nt", "-np", "-otxt", "-t", str(THREADS)]
+        befehl = [WHISPER_CLI, "-m", modell, "-l", "de", "-nt", "-np", "-otxt", "-t", str(THREADS), *extra]
         for p in pfade:
             befehl += ["-f", p]
         t0 = time.time()
@@ -282,8 +293,8 @@ def vergleichen(name, art):
           f"({dauer:.1f} s Sprache), Vorlage {len(ref)} {'Waren' if art == 'einkaufszettel' else 'Absatz'}")
     erkenner = [("vosk-gross (DialOS heute)", lambda: mit_vosk(teile)),
                 ("parakeet-v3", lambda: mit_parakeet(teile))]
-    for k, datei in WHISPER_MODELLE.items():
-        erkenner.append((k, lambda d=datei: mit_whisper(teile, d)))
+    for k, datei, extra in WHISPER_LAEUFE:
+        erkenner.append((k, lambda d=datei, x=extra: mit_whisper(teile, d, x)))
     zeilen, details = [], []
     for kennung, lauf in erkenner:
         print(f"  {kennung} ...", flush=True)

@@ -198,6 +198,30 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   schnell wie Vosk und lädt sechsmal schneller.** Welcher Stephan am besten
   versteht, zeigt erst seine Aufnahme am 2026-09-15.
 
+  **Stephans Einkaufszettel (2026-09-15, 10:36) - VOSK VORN.** 36 s, mit
+  Pausengrenze 0,2 s genau 20 Stücke (bei 0,45 s nur 14 - er sprach zügig,
+  Pausen gegen Ende 0,24-0,45 s, innerhalb einer Ware unter 0,15 s):
+
+  | Erkenner | Waren wörtlich | Wortfehler | je Ware |
+  |---|---|---|---|
+  | **Vosk groß (heute)** | **16/20** | **14,8 %** | 0,25 s |
+  | Parakeet v3 | 11/20 | 40,7 % | 0,24 s |
+  | Whisper small | 13/20 | 29,6 % | 6,17 s |
+  | Whisper small `-ac 512` | 13/20 | 29,6 % | 2,02 s |
+  | Whisper turbo `-ac 512` | 13/20 | 40,7 % | 12,99 s |
+
+  **Warum:** Einzelne Wörter ohne Zusammenhang sind nicht die Stärke von
+  Whisper/Parakeet. Parakeet rutscht ins Englische („Faz it?", „Rice",
+  „Cacao"), Whisper erfindet („2 Liter Wildschwein", „Coffee. Coffee.",
+  „Zahnpasta Zahnpasta"). Strenge Wertung zählt auch Schreibweisen
+  („Brocoli", „Jogurt", „500 g") - mit Nachsicht käme Whisper small auf etwa
+  15/20, weiter nicht vor Vosk. Vosks Fehler: Birne(n), „erzähl" (Äpfel),
+  „Monsterwelle" (Mozzarella), „Surimi" (Zucchini) - vor allem Fremdwörter.
+  **Folgerung:** Die Einkaufszettel-Probleme vom 14.09. lagen überwiegend nicht
+  an Vosk, sondern an Aufnahmebeginn, Schlusssatz und Fehl-Schluss - alle am
+  14.09. behoben. Eine Aufnahme, ein Sprecher. Offen: Brief-Absatz (ganze
+  Sätze - dort sind Whisper und Parakeet stärker).
+
 - [x] **Umlaut-Wörter fehlen NICHT im Wortschatz - drei Entscheidungen waren
   wieder offen, alle drei am selben Tag entschieden** (gefunden 2026-09-14 bei Stephans Frage nach Dialekten).
   Jedes Wort, das Vosk seit August als „missing in vocabulary" gemeldet hat,
