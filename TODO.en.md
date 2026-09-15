@@ -199,6 +199,30 @@ finished too, and then move down together. That way no reference breaks.
   times faster.** Which one understands Stephan best only his recording on
   2026-09-15 will show.
 
+  **Stephan's shopping list (2026-09-15, 10:36) - VOSK AHEAD.** 36 s, with a
+  pause threshold of 0.2 s exactly 20 pieces (at 0.45 s only 14 - he spoke
+  briskly, pauses towards the end 0.24-0.45 s, within an item below 0.15 s):
+
+  | Recogniser | Items verbatim | Word errors | per item |
+  |---|---|---|---|
+  | **Vosk big (today)** | **16/20** | **14.8 %** | 0.25 s |
+  | Parakeet v3 | 11/20 | 40.7 % | 0.24 s |
+  | Whisper small | 13/20 | 29.6 % | 6.17 s |
+  | Whisper small `-ac 512` | 13/20 | 29.6 % | 2.02 s |
+  | Whisper turbo `-ac 512` | 13/20 | 40.7 % | 12.99 s |
+
+  **Why:** single words without context are not Whisper's/Parakeet's
+  strength. Parakeet drifts into English ("Faz it?", "Rice", "Cacao"),
+  Whisper invents ("2 Liter Wildschwein", "Coffee. Coffee.", "Zahnpasta
+  Zahnpasta"). Strict scoring also counts spellings ("Brocoli", "Jogurt",
+  "500 g") - leniently Whisper small would reach about 15/20, still not ahead
+  of Vosk. Vosk's errors: Birne(n), "erzähl" (Äpfel), "Monsterwelle"
+  (Mozzarella), "Surimi" (Zucchini) - mostly foreign words. **Conclusion:**
+  the shopping-list problems of 09-14 were mostly not Vosk but recording
+  start, closing phrase and false end - all fixed on 09-14. One recording, one
+  speaker. Open: letter paragraph (whole sentences - where Whisper and
+  Parakeet are stronger).
+
 - [x] **Umlaut words are NOT missing from the vocabulary - three decisions
   were open again, all three decided the same day** (found 2026-09-14 when Stephan asked about dialects). Every
   word Vosk reported as "missing in vocabulary" since August contained ä, ö,
