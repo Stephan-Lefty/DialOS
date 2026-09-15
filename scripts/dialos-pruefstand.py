@@ -417,20 +417,57 @@ def befehle_beschriften():
     return 0
 
 
+def wirkung(dienst, satz):
+    """Was ein Befehlssatz BEWIRKT - Synonyme ("brief schreiben"/"brief erstellen")
+    und die Optik-Umschaltung zaehlen so gleich."""
+    for tabelle, art in ((dienst.DIKTAT_SAETZE, "diktat"), (dienst.DRUCK_SAETZE, "drucken"),
+                         (dienst.AUSKUNFT_SAETZE, "auskunft"), (dienst.HILFE_SAETZE, "hilfe")):
+        if satz in tabelle:
+            return f"{art}:{tabelle[satz]}"
+    if satz in dienst.NOTIZ_SAETZE:
+        return "notiz:" + ":".join(dienst.NOTIZ_SAETZE[satz])
+    if satz in dienst.FOTO_SAETZE:
+        return "foto"
+    worte = satz.split()
+    if dienst.AUSLOESER in worte:
+        for w in worte:
+            if dienst.ZIELE.get(w):
+                return "optik:" + dienst.ZIELE[w]
+    if satz in (dienst.STARTSATZ, dienst.STOPPSATZ):
+        return satz
+    return satz
+
+
 def befehl_entscheiden(dienst, text, hoert_zu, verlauf):
-    """Was der Befehlsdienst mit dieser Aeusserung taete - ohne es zu tun."""
+    """Was der Befehlsdienst mit dieser Aeusserung taete - ohne es zu tun.
+
+    Dieselbe Reihenfolge wie in dialos-sprachbefehl-desktop.py main(): Start,
+    Stopp, exakter Satz oder enthaltener Befehl, zuletzt die Optik-Regel
+    ("umschalten" plus Ziel irgendwo in der Aeusserung). Ergebnis ist die
+    WIRKUNG (siehe wirkung()), "nichts" oder "verworfen:zu laut".
+    """
     worte = text.split()
     satz = " ".join(worte)
     if not hoert_zu:
         if dienst.ist_phrase(satz, dienst.STARTSATZ, ("sprachsteuerung", "starten")):
             return dienst.STARTSATZ if dienst.still_danach(verlauf) else "verworfen:zu laut"
         return "nichts"
+    if dienst.ist_phrase(satz, dienst.STARTSATZ, ("sprachsteuerung", "starten")) or dienst.STARTSATZ in satz:
+        return dienst.STARTSATZ
     if dienst.ist_phrase(satz, dienst.STOPPSATZ, "stoppen"):
         return dienst.STOPPSATZ
-    if dienst.STARTSATZ in satz:
-        return dienst.STARTSATZ
-    befehl = dienst.enthaltener_befehl(worte)
-    return befehl if befehl else "nichts"
+    if satz not in dienst.BEFEHLSSAETZE:
+        genauer = dienst.enthaltener_befehl(worte)
+        if genauer:
+            satz, worte = genauer, genauer.split()
+    w = wirkung(dienst, satz)
+    if w != satz or satz in dienst.BEFEHLSSAETZE:
+        return w
+    if dienst.AUSLOESER in worte:
+        for wort in worte:
+            if dienst.ZIELE.get(wort):
+                return "optik:" + dienst.ZIELE[wort]
+    return "nichts"
 
 
 def befehle_pruefen():
@@ -464,7 +501,7 @@ def befehle_pruefen():
         # Ergebnis hinaus nicht - Vosk liefert erst nach einer Pause ab).
         entscheidung = befehl_entscheiden(dienst, text, info["hoert_zu"],
                                           info.get("pegel_verlauf") or verlauf)
-        gesagt = info["gesagt"]
+        gesagt = info["gesagt"] if info["gesagt"] == "nichts" else wirkung(dienst, info["gesagt"])
         if gesagt == "nichts":
             art = "richtig_nichts" if entscheidung in ("nichts", "verworfen:zu laut") else "falsch_ausgeloest"
         elif entscheidung == gesagt:
