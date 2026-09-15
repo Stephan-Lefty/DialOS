@@ -67,6 +67,7 @@ Details zum jeweiligen Stand stehen im
 - [Hardware](docs/hardware.md) – Referenzgerät, Test-Hardware, WWAN-Anforderungen
 - [Sicherheit & Datenschutz](docs/sicherheit-datenschutz.md) – Autologin, Verschlüsselung, Fernwartung, Versand
 - [Sprachbefehle](docs/sprachbefehle.md) – die Liste aller Sprachbefehle: was das System versteht und was es dann tut
+- [Prüfstand](docs/pruefstand.md) – echte Aufnahmen durch das echte Programm: Erkenner, Mikrofone, Befehle, mit allen Messungen vom 2026-09-15
 - [Sprachsteuerung](docs/sprachsteuerung.md) – STT/TTS-Stack, Intent-Erkennung, Design-Prinzipien
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
@@ -128,6 +129,12 @@ das Erfolg meldet, während es versagt.
 ## Änderungsprotokoll
 
 ### 0.5.1
+
+- **Tagesauswertung Prüfstand** (2026-09-15, Stephan: „Werte alles aus und
+  dokumentiere es genau"): `docs/pruefstand.md` fasst Aufbau, alle Messungen
+  (Erkenner, Mikrofone, Fernseher, Befehls-Messsitzung), die vom Prüfstand
+  gefundenen Fehler, den Stand der Entscheidungen, den Gerätezustand und die
+  Reihenfolge für Mittwoch zusammen.
 
 - **Prüfstand auch für Befehle** (2026-09-15). Der Befehlsdienst schneidet mit
   Schalter jede erkannte Äußerung mit (nur für eine Messsitzung, nur externe

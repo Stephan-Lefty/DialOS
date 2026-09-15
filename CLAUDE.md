@@ -91,7 +91,32 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-14)
+## Aktueller Stand (Stand: 2026-09-15, abends - weiter am Mittwoch 2026-09-17)
+
+**Der 2026-09-15 in einem Absatz - Einzelheiten in
+[docs/pruefstand.md](docs/pruefstand.md), dort auch die Reihenfolge fuer
+Mittwoch.** Stephans Ziel: "ein System ..., was sauber die Befehle umsetzt und
+auf der anderen Seite auch einen Text in deutscher Sprache sauber zu Papier
+bringt". Dafuer gibt es jetzt den **Pruefstand** (`scripts/dialos-pruefstand.py`,
+Aufnahmen nur auf der externen Platte, Stephans Zustimmung fuer seine Stimme).
+Ergebnisse: **Text mit Parakeet, natuerlich gesprochen ("Weg 3")** - 2,8 %
+Wortfehler und alle Satzzeichen richtig (Vosk 12,7 %, keine Punkte);
+entschieden fuer Brief und Notizen, fester Einbau nach einer Probe mit frei
+formuliertem Brief. **Befehle und Einkaufszettel bleiben bei Vosk.** Mit
+Fernseher haelt das USB-Tischmikrofon TONOR TC30 den Text bei 4,2 %, das
+eingebaute faellt auf 9,9 %; Befehle stoert der Fernseher kaum. **Groesster
+offener Fehler der Sprachsteuerung:** Nach jeder Ansage von Anna gehen rund 1,5 s
+verloren, das erste Wort wird verschluckt ("tag haben wir") - Stephans
+Beobachtung, durch die Messsitzung bestaetigt; wird am Mittwoch zuerst
+gebaut. Ausserdem neu an dem Tag: "Satz loeschen"/"Satz wiederholen",
+"Brief erstellen", "Brief als PDF speichern", Dateinamen
+`2026-09-15-1343-Brief.txt`, persoenliches Woerterbuch (nur Geraet),
+"zu laut" erst beim zweiten Mal, Begruessung nennt "Sprachsteuerung starten".
+**Schalter im Admin-Konto:** `parakeet-test` und `pruefstand` an,
+Befehls-Mitschnitt und Mikrofonwahl aus (Tabelle in docs/pruefstand.md,
+Abschnitt 7). Das Nutzerkonto ist unberuehrt.
+
+## Stand vom 2026-09-14
 
 **Wo das Projekt am 2026-09-14 steht.** Der ausfuehrliche Verlauf steht im
 Aenderungsprotokoll in `README.md` unter 0.5.1; hier nur die Lage.

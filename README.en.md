@@ -67,6 +67,7 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 - [Hardware](docs/hardware.en.md) – reference device, test hardware, WWAN requirements
 - [Security & privacy](docs/sicherheit-datenschutz.en.md) – autologin, encryption, remote support, shipping
 - [Voice commands](docs/sprachbefehle.en.md) – the list of all voice commands: what the system understands and what it then does
+- [Test bench](docs/pruefstand.en.md) – real recordings through the real program: recognisers, microphones, commands, with all measurements of 2026-09-15
 - [Voice control](docs/sprachsteuerung.en.md) – STT/TTS stack, intent recognition, design principles
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
@@ -120,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.1
+
+- **Test bench day summary** (2026-09-15, Stephan: evaluate everything and
+  document it precisely): `docs/pruefstand.en.md` summarises setup, all
+  measurements (recognisers, microphones, TV, command session), the bugs the
+  bench found, the state of decisions, the device state and the order for
+  Wednesday.
 
 - **Test bench for commands too** (2026-09-15). With a switch, the command
   service records every recognised utterance (for a measurement session only,
