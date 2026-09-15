@@ -259,3 +259,26 @@ einmal aufgetreten ist:
 - **Danach neu aufnehmen.** Spricht das System selbst, steht seine eigene
   Stimme anschließend in der Aufnahme-Warteschlange. Am 2026-08-17 hat
   sich der Dienst dadurch selbst zurückgeschaltet.
+
+## Prüfstand für Befehle (2026-09-15)
+
+Nach dem Mikrofon-Vergleich beim Diktat (TONOR mit Fernseher 4,2 %, eingebaut
+9,9 %) und Stephans Beobachtung am selben Nachmittag („Die Sprachsteuerung
+reagiert immer, wenn ich was sage … und immer mit es ist zu laut"):
+
+- **Mitschnitt nur für eine Messsitzung:** Mit `~/.config/dialos/pruefstand-befehle`
+  speichert der Befehlsdienst jede Äußerung, die mehr als `[unk]` ergab - den Ton,
+  aus dem das Ergebnis entstand, dazu Zustand (an/aus), Pegelverlauf und
+  Mikrofon - nach `erkenner-vergleich/pruefstand/befehle/` auf der externen
+  Platte. Das schließt Gespräch und Fernseher ein; darum geht es beim Messen.
+  Danach den Schalter wieder entfernen.
+- **Beschriften:** `scripts/dialos-pruefstand.py befehle-beschriften` spielt jeden
+  Mitschnitt vor und fragt, was wirklich gesagt wurde (Befehlssatz oder
+  „nichts").
+- **Prüfen:** `scripts/dialos-pruefstand.py befehle-pruefen` erkennt alle
+  beschrifteten Mitschnitte neu, mit Grammatik und Regeln des Dienstes
+  (`ist_phrase`, `still_danach`, `enthaltener_befehl`), ohne etwas auszuführen,
+  und zählt: richtig, verpasst, falsch ausgelöst, richtig ignoriert, echter
+  Einschaltsatz als „zu laut" verworfen.
+- **Mikrofon zum Vergleich:** `~/.config/dialos/befehl-mikrofon` mit dem Namen
+  einer Quelle; wirkt nach Ab- und Anmelden.

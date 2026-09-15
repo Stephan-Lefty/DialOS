@@ -958,6 +958,51 @@ def mitschrift_schliessen():
 ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
 
 
+# MIKROFON ZUM VERGLEICH (2026-09-15, Pruefstand). Nennt diese Datei eine
+# vorhandene Quelle, hoert der Befehlsdienst dort - fuer den Vergleich mit dem
+# USB-Tischmikrofon TONOR TC30, das beim Diktat mit laufendem Fernseher 4,2 %
+# statt 9,9 % Wortfehler hatte. OHNE Echo-Unterdrueckung: Anna waere zu hoeren,
+# aber waehrend sie spricht, hoert der Dienst ohnehin nicht zu und beginnt die
+# Aufnahme danach neu (siehe aufnahme_verwerfen). Wirkt nach dem Neustart des
+# Dienstes (Ab- und Anmelden).
+MIKROFON_WAHL = os.path.join(os.path.expanduser("~"), ".config", "dialos", "befehl-mikrofon")
+
+# MITSCHNITT FUER DEN PRUEFSTAND (Stephan, 2026-09-15: "Ja, bereite das so vor").
+# NUR MIT SCHALTER, und dann wird JEDE Aeusserung gespeichert, die mehr als
+# "[unk]" ergab - auch Gespraech und Fernseher, genau darum geht es beim Messen.
+# Deshalb: Schalter nur fuer eine Messsitzung setzen und danach entfernen. Nur
+# auf die externe Platte, nie ins Repo. Gespeichert wird das Stueck Ton, aus dem
+# der Erkenner das Ergebnis gebaut hat (seit dem vorigen Ergebnis, hoechstens
+# MITSCHNITT_HOECHSTENS_S), dazu Zustand, Pegelverlauf und Mikrofon.
+MITSCHNITT_SCHALTER = os.path.join(os.path.expanduser("~"), ".config", "dialos", "pruefstand-befehle")
+MITSCHNITT_ORDNER = "/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich/pruefstand/befehle"
+MITSCHNITT_HOECHSTENS_S = 20.0
+
+
+def mitschnitt_an():
+    return (os.path.exists(MITSCHNITT_SCHALTER)
+            and os.path.isdir(os.path.dirname(os.path.dirname(MITSCHNITT_ORDNER))))
+
+
+def mitschnitt_speichern(ton, text, hoert_zu, verlauf, quelle):
+    try:
+        import wave
+        os.makedirs(MITSCHNITT_ORDNER, exist_ok=True)
+        stamm = os.path.join(MITSCHNITT_ORDNER, time.strftime("%Y-%m-%d-%H%M%S")
+                             + ("-an" if hoert_zu else "-aus"))
+        with wave.open(stamm + ".wav", "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(ABTASTRATE)
+            w.writeframes(bytes(ton))
+        with open(stamm + ".json", "w", encoding="utf-8") as f:
+            json.dump({"erkannt": text, "hoert_zu": hoert_zu, "quelle": quelle,
+                       "pegel_verlauf": list(verlauf), "gesagt": None}, f,
+                      ensure_ascii=False, indent=1)
+    except Exception as fehler:
+        melde(f"  Mitschnitt nicht gespeichert: {fehler}")
+
+
 def waehle_mikrofon():
     """Reihenfolge: Echo-bereinigte Quelle, sonst eingebaut, zuletzt Bluetooth.
 
@@ -1002,6 +1047,13 @@ def waehle_mikrofon():
         return None
     namen = [q.get("name", "") for q in quellen
              if q.get("name") and not q["name"].endswith(".monitor")]
+    try:
+        with open(MIKROFON_WAHL, encoding="utf-8") as f:
+            gewuenscht = f.read().strip()
+        if gewuenscht in namen:
+            return gewuenscht
+    except OSError:
+        pass
     if ECHO_QUELLE in namen:
         return ECHO_QUELLE
     eingebaut = [n for n in namen if n.startswith("alsa_input.pci-")]
@@ -1396,6 +1448,9 @@ def main():
     # "Pegel". Wer beide Zahlen gegenueberstellen will, muss dasselbe Mass
     # rechnen.
     pegel_spitze = 0
+    # Ton seit dem letzten Ergebnis - nur fuer den Pruefstand-Mitschnitt.
+    stueck = bytearray()
+    stueck_erkenner = None
 
     try:
         while True:
@@ -1521,6 +1576,14 @@ def main():
                         for i in range(0, len(block) - 1, 2))
             pegel_spitze = max(pegel_spitze, pegel)
             pegel_verlauf.append(pegel)
+            if stueck_erkenner is not erkenner:
+                # Neuer Erkenner (Zustandswechsel, neue Aufnahme): sein
+                # Ergebnis entsteht nur aus Ton ab jetzt.
+                stueck = bytearray()
+                stueck_erkenner = erkenner
+            stueck.extend(block)
+            if len(stueck) > MITSCHNITT_HOECHSTENS_S * 2 * ABTASTRATE:
+                del stueck[:len(block)]
             gesaettigt = pegel >= 32000
             if DEBUG:
                 print(f"\rPegel {100 * pegel / 32768:5.1f} %"
@@ -1552,6 +1615,9 @@ def main():
             if not erkenner.AcceptWaveform(block):
                 continue
             text = json.loads(erkenner.Result()).get("text", "")
+            if text and set(text.split()) != {"[unk]"} and mitschnitt_an():
+                mitschnitt_speichern(stueck, text, hoert_zu, pegel_verlauf, quelle)
+            stueck = bytearray()
             # KEIN "if DEBUG" davor (Fehler vom 2026-08-19). Das ist die
             # wichtigste Zeile des ganzen Protokolls - was der Dienst gehoert
             # hat. Beim Umbau auf "immer protokollieren" blieb der alte

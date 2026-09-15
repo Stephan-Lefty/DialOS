@@ -129,6 +129,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Prüfstand auch für Befehle** (2026-09-15). Der Befehlsdienst schneidet mit
+  Schalter jede erkannte Äußerung mit (nur für eine Messsitzung, nur externe
+  Platte); `dialos-pruefstand.py befehle-beschriften` / `befehle-pruefen`
+  beschriften und erkennen sie mit den Regeln des Dienstes neu. Dazu die Wahl
+  eines anderen Mikrofons für den Befehlsdienst. Offline mit Piper geprüft.
+  Beschrieben in `docs/sprachbefehle.md`.
+
 - **Prüfstand für Diktat und Befehle** (2026-09-15, Stephans Zustimmung zu
   Aufnahmen seiner Stimme). Das Diktat schneidet mit Schalter genau den Ton mit,
   den die Erkenner bekamen (nur externe Platte, nie im Repo);

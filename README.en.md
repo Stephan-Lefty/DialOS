@@ -121,6 +121,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Test bench for commands too** (2026-09-15). With a switch, the command
+  service records every recognised utterance (for a measurement session only,
+  external disk only); `dialos-pruefstand.py befehle-beschriften` /
+  `befehle-pruefen` label them and re-recognise them with the service's rules.
+  Plus a choice of another microphone for the command service. Checked offline
+  with Piper. Described in `docs/sprachbefehle.en.md`.
+
 - **Test bench for dictation and commands** (2026-09-15, Stephan's consent to
   recordings of his voice). With a switch, dictation records exactly the audio
   the recognisers got (external disk only, never in the repo);

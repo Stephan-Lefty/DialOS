@@ -302,7 +302,11 @@ finished too, and then move down together. That way no reference breaks.
     **Open:** voice control with the TV - genuine switch-on attempts are
     rejected (fixed limit 3000 for "silent afterwards"), false alarms while
     off. Next step: TONOR and noise floor for the command service on the test
-    bench (needs short command recordings with consent, not continuous). When building it
+    bench (needs short command recordings with consent, not continuous).
+    **Prepared 2026-09-15:** recording with a switch, labelling,
+    re-recognition, microphone choice for the service. Measurement session
+    pending. **Fundamental question (Stephan):** does DialOS only work in
+    silence - and is it therefore unsuitable outdoors? When building it
     in: model (465 MB) and sherpa-onnx
     for all accounts under /usr/local, sort out packaging and licence (model
     CC-BY-4.0, attribution).

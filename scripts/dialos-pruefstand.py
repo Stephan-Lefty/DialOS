@@ -18,8 +18,10 @@ erkenner-vergleich/pruefstand/, NIE im Repo: Es ist die Stimme des Sprechers,
 und die Texte sind persoenlich. Stephans Zustimmung vom 2026-09-15 gilt fuer
 seine eigenen Aufnahmen; fuer andere Sprecher braucht es eine eigene.
 
-DER BEFEHLSDIENST SCHNEIDET BEWUSST NICHT MIT: Er hoert dauernd zu, ein
-Mitschnitt waere jedes Gespraech im Raum. Fuer Befehle wertet "befehle" die
+DER BEFEHLSDIENST SCHNEIDET NUR IN EINER MESSSITZUNG MIT: Er hoert dauernd zu,
+ein dauernder Mitschnitt waere jedes Gespraech im Raum. Mit dem Schalter
+~/.config/dialos/pruefstand-befehle speichert er jede erkannte Aeusserung -
+Schalter danach wieder entfernen. Ohne Mitschnitt wertet "befehle" die
 Protokolle aus.
 
 Aufruf (mit /usr/bin/python3 - Vosk ist systemweit installiert):
@@ -33,6 +35,15 @@ Aufruf (mit /usr/bin/python3 - Vosk ist systemweit installiert):
         spielt die Faelle durch und misst Wortfehler, Satzzeichen, Befehle
   scripts/dialos-pruefstand.py befehle [--tage N]
         wertet die Protokolle der Sprachsteuerung aus
+
+Befehle (Mitschnitt der Sprachsteuerung mit ~/.config/dialos/pruefstand-befehle,
+nur fuer eine Messsitzung - er speichert JEDE erkannte Aeusserung, auch Gespraech):
+  scripts/dialos-pruefstand.py befehle-beschriften
+        spielt jeden unbeschrifteten Mitschnitt vor und fragt, was gesagt wurde
+        (Befehlssatz, "nichts" fuer Geraeusch/Gespraech/Fernseher, leer = spaeter)
+  scripts/dialos-pruefstand.py befehle-pruefen
+        erkennt alle beschrifteten Mitschnitte neu, mit den Regeln des
+        Befehlsdienstes, und zaehlt: richtig, verpasst, falsch ausgeloest
 """
 
 import difflib
@@ -360,6 +371,118 @@ def befehle(argumente):
     return 0
 
 
+# ------------------------------------------------ Befehls-Mitschnitte ---
+
+BEFEHL_ORDNER = os.path.join(ORDNER, "befehle")
+
+
+def dienst_laden():
+    sys.argv = ["dialos-sprachbefehl-desktop.py"]
+    return laden(os.path.join(BIN, "dialos-sprachbefehl-desktop.py"), "befehlsdienst")
+
+
+def befehle_beschriften():
+    import subprocess
+    dienst = dienst_laden()
+    erlaubt = set(dienst.BEFEHLSSAETZE) | {dienst.STARTSATZ, dienst.STOPPSATZ, "nichts"}
+    dateien = sorted(glob.glob(os.path.join(BEFEHL_ORDNER, "*.json")))
+    offen = []
+    for d in dateien:
+        with open(d, encoding="utf-8") as f:
+            if json.load(f).get("gesagt") is None:
+                offen.append(d)
+    print(f"{len(offen)} unbeschriftete Mitschnitte von {len(dateien)}.")
+    print("Antwort: der gesagte Befehlssatz, 'nichts' (kein Befehl gesagt),")
+    print("Eingabetaste = nochmal anhoeren, 'w' = weiter ohne Beschriftung, 'q' = aufhoeren.\n")
+    for d in offen:
+        with open(d, encoding="utf-8") as f:
+            info = json.load(f)
+        while True:
+            print(f"{os.path.basename(d)[:-5]}  erkannt: {info['erkannt']!r}")
+            subprocess.run(["paplay", d[:-5] + ".wav"])
+            antwort = input("  gesagt: ").strip().lower()
+            if antwort == "q":
+                return 0
+            if antwort == "w":
+                break
+            if not antwort:
+                continue
+            if antwort not in erlaubt:
+                print(f"  unbekannt - einer der Befehlssaetze oder 'nichts'")
+                continue
+            info["gesagt"] = antwort
+            with open(d, "w", encoding="utf-8") as f:
+                json.dump(info, f, ensure_ascii=False, indent=1)
+            break
+    return 0
+
+
+def befehl_entscheiden(dienst, text, hoert_zu, verlauf):
+    """Was der Befehlsdienst mit dieser Aeusserung taete - ohne es zu tun."""
+    worte = text.split()
+    satz = " ".join(worte)
+    if not hoert_zu:
+        if dienst.ist_phrase(satz, dienst.STARTSATZ, ("sprachsteuerung", "starten")):
+            return dienst.STARTSATZ if dienst.still_danach(verlauf) else "verworfen:zu laut"
+        return "nichts"
+    if dienst.ist_phrase(satz, dienst.STOPPSATZ, "stoppen"):
+        return dienst.STOPPSATZ
+    if dienst.STARTSATZ in satz:
+        return dienst.STARTSATZ
+    befehl = dienst.enthaltener_befehl(worte)
+    return befehl if befehl else "nichts"
+
+
+def befehle_pruefen():
+    import vosk
+    import array
+    vosk.SetLogLevel(-1)
+    dienst = dienst_laden()
+    modell = vosk.Model(dienst.MODELL)
+    zaehler = {"richtig": 0, "verpasst": 0, "falsch_ausgeloest": 0, "richtig_nichts": 0,
+               "zu_laut_verworfen_obwohl_gesagt": 0}
+    zeilen = []
+    for d in sorted(glob.glob(os.path.join(BEFEHL_ORDNER, "*.json"))):
+        with open(d, encoding="utf-8") as f:
+            info = json.load(f)
+        if info.get("gesagt") is None:
+            continue
+        with wave.open(d[:-5] + ".wav") as w:
+            daten = w.readframes(w.getnframes())
+        erkenner = vosk.KaldiRecognizer(
+            modell, RATE, dienst.GRAMMATIK_AN if info["hoert_zu"] else dienst.GRAMMATIK_AUS)
+        verlauf = []
+        text = ""
+        for i in range(0, len(daten), BLOCK):
+            block = daten[i:i + BLOCK]
+            werte = array.array("h", block[:len(block) // 2 * 2])
+            verlauf.append(max((abs(x) for x in werte), default=0))
+            if erkenner.AcceptWaveform(block):
+                text = json.loads(erkenner.Result()).get("text", "") or text
+        text = text or json.loads(erkenner.FinalResult()).get("text", "")
+        # Stille nach dem Satz: der Verlauf aus dem Dienst (reicht ueber das
+        # Ergebnis hinaus nicht - Vosk liefert erst nach einer Pause ab).
+        entscheidung = befehl_entscheiden(dienst, text, info["hoert_zu"],
+                                          info.get("pegel_verlauf") or verlauf)
+        gesagt = info["gesagt"]
+        if gesagt == "nichts":
+            art = "richtig_nichts" if entscheidung in ("nichts", "verworfen:zu laut") else "falsch_ausgeloest"
+        elif entscheidung == gesagt:
+            art = "richtig"
+        elif entscheidung == "verworfen:zu laut" and gesagt == dienst.STARTSATZ:
+            art = "zu_laut_verworfen_obwohl_gesagt"
+        else:
+            art = "verpasst" if entscheidung in ("nichts", "verworfen:zu laut") else "falsch_ausgeloest"
+        zaehler[art] += 1
+        zeilen.append((os.path.basename(d)[:-5], gesagt, text, entscheidung, art))
+    for name, gesagt, text, entscheidung, art in zeilen:
+        print(f"{name}  gesagt={gesagt!r:28s} erkannt={text!r:34s} -> {entscheidung:26s} {art}")
+    print()
+    for k, v in zaehler.items():
+        print(f"  {k:32s} {v}")
+    return 0
+
+
 def main():
     a = sys.argv[1:]
     if not a:
@@ -373,6 +496,10 @@ def main():
         return pruefen(a[1:])
     if a[0] == "befehle":
         return befehle(a[1:])
+    if a[0] == "befehle-beschriften":
+        return befehle_beschriften()
+    if a[0] == "befehle-pruefen":
+        return befehle_pruefen()
     print(__doc__.split("Aufruf")[1])
     return 2
 

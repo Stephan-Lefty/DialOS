@@ -213,3 +213,26 @@ occurred:
 - **Restart the recording afterwards.** When the system speaks, its own
   voice ends up in the recording queue. On 2026-08-17 that made the
   service switch itself back.
+
+## Test bench for commands (2026-09-15)
+
+After the microphone comparison for dictation (TONOR with TV 4.2 %, built-in
+9.9 %) and Stephan's observation the same afternoon (voice control reacts
+whenever he says something, always with "zu laut"):
+
+- **Recording only for a measurement session:** with
+  `~/.config/dialos/pruefstand-befehle` the command service stores every
+  utterance that produced more than `[unk]` - the audio the result came from,
+  plus state (on/off), level history and microphone - to
+  `erkenner-vergleich/pruefstand/befehle/` on the external disk. That includes
+  conversation and TV; that is the point of measuring. Remove the switch
+  afterwards.
+- **Labelling:** `scripts/dialos-pruefstand.py befehle-beschriften` plays each
+  recording and asks what was really said (command sentence or "nichts").
+- **Checking:** `scripts/dialos-pruefstand.py befehle-pruefen` re-recognises all
+  labelled recordings with the service's grammar and rules (`ist_phrase`,
+  `still_danach`, `enthaltener_befehl`), executes nothing, and counts: right,
+  missed, falsely triggered, rightly ignored, genuine start sentence rejected as
+  "zu laut".
+- **Microphone for comparison:** `~/.config/dialos/befehl-mikrofon` with a source
+  name; effective after logging out and in.

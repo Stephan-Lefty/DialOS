@@ -302,7 +302,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     mit Fernseher - echte Einschaltversuche werden verworfen (feste Grenze 3000
     für „danach still"), Fehlalarme im Aus-Zustand. Nächster Schritt: TONOR und
     Rauschboden für den Befehlsdienst auf dem Prüfstand (braucht kurze
-    Befehls-Mitschnitte mit Zustimmung, nicht dauernd). Beim festen
+    Befehls-Mitschnitte mit Zustimmung, nicht dauernd). **Vorbereitet
+    2026-09-15:** Mitschnitt mit Schalter, Beschriften, Neu-Erkennen,
+    Mikrofonwahl für den Dienst. Messsitzung steht aus. **Grundsatzfrage
+    (Stephan):** Taugt DialOS nur bei Stille - und damit nicht für draußen? Beim festen
     Einbau: Modell (465 MB) und
     sherpa-onnx für alle Konten nach /usr/local, Paketierung und Lizenz
     (Modell CC-BY-4.0, Namensnennung) klären.
