@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Letter dictation: three bugs from the first complete letter fixed**
+  (2026-09-15). A "diktat … beenden" with a 1.24 s gap (from "bis Ende") ended
+  dictation mid-text - the words now have to follow each other directly.
+  "neuer Absatz" at the end of an utterance and "neue Zeile" were lost in the
+  letter - both preserved now.
+
 - **Recogniser comparison for dictation prepared** (2026-09-14). Commands stay
   with Vosk; for free text (shopping list, notes, letter) Whisper (whisper.cpp)
   and Parakeet TDT 0.6B v3 are measured. `scripts/dialos-erkenner-einrichten.sh`

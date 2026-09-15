@@ -585,7 +585,14 @@ def satzzeichen_setzen(satz):
             text = text.rstrip() + wert
         else:
             text = text.rstrip() + wert + " "
-    return text.strip()
+    # NUR LEERZEICHEN ABSCHNEIDEN, KEINE ZEILENUMBRUECHE (Fehler vom
+    # 2026-09-15, Stephans erster ganzer Brief). Hier stand "text.strip()" -
+    # das entfernte auch das "\n\n", das ein "neuer absatz" am ENDE einer
+    # Aeusserung gerade gesetzt hatte. Im Protokoll: erkannt '... bezahlt punkt
+    # setzen neuer absatz', daraus '... bezahlt.' - und im Brief lief der
+    # naechste Absatz ohne Leerzeile weiter. Mitten in einer Aeusserung ("Herren
+    # komma setzen neuer absatz am zwoelften") ging es, deshalb fiel es nie auf.
+    return text.strip(" ")
 
 
 def schreibung_richten(satz):
@@ -680,6 +687,24 @@ SCHLUSS_SPIELRAUM_S = 0.35
 # Wie lang "Diktat beenden" hoechstens dauert. Liegen die letzten zwei
 # Schlusswoerter weiter auseinander, gehoert das vordere nicht zum Satz.
 SCHLUSS_HOECHSTENS_S = 2.0
+
+# DIE BEIDEN SCHLUSSWOERTER MUESSEN UNMITTELBAR AUFEINANDER FOLGEN (Fehler vom
+# 2026-09-15, Stephans erster ganzer Brief). Mitten im Satz "Ueber eine Antwort
+# bis Ende des Monats" hoerte das kleine Modell "diktat" (37,92-38,31 s) und in
+# "bis Ende" ein "beenden" (39,55-40,19 s) - genau zwei Woerter, in der richtigen
+# Reihenfolge, nach einer Sprechpause. Die Regel "genau diktat beenden" liess es
+# durch, das Diktat endete, und Stephan "konnte den letzten Absatz nicht mehr
+# einsprechen". Zwischen den Woertern lagen 1,24 s. Beim echten Schluss vom
+# 2026-09-14 lagen sie direkt aneinander (8,61 -> 8,61 s). 0,6 s laesst Raum
+# fuer ein langsames "Diktat - beenden".
+SCHLUSS_LUECKE_MAX_S = 0.6
+
+
+def schluss_luecke(worte):
+    """Luecke zwischen "diktat" und "beenden" in Sekunden, oder None."""
+    if len(worte) != 2 or worte[0].get("end") is None or worte[1].get("start") is None:
+        return None
+    return worte[1]["start"] - worte[0]["end"]
 
 
 def schluss_beginn_aus(worte):
@@ -844,9 +869,17 @@ def briefbogen(text):
     # ausgerichtet sind - ein Briefbogen mit zwei Breiten ist keiner. Absaetze
     # bleiben Absaetze: umgebrochen wird je Absatz, nicht ueber den ganzen Text.
     absaetze = []
-    for absatz in text.rstrip().split("\n\n"):
-        einzeln = " ".join(absatz.split())
-        absaetze.append(textwrap.fill(einzeln, breite) if einzeln else "")
+    # strip() statt rstrip(): Seit Absaetze am Aeusserungsende erhalten bleiben
+    # (2026-09-15), kann auch der Anfang mit einem Absatz beginnen - eine
+    # Leerzeile vor der Anrede waere falsch.
+    #
+    # EINZELNE ZEILEN BLEIBEN ERHALTEN (2026-09-15): Ein "\n" im Text kommt nur
+    # noch von einem gesprochenen "neue zeile" (siehe brief_schreiben) und wird
+    # nicht mehr zusammengezogen - umgebrochen wird je Zeile.
+    for absatz in text.strip().split("\n\n"):
+        zeilen = [" ".join(z.split()) for z in absatz.split("\n")]
+        zeilen = [z for z in zeilen if z]
+        absaetze.append("\n".join(textwrap.fill(z, breite) for z in zeilen))
     teile.append("\n\n".join(absaetze))
     teile.append("")
     # Linksbuendig und nicht rechts: Er gehoert zum Brief, nicht zum Briefkopf -
@@ -882,7 +915,12 @@ def brief_schreiben(zeilen):
         except OSError as fehler:
             melde(f"  konnte den vorigen Brief nicht beiseitelegen: {fehler}")
     with open(pfad, "w", encoding="utf-8") as f:
-        f.write(briefbogen("\n".join(zeilen)))
+        # MIT LEERZEICHEN VERBINDEN, NICHT MIT ZEILENUMBRUCH (2026-09-15). Jede
+        # Aeusserung ist ein Stueck desselben Fliesstexts. Mit "\n" verbunden
+        # konnte der Briefbogen einen Stueck-Uebergang nicht von einem
+        # gesprochenen "neue zeile" unterscheiden - und zog beide zusammen: "Mit
+        # freundlichen Gruessen neue zeile Stephan Roesner" stand in einer Zeile.
+        f.write(briefbogen(" ".join(zeilen)))
 
     # JEDER BRIEF WANDERT ALS PDF INS ARCHIV (Stephans Vorgabe vom
     # 2026-08-21). Nicht abwarten und nicht daran scheitern: Der Brief ist als
@@ -1079,6 +1117,11 @@ def diktat_fuehren(zweck, name, quelle):
                     if not pause_davor(pegel_verlauf):
                         melde(f"  Schluss {gehoert!r} verworfen - keine Sprechpause davor "
                               f"(Pegel {mittel:.0f})")
+                        continue
+                    luecke = schluss_luecke(ergebnis_schluss.get("result", []))
+                    if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
+                        melde(f"  Schluss {gehoert!r} verworfen - Woerter nicht zusammenhaengend "
+                              f"({luecke:.2f} s Luecke, erlaubt {SCHLUSS_LUECKE_MAX_S:.1f} s)")
                         continue
                     seit_start = time.time() - aufnahme_seit
                     if seit_start < SCHLUSS_SPERRFRIST_S:

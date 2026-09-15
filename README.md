@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Brief-Diktat: drei Fehler aus dem ersten ganzen Brief behoben** (2026-09-15).
+  Ein „diktat … beenden" mit 1,24 s Lücke (aus „bis Ende") beendete das Diktat
+  mitten im Text - die Wörter müssen jetzt unmittelbar aufeinander folgen.
+  „neuer Absatz" am Ende einer Äußerung und „neue Zeile" gingen im Brief
+  verloren - beides erhalten.
+
 - **Vergleich der Spracherkenner fürs Diktat vorbereitet** (2026-09-14).
   Befehle bleiben bei Vosk; für freien Text (Einkaufszettel, Notizen, Brief)
   werden Whisper (whisper.cpp) und Parakeet TDT 0.6B v3 gemessen.

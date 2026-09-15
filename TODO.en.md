@@ -158,6 +158,28 @@ finished too, and then move down together. That way no reference breaks.
     or a headset provides a key that can be read (media key via Bluetooth
     AVRCP).
 
+- [ ] **Letter dictated in DialOS (2026-09-15, 11:46) - three program bugs
+  found and fixed, proof with a complete letter still pending.**
+  Confirmation "ja" on the first attempt; dictation from the letter template
+  with spoken punctuation.
+  1. **False end in the middle of the text:** the small model heard "diktat"
+     (37.92-38.31 s) and "beenden" (39.55-40.19 s) in "…Antwort bis Ende des
+     Monats". Stephan could not dictate the last paragraph. **Fixed:** both
+     words must follow each other directly (gap at most 0.6 s; here 1.24 s,
+     for the genuine end on 09-14 0.00 s).
+  2. **"neuer Absatz" at the end of an utterance was lost** -
+     `satzzeichen_setzen()` ended with `strip()` and took the "\n\n" along.
+     **Fixed:** only strip spaces.
+  3. **"neue Zeile" was lost in the letter** - utterances were joined with
+     "\n", and the letterhead collapsed every single line break. **Fixed:**
+     join utterances with spaces, wrap line by line.
+  All three checked offline against the logged values; a letterhead built from
+  the spoken sentences now has four paragraphs and the closing on two lines.
+  **Open - Vosk recognition:** "rama setzen mit diesem Bit jeden" (komma setzen
+  mir diesen), "dr muster", "zweihundert vierzig", "Neuer abstatt";
+  Sie/Ihnen/Schreiben lower case. Parakeet recognised the same paragraph with
+  one error in the comparison (see recogniser comparison).
+
 - [ ] **Recogniser comparison for dictation: Vosk against Whisper and
   Parakeet - test on 2026-09-15** (Stephan on 2026-09-14: the shopping list
   is still a headache; are there better speech systems - and: commands as

@@ -156,6 +156,30 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - **D - Knopf statt Einschaltsatz:** prüfen, ob AIRHUG oder ein Headset eine
     Taste liefert, die sich abgreifen lässt (Medientaste über Bluetooth AVRCP).
 
+- [ ] **Brief in DialOS eingesprochen (2026-09-15, 11:46) - drei Programmfehler
+  gefunden und behoben, Beweis mit vollständigem Brief steht aus.** Rückfrage
+  „ja" beim ersten Versuch; Diktat nach Brief-Vorlage mit gesprochenen
+  Satzzeichen.
+  1. **Falscher Schluss mitten im Text:** Das kleine Modell hörte in „…Antwort
+     bis Ende des Monats" ein „diktat" (37,92-38,31 s) und ein „beenden"
+     (39,55-40,19 s). Stephan: „Konnte den letzten Absatz nicht mehr
+     einsprechen". **Behoben:** Die beiden Wörter müssen unmittelbar
+     aufeinander folgen (Lücke höchstens 0,6 s; hier 1,24 s, beim echten
+     Schluss am 14.09. 0,00 s).
+  2. **„neuer Absatz" am Ende einer Äußerung ging verloren** -
+     `satzzeichen_setzen()` schloss mit `strip()` und nahm das „\n\n" mit.
+     **Behoben:** nur noch Leerzeichen abschneiden.
+  3. **„neue Zeile" ging im Brief verloren** - Äußerungen wurden mit „\n"
+     verbunden, der Briefbogen zog jeden einfachen Umbruch zusammen.
+     **Behoben:** Äußerungen mit Leerzeichen verbinden, Zeilen je Zeile
+     umbrechen.
+  Alle drei offline an den Protokollwerten geprüft; ein Briefbogen aus den
+  gesprochenen Sätzen hat jetzt vier Absätze und den Gruß auf zwei Zeilen.
+  **Offen - Vosk-Erkennung:** „rama setzen mit diesem Bit jeden" (komma
+  setzen mir diesen), „dr muster", „zweihundert vierzig", „Neuer abstatt";
+  Sie/Ihnen/Schreiben klein. Parakeet hatte denselben Absatz im Vergleich mit
+  einem Fehler erkannt (siehe Erkenner-Vergleich).
+
 - [ ] **Erkenner-Vergleich fürs Diktat: Vosk gegen Whisper und Parakeet -
   Test am 2026-09-15** (Stephan am 2026-09-14: „Was mir aktuell noch
   Kopfzerbrechen macht ist der Einkaufszettel. Gibt es noch 'bessere'
