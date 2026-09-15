@@ -121,6 +121,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Parakeet test in real letter dictation** (2026-09-15, switchable
+  measurement setup). Vosk keeps control, Parakeet recognises each chunk again
+  from the same recording and supplies the letter text; both texts in the log.
+  Only with `~/.config/dialos/parakeet-test` and the measurement folder - the
+  user account keeps using Vosk. Described in `docs/diktat.en.md`.
+
 - **Personal dictionary for dictation** (2026-09-15, Stephan's choice: on the
   device only). A name that sounds the same but is spelled differently arrives
   wrong - no recogniser can hear that. `~/.config/dialos/woerterbuch.txt` with

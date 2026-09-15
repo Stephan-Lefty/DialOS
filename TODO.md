@@ -276,8 +276,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     („Wort merken"?), Füllen aus den Kundendaten (hängt an deren
     Verschlüsselung). **Zurückgestellt (Stephan, 2026-09-15: „Das mit dem Brief
     und den Kundendaten eintragen machen wir später"):** Brief-Test mit dem
-    Namen am Gerät, Kundendaten eintragen. Danach offen: Parakeet als Erkenner
-    für den Brief.
+    Namen am Gerät, Kundendaten eintragen.
+  - **Parakeet-Test im Diktat (2026-09-15, gebaut, Schalter im Admin-Konto
+    gesetzt):** Probe mit Stephans Stimme steht aus. Danach entscheiden: fest
+    einbauen (Modell nach /usr/local/share, sherpa-onnx für alle Konten) oder
+    verwerfen. Offen: Ziffern ohne Punkt („Am 12 August", „Dr Muster").
   - **„Brief als PDF speichern" am Gerät belegt (2026-09-15, 13:44)**, ebenso
     „Brief erstellen" und die neue Schlussansage. Und zum ersten Mal hat die
     Sprachsteuerung einen Befehl VORGESCHLAGEN: „als pdf speichern" -> „Der

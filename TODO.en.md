@@ -277,8 +277,11 @@ finished too, and then move down together. That way no reference breaks.
     entries by voice ("Wort merken"?), filling from the customer data (depends
     on their encryption). **Postponed (Stephan, 2026-09-15: the letter and
     entering the customer data come later):** letter test with the name on the
-    device, entering the customer data. Open after that: Parakeet as the
-    recogniser for letters.
+    device, entering the customer data.
+  - **Parakeet test in dictation (2026-09-15, built, switch set in the admin
+    account):** test with Stephan's voice pending. Then decide: build in for
+    good (model to /usr/local/share, sherpa-onnx for all accounts) or drop.
+    Open: digits without full stop ("Am 12 August", "Dr Muster").
   - **"Brief als PDF speichern" proven on the device (2026-09-15, 13:44)**, as
     are "Brief erstellen" and the new closing announcement. And for the first
     time voice control SUGGESTED a command: "als pdf speichern" -> "Der Befehl

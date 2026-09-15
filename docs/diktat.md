@@ -799,3 +799,21 @@ gemeint ist. Deshalb wird **nach** der Erkennung korrigiert.
 werden nicht erkannt, sondern geschrieben - sie gehören richtig in die
 Kundendaten und werden von dort übernommen. Das Wörterbuch ist nur für das, was
 jemand spricht.
+
+## Parakeet-Test im echten Diktat (2026-09-15, nur Messaufbau)
+
+Stephan: „Parakeet jetzt testen". Vosk bleibt für alles, was Zeitmarken
+braucht (Sprechpausen, Schluss, „Satz löschen", Gegenprobe). Jedes Stück, das
+Vosk abliefert, erkennt Parakeet noch einmal **aus derselben Aufnahme**, und
+Parakeets Text kommt in den Brief; im Protokoll stehen `VOSK:` und `PARAKEET:`
+untereinander. Eingeschaltet nur für den Brief und nur über die Schalterdatei
+`~/.config/dialos/parakeet-test`; Modell und sherpa-onnx kommen aus
+`erkenner-vergleich/` auf der externen Platte. Fehlt etwas, bleibt es bei Vosk.
+
+- **Parakeet setzt eigene Satzzeichen** - sie werden entfernt, es zählen nur
+  gesprochene. **Gesprochenes „Komma" wurde zum Zeichen** („Herren, setzen"):
+  Steht ein Zeichen direkt vor „setzen", kommt das Wort zurück.
+- **Zahlen als Ziffern** („Am 12 August", „Dr Muster"): Der Punkt nach „12."
+  und „Dr." fällt mit den übrigen Zeichen weg. Offen.
+- Offline (Michael, Echtzeit): Befehle, Streichen und Wiederholen liefen wie mit
+  Vosk; Parakeet 0,12-0,52 s je Stück, Laden 2,1 s.

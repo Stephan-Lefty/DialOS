@@ -775,3 +775,21 @@ meant. So the correction happens **after** recognition.
 signature are not recognised but written - they belong, correct, in the
 customer data and are taken from there. The dictionary is only for what
 someone speaks.
+
+## Parakeet test in real dictation (2026-09-15, measurement setup only)
+
+Stephan: "test Parakeet now". Vosk stays in charge of everything that needs
+timestamps (speech pauses, end, "Satz löschen", cross-check). Every chunk Vosk
+delivers is recognised again by Parakeet **from the same recording**, and
+Parakeet's text goes into the letter; the log shows `VOSK:` and `PARAKEET:`
+one below the other. Enabled only for letters and only via the switch file
+`~/.config/dialos/parakeet-test`; model and sherpa-onnx come from
+`erkenner-vergleich/` on the external disk. If anything is missing, Vosk stays.
+
+- **Parakeet sets its own punctuation** - it is removed, only spoken punctuation
+  counts. **A spoken "Komma" became the symbol** ("Herren, setzen"): if a symbol
+  stands directly before "setzen", the word comes back.
+- **Numbers as digits** ("Am 12 August", "Dr Muster"): the full stop after "12."
+  and "Dr." is removed with the other symbols. Open.
+- Offline (Michael, real time): commands, deleting and repeating worked as with
+  Vosk; Parakeet 0.12-0.52 s per chunk, loading 2.1 s.

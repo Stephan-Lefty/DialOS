@@ -770,10 +770,14 @@ class Aeusserungen:
 
     def __init__(self, name):
         self.name = name
+        # Woerter -> Text, wenn hinzu() ohne Text gerufen wird (Parakeet-Test).
+        self.umschreiben = None
         self.liste = []          # dicts: epoche, worte, eintraege
 
     def hinzu(self, epoche, worte, text=None):
-        text = text if text is not None else " ".join(w["word"] for w in worte)
+        if text is None:
+            text = (self.umschreiben(worte) if self.umschreiben
+                    else " ".join(w["word"] for w in worte))
         if not text.strip():
             return []
         # EIN GESPROCHENES SATZZEICHEN UEBER DIE STUECKGRENZE (2026-09-15,
@@ -1402,6 +1406,89 @@ def aeusserung_verarbeiten(name, text):
 
 
 
+# PARAKEET ALS ZWEITER ERKENNER FUER DEN BRIEF - NUR ZUM TESTEN (Stephan,
+# 2026-09-15: "Parakeet jetzt testen"). Im Vergleich vom selben Morgen lag
+# Parakeet beim Brief bei 3,0 % Wortfehlern, Vosk bei 7,6 % (sauber
+# aufgenommen, ohne gesprochene Satzzeichen).
+#
+# SO GEBAUT, DASS EIN DIKTAT BEIDE MISST: Vosk bleibt fuer alles, was Zeit
+# braucht - Sprechpausen, Schlusssatz, "Satz loeschen", Gegenprobe. Parakeet
+# erkennt jedes Stueck, das Vosk abliefert, noch einmal aus DERSELBEN Aufnahme,
+# und sein Text kommt in den Brief. Beide Texte stehen im Protokoll.
+#
+# EINGESCHALTET NUR UEBER DIE SCHALTERDATEI, und nur fuer den Brief. Modell und
+# sherpa-onnx liegen im Messordner auf der externen Platte (eingerichtet von
+# scripts/dialos-erkenner-einrichten.sh) - im Nutzerkonto gibt es sie nicht.
+# Fehlt etwas, laeuft das Diktat wie bisher mit Vosk.
+PARAKEET_SCHALTER = os.path.join(os.path.expanduser("~"), ".config", "dialos", "parakeet-test")
+PARAKEET_ORDNER = "/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich"
+PARAKEET_MODELL = os.path.join(PARAKEET_ORDNER, "modelle",
+                               "sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8")
+PARAKEET_PAKETE = os.path.join(PARAKEET_ORDNER, "venv", "lib",
+                               f"python{sys.version_info.major}.{sys.version_info.minor}",
+                               "site-packages")
+PARAKEET_RAND_S = 0.3
+
+
+def parakeet_laden():
+    try:
+        if PARAKEET_PAKETE not in sys.path:
+            sys.path.append(PARAKEET_PAKETE)
+        import sherpa_onnx
+        t0 = time.time()
+        m = PARAKEET_MODELL
+        erkenner = sherpa_onnx.OfflineRecognizer.from_transducer(
+            encoder=f"{m}/encoder.int8.onnx", decoder=f"{m}/decoder.int8.onnx",
+            joiner=f"{m}/joiner.int8.onnx", tokens=f"{m}/tokens.txt",
+            num_threads=4, model_type="nemo_transducer")
+        melde(f"  PARAKEET-TEST: Modell geladen in {time.time()-t0:.1f} s")
+        return erkenner
+    except Exception as fehler:
+        melde(f"  PARAKEET-TEST: nicht ladbar, weiter mit Vosk ({fehler})")
+        return None
+
+
+def parakeet_bereinigen(text):
+    """Parakeet setzt eigene Satzzeichen - im Diktat zaehlen nur gesprochene.
+
+    Punkt, Komma usw. fallen weg; Gross- und Kleinschreibung bleibt, sie ist bei
+    Parakeet meist richtig, und die Schreibhilfe macht danach nur noch gross.
+
+    GESPROCHENES "KOMMA" ALS ZEICHEN (offline gefunden, 2026-09-15): Aus "Herren
+    komma setzen" machte Parakeet "Herren, setzen" - das Wort wurde zum Zeichen,
+    und nach dem Entfernen blieb "setzen" im Brief. Steht ein Zeichen direkt vor
+    "setzen" und davor kein Satzzeichen-Wort, kommt das Wort zurueck. "Punkt.
+    Setzen" bleibt dabei, wie es ist.
+    """
+    woerter = {",": "komma", ".": "punkt", "?": "fragezeichen", "!": "ausrufezeichen",
+               ":": "doppelpunkt"}
+
+    def zurueck(m):
+        if m.group(1).lower() in woerter.values():
+            return m.group(0)
+        return f"{m.group(1)} {woerter[m.group(2)]} {m.group(3)}"
+    text = re.sub(r"([\wäöüÄÖÜß]+)\s*([,.?!:])\s+(setzen)\b", zurueck, text, flags=re.IGNORECASE)
+    text = re.sub(r"[.,;:!?\"„“”‚‘’»«()]", " ", text)
+    return " ".join(text.split())
+
+
+def parakeet_erkennen(erkenner, audio, worte):
+    """Erkennt die Zeitspanne der Vosk-Woerter aus der Aufnahme dieser Epoche."""
+    if not worte:
+        return None
+    von = max(0.0, worte[0].get("start", 0) - PARAKEET_RAND_S)
+    bis = worte[-1].get("end", worte[-1].get("start", 0)) + PARAKEET_RAND_S
+    a = int(von * ABTASTRATE) * 2
+    b = min(len(audio), int(bis * ABTASTRATE) * 2)
+    if b - a < ABTASTRATE // 5:
+        return None
+    werte = array.array("h", bytes(audio[a:b - (b - a) % 2]))
+    strom = erkenner.create_stream()
+    strom.accept_waveform(ABTASTRATE, [x / 32768.0 for x in werte])
+    erkenner.decode_stream(strom)
+    return strom.result.text.strip()
+
+
 def diktat_fuehren(zweck, name, quelle):
     import vosk
     vosk.SetLogLevel(-1)
@@ -1423,9 +1510,32 @@ def diktat_fuehren(zweck, name, quelle):
     else:
         melde("  ACHTUNG: kleines Modell fehlt - Schluss nur mit Strg+C")
 
+    parakeet = (parakeet_laden()
+                if name in BRIEF_ZIELE and os.path.exists(PARAKEET_SCHALTER) else None)
+    # Aufnahme der aktuellen Epoche - gleiche Zeitachse wie die Vosk-Woerter.
+    epoche_audio = bytearray()
+
+    def frei_text(worte, vosk_text):
+        """Text fuer den Brief: Parakeets, falls eingeschaltet, sonst Vosks."""
+        if parakeet is None or not worte:
+            return vosk_text
+        t0 = time.time()
+        try:
+            roh = parakeet_erkennen(parakeet, epoche_audio, worte)
+        except Exception as fehler:
+            melde(f"  PARAKEET-TEST: Fehler, Vosk-Text bleibt ({fehler})")
+            return vosk_text
+        if not roh:
+            return vosk_text
+        melde(f"  VOSK:        {vosk_text!r}")
+        melde(f"  PARAKEET:    {roh!r} ({time.time()-t0:.2f} s)")
+        return parakeet_bereinigen(roh) or vosk_text
+
     prozess = None
     gesammelt = []
     aeusserungen = Aeusserungen(name)
+    aeusserungen.umschreiben = lambda worte: frei_text(
+        worte, " ".join(w["word"] for w in worte))
     letzte_aeusserung = time.time()
     # Wo der Schlusssatz in der Aufnahme BEGINNT, in Sekunden. Beide Erkenner
     # bekommen dieselben Bloecke vom selben Anfang an, ihre Zeitmarken sind
@@ -1477,6 +1587,8 @@ def diktat_fuehren(zweck, name, quelle):
             pegel_puffer.append(pegel(block))
             pegel_verlauf.append(pegel_puffer[-1])
             zeitverlauf.append(pegel_puffer[-1])
+            if parakeet is not None:
+                epoche_audio.extend(block)
 
             # EIN BEFEHL WARTET AUF SEINE RUHE DANACH. Erst wenn die halbe
             # Sekunde nach dem letzten Befehlswort aufgenommen ist, wird
@@ -1562,6 +1674,7 @@ def diktat_fuehren(zweck, name, quelle):
                         schluss.SetWords(True)
                         epoche += 1
                         zeitverlauf = []
+                        del epoche_audio[:]
                         pegel_puffer = []
                         letzte_aeusserung = time.time()
                         # Die Sperrfrist fuer den Schluss gilt nach jedem Befehl neu:
@@ -1712,7 +1825,7 @@ def diktat_fuehren(zweck, name, quelle):
                 # das kleine Modell fehlt.
                 melde("  -> Schlusssatz in der freien Erkennung, Diktat endet")
                 break
-            aeusserungen.hinzu(epoche, worte_frei, text)
+            aeusserungen.hinzu(epoche, worte_frei, frei_text(worte_frei, text))
     except KeyboardInterrupt:
         pass
     finally:
@@ -1749,9 +1862,11 @@ def diktat_fuehren(zweck, name, quelle):
     # was sie daraus gemacht hat. Die Wortliste bleibt als Rueckfall, falls
     # keine Zeitmarken vorliegen.
     rest = ""
+    rest_worte = []
     try:
         ergebnis_rest = json.loads(erkenner.FinalResult())
         rest = ergebnis_rest.get("text", "").strip()
+        rest_worte = ergebnis_rest.get("result", [])
         if rest and schluss_beginn is not None and ergebnis_rest.get("result"):
             # Die Zeitmarken ins Protokoll - nur die des Rests. Beim ersten
             # echten Test blieb "Den" stehen, und ohne Zahlen war nicht zu
@@ -1766,6 +1881,7 @@ def diktat_fuehren(zweck, name, quelle):
                 melde(f"  vom Resttext {weg} Wort/Woerter ab dem Schlusssatz "
                       f"abgeschnitten (ab {grenze:.2f} s)")
             rest = " ".join(behalten).strip()
+            rest_worte = rest_worte[:len(behalten)]
     except Exception as fehler:
         melde(f"  Resttext nicht lesbar: {fehler}")
     if rest:
@@ -1773,6 +1889,9 @@ def diktat_fuehren(zweck, name, quelle):
         while worte and worte[-1] in SCHLUSS_WOERTER:
             worte.pop()
         rest = " ".join(worte).strip()
+        rest_worte = rest_worte[:len(worte)]
+        if rest and len(rest_worte) == len(worte):
+            rest = frei_text(rest_worte, rest)
     if rest:
         melde(f"  Resttext aus dem Erkenner: {rest!r}")
         gesammelt += aeusserung_verarbeiten(name, rest)

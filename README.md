@@ -129,6 +129,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Parakeet-Test im echten Brief-Diktat** (2026-09-15, abschaltbarer
+  Messaufbau). Vosk steuert weiter, Parakeet erkennt jedes Stück noch einmal aus
+  derselben Aufnahme und liefert den Brieftext; beide Texte im Protokoll. Nur
+  mit `~/.config/dialos/parakeet-test` und dem Messordner - im Nutzerkonto
+  unverändert Vosk. Beschrieben in `docs/diktat.md`.
+
 - **Persönliches Wörterbuch fürs Diktat** (2026-09-15, Stephans Wahl: nur auf
   dem Gerät). Ein Name, der gleich klingt, aber anders geschrieben wird, kommt
   falsch an - das kann kein Erkenner hören. `~/.config/dialos/woerterbuch.txt`
