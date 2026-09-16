@@ -188,7 +188,8 @@ with Stephan's voice (12:18, first version): 4 of 5 questions on the first try,
 → 8/8 (answer 0.15 s after the last sound), 3/8 → 8/8 (0.4 s). **Test with
 Stephan's voice (12:48): 6 of 6 on the first try** - start, four time and date
 questions without waiting, stop; the fastest answer came about one second after
-"Ansage vorbei".
+"Ansage vorbei". With the faster new announcements
+(13:10) Stephan's verdict: **"It is now like a normal conversation."**
 
 **Side finding:** announcements not yet in the cache (every time of day) start
 speaking only 2.3-2.7 s after the call, cached ones after 0.2 s.

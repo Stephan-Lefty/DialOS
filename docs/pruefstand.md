@@ -194,7 +194,8 @@ Markierung endet 0,64-0,70 s nach dem letzten Ton. Zweite Fassung mit Leser:
 nachgebildet 0/8 → 8/8 (Antwort 0,15 s nach dem letzten Ton), 3/8 → 8/8 (0,4 s).
 **Probe mit Stephans Stimme (12:48): 6 von 6 beim ersten Versuch** - Start,
 vier Uhrzeit- und Datumsfragen ohne Warten, Stopp; die schnellste Antwort kam
-rund eine Sekunde nach „Ansage vorbei".
+rund eine Sekunde nach „Ansage vorbei". Mit den schnelleren neuen Ansagen (13:10)
+Stephans Urteil: **„Es ist jetzt so wie in einem normalen Gespräch."**
 
 **Nebenbefund:** Ansagen, die noch nicht im Speicher liegen (jede Uhrzeit),
 beginnen erst 2,3-2,7 s nach dem Aufruf zu sprechen, gespeicherte nach 0,2 s.

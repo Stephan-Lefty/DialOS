@@ -311,7 +311,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     begrenzt), aufgespielt. Erste Probe 12:18: 4/5 beim ersten Versuch; Rest
     lag an der Markierung, die 0,64-0,70 s nach dem Ton endet → Leser mit
     Zeitstempeln, nachgebildet 0/8 → 8/8. **Probe 12:48: 6/6 beim ersten
-    Versuch, ohne Warten.** Punkt 1 und 2 erledigt.
+    Versuch, ohne Warten.** Punkt 1 und 2 erledigt. Nach den schnelleren
+    Ansagen (13:10) Stephans Urteil: **„Es ist jetzt so wie in einem normalen
+    Gespräch."** Ungeklärt: 13:10:27 kam „brief als wir" an.
     **Neu:** Nicht gespeicherte Ansagen (jede Uhrzeit) sprechen erst 2,3-2,7 s
     nach dem Aufruf (gespeicherte 0,2 s) - Aufwärm-Ansage und frische Piper-
     Synthese. **Erledigt 2026-09-16:** direkt erzeugen und abspielen, 1,4-1,7 s.

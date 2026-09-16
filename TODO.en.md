@@ -311,7 +311,9 @@ finished too, and then move down together. That way no reference breaks.
     desktop-look rule limited), installed. First test 12:18: 4/5 on the first
     try; the rest was due to the marker ending 0.64-0.70 s after the sound →
     reader with timestamps, simulated 0/8 → 8/8. **Test 12:48: 6/6 on the
-    first try, without waiting.** Items 1 and 2 done.
+    first try, without waiting.** Items 1 and 2 done. After the faster
+    announcements (13:10) Stephan's verdict: **"It is now like a normal
+    conversation."** Unresolved: at 13:10:27 "brief als wir" arrived.
     **New:** announcements not in the cache (every time of day) start speaking
     only 2.3-2.7 s after the call (cached 0.2 s) - warm-up announcement and
     fresh Piper synthesis. **Done 2026-09-16:** generate directly and play,
