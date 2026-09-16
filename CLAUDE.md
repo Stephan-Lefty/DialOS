@@ -91,7 +91,32 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-15, abends - weiter am Mittwoch 2026-09-16)
+## Aktueller Stand (Stand: 2026-09-16, abends - weiter am Donnerstag 2026-09-17)
+
+**Der 2026-09-16 in Stichpunkten - Einzelheiten im Aenderungsprotokoll 0.5.1.**
+Luecke nach Annas Ansage geschlossen (Stephan: "wie in einem normalen
+Gespraech"), neue Ansagen schneller, Rueckfall-Antworten und Wetter mit
+menschlicher Formulierung. **Parakeet fest eingebaut** (Modell unter
+/usr/local/share/dialos-parakeet, Laden 12 s statt 33 s), dazu aus zwei echten
+Briefen: "Absatz" allein, Betreff bis Satzende, Anrede-Komma, Gruss-Leerzeile,
+Endungen ueber Vosk+hunspell - Pruefstand jetzt 7 Faelle. **Persoenliche Daten:**
+Formular `~/.config/dialos/persoenliche-daten.txt`, Werkzeug
+`dialos-persoenliche-daten.py`, Brief/Namen/Wetter lesen daraus; **Eingabemaske**
+`dialos-persoenliche-daten-maske.py` auch fuer `nutzer` (pkexec + Hilfsprogramm
+in sbin, polkit-Regel), fester Schritt 6/6 der Einrichtung. Stephan hat seine
+Daten in BEIDEN Konten eingetragen (Werte nie ins Repo). **Befehlsuebersicht**
+"Alle Befehle vorlesen"/"Befehle fuer ..." (49 Saetze). Alles installiert.
+
+**Donnerstag, in dieser Reihenfolge:**
+1. Stephans Test nach Neuanmeldung: "Befehle fuer Briefe", Brief mit Absender und
+   Name aus den Daten, Wetter-Ort aus den Daten - danach ins Protokoll schauen.
+2. polkit-Regel `org.dialos.persoenliche-daten.policy` von Stephan durchsehen lassen.
+3. Brief-Ausbau (TODO oben): Empfaengeradresse einsprechen, als Thunderbird-Kontakt
+   anlegen, Aufbau nach DIN 5008 (Anschriftfeld, Datum 31.08.2026, Falzmarken).
+4. Offen aus dem Tag: Mail-Signatur und Du/Sie aus den Daten, Unterbrechen der
+   langen Befehlsuebersicht, Parakeet-Zahlenfehler ("1229" statt "12629").
+
+## Stand vom 2026-09-15, abends
 
 **Der 2026-09-15 in einem Absatz - Einzelheiten in
 [docs/pruefstand.md](docs/pruefstand.md), dort auch die Reihenfolge fuer
