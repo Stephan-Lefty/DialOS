@@ -618,6 +618,19 @@ vocabulary".** Seit August wurden so "loeschen", "spaeter", "spaet",
 Grammatik und jede Wortschatz-Pruefung uebergibt mit `ensure_ascii=False`.
 Eine Warnung zu einem Wort mit ae/oe/ue/ss-Laut zuerst DARAUF pruefen.
 
+## Nie `paplay --volume` oder stumm abspielen zum Messen (Regel seit 2026-09-16)
+
+**PipeWire merkt sich die Lautstaerke JE PROGRAMMNAME dauerhaft**
+(`~/.local/state/wireplumber/stream-properties`). Am 2026-09-16 habe ich zum
+Messen der Abspielzeit zweimal `paplay --volume=0` aufgerufen - danach war
+`paplay` fuer ALLE auf Lautstaerke 0 gespeichert, und damit jede Ansage aus dem
+Speicher und jede neue Ansage stumm. Stephan: "keine Audio ausgabe". Dieselbe
+Falle wie am 2026-08-24 mit der Stummschaltung. Zum Messen ohne Ton eine eigene
+`--client-name`/`--property=application.name=...` verwenden oder ueber den
+Monitor der Senke messen - nie den echten Programmnamen leise stellen.
+Reparatur, falls es doch passiert: waehrend ein `paplay` laeuft
+`pactl set-sink-input-volume <id> 100%`.
+
 ## Dienste nicht aus Claudes Sitzung heraus testen (Regel seit 2026-09-14)
 
 **Ein DialOS-Dienst, den Claude neu startet, laeuft in Claudes systemd-Einheit
