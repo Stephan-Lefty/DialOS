@@ -314,7 +314,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Versuch, ohne Warten.** Punkt 1 und 2 erledigt.
     **Neu:** Nicht gespeicherte Ansagen (jede Uhrzeit) sprechen erst 2,3-2,7 s
     nach dem Aufruf (gespeicherte 0,2 s) - Aufwärm-Ansage und frische Piper-
-    Synthese; eigener Punkt. **Reihenfolge danach:** 1. Lücke nach Annas Ansage schließen, 2.
+    Synthese. **Erledigt 2026-09-16:** direkt erzeugen und abspielen, 1,4-1,7 s.
+    Offen: mit Bluetooth-Lautsprecher prüfen (Stille statt Aufwärm-Ansage);
+    ein dauerhaft laufendes Piper sparte weitere rund 0,5 s Modell-Laden. **Reihenfolge danach:** 1. Lücke nach Annas Ansage schließen, 2.
     Optik-Regel an die Zusatzwort-Grenze, 3. TONOR-Verstärkung senken (100 %
     übersteuert), dann dieselben 15 Befehle erneut messen. Gefunden: Fehlauslöser
     „auf Windows umschalten" aus Wortsalat (alte Optik-Regel ohne

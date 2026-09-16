@@ -726,6 +726,17 @@ enabled=true` steht schon als dconf-Standardwert in
   spräche DialOS nach einer Tempoänderung teils im alten, teils im neuen
   Tempo. Der Speicher darf jederzeit gelöscht werden, er baut sich neu
   auf.
+  **Neue Sätze seit 2026-09-16 direkt erzeugt:** Jede Uhrzeit ist neu und
+  begann erst 2,3-2,7 s nach dem Aufruf - eine Aufwärm-Ansage „." über
+  speech-dispatcher (0,87 s, Piper lädt das Modell), dann der Satz (0,95 s,
+  Modell zum zweiten Mal), danach im Hintergrund ein drittes Mal für den
+  Speicher. Jetzt erzeugt `dialos-say.py` den Satz einmal mit der
+  Speicher-Kette (`speicher_fuellen(text, warten=True)`) und spielt die Datei
+  sofort - gemessen am Lautsprecherausgang 1,4-1,7 s bis zum ersten Ton, je
+  nach Satzlänge, und der Satz liegt danach im Speicher. Statt der
+  Aufwärm-Ansage läuft **nur bei Bluetooth-Ausgabe** während der Erzeugung
+  0,3 s Stille (`bluetooth_wecken()`). Mit `--lautstaerke` (Start-Ansage) und
+  als Rückfall bleibt der Weg über speech-dispatcher.
 - `dialos-start-ansage.py` ("Michael"): läuft bei jedem Login, begrüßt,
   nennt Datum/Uhrzeit, Akkustände (kontobasiert gefiltert - `nutzer`
   bekommt nur Laptop+Lautsprecher, jedes andere Konto zusätzlich

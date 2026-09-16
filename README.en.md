@@ -122,6 +122,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **New announcements faster** (2026-09-16, side finding of the gap
+  measurement): every time of day started only 2.3-2.7 s after the command -
+  loading the Piper model twice (warm-up announcement and sentence) plus a
+  third generation for the cache. Now generated once, played immediately,
+  cached afterwards: 1.4-1.7 s to the first sound. The warm-up announcement is
+  replaced by 0.3 s of silence, only with Bluetooth output (not yet tested with
+  Bluetooth).
+
 - **No more waiting after announcements** (2026-09-16, Stephan: he always had to
   wait about 1.5 seconds, otherwise the first word was swallowed). Voice control
   reads the microphone continuously with a dedicated reader and discards by time

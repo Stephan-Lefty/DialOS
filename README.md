@@ -130,6 +130,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Neue Ansagen schneller** (2026-09-16, Nebenbefund der Lücken-Messung): Jede
+  Uhrzeit begann erst 2,3-2,7 s nach dem Befehl - zweimal Piper-Modell laden
+  (Aufwärm-Ansage und Satz) plus eine dritte Erzeugung für den Speicher. Jetzt
+  einmal erzeugen, sofort abspielen, liegt danach im Speicher: 1,4-1,7 s bis
+  zum ersten Ton. Die Aufwärm-Ansage ersetzt 0,3 s Stille, nur bei
+  Bluetooth-Ausgabe (mit Bluetooth noch nicht geprüft).
+
 - **Keine Wartezeit mehr nach Ansagen** (2026-09-16, Stephan: „… muss ich immer
   so 1,5 Sekunden warten. Sonst wird das erste Wort verschluckt!"). Die
   Sprachsteuerung liest das Mikrofon mit einem eigenen Leser ununterbrochen aus

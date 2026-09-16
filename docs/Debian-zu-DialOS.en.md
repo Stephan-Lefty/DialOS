@@ -686,6 +686,18 @@ already a dconf default in `01-dialos-defaults`, see step 3.)
   longer found; without that, DialOS would speak partly at the old and
   partly at the new tempo after a tempo change. The cache may be deleted
   at any time, it rebuilds itself.
+  **New sentences generated directly since 2026-09-16:** every time of day
+  is new and started only 2.3-2.7 s after the call - a warm-up
+  announcement "." via speech-dispatcher (0.87 s, Piper loads the model),
+  then the sentence (0.95 s, the model a second time), then a third time in
+  the background for the cache. Now `dialos-say.py` generates the sentence
+  once with the cache chain (`speicher_fuellen(text, warten=True)`) and
+  plays the file immediately - measured at the speaker output 1.4-1.7 s to
+  the first sound, depending on sentence length, and the sentence is cached
+  afterwards. Instead of the warm-up announcement, **only with Bluetooth
+  output** 0.3 s of silence plays during generation (`bluetooth_wecken()`).
+  With `--lautstaerke` (start announcement) and as a fallback the
+  speech-dispatcher route stays.
 - `dialos-start-ansage.py` ("Michael"): runs at every login, greets the
   user, states date/time, battery levels (filtered by account -
   `nutzer` only gets laptop+speaker, every other account also gets

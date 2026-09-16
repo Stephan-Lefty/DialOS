@@ -314,7 +314,10 @@ finished too, and then move down together. That way no reference breaks.
     first try, without waiting.** Items 1 and 2 done.
     **New:** announcements not in the cache (every time of day) start speaking
     only 2.3-2.7 s after the call (cached 0.2 s) - warm-up announcement and
-    fresh Piper synthesis; separate item. **Order afterwards:** 1. close the gap after Anna's
+    fresh Piper synthesis. **Done 2026-09-16:** generate directly and play,
+    1.4-1.7 s. Open: test with a Bluetooth speaker (silence instead of the
+    warm-up announcement); a permanently running Piper would save roughly
+    another 0.5 s of model loading. **Order afterwards:** 1. close the gap after Anna's
     announcement, 2. desktop-look rule under the extra-word limit, 3. lower the
     TONOR gain (100 % clips), then measure the same 15 commands again. Found: false trigger "auf Windows umschalten" from word salad (old
     desktop-look rule without the extra-word limit) - fix after the

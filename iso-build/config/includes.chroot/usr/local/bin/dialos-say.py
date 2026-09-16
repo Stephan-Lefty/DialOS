@@ -278,7 +278,7 @@ def speicher_schluessel(text):
     return hashlib.sha256("\x00".join(teile).encode("utf-8")).hexdigest()[:32]
 
 
-def speicher_fuellen(text):
+def speicher_fuellen(text, warten=False):
     """Legt die Ansage fuer das naechste Mal ab - im Hintergrund.
 
     Bewusst NACH dem Sprechen und ohne darauf zu warten: Der Nutzer soll
@@ -329,9 +329,59 @@ def speicher_fuellen(text):
             f"-t wav {shlex.quote(vorlaeufig)} tempo {shlex.quote(tempo)} norm 2>/dev/null "
             f"&& mv {shlex.quote(vorlaeufig)} {shlex.quote(ziel)}"
         )
+        if warten:
+            subprocess.run(["sh", "-c", befehl], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=20 + len(text) // 10)
+            return ziel if os.path.exists(ziel) else None
         subprocess.Popen(["sh", "-c", befehl],
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                          start_new_session=True)
+    except Exception:
+        pass
+    return None
+
+
+# NEUE ANSAGEN DIREKT ERZEUGEN STATT UEBER SPEECH-DISPATCHER (2026-09-16).
+#
+# Gemessen: Jede Uhrzeit ("Es ist zwoelf Uhr achtundvierzig.") begann erst
+# 2,3-2,7 s nach dem Aufruf zu sprechen, eine gespeicherte Ansage nach 0,2 s. Die
+# Zeit ging so weg: Aufwaerm-Ansage "." ueber speech-dispatcher 0,87 s (Piper
+# laedt das Stimmmodell), dann der Satz 0,95 s (Piper laedt das Modell ZUM ZWEITEN
+# MAL), dazu der Dienst selbst - und danach erzeugte speicher_fuellen() denselben
+# Satz im Hintergrund ein drittes Mal fuer den Speicher.
+#
+# Jetzt wird der Satz einmal mit derselben Kette wie im Speicher erzeugt und sofort
+# abgespielt - er klingt also genau wie jede gespeicherte Ansage und liegt danach
+# im Speicher. Die Aufwaerm-Ansage war nur fuer einen eingeschlafenen Bluetooth-
+# Lautsprecher da (sonst fehlte der Anfang): Sie wird durch einen kurzen stillen
+# Ton ersetzt, der WAEHREND der Erzeugung laeuft - und nur, wenn die Ausgabe
+# wirklich Bluetooth ist. Mit vorgegebener Lautstaerke (Start-Ansage) und als
+# Rueckfall bleibt es beim alten Weg.
+STILLE_WECKTON = os.path.join(SPEICHER, "wecken-stille.wav")
+
+
+def bluetooth_ausgabe():
+    try:
+        senke = subprocess.run(["pactl", "get-default-sink"], capture_output=True,
+                               text=True, timeout=3).stdout.strip()
+        return senke.startswith("bluez")
+    except Exception:
+        return False
+
+
+def bluetooth_wecken():
+    """0,3 s Stille abspielen, ohne zu warten - weckt den Lautsprecher auf."""
+    try:
+        if not os.path.exists(STILLE_WECKTON):
+            import wave
+            os.makedirs(SPEICHER, exist_ok=True)
+            with wave.open(STILLE_WECKTON, "wb") as w:
+                w.setnchannels(1)
+                w.setsampwidth(2)
+                w.setframerate(22050)
+                w.writeframes(bytes(2 * int(22050 * 0.3)))
+        subprocess.Popen(["paplay", STILLE_WECKTON], stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
     except Exception:
         pass
 
@@ -589,6 +639,12 @@ def main():
         # waehrenddessen nicht zu.
         if intensitaet is None and aus_speicher(text):
             return
+        if intensitaet is None:
+            if bluetooth_ausgabe():
+                bluetooth_wecken()
+            if speicher_fuellen(text, warten=True) and aus_speicher(text):
+                return
+            melde("  (direkte Erzeugung fehlgeschlagen - ueber speech-dispatcher)")
         # Kurze "Aufwaerm"-Ansage, damit ein evtl. eingeschlafener
         # Bluetooth-Lautsprecher rechtzeitig aufwacht, bevor der
         # eigentliche Text gesprochen wird (sonst geht der Anfang verloren).
