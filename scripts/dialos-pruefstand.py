@@ -436,7 +436,7 @@ def wirkung(dienst, satz):
     if satz in dienst.FOTO_SAETZE:
         return "foto"
     worte = satz.split()
-    if dienst.AUSLOESER in worte:
+    if dienst.AUSLOESER in worte and satz in dienst.BEFEHLSSAETZE:
         for w in worte:
             if dienst.ZIELE.get(w):
                 return "optik:" + dienst.ZIELE[w]
@@ -470,7 +470,8 @@ def befehl_entscheiden(dienst, text, hoert_zu, verlauf):
     w = wirkung(dienst, satz)
     if w != satz or satz in dienst.BEFEHLSSAETZE:
         return w
-    if dienst.AUSLOESER in worte:
+    if (dienst.AUSLOESER in worte and "[unk]" not in worte
+            and len(worte) <= 3 + getattr(dienst, "ZUSATZWORTE_MAX", 99)):
         for wort in worte:
             if dienst.ZIELE.get(wort):
                 return "optik:" + dienst.ZIELE[wort]

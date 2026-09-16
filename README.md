@@ -130,6 +130,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Keine Wartezeit mehr nach Ansagen** (2026-09-16, Stephan: „… muss ich immer
+  so 1,5 Sekunden warten. Sonst wird das erste Wort verschluckt!"). Die
+  Sprachsteuerung hält die Aufnahme während Ansagen offen und verwirft nur,
+  statt sie neu zu starten; der Rückstand nach eigenen Ansagen wird jetzt auch
+  verworfen. Nachgebildet (`scripts/dialos-ansage-luecke-nachbilden.py`): vorher
+  4 von 8 Fragen angekommen, nachher 8 von 8. Dazu die Optik-Regel an die
+  Zusatzwort-Grenze gebunden (Wortsalat schaltete am 15.09. auf Windows).
+
 - **Tagesauswertung Prüfstand** (2026-09-15, Stephan: „Werte alles aus und
   dokumentiere es genau"): `docs/pruefstand.md` fasst Aufbau, alle Messungen
   (Erkenner, Mikrofone, Fernseher, Befehls-Messsitzung), die vom Prüfstand

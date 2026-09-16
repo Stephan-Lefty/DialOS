@@ -187,6 +187,11 @@ kein Mitschnitt.
 
 ## 8. Reihenfolge für Mittwoch
 
+**Stand 2026-09-16:** Punkt 1 und 2 gebaut, nachgebildet und aufgespielt - vorher
+4 von 8 Fragen nach einer Ansage angekommen, nachher 8 von 8 (auch mit Ansage im
+rohen Mikrofon). Probe mit Stephans Stimme steht aus (wirkt nach Ab- und
+Anmelden).
+
 1. **Lücke nach Annas Ansage schließen** (Befehlsdienst): Aufnahme während der
    Ansage offen lassen und verwerfen, ab ihrem Ende mit 0,3 s Vorlauf auswerten
    - wie beim Diktat seit dem 14.09. Beim rohen TONOR darauf achten, dass Annas

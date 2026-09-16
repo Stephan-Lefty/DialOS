@@ -1035,6 +1035,27 @@ spricht also 3,6 Sekunden gegen ein taubes System. Noetig war sie
 ohnehin nicht mehr: Das Verwerfen und Neubeginnen der Aufnahme nach jedem
 Sprechen verhindert Doppelausloesung vollstaendig.
 
+**Seit 2026-09-16 wird die Aufnahme nicht mehr neu begonnen, sondern bleibt
+offen.** Stephan: „Zwischen der Ansage von Anna und meiner Antwort muss ich
+immer so 1,5 Sekunden warten. Sonst wird das erste Wort verschluckt!" Das
+Neubeginnen kostete 0,7 s Nachhall-Pause, 0,3 s in `aufnahme_starten()` und bis
+zu 0,3 s Abfragetakt. Jetzt liest der Dienst während einer Ansage (Markierung)
+und während eines Diktats weiter und verwirft; hat er selbst länger nicht
+gelesen (eigene Ansage, Umschalt-Skript, Bildschirmfoto), liest er den
+Rückstand weg, bis wieder frischer Ton kommt - nach eigenen Ansagen blieb der
+Rückstand vorher sogar stehen („speichern" nach „Das Bildschirmfoto ist
+gespeichert"). Der letzte Block vor dem Ende der Markierung bleibt an der
+Echo-bereinigten Quelle als Vorlauf; an Quellen ohne Echo-Unterdrückung werden
+stattdessen 0,25 s verworfen. Nachgebildet mit
+`scripts/dialos-ansage-luecke-nachbilden.py` (echter Dienst, echtes Vosk):
+vorher 4 von 8 Fragen bei 0,15/0,3/0,6 s Abstand, nachher 8 von 8, auch mit
+Ansage im rohen Mikrofon.
+
+**Die Optik-Regel** („umschalten" plus Ziel irgendwo in der Äußerung) gilt seit
+2026-09-16 nur noch ohne `[unk]` und mit höchstens zwei Wörtern mehr als „auf
+windows umschalten" - am 15.09. schaltete ein Wortsalat aus zwölf Wörtern auf
+Windows um.
+
 **Der alte Text dazu, weil die Diagnose lehrreich ist:**
 Vorher stand sie auch hinter den Ansagen "Ich höre." und "Ich höre nicht
 mehr." - der Dienst war damit ausgerechnet in den fünf Sekunden nach

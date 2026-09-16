@@ -991,6 +991,26 @@ system for 3.6 seconds. It was not needed anyway: discarding and
 restarting the recording after every utterance prevents double triggering
 completely.
 
+**Since 2026-09-16 the recording is no longer restarted but stays open.**
+Stephan: between Anna's announcement and his answer he always has to wait
+about 1.5 seconds, otherwise the first word is swallowed. The restart cost a
+0.7 s reverberation pause, 0.3 s in `aufnahme_starten()` and up to 0.3 s of
+polling. Now the service keeps reading and discarding during an announcement
+(marker) and during dictation; if it has not read for a while itself (own
+announcement, switch script, screenshot), it reads away the backlog until fresh
+audio arrives - after its own announcements the backlog used to stay
+("speichern" after "Das Bildschirmfoto ist gespeichert"). The last block before
+the marker ends is kept as lead-in on the echo-cancelled source; on sources
+without echo cancellation 0.25 s are discarded instead. Simulated with
+`scripts/dialos-ansage-luecke-nachbilden.py` (real service, real Vosk): before 4
+of 8 questions at 0.15/0.3/0.6 s gap, after 8 of 8, also with the announcement
+in the raw microphone.
+
+**The desktop-look rule** ("umschalten" plus a target anywhere in the utterance)
+applies since 2026-09-16 only without `[unk]` and with at most two words more
+than "auf windows umschalten" - on 09-15 a twelve-word salad switched to
+Windows.
+
 **The old text on it, because the diagnosis is instructive:**
 Before that it also sat behind the announcements "Ich höre." and "Ich
 höre nicht mehr." - which left the service deaf for exactly the five

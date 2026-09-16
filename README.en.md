@@ -122,6 +122,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **No more waiting after announcements** (2026-09-16, Stephan: he always had to
+  wait about 1.5 seconds, otherwise the first word was swallowed). Voice control
+  keeps the recording open during announcements and only discards instead of
+  restarting it; the backlog after its own announcements is now discarded too.
+  Simulated (`scripts/dialos-ansage-luecke-nachbilden.py`): before 4 of 8
+  questions arrived, after 8 of 8. Plus the desktop-look rule bound to the
+  extra-word limit (a word salad switched to Windows on 09-15).
+
 - **Test bench day summary** (2026-09-15, Stephan: evaluate everything and
   document it precisely): `docs/pruefstand.en.md` summarises setup, all
   measurements (recognisers, microphones, TV, command session), the bugs the

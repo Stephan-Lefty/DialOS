@@ -502,9 +502,36 @@ ANSAGE_LAEUFT_SCHON = "Ich höre Dir schon zu."
 # auch auf das Umschalten anzuwenden.
 #
 # Bleibt taub ist damit nur noch: solange das System spricht (ueber die
-# Markierungsdatei) plus NACHHALL_WARTEN_S danach.
-WARTEN_BEIM_SPRECHEN_S = 0.3
-NACHHALL_WARTEN_S = 0.7     # Pause nach dem Sprechen, bevor neu aufgenommen wird
+# Markierungsdatei) - seit 2026-09-16 ohne Pause danach, siehe NACHHALL_ROH_S.
+# DIE AUFNAHME BLEIBT WAEHREND DER ANSAGE OFFEN (2026-09-16).
+#
+# Stephan am 2026-09-15: "Zwischen der Ansage von Anna und meiner Antwort muss ich
+# immer so 1,5 Sekunden warten. Sonst wird das erste Wort verschluckt!" Die
+# Befehls-Messsitzung am selben Tag bestaetigte es: Fast alle Verpasser waren
+# abgeschnittene Anfaenge ("tag haben wir", "datum haben wir"), und im Durchgang,
+# in dem Stephan bewusst wartete, fehlte keiner.
+#
+# Die Zeit steckte hier: Nach jeder Ansage eines anderen Programms (Uhrzeit, Datum,
+# Vorlesen) wurde parec beendet, NACHHALL_WARTEN_S (0,7 s) gewartet, parec neu
+# gestartet (0,3 s Wartezeit in aufnahme_starten, dazu pegel_richten) - plus bis zu
+# 0,3 s Abfragetakt. Nach den EIGENEN Ansagen ("Ich hoere Dir zu", Bildschirmfoto,
+# Umschalten) passierte dagegen gar nichts: Der Ton, der waehrend der Ansage in
+# der Leitung aufgelaufen war, wurde ausgewertet - daher am 15.09. "speichern"
+# direkt nach "Das Bildschirmfoto ist gespeichert".
+#
+# Jetzt, wie beim Diktat seit dem 14.09.: parec laeuft durch. Solange jemand
+# spricht (Markierung) oder ein Diktat laeuft, wird gelesen und verworfen. Hat der
+# Dienst selbst laenger nicht gelesen (eigene Ansage, Umschalt-Skript), wird der
+# Rueckstand weggelesen, bis wieder frischer Ton kommt. Danach sofort ein neuer
+# Erkenner - ohne Pause.
+#
+# NACHHALL NUR BEI QUELLEN OHNE ECHO-UNTERDRUECKUNG: Die bereinigte Quelle rechnet
+# die Ansage heraus. Am TONOR (roh) kam am 15.09. Annas Stimme als "speichern",
+# "loeschen", "notiz" an - dort werden nach der Ansage noch NACHHALL_ROH_S verworfen.
+WARTEN_BEIM_SPRECHEN_S = 0.3   # nur noch, wenn gar keine Aufnahme laeuft
+NACHHALL_ROH_S = 0.25
+STAU_S = 0.5                   # so lange nicht gelesen = Rueckstand wegwerfen
+FRISCH_S = 0.06                # ein Lesen, das so lange wartet, liefert frischen Ton
 SAETTIGUNG_GRENZE = 15      # so viele uebersteuerte Bloecke in Folge = Pegel richten
 PEGEL_ABSTAND_S = 60.0      # hoechstens einmal pro Minute nachregeln
 
@@ -1423,6 +1450,9 @@ def main():
     # haengt, welche der beiden Fristen gilt.
     an_seit = letzte_aktivitaet
     aufnahme_verwerfen = False
+    zuletzt_gelesen = time.time()
+    naechster_block = None
+    zuletzt_verworfen = None
     saettigungen = 0
     letzte_pegelkorrektur = 0.0
     letzter_hinweis = None
@@ -1505,46 +1535,72 @@ def main():
                 if diktat_laeuft() and not diktat_gemeldet:
                     melde("anderer Dienst hoert zu - ich halte mich heraus")
                     diktat_gemeldet = True
+                # Mitlesen und verwerfen statt die Aufnahme anzuhalten - siehe
+                # NACHHALL_ROH_S. Ein read() wartet auf den naechsten Block und ist
+                # damit zugleich der Abfragetakt.
                 aufnahme_verwerfen = True
-                time.sleep(WARTEN_BEIM_SPRECHEN_S)
+                try:
+                    zuletzt_verworfen = prozess.stdout.read(4000)
+                    if not zuletzt_verworfen:
+                        time.sleep(WARTEN_BEIM_SPRECHEN_S)
+                except Exception:
+                    zuletzt_verworfen = None
+                    time.sleep(WARTEN_BEIM_SPRECHEN_S)
+                zuletzt_gelesen = time.time()
                 continue
 
             if diktat_gemeldet and not diktat_laeuft():
                 melde("anderer Dienst fertig - ich hoere wieder zu")
                 diktat_gemeldet = False
 
+            # EIGENE ANSAGE ODER LANGE AKTION: Der Dienst hat nicht gelesen, in der
+            # Leitung steht Ton von waehrend der Ansage. Weglesen, bis ein read()
+            # wieder auf frischen Ton warten muss.
+            if time.time() - zuletzt_gelesen > STAU_S:
+                while True:
+                    t_lesen = time.time()
+                    stueck_alt = prozess.stdout.read(4000)
+                    if not stueck_alt or time.time() - t_lesen > FRISCH_S:
+                        # Dieser Block musste warten, ist also frisch - behalten,
+                        # sonst fehlen dem Nutzer, der sofort spricht, 0,125 s.
+                        naechster_block = stueck_alt or None
+                        break
+                aufnahme_verwerfen = True
+
             if aufnahme_verwerfen:
-                # Waehrend der Pause hat parec weiter aufgezeichnet - unter
-                # anderem die eigene Ansage. Diese Aufzeichnung steht jetzt
-                # in der Warteschlange und wuerde als Naechstes ganz normal
-                # ausgewertet. Genau daran ist der Dienst am 2026-08-17
-                # gescheitert: Er schaltete auf Windows um und 15 Sekunden
-                # spaeter von selbst zurueck.
-                #
-                # Die Markierungsdatei verhindert das Zuhoeren, nicht das
-                # Aufzeichnen. Deshalb wird die Aufnahme hier komplett
-                # verworfen und neu begonnen - ein frischer parec-Prozess
-                # hat keinen Rueckstand.
+                # Nach der Ansage: Was waehrend der Ansage aufgelaufen ist, wurde
+                # oben verworfen (seit 2026-08-17 der Grund fuer diesen Schritt:
+                # Der Dienst schaltete damals auf Windows um und 15 s spaeter
+                # von selbst zurueck). Neu ist, dass parec NICHT mehr neu startet -
+                # das kostete zusammen mit dem Nachhall rund 1,5 s.
                 aufnahme_verwerfen = False
-                try:
-                    prozess.terminate()
-                    prozess.stdout.close()
-                except Exception:
-                    pass
-                # Kurz warten, damit auch der Nachhall der Ansage im Raum
-                # nicht mehr in die neue Aufnahme faellt.
-                time.sleep(NACHHALL_WARTEN_S)
-                prozess = aufnahme_starten(quelle)
+                # DER LETZTE BLOCK VOR DEM ENDE DER MARKIERUNG gehoert zur Zeit NACH
+                # der Ansage: Die Markierung verschwindet mitten in einem Block, und
+                # wer sofort antwortet, spricht schon hinein. Offline gemessen
+                # (2026-09-16): Ohne ihn kam bei 0,15 s Abstand "spaet ist es" an.
+                # An der bereinigten Quelle ist die Ansage darin herausgerechnet.
+                if quelle == ECHO_QUELLE and zuletzt_verworfen and not naechster_block:
+                    naechster_block = zuletzt_verworfen
+                zuletzt_verworfen = None
+                if quelle != ECHO_QUELLE:
+                    naechster_block = None
+                    for _ in range(int(NACHHALL_ROH_S / 0.125 + 0.999)):
+                        prozess.stdout.read(4000)
                 erkenner = vosk.KaldiRecognizer(
                     modell, ABTASTRATE,
                     GRAMMATIK_AN if hoert_zu else GRAMMATIK_AUS)
+                zuletzt_gelesen = time.time()
                 # Immer protokollieren: Diese Zeile erklaert Luecken im
                 # Protokoll. Ohne sie sieht eine Pause zwischen zwei
                 # Befehlen aus wie ein Aussetzer.
-                melde("(Aufnahme nach Sprechpause neu begonnen)")
+                melde("(Ansage vorbei - hoere sofort weiter)")
                 continue
 
-            block = prozess.stdout.read(4000)
+            if naechster_block:
+                block, naechster_block = naechster_block, None
+            else:
+                block = prozess.stdout.read(4000)
+            zuletzt_gelesen = time.time()
             if not block:
                 # parec beendet (z. B. Audiogeraet gewechselt) - neu
                 # aufsetzen statt den Dienst sterben zu lassen.
@@ -1817,7 +1873,16 @@ def main():
 
             # --- Befehle: Schreibtisch ---
             getroffen = False
-            if AUSLOESER in worte:
+            # DIESELBE GRENZE WIE BEI ALLEN ANDEREN BEFEHLEN (2026-09-16). Diese
+            # Regel ist aelter als enthaltener_befehl() und nahm "umschalten" plus
+            # ein Ziel IRGENDWO in der Aeusserung. In der Messsitzung vom 15.09.
+            # schaltete so "welchen windows umschalten windows brief notizen wir es
+            # welchen haben wir" (zwoelf Woerter) auf Windows um. Sie bleibt fuer
+            # verkuerzte Saetze wie "windows umschalten" (am selben Tag echt
+            # gesagt und so erkannt), aber nur ohne [unk] und mit hoechstens
+            # ZUSATZWORTE_MAX Woertern mehr als "auf windows umschalten".
+            if (AUSLOESER in worte and "[unk]" not in worte
+                    and len(worte) <= len("auf windows umschalten".split()) + ZUSATZWORTE_MAX):
                 for wort in worte:
                     ziel = ZIELE.get(wort)
                     if ziel:

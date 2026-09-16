@@ -181,6 +181,11 @@ recording.
 
 ## 8. Order for Wednesday
 
+**State 2026-09-16:** items 1 and 2 built, simulated and installed - before 4 of
+8 questions after an announcement arrived, after 8 of 8 (also with the
+announcement in the raw microphone). Test with Stephan's voice pending
+(effective after logging out and in).
+
 1. **Close the gap after Anna's announcement** (command service): keep the
    recording open during the announcement and discard it, evaluate from its end
    with 0.3 s lead-in - as dictation has done since 09-14. With the raw TONOR
