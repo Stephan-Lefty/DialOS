@@ -2,7 +2,7 @@
 
 # Prüfstand - Messungen vom 2026-09-15
 
-*Stand: Abend des 2026-09-15. Weiter am Mittwoch, 2026-09-17.*
+*Stand: Abend des 2026-09-15. Weiter am Mittwoch, 2026-09-16.*
 
 Stephan am 2026-09-15: „Wir müssen ein System hinbekommen, was sauber die
 Befehle umsetzt und auf der anderen Seite auch einen Text in deutscher Sprache

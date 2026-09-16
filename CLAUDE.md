@@ -91,7 +91,7 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-15, abends - weiter am Mittwoch 2026-09-17)
+## Aktueller Stand (Stand: 2026-09-15, abends - weiter am Mittwoch 2026-09-16)
 
 **Der 2026-09-15 in einem Absatz - Einzelheiten in
 [docs/pruefstand.md](docs/pruefstand.md), dort auch die Reihenfolge fuer
