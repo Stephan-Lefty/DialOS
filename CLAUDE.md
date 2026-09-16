@@ -105,7 +105,10 @@ Formular `~/.config/dialos/persoenliche-daten.txt`, Werkzeug
 `dialos-persoenliche-daten-maske.py` auch fuer `nutzer` (pkexec + Hilfsprogramm
 in sbin, polkit-Regel), fester Schritt 6/6 der Einrichtung. Stephan hat seine
 Daten in BEIDEN Konten eingetragen (Werte nie ins Repo). **Befehlsuebersicht**
-"Alle Befehle vorlesen"/"Befehle fuer ..." (49 Saetze). Alles installiert.
+"Alle Befehle vorlesen"/"Befehle fuer ..." (49 Saetze). **Hintergrund nach
+Jahreszeit:** acht Bilder (3840x2160, hell/dunkel) in /usr/share/backgrounds/dialos,
+`dialos-jahreszeit.py` + Nutzer-Timer, kalendarischer Wechsel (Herbst 23.09. 02:06);
+Admin-Konto auf dunklem Stil. Alles installiert.
 
 **Donnerstag, in dieser Reihenfolge:**
 1. Stephans Test nach Neuanmeldung: "Befehle fuer Briefe", Brief mit Absender und
