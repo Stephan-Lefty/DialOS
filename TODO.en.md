@@ -310,7 +310,8 @@ finished too, and then move down together. That way no reference breaks.
     swallowed beginnings. **2026-09-16: items 1 and 2 built** (recording stays open;
     desktop-look rule limited), installed. First test 12:18: 4/5 on the first
     try; the rest was due to the marker ending 0.64-0.70 s after the sound →
-    reader with timestamps, simulated 0/8 → 8/8. Test with it pending.
+    reader with timestamps, simulated 0/8 → 8/8. **Test 12:48: 6/6 on the
+    first try, without waiting.** Items 1 and 2 done.
     **New:** announcements not in the cache (every time of day) start speaking
     only 2.3-2.7 s after the call (cached 0.2 s) - warm-up announcement and
     fresh Piper synthesis; separate item. **Order afterwards:** 1. close the gap after Anna's

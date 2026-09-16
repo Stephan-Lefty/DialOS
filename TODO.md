@@ -310,7 +310,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     **2026-09-16: Punkt 1 und 2 gebaut** (Aufnahme bleibt offen; Optik-Regel
     begrenzt), aufgespielt. Erste Probe 12:18: 4/5 beim ersten Versuch; Rest
     lag an der Markierung, die 0,64-0,70 s nach dem Ton endet → Leser mit
-    Zeitstempeln, nachgebildet 0/8 → 8/8. Probe damit steht aus.
+    Zeitstempeln, nachgebildet 0/8 → 8/8. **Probe 12:48: 6/6 beim ersten
+    Versuch, ohne Warten.** Punkt 1 und 2 erledigt.
     **Neu:** Nicht gespeicherte Ansagen (jede Uhrzeit) sprechen erst 2,3-2,7 s
     nach dem Aufruf (gespeicherte 0,2 s) - Aufwärm-Ansage und frische Piper-
     Synthese; eigener Punkt. **Reihenfolge danach:** 1. Lücke nach Annas Ansage schließen, 2.
