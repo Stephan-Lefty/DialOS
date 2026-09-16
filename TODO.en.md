@@ -308,8 +308,12 @@ finished too, and then move down together. That way no reference breaks.
     done 17:52** (90 recordings, table in docs/sprachbefehle.en.md): right
     18/21, 17/18, 16/17, 18/19; no executed false trigger; misses almost only
     swallowed beginnings. **2026-09-16: items 1 and 2 built** (recording stays open;
-    desktop-look rule limited), simulated 4/8 → 8/8, installed, test with a
-    real voice pending. **Order afterwards:** 1. close the gap after Anna's
+    desktop-look rule limited), installed. First test 12:18: 4/5 on the first
+    try; the rest was due to the marker ending 0.64-0.70 s after the sound →
+    reader with timestamps, simulated 0/8 → 8/8. Test with it pending.
+    **New:** announcements not in the cache (every time of day) start speaking
+    only 2.3-2.7 s after the call (cached 0.2 s) - warm-up announcement and
+    fresh Piper synthesis; separate item. **Order afterwards:** 1. close the gap after Anna's
     announcement, 2. desktop-look rule under the extra-word limit, 3. lower the
     TONOR gain (100 % clips), then measure the same 15 commands again. Found: false trigger "auf Windows umschalten" from word salad (old
     desktop-look rule without the extra-word limit) - fix after the

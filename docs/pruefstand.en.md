@@ -181,10 +181,15 @@ recording.
 
 ## 8. Order for Wednesday
 
-**State 2026-09-16:** items 1 and 2 built, simulated and installed - before 4 of
-8 questions after an announcement arrived, after 8 of 8 (also with the
-announcement in the raw microphone). Test with Stephan's voice pending
-(effective after logging out and in).
+**State 2026-09-16:** items 1 and 2 built, simulated and installed. First test
+with Stephan's voice (12:18, first version): 4 of 5 questions on the first try,
+"datum haben wir" still lost the beginning - cause measured: the marker ends
+0.64-0.70 s after the last sound. Second version with the reader: simulated 0/8
+→ 8/8 (answer 0.15 s after the last sound), 3/8 → 8/8 (0.4 s). Test with it
+pending.
+
+**Side finding:** announcements not yet in the cache (every time of day) start
+speaking only 2.3-2.7 s after the call, cached ones after 0.2 s.
 
 1. **Close the gap after Anna's announcement** (command service): keep the
    recording open during the announcement and discard it, evaluate from its end

@@ -187,10 +187,15 @@ kein Mitschnitt.
 
 ## 8. Reihenfolge für Mittwoch
 
-**Stand 2026-09-16:** Punkt 1 und 2 gebaut, nachgebildet und aufgespielt - vorher
-4 von 8 Fragen nach einer Ansage angekommen, nachher 8 von 8 (auch mit Ansage im
-rohen Mikrofon). Probe mit Stephans Stimme steht aus (wirkt nach Ab- und
-Anmelden).
+**Stand 2026-09-16:** Punkt 1 und 2 gebaut, nachgebildet und aufgespielt. Erste
+Probe mit Stephans Stimme (12:18, erste Fassung): 4 von 5 Fragen beim ersten
+Versuch, „datum haben wir" verlor noch den Anfang - Ursache gemessen: Die
+Markierung endet 0,64-0,70 s nach dem letzten Ton. Zweite Fassung mit Leser:
+nachgebildet 0/8 → 8/8 (Antwort 0,15 s nach dem letzten Ton), 3/8 → 8/8 (0,4 s).
+Probe damit steht aus.
+
+**Nebenbefund:** Ansagen, die noch nicht im Speicher liegen (jede Uhrzeit),
+beginnen erst 2,3-2,7 s nach dem Aufruf zu sprechen, gespeicherte nach 0,2 s.
 
 1. **Lücke nach Annas Ansage schließen** (Befehlsdienst): Aufnahme während der
    Ansage offen lassen und verwerfen, ab ihrem Ende mit 0,3 s Vorlauf auswerten

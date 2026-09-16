@@ -308,8 +308,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Tabelle in docs/sprachbefehle.md): richtig 18/21, 17/18, 16/17, 18/19;
     kein ausgeführter Fehlauslöser; Verpasser fast nur verschluckte Anfänge.
     **2026-09-16: Punkt 1 und 2 gebaut** (Aufnahme bleibt offen; Optik-Regel
-    begrenzt), nachgebildet 4/8 → 8/8, aufgespielt, Probe mit echter Stimme
-    steht aus. **Reihenfolge danach:** 1. Lücke nach Annas Ansage schließen, 2.
+    begrenzt), aufgespielt. Erste Probe 12:18: 4/5 beim ersten Versuch; Rest
+    lag an der Markierung, die 0,64-0,70 s nach dem Ton endet → Leser mit
+    Zeitstempeln, nachgebildet 0/8 → 8/8. Probe damit steht aus.
+    **Neu:** Nicht gespeicherte Ansagen (jede Uhrzeit) sprechen erst 2,3-2,7 s
+    nach dem Aufruf (gespeicherte 0,2 s) - Aufwärm-Ansage und frische Piper-
+    Synthese; eigener Punkt. **Reihenfolge danach:** 1. Lücke nach Annas Ansage schließen, 2.
     Optik-Regel an die Zusatzwort-Grenze, 3. TONOR-Verstärkung senken (100 %
     übersteuert), dann dieselben 15 Befehle erneut messen. Gefunden: Fehlauslöser
     „auf Windows umschalten" aus Wortsalat (alte Optik-Regel ohne

@@ -1039,17 +1039,25 @@ Sprechen verhindert Doppelausloesung vollstaendig.
 offen.** Stephan: „Zwischen der Ansage von Anna und meiner Antwort muss ich
 immer so 1,5 Sekunden warten. Sonst wird das erste Wort verschluckt!" Das
 Neubeginnen kostete 0,7 s Nachhall-Pause, 0,3 s in `aufnahme_starten()` und bis
-zu 0,3 s Abfragetakt. Jetzt liest der Dienst während einer Ansage (Markierung)
-und während eines Diktats weiter und verwirft; hat er selbst länger nicht
-gelesen (eigene Ansage, Umschalt-Skript, Bildschirmfoto), liest er den
-Rückstand weg, bis wieder frischer Ton kommt - nach eigenen Ansagen blieb der
-Rückstand vorher sogar stehen („speichern" nach „Das Bildschirmfoto ist
-gespeichert"). Der letzte Block vor dem Ende der Markierung bleibt an der
-Echo-bereinigten Quelle als Vorlauf; an Quellen ohne Echo-Unterdrückung werden
-stattdessen 0,25 s verworfen. Nachgebildet mit
-`scripts/dialos-ansage-luecke-nachbilden.py` (echter Dienst, echtes Vosk):
-vorher 4 von 8 Fragen bei 0,15/0,3/0,6 s Abstand, nachher 8 von 8, auch mit
-Ansage im rohen Mikrofon.
+zu 0,3 s Abfragetakt. Nach eigenen Ansagen blieb der Rückstand dagegen stehen
+(„speichern" nach „Das Bildschirmfoto ist gespeichert").
+
+Jetzt liest ein eigener **Leser** (`class Leser`) parec ununterbrochen aus und
+legt jeden Block mit Ankunftszeit ab - auch während die Hauptschleife in
+`sprich()` steht; vorher lief dann der Puffer über, und was verloren ging, war
+nicht zu steuern. Nach jeder Ansage (fremde über die Markierung, eigene über
+„länger als `STAU_S` nicht gelesen") wird **nach Zeit** verworfen: Es bleibt,
+was in den letzten `VORLAUF_MARKE_S` (0,625 s) vor dem Ende der Markierung
+ankam, an Quellen ohne Echo-Unterdrückung `VORLAUF_MARKE_ROH_S` (0,5 s), nach
+einem Diktat nichts. Grund: **Die Markierung endet 0,64-0,70 s nach dem letzten
+hörbaren Ton** (gemessen am Lautsprecherausgang) - Piper hängt die Satzpause
+(`--sentence_silence 0.5`) auch hinter den letzten Satz. Wer in dieser Stille
+antwortete, verlor das erste Wort.
+
+Nachgebildet mit `scripts/dialos-ansage-luecke-nachbilden.py` (echter Dienst,
+echtes Vosk, Antwort ab dem letzten hörbaren Ton): alter Stand 0/8 bei 0,15 s
+und 3/8 bei 0,4 s; mit Leser 8/8, 8/8, bei 1,0 s 7/8 (ein Erkennungsfehler),
+mit Ansage im rohen Mikrofon 8/8.
 
 **Die Optik-Regel** („umschalten" plus Ziel irgendwo in der Äußerung) gilt seit
 2026-09-16 nur noch ohne `[unk]` und mit höchstens zwei Wörtern mehr als „auf

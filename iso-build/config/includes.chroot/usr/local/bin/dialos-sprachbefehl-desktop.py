@@ -119,6 +119,7 @@ import os
 import signal
 import subprocess
 import sys
+import threading
 import time
 
 MODELL = "/usr/local/share/vosk-model-de-small"
@@ -502,7 +503,7 @@ ANSAGE_LAEUFT_SCHON = "Ich höre Dir schon zu."
 # auch auf das Umschalten anzuwenden.
 #
 # Bleibt taub ist damit nur noch: solange das System spricht (ueber die
-# Markierungsdatei) - seit 2026-09-16 ohne Pause danach, siehe NACHHALL_ROH_S.
+# Markierungsdatei) - seit 2026-09-16 ohne Pause danach, siehe VORLAUF_MARKE_S.
 # DIE AUFNAHME BLEIBT WAEHREND DER ANSAGE OFFEN (2026-09-16).
 #
 # Stephan am 2026-09-15: "Zwischen der Ansage von Anna und meiner Antwort muss ich
@@ -525,13 +526,23 @@ ANSAGE_LAEUFT_SCHON = "Ich höre Dir schon zu."
 # Rueckstand weggelesen, bis wieder frischer Ton kommt. Danach sofort ein neuer
 # Erkenner - ohne Pause.
 #
-# NACHHALL NUR BEI QUELLEN OHNE ECHO-UNTERDRUECKUNG: Die bereinigte Quelle rechnet
-# die Ansage heraus. Am TONOR (roh) kam am 15.09. Annas Stimme als "speichern",
-# "loeschen", "notiz" an - dort werden nach der Ansage noch NACHHALL_ROH_S verworfen.
+# QUELLEN OHNE ECHO-UNTERDRUECKUNG: Am TONOR (roh) kam am 15.09. Annas Stimme als
+# "speichern", "loeschen", "notiz" an. Dort wird nur VORLAUF_MARKE_ROH_S der Stille
+# mitgenommen - der Anfang dieser Stille kann noch Nachhall enthalten.
 WARTEN_BEIM_SPRECHEN_S = 0.3   # nur noch, wenn gar keine Aufnahme laeuft
-NACHHALL_ROH_S = 0.25
 STAU_S = 0.5                   # so lange nicht gelesen = Rueckstand wegwerfen
-FRISCH_S = 0.06                # ein Lesen, das so lange wartet, liefert frischen Ton
+# DIE MARKIERUNG ENDET SPAETER ALS DER TON (gemessen 2026-09-16 am Ausgang des
+# Lautsprechers): 0,64 / 0,66 s bei frisch gesprochener, 0,70 s bei gespeicherter
+# Ansage. Das ist die halbe Sekunde Satzpause (--sentence_silence 0.5, seit
+# 14.09.), die Piper auch hinter den LETZTEN Satz haengt, plus Abspielende. Wer
+# in dieser Stille antwortet, verlor das erste Wort - bei Stephans erster Probe
+# des neuen Stands "datum haben wir". Deshalb werden die letzten VORLAUF_MARKE_S
+# vor dem Ende der Markierung mitgenommen: Sie liegen in dieser Stille, von der
+# Ansage ist darin nichts. Dasselbe gilt nach eigenen Ansagen fuer das Ende des
+# Rueckstands - sprich() kehrt erst mit dem Ende der Markierung zurueck.
+VORLAUF_MARKE_S = 0.625
+VORLAUF_MARKE_ROH_S = 0.5
+
 SAETTIGUNG_GRENZE = 15      # so viele uebersteuerte Bloecke in Folge = Pegel richten
 PEGEL_ABSTAND_S = 60.0      # hoechstens einmal pro Minute nachregeln
 
@@ -1331,6 +1342,53 @@ def pegel_richten():
         pass
 
 
+class Leser:
+    """Liest parec IMMER aus, auch waehrend der Dienst spricht (2026-09-16).
+
+    Jeder Block kommt mit seiner Ankunftszeit in einen Vorrat. Waehrend einer
+    eigenen Ansage steht die Hauptschleife in sprich() - vorher las dann niemand,
+    der Puffer lief ueber, und was verloren ging, war nicht zu steuern: In der
+    Nachbildung waren es genau die Wortanfaenge nach "Ich hoere Dir zu". Mit dem
+    Leser bleibt alles da, und nach einer Ansage wird nach ZEIT verworfen
+    (verwerfen_vor), nicht nach dem, was zufaellig im Puffer stand.
+    """
+
+    HOECHSTENS = int(20 / 0.125)        # 20 s Vorrat
+
+    def __init__(self, prozess):
+        self.prozess = prozess
+        self.vorrat = collections.deque(maxlen=self.HOECHSTENS)
+        self.bedingung = threading.Condition()
+        self.ende = False
+        threading.Thread(target=self._lesen, daemon=True).start()
+
+    def _lesen(self):
+        while True:
+            try:
+                block = self.prozess.stdout.read(4000)
+            except Exception:
+                block = b""
+            with self.bedingung:
+                if not block:
+                    self.ende = True
+                    self.bedingung.notify_all()
+                    return
+                self.vorrat.append((time.time(), block))
+                self.bedingung.notify_all()
+
+    def naechster(self, warten_s=1.0):
+        """Naechster Block, oder None (Zeitgrenze oder Ende des Datenstroms)."""
+        with self.bedingung:
+            if not self.vorrat and not self.ende:
+                self.bedingung.wait(warten_s)
+            return self.vorrat.popleft()[1] if self.vorrat else None
+
+    def verwerfen_vor(self, zeitpunkt):
+        with self.bedingung:
+            while self.vorrat and self.vorrat[0][0] < zeitpunkt:
+                self.vorrat.popleft()
+
+
 def aufnahme_starten(quelle):
     # "--latency-msec=30" (2026-09-14): ohne die Angabe kam jeder Befehl rund
     # zwei Sekunden spaeter an - parec puffert ab Werk so lange (gemessen
@@ -1440,6 +1498,7 @@ def main():
     hoert_zu = False
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, GRAMMATIK_AUS)
     prozess = aufnahme_starten(quelle)
+    leser = Leser(prozess)
     letzte_aktivitaet = time.time()
     leer_zeiten = collections.deque()
     pegel_verlauf = collections.deque(maxlen=PEGEL_VERLAUF_BLOECKE)
@@ -1451,8 +1510,7 @@ def main():
     an_seit = letzte_aktivitaet
     aufnahme_verwerfen = False
     zuletzt_gelesen = time.time()
-    naechster_block = None
-    zuletzt_verworfen = None
+    nach_diktat = False
     saettigungen = 0
     letzte_pegelkorrektur = 0.0
     letzter_hinweis = None
@@ -1535,57 +1593,37 @@ def main():
                 if diktat_laeuft() and not diktat_gemeldet:
                     melde("anderer Dienst hoert zu - ich halte mich heraus")
                     diktat_gemeldet = True
-                # Mitlesen und verwerfen statt die Aufnahme anzuhalten - siehe
-                # NACHHALL_ROH_S. Ein read() wartet auf den naechsten Block und ist
-                # damit zugleich der Abfragetakt.
+                # Nicht zuhoeren - der Leser sammelt weiter, danach wird nach Zeit
+                # verworfen (siehe VORLAUF_MARKE_S).
                 aufnahme_verwerfen = True
-                try:
-                    zuletzt_verworfen = prozess.stdout.read(4000)
-                    if not zuletzt_verworfen:
-                        time.sleep(WARTEN_BEIM_SPRECHEN_S)
-                except Exception:
-                    zuletzt_verworfen = None
-                    time.sleep(WARTEN_BEIM_SPRECHEN_S)
-                zuletzt_gelesen = time.time()
+                if diktat_laeuft():
+                    nach_diktat = True
+                time.sleep(0.05)
                 continue
 
             if diktat_gemeldet and not diktat_laeuft():
                 melde("anderer Dienst fertig - ich hoere wieder zu")
                 diktat_gemeldet = False
 
-            # EIGENE ANSAGE ODER LANGE AKTION: Der Dienst hat nicht gelesen, in der
-            # Leitung steht Ton von waehrend der Ansage. Weglesen, bis ein read()
-            # wieder auf frischen Ton warten muss.
+            # EIGENE ANSAGE ODER LANGE AKTION: Die Hauptschleife stand in sprich()
+            # oder im Umschalt-Skript - sprich() kehrt erst mit dem Ende der
+            # Markierung zurueck, also gilt dasselbe wie nach fremden Ansagen.
             if time.time() - zuletzt_gelesen > STAU_S:
-                while True:
-                    t_lesen = time.time()
-                    stueck_alt = prozess.stdout.read(4000)
-                    if not stueck_alt or time.time() - t_lesen > FRISCH_S:
-                        # Dieser Block musste warten, ist also frisch - behalten,
-                        # sonst fehlen dem Nutzer, der sofort spricht, 0,125 s.
-                        naechster_block = stueck_alt or None
-                        break
                 aufnahme_verwerfen = True
 
             if aufnahme_verwerfen:
-                # Nach der Ansage: Was waehrend der Ansage aufgelaufen ist, wurde
-                # oben verworfen (seit 2026-08-17 der Grund fuer diesen Schritt:
-                # Der Dienst schaltete damals auf Windows um und 15 s spaeter
-                # von selbst zurueck). Neu ist, dass parec NICHT mehr neu startet -
-                # das kostete zusammen mit dem Nachhall rund 1,5 s.
+                # Nach der Ansage: Was waehrend der Ansage ankam, wird verworfen
+                # (seit 2026-08-17 der Grund fuer diesen Schritt: Der Dienst
+                # schaltete damals auf Windows um und 15 s spaeter von selbst
+                # zurueck). Seit 2026-09-16 ohne Neustart von parec - das kostete
+                # mit dem Nachhall rund 1,5 s -, und die Stille zwischen letztem Ton
+                # und Ende der Markierung bleibt, damit ein sofort gesprochenes
+                # erstes Wort ankommt. Nach einem Diktat bleibt nichts.
                 aufnahme_verwerfen = False
-                # DER LETZTE BLOCK VOR DEM ENDE DER MARKIERUNG gehoert zur Zeit NACH
-                # der Ansage: Die Markierung verschwindet mitten in einem Block, und
-                # wer sofort antwortet, spricht schon hinein. Offline gemessen
-                # (2026-09-16): Ohne ihn kam bei 0,15 s Abstand "spaet ist es" an.
-                # An der bereinigten Quelle ist die Ansage darin herausgerechnet.
-                if quelle == ECHO_QUELLE and zuletzt_verworfen and not naechster_block:
-                    naechster_block = zuletzt_verworfen
-                zuletzt_verworfen = None
-                if quelle != ECHO_QUELLE:
-                    naechster_block = None
-                    for _ in range(int(NACHHALL_ROH_S / 0.125 + 0.999)):
-                        prozess.stdout.read(4000)
+                vorlauf = (0.0 if nach_diktat else
+                           VORLAUF_MARKE_S if quelle == ECHO_QUELLE else VORLAUF_MARKE_ROH_S)
+                nach_diktat = False
+                leser.verwerfen_vor(time.time() - vorlauf)
                 erkenner = vosk.KaldiRecognizer(
                     modell, ABTASTRATE,
                     GRAMMATIK_AN if hoert_zu else GRAMMATIK_AUS)
@@ -1596,11 +1634,10 @@ def main():
                 melde("(Ansage vorbei - hoere sofort weiter)")
                 continue
 
-            if naechster_block:
-                block, naechster_block = naechster_block, None
-            else:
-                block = prozess.stdout.read(4000)
+            block = leser.naechster()
             zuletzt_gelesen = time.time()
+            if block is None and not leser.ende:
+                continue
             if not block:
                 # parec beendet (z. B. Audiogeraet gewechselt) - neu
                 # aufsetzen statt den Dienst sterben zu lassen.
@@ -1623,6 +1660,7 @@ def main():
                     mikrofon_fehlt_gemeldet = False
                 quelle = neu
                 prozess = aufnahme_starten(quelle)
+                leser = Leser(prozess)
                 erkenner = vosk.KaldiRecognizer(
                     modell, ABTASTRATE,
                     GRAMMATIK_AN if hoert_zu else GRAMMATIK_AUS)

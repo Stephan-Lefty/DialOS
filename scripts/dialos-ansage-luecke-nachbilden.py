@@ -10,12 +10,23 @@ und Sprechdauer wie dialos-say, mit "roh" auch mit Michaels Stimme im Mikrofon)
 und die Auskunft (spricht nach 0,2 s Start). Michael (Piper) spricht acht Uhrzeit-
 und Datumsfragen, jede DELAY s nach dem Ende der vorigen Antwort.
 
-Gemessen am 2026-09-16 (8 Fragen):
-    Abstand        vorher   nachher
-    0,15 s           4/8      8/8
-    0,30 s           4/8      8/8
-    0,60 s           4/8      8/8
-    0,30 s roh       3/8      8/8
+DELAY zaehlt ab dem letzten HOERBAREN Ton - so reagiert ein Mensch. Die
+Markierung endet wie am Geraet NACHLAUF_MARKE_S (0,65 s) spaeter: Piper haengt
+die Satzpause auch hinter den letzten Satz (gemessen 2026-09-16 am Lautsprecher-
+ausgang: 0,64 / 0,66 s frisch, 0,70 s gespeichert).
+
+Gemessen am 2026-09-16 (8 Fragen je Lauf):
+    Abstand        alt (bis 15.09.)   Mittag 16.09.   mit Leser (aufgespielt)
+    0,15 s               0/8               2/8              8/8
+    0,40 s               3/8               4/8              8/8
+    1,00 s                -                 -               7/8 (Erkennungsfehler
+                                                                 "die ist die uhrzeit")
+    0,30 s roh            -                3/8              8/8
+
+Eine erste Fassung dieser Nachbildung zaehlte ab dem Ende der MARKIERUNG und
+meldete schon fuer den Mittagsstand 8/8 - falsch, weil ein Mensch 0,65 s frueher
+antwortet. Laufen mehrere Nachbildungen gleichzeitig, verfaelscht die CPU-Last
+das Zeitverhalten; hoechstens zwei parallel.
 
 Aufruf:  scripts/dialos-ansage-luecke-nachbilden.py DIENST.py DELAY [roh]
          DIENST.py z. B. iso-build/config/includes.chroot/usr/local/bin/dialos-sprachbefehl-desktop.py
@@ -29,6 +40,7 @@ S = tempfile.mkdtemp(prefix="ansage-luecke-")
 MARKE = os.path.join(S, f"marke-{os.getpid()}")
 LOG = os.path.join(S, f"log-{os.getpid()}.txt")
 RATE = 16000
+NACHLAUF_MARKE_S = float(os.environ.get("NACHLAUF_MARKE_S", "0.65"))
 
 _cache = {}
 def piper(text):
@@ -103,13 +115,20 @@ def starten(quelle):
 d.aufnahme_starten = starten
 os.environ["FAKE_MARKE"] = MARKE
 
+ton_ende = []
+
+
 def ansage(text):
     """Wie dialos-say: Marke, Sprechen (mit Echo?), Marke weg."""
     open(MARKE, "w").close()
     a = piper(text)
     if ECHO:
         einplanen(text, time.time(), 0.4)
-    time.sleep(len(a) / RATE + 0.1)
+    # Die Markierung endet am echten Geraet 0,64-0,70 s nach dem letzten Ton
+    # (Satzpause hinter dem letzten Satz, gemessen 2026-09-16) - hier ebenso.
+    time.sleep(len(a) / RATE)
+    ton_ende.append(time.time())      # hier hoert der Nutzer das Ende
+    time.sleep(NACHLAUF_MARKE_S)
     os.remove(MARKE)
 d.sprich = ansage
 auskunft_skript = os.path.join(S, "auskunft-fake.py")
@@ -140,10 +159,11 @@ def regie():
     time.sleep(2.0)
     einplanen(folge[0], time.time())
     for text in folge[1:]:
-        # warten auf Ende einer Ansage (Marke kommt und geht), hoechstens 8 s
+        # DELAY ab dem letzten hoerbaren Ton der naechsten Ansage - so reagiert
+        # ein Mensch; die Markierung endet erst NACHLAUF_MARKE_S spaeter.
+        vorher = len(ton_ende)
         frist = time.time() + 8
-        while not os.path.exists(MARKE) and time.time() < frist: time.sleep(0.01)
-        while os.path.exists(MARKE) and time.time() < frist: time.sleep(0.01)
+        while len(ton_ende) == vorher and time.time() < frist: time.sleep(0.01)
         time.sleep(DELAY)
         einplanen(text, time.time())
         time.sleep(len(piper(text)) / RATE)

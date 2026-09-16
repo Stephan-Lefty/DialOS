@@ -995,16 +995,25 @@ completely.
 Stephan: between Anna's announcement and his answer he always has to wait
 about 1.5 seconds, otherwise the first word is swallowed. The restart cost a
 0.7 s reverberation pause, 0.3 s in `aufnahme_starten()` and up to 0.3 s of
-polling. Now the service keeps reading and discarding during an announcement
-(marker) and during dictation; if it has not read for a while itself (own
-announcement, switch script, screenshot), it reads away the backlog until fresh
-audio arrives - after its own announcements the backlog used to stay
-("speichern" after "Das Bildschirmfoto ist gespeichert"). The last block before
-the marker ends is kept as lead-in on the echo-cancelled source; on sources
-without echo cancellation 0.25 s are discarded instead. Simulated with
-`scripts/dialos-ansage-luecke-nachbilden.py` (real service, real Vosk): before 4
-of 8 questions at 0.15/0.3/0.6 s gap, after 8 of 8, also with the announcement
-in the raw microphone.
+polling. After its own announcements, on the other hand, the backlog stayed
+("speichern" after "Das Bildschirmfoto ist gespeichert").
+
+Now a dedicated **reader** (`class Leser`) reads parec continuously and stores
+every block with its arrival time - also while the main loop is inside
+`sprich()`; before, the buffer then overflowed and what got lost was not under
+control. After every announcement (other programs' via the marker, its own via
+"not read for longer than `STAU_S`") audio is discarded **by time**: what
+arrived in the last `VORLAUF_MARKE_S` (0.625 s) before the marker ended is kept,
+on sources without echo cancellation `VORLAUF_MARKE_ROH_S` (0.5 s), after a
+dictation nothing. Reason: **the marker ends 0.64-0.70 s after the last audible
+sound** (measured at the speaker output) - Piper appends the sentence pause
+(`--sentence_silence 0.5`) after the last sentence too. Anyone answering in that
+silence lost the first word.
+
+Simulated with `scripts/dialos-ansage-luecke-nachbilden.py` (real service, real
+Vosk, answer timed from the last audible sound): old state 0/8 at 0.15 s and
+3/8 at 0.4 s; with the reader 8/8, 8/8, at 1.0 s 7/8 (one recognition error),
+with the announcement in the raw microphone 8/8.
 
 **The desktop-look rule** ("umschalten" plus a target anywhere in the utterance)
 applies since 2026-09-16 only without `[unk]` and with at most two words more
