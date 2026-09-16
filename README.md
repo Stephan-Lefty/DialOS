@@ -130,6 +130,18 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Parakeet fest eingebaut: Brief und Notizen schreibt jetzt Parakeet**
+  (2026-09-16, Stephan: „Ja, bau Parakeet fest ein"). Modell (641 MB) nach
+  `/usr/local/share/dialos-parakeet`, sherpa-onnx systemweit - damit auch im
+  Nutzerkonto. Neues Einrichtungsskript `scripts/dialos-parakeet-einrichten.sh`
+  mit Prüfsummen und Selbsttest, Schritt `15b_parakeet` im Einrichtungslauf.
+  Parakeet ist an, sobald es eingerichtet ist; fehlt es, schreibt Vosk wie
+  vorher. Abschalten je Konto mit `~/.config/dialos/parakeet-aus`. Beide Modelle
+  laden gleichzeitig statt nacheinander (vorher 33 s bis „Ich schreibe mit").
+  Prüfstand nach dem Umbau mit denselben Werten. Lizenz CC-BY-4.0 mit
+  Namensnennung in `docs/lizenzen.md`. Beschrieben in `docs/Debian-zu-DialOS.md`,
+  Abschnitt 15b.
+
 - **Frei diktierter Brief: Parakeet 3,4 %, Vosk 28,8 %** (2026-09-16, letzte
   Probe vor dem festen Einbau). Dazu: Gruß und Name auf eigene Zeilen, und
   beginnt ein Brief mit „Betreff", eine Betreffzeile „Betreff: …" - fett im PDF

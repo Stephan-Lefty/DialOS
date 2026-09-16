@@ -832,7 +832,7 @@ class Aeusserungen:
 
     def __init__(self, name):
         self.name = name
-        # Woerter -> Text, wenn hinzu() ohne Text gerufen wird (Parakeet-Test).
+        # Woerter -> Text, wenn hinzu() ohne Text gerufen wird (mit Parakeet).
         self.umschreiben = None
         self.liste = []          # dicts: epoche, worte, eintraege
 
@@ -851,7 +851,7 @@ class Aeusserungen:
         # "Kommas", das naechste begann mit "Setzen", und beide standen so im
         # Brief. Beginnt ein Stueck mit dem zweiten Wort eines Satzzeichens und
         # endete das vorige mit dem ersten, wird beides zusammen neu verarbeitet.
-        # Beim Parakeet-Test sind die Satzzeichen schon umgesetzt - nichts zu verbinden.
+        # Mit Parakeet sind die Satzzeichen schon umgesetzt - nichts zu verbinden.
         vorher = self.liste[-1] if self.liste and self.umschreiben is None else None
         erstes = text.split()[0].lower() if text.split() else ""
         if (vorher and self.name not in LISTEN_ZIELE and vorher["epoche"] == epoche
@@ -1566,34 +1566,32 @@ def aeusserung_verarbeiten(name, text, satzzeichen_fertig=False):
 
 
 
-# PARAKEET ALS ZWEITER ERKENNER FUER DEN BRIEF - NUR ZUM TESTEN (Stephan,
-# 2026-09-15: "Parakeet jetzt testen"). Im Vergleich vom selben Morgen lag
-# Parakeet beim Brief bei 3,0 % Wortfehlern, Vosk bei 7,6 % (sauber
-# aufgenommen, ohne gesprochene Satzzeichen).
+# PARAKEET SCHREIBT BRIEF UND NOTIZEN (Stephan, 2026-09-16: "Ja, bau Parakeet
+# fest ein"). Getestet seit 2026-09-15 mit der Schalterdatei parakeet-test und
+# dem Pruefstand (docs/pruefstand.md): frei diktierter Brief 3,4 % Wortfehler
+# gegen Vosk 28,8 %, vorgelesener Brief 2,8 % gegen 12,7 %, und alle Satzzeichen
+# richtig - Vosk setzt keine.
 #
-# SO GEBAUT, DASS EIN DIKTAT BEIDE MISST: Vosk bleibt fuer alles, was Zeit
+# SO GEBAUT, DASS VOSK DIE ZEIT FUEHRT: Vosk bleibt fuer alles, was Zeit
 # braucht - Sprechpausen, Schlusssatz, "Satz loeschen", Gegenprobe. Parakeet
 # erkennt jedes Stueck, das Vosk abliefert, noch einmal aus DERSELBEN Aufnahme,
 # und sein Text kommt in den Brief. Beide Texte stehen im Protokoll.
 #
-# EINGESCHALTET NUR UEBER DIE SCHALTERDATEI, fuer Brief und Notizen. Modell und
-# sherpa-onnx liegen im Messordner auf der externen Platte (eingerichtet von
-# scripts/dialos-erkenner-einrichten.sh) - im Nutzerkonto gibt es sie nicht.
-# Fehlt etwas, laeuft das Diktat wie bisher mit Vosk.
-PARAKEET_SCHALTER = os.path.join(os.path.expanduser("~"), ".config", "dialos", "parakeet-test")
-PARAKEET_ORDNER = "/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich"
-PARAKEET_MODELL = os.path.join(PARAKEET_ORDNER, "modelle",
-                               "sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8")
-PARAKEET_PAKETE = os.path.join(PARAKEET_ORDNER, "venv", "lib",
-                               f"python{sys.version_info.major}.{sys.version_info.minor}",
-                               "site-packages")
+# FUER ALLE KONTEN: Modell unter /usr/local/share/dialos-parakeet, sherpa-onnx
+# systemweit (scripts/dialos-parakeet-einrichten.sh). Fehlt etwas, schreibt Vosk
+# wie vor dem 15.09. - das Diktat faellt nie aus, nur weil Parakeet fehlt.
+# Abschalten je Konto mit der Datei ~/.config/dialos/parakeet-aus (fuer
+# Vergleiche auf dem Pruefstand; die Schalterdatei parakeet-test gilt nicht mehr).
+PARAKEET_AUS = os.path.join(os.path.expanduser("~"), ".config", "dialos", "parakeet-aus")
+PARAKEET_MODELL = "/usr/local/share/dialos-parakeet/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8"
 PARAKEET_RAND_S = 0.3
 
 
 def parakeet_laden():
+    if not os.path.isfile(os.path.join(PARAKEET_MODELL, "tokens.txt")):
+        melde(f"  PARAKEET: nicht eingerichtet ({PARAKEET_MODELL} fehlt), Vosk schreibt")
+        return None
     try:
-        if PARAKEET_PAKETE not in sys.path:
-            sys.path.append(PARAKEET_PAKETE)
         import sherpa_onnx
         t0 = time.time()
         m = PARAKEET_MODELL
@@ -1601,10 +1599,10 @@ def parakeet_laden():
             encoder=f"{m}/encoder.int8.onnx", decoder=f"{m}/decoder.int8.onnx",
             joiner=f"{m}/joiner.int8.onnx", tokens=f"{m}/tokens.txt",
             num_threads=4, model_type="nemo_transducer")
-        melde(f"  PARAKEET-TEST: Modell geladen in {time.time()-t0:.1f} s")
+        melde(f"  PARAKEET: Modell geladen in {time.time()-t0:.1f} s")
         return erkenner
     except Exception as fehler:
-        melde(f"  PARAKEET-TEST: nicht ladbar, weiter mit Vosk ({fehler})")
+        melde(f"  PARAKEET: nicht ladbar, Vosk schreibt ({fehler})")
         return None
 
 
@@ -1716,7 +1714,8 @@ MITSCHNITT_SCHALTER = os.path.join(os.path.expanduser("~"), ".config", "dialos",
 MITSCHNITT_ORDNER = "/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich/pruefstand/mitschnitte"
 
 
-def mitschnitt_speichern(ton, epochen, kurz, name, protokoll_ab, ergebnis, pfad, quelle=None):
+def mitschnitt_speichern(ton, epochen, kurz, name, protokoll_ab, ergebnis, pfad, quelle=None,
+                         parakeet=False):
     try:
         import wave
         os.makedirs(MITSCHNITT_ORDNER, exist_ok=True)
@@ -1736,7 +1735,7 @@ def mitschnitt_speichern(ton, epochen, kurz, name, protokoll_ab, ergebnis, pfad,
             json.dump({"name": name, "epochen_ab_s": [e / (2 * ABTASTRATE) for e in epochen],
                        "kurze_bloecke": kurz, "quelle": quelle,
                        "dauer_s": len(ton) / (2 * ABTASTRATE), "ergebnis": ergebnis,
-                       "datei": pfad, "parakeet": os.path.exists(PARAKEET_SCHALTER),
+                       "datei": pfad, "parakeet": parakeet,
                        "protokoll": protokoll}, f, ensure_ascii=False, indent=1)
         melde(f"  Mitschnitt fuer den Pruefstand: {stamm}.wav")
     except Exception as fehler:
@@ -1750,6 +1749,21 @@ def diktat_fuehren(zweck, name, quelle):
     # Wartezeit ansagen, statt den Nutzer in die Stille sprechen zu lassen.
     melde(f"=== Diktat gestartet ({zweck}, {name}), Quelle {quelle} ===")
     sprich(ANSAGE_LADEN)
+    # BEIDE MODELLE GLEICHZEITIG LADEN: Nacheinander dauerte es am 2026-09-16
+    # 33 s bis "Ich schreibe mit" (Vosk 12 s, Parakeet 17 s von der externen
+    # Platte). Vosk laedt ueber cffi und gibt dabei den Python-Lock frei, beide
+    # laufen also wirklich nebeneinander. Brief und Notizen (Stephan, 2026-09-15:
+    # "Ja, Notizen auch zu Parakeet") - beides sind ganze Saetze. Der
+    # Einkaufszettel bleibt bei Vosk: Einzelne Waren traf Vosk 16 von 20,
+    # Parakeet 11 (es kippte bei Einzelwoertern ins Englische).
+    parakeet_geladen = {}
+    parakeet_faden = None
+    if name not in LISTEN_ZIELE and not os.path.exists(PARAKEET_AUS):
+        parakeet_faden = threading.Thread(
+            target=lambda: parakeet_geladen.update(erkenner=parakeet_laden()), daemon=True)
+        parakeet_faden.start()
+    elif name not in LISTEN_ZIELE:
+        melde(f"  PARAKEET: abgeschaltet ({PARAKEET_AUS}), Vosk schreibt")
     t0 = time.time()
     modell = vosk.Model(MODELL_GROSS)
     melde(f"  grosses Modell geladen in {time.time()-t0:.1f} s")
@@ -1764,10 +1778,6 @@ def diktat_fuehren(zweck, name, quelle):
     else:
         melde("  ACHTUNG: kleines Modell fehlt - Schluss nur mit Strg+C")
 
-    # Brief UND Notizen (Stephan, 2026-09-15: "Ja, Notizen auch zu Parakeet") -
-    # beides sind ganze Saetze. Der Einkaufszettel bleibt bei Vosk: Einzelne
-    # Waren traf Vosk 16 von 20, Parakeet 11 (es kippte bei Einzelwoertern ins
-    # Englische).
     # Geprueft wird der Messordner (erkenner-vergleich), nicht "pruefstand" darin -
     # den legt erst der erste Mitschnitt an. So stand es zuerst, und Stephans
     # erste Aufnahme am 2026-09-15 (15:20) wurde deshalb nicht gespeichert.
@@ -1782,8 +1792,9 @@ def diktat_fuehren(zweck, name, quelle):
         protokoll_ab = os.path.getsize(PROTOKOLL)
     except OSError:
         protokoll_ab = 0
-    parakeet = (parakeet_laden()
-                if name not in LISTEN_ZIELE and os.path.exists(PARAKEET_SCHALTER) else None)
+    if parakeet_faden is not None:
+        parakeet_faden.join()
+    parakeet = parakeet_geladen.get("erkenner")
     # Aufnahme der aktuellen Epoche - gleiche Zeitachse wie die Vosk-Woerter.
     epoche_audio = bytearray()
 
@@ -1792,14 +1803,14 @@ def diktat_fuehren(zweck, name, quelle):
         if parakeet is None:
             return vosk_text
         if not worte:
-            # Rueckfall im Parakeet-Test: Die Aeusserung gilt als fertig
+            # Rueckfall: Die Aeusserung gilt als fertig
             # gesetzt, also die gesprochenen Satzzeichen hier umsetzen.
             return satzzeichen_setzen(vosk_text)
         t0 = time.time()
         try:
             roh = parakeet_erkennen(parakeet, epoche_audio, worte)
         except Exception as fehler:
-            melde(f"  PARAKEET-TEST: Fehler, Vosk-Text bleibt ({fehler})")
+            melde(f"  PARAKEET: Fehler, Vosk-Text bleibt ({fehler})")
             return satzzeichen_setzen(vosk_text)
         if not roh:
             return satzzeichen_setzen(vosk_text)
@@ -2188,7 +2199,8 @@ def diktat_fuehren(zweck, name, quelle):
 
     if not gesammelt:
         if mitschnitt is not None:
-            mitschnitt_speichern(mitschnitt, mitschnitt_epochen, mitschnitt_kurz, name, protokoll_ab, [], None, quelle)
+            mitschnitt_speichern(mitschnitt, mitschnitt_epochen, mitschnitt_kurz, name, protokoll_ab, [], None, quelle,
+                                 parakeet is not None)
         sprich(ANSAGE_LEER)
         return 0
 
@@ -2196,7 +2208,8 @@ def diktat_fuehren(zweck, name, quelle):
             else notiz_schreiben(name, gesammelt))
     melde(f"  geschrieben nach {pfad}")
     if mitschnitt is not None:
-        mitschnitt_speichern(mitschnitt, mitschnitt_epochen, mitschnitt_kurz, name, protokoll_ab, gesammelt, pfad, quelle)
+        mitschnitt_speichern(mitschnitt, mitschnitt_epochen, mitschnitt_kurz, name, protokoll_ab, gesammelt, pfad, quelle,
+                             parakeet is not None)
     # SAETZE ZAEHLEN, NICHT STUECKE (2026-09-15): Der Brief mit elf Saetzen
     # meldete "3 Sätze" - gezaehlt wurden die Stuecke der Erkennung.
     anzahl = len(gesammelt)

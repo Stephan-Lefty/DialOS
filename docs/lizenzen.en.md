@@ -88,11 +88,21 @@ The most delicate part, because models and datasets are shipped here and
 | `vosk-model-small-de-0.15` | command recognition | Apache 2.0 |
 | `vosk-model-de-0.21` | dictation | Apache 2.0 |
 | `vosk-model-de-tuda-0.6-900k` | dictation (alternative) | Apache 2.0 |
+| [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) 1.13.8 | text recognition in dictation (since 2026-09-16) | Apache 2.0; includes ONNX Runtime (MIT) |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), int8 version by sherpa-onnx | text for letters and notes | **CC-BY-4.0** |
 
 **CC0** means public domain - no conditions, commercial use included.
 **Apache 2.0** permits commercial use and adds an explicit patent
 licence. Every model used here may therefore ship on devices that are
 sold.
+
+**CC-BY-4.0** (Parakeet) permits commercial use and modification but requires
+**attribution**: author, licence and a note on changes. For DialOS:
+*"Parakeet TDT 0.6B v3" by NVIDIA, licensed under CC-BY-4.0
+(https://creativecommons.org/licenses/by/4.0/); converted to ONNX and quantised
+to int8 by the sherpa-onnx project (k2-fsa), used unchanged in DialOS.* This
+notice also belongs in the licence overview on the device once it exists
+(TODO.en.md).
 
 These statements come from the sources themselves: the `MODEL_CARD`
 files next to the Piper voices' `.onnx` files, and the model overview at

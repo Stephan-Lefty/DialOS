@@ -16,6 +16,21 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Kompletter Brief nach DIN 5008** (Stephan, 2026-09-16, nach dem festen
+  Einbau von Parakeet). (1) Persönliche Daten des Nutzers - zuerst Stephans -
+  einmal fest für alle Programme festlegen und eintragen (Briefbogen,
+  Thunderbird-Signatur, Wetter-Ort; hängt an den Kundendaten und deren
+  Verschlüsselung). (2) Die genaue Empfängeradresse wird eingesprochen.
+  (3) Diese Adresse wird automatisch als Kontakt in Thunderbird angelegt.
+  (4) Aufbau nach DIN 5008, damit das PDF immer sauber ist - ob gedruckt oder
+  per Mail verschickt (Anschriftfeld für Fensterumschlag, Bezugszeichen/Datum,
+  Betreff, Falzmarken). Persönliche Daten nur auf dem Gerät, neue Daten fürs
+  Repo erst fragen.
+
+- [ ] **Lizenzhinweis für Parakeet am Gerät** (2026-09-16): CC-BY-4.0 verlangt
+  Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
+  Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
+
 - [ ] **EIN GESPRÄCH IM RAUM HAT DIALOS BEDIENT - mit Druck, Diktat und
   Archiv** (2026-09-14, 11:01-11:31, während Stephans Pause). Der
   schwerwiegendste Befund bisher, weil er nicht nur stört, sondern **fremde
@@ -317,8 +332,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     **Rückfall-Antworten gebaut (2026-09-16):** Standard-Antwort, „Was kann ich
     sagen", ehrliche Antworten mit WUNSCH-Zählung, Wetter mit Rückfall-Ort und
     menschlicher Formulierung. **Frei diktierter Brief 13:35: Parakeet 3,4 %,
-    Vosk 28,8 %** - Weg 3 bestätigt, fester Einbau als Nächstes (dabei Modelle
-    parallel laden: 33 s bis „Ich schreibe mit"). Gruß/Name-Zeilen und
+    Vosk 28,8 %** - Weg 3 bestätigt. **Fest eingebaut (2026-09-16, 14:00):**
+    `scripts/dialos-parakeet-einrichten.sh` (Modell nach
+    /usr/local/share/dialos-parakeet, sherpa-onnx systemweit, Prüfsummen,
+    Selbsttest), Diktat standardmäßig mit Parakeet, abschaltbar mit
+    `parakeet-aus`, beide Modelle laden gleichzeitig; Prüfstand danach
+    unverändert (2,8/9,9/4,2/3,4/4,2 %). **Offen:** Einrichtung am Gerät
+    (Stephan), Ladezeit messen, Probe im Nutzerkonto nach Neuanmeldung. Gruß/Name-Zeilen und
     Betreffzeile (fett im PDF und Druck) gebaut. Offen: „-ung"-Endungen bei
     Parakeet („Rechn", „Nebenkostenabrechn"). Ort im Admin-Konto hinterlegt (wttr.in
     findet ihn richtig, 47,35/11,20); im Nutzerkonto fehlt er noch. Offen:

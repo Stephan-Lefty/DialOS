@@ -802,6 +802,13 @@ jemand spricht.
 
 ## Parakeet-Test im echten Diktat (2026-09-15, nur Messaufbau)
 
+> **Seit 2026-09-16 fest eingebaut** (Stephan: „Ja, bau Parakeet fest ein"):
+> Modell unter `/usr/local/share/dialos-parakeet`, sherpa-onnx systemweit,
+> standardmäßig an, abschaltbar mit `~/.config/dialos/parakeet-aus`; die
+> Schalterdatei `parakeet-test` und der Messordner gelten nicht mehr.
+> Einrichtung: [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Abschnitt 15b.
+> Der Abschnitt hier beschreibt den Weg dorthin.
+
 Stephan: „Parakeet jetzt testen". Vosk bleibt für alles, was Zeitmarken
 braucht (Sprechpausen, Schluss, „Satz löschen", Gegenprobe). Jedes Stück, das
 Vosk abliefert, erkennt Parakeet noch einmal **aus derselben Aufnahme**, und

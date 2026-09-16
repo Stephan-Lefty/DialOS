@@ -15,6 +15,20 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Complete letter following DIN 5008** (Stephan, 2026-09-16, after building
+  Parakeet in). (1) Define the user's personal data - Stephan's first - once for
+  all programs and enter it (letterhead, Thunderbird signature, weather place;
+  depends on the customer data and its encryption). (2) The recipient's exact
+  address is dictated. (3) That address is automatically added as a contact in
+  Thunderbird. (4) Layout following DIN 5008 so the PDF is always clean - printed
+  or sent by mail (address field for window envelopes, reference line/date,
+  subject, fold marks). Personal data only on the device; ask before adding new
+  data to the repo.
+
+- [ ] **Parakeet licence notice on the device** (2026-09-16): CC-BY-4.0 requires
+  attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
+  that DialOS can show or read out on the device.
+
 - [ ] **A CONVERSATION IN THE ROOM OPERATED DIALOS - with printing,
   dictation and archive** (2026-09-14, 11:01-11:31, during Stephan's break).
   The most serious finding so far, because it does not just annoy but
@@ -317,8 +331,13 @@ finished too, and then move down together. That way no reference breaks.
     **Fallback answers built (2026-09-16):** standard answer, "Was kann ich
     sagen", honest answers with WUNSCH counting, weather with a fallback place
     and human wording. **Freely dictated letter 13:35: Parakeet 3.4 %, Vosk
-    28.8 %** - option 3 confirmed, building it in next (load models in
-    parallel: 33 s until "Ich schreibe mit"). Closing/name lines and subject
+    28.8 %** - option 3 confirmed. **Built in for good (2026-09-16, 14:00):**
+    `scripts/dialos-parakeet-einrichten.sh` (model to
+    /usr/local/share/dialos-parakeet, sherpa-onnx system-wide, checksums,
+    self-test), dictation uses Parakeet by default, switch off with
+    `parakeet-aus`, both models load at the same time; test bench unchanged
+    afterwards (2.8/9.9/4.2/3.4/4.2 %). **Open:** setup on the device
+    (Stephan), measure loading time, test in the user account after re-login. Closing/name lines and subject
     line (bold in PDF and print) built. Open: "-ung" endings with Parakeet
     ("Rechn", "Nebenkostenabrechn"). Place stored in the admin account (wttr.in
     finds it correctly, 47.35/11.20); still missing in the user account. Open:

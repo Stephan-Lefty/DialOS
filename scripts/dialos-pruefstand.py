@@ -213,6 +213,12 @@ class Prozess:
         pass
 
 
+MESS_PARAKEET = ("/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich/modelle/"
+                 "sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8")
+MESS_PAKETE = (f"/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich/venv/lib/"
+               f"python{sys.version_info.major}.{sys.version_info.minor}/site-packages")
+
+
 def fall_abspielen(fall, parakeet, tempo):
     with open(os.path.join(fall, "erwartet.json"), encoding="utf-8") as f:
         erwartet = json.load(f)
@@ -230,9 +236,14 @@ def fall_abspielen(fall, parakeet, tempo):
     d.ARCHIV_SKRIPT = "/nicht/vorhanden"
     d.PROTOKOLL = os.path.join(tmp, "diktat.log")
     d.MITSCHNITT_SCHALTER = os.path.join(tmp, "kein-mitschnitt")
-    d.PARAKEET_SCHALTER = os.path.join(tmp, "parakeet")
-    if parakeet:
-        open(d.PARAKEET_SCHALTER, "w").close()
+    d.PARAKEET_AUS = os.path.join(tmp, "parakeet-aus")
+    if not parakeet:
+        open(d.PARAKEET_AUS, "w").close()
+    elif not os.path.isdir(d.PARAKEET_MODELL) and os.path.isdir(MESS_PARAKEET):
+        # Noch nicht fest eingerichtet: Modell und sherpa-onnx aus dem Messordner.
+        d.PARAKEET_MODELL = MESS_PARAKEET
+        if MESS_PAKETE not in sys.path:
+            sys.path.append(MESS_PAKETE)
     d.DIKTAT_ZEITGRENZE_S = 15.0
     d.sprich = lambda text, *a, **k: None
     d.sprechen_bei_offener_aufnahme = lambda text, prozess: b""

@@ -89,12 +89,22 @@ und **nicht** alle frei verwendbar sind. Stand der Prüfung: 2026-08-23.
 | `vosk-model-small-de-0.15` | Befehlserkennung | Apache 2.0 |
 | `vosk-model-de-0.21` | Diktat | Apache 2.0 |
 | `vosk-model-de-tuda-0.6-900k` | Diktat (Alternative) | Apache 2.0 |
+| [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) 1.13.8 | Texterkennung im Diktat (seit 2026-09-16) | Apache 2.0; enthält ONNX Runtime (MIT) |
+| [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3), int8-Fassung von sherpa-onnx | Text für Brief und Notizen | **CC-BY-4.0** |
 
 **CC0** heißt Gemeinfreiheit - keine Auflagen, auch nicht bei
 kommerzieller Nutzung. **Apache 2.0** erlaubt kommerzielle Nutzung und
 enthält zusätzlich eine ausdrückliche Patentlizenz. Alle hier
 eingesetzten Modelle dürfen also mit verkauften Geräten ausgeliefert
 werden.
+
+**CC-BY-4.0** (Parakeet) erlaubt kommerzielle Nutzung und Veränderung, verlangt
+aber **Namensnennung**: Urheber, Lizenz und Hinweis auf Änderungen. Für DialOS:
+*„Parakeet TDT 0.6B v3" von NVIDIA, lizenziert unter CC-BY-4.0
+(https://creativecommons.org/licenses/by/4.0/); nach ONNX umgewandelt und auf
+int8 verkleinert vom sherpa-onnx-Projekt (k2-fsa), in DialOS unverändert
+verwendet.* Dieser Hinweis gehört auch in die Lizenzübersicht am Gerät, sobald
+es sie gibt (TODO.md).
 
 Die Angaben stammen aus den Quellen selbst: den `MODEL_CARD`-Dateien
 neben den `.onnx`-Dateien der Piper-Stimmen und der Modellübersicht unter

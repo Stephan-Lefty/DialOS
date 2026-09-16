@@ -3352,6 +3352,42 @@ eingebauten Mikrofons und ist deshalb nicht belastbar - er gehört
 wiederholt (TODO.md). Details:
 [offene-punkte.md](offene-punkte.md), Abschnitt "Sprachsteuerung".
 
+### 15b. Texterkennung Parakeet für Brief und Notizen (neu 2026-09-16)
+
+Stephan: „Ja, bau Parakeet fest ein". Auf dem Prüfstand
+([pruefstand.md](pruefstand.md)) schrieb Parakeet den frei diktierten Brief mit
+3,4 % Wortfehlern (Vosk 28,8 %) und setzte alle Satzzeichen selbst. Vosk bleibt
+für alles, was Zeit braucht (Sprechpausen, Schlusssatz, „Satz löschen"), für die
+Befehle und den Einkaufszettel; Parakeet erkennt jedes Stück, das Vosk
+abliefert, noch einmal aus derselben Aufnahme und liefert den Text.
+
+| Bestandteil | Ort | Größe | Lizenz |
+|---|---|---|---|
+| Parakeet TDT 0.6B v3, int8 (sherpa-onnx-Paketierung) | `/usr/local/share/dialos-parakeet/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/` | 641 MB | CC-BY-4.0 (NVIDIA) |
+| sherpa-onnx 1.13.8 mit sherpa-onnx-core | systemweit per pip, wie Vosk | ~45 MB | Apache-2.0 |
+
+```bash
+scripts/dialos-parakeet-einrichten.sh
+```
+
+Ohne sudo starten, das Skript fragt selbst. Es lädt das Archiv von
+`github.com/k2-fsa/sherpa-onnx` (Release `asr-models`), prüft dessen sha256
+und danach jede der vier Modelldateien einzeln, kopiert nach
+`/usr/local/share/dialos-parakeet/`, installiert
+`sudo pip3 install --break-system-packages sherpa-onnx==1.13.8` und lädt das
+Modell zur Probe. Liegt das Modell schon entpackt vor (Entwicklungsgerät:
+`erkenner-vergleich/modelle/`), als Argument übergeben - dann wird nach
+Prüfung kopiert statt geladen. Mehrfach aufrufbar. Im Einrichtungslauf Schritt
+`15b_parakeet`.
+
+**Diktat (`dialos-diktat.py`):** Parakeet ist an, sobald das Modell da ist.
+Fehlt es oder lässt sich sherpa-onnx nicht laden, schreibt Vosk wie vorher -
+im Protokoll steht `PARAKEET: nicht eingerichtet` bzw. `nicht ladbar`.
+Abschalten je Konto: `touch ~/.config/dialos/parakeet-aus` (für Vergleiche auf
+dem Prüfstand). Die Test-Schalterdatei `parakeet-test` vom 15.09. gilt nicht
+mehr und kann weg. Beide Modelle laden gleichzeitig: Nacheinander dauerte es
+33 s bis „Ich schreibe mit".
+
 ## 16. Sicherungs-Abbild (Clonezilla)
 
 **Entscheidung vom 2026-08-16: Penguins' Eggs entfällt, Clonezilla

@@ -39,7 +39,7 @@ Sprachsteuerung nutzen. Aktuell gehören dazu:
 
 | Projekt | Was es ist | Engine | Lizenz |
 |---|---|---|---|
-| **DialOS** | die Live-ISO selbst | Vosk | GPL-3.0 |
+| **DialOS** | die Live-ISO selbst | Vosk (Befehle), Parakeet (Text, seit 2026-09-16) | GPL-3.0 |
 | **DialOS-Mobil** | DialOS auf dem Handy, gleiche Zielgruppe | Vosk | Apache-2.0 |
 | **Denkzettel** | Sprachnotizbuch für Debian/Arch, freie Rede | whisper.cpp | MIT |
 
@@ -112,7 +112,9 @@ gebaut. Ausserdem neu an dem Tag: "Satz loeschen"/"Satz wiederholen",
 "Brief erstellen", "Brief als PDF speichern", Dateinamen
 `2026-09-15-1343-Brief.txt`, persoenliches Woerterbuch (nur Geraet),
 "zu laut" erst beim zweiten Mal, Begruessung nennt "Sprachsteuerung starten".
-**Schalter im Admin-Konto:** `parakeet-test` und `pruefstand` an,
+**Parakeet seit 2026-09-16 fest eingebaut** (`scripts/dialos-parakeet-einrichten.sh`,
+/usr/local/share/dialos-parakeet, abschaltbar mit `parakeet-aus`; `parakeet-test`
+gilt nicht mehr). **Schalter im Admin-Konto:** `pruefstand` an,
 Befehls-Mitschnitt und Mikrofonwahl aus (Tabelle in docs/pruefstand.md,
 Abschnitt 7). Das Nutzerkonto ist unberuehrt.
 

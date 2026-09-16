@@ -122,6 +122,18 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Parakeet built in for good: letters and notes are now written by Parakeet**
+  (2026-09-16, Stephan: "Ja, bau Parakeet fest ein"). Model (641 MB) to
+  `/usr/local/share/dialos-parakeet`, sherpa-onnx system-wide - so the user
+  account gets it too. New setup script `scripts/dialos-parakeet-einrichten.sh`
+  with checksums and self-test, step `15b_parakeet` in the setup run. Parakeet
+  is on as soon as it is set up; if missing, Vosk writes as before. Switch off
+  per account with `~/.config/dialos/parakeet-aus`. Both models load at the same
+  time instead of one after the other (previously 33 s until "Ich schreibe
+  mit"). Test bench with the same values after the change. Licence CC-BY-4.0
+  with attribution in `docs/lizenzen.en.md`. Described in
+  `docs/Debian-zu-DialOS.en.md`, section 15b.
+
 - **Freely dictated letter: Parakeet 3.4 %, Vosk 28.8 %** (2026-09-16, last test
   before building it in). Plus: closing and name on separate lines, and if a
   letter starts with "Betreff", a subject line "Betreff: …" - bold in the PDF

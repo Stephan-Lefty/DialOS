@@ -38,7 +38,7 @@ Stimme; für andere Sprecher braucht es eine eigene Zustimmung.
 | Diktat-Mitschnitt | `dialos-diktat.py`, Schalter `~/.config/dialos/pruefstand` | genau der Ton, den die Erkenner bekamen (Blöcke in Reihenfolge, kurze Blöcke und Epochen vermerkt), dazu Protokollausschnitt, Ergebnis, Mikrofon |
 | Befehls-Mitschnitt | `dialos-sprachbefehl-desktop.py`, Schalter `~/.config/dialos/pruefstand-befehle` | jede Äußerung mit mehr als `[unk]`: Ton seit dem vorigen Ergebnis, Zustand an/aus, Pegelverlauf, Mikrofon - **nur für eine Messsitzung**, schließt Gespräch und Fernseher ein |
 | Mikrofonwahl | `~/.config/dialos/diktat-mikrofon`, `~/.config/dialos/befehl-mikrofon` | Name einer Quelle; sonst gilt die Festlegung „eingebautes Mikrofon" |
-| Parakeet-Test | `~/.config/dialos/parakeet-test` | Brief und Notizen mit Parakeet (Weg 3), Befehle weiter Vosk |
+| Parakeet-Test | `~/.config/dialos/parakeet-test` | Brief und Notizen mit Parakeet (Weg 3), Befehle weiter Vosk. **Seit 2026-09-16 fest eingebaut** - abschalten mit `parakeet-aus`; `pruefen --vosk` setzt das selbst |
 | Auswertung | `scripts/dialos-pruefstand.py` | `uebernehmen`, `pruefen --beide`, `befehle`, `befehle-beschriften`, `befehle-pruefen` |
 
 **Gemessen wird beim Diktat:** Wortfehlerrate (Levenshtein über normalisierte

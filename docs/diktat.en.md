@@ -778,6 +778,13 @@ someone speaks.
 
 ## Parakeet test in real dictation (2026-09-15, measurement setup only)
 
+> **Built in for good since 2026-09-16** (Stephan: "Ja, bau Parakeet fest ein"):
+> model under `/usr/local/share/dialos-parakeet`, sherpa-onnx system-wide, on
+> by default, switch off with `~/.config/dialos/parakeet-aus`; the switch file
+> `parakeet-test` and the measurement folder no longer apply. Setup:
+> [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), section 15b. This section
+> describes the way there.
+
 Stephan: "test Parakeet now". Vosk stays in charge of everything that needs
 timestamps (speech pauses, end, "Satz löschen", cross-check). Every chunk Vosk
 delivers is recognised again by Parakeet **from the same recording**, and

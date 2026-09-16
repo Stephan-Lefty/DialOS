@@ -3109,6 +3109,41 @@ over-amplified by 60 dB and is therefore not reliable - it should be
 repeated (TODO.en.md). Details:
 [offene-punkte.en.md](offene-punkte.en.md), section "Voice control".
 
+### 15b. Parakeet text recognition for letters and notes (new 2026-09-16)
+
+Stephan: "Ja, bau Parakeet fest ein" (build Parakeet in for good). On the test
+bench ([pruefstand.en.md](pruefstand.en.md)) Parakeet wrote the freely dictated
+letter with 3.4 % word errors (Vosk 28.8 %) and set all punctuation itself.
+Vosk stays for everything that needs timing (pauses, closing sentence, "Satz
+löschen"), for commands and the shopping list; Parakeet re-recognises every
+chunk Vosk delivers from the same recording and supplies the text.
+
+| Component | Location | Size | Licence |
+|---|---|---|---|
+| Parakeet TDT 0.6B v3, int8 (sherpa-onnx packaging) | `/usr/local/share/dialos-parakeet/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8/` | 641 MB | CC-BY-4.0 (NVIDIA) |
+| sherpa-onnx 1.13.8 with sherpa-onnx-core | system-wide via pip, like Vosk | ~45 MB | Apache-2.0 |
+
+```bash
+scripts/dialos-parakeet-einrichten.sh
+```
+
+Run without sudo, the script asks itself. It downloads the archive from
+`github.com/k2-fsa/sherpa-onnx` (release `asr-models`), checks its sha256 and
+then each of the four model files, copies to `/usr/local/share/dialos-parakeet/`,
+runs `sudo pip3 install --break-system-packages sherpa-onnx==1.13.8` and loads
+the model as a check. If the model is already unpacked (development device:
+`erkenner-vergleich/modelle/`), pass that folder as argument - it is copied
+after checking instead of downloaded. Safe to run repeatedly. In the setup run
+this is step `15b_parakeet`.
+
+**Dictation (`dialos-diktat.py`):** Parakeet is on as soon as the model is
+present. If it is missing or sherpa-onnx cannot be loaded, Vosk writes as
+before - the log says `PARAKEET: nicht eingerichtet` or `nicht ladbar`. Switch
+off per account: `touch ~/.config/dialos/parakeet-aus` (for comparisons on the
+test bench). The test switch file `parakeet-test` of 09-15 no longer applies and
+can be removed. Both models load at the same time: one after the other it took
+33 s until "Ich schreibe mit".
+
 ## 16. Backup image (Clonezilla)
 
 **Decision of 2026-08-16: Penguins' Eggs is dropped, Clonezilla takes

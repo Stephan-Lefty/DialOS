@@ -35,7 +35,7 @@ test bench turns this around: **real recordings** are played through the
 | Dictation recording | `dialos-diktat.py`, switch `~/.config/dialos/pruefstand` | exactly the audio the recognisers got (blocks in order, short blocks and epochs noted), plus log excerpt, result, microphone |
 | Command recording | `dialos-sprachbefehl-desktop.py`, switch `~/.config/dialos/pruefstand-befehle` | every utterance with more than `[unk]`: audio since the previous result, state on/off, level history, microphone - **for one measurement session only**, includes conversation and TV |
 | Microphone choice | `~/.config/dialos/diktat-mikrofon`, `~/.config/dialos/befehl-mikrofon` | name of a source; otherwise the "built-in microphone" decision applies |
-| Parakeet test | `~/.config/dialos/parakeet-test` | letters and notes with Parakeet (option 3), commands still Vosk |
+| Parakeet test | `~/.config/dialos/parakeet-test` | letters and notes with Parakeet (option 3), commands still Vosk. **Built in for good since 2026-09-16** - switch off with `parakeet-aus`; `pruefen --vosk` sets that itself |
 | Evaluation | `scripts/dialos-pruefstand.py` | `uebernehmen`, `pruefen --beide`, `befehle`, `befehle-beschriften`, `befehle-pruefen` |
 
 **Dictation metrics:** word error rate (Levenshtein over normalised words,

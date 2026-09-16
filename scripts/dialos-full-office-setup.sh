@@ -505,13 +505,21 @@ schritt_15_vosk() {
   sudo chmod 755 /usr/local/bin/dialos-vosk-test.py
 }
 
+# Parakeet schreibt Brief und Notizen (seit 2026-09-16), Vosk fuehrt die Zeit
+# und erkennt die Befehle. Modell ~641 MB, sherpa-onnx systemweit; Pruefsummen,
+# Selbsttest und Begruendung im Skript.
+schritt_15b_parakeet() {
+  log "Schritt 15b: Texterkennung Parakeet (sherpa-onnx)"
+  scripts/dialos-parakeet-einrichten.sh
+}
+
 # Vollstaendige Liste in Doku-Reihenfolge - 14_bluetooth ist bewusst
 # NICHT Teil des normalen Laufs (device-spezifisch, siehe Funktion
 # oben), nur per --bluetooth-kopplung zuschaltbar oder einzeln per
 # "./dialos-full-office-setup.sh 14" aufrufbar.
 ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 04_autologin 05_calamares_entfernen 06_rustdesk
   07_claude_cli 08_piper 09_gnome_erweiterungen 10_standardprogramme
-  11_sprachausgabe 11c_admin_tastenkuerzel 12_sicherheit 14_bluetooth 15_vosk)
+  11_sprachausgabe 11c_admin_tastenkuerzel 12_sicherheit 14_bluetooth 15_vosk 15b_parakeet)
 
 main() {
   local bluetooth_kopplung=0
