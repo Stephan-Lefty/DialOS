@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Persönliche Daten
+Comment=Name, Anschrift, Kontakt und Unterschrift für ein Konto eintragen – auch für den Nutzer, den Du einrichtest
+Exec=/usr/local/bin/dialos-persoenliche-daten-maske.py
+Icon=contact-new-symbolic
+Terminal=false
+Categories=Settings;
+Keywords=Adresse;Absender;Kundendaten;Kontakt;

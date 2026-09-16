@@ -94,13 +94,17 @@ def lesen(pfad=None, unbekannt=None):
     Unbekannte Feldnamen kommen in die Liste unbekannt (fuer "pruefen") -
     ein Tippfehler im Feldnamen soll nicht still verschwinden.
     """
-    daten = {}
     try:
         with open(pfad or DATEI, encoding="utf-8") as f:
-            zeilen = f.readlines()
+            return aus_text(f.read(), unbekannt)
     except OSError:
-        return daten
-    for nummer, zeile in enumerate(zeilen, 1):
+        return {}
+
+
+def aus_text(text, unbekannt=None):
+    """Wie lesen(), aber aus einem Text - die Eingabemaske liest fremde Konten so."""
+    daten = {}
+    for nummer, zeile in enumerate(text.splitlines(), 1):
         zeile = zeile.strip()
         if not zeile or zeile.startswith("#") or ":" not in zeile:
             continue
@@ -109,11 +113,74 @@ def lesen(pfad=None, unbekannt=None):
         wert = " ".join(wert.split())
         if schluessel is None:
             if unbekannt is not None:
-                unbekannt.append((nummer, feld.strip()))
+                unbekannt.append((nummer, feld.strip(), zeile))
             continue
         if wert:
             daten[schluessel] = wert
     return daten
+
+
+ABSCHNITT = re.compile(r"^#\s*-{5,}\s*(.+?)\s*$")
+
+
+def aufbau(vorlage=None):
+    """[(Abschnitt, [(schluessel, Feldname, Pflicht, Hinweis)])] aus der Vorlage.
+
+    DIE VORLAGE IST DIE EINZIGE QUELLE fuer Reihenfolge, Abschnitte und Hinweise:
+    Die Eingabemaske baut sich daraus, damit Datei und Maske nie auseinanderlaufen.
+    Ein Hinweis sind die #-Zeilen direkt ueber dem Feld.
+    """
+    pflicht = {k: p for k, _, p in FELDER}
+    abschnitte = []
+    hinweis = []
+    with open(vorlage or VORLAGE, encoding="utf-8") as f:
+        for zeile in f:
+            zeile = zeile.rstrip("\n")
+            kopf = ABSCHNITT.match(zeile)
+            if kopf:
+                abschnitte.append((kopf.group(1), []))
+                hinweis = []
+            elif zeile.startswith("#"):
+                hinweis.append(zeile.lstrip("#").strip())
+            elif ":" in zeile and abschnitte:
+                feld = zeile.split(":", 1)[0].strip()
+                schluessel = NACH_FELDNAME.get(_schluessel(feld))
+                if schluessel:
+                    text = " ".join(h for h in hinweis if h)
+                    # "Titel: z.B. Dr." - der Feldname steht in der Maske schon davor.
+                    if text.lower().startswith(feld.lower() + ":"):
+                        text = text[len(feld) + 1:].strip()
+                    abschnitte[-1][1].append((schluessel, feld, pflicht[schluessel],
+                                              text[:1].upper() + text[1:]))
+                hinweis = []
+            else:
+                hinweis = []
+    return abschnitte
+
+
+def als_text(daten, vorlage=None, unbekannte_zeilen=()):
+    """Die Datei zum Speichern: die Vorlage mit ihren Erklaerungen, die Werte eingesetzt.
+
+    Zeilen mit unbekanntem Feldnamen aus der alten Datei gehen nicht verloren -
+    sie stehen am Ende, damit niemand eine Angabe still verliert.
+    """
+    ausgabe = []
+    with open(vorlage or VORLAGE, encoding="utf-8") as f:
+        for zeile in f:
+            zeile = zeile.rstrip("\n")
+            if not zeile.startswith("#") and ":" in zeile:
+                feld = zeile.split(":", 1)[0].strip()
+                schluessel = NACH_FELDNAME.get(_schluessel(feld))
+                if schluessel:
+                    wert = " ".join(str(daten.get(schluessel, "")).split())
+                    zeile = f"{feld}: {wert}" if wert else f"{feld}:"
+            ausgabe.append(zeile)
+    if unbekannte_zeilen:
+        ausgabe += ["", "# ---------------------------------------------------------------- "
+                    "Nicht erkannt", "# Diese Zeilen standen in der alten Datei, passen aber "
+                    "zu keinem Feld."]
+        ausgabe += list(unbekannte_zeilen)
+    return "\n".join(ausgabe) + "\n"
 
 
 def voller_name(daten):
@@ -165,7 +232,7 @@ def kontaktzeilen(daten):
 def pruefen(daten, unbekannt=()):
     """Liste von Saetzen, was fehlt oder nicht passt. Leer heisst: in Ordnung."""
     meldungen = []
-    for nummer, feld in unbekannt:
+    for nummer, feld, *_ in unbekannt:
         meldungen.append(f"Zeile {nummer}: Das Feld „{feld}“ kenne ich nicht.")
     for schluessel, beschriftung, pflicht in FELDER:
         if pflicht and not daten.get(schluessel):

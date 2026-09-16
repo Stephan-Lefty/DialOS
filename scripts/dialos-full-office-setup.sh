@@ -470,6 +470,20 @@ schritt_12_sicherheit() {
   sudo mkdir -p /usr/share/applications
   sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-rekey.desktop /usr/share/applications/
 
+  # Persoenliche Daten (2026-09-16): Eingabemaske fuer das Admin-Konto, mit der
+  # auch die Daten von "nutzer" eingetragen werden. Das Hilfsprogramm in sbin
+  # schreibt ALS das Zielkonto und nie auf eine nicht eingehaengte
+  # verschluesselte Partition; die polkit-Regel verlangt das Admin-Passwort.
+  sudo cp iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten.py \
+    iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten-maske.py /usr/local/bin/
+  sudo chmod 755 /usr/local/bin/dialos-persoenliche-daten.py /usr/local/bin/dialos-persoenliche-daten-maske.py
+  sudo mkdir -p /usr/local/share/dialos
+  sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/persoenliche-daten-vorlage.txt /usr/local/share/dialos/
+  sudo install -m 755 iso-build/config/includes.chroot/usr/local/sbin/dialos-persoenliche-daten-konto /usr/local/sbin/
+  sudo install -D -m 644 iso-build/config/includes.chroot/usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy \
+    /usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy
+  sudo cp iso-build/config/includes.chroot/usr/share/applications/dialos-persoenliche-daten.desktop /usr/share/applications/
+
   sudo cp iso-build/config/includes.chroot/etc/systemd/system/dialos-stick-gate.service /etc/systemd/system/
   sudo systemctl daemon-reload
   sudo systemctl enable dialos-stick-gate.service

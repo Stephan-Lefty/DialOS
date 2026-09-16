@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!--
+  DialOS: persoenliche Daten eines anderen Kontos lesen/schreiben (2026-09-16).
+
+  Nur fuer /usr/local/sbin/dialos-persoenliche-daten-konto - das Programm darf
+  genau eine Datei im Heimatverzeichnis eines Personenkontos lesen oder
+  schreiben, und zwar ALS dieses Konto (Begruendung im Kopf des Programms).
+
+  auth_admin_keep: Das Admin-Passwort gilt ein paar Minuten, damit Laden und
+  Speichern in der Eingabemaske nicht zweimal fragen. Nur fuer Admins
+  (allow_active), nie ohne Passwort, nie fuer Sitzungen ohne Bildschirm.
+-->
+<policyconfig>
+  <vendor>DialOS</vendor>
+  <vendor_url>https://dialos.org</vendor_url>
+  <action id="org.dialos.persoenliche-daten">
+    <description>Persönliche Daten eines Kontos bearbeiten</description>
+    <message>Für die persönlichen Daten eines anderen Kontos wird das Administrator-Passwort benötigt.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/sbin/dialos-persoenliche-daten-konto</annotate>
+  </action>
+</policyconfig>

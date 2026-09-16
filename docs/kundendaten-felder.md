@@ -35,6 +35,10 @@ das Gerät.
 >   unter dem Gruß), Namen (Vorname, „Name gesprochen"), Wetter (Wetter-Ort,
 >   sonst Ort). `nutzer-name.txt`, `absender.txt` und `wetter-ort` bleiben der
 >   Rückfall, solange es keine Datei gibt.
+> - **Eingabemaske:** `dialos-persoenliche-daten-maske.py`, auch für das Konto
+>   `nutzer` (über pkexec, schreibt als das Konto, nie auf eine nicht
+>   eingehängte verschlüsselte Partition). Fester Schritt 6/6 in
+>   `dialos-buero-setup-abschliessen.sh`. Rezept: Debian-zu-DialOS.md.
 > - **Noch nicht angebunden:** Mail-Signatur, Thunderbird-Kontakte, Ansprache
 >   Du/Sie, Unterschrift als Bild. Die Beschreibung unten ist der Stand vom
 >   2026-08-24.

@@ -6,6 +6,7 @@
 # 3. Admin-Konto in die Gruppe "adm" aufnehmen (Systemprotokolle lesen)
 # 4. "nutzer"-Konto anlegen + Autologin umschalten
 # 5. Firefox-Startseite pruefen (sollte automatisch aus der ISO kommen)
+# 6. Persoenliche Daten des Nutzers: Eingabemaske oeffnen (seit 2026-09-16)
 #
 # Schritt 2 war bis 2026-08-16 reine Handarbeit aus der Doku (Schritt 13 in
 # docs/Debian-zu-DialOS.md) und damit die einzige Luecke, die den Aufbau
@@ -27,11 +28,11 @@ if [ -z "$ADMIN_HOME" ] || [ ! -d "$ADMIN_HOME" ]; then
   exit 1
 fi
 
-echo "=== [dialos] Schritt 1/5: Avatar setzen ==="
+echo "=== [dialos] Schritt 1/6: Avatar setzen ==="
 "$SCRIPT_DIR/dialos-set-avatar.sh" "$ADMIN_USER"
 
 echo ""
-echo "=== [dialos] Schritt 2/5: Admin-Werkzeuge auf die Arbeitsflaeche ==="
+echo "=== [dialos] Schritt 2/6: Admin-Werkzeuge auf die Arbeitsflaeche ==="
 # WICHTIG: bewusst direkt auf das schon existierende Admin-Konto, NICHT
 # ueber /etc/skel/Desktop/ - /etc/skel wirkt nur auf kuenftig angelegte
 # Konten, und das ist in diesem Rezept ausschliesslich "nutzer". Ueber skel
@@ -111,7 +112,7 @@ fi
 
 echo ""
 echo ""
-echo "=== [dialos] Schritt 3/5: Admin-Konto in die Gruppe adm ==="
+echo "=== [dialos] Schritt 3/6: Admin-Konto in die Gruppe adm ==="
 # Ohne "adm" liest das Admin-Konto keine Systemprotokolle: "journalctl -u
 # <dienst>" antwortet mit "-- No entries --", obwohl der Dienst sehr wohl
 # protokolliert hat. Live gestolpert am 2026-08-16 bei der Suche nach dem
@@ -134,11 +135,11 @@ else
 fi
 
 echo ""
-echo "=== [dialos] Schritt 4/5: Nutzer-Konto + Autologin ==="
+echo "=== [dialos] Schritt 4/6: Nutzer-Konto + Autologin ==="
 "$SCRIPT_DIR/dialos-setup-nutzer.sh" "$ADMIN_USER"
 
 echo ""
-echo "=== [dialos] Schritt 5/5: Firefox-Startseite pruefen ==="
+echo "=== [dialos] Schritt 5/6: Firefox-Startseite pruefen ==="
 POLICY_FILE="/usr/lib/firefox-esr/distribution/policies.json"
 if [ -f "$POLICY_FILE" ] && grep -q "dialos.org" "$POLICY_FILE"; then
   echo "[dialos] Firefox-Startseite ist korrekt gesetzt (automatisch aus der ISO)."
@@ -148,4 +149,40 @@ else
 fi
 
 echo ""
-echo "=== [dialos] Alles erledigt. Bitte einmal neu starten. ==="
+echo "=== [dialos] Schritt 6/6: Persoenliche Daten des Nutzers eintragen ==="
+# FESTER BESTANDTEIL DER EINRICHTUNG (Stephan, 2026-09-16: "Diese Maske muss
+# fester Bestandteil der Einrichtung von DialOS auf einem neuen Rechner sein").
+# Ohne Daten hat der Brief keinen Absender, unter dem Gruss steht, was die
+# Erkennung hoert, und das Wetter kennt keinen Ort.
+#
+# Die Maske laeuft ALS ADMIN-KONTO in dessen grafischer Sitzung, nie als root;
+# fuer das Konto "nutzer" fragt sie selbst nach dem Admin-Passwort. Jetzt ist
+# /home/nutzer eingehaengt (dialos-setup-home-partition.sh lief vorher) - nach
+# einem Neustart ohne Stick ginge es nicht.
+MASKE_DESKTOP="/usr/share/applications/dialos-persoenliche-daten.desktop"
+if [ -f "$MASKE_DESKTOP" ]; then
+  cp "$MASKE_DESKTOP" "$DESKTOP_DIR/"
+  chmod 755 "$DESKTOP_DIR/dialos-persoenliche-daten.desktop"
+  chown "$ADMIN_USER":"$ADMIN_USER" "$DESKTOP_DIR/dialos-persoenliche-daten.desktop"
+  echo "[dialos] Startsymbol 'DialOS Persoenliche Daten' auf der Arbeitsflaeche abgelegt."
+else
+  echo "[dialos] WARNUNG: $MASKE_DESKTOP fehlt - lief Schritt 12 durch?" >&2
+fi
+if [ -x /usr/local/bin/dialos-persoenliche-daten-maske.py ] && id nutzer >/dev/null 2>&1; then
+  ADMIN_UID=$(id -u "$ADMIN_USER")
+  if [ -S "/run/user/$ADMIN_UID/wayland-0" ]; then
+    runuser -u "$ADMIN_USER" -- env \
+      XDG_RUNTIME_DIR="/run/user/$ADMIN_UID" WAYLAND_DISPLAY=wayland-0 \
+      DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$ADMIN_UID/bus" \
+      setsid /usr/local/bin/dialos-persoenliche-daten-maske.py --konto nutzer \
+      >/dev/null 2>&1 < /dev/null &
+    echo "[dialos] Die Eingabemaske ist geoeffnet (Konto 'nutzer'). Bitte ausfuellen und"
+    echo "[dialos] speichern, BEVOR neu gestartet wird."
+  else
+    echo "[dialos] Keine grafische Sitzung von '$ADMIN_USER' gefunden. Bitte von Hand"
+    echo "[dialos] oeffnen: Arbeitsflaeche -> 'DialOS Persoenliche Daten', Konto 'nutzer'."
+  fi
+fi
+
+echo ""
+echo "=== [dialos] Alles erledigt. Nach dem Ausfuellen der persoenlichen Daten einmal neu starten. ==="

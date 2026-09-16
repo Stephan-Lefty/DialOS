@@ -45,11 +45,12 @@ Länderkennzeichen:
 Wetter-Ort:
 
 # ---------------------------------------------------------------- Kontakt privat
+E-Mail-Adresse:
 # Telefonnummern IMMER vollständig mit Ländervorwahl: +49 170 1234567 oder
 # 0043 664 1234567 - ein deutsches und ein österreichisches Handy haben
 # verschiedene Vorwahlen, abgeleitet wird nichts.
-E-Mail-Adresse:
 Telefon Festnetz privat:
+# Mit Ländervorwahl, z.B. +43 664 1234567
 Telefon Handy privat:
 Fax privat:
 Webseite:

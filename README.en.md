@@ -122,6 +122,17 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Input form for the personal data - also for the user, a fixed part of the
+  setup** (2026-09-16). New program "DialOS Persönliche Daten" (GTK 4/libadwaita)
+  in the admin account: choose the account, fields by section with hints,
+  salutation and Du/Sie as choices, check before saving. Built from the template.
+  Other accounts via pkexec with the admin password and the helper
+  `dialos-persoenliche-daten-konto`, which writes only this file, only as the
+  target account and never onto an unmounted encrypted partition.
+  `dialos-buero-setup-abschliessen.sh` opens the form as step 6/6 for `nutzer`;
+  `dialos-full-office-setup.sh` installs it in step 12. Package list:
+  `python3-gi`, `gir1.2-gtk-4.0`, `gir1.2-adw-1`.
+
 - **Command overview to listen to: "Alle Befehle vorlesen" and "Befehle für …"**
   (2026-09-16, Stephan: a blind user cannot remember all commands). Seven new
   sentences: all commands (144 s) or one topic - questions, letters, notes,

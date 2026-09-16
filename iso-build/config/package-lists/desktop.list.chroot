@@ -36,6 +36,11 @@ hunspell-en-us
 # Parakeet-Wort mit abgeschnittener Endung ("Rechn") ein echtes Wort ist. Kam
 # bisher nur als Empfehlung anderer Pakete mit.
 hunspell
+# Eingabemaske fuer die persoenlichen Daten (ergaenzt 2026-09-16): GTK 4 und
+# libadwaita fuer Python. Kamen bisher nur ueber GNOME mit.
+python3-gi
+gir1.2-gtk-4.0
+gir1.2-adw-1
 
 gnome-terminal
 curl

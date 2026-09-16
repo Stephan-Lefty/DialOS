@@ -130,6 +130,17 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Eingabemaske für die persönlichen Daten - auch für den Nutzer, fester Teil
+  der Einrichtung** (2026-09-16). Neues Programm „DialOS Persönliche Daten"
+  (GTK 4/libadwaita) im Admin-Konto: Konto wählen, Felder nach Abschnitten mit
+  Hinweisen, Anrede und Du/Sie als Auswahl, Prüfung vor dem Speichern. Baut sich
+  aus der Vorlage. Andere Konten über pkexec mit Admin-Passwort und dem
+  Hilfsprogramm `dialos-persoenliche-daten-konto`, das nur diese Datei, nur als
+  das Zielkonto und nie auf eine nicht eingehängte verschlüsselte Partition
+  schreibt. `dialos-buero-setup-abschliessen.sh` öffnet die Maske als Schritt 6/6
+  für `nutzer`; `dialos-full-office-setup.sh` installiert sie in Schritt 12.
+  Paketliste: `python3-gi`, `gir1.2-gtk-4.0`, `gir1.2-adw-1`.
+
 - **Befehlsübersicht zum Anhören: „Alle Befehle vorlesen" und „Befehle für …"**
   (2026-09-16, Stephan: „Als blinder Nutzer kann man sich nicht alle Befehle
   merken"). Sieben neue Sätze: alle Befehle (144 s) oder ein Thema - Fragen,

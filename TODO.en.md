@@ -20,7 +20,9 @@ finished too, and then move down together. That way no reference breaks.
   all programs and enter it (letterhead, Thunderbird signature, weather place;
   depends on the customer data and its encryption). **(1) built 2026-09-16:**
   form `persoenliche-daten-vorlage.txt`, `dialos-persoenliche-daten.py`,
-  letters/names/weather connected - open: Stephan fills in his data, mail
+  letters/names/weather connected; input form also for `nutzer`, setup step
+  6/6 - open: Stephan reviews the polkit rule, form on the device (also for
+  `nutzer`), Stephan fills in his data, mail
   signature, Du/Sie, signature as image. (2) The recipient's exact
   address is dictated. (3) That address is automatically added as a contact in
   Thunderbird. (4) Layout following DIN 5008 so the PDF is always clean - printed

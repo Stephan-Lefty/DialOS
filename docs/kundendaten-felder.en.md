@@ -36,6 +36,10 @@ the values onto the device only.
 >   under the closing), names (first name, "Name gesprochen"), weather (weather
 >   place, else town). `nutzer-name.txt`, `absender.txt` and `wetter-ort` remain
 >   the fallback while there is no file.
+> - **Input form:** `dialos-persoenliche-daten-maske.py`, also for the account
+>   `nutzer` (via pkexec, writes as that account, never onto an unmounted
+>   encrypted partition). Fixed step 6/6 in `dialos-buero-setup-abschliessen.sh`.
+>   Recipe: Debian-zu-DialOS.en.md.
 > - **Not connected yet:** mail signature, Thunderbird contacts, Du/Sie,
 >   signature as image. The description below is the state of 2026-08-24.
 

@@ -1916,6 +1916,37 @@ In the person's account: `dialos-persoenliche-daten.py anlegen`, fill it in,
 then `dialos-persoenliche-daten.py pruefen`. **Never put the file into the
 repo.**
 
+**Input form (since 2026-09-16, fixed part of the setup).** Stephan asked for "a
+proper input form … also for a user I set up" and for it to be "a fixed part of
+setting up DialOS". `dialos-persoenliche-daten-maske.py` (GTK 4, libadwaita)
+builds itself from the template: sections, order, hints, salutation and Du/Sie as
+choices. The account is chosen at the top. For its own account the form writes
+directly; for another one it calls
+`/usr/local/sbin/dialos-persoenliche-daten-konto` via `pkexec`, which
+- only touches this one file in a person account (UID 1000-59999),
+- reads and writes **as that account** (`runuser`) - as root it would follow a
+  symlink placed by the account,
+- refuses (exit 3) if `/etc/fstab` mounts the home directory separately but it
+  is not mounted - otherwise address and IBAN would land unencrypted on the root
+  partition.
+
+The polkit action `org.dialos.persoenliche-daten` requires the admin password
+(`auth_admin_keep`: loading and saving ask only once). The form is only in the
+admin account's menu. New packages listed explicitly: `python3-gi`,
+`gir1.2-gtk-4.0`, `gir1.2-adw-1` (previously pulled in by GNOME).
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten-maske.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/sbin/dialos-persoenliche-daten-konto /usr/local/sbin/
+sudo install -D -m 644 iso-build/config/includes.chroot/usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy /usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy
+sudo install -m 644 iso-build/config/includes.chroot/usr/share/applications/dialos-persoenliche-daten.desktop /usr/share/applications/
+```
+
+In the setup run: `dialos-full-office-setup.sh` step 12 installs everything,
+`dialos-buero-setup-abschliessen.sh` step 6/6 puts the launcher on the desktop
+and opens the form for `nutzer` - while `/home/nutzer` is mounted, i.e. before
+the reboot.
+
 **Why this was needed.** exFAT is mounted with the `uid`/`gid` of whoever
 mounts it. On a device with two accounts that means: whoever plugs the stick in
 first owns it, and the other account cannot even read it. Measured on

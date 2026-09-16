@@ -1,0 +1,122 @@
+#!/usr/bin/python3
+"""DialOS: persoenliche Daten eines ANDEREN Kontos lesen oder schreiben.
+
+Nur fuer die Eingabemaske (dialos-persoenliche-daten-maske.py), aufgerufen ueber
+pkexec. Stephan am 2026-09-16: Die Maske soll auch die Daten eines Nutzers
+befuellen, den er einrichtet - dessen ~/.config gehoert aber nicht dem
+Admin-Konto, und im Nutzerkonto liegt es auf der verschluesselten Partition.
+
+WAS ES DARF, UND NICHT MEHR: genau eine Datei, ~/.config/dialos/persoenliche-
+daten.txt, in einem echten Personenkonto (UID 1000-59999, mit Anmelde-Shell).
+Kein Pfad von aussen, kein root, keine Systemkonten.
+
+GELESEN UND GESCHRIEBEN WIRD ALS DIESES KONTO (runuser), NICHT ALS ROOT: Das
+Verzeichnis gehoert dem Konto. Ein root-Prozess, der dort schreibt, folgt einem
+Symlink, den das Konto selbst gelegt hat - aus "persoenliche-daten.txt" wird
+dann /etc/shadow. Als das Konto selbst kann es nur, was das Konto ohnehin kann.
+
+NIE AUF DIE UNVERSCHLUESSELTE PLATTE: Steht das Heimatverzeichnis in /etc/fstab
+als eigener Einhaengepunkt (bei DialOS /home/nutzer auf dialos-nutzer-home,
+LUKS), ist aber nicht eingehaengt, liegt darunter nur der leere Ordner auf der
+Wurzelpartition. Dorthin geschrieben waeren Anschrift und IBAN unverschluesselt -
+genau der Fehler, den docs/kundendaten-felder.md am 2026-08-24 beschreibt.
+Deshalb Abbruch mit Rueckgabewert 3.
+
+Aufruf (als root, ueber pkexec):
+  dialos-persoenliche-daten-konto lesen KONTO       Datei nach stdout (4 = gibt es noch nicht)
+  dialos-persoenliche-daten-konto schreiben KONTO   Datei von stdin, hoechstens 64 KB, UTF-8
+
+Rueckgabewerte: 0 ok, 2 falscher Aufruf, 3 Heimatverzeichnis nicht eingehaengt,
+4 Datei fehlt, 5 Schreiben/Lesen fehlgeschlagen.
+"""
+
+import os
+import pwd
+import re
+import subprocess
+import sys
+
+UNTERPFAD = (".config", "dialos", "persoenliche-daten.txt")
+HOECHSTENS = 64 * 1024
+
+
+def fehler(text, code):
+    print(text, file=sys.stderr)
+    sys.exit(code)
+
+
+def konto_pruefen(name):
+    if not re.match(r"^[a-z_][a-z0-9_-]{0,31}$", name):
+        fehler(f"Kein gueltiger Kontoname: {name!r}", 2)
+    try:
+        eintrag = pwd.getpwnam(name)
+    except KeyError:
+        fehler(f"Konto gibt es nicht: {name}", 2)
+    if not 1000 <= eintrag.pw_uid < 60000:
+        fehler(f"Kein Personenkonto: {name}", 2)
+    if eintrag.pw_shell.endswith(("nologin", "false")):
+        fehler(f"Konto ohne Anmeldung: {name}", 2)
+    if not os.path.isdir(eintrag.pw_dir):
+        fehler(f"Heimatverzeichnis fehlt: {eintrag.pw_dir}", 2)
+    return eintrag
+
+
+def eingehaengt_oder_egal(heim):
+    """False, wenn heim laut fstab eigens eingehaengt wird, es aber gerade nicht ist."""
+    try:
+        with open("/etc/fstab", encoding="utf-8") as f:
+            for zeile in f:
+                teile = zeile.split()
+                if len(teile) >= 2 and not teile[0].startswith("#"):
+                    if os.path.normpath(teile[1]) == os.path.normpath(heim):
+                        return os.path.ismount(heim)
+    except OSError:
+        pass
+    return True
+
+
+def main():
+    if len(sys.argv) != 3 or sys.argv[1] not in ("lesen", "schreiben"):
+        fehler(__doc__, 2)
+    if os.geteuid() != 0:
+        fehler("Nur ueber pkexec aufrufen.", 2)
+    aktion, name = sys.argv[1], sys.argv[2]
+    eintrag = konto_pruefen(name)
+    if not eingehaengt_oder_egal(eintrag.pw_dir):
+        fehler(f"{eintrag.pw_dir} ist nicht eingehaengt (Sicherheits-Stick?). "
+               "Nichts gelesen oder geschrieben - die Daten landeten sonst unverschluesselt.", 3)
+    ordner = os.path.join(eintrag.pw_dir, *UNTERPFAD[:-1])
+    datei = os.path.join(ordner, UNTERPFAD[-1])
+    als_konto = ["runuser", "-u", name, "--"]
+    umgebung = {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"}
+
+    if aktion == "lesen":
+        pruefung = subprocess.run(als_konto + ["test", "-f", datei], env=umgebung)
+        if pruefung.returncode != 0:
+            sys.exit(4)
+        ergebnis = subprocess.run(als_konto + ["head", "-c", str(HOECHSTENS), datei],
+                                  capture_output=True, env=umgebung)
+        if ergebnis.returncode != 0:
+            fehler(ergebnis.stderr.decode("utf-8", "replace"), 5)
+        sys.stdout.buffer.write(ergebnis.stdout)
+        return
+
+    daten = sys.stdin.buffer.read(HOECHSTENS + 1)
+    if len(daten) > HOECHSTENS:
+        fehler("Zu gross.", 2)
+    try:
+        daten.decode("utf-8")
+    except UnicodeDecodeError:
+        fehler("Kein UTF-8.", 2)
+    # Erst in eine Zwischendatei, dann umbenennen: Ein Abbruch hinterlaesst nie
+    # eine halbe Datei. umask 077: nur das Konto selbst liest seine Daten.
+    skript = ('umask 077 && mkdir -p "$1" && cat > "$2.neu" && chmod 600 "$2.neu" '
+              '&& mv -f "$2.neu" "$2"')
+    ergebnis = subprocess.run(als_konto + ["sh", "-c", skript, "sh", ordner, datei],
+                              input=daten, capture_output=True, env=umgebung)
+    if ergebnis.returncode != 0:
+        fehler(ergebnis.stderr.decode("utf-8", "replace"), 5)
+
+
+if __name__ == "__main__":
+    main()

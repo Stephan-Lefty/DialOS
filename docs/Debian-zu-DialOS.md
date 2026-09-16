@@ -1990,6 +1990,37 @@ sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/pers
 Im Konto der Person: `dialos-persoenliche-daten.py anlegen`, ausfüllen, dann
 `dialos-persoenliche-daten.py pruefen`. **Die Datei nie ins Repo.**
 
+**Eingabemaske (seit 2026-09-16, fester Teil der Einrichtung).** Stephan: „eine
+richtige Eingabemaske … Auch die von einem Nutzer, den ich einrichte" und „fester
+Bestandteil der Einrichtung". `dialos-persoenliche-daten-maske.py` (GTK 4,
+libadwaita) baut sich aus der Vorlage: Abschnitte, Reihenfolge, Hinweise, Anrede
+und Du/Sie als Auswahl. Oben wird das Konto gewählt. Für das eigene Konto
+schreibt die Maske direkt; für ein anderes ruft sie über `pkexec`
+`/usr/local/sbin/dialos-persoenliche-daten-konto` auf, das
+- nur diese eine Datei in einem Personenkonto (UID 1000-59999) anfasst,
+- **als dieses Konto** liest und schreibt (`runuser`) - als root würde es einem
+  Symlink des Kontos folgen,
+- sich weigert (Rückgabe 3), wenn das Heimatverzeichnis laut `/etc/fstab` eigens
+  eingehängt wird, es aber nicht ist - sonst lägen Anschrift und IBAN
+  unverschlüsselt auf der Wurzelpartition.
+
+Die polkit-Regel `org.dialos.persoenliche-daten` verlangt das Admin-Passwort
+(`auth_admin_keep`: Laden und Speichern fragen nur einmal). Die Maske steht nur
+im Menü des Admin-Kontos. Neue Pakete ausdrücklich in der Paketliste:
+`python3-gi`, `gir1.2-gtk-4.0`, `gir1.2-adw-1` (kamen bisher über GNOME mit).
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten-maske.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/sbin/dialos-persoenliche-daten-konto /usr/local/sbin/
+sudo install -D -m 644 iso-build/config/includes.chroot/usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy /usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy
+sudo install -m 644 iso-build/config/includes.chroot/usr/share/applications/dialos-persoenliche-daten.desktop /usr/share/applications/
+```
+
+Im Einrichtungslauf: `dialos-full-office-setup.sh` Schritt 12 installiert alles,
+`dialos-buero-setup-abschliessen.sh` Schritt 6/6 legt das Startsymbol auf die
+Arbeitsfläche und öffnet die Maske für `nutzer` - solange `/home/nutzer`
+eingehängt ist, also vor dem Neustart.
+
 **Warum das nötig war.** exFAT wird mit `uid`/`gid` dessen eingehängt, der es
 einhängt. Auf einem Gerät mit zwei Konten heißt das: Wer den Stick zuerst
 einsteckt, besitzt ihn, und das andere Konto kommt nicht einmal lesend hinein.

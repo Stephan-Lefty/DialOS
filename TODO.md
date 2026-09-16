@@ -22,7 +22,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Thunderbird-Signatur, Wetter-Ort; hängt an den Kundendaten und deren
   Verschlüsselung). **(1) gebaut 2026-09-16:** Formular
   `persoenliche-daten-vorlage.txt`, `dialos-persoenliche-daten.py`, Brief/Namen/
-  Wetter angebunden - offen: Stephan füllt seine Daten aus, Mail-Signatur,
+  Wetter angebunden; Eingabemaske auch für `nutzer`, Schritt 6/6 der Einrichtung
+  - offen: polkit-Regel von Stephan durchsehen, Maske am Gerät (auch für
+  `nutzer`), Stephan füllt seine Daten aus, Mail-Signatur,
   Du/Sie, Unterschrift als Bild. (2) Die genaue Empfängeradresse wird eingesprochen.
   (3) Diese Adresse wird automatisch als Kontakt in Thunderbird angelegt.
   (4) Aufbau nach DIN 5008, damit das PDF immer sauber ist - ob gedruckt oder
