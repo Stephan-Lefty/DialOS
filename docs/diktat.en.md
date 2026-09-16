@@ -948,3 +948,25 @@ Absatz" as a chunk of its own was lost with Parakeet (after conversion the text
 was only "\n\n" and counted as empty), and the first fix would have crashed
 dictation (empty text in the chunk-boundary check). Also: a short line before a
 line break without a full stop ("Mit freundlichen Grüßen." / name).
+
+**Freely dictated letter (2026-09-16, 13:35) - last test before building it
+in.** Stephan dictated without a template (subject, salutation, claim with date
+and amount, reply, closing). Test case `frei-brief-1`: **Parakeet 3.4 % word
+errors, Vosk 28.8 %.** Parakeet wrote "31.8.2026", "322,40 Euro", "1.10.2026" -
+Vosk "einunddreißig achtundzwanzig sechsundzwanzig". Parakeet's two errors:
+"Nebenkostenabrechn" (word ending missing - like "Rechn" on 09-15) and "Ihr
+Wahl". Until "Ich schreibe mit" 33 s passed (Vosk 11 s, Parakeet 17 s from the
+external disk right after login).
+
+Built along with it:
+- **Closing and name on separate lines** (`grussformel_richten`): "Mit
+  freundlichen Grüßen, Stephan Rösner" becomes two lines, even without "neue
+  Zeile" - only at the very end, only at a sentence or line start, name at most
+  four words ("viele Grüße aus Tirol …" in the middle of the text stays).
+- **Subject line** (`betreff_richten`, Stephan: bold and "Betreff: …" - the
+  subject line is not fixed, but if someone says "Betreff" at the start, a
+  subject line must be inserted): if the letter starts with "Betreff", it reads
+  "Betreff: …" without a full stop, as its own paragraph. **Bold** in the PDF
+  (`als_pdf` in `dialos-archiv.py`, DejaVu Sans Mono Bold - same character
+  width); `dialos-drucken.py` therefore prints the letter via the same PDF
+  (fallback: text).

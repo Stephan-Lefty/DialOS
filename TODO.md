@@ -316,7 +316,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Gespräch."** Ungeklärt: 13:10:27 kam „brief als wir" an.
     **Rückfall-Antworten gebaut (2026-09-16):** Standard-Antwort, „Was kann ich
     sagen", ehrliche Antworten mit WUNSCH-Zählung, Wetter mit Rückfall-Ort und
-    menschlicher Formulierung. Ort im Admin-Konto hinterlegt (wttr.in
+    menschlicher Formulierung. **Frei diktierter Brief 13:35: Parakeet 3,4 %,
+    Vosk 28,8 %** - Weg 3 bestätigt, fester Einbau als Nächstes (dabei Modelle
+    parallel laden: 33 s bis „Ich schreibe mit"). Gruß/Name-Zeilen und
+    Betreffzeile (fett im PDF und Druck) gebaut. Offen: „-ung"-Endungen bei
+    Parakeet („Rechn", „Nebenkostenabrechn"). Ort im Admin-Konto hinterlegt (wttr.in
     findet ihn richtig, 47,35/11,20); im Nutzerkonto fehlt er noch. Offen:
     Probe am Gerät, später freie Erkennung unbekannter Sätze.
     **Neu:** Nicht gespeicherte Ansagen (jede Uhrzeit) sprechen erst 2,3-2,7 s

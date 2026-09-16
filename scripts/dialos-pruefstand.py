@@ -240,7 +240,11 @@ def fall_abspielen(fall, parakeet, tempo):
     ergebnis = {}
 
     def brief(zeilen):
-        ergebnis["text"] = " ".join(zeilen)
+        text = " ".join(zeilen)
+        for richten in ("grussformel_richten", "betreff_richten"):
+            if hasattr(d, richten):
+                text = getattr(d, richten)(text)
+        ergebnis["text"] = text
         return os.path.join(tmp, "brief.txt")
 
     def notiz(name, zeilen):

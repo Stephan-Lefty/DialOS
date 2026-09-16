@@ -975,3 +975,25 @@ Umwandlung war der Text nur „\n\n" und galt als leer), und die erste
 Reparatur dafür hätte das Diktat abstürzen lassen (leerer Text in der
 Stückgrenzen-Prüfung). Außerdem: kurze Zeile vor einem Zeilenwechsel ohne
 Punkt („Mit freundlichen Grüßen." / Name).
+
+**Frei diktierter Brief (2026-09-16, 13:35) - letzte Probe vor dem festen
+Einbau.** Stephan diktierte ohne Vorlage (Betreff, Anrede, Forderung mit Datum
+und Betrag, Antwort, Gruß). Prüffall `frei-brief-1`: **Parakeet 3,4 %
+Wortfehler, Vosk 28,8 %.** Parakeet schrieb „31.8.2026", „322,40 Euro",
+„1.10.2026" - Vosk „einunddreißig achtundzwanzig sechsundzwanzig". Parakeets zwei
+Fehler: „Nebenkostenabrechn" (Wortende fehlt - wie „Rechn" am 15.09.) und „Ihr
+Wahl". Bis „Ich schreibe mit" vergingen 33 s (Vosk 11 s, Parakeet 17 s von der
+externen Platte direkt nach dem Anmelden).
+
+Dazu gebaut:
+- **Gruß und Name auf eigene Zeilen** (`grussformel_richten`): „Mit freundlichen
+  Grüßen, Stephan Rösner" wird zu zwei Zeilen, auch ohne „neue Zeile" - nur ganz
+  am Ende, nur am Satz- oder Zeilenanfang, Name höchstens vier Wörter („viele
+  Grüße aus Tirol …" mitten im Text bleibt).
+- **Betreffzeile** (`betreff_richten`, Stephan: „fett geschrieben und Betreff:
+  …" - „Die Betreffzeile ist nicht fix. Aber wenn jemand beim Diktieren Betreff
+  am Anfang sagt, dann müssen wir eine Betreffzeile einfügen"): Beginnt der Brief
+  mit „Betreff", steht dort „Betreff: …" ohne Punkt, als eigener Absatz. **Fett**
+  im PDF (`als_pdf` in `dialos-archiv.py`, DejaVu Sans Mono Bold - gleiche
+  Zeichenbreite); `dialos-drucken.py` druckt den Brief deshalb über dasselbe PDF
+  (Rückfall: Text).

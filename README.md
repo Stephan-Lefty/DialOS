@@ -130,6 +130,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Frei diktierter Brief: Parakeet 3,4 %, Vosk 28,8 %** (2026-09-16, letzte
+  Probe vor dem festen Einbau). Dazu: Gruß und Name auf eigene Zeilen, und
+  beginnt ein Brief mit „Betreff", eine Betreffzeile „Betreff: …" - fett im PDF
+  und im Druck (Brief wird über das PDF gedruckt). Beschrieben in
+  `docs/diktat.md`.
+
 - **Rückfall-Antworten, „Was kann ich sagen" und Wetter** (2026-09-16, Stephan:
   „Müssen wir für alles, was der Nutzer direkt fragt … eine Art Rückfall-Antwort
   geben!"). Klare Standard-Antwort statt Wortsalat, Übersicht der Befehle,

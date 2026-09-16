@@ -1070,6 +1070,13 @@ echtes Vosk, Antwort ab dem letzten hörbaren Ton): alter Stand 0/8 bei 0,15 s
 und 3/8 bei 0,4 s; mit Leser 8/8, 8/8, bei 1,0 s 7/8 (ein Erkennungsfehler),
 mit Ansage im rohen Mikrofon 8/8.
 
+**Brief-Nachbearbeitung seit 2026-09-16:** `brief_schreiben()` in
+`dialos-diktat.py` setzt Gruß und Name auf eigene Zeilen (`grussformel_richten`)
+und macht aus einem „Betreff" am Briefanfang die Zeile „Betreff: …"
+(`betreff_richten`). `als_pdf()` in `dialos-archiv.py` setzt diese Zeile fett;
+`dialos-drucken.py` druckt Briefe über dieses PDF. Keine neuen Pakete (cairo,
+DejaVu Sans Mono sind vorhanden).
+
 **Rückfall-Antworten seit 2026-09-16:** 42 Befehlssätze - dazu „was kann ich
 sagen"/„was kannst du" (Übersicht), „wie ist/wird das wetter" (über
 `dialos-auskunft.py wetter`, Rückfall-Ort aus `~/.config/dialos/wetter-ort`,

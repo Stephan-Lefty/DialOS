@@ -150,6 +150,24 @@ def aktueller_pfad(name, pfad):
         return pfad
 
 
+ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
+
+
+def brief_als_pdf(text):
+    """Derselbe PDF-Erzeuger wie das Archiv; Pfad einer Zwischendatei oder None."""
+    try:
+        import importlib.util
+        import tempfile
+        spec = importlib.util.spec_from_file_location("archiv", ARCHIV_SKRIPT)
+        archiv = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(archiv)
+        ziel = os.path.join(tempfile.mkdtemp(prefix="dialos-druck-"), "brief.pdf")
+        return ziel if archiv.als_pdf(text, ziel) else None
+    except Exception as fehler:
+        melde(f"PDF fuer den Druck nicht erzeugt, drucke Text: {fehler}")
+        return None
+
+
 def text_fuer(name):
     """Der zu druckende Text - mit Fusszeile, wo sie fehlt."""
     pfad, bezeichnung, _wird, _ist, braucht_fusszeile = ZIELE[name]
@@ -192,10 +210,19 @@ def main():
         sprich(anrede("ich finde keinen Drucker."))
         return 1
 
+    # DER BRIEF GEHT ALS PDF IN DEN DRUCK (2026-09-16): Nur dort ist die
+    # Betreffzeile fett (Stephan: "fett geschrieben und Betreff: ..."), und Papier
+    # soll aussehen wie das PDF im Archiv. Klappt das PDF nicht, wird wie bisher
+    # der Text gedruckt - lieber ohne Fett als gar nicht.
+    pdf = brief_als_pdf(text) if name == "brief" else None
     try:
-        p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + ["-"],
-                           input=text.encode("utf-8"),
-                           capture_output=True, timeout=60)
+        if pdf:
+            p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + [pdf],
+                               capture_output=True, timeout=60)
+        else:
+            p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + ["-"],
+                               input=text.encode("utf-8"),
+                               capture_output=True, timeout=60)
     except Exception as fehler:
         melde(f"lp nicht aufrufbar: {fehler}")
         sprich(anrede("ich konnte nicht drucken."))

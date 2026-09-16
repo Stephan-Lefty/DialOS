@@ -124,6 +124,11 @@ def als_pdf(text, ziel):
             flaeche.show_page()
         y = RAND + (nummer % je_seite + 1) * ZEILENHOEHE
         stift.move_to(RAND, y)
+        # "Betreff:" FETT (Stephan, 2026-09-16). Festbreite Schrift hat fett
+        # dieselbe Zeichenbreite - die Ausrichtung des Briefbogens bleibt.
+        fett = zeile.lstrip().startswith("Betreff:")
+        stift.select_font_face(SCHRIFT, cairo.FONT_SLANT_NORMAL,
+                               cairo.FONT_WEIGHT_BOLD if fett else cairo.FONT_WEIGHT_NORMAL)
         stift.show_text(zeile)
     flaeche.finish()
     return os.path.exists(ziel) and os.path.getsize(ziel) > 0

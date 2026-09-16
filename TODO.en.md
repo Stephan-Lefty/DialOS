@@ -316,7 +316,11 @@ finished too, and then move down together. That way no reference breaks.
     conversation."** Unresolved: at 13:10:27 "brief als wir" arrived.
     **Fallback answers built (2026-09-16):** standard answer, "Was kann ich
     sagen", honest answers with WUNSCH counting, weather with a fallback place
-    and human wording. Place stored in the admin account (wttr.in
+    and human wording. **Freely dictated letter 13:35: Parakeet 3.4 %, Vosk
+    28.8 %** - option 3 confirmed, building it in next (load models in
+    parallel: 33 s until "Ich schreibe mit"). Closing/name lines and subject
+    line (bold in PDF and print) built. Open: "-ung" endings with Parakeet
+    ("Rechn", "Nebenkostenabrechn"). Place stored in the admin account (wttr.in
     finds it correctly, 47.35/11.20); still missing in the user account. Open:
     test on the device, later free recognition of unknown sentences.
     **New:** announcements not in the cache (every time of day) start speaking

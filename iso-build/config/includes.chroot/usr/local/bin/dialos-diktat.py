@@ -1316,6 +1316,47 @@ def briefbogen(text):
     return "\n".join(teile) + "\n"
 
 
+# GRUSSFORMEL UND NAME AUF EIGENE ZEILEN (2026-09-16, Stephans frei diktierter
+# Brief). Er sagte "neuer Absatz mit freundlichen Gruessen Stefan Roesner" ohne
+# "neue Zeile" - im Brief stand "Mit freundlichen Gruessen, Stephan Roesner" in
+# einer Zeile. Nach DIN 5008 steht der Name unter dem Gruss; wer das nicht
+# ansagt, meint es trotzdem so. Ein Punkt oder Komma hinter Gruss oder Name
+# (Parakeet setzt beides) faellt weg.
+GRUSSFORMELN = ("mit freundlichen grüßen", "mit freundlichem gruß", "freundliche grüße",
+                "viele grüße", "liebe grüße", "herzliche grüße", "beste grüße",
+                "hochachtungsvoll")
+
+
+def grussformel_richten(text):
+    """Nur ganz am Ende, nur am Satz- oder Zeilenanfang, und der Name hat hoechstens vier Woerter."""
+    muster = re.compile(r"(?i)(^|\n|[.!?][ \t]+)[ \t]*(" + "|".join(re.escape(g) for g in GRUSSFORMELN)
+                        + r")[,.]?[ \t]*\n?[ \t]*([^\n.,!?]{1,50}?)[.,]?[ \t]*$")
+    rest = text.rstrip()
+    treffer = muster.search(rest)
+    if not treffer or len(treffer.group(3).split()) > 4:
+        return text
+    return rest[:treffer.start(2)] + treffer.group(2) + "\n" + treffer.group(3).strip()
+
+
+# BETREFFZEILE (Stephan, 2026-09-16: "fett geschrieben und Betreff: ......").
+# Sein frei diktierter Brief begann mit "Betreff Nebenkostenabrechnung 2025" -
+# Parakeet machte daraus "Betreff Nebenkostenabrechn 2025." mit Punkt. Jetzt
+# steht am Briefanfang immer "Betreff: ..." ohne Punkt am Ende. FETT wird die Zeile
+# im PDF (dialos-archiv.py als_pdf) - eine Textdatei kennt kein Fett; deshalb
+# druckt dialos-drucken.py den Brief ueber dasselbe PDF.
+BETREFF = re.compile(r"(?i)^\s*betreff\s*[:,.]?\s*([^\n]+?)[.:,]?\s*(\n|$)")
+
+
+def betreff_richten(text):
+    treffer = BETREFF.match(text)
+    if not treffer or not treffer.group(1).strip():
+        return text
+    inhalt = treffer.group(1).strip()
+    inhalt = inhalt[:1].upper() + inhalt[1:]
+    rest = text[treffer.end():].lstrip("\n ")
+    return f"Betreff: {inhalt}\n\n{rest}" if rest else f"Betreff: {inhalt}"
+
+
 def brief_schreiben(zeilen):
     """Schreibt den Brief unter einem eigenen Namen mit Datum und Uhrzeit.
 
@@ -1345,7 +1386,7 @@ def brief_schreiben(zeilen):
         # konnte der Briefbogen einen Stueck-Uebergang nicht von einem
         # gesprochenen "neue zeile" unterscheiden - und zog beide zusammen: "Mit
         # freundlichen Gruessen neue zeile Stephan Roesner" stand in einer Zeile.
-        f.write(briefbogen(" ".join(zeilen)))
+        f.write(briefbogen(betreff_richten(grussformel_richten(" ".join(zeilen)))))
 
     # JEDER BRIEF WANDERT ALS PDF INS ARCHIV (Stephans Vorgabe vom
     # 2026-08-21). Nicht abwarten und nicht daran scheitern: Der Brief ist als

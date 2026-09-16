@@ -1027,6 +1027,13 @@ Vosk, answer timed from the last audible sound): old state 0/8 at 0.15 s and
 3/8 at 0.4 s; with the reader 8/8, 8/8, at 1.0 s 7/8 (one recognition error),
 with the announcement in the raw microphone 8/8.
 
+**Letter post-processing since 2026-09-16:** `brief_schreiben()` in
+`dialos-diktat.py` puts closing and name on separate lines
+(`grussformel_richten`) and turns a "Betreff" at the start of the letter into
+the line "Betreff: …" (`betreff_richten`). `als_pdf()` in `dialos-archiv.py`
+sets that line in bold; `dialos-drucken.py` prints letters via that PDF. No new
+packages (cairo, DejaVu Sans Mono are present).
+
 **Fallback answers since 2026-09-16:** 42 command sentences - plus "was kann
 ich sagen"/"was kannst du" (overview), "wie ist/wird das wetter" (via
 `dialos-auskunft.py wetter`, fallback place from `~/.config/dialos/wetter-ort`,

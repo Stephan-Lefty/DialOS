@@ -122,6 +122,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Freely dictated letter: Parakeet 3.4 %, Vosk 28.8 %** (2026-09-16, last test
+  before building it in). Plus: closing and name on separate lines, and if a
+  letter starts with "Betreff", a subject line "Betreff: …" - bold in the PDF
+  and in print (the letter is printed via the PDF). Described in
+  `docs/diktat.en.md`.
+
 - **Fallback answers, "Was kann ich sagen" and weather** (2026-09-16, Stephan:
   must there be a fallback answer for everything the user asks directly?).
   Clear standard answer instead of word salad, command overview, honest answers
