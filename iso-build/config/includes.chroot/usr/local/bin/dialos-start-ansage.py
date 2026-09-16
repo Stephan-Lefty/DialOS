@@ -8,6 +8,7 @@ import signal
 import socket
 import subprocess
 import time
+import urllib.parse
 import urllib.request
 from datetime import datetime
 
@@ -602,42 +603,135 @@ def geoclue_standort():
         return None
 
 
-def wetter_text():
-    standort = geoclue_standort()
-    if not standort:
-        return ""
-    breite, laenge = standort
+# RUECKFALL-ORT FUERS WETTER (Stephan, 2026-09-16). Er fragte "Wie ist das
+# Wetter?", und es kam keine Antwort - der Befehl war am 2026-08-19 entfernt worden,
+# weil die Standortbestimmung am Einsatzort nur eine IP-Schaetzung liefert (Wien
+# statt Tirol, 26 km Ungenauigkeit). Ist die Messung zu ungenau, gilt jetzt dieser
+# Ort. Er liegt NUR auf dem Geraet, im eigenen Konto; spaeter kommt er aus den
+# Kundendaten. Unterwegs waere es das Wetter zu Hause - deshalb nennt die Ansage
+# den Ort immer ("Das Wetter in ...").
+WETTER_ORT_DATEI = os.path.join(os.path.expanduser("~"), ".config", "dialos", "wetter-ort")
+
+
+def wetter_ort():
+    try:
+        with open(WETTER_ORT_DATEI, encoding="utf-8") as f:
+            return f.read().strip() or None
+    except OSError:
+        return None
+
+
+def wetter_text(ort=None):
+    """Wetter fuer den gemessenen Standort, oder - mit ort - fuer diesen Ortsnamen."""
+    if ort:
+        abfrage = urllib.parse.quote(ort)
+    else:
+        standort = geoclue_standort()
+        if not standort:
+            return ""
+        abfrage = f"{standort[0]},{standort[1]}"
     try:
         req = urllib.request.Request(
-            f"http://wttr.in/{breite},{laenge}?format=j1&lang=de",
+            f"http://wttr.in/{abfrage}?format=j1&lang=de",
             headers={"User-Agent": "curl"},
         )
         with urllib.request.urlopen(req, timeout=6) as resp:
             daten = json.load(resp)
-        ort = daten["nearest_area"][0]["areaName"][0]["value"]
+        ort = ort or daten["nearest_area"][0]["areaName"][0]["value"]
         stundenwerte = {h["time"]: h for h in daten["weather"][0]["hourly"]}
-        teile = [f"Das Wetter in {ort} wird heute so sein."]
-        regen_erwartet = False
-        for zeit_key, label in WETTER_SLOTS:
+        abschnitte = []
+        for zeit_key, _label in WETTER_SLOTS:
             eintrag = stundenwerte.get(zeit_key)
             if not eintrag:
                 continue
-            beschreibung = eintrag["lang_de"][0]["value"]
-            temp = eintrag.get("tempC", "").strip()
-            if temp:
-                teile.append(f"{label}: {beschreibung}, {temp} Grad.")
-            else:
-                teile.append(f"{label}: {beschreibung}.")
             try:
-                if int(eintrag.get("chanceofrain", 0)) >= 50:
-                    regen_erwartet = True
+                temp = int(eintrag.get("tempC", "").strip())
             except ValueError:
-                pass
-        if regen_erwartet:
-            teile.append("Es wird Regen erwartet, denk an einen Regenschirm.")
-        return " ".join(teile)
+                temp = None
+            try:
+                regen = int(eintrag.get("chanceofrain", 0)) >= 50
+            except ValueError:
+                regen = False
+            abschnitte.append((int(zeit_key) // 100, wetter_art(eintrag["lang_de"][0]["value"], regen),
+                               temp, regen))
+        return wetter_satz(ort, abschnitte, datetime.now().hour)
     except Exception:
         return ""
+
+
+# MENSCHLICH STATT WETTERBERICHT (Stephan, 2026-09-16): "Und die Antwort soll nicht
+# nur sachlich sein. Sondern etwas menschlicher klingen. Beispiel: Heute wird es
+# regnen bei 15 Grad. Denke an einen Regenschirm, wenn Du raus gehst!" Vorher las
+# Michael vier Tageszeiten mit Beschreibung und Grad vor ("Morgens: Wolkenlos, 12
+# Grad. Mittags: Oertlich Regen, 18 Grad. ...").
+#
+# Jetzt: EINE Wetterart fuer den Tag, oder die erste Aenderung ("ab Mittag wird es
+# regnerisch"), die Spanne der Temperatur, und ein Tipp, der zum Wetter passt. Der
+# Ort bleibt drin - mit dem Rueckfall-Ort koennte es sonst unterwegs das Wetter von
+# zu Hause sein, ohne dass man es merkt. Bereits vergangene Tageszeiten fallen weg:
+# Wer um drei fragt, will nicht hoeren, wie der Morgen war.
+WETTER_ARTEN = (             # (Merkmal in der Beschreibung, Art) - erste passende gewinnt
+    ("gewitter", "gewittrig"),
+    ("schnee", "verschneit"), ("graupel", "verschneit"),
+    ("regen", "regnerisch"), ("niesel", "regnerisch"), ("schauer", "regnerisch"),
+    ("nebel", "neblig"),
+    ("sonnig", "sonnig"), ("klar", "sonnig"), ("wolkenlos", "sonnig"), ("heiter", "freundlich"),
+    ("bedeckt", "bewölkt"), ("bewölkt", "bewölkt"), ("wolkig", "bewölkt"),
+)
+WETTER_ZEITEN = {6: "am Morgen", 12: "mittags", 15: "am Nachmittag", 18: "am Abend"}
+WETTER_AB = {6: "ab dem Morgen", 12: "ab Mittag", 15: "ab dem Nachmittag", 18: "am Abend"}
+
+
+def wetter_art(beschreibung, regen=False):
+    b = beschreibung.lower()
+    for merkmal, art in WETTER_ARTEN:
+        if merkmal in b:
+            return art
+    return "regnerisch" if regen else "wechselhaft"
+
+
+def wetter_satz(ort, abschnitte, stunde):
+    """abschnitte: [(stunde, art, grad, regen)] - daraus ein bis drei gesprochene Saetze."""
+    kommend = [a for a in abschnitte if a[0] >= stunde - 2] or abschnitte[-1:]
+    if not kommend:
+        return ""
+    grade = [a[2] for a in kommend if a[2] is not None]
+    if not grade:
+        spanne = ""
+    elif min(grade) == max(grade):
+        spanne = f" bei {grade[0]} Grad"
+    else:
+        spanne = f" bei {min(grade)} bis {max(grade)} Grad"
+    erste = kommend[0][1]
+    wechsel = next((a for a in kommend if a[1] != erste), None)
+    if wechsel is None and len(kommend) == 1 and kommend[0][0] >= 18:
+        satz = f"In {ort} ist es heute Abend {erste}{spanne}."
+    elif wechsel is None:
+        satz = f"In {ort} wird es heute {erste}{spanne}."
+    else:
+        satz = (f"In {ort} ist es {WETTER_ZEITEN.get(kommend[0][0], 'zuerst')} {erste}, "
+                f"{WETTER_AB.get(wechsel[0], 'später')} wird es {wechsel[1]}. "
+                f"Die Temperatur liegt{spanne}.") if spanne else (
+                f"In {ort} ist es {WETTER_ZEITEN.get(kommend[0][0], 'zuerst')} {erste}, "
+                f"{WETTER_AB.get(wechsel[0], 'später')} wird es {wechsel[1]}.")
+    arten = {a[1] for a in kommend}
+    hoch = max(grade) if grade else None
+    tief = min(grade) if grade else None
+    if "gewittrig" in arten:
+        tipp = "Pass auf Dich auf, es kann Gewitter geben!"
+    elif "verschneit" in arten:
+        tipp = "Zieh Dich warm an, es kann glatt werden!"
+    elif "regnerisch" in arten or any(a[3] for a in kommend):
+        tipp = "Denk an einen Regenschirm, wenn Du rausgehst!"
+    elif hoch is not None and hoch >= 28:
+        tipp = "Trink genug, es wird heiß!"
+    elif tief is not None and tief <= 3:
+        tipp = "Zieh Dich warm an, wenn Du rausgehst!"
+    elif arten <= {"sonnig", "freundlich"} and hoch is not None and hoch >= 18:
+        tipp = "Ein schöner Tag, um rauszugehen!"
+    else:
+        tipp = ""
+    return f"{satz} {tipp}".strip()
 
 
 UEBERWACHUNGS_INTERVALL_SEKUNDEN = 90
@@ -800,7 +894,7 @@ def main():
     hat_internet = internet_verfuegbar()
     if hat_internet:
         text += " Es besteht eine Internetverbindung."
-        wetter = wetter_text()
+        wetter = wetter_text() or (wetter_text(wetter_ort()) if wetter_ort() else "")
         if wetter:
             text += " " + wetter
     else:

@@ -314,6 +314,7 @@ def befehle(argumente):
                    "Druck ", "Notiz-Aktion", "Auskunft ", "Bildschirmfoto erstellt")
     je_tag = {}
     hinweise = {}
+    wuensche = {}
     heute = time.strftime("%m-%d")
     for pfad in dateien:
         tag_datei = None
@@ -345,6 +346,9 @@ def befehle(argumente):
                     t["aeusserungen_an"] += 1
                 elif any(a in zeile for a in ausgefuehrt):
                     t["befehle"] += 1
+                elif "WUNSCH " in zeile:
+                    w = zeile.split("WUNSCH ", 1)[1].split(":")[0]
+                    wuensche[w] = wuensche.get(w, 0) + 1
                 elif "kein Befehl - Hinweis" in zeile:
                     t["kein_befehl_hinweis"] += 1
                     h = re.search(r"Hinweis: '(.*)'", zeile)
@@ -365,6 +369,10 @@ def befehle(argumente):
     print("\nHaeufigste Hinweise 'Das war kein Befehl' (was gemeint gewesen sein koennte):")
     for text, n in sorted(hinweise.items(), key=lambda x: -x[1])[:15]:
         print(f"  {n:3d} x  {text}")
+    if wuensche:
+        print("\nGewuenschte Funktionen, die es noch nicht gibt (WUNSCH):")
+        for w, n in sorted(wuensche.items(), key=lambda x: -x[1]):
+            print(f"  {n:3d} x  {w}")
     print("\nNicht in den Zahlen: Umschalten der Optik und Ein-/Ausschalten selbst werden")
     print("nicht als Befehl gezaehlt; ob ein ausgefuehrter Befehl GEMEINT war, steht in")
     print("keinem Protokoll - das kann nur der Sprecher sagen.")
@@ -435,6 +443,10 @@ def wirkung(dienst, satz):
         return "notiz:" + ":".join(dienst.NOTIZ_SAETZE[satz])
     if satz in dienst.FOTO_SAETZE:
         return "foto"
+    if satz in getattr(dienst, "UEBERSICHT_SAETZE", ()):
+        return "uebersicht"
+    if satz in getattr(dienst, "WUNSCH_SAETZE", {}):
+        return "wunsch:" + dienst.WUNSCH_SAETZE[satz][0]
     worte = satz.split()
     if dienst.AUSLOESER in worte and satz in dienst.BEFEHLSSAETZE:
         for w in worte:

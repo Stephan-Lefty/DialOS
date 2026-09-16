@@ -308,3 +308,28 @@ des Dienstes je Mitschnitt:
 - Vorbehalt: kleine Zahlen, im ersten Durchgang wich die Reihenfolge teils von
   der Liste ab, und die automatische Beschriftung setzt voraus, dass ein genau
   erkannter und ausgeführter Listenbefehl auch gesagt wurde.
+
+## Rückfall-Antworten und Wetter (2026-09-16)
+
+Stephan fragte „Wie ist das Wetter?" - und es kam „Ich habe verstanden: brief als
+wir. Das war kein Befehl." Seine Frage danach: „Müssen wir für alles, was der Nutzer
+direkt Michael/Anna fragt und wo es keine Antwort gibt, eine Art Rückfall-Antwort
+geben!" Seine Wahl: alle vier Wege, der vierte später.
+
+| Satz | Antwort |
+|---|---|
+| **„Was kann ich sagen"**, **„Was kannst du"** | Übersicht: Uhrzeit, Datum, Wetter, Brief, Notizen, Einkaufszettel, Bildschirmfoto, Stoppen - mit den Sätzen dazu. |
+| **„Wie ist das Wetter"**, **„Wie wird das Wetter"** | Menschlich statt Wetterbericht (Stephans Beispiel: „Heute wird es regnen bei 15 Grad. Denke an einen Regenschirm, wenn Du raus gehst!"): eine Wetterart für den Rest des Tages oder die erste Änderung, die Spanne der Temperatur, ein passender Tipp, **immer mit Ort**. Standort gemessen, sonst der **Rückfall-Ort** aus `~/.config/dialos/wetter-ort` (nur auf dem Gerät, später aus den Kundendaten). Ohne Ort: „Für das Wetter fehlt mir Dein Wohnort." Die Begrüßung nutzt dieselbe Fassung. |
+| „Nachrichten vorlesen", „Was gibt es Neues" | „Nachrichten kann ich noch nicht vorlesen." |
+| „Radio einschalten", „Musik abspielen" | „Radio und Musik kann ich noch nicht abspielen." |
+| „Jemanden anrufen" | „Telefonieren kann ich noch nicht." |
+| „Mails vorlesen" | „E-Mails kann ich noch nicht vorlesen." |
+| „Termine vorlesen", „Was steht heute an" | „Termine kann ich noch nicht vorlesen." |
+| *alles andere ohne ähnlichen Befehl* | **„Das kann ich noch nicht. Sage: Was kann ich sagen."** (vorher „Ich habe verstanden: … Das war kein Befehl."). Bei einem ähnlichen Befehl bleibt der Vorschlag „Der Befehl heißt …". |
+
+Die ehrlichen Antworten stehen im Protokoll als `WUNSCH <thema>`;
+`scripts/dialos-pruefstand.py befehle` zählt sie - so wird sichtbar, was Nutzer
+wirklich wollen. Alle 42 Sätze gegen Piper über die volle Grammatik geprüft.
+**Später (Stephans Wahl):** unbekannte Sätze zusätzlich frei erkennen (Parakeet),
+um das Thema zu verstehen - eigene Datenschutz-Entscheidung, weil dabei
+Gesprächsinhalte erkannt würden.

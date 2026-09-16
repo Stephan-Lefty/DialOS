@@ -1027,6 +1027,14 @@ Vosk, answer timed from the last audible sound): old state 0/8 at 0.15 s and
 3/8 at 0.4 s; with the reader 8/8, 8/8, at 1.0 s 7/8 (one recognition error),
 with the announcement in the raw microphone 8/8.
 
+**Fallback answers since 2026-09-16:** 42 command sentences - plus "was kann
+ich sagen"/"was kannst du" (overview), "wie ist/wird das wetter" (via
+`dialos-auskunft.py wetter`, fallback place from `~/.config/dialos/wetter-ort`,
+wording in `wetter_satz()` in `dialos-start-ansage.py`) and eight sentences with
+an honest answer (`WUNSCH_SAETZE`, logged as `WUNSCH`). Without a matching
+command: "Das kann ich noch nicht. Sage: Was kann ich sagen." Checked with
+`scripts/dialos-grammatik-pruefen.py`: all 42 sentences verbatim.
+
 **The desktop-look rule** ("umschalten" plus a target anywhere in the utterance)
 applies since 2026-09-16 only without `[unk]` and with at most two words more
 than "auf windows umschalten" - on 09-15 a twelve-word salad switched to

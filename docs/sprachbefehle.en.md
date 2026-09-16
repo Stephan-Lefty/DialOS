@@ -261,3 +261,28 @@ by Stephan, 13 left open). Counted: the service's live decision per recording:
 - Caveat: small numbers, in the first run the order partly deviated from the
   list, and automatic labelling assumes that a list command recognised exactly
   and executed was also said.
+
+## Fallback answers and weather (2026-09-16)
+
+Stephan asked "Wie ist das Wetter?" - and got "Ich habe verstanden: brief als wir.
+Das war kein Befehl." His question afterwards: must there be a kind of fallback
+answer for everything the user asks Michael/Anna that has no answer? His choice:
+all four ways, the fourth later.
+
+| Sentence | Answer |
+|---|---|
+| **"Was kann ich sagen"**, **"Was kannst du"** | Overview: time, date, weather, letter, notes, shopping list, screenshot, stop - with the sentences. |
+| **"Wie ist das Wetter"**, **"Wie wird das Wetter"** | Human instead of a weather report (Stephan's example: "Heute wird es regnen bei 15 Grad. Denke an einen Regenschirm, wenn Du raus gehst!"): one kind of weather for the rest of the day or the first change, the temperature range, a fitting tip, **always with the place**. Measured location, otherwise the **fallback place** from `~/.config/dialos/wetter-ort` (device only, later from the customer data). Without a place: "Für das Wetter fehlt mir Dein Wohnort." The greeting uses the same wording. |
+| "Nachrichten vorlesen", "Was gibt es Neues" | "Nachrichten kann ich noch nicht vorlesen." |
+| "Radio einschalten", "Musik abspielen" | "Radio und Musik kann ich noch nicht abspielen." |
+| "Jemanden anrufen" | "Telefonieren kann ich noch nicht." |
+| "Mails vorlesen" | "E-Mails kann ich noch nicht vorlesen." |
+| "Termine vorlesen", "Was steht heute an" | "Termine kann ich noch nicht vorlesen." |
+| *anything else without a similar command* | **"Das kann ich noch nicht. Sage: Was kann ich sagen."** (before: "Ich habe verstanden: … Das war kein Befehl."). With a similar command the suggestion "Der Befehl heißt …" stays. |
+
+The honest answers are logged as `WUNSCH <topic>`; `scripts/dialos-pruefstand.py
+befehle` counts them - so it becomes visible what users really want. All 42
+sentences checked against Piper over the full grammar. **Later (Stephan's
+choice):** additionally recognise unknown sentences freely (Parakeet) to
+understand the topic - a separate privacy decision, because conversation
+content would be recognised.

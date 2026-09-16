@@ -190,6 +190,25 @@ GRAMMATIK_AN = json.dumps([
     "wie spät ist es",
     "welchen tag haben wir",
     "welches datum haben wir",
+    # Wetter wieder (2026-09-16), mit Rueckfall-Ort - siehe dialos-auskunft.py.
+    "wie ist das wetter",
+    "wie wird das wetter",
+    # UEBERSICHT UND EHRLICHE ANTWORTEN (Stephan, 2026-09-16: "Muessen wir fuer
+    # alles, was der Nutzer direkt Michael/Anna fragt und wo es keine Antwort
+    # gibt, eine Art Rueckfall-Antwort geben!"). Seine Wahl: klare
+    # Standard-Antwort, "Was kann ich sagen", und erwartbare Fragen mit ehrlicher
+    # Antwort - jede wird als WUNSCH protokolliert, damit sichtbar wird, was
+    # Nutzer wirklich wollen. Alle Woerter im Wortschatz geprueft.
+    "was kann ich sagen",
+    "was kannst du",
+    "nachrichten vorlesen",
+    "was gibt es neues",
+    "radio einschalten",
+    "musik abspielen",
+    "jemanden anrufen",
+    "mails vorlesen",
+    "termine vorlesen",
+    "was steht heute an",
     # Bildschirmfoto (Stephan, 2026-08-21). Zwei Formulierungen wie ueberall.
     # Das Foto ist nicht fuer den Nutzer - er sieht es nicht -, sondern fuer
     # den sehenden Helfer und den Support: "Was steht da gerade?"
@@ -298,6 +317,26 @@ AUSKUNFT_SAETZE = {
     "wie spät ist es": "uhrzeit",
     "welchen tag haben wir": "datum",
     "welches datum haben wir": "datum",
+    "wie ist das wetter": "wetter",
+    "wie wird das wetter": "wetter",
+}
+UEBERSICHT_SAETZE = ("was kann ich sagen", "was kannst du")
+ANSAGE_UEBERSICHT = (
+    "Du kannst mich fragen: Wie spät ist es. Welchen Tag haben wir. Wie ist das "
+    "Wetter. Für Briefe: Brief erstellen, Brief vorlesen, Brief drucken, Brief als "
+    "PDF speichern. Für Notizen: Notiz aufnehmen, Notizen vorlesen. Für den "
+    "Einkauf: Einkaufszettel aufnehmen, Einkaufszettel vorlesen. Außerdem: "
+    "Bildschirmfoto machen. Und zum Schluss: Sprachsteuerung stoppen.")
+# Thema (fuers Protokoll), ehrliche Antwort. Kein Versprechen, wann.
+WUNSCH_SAETZE = {
+    "nachrichten vorlesen": ("nachrichten", "Nachrichten kann ich noch nicht vorlesen."),
+    "was gibt es neues": ("nachrichten", "Nachrichten kann ich noch nicht vorlesen."),
+    "radio einschalten": ("radio", "Radio und Musik kann ich noch nicht abspielen."),
+    "musik abspielen": ("radio", "Radio und Musik kann ich noch nicht abspielen."),
+    "jemanden anrufen": ("telefon", "Telefonieren kann ich noch nicht."),
+    "mails vorlesen": ("mails", "E-Mails kann ich noch nicht vorlesen."),
+    "termine vorlesen": ("termine", "Termine kann ich noch nicht vorlesen."),
+    "was steht heute an": ("termine", "Termine kann ich noch nicht vorlesen."),
 }
 
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
@@ -764,7 +803,11 @@ def hinweis_text(worte):
     if befehl and anteil >= HINWEIS_ANTEIL and befehl not in NICHT_VORSCHLAGEN:
         return (f"Ich habe verstanden: {gehoert}. "
                 f"Der Befehl heisst: {befehl}.")
-    return f"Ich habe verstanden: {gehoert}. Das war kein Befehl."
+    # KLARE STANDARD-ANTWORT (Stephan, 2026-09-16). Vorher: "Ich habe verstanden:
+    # brief als wir. Das war kein Befehl." - so kam "Wie ist das Wetter?" an, als es
+    # den Befehl nicht gab. Der Wortsalat half niemandem; wohin man sich wendet,
+    # schon.
+    return "Das kann ich noch nicht. Sage: Was kann ich sagen."
 
 
 def hinweis_faellig(worte, letzter):
@@ -1896,6 +1939,21 @@ def main():
             # --- Befehle: Fernwartung ---
             # VOR der Umschaltung, wie Diktat und Auskunft: Diese Saetze
             # enthalten "umschalten" nicht.
+            if satz in UEBERSICHT_SAETZE:
+                melde("Uebersicht der Befehle angesagt")
+                sprich(ANSAGE_UEBERSICHT)
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            if satz in WUNSCH_SAETZE:
+                thema, antwort = WUNSCH_SAETZE[satz]
+                melde(f"WUNSCH {thema}: {satz!r}")
+                sprich(antwort)
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
             if satz in HILFE_SAETZE:
                 hilfe_aktion(HILFE_SAETZE[satz])
                 letzte_aktivitaet = time.time()

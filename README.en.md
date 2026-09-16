@@ -122,6 +122,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Fallback answers, "Was kann ich sagen" and weather** (2026-09-16, Stephan:
+  must there be a fallback answer for everything the user asks directly?).
+  Clear standard answer instead of word salad, command overview, honest answers
+  for news, radio, phone, mails, appointments (logged and counted as `WUNSCH`),
+  weather on request with a fallback place (device only) and human wording -
+  also in the greeting. 42 sentences. Described in `docs/sprachbefehle.en.md`.
+
 - **New announcements faster** (2026-09-16, side finding of the gap
   measurement): every time of day started only 2.3-2.7 s after the command -
   loading the Piper model twice (warm-up announcement and sentence) plus a

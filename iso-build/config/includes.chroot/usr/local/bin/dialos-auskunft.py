@@ -23,6 +23,7 @@ Uhrzeit?" - beide geprueft, beide woertlich erkannt.
 Aufruf:
     dialos-auskunft.py uhrzeit
     dialos-auskunft.py datum
+    dialos-auskunft.py wetter
     dialos-auskunft.py --debug ...
 """
 
@@ -110,7 +111,12 @@ def datum(a):
     return 0
 
 
-# WETTER AUF NACHFRAGE GIBT ES BEWUSST NICHT (Stephan, 2026-08-19:
+# WETTER AUF NACHFRAGE GIBT ES SEIT 2026-09-16 WIEDER - mit Rueckfall-Ort (siehe
+# wetter() unten). Stephan fragte "Wie ist das Wetter?" und bekam keine Antwort.
+# Die Begruendung von damals bleibt stehen, weil sie erklaert, warum es ohne
+# hinterlegten Ort nicht ging:
+#
+# WETTER AUF NACHFRAGE GAB ES BEWUSST NICHT (Stephan, 2026-08-19:
 # "Wetter nur beim Start lassen").
 #
 # Der Befehl war gebaut und getestet und wurde wieder entfernt, weil er am
@@ -138,6 +144,32 @@ def datum(a):
 # nutzbar.
 
 
+def wetter(a):
+    """Gemessener Standort, sonst der hinterlegte Ort - und sonst eine ehrliche Antwort.
+
+    Nie "Das war kein Befehl": Wer nach dem Wetter fragt, soll erfahren, WARUM es
+    nicht geht, und was fehlt.
+    """
+    text = a.wetter_text()
+    ort = a.wetter_ort()
+    if not text and ort:
+        text = a.wetter_text(ort)
+    if text:
+        melde(f"  wetter: {text[:80]}")
+        sprich(text)
+        return 0
+    if not a.internet_verfuegbar():
+        melde("  wetter: kein Internet")
+        sprich("Ich habe gerade keine Internetverbindung. Das Wetter kann ich nicht abrufen.")
+    elif not ort:
+        melde("  wetter: kein Rueckfall-Ort hinterlegt, Standort zu ungenau")
+        sprich("Für das Wetter fehlt mir Dein Wohnort.")
+    else:
+        melde("  wetter: Abruf fehlgeschlagen")
+        sprich("Ich kann das Wetter gerade nicht abrufen.")
+    return 0
+
+
 def main():
     argumente = [x for x in sys.argv[1:] if not x.startswith("--")]
     if not argumente:
@@ -153,6 +185,8 @@ def main():
         return uhrzeit(a)
     if was == "datum":
         return datum(a)
+    if was == "wetter":
+        return wetter(a)
     print(f"Unbekannt: {was}", file=sys.stderr)
     return 2
 

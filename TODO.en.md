@@ -314,6 +314,10 @@ finished too, and then move down together. That way no reference breaks.
     first try, without waiting.** Items 1 and 2 done. After the faster
     announcements (13:10) Stephan's verdict: **"It is now like a normal
     conversation."** Unresolved: at 13:10:27 "brief als wir" arrived.
+    **Fallback answers built (2026-09-16):** standard answer, "Was kann ich
+    sagen", honest answers with WUNSCH counting, weather with a fallback place
+    and human wording. Open: place in `~/.config/dialos/wetter-ort` (Stephan),
+    test on the device, later free recognition of unknown sentences.
     **New:** announcements not in the cache (every time of day) start speaking
     only 2.3-2.7 s after the call (cached 0.2 s) - warm-up announcement and
     fresh Piper synthesis. **Done 2026-09-16:** generate directly and play,

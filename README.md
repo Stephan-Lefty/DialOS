@@ -130,6 +130,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Rückfall-Antworten, „Was kann ich sagen" und Wetter** (2026-09-16, Stephan:
+  „Müssen wir für alles, was der Nutzer direkt fragt … eine Art Rückfall-Antwort
+  geben!"). Klare Standard-Antwort statt Wortsalat, Übersicht der Befehle,
+  ehrliche Antworten für Nachrichten, Radio, Telefon, Mails, Termine (als
+  `WUNSCH` protokolliert und gezählt), Wetter auf Nachfrage mit Rückfall-Ort
+  (nur Gerät) und menschlicher Formulierung - auch in der Begrüßung. 42 Sätze.
+  Beschrieben in `docs/sprachbefehle.md`.
+
 - **Neue Ansagen schneller** (2026-09-16, Nebenbefund der Lücken-Messung): Jede
   Uhrzeit begann erst 2,3-2,7 s nach dem Befehl - zweimal Piper-Modell laden
   (Aufwärm-Ansage und Satz) plus eine dritte Erzeugung für den Speicher. Jetzt
