@@ -341,7 +341,11 @@ finished too, and then move down together. That way no reference breaks.
     salutation comma, "Cent"→"Euro" added (test bench case `absatz-allein-1`,
     3.8 %). **Open:** test in the user account after re-login; grammar "ein
     Brief geschrieben" (Parakeet, Vosk heard "einen") passes unchecked; date
-    following DIN 5008 ("31.08.2026") belongs to the letter work. Closing/name lines and subject
+    following DIN 5008 ("31.08.2026") belongs to the letter work. **Second letter
+    14:36:** salutation paragraph, "Betriff", "Yeah.", blank line before closing,
+    endings via Vosk+hunspell, Vosk paragraph added (case `absatz-allein-2`,
+    4.5 %, all punctuation). Name under the closing ("Stefan Grüßen") → from the
+    personal data; numbers ("1229" instead of "12629") remain Parakeet's error. Closing/name lines and subject
     line (bold in PDF and print) built. Open: "-ung" endings with Parakeet
     ("Rechn", "Nebenkostenabrechn"). Place stored in the admin account (wttr.in
     finds it correctly, 47.35/11.20); still missing in the user account. Open:

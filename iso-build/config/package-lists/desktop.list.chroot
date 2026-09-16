@@ -32,6 +32,10 @@ libreoffice-writer
 # braucht es.
 hunspell-de-de
 hunspell-en-us
+# Das Programm selbst (ergaenzt 2026-09-16): dialos-diktat.py fragt es, ob ein
+# Parakeet-Wort mit abgeschnittener Endung ("Rechn") ein echtes Wort ist. Kam
+# bisher nur als Empfehlung anderer Pakete mit.
+hunspell
 
 gnome-terminal
 curl

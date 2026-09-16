@@ -122,6 +122,21 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Second letter: paragraph after the salutation, closing on its own line,
+  endings completed** (2026-09-16, 14:36). Found: a rule for name lines swallowed
+  the paragraph after "Sehr geehrte Damen und Herren." (the salutation ran into
+  the first sentence); "Betriff" was not recognised as subject; a noise came out
+  as "Yeah." in the letter; "Mit freundlichen Grüßen" followed the last sentence;
+  Parakeet cut off "aufführ". Now: breaks are kept, "Betriff/Betrifft" counts,
+  English filler words as a whole chunk are dropped, there is always a blank line
+  before the closing (DIN 5008), missing endings come from Vosk - only if
+  hunspell does not know the word (otherwise "Rechnung" became "Rechnungen"); if
+  only Vosk heard an "Absatz" at a chunk start, the paragraph is made. `hunspell`
+  is now listed explicitly in the package list. Test bench with seven cases: no
+  case worse, "Nebenkostenabrechnung" and "Rechnung" now right (freely dictated
+  letter 1.7 %). **Open:** the name under the closing ("Stefan Grüßen") - it
+  will only be right once it comes from the personal data.
+
 - **First letter with Parakeet built in: "Absatz" alone is enough, subject ends
   at the sentence end** (2026-09-16, 14:19). Loading until "Ich schreibe mit"
   now 12 s instead of 33 s. Stephan said just "Absatz" five times instead of

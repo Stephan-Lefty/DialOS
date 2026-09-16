@@ -342,7 +342,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     „Cent"→„Euro" nachgebaut (Prüfstand-Fall `absatz-allein-1`, 3,8 %).
     **Offen:** Probe im Nutzerkonto nach Neuanmeldung; Grammatik „ein Brief
     geschrieben" (Parakeet, Vosk hörte „einen") kommt ungeprüft durch;
-    Datum nach DIN 5008 („31.08.2026") gehört zum Brief-Ausbau. Gruß/Name-Zeilen und
+    Datum nach DIN 5008 („31.08.2026") gehört zum Brief-Ausbau. **Zweiter Brief
+    14:36:** Anrede-Absatz, „Betriff", „Yeah.", Gruß-Leerzeile, Endungen über
+    Vosk+hunspell, Vosk-Absatz nachgebaut (Fall `absatz-allein-2`, 4,5 %, alle
+    Satzzeichen). Name unter dem Gruß („Stefan Grüßen") → aus den persönlichen
+    Daten; Zahlen („1229" statt „12629") bleiben Parakeets Fehler. Gruß/Name-Zeilen und
     Betreffzeile (fett im PDF und Druck) gebaut. Offen: „-ung"-Endungen bei
     Parakeet („Rechn", „Nebenkostenabrechn"). Ort im Admin-Konto hinterlegt (wttr.in
     findet ihn richtig, 47,35/11,20); im Nutzerkonto fehlt er noch. Offen:

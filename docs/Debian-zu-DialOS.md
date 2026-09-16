@@ -3395,6 +3395,14 @@ Anrede bekommt ihr Komma auch über Stückgrenzen (`anrede_richten`),
 „322,40 Cent" wird „322,40 Euro". Alles zusammen in `brief_text()`, die auch
 der Prüfstand ruft.
 
+**Nach dem zweiten Brief (14:36):** „Betriff/Betrifft" gilt als Betreff; ein
+Stück, das bei Parakeet nur aus einem englischen Füllwort besteht („Yeah."),
+fällt weg; vor dem Gruß steht immer eine Leerzeile; abgeschnittene Endungen
+(„aufführ") ergänzt `endungen_ergaenzen()` aus Vosks Wörtern, aber nur, wenn
+`hunspell -d de_DE -l` das Wort nicht kennt - deshalb steht `hunspell` jetzt
+ausdrücklich in `package-lists/desktop.list.chroot`; hört nur Vosk am
+Stückanfang „absatz/abseits/absender", gibt es einen Absatz.
+
 ## 16. Sicherungs-Abbild (Clonezilla)
 
 **Entscheidung vom 2026-08-16: Penguins' Eggs entfällt, Clonezilla

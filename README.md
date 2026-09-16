@@ -130,6 +130,21 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Zweiter Brief: Absatz nach der Anrede, Gruß auf eigener Zeile, Endungen
+  ergänzt** (2026-09-16, 14:36). Gefunden: Eine Regel für Namenszeilen schluckte
+  den Absatz nach „Sehr geehrte Damen und Herren." (die Anrede lief in den ersten
+  Satz); „Betriff" wurde nicht als Betreff erkannt; ein Geräusch kam als „Yeah."
+  in den Brief; „Mit freundlichen Grüßen" stand hinter dem letzten Satz; Parakeet
+  schnitt „aufführ" ab. Jetzt: Umbrüche bleiben, „Betriff/Betrifft" gilt,
+  englische Füllwörter als ganzes Stück fallen weg, vor dem Gruß steht immer eine
+  Leerzeile (DIN 5008), fehlende Endungen kommen von Vosk - nur wenn hunspell das
+  Wort nicht kennt (sonst wurde „Rechnung" zu „Rechnungen"); hörte nur Vosk ein
+  „Absatz" am Stückanfang, gibt es den Absatz. `hunspell` steht jetzt
+  ausdrücklich in der Paketliste. Prüfstand mit sieben Fällen: kein Fall
+  schlechter, „Nebenkostenabrechnung" und „Rechnung" jetzt richtig (frei
+  diktierter Brief 1,7 %). **Offen:** der Name unter dem Gruß („Stefan Grüßen") -
+  er kommt richtig erst aus den persönlichen Daten.
+
 - **Erster Brief mit festem Parakeet: „Absatz" allein reicht, Betreff endet am
   Satzende** (2026-09-16, 14:19). Laden bis „Ich schreibe mit" jetzt 12 s statt
   33 s. Stephan sagte fünfmal nur „Absatz" statt „neuer Absatz" - der Brief

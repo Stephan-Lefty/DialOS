@@ -1335,7 +1335,11 @@ def grussformel_richten(text):
     treffer = muster.search(rest)
     if not treffer or len(treffer.group(3).split()) > 4:
         return text
-    return rest[:treffer.start(2)] + treffer.group(2) + "\n" + treffer.group(3).strip()
+    # Vor dem Gruss eine Leerzeile (DIN 5008), auch wenn kein Absatz gesprochen
+    # wurde - am 2026-09-16 stand "... ueberweisen. Mit freundlichen Gruessen".
+    davor = rest[:treffer.start(2)].rstrip(" \t\n")
+    davor = davor + "\n\n" if davor else ""
+    return davor + treffer.group(2) + "\n" + treffer.group(3).strip()
 
 
 # BETREFFZEILE (Stephan, 2026-09-16: "fett geschrieben und Betreff: ......").
@@ -1344,7 +1348,8 @@ def grussformel_richten(text):
 # steht am Briefanfang immer "Betreff: ..." ohne Punkt am Ende. FETT wird die Zeile
 # im PDF (dialos-archiv.py als_pdf) - eine Textdatei kennt kein Fett; deshalb
 # druckt dialos-drucken.py den Brief ueber dasselbe PDF.
-BETREFF = re.compile(r"(?i)^\s*betreff\b\s*[:,.]?\s*")
+# "Betriff"/"Betrifft" auch: So schrieb Parakeet es am 2026-09-16 (Vosk: "betreff").
+BETREFF = re.compile(r"(?i)^\s*betr[ie]ff?t?\b\s*[:,.]?\s*")
 
 
 ANREDE = re.compile(r"(?im)^((?:sehr geehrte|liebe|lieber|hallo)\b[^\n.!?]*?)[ \t]*[.!,]?[ \t]*\n\n")
@@ -1721,13 +1726,72 @@ def parakeet_natuerlich(text):
                   text, flags=re.IGNORECASE)
     # Kurze Zeile nach einem Zeilenwechsel (Name unter dem Gruss) ohne den Punkt,
     # den Parakeet ans Ende jedes Stuecks setzt: "Gruessen\nMax Muster."
-    text = re.sub(r"(\n(?!\n)[^\n.?!]{1,40}?)\.\s*$", r"\1", text)
+    # Nur nach EINEM Zeilenwechsel und ohne Umbrueche am Ende zu schlucken: Mit
+    # "\.\s*$" fiel am 2026-09-16 der Absatz nach "\n\nSehr geehrte Damen und
+    # Herren. Absatz." weg - und die Anrede lief in den ersten Satz.
+    text = re.sub(r"((?<!\n)\n(?!\n)[^\n.?!]{1,40}?)\.[ \t]*$", r"\1", text)
     # "322,40 Cent" fuer "dreihundertzweiundzwanzig Euro und vierzig Cent"
     # (2026-09-16): Parakeet fasste den Betrag zusammen und behielt die falsche
     # Einheit. Ein Betrag mit zwei Nachkommastellen in Cent gibt es nicht.
     text = re.sub(r"\b(\d+,\d\d)\s+Cent\b", r"\1 Euro", text)
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip(" ")
+
+
+# PARAKEET-FUELLWOERTER (2026-09-16): Ein kurzes Geraeusch, das Vosk "apfel"
+# nannte, schrieb Parakeet als "Yeah." in den Brief - bei Einzelwoertern kippt es
+# ins Englische (so schon beim Einkaufszettel). Besteht Parakeets ganzes Stueck
+# aus so einem Wort, faellt es weg.
+PARAKEET_FUELLWOERTER = {"yeah", "yes", "yep", "okay", "ok", "oh", "uh", "um", "hmm", "mhm",
+                         "mm", "ah", "so", "and", "the", "no", "hey", "hi", "wow", "thank you",
+                         "thanks", "bye"}
+
+
+ABSATZ_BEI_VOSK = {"absatz", "absätze", "abseits", "absender", "absenders"}
+
+
+def parakeet_fuellwort(text):
+    return re.sub(r"[^\w ]", "", text).strip().lower() in PARAKEET_FUELLWOERTER
+
+
+# ABGESCHNITTENE ENDUNGEN (2026-09-15/16): Parakeet schrieb "Rechn",
+# "Nebenkostenabrechn", "aufführ" - Vosk hoerte im selben Stueck "rechnung",
+# "aufführen". Ist ein Parakeet-Wort kein Vosk-Wort, aber der Anfang genau eines
+# Vosk-Worts, dem nur eine uebliche Endung fehlt, kommt die Endung dazu.
+#
+# NUR WENN DIE RECHTSCHREIBPRUEFUNG DAS WORT NICHT KENNT: Ohne diese Bedingung
+# wurde auf dem Pruefstand aus einem richtigen "Rechnung" ein "Rechnungen", weil
+# Vosk dort die Mehrzahl hoerte. hunspell mit dem deutschen Woerterbuch ist
+# auf dem Geraet (Paketliste desktop); fehlt es, wird nichts ergaenzt.
+ENDUNGEN = ("ungen", "ung", "en", "n", "e", "er", "es", "em", "st", "t")
+
+
+def unbekannte_woerter(woerter):
+    if not woerter or not shutil.which("hunspell"):
+        return set()
+    try:
+        ausgabe = subprocess.run(["hunspell", "-d", "de_DE", "-l"], input="\n".join(woerter),
+                                 capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.SubprocessError):
+        return set()
+    return set(ausgabe.split())
+
+
+def endungen_ergaenzen(text, vosk_worte):
+    vosk = {w.lower() for w in vosk_worte}
+    kandidaten = {}
+    for wort in set(re.findall(r"[A-Za-zÄÖÜäöüß]+", text)):
+        klein = wort.lower()
+        if len(klein) < 4 or klein in vosk:
+            continue
+        passend = {v for v in vosk if v.startswith(klein) and v[len(klein):] in ENDUNGEN}
+        if len(passend) == 1:
+            kandidaten[wort] = wort + passend.pop()[len(klein):]
+    falsch = unbekannte_woerter(list(kandidaten))
+    ersatz = {w: e for w, e in kandidaten.items() if w in falsch}
+    if not ersatz:
+        return text
+    return re.sub(r"[A-Za-zÄÖÜäöüß]+", lambda m: ersatz.get(m.group(0), m.group(0)), text)
 
 
 def parakeet_erkennen(erkenner, audio, worte):
@@ -1866,7 +1930,24 @@ def diktat_fuehren(zweck, name, quelle):
             return satzzeichen_setzen(vosk_text)
         melde(f"  VOSK:        {vosk_text!r}")
         melde(f"  PARAKEET:    {roh!r} ({time.time()-t0:.2f} s)")
-        return parakeet_natuerlich(roh) or satzzeichen_setzen(vosk_text)
+        if parakeet_fuellwort(roh):
+            melde(f"  PARAKEET: nur Fuellwort {roh!r} - Stueck faellt weg")
+            return ""
+        ergaenzt = endungen_ergaenzen(roh, vosk_text.split())
+        if ergaenzt != roh:
+            melde(f"  Endungen nach Vosk ergaenzt: {ergaenzt!r}")
+        text = parakeet_natuerlich(ergaenzt)
+        # ABSATZ, DEN NUR VOSK HOERTE (2026-09-16, 14:36): Stephan sagte "Absatz
+        # Diesen Betrag ...", Vosk hoerte "absender diesen betrag", Parakeet liess
+        # das Wort ganz weg - und der Absatz fehlte. Vosk schreibt dieses "Absatz"
+        # am Stueckanfang oft als "absender(s)"/"abseits"; steht das bei Parakeet
+        # nicht als eigenes Wort da, gilt es als Absatz.
+        erstes = vosk_text.split()[0].lower() if vosk_text.split() else ""
+        if (erstes in ABSATZ_BEI_VOSK and text and not text.startswith("\n")
+                and not re.match(r"(?i)\W*" + erstes + r"\b", text)):
+            melde(f"  Absatz nach Vosk ({erstes!r} am Stueckanfang, bei Parakeet fehlt es)")
+            text = "\n\n" + text
+        return text or satzzeichen_setzen(vosk_text)
 
     prozess = None
     gesammelt = []

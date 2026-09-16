@@ -3152,6 +3152,14 @@ article), the subject ends at the first sentence end and without full stop
 (`anrede_richten`), "322,40 Cent" becomes "322,40 Euro". All combined in
 `brief_text()`, which the test bench calls as well.
 
+**After the second letter (14:36):** "Betriff/Betrifft" counts as subject; a
+chunk that Parakeet renders as a single English filler word ("Yeah.") is
+dropped; there is always a blank line before the closing; cut-off endings
+("aufführ") are completed by `endungen_ergaenzen()` from Vosk's words, but only
+if `hunspell -d de_DE -l` does not know the word - hence `hunspell` is now listed
+explicitly in `package-lists/desktop.list.chroot`; if only Vosk hears
+"absatz/abseits/absender" at a chunk start, a paragraph is made.
+
 ## 16. Backup image (Clonezilla)
 
 **Decision of 2026-08-16: Penguins' Eggs is dropped, Clonezilla takes
