@@ -122,6 +122,18 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Personal data: one form for all programs** (2026-09-16, Stephan: define it
+  "fix für alle Programme" and enter it). Template
+  `persoenliche-daten-vorlage.txt` in `Feld: Wert` format following Stephan's
+  draft, extended by title, Du/Sie, address suffix, weather place, business
+  details, signature, closing, bank and emergency contact. Lives per account in
+  `~/.config/dialos/persoenliche-daten.txt` (encrypted in the user account). New
+  tool `dialos-persoenliche-daten.py` (create, check, show, vCard). Letters take
+  sender and contact following DIN 5008 from it and set the name under the
+  closing from the data - "Stefan Grüße" becomes the right name; names and
+  weather place come from there too. Without the file everything as before.
+  Test bench unchanged. Described in `docs/kundendaten-felder.en.md`.
+
 - **Second letter: paragraph after the salutation, closing on its own line,
   endings completed** (2026-09-16, 14:36). Found: a rule for name lines swallowed
   the paragraph after "Sehr geehrte Damen und Herren." (the salutation ran into

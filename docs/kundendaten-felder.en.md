@@ -14,6 +14,31 @@ Writing a postal address or phone number in here means publishing it. The same
 split as with `Wordpressinstallation/.env.example` - the template into the repo,
 the values onto the device only.
 
+> **Built on 2026-09-16** (Stephan: define the personal data "fix für alle
+> Programme" and enter it, plus a form he fills in by hand per customer and puts
+> in a fixed place). Decided and implemented:
+>
+> - **Location:** `~/.config/dialos/persoenliche-daten.txt` in the person's
+>   account, mode 0600 - in the user account on the encrypted partition. This
+>   answers the open question below. The admin account has its own file.
+> - **Format:** `Feld: Wert` as in Stephan's draft "Welche Daten werden
+>   benötigt", not `key = value`. Template:
+>   `/usr/local/share/dialos/persoenliche-daten-vorlage.txt`.
+> - **Fields:** the list below plus title, form of address (Du/Sie), address
+>   suffix, weather place, fax, website, business details (company, position,
+>   mail, phone, fax), name for the signature, closing, signature as image,
+>   bank (account holder, IBAN, BIC, bank), emergency contact.
+> - **Tool:** `dialos-persoenliche-daten.py anlegen | pruefen | zeigen | vcard`.
+>   It reads and checks (required fields, phone with country code, mail,
+>   postcode, IBAN, unknown field names) and prints the own card as vCard - the
+>   format of Thunderbird contacts.
+> - **Used by:** letters (sender following DIN 5008 with contact lines, name
+>   under the closing), names (first name, "Name gesprochen"), weather (weather
+>   place, else town). `nutzer-name.txt`, `absender.txt` and `wetter-ort` remain
+>   the fallback while there is no file.
+> - **Not connected yet:** mail signature, Thunderbird contacts, Du/Sie,
+>   signature as image. The description below is the state of 2026-08-24.
+
 ## The fields
 
 Drawn up by Stephan using his own person as the example. The "today" column says

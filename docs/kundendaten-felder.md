@@ -13,6 +13,32 @@ heißt, sie zu veröffentlichen. Dieselbe Trennung wie bei
 `Wordpressinstallation/.env.example` — die Vorlage ins Repo, die Werte nur auf
 das Gerät.
 
+> **Gebaut am 2026-09-16** (Stephan: „die persönlichen Daten … fix für alle
+> Programme definieren und eintragen", dazu ein Formular, das er je Kunde von
+> Hand ausfüllt und an einen festen Ort legt). Entschieden und umgesetzt:
+>
+> - **Ort:** `~/.config/dialos/persoenliche-daten.txt` im Konto der Person,
+>   Rechte 0600 - im Nutzerkonto auf der verschlüsselten Partition. Damit ist
+>   die offene Frage unten beantwortet. Das Admin-Konto hat seine eigene Datei.
+> - **Format:** `Feld: Wert` wie in Stephans Entwurf „Welche Daten werden
+>   benötigt", nicht `schlüssel = wert`. Vorlage:
+>   `/usr/local/share/dialos/persoenliche-daten-vorlage.txt`.
+> - **Felder:** die Liste unten plus Titel, Ansprache (Du/Sie), Adresszusatz,
+>   Wetter-Ort, Fax, Webseite, dienstliche Angaben (Firma, Position, Mail,
+>   Telefon, Fax), Name für die Unterschrift, Grußformel, Unterschrift als
+>   Bild, Bank (Kontoinhaber, IBAN, BIC, Bank), Notfallkontakt.
+> - **Werkzeug:** `dialos-persoenliche-daten.py anlegen | pruefen | zeigen |
+>   vcard`. Es liest und prüft (Pflichtfelder, Telefon mit Ländervorwahl,
+>   Mail, PLZ, IBAN, unbekannte Feldnamen) und gibt die eigene Karte als vCard
+>   aus - im Format der Thunderbird-Kontakte.
+> - **Genutzt von:** Brief (Absender nach DIN 5008 mit Kontaktzeilen, Name
+>   unter dem Gruß), Namen (Vorname, „Name gesprochen"), Wetter (Wetter-Ort,
+>   sonst Ort). `nutzer-name.txt`, `absender.txt` und `wetter-ort` bleiben der
+>   Rückfall, solange es keine Datei gibt.
+> - **Noch nicht angebunden:** Mail-Signatur, Thunderbird-Kontakte, Ansprache
+>   Du/Sie, Unterschrift als Bild. Die Beschreibung unten ist der Stand vom
+>   2026-08-24.
+
 ## Die Felder
 
 Von Stephan am Beispiel seiner eigenen Person aufgestellt. Die Spalte „heute"

@@ -20,7 +20,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Einbau von Parakeet). (1) Persönliche Daten des Nutzers - zuerst Stephans -
   einmal fest für alle Programme festlegen und eintragen (Briefbogen,
   Thunderbird-Signatur, Wetter-Ort; hängt an den Kundendaten und deren
-  Verschlüsselung). (2) Die genaue Empfängeradresse wird eingesprochen.
+  Verschlüsselung). **(1) gebaut 2026-09-16:** Formular
+  `persoenliche-daten-vorlage.txt`, `dialos-persoenliche-daten.py`, Brief/Namen/
+  Wetter angebunden - offen: Stephan füllt seine Daten aus, Mail-Signatur,
+  Du/Sie, Unterschrift als Bild. (2) Die genaue Empfängeradresse wird eingesprochen.
   (3) Diese Adresse wird automatisch als Kontakt in Thunderbird angelegt.
   (4) Aufbau nach DIN 5008, damit das PDF immer sauber ist - ob gedruckt oder
   per Mail verschickt (Anschriftfeld für Fensterumschlag, Bezugszeichen/Datum,

@@ -1,0 +1,84 @@
+# DialOS - Persönliche Daten
+#
+# Diese Angaben nutzt DialOS überall dort, wo es um die Person geht: Absender und
+# Unterschrift im Brief, Anrede und Aussprache des Namens, Wetter am Wohnort,
+# später Mail-Signatur und die eigene Karte in den Thunderbird-Kontakten.
+#
+# SO AUSFÜLLEN: Hinter den Doppelpunkt schreiben. Was nicht zutrifft, bleibt
+# leer - nie "Musterstraße" oder "-" eintragen: Ein blinder Nutzer hört eine
+# falsche Angabe im Brief nicht, eine fehlende fällt einfach weg.
+# Zeilen mit # sind Erklärungen und werden nicht gelesen.
+#
+# DIESE DATEI GEHÖRT NUR AUF DAS GERÄT: ~/.config/dialos/persoenliche-daten.txt
+# im Konto der Person. Nie ins Repo, nie per Mail verschicken.
+#
+# Prüfen, ob alles lesbar ist:  dialos-persoenliche-daten.py pruefen
+
+# ---------------------------------------------------------------- Person
+# Anrede: Herr, Frau oder leer (für Briefe und Mails an diese Person)
+Anrede:
+# Titel: z.B. Dr. - steht vor dem Vornamen im Absender
+Titel:
+Vorname:
+Name:
+# Wie DialOS den Vornamen AUSSPRECHEN soll, wenn es ihn falsch betont.
+# Beispiel: geschrieben "Stephan", gesprochen "Steffan". Sonst leer.
+Name gesprochen:
+# Du oder Sie - wie DialOS die Person anspricht. Leer heißt Du.
+Ansprache:
+
+# ---------------------------------------------------------------- Anschrift
+Straße:
+Hausnummer:
+# Adresszusatz: c/o, Etage, Wohnung, Hinterhaus - sonst leer
+Adresszusatz:
+Postleitzahl:
+# Ort: Er ist auch der Ort für die Wetteransage, wenn unten kein Wetter-Ort steht.
+Ort:
+Bundesland:
+Land:
+# Länderkennzeichen der Postanschrift: DE, AT, CH ... (nicht die Telefonvorwahl)
+Länderkennzeichen:
+
+# ---------------------------------------------------------------- Wetter
+# Nur wenn das Wetter für einen anderen Ort angesagt werden soll als den Wohnort.
+Wetter-Ort:
+
+# ---------------------------------------------------------------- Kontakt privat
+# Telefonnummern IMMER vollständig mit Ländervorwahl: +49 170 1234567 oder
+# 0043 664 1234567 - ein deutsches und ein österreichisches Handy haben
+# verschiedene Vorwahlen, abgeleitet wird nichts.
+E-Mail-Adresse:
+Telefon Festnetz privat:
+Telefon Handy privat:
+Fax privat:
+Webseite:
+
+# ---------------------------------------------------------------- Dienstlich (optional)
+Firma:
+Position:
+E-Mail-Adresse dienstlich:
+Telefon Festnetz dienstlich:
+Telefon Handy dienstlich:
+Fax dienstlich:
+
+# ---------------------------------------------------------------- Brief
+# Name unter dem Gruß. Leer: Titel, Vorname und Name von oben.
+Name für die Unterschrift:
+# Leer: Mit freundlichen Grüßen
+Grußformel:
+# Eingescannte Unterschrift als Bilddatei (voller Pfad). Leer: Der Brief sagt,
+# dass er per Spracheingabe erstellt und nicht unterschrieben ist.
+Unterschrift als Bild:
+
+# ---------------------------------------------------------------- Bank (optional)
+# Für Briefe, in denen es um Zahlungen geht. Nur eintragen, wenn die Person
+# das möchte.
+Kontoinhaber:
+IBAN:
+BIC:
+Bank:
+
+# ---------------------------------------------------------------- Notfall (optional)
+Notfallkontakt Name:
+Notfallkontakt Telefon:

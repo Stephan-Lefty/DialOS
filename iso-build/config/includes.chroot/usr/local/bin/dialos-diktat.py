@@ -456,6 +456,20 @@ DOKUMENT_ORDNER = os.path.join(os.path.expanduser("~"), "Dokumente")
 FUSSZEILE_SKRIPT = "/usr/local/bin/dialos-fusszeile.py"
 NAMEN_SKRIPT_PFAD = "/usr/local/bin/dialos-namen.py"
 ABSENDER = "/usr/local/share/dialos/absender.txt"
+# Persoenliche Daten (2026-09-16): Absender, Kontakt und Name unter dem Gruss.
+# Gibt es sie, gelten sie; sonst der alte Weg ueber nutzer-name.txt/absender.txt.
+PERSOENLICHE_DATEN_SKRIPT = "/usr/local/bin/dialos-persoenliche-daten.py"
+
+
+def persoenliche_daten():
+    """(Modul, Daten) oder (None, {}) - ein Brief ohne Absender ist besser als keiner."""
+    modul = holen(PERSOENLICHE_DATEN_SKRIPT, "persoenliche_daten")
+    if not modul:
+        return None, {}
+    try:
+        return modul, modul.lesen()
+    except Exception:
+        return None, {}
 ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
 
 # DER HINWEIS AN DER STELLE DER UNTERSCHRIFT (Stephan, 2026-08-21). Ein Brief
@@ -1244,6 +1258,9 @@ def absenderzeilen():
     ersatzlos weg - ein Brief mit leeren Platzhalterzeilen waere schlimmer als
     einer ohne Kopf, weil ein blinder Nutzer die Luecke nicht sieht.
     """
+    modul, daten = persoenliche_daten()
+    if daten:
+        return modul.absenderzeilen(daten) + modul.kontaktzeilen(daten)
     zeilen = []
     namen = holen(NAMEN_SKRIPT_PFAD, "namen")
     if namen:
@@ -1339,7 +1356,14 @@ def grussformel_richten(text):
     # wurde - am 2026-09-16 stand "... ueberweisen. Mit freundlichen Gruessen".
     davor = rest[:treffer.start(2)].rstrip(" \t\n")
     davor = davor + "\n\n" if davor else ""
-    return davor + treffer.group(2) + "\n" + treffer.group(3).strip()
+    # DER NAME KOMMT AUS DEN PERSOENLICHEN DATEN, wenn es sie gibt (2026-09-16):
+    # Parakeet schrieb unter Stephans Gruss "Stefan Gruesse" - ein Name ist fuer
+    # jeden Erkenner ein unbekanntes Wort, und der eigene steht ohnehin fest.
+    modul, daten = persoenliche_daten()
+    name = (modul.unterschrift_name(daten) if daten else "") or treffer.group(3).strip()
+    if name != treffer.group(3).strip():
+        melde(f"  Unterschrift aus den persoenlichen Daten: {treffer.group(3).strip()!r} -> {name!r}")
+    return davor + treffer.group(2) + "\n" + name
 
 
 # BETREFFZEILE (Stephan, 2026-09-16: "fett geschrieben und Betreff: ......").

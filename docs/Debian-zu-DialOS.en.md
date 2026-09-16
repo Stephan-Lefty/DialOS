@@ -1891,6 +1891,21 @@ umstellen`.
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-dateiname.py /usr/local/bin/
 ```
 
+**Personal data (since 2026-09-16).** One form for name, address, contact,
+signature, bank and emergency contact - filled in once per account in
+`~/.config/dialos/persoenliche-daten.txt` (0600). Letters (sender, name under
+the closing), names and weather read from it; without the file the old way
+applies. Fields and decisions: [kundendaten-felder.en.md](kundendaten-felder.en.md).
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/persoenliche-daten-vorlage.txt /usr/local/share/dialos/
+```
+
+In the person's account: `dialos-persoenliche-daten.py anlegen`, fill it in,
+then `dialos-persoenliche-daten.py pruefen`. **Never put the file into the
+repo.**
+
 **Why this was needed.** exFAT is mounted with the `uid`/`gid` of whoever
 mounts it. On a device with two accounts that means: whoever plugs the stick in
 first owns it, and the other account cannot even read it. Measured on

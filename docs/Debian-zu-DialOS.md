@@ -1966,6 +1966,20 @@ Von Hand: `dialos-dateiname.py umstellen`.
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-dateiname.py /usr/local/bin/
 ```
 
+**Persönliche Daten (seit 2026-09-16).** Ein Formular für Name, Anschrift,
+Kontakt, Unterschrift, Bank und Notfall - einmal je Konto ausgefüllt in
+`~/.config/dialos/persoenliche-daten.txt` (0600). Brief (Absender, Name unter
+dem Gruß), Namen und Wetter lesen daraus; fehlt die Datei, gilt der alte Weg.
+Felder und Entscheidungen: [kundendaten-felder.md](kundendaten-felder.md).
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/persoenliche-daten-vorlage.txt /usr/local/share/dialos/
+```
+
+Im Konto der Person: `dialos-persoenliche-daten.py anlegen`, ausfüllen, dann
+`dialos-persoenliche-daten.py pruefen`. **Die Datei nie ins Repo.**
+
 **Warum das nötig war.** exFAT wird mit `uid`/`gid` dessen eingehängt, der es
 einhängt. Auf einem Gerät mit zwei Konten heißt das: Wer den Stick zuerst
 einsteckt, besitzt ihn, und das andere Konto kommt nicht einmal lesend hinein.

@@ -613,7 +613,21 @@ def geoclue_standort():
 WETTER_ORT_DATEI = os.path.join(os.path.expanduser("~"), ".config", "dialos", "wetter-ort")
 
 
+PERSOENLICHE_DATEN_SKRIPT = "/usr/local/bin/dialos-persoenliche-daten.py"
+
+
 def wetter_ort():
+    """Aus den persoenlichen Daten (Wetter-Ort, sonst Ort), sonst aus der alten Datei wetter-ort."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("persoenliche_daten", PERSOENLICHE_DATEN_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        ort = modul.wetter_ort(modul.lesen())
+        if ort:
+            return ort
+    except Exception:
+        pass
     try:
         with open(WETTER_ORT_DATEI, encoding="utf-8") as f:
             return f.read().strip() or None

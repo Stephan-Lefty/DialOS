@@ -130,6 +130,18 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Persönliche Daten: ein Formular für alle Programme** (2026-09-16, Stephan:
+  „fix für alle Programme definieren und eintragen"). Vorlage
+  `persoenliche-daten-vorlage.txt` im Format `Feld: Wert` nach Stephans Entwurf,
+  ergänzt um Titel, Du/Sie, Adresszusatz, Wetter-Ort, dienstliche Angaben,
+  Unterschrift, Grußformel, Bank und Notfallkontakt. Liegt je Konto in
+  `~/.config/dialos/persoenliche-daten.txt` (im Nutzerkonto verschlüsselt).
+  Neues Werkzeug `dialos-persoenliche-daten.py` (anlegen, prüfen, zeigen,
+  vCard). Der Brief nimmt Absender und Kontakt nach DIN 5008 daraus und setzt
+  den Namen unter dem Gruß aus den Daten - aus „Stefan Grüße" wird der richtige
+  Name; Namen und Wetter-Ort kommen ebenfalls daher. Ohne Datei alles wie
+  bisher. Prüfstand unverändert. Beschrieben in `docs/kundendaten-felder.md`.
+
 - **Zweiter Brief: Absatz nach der Anrede, Gruß auf eigener Zeile, Endungen
   ergänzt** (2026-09-16, 14:36). Gefunden: Eine Regel für Namenszeilen schluckte
   den Absatz nach „Sehr geehrte Damen und Herren." (die Anrede lief in den ersten

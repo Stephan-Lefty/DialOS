@@ -236,6 +236,8 @@ def fall_abspielen(fall, parakeet, tempo):
     d.ARCHIV_SKRIPT = "/nicht/vorhanden"
     d.PROTOKOLL = os.path.join(tmp, "diktat.log")
     d.MITSCHNITT_SCHALTER = os.path.join(tmp, "kein-mitschnitt")
+    # Ohne persoenliche Daten: Der Fall misst die Erkennung, nicht die Unterschrift.
+    d.PERSOENLICHE_DATEN_SKRIPT = "/nicht/vorhanden"
     d.PARAKEET_AUS = os.path.join(tmp, "parakeet-aus")
     if not parakeet:
         open(d.PARAKEET_AUS, "w").close()

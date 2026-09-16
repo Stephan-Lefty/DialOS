@@ -90,6 +90,21 @@ def _nutzer_felder():
     statt "Stephan" schlicht falsch waere. Fehlt das zweite, gilt das erste
     fuer beides.
     """
+    # PERSOENLICHE DATEN ZUERST (2026-09-16): Vorname und "Name gesprochen" aus
+    # ~/.config/dialos/persoenliche-daten.txt - im Konto der Person, im
+    # Nutzerkonto also verschluesselt. nutzer-name.txt bleibt der Rueckfall.
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "persoenliche_daten", "/usr/local/bin/dialos-persoenliche-daten.py")
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        daten = modul.lesen()
+        geschrieben = _geprueft(daten.get("vorname"))
+        if geschrieben:
+            return geschrieben, (_geprueft(daten.get("name_gesprochen")) or geschrieben)
+    except Exception:
+        pass
     roh = _lesen(NUTZER_DATEI)
     if not roh:
         return None, None
