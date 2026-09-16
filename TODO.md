@@ -316,8 +316,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Gespräch."** Ungeklärt: 13:10:27 kam „brief als wir" an.
     **Rückfall-Antworten gebaut (2026-09-16):** Standard-Antwort, „Was kann ich
     sagen", ehrliche Antworten mit WUNSCH-Zählung, Wetter mit Rückfall-Ort und
-    menschlicher Formulierung. Offen: Ort in `~/.config/dialos/wetter-ort`
-    (Stephan), Probe am Gerät, später freie Erkennung unbekannter Sätze.
+    menschlicher Formulierung. Ort im Admin-Konto hinterlegt (wttr.in
+    findet ihn richtig, 47,35/11,20); im Nutzerkonto fehlt er noch. Offen:
+    Probe am Gerät, später freie Erkennung unbekannter Sätze.
     **Neu:** Nicht gespeicherte Ansagen (jede Uhrzeit) sprechen erst 2,3-2,7 s
     nach dem Aufruf (gespeicherte 0,2 s) - Aufwärm-Ansage und frische Piper-
     Synthese. **Erledigt 2026-09-16:** direkt erzeugen und abspielen, 1,4-1,7 s.

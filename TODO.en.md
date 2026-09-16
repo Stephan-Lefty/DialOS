@@ -316,7 +316,8 @@ finished too, and then move down together. That way no reference breaks.
     conversation."** Unresolved: at 13:10:27 "brief als wir" arrived.
     **Fallback answers built (2026-09-16):** standard answer, "Was kann ich
     sagen", honest answers with WUNSCH counting, weather with a fallback place
-    and human wording. Open: place in `~/.config/dialos/wetter-ort` (Stephan),
+    and human wording. Place stored in the admin account (wttr.in
+    finds it correctly, 47.35/11.20); still missing in the user account. Open:
     test on the device, later free recognition of unknown sentences.
     **New:** announcements not in the cache (every time of day) start speaking
     only 2.3-2.7 s after the call (cached 0.2 s) - warm-up announcement and
