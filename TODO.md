@@ -38,6 +38,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   vorlesen" und die sechs „Befehle für …" mit echter Stimme; ist die ganze Liste
   (144 s) zu lang? Offen: Unterbrechen während der Ansage geht nicht.
 
+- [ ] **Jahreszeiten-Hintergrund am Gerät prüfen** (gebaut 2026-09-16): nach
+  dem Anmelden Sommerbild, am 23.09. ab 02:06 Herbst. Offen: vier dunkle
+  Nachtbilder (`assets/wallpaper-<jahreszeit>-dark.png`) - erstellt Stephan.
+
 - [ ] **Lizenzhinweis für Parakeet am Gerät** (2026-09-16): CC-BY-4.0 verlangt
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
   Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.

@@ -130,6 +130,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Hintergrundbild wechselt mit der Jahreszeit** (2026-09-16, Stephan: „etwas
+  Schwung in unser Wallpaper bringen"). Vier Bilder desselben Bergsees - Frühling,
+  Sommer, Herbst, Winter. `dialos-jahreszeit.py` berechnet den kalendarischen
+  Jahreszeitbeginn (Stephans Wahl, auf Minuten genau) am Wohnort und stellt hellen
+  und dunklen Modus auf das passende Bild; ein selbst gewähltes Foto bleibt.
+  Nutzer-Timer beim Anmelden und stündlich. Dunkle Jahreszeitbilder werden
+  übernommen, sobald sie als `wallpaper-<jahreszeit>-dark.png` vorliegen.
+  Beschrieben in `docs/Debian-zu-DialOS.md`, Schritt 3.
+
 - **Eingabemaske für die persönlichen Daten - auch für den Nutzer, fester Teil
   der Einrichtung** (2026-09-16). Neues Programm „DialOS Persönliche Daten"
   (GTK 4/libadwaita) im Admin-Konto: Konto wählen, Felder nach Abschnitten mit

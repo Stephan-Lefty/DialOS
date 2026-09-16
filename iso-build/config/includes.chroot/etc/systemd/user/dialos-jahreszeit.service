@@ -1,0 +1,16 @@
+[Unit]
+# Stellt das Hintergrundbild auf die Jahreszeit am Wohnort (Stephan, 2026-09-16).
+#
+# WARUM EIN NUTZERDIENST: Das Hintergrundbild ist eine Einstellung JE KONTO
+# (gsettings), und der Wohnort steht in den persoenlichen Daten des Kontos.
+#
+# WARUM NACH graphical-session.target: gsettings braucht den Sitzungsbus. Ohne
+# ihn schreibt es in eine Datenbank, die die laufende Sitzung nicht sieht.
+Description=DialOS: Hintergrundbild nach der Jahreszeit
+Documentation=file:///usr/local/bin/dialos-jahreszeit.py
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dialos-jahreszeit.py
+Nice=15

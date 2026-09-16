@@ -122,6 +122,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Wallpaper changes with the season** (2026-09-16, Stephan: bring "some swing"
+  into the wallpaper). Four pictures of the same mountain lake - spring, summer,
+  autumn, winter. `dialos-jahreszeit.py` computes the astronomical start of the
+  season (Stephan's choice, accurate to minutes) at the home place and sets light
+  and dark mode to the matching picture; a self-chosen photo stays. User timer at
+  login and hourly. Dark season pictures are used as soon as they exist as
+  `wallpaper-<season>-dark.png`. Described in `docs/Debian-zu-DialOS.en.md`,
+  step 3.
+
 - **Input form for the personal data - also for the user, a fixed part of the
   setup** (2026-09-16). New program "DialOS Persönliche Daten" (GTK 4/libadwaita)
   in the admin account: choose the account, fields by section with hints,

@@ -156,6 +156,12 @@ schritt_03_branding() {
   sudo mkdir -p /usr/share/backgrounds/dialos
   sudo cp iso-build/config/includes.chroot/usr/share/backgrounds/dialos/*.png /usr/share/backgrounds/dialos/
   sudo cp assets/mark.png /usr/share/pixmaps/distributor-logo.png
+  # Hintergrund nach Jahreszeit (2026-09-16): Skript und Nutzer-Timer fuer alle
+  # Konten. Wechselt nur ein DialOS-Bild, nie ein selbst gewaehltes.
+  sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-jahreszeit.py /usr/local/bin/
+  sudo cp iso-build/config/includes.chroot/etc/systemd/user/dialos-jahreszeit.service \
+    iso-build/config/includes.chroot/etc/systemd/user/dialos-jahreszeit.timer /etc/systemd/user/
+  sudo systemctl --global enable dialos-jahreszeit.timer
   sudo cp iso-build/config/includes.chroot/etc/os-release /etc/os-release
 
   sudo mkdir -p /etc/dconf/db/local.d /etc/dconf/profile

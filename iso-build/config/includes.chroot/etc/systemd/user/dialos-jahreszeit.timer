@@ -1,0 +1,14 @@
+[Unit]
+# Kurz nach dem Anmelden und dann stuendlich. Die Jahreszeit beginnt zu einer
+# bestimmten Uhrzeit (2026: Herbst am 23.09. um 02:06) - wer das Geraet ueber
+# Nacht laufen laesst, bekommt das neue Bild spaetestens eine Stunde danach.
+# Der Lauf vergleicht nur und aendert nichts, solange alles stimmt.
+Description=DialOS: Jahreszeit-Hintergrund regelmaessig pruefen
+
+[Timer]
+OnStartupSec=20s
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

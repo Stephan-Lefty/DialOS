@@ -397,6 +397,26 @@ sudo cp assets/mark.png /usr/share/pixmaps/distributor-logo.png   # 512x512, log
 sudo cp iso-build/config/includes.chroot/etc/os-release /etc/os-release
 ```
 
+**Background by season (since 2026-09-16).** Stephan: bring "some swing" into
+the wallpaper - four pictures of the same mountain lake
+(`wallpaper-fruehling/sommer/herbst/winter.png`, sources in `assets/` as
+`…-light.png`, losslessly repacked: same pixels, 3.7-5.1 MB instead of 14.7 MB).
+`dialos-jahreszeit.py` computes the **astronomical** start of each season every
+year (Meeus, accurate to minutes; 2026: 20.03. 15:46, 21.06. 10:26, 23.09.
+02:06, 21.12. 21:51) and sets `picture-uri` and `picture-uri-dark` to the season
+picture - if `wallpaper-<season>-dark.png` exists, dark mode uses it. Southern
+hemisphere via the country in the personal data. **Only a DialOS picture** from
+`/usr/share/backgrounds/dialos` is switched; a self-chosen photo stays. User
+timer at login (20 s) and hourly.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-jahreszeit.py /usr/local/bin/
+sudo cp iso-build/config/includes.chroot/etc/systemd/user/dialos-jahreszeit.service iso-build/config/includes.chroot/etc/systemd/user/dialos-jahreszeit.timer /etc/systemd/user/
+sudo systemctl --global enable dialos-jahreszeit.timer
+```
+
+Check: `dialos-jahreszeit.py --zeigen`; log `~/.log/dialos-jahreszeit.log`.
+
 **dconf branding/defaults** (wallpaper, login logo, mouse acceleration,
 battery percentage display, default extensions) - take the files from
 [`iso-build/config/includes.chroot_before_packages/etc/dconf/db/local.d/`](../iso-build/config/includes.chroot_before_packages/etc/dconf/db/local.d/)

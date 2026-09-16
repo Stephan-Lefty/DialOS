@@ -37,6 +37,10 @@ finished too, and then move down together. That way no reference breaks.
   list (144 s) too long? Open: interrupting during the announcement is not
   possible.
 
+- [ ] **Check the seasonal wallpaper on the device** (built 2026-09-16): summer
+  picture after login, autumn from 23.09. 02:06. Open: four dark night pictures
+  (`assets/wallpaper-<season>-dark.png`) - Stephan creates them.
+
 - [ ] **Parakeet licence notice on the device** (2026-09-16): CC-BY-4.0 requires
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
   that DialOS can show or read out on the device.
