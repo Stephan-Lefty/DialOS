@@ -39,8 +39,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   (144 s) zu lang? Offen: Unterbrechen während der Ansage geht nicht.
 
 - [ ] **Jahreszeiten-Hintergrund am Gerät prüfen** (gebaut 2026-09-16): nach
-  dem Anmelden Sommerbild, am 23.09. ab 02:06 Herbst. Offen: vier dunkle
-  Nachtbilder (`assets/wallpaper-<jahreszeit>-dark.png`) - erstellt Stephan.
+  dem Anmelden Sommerbild, am 23.09. ab 02:06 Herbst. Alle acht Bilder in
+  3840 × 2160 hell und dunkel eingebunden (19:10). Hinweis für die nächste
+  Bildfassung: Das Logo unten rechts liegt nur ~3 % vom Rand - auf 16:10-Bildschirmen
+  schneidet der Zoom links/rechts je 5 % ab.
 
 - [ ] **Lizenzhinweis für Parakeet am Gerät** (2026-09-16): CC-BY-4.0 verlangt
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine

@@ -400,11 +400,14 @@ sudo cp iso-build/config/includes.chroot/etc/os-release /etc/os-release
 **Background by season (since 2026-09-16).** Stephan: bring "some swing" into
 the wallpaper - four pictures of the same mountain lake
 (`wallpaper-fruehling/sommer/herbst/winter.png`, sources in `assets/` as
-`…-light.png`, losslessly repacked: same pixels, 3.7-5.1 MB instead of 14.7 MB).
+`…-light.png`/`…-dark.png`, losslessly repacked: same pixels, 6-11 MB instead of 32 MB).
 `dialos-jahreszeit.py` computes the **astronomical** start of each season every
 year (Meeus, accurate to minutes; 2026: 20.03. 15:46, 21.06. 10:26, 23.09.
 02:06, 21.12. 21:51) and sets `picture-uri` and `picture-uri-dark` to the season
-picture - if `wallpaper-<season>-dark.png` exists, dark mode uses it. Southern
+picture and its dark version `wallpaper-<season>-dark.png`. The pictures (3840 ×
+2160, light and dark since 19:10) are in `/usr/share/backgrounds/dialos` on every
+installation; the user only switches the style (quick settings top right: "Dark
+Style"), the picture follows by itself. Southern
 hemisphere via the country in the personal data. **Only a DialOS picture** from
 `/usr/share/backgrounds/dialos` is switched; a self-chosen photo stays. User
 timer at login (20 s) and hourly.

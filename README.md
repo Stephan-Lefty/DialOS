@@ -135,8 +135,8 @@ das Erfolg meldet, während es versagt.
   Sommer, Herbst, Winter. `dialos-jahreszeit.py` berechnet den kalendarischen
   Jahreszeitbeginn (Stephans Wahl, auf Minuten genau) am Wohnort und stellt hellen
   und dunklen Modus auf das passende Bild; ein selbst gewähltes Foto bleibt.
-  Nutzer-Timer beim Anmelden und stündlich. Dunkle Jahreszeitbilder werden
-  übernommen, sobald sie als `wallpaper-<jahreszeit>-dark.png` vorliegen.
+  Nutzer-Timer beim Anmelden und stündlich. Alle acht Bilder (3840 × 2160, hell und
+  dunkel) gehören zu jeder Installation - der Nutzer wechselt nur den Stil.
   Beschrieben in `docs/Debian-zu-DialOS.md`, Schritt 3.
 
 - **Eingabemaske für die persönlichen Daten - auch für den Nutzer, fester Teil

@@ -423,12 +423,15 @@ sudo cp iso-build/config/includes.chroot/etc/os-release /etc/os-release
 **Hintergrund nach Jahreszeit (seit 2026-09-16).** Stephan: „etwas Schwung in
 unser Wallpaper bringen" - vier Bilder desselben Bergsees
 (`wallpaper-fruehling/sommer/herbst/winter.png`, Quellen in `assets/` als
-`…-light.png`, verlustfrei neu gepackt: gleiche Pixel, 3,7-5,1 MB statt 14,7 MB).
+`…-light.png`/`…-dark.png`, verlustfrei neu gepackt: gleiche Pixel, 6-11 MB statt 32 MB).
 `dialos-jahreszeit.py` berechnet den **kalendarischen** Jahreszeitbeginn jedes
 Jahres (Meeus, auf Minuten genau; 2026: 20.03. 15:46, 21.06. 10:26, 23.09.
 02:06, 21.12. 21:51) und setzt `picture-uri` und `picture-uri-dark` auf das
-Jahreszeitenbild - gibt es `wallpaper-<jahreszeit>-dark.png`, nimmt der dunkle
-Modus das. Südhalbkugel über das Land in den persoenlichen Daten. **Gewechselt
+Jahreszeitenbild und dessen dunkle Fassung `wallpaper-<jahreszeit>-dark.png`.
+Die Bilder (3840 × 2160, seit 19:10 hell und dunkel) liegen bei jeder
+Installation in `/usr/share/backgrounds/dialos`; der Nutzer wechselt nur den
+Stil (Schnelleinstellungen oben rechts: „Dunkler Stil"), das Bild folgt von
+selbst. Südhalbkugel über das Land in den persoenlichen Daten. **Gewechselt
 wird nur ein DialOS-Bild** aus `/usr/share/backgrounds/dialos`; ein selbst
 gewähltes Foto bleibt. Nutzer-Timer beim Anmelden (20 s) und stündlich.
 

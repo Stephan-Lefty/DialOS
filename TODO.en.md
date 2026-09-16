@@ -38,8 +38,10 @@ finished too, and then move down together. That way no reference breaks.
   possible.
 
 - [ ] **Check the seasonal wallpaper on the device** (built 2026-09-16): summer
-  picture after login, autumn from 23.09. 02:06. Open: four dark night pictures
-  (`assets/wallpaper-<season>-dark.png`) - Stephan creates them.
+  picture after login, autumn from 23.09. 02:06. All eight pictures in 3840 ×
+  2160 light and dark included (19:10). Note for the next picture version: the
+  logo bottom right is only ~3 % from the edge - on 16:10 screens the zoom cuts
+  5 % on the left and right.
 
 - [ ] **Parakeet licence notice on the device** (2026-09-16): CC-BY-4.0 requires
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview

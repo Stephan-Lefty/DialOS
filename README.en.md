@@ -127,8 +127,8 @@ background) and `splash.png` (boot/login screen).
   autumn, winter. `dialos-jahreszeit.py` computes the astronomical start of the
   season (Stephan's choice, accurate to minutes) at the home place and sets light
   and dark mode to the matching picture; a self-chosen photo stays. User timer at
-  login and hourly. Dark season pictures are used as soon as they exist as
-  `wallpaper-<season>-dark.png`. Described in `docs/Debian-zu-DialOS.en.md`,
+  login and hourly. All eight pictures (3840 × 2160, light and dark)
+  are part of every installation - the user only switches the style. Described in `docs/Debian-zu-DialOS.en.md`,
   step 3.
 
 - **Input form for the personal data - also for the user, a fixed part of the
