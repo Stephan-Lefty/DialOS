@@ -37,6 +37,12 @@ import subprocess
 import sys
 
 UNTERPFAD = (".config", "dialos", "persoenliche-daten.txt")
+# Voller Pfad: pkexec setzt PATH auf einen sicheren Standard, in dem /usr/sbin
+# nicht immer steht - am 2026-09-16 scheiterte der erste echte Aufruf genau an
+# "No such file or directory: 'runuser'".
+# Arbeitsverzeichnis "/": Unter pkexec ist es sonst eines, in das das Zielkonto
+# nicht hineinkommt.
+RUNUSER = "/usr/sbin/runuser"
 HOECHSTENS = 64 * 1024
 
 
@@ -87,15 +93,15 @@ def main():
                "Nichts gelesen oder geschrieben - die Daten landeten sonst unverschluesselt.", 3)
     ordner = os.path.join(eintrag.pw_dir, *UNTERPFAD[:-1])
     datei = os.path.join(ordner, UNTERPFAD[-1])
-    als_konto = ["runuser", "-u", name, "--"]
-    umgebung = {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"}
+    als_konto = [RUNUSER, "-u", name, "--"]
+    umgebung = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LANG": "C.UTF-8"}
 
     if aktion == "lesen":
-        pruefung = subprocess.run(als_konto + ["test", "-f", datei], env=umgebung)
+        pruefung = subprocess.run(als_konto + ["test", "-f", datei], env=umgebung, cwd="/")
         if pruefung.returncode != 0:
             sys.exit(4)
         ergebnis = subprocess.run(als_konto + ["head", "-c", str(HOECHSTENS), datei],
-                                  capture_output=True, env=umgebung)
+                                  capture_output=True, env=umgebung, cwd="/")
         if ergebnis.returncode != 0:
             fehler(ergebnis.stderr.decode("utf-8", "replace"), 5)
         sys.stdout.buffer.write(ergebnis.stdout)
@@ -113,10 +119,14 @@ def main():
     skript = ('umask 077 && mkdir -p "$1" && cat > "$2.neu" && chmod 600 "$2.neu" '
               '&& mv -f "$2.neu" "$2"')
     ergebnis = subprocess.run(als_konto + ["sh", "-c", skript, "sh", ordner, datei],
-                              input=daten, capture_output=True, env=umgebung)
+                              input=daten, capture_output=True, env=umgebung, cwd="/")
     if ergebnis.returncode != 0:
         fehler(ergebnis.stderr.decode("utf-8", "replace"), 5)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as unerwartet:
+        # Kurz und lesbar - die Maske zeigt diesen Text im Dialog.
+        fehler(f"Unerwarteter Fehler: {unerwartet}", 5)
