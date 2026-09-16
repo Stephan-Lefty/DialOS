@@ -201,6 +201,17 @@ GRAMMATIK_AN = json.dumps([
     # Nutzer wirklich wollen. Alle Woerter im Wortschatz geprueft.
     "was kann ich sagen",
     "was kannst du",
+    # BEFEHLSUEBERSICHT (Stephan, 2026-09-16: "Als blinder Nutzer kann man sich
+    # nicht alle Befehle merken"). Alle Befehle oder ein Thema - die Texte
+    # entstehen aus den Tabellen unten, siehe befehls_themen(). Alle Woerter im
+    # Wortschatz geprueft ("befehlsliste" fehlt dort, deshalb "alle befehle").
+    "alle befehle vorlesen",
+    "befehle für fragen",
+    "befehle für briefe",
+    "befehle für notizen",
+    "befehle für den einkauf",
+    "befehle für den bildschirm",
+    "befehle für das diktat",
     "nachrichten vorlesen",
     "was gibt es neues",
     "radio einschalten",
@@ -326,7 +337,193 @@ ANSAGE_UEBERSICHT = (
     "Wetter. Für Briefe: Brief erstellen, Brief vorlesen, Brief drucken, Brief als "
     "PDF speichern. Für Notizen: Notiz aufnehmen, Notizen vorlesen. Für den "
     "Einkauf: Einkaufszettel aufnehmen, Einkaufszettel vorlesen. Außerdem: "
-    "Bildschirmfoto machen. Und zum Schluss: Sprachsteuerung stoppen.")
+    "Bildschirmfoto machen. Und zum Schluss: Sprachsteuerung stoppen. "
+    "Alle Befehle hörst Du mit: Alle Befehle vorlesen.")
+
+# ALLE BEFEHLE ZUM ANHOEREN (Stephan, 2026-09-16: "eine Audiodatei ..., wo alle
+# bestehenden und noch folgenden Befehle enthalten sind, und dem Nutzer einen
+# Befehl geben, womit er sich diese vorsprechen lassen kann").
+#
+# AUS DEN TABELLEN ERZEUGT, NICHT VON HAND GESCHRIEBEN: Ein neuer Satz in
+# DIKTAT_SAETZE, NOTIZ_SAETZE, DRUCK_SAETZE, AUSKUNFT_SAETZE oder FOTO_SAETZE
+# steht damit von selbst in der Uebersicht. Fehlt fuer eine neue Aktion die
+# Beschriftung, erscheint der Satz unter "Ausserdem" - und
+# befehle_ohne_uebersicht() meldet beim Start jeden Satz der Grammatik, der
+# nirgends vorkommt.
+#
+# NACH THEMEN, weil die ganze Liste rund zwei Minuten dauert und sich in einem
+# Stueck niemand merkt. Jedes Thema wird einzeln gesprochen (sprich() hat 60 s
+# Zeitgrenze) und liegt als fertige Audiodatei im Speicher von dialos-say.py -
+# befehle_vorbereiten() erzeugt sie kurz nach dem Start im Hintergrund.
+UEBERSICHT_THEMEN_SAETZE = {
+    "befehle für fragen": "fragen",
+    "befehle für briefe": "briefe",
+    "befehle für notizen": "notizen",
+    "befehle für den einkauf": "einkauf",
+    "befehle für den bildschirm": "bildschirm",
+    "befehle für das diktat": "diktat",
+}
+ALLE_BEFEHLE_SATZ = "alle befehle vorlesen"
+THEMEN_NAMEN = {"fragen": "Fragen", "briefe": "Briefe", "notizen": "Notizen",
+                "einkauf": "den Einkauf", "bildschirm": "den Bildschirm",
+                "diktat": "das Diktat"}
+# (Thema, Beschriftung) je Aktion. Schluessel: (Tabelle, Wert der Tabelle).
+AKTIONEN = {
+    ("auskunft", "uhrzeit"): ("fragen", "Die Uhrzeit"),
+    ("auskunft", "datum"): ("fragen", "Das Datum"),
+    ("auskunft", "wetter"): ("fragen", "Das Wetter"),
+    ("diktat", "brief"): ("briefe", "Einen Brief diktieren"),
+    ("notiz", ("brief", "vorlesen")): ("briefe", "Den Brief vorlesen"),
+    ("druck", "brief"): ("briefe", "Den Brief drucken"),
+    ("notiz", ("brief", "pdf")): ("briefe", "Den Brief als PDF speichern"),
+    ("diktat", "notizen"): ("notizen", "Eine Notiz diktieren"),
+    ("notiz", ("notizen", "vorlesen")): ("notizen", "Die Notizen vorlesen"),
+    ("druck", "notizen"): ("notizen", "Die Notizen drucken"),
+    ("diktat", "einkaufszettel"): ("einkauf", "Den Einkaufszettel diktieren"),
+    ("notiz", ("einkaufszettel", "vorlesen")): ("einkauf", "Den Einkaufszettel vorlesen"),
+    ("druck", "einkaufszettel"): ("einkauf", "Den Einkaufszettel drucken"),
+    ("notiz", ("einkaufszettel", "loeschen")): ("einkauf", "Den Einkaufszettel leeren"),
+    ("foto", None): ("bildschirm", "Ein Bildschirmfoto für Deinen Helfer"),
+    ("umschalten", "gnome"): ("bildschirm", "Linux-Ansicht"),
+    ("umschalten", "windows"): ("bildschirm", "Windows-Ansicht"),
+}
+THEMEN_REIHENFOLGE = ("fragen", "briefe", "notizen", "einkauf", "bildschirm", "diktat")
+GROSS_SCHREIBEN = {"pdf": "PDF", "linux": "Linux", "gnome": "Gnome", "windows": "Windows",
+                   "brief": "Brief", "notiz": "Notiz", "notizen": "Notizen",
+                   "einkaufszettel": "Einkaufszettel", "einkauf": "Einkauf",
+                   "bildschirmfoto": "Bildschirmfoto", "uhrzeit": "Uhrzeit",
+                   "tag": "Tag", "uhr": "Uhr", "datum": "Datum", "wetter": "Wetter",
+                   "diktat": "Diktat", "satz": "Satz", "absatz": "Absatz", "zeile": "Zeile",
+                   "betreff": "Betreff", "befehle": "Befehle", "fragen": "Fragen",
+                   "briefe": "Briefe", "bildschirm": "Bildschirm",
+                   "sprachsteuerung": "Sprachsteuerung"}
+
+
+def gesprochen(satz):
+    """"brief als pdf speichern" -> "Brief als PDF speichern" (fuer Anzeige und Piper)."""
+    worte = [GROSS_SCHREIBEN.get(w, w) for w in satz.split()]
+    if worte:
+        worte[0] = worte[0][:1].upper() + worte[0][1:]
+    return " ".join(worte)
+
+
+def diktat_befehle():
+    """Die Befehle IM Diktat - aus dialos-diktat.py geholt, wo sie gelten."""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("diktat_befehle", DIKTAT_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        schluss, loeschen, wiederholen = (modul.SCHLUSSSATZ, modul.BEFEHL_LOESCHEN,
+                                          modul.BEFEHL_WIEDERHOLEN)
+    except Exception:
+        schluss, loeschen, wiederholen = "diktat beenden", "satz löschen", "satz wiederholen"
+    return [
+        ("Einen neuen Absatz", ["absatz", "neuer absatz"]),
+        ("Eine neue Zeile", ["neue zeile"]),
+        ("Den letzten Satz streichen, mit kurzer Pause davor und danach", [loeschen]),
+        ("Den letzten Satz noch einmal hören, ebenso mit Pause", [wiederholen]),
+        ("Eine Betreffzeile, ganz am Anfang des Briefs", ["betreff"]),
+        ("Das Diktat beenden, nach einer kurzen Pause", [schluss]),
+    ]
+
+
+def befehls_themen():
+    """{thema: [(beschriftung, [saetze])]} aus den Befehlstabellen."""
+    zuordnung = collections.OrderedDict()
+
+    def dazu(schluessel, satz):
+        thema, beschriftung = AKTIONEN.get(schluessel, ("ausserdem", None))
+        eintraege = zuordnung.setdefault(thema, collections.OrderedDict())
+        eintraege.setdefault(beschriftung or gesprochen(satz), []).append(satz)
+
+    for satz, wert in AUSKUNFT_SAETZE.items():
+        dazu(("auskunft", wert), satz)
+    for satz, wert in DIKTAT_SAETZE.items():
+        dazu(("diktat", wert), satz)
+    for satz, wert in NOTIZ_SAETZE.items():
+        dazu(("notiz", wert), satz)
+    for satz, wert in DRUCK_SAETZE.items():
+        dazu(("druck", wert), satz)
+    for satz in FOTO_SAETZE:
+        dazu(("foto", None), satz)
+    for satz in BEFEHLSSAETZE:
+        worte = satz.split()
+        if AUSLOESER in worte:
+            ziel = next((ZIELE[w] for w in worte if w in ZIELE), None)
+            dazu(("umschalten", ziel), satz)
+    zuordnung["diktat"] = collections.OrderedDict(diktat_befehle())
+    return {thema: list(eintraege.items()) for thema, eintraege in zuordnung.items()}
+
+
+def thema_text(thema, themen=None):
+    themen = themen or befehls_themen()
+    teile = [f"Befehle für {THEMEN_NAMEN.get(thema, thema)}."]
+    for beschriftung, saetze in themen.get(thema, []):
+        gesagt = ". Oder: ".join(gesprochen(x) for x in saetze)
+        teile.append(f"{beschriftung}: {gesagt}.")
+    return " ".join(teile)
+
+
+def alle_befehle_texte():
+    """Die ganze Uebersicht als Folge einzelner Ansagen - je Thema eine."""
+    themen = befehls_themen()
+    einzeln = ", ".join(gesprochen(x) for x in UEBERSICHT_THEMEN_SAETZE)
+    texte = [f"Hier sind alle Befehle, nach Themen. Ein einzelnes Thema hörst Du "
+             f"mit: {einzeln}. Zuerst: Du schaltest mich ein mit Sprachsteuerung "
+             f"starten, und aus mit Sprachsteuerung stoppen."]
+    for thema in THEMEN_REIHENFOLGE:
+        texte.append(thema_text(thema, themen))
+    if themen.get("ausserdem"):
+        texte.append(" ".join(["Außerdem:"] + [f"{gesprochen(x[1][0])}."
+                                               for x in themen["ausserdem"]]))
+    texte.append("Das waren alle Befehle.")
+    return texte
+
+
+def befehle_ohne_uebersicht():
+    """Saetze der Grammatik, die in keiner Uebersicht vorkommen - fuers Protokoll."""
+    bekannt = {x for eintraege in befehls_themen().values() for _, saetze in eintraege
+               for x in saetze}
+    bekannt |= set(UEBERSICHT_SAETZE) | set(UEBERSICHT_THEMEN_SAETZE) | {ALLE_BEFEHLE_SATZ}
+    bekannt |= set(WUNSCH_SAETZE) | set(HILFE_SAETZE)
+    return [x for x in BEFEHLSSAETZE if x not in bekannt]
+
+
+def befehle_vorbereiten():
+    """Legt alle Uebersichts-Ansagen als Audiodatei in den Speicher von dialos-say.py.
+
+    Im Hintergrund und erst nach einer Minute: Beim Anmelden laufen Begruessung
+    und Wetter, die sollen nicht auf Piper warten. Schon Gespeichertes wird
+    uebersprungen - nach einem Stimmwechsel entstehen die Dateien neu.
+    """
+    time.sleep(60)
+    try:
+        # Niedrige Prioritaet nur fuer diesen Faden und seine Piper-Aufrufe
+        # (unter Linux gilt setpriority je Thread-ID und vererbt sich): Alle
+        # Ansagen zu erzeugen kostete am 2026-09-16 rund 50 s Rechenzeit auf
+        # allen Kernen - ein Befehl in dieser Zeit soll davon nichts merken.
+        os.setpriority(os.PRIO_PROCESS, threading.get_native_id(), 15)
+    except (OSError, AttributeError):
+        pass
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dialos_say", SAY)
+        say = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(say)
+        texte = alle_befehle_texte() + [thema_text(t) for t in THEMEN_REIHENFOLGE]
+        neu = 0
+        for text in texte:
+            fertig = say.fuer_sprachausgabe(text)
+            pfad = os.path.join(say.SPEICHER, say.speicher_schluessel(fertig) + ".wav")
+            if not os.path.exists(pfad):
+                say.speicher_fuellen(fertig, warten=True)
+                neu += 1
+        melde(f"Befehlsuebersicht vorbereitet ({len(texte)} Ansagen, {neu} neu erzeugt)")
+    except Exception as fehler:
+        melde(f"Befehlsuebersicht nicht vorbereitet: {fehler}")
+
+
 # Thema (fuers Protokoll), ehrliche Antwort. Kein Versprechen, wann.
 WUNSCH_SAETZE = {
     "nachrichten vorlesen": ("nachrichten", "Nachrichten kann ich noch nicht vorlesen."),
@@ -1529,6 +1726,10 @@ def main():
     # Vermutungen. Dieselbe Ueberlegung, die beim Diktat schon zur Meldung
     # "Diktat laeuft - ich hoere nicht zu" gefuehrt hat.
     melde(f"=== Befehlsdienst gestartet, Quelle {quelle} ===")
+    fehlend = befehle_ohne_uebersicht()
+    if fehlend:
+        melde(f"ACHTUNG: Befehle ohne Platz in der Uebersicht: {fehlend!r}")
+    threading.Thread(target=befehle_vorbereiten, daemon=True).start()
 
     # Merker fuer die Ansage "kein Mikrofon" - damit sie einmal kommt und
     # nicht alle fuenf Sekunden.
@@ -1942,6 +2143,18 @@ def main():
             if satz in UEBERSICHT_SAETZE:
                 melde("Uebersicht der Befehle angesagt")
                 sprich(ANSAGE_UEBERSICHT)
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            if satz == ALLE_BEFEHLE_SATZ or satz in UEBERSICHT_THEMEN_SAETZE:
+                if satz == ALLE_BEFEHLE_SATZ:
+                    melde("Alle Befehle angesagt")
+                    for text in alle_befehle_texte():
+                        sprich(text)
+                else:
+                    melde(f"Befehle angesagt: {UEBERSICHT_THEMEN_SAETZE[satz]}")
+                    sprich(thema_text(UEBERSICHT_THEMEN_SAETZE[satz]))
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

@@ -30,6 +30,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Betreff, Falzmarken). Persönliche Daten nur auf dem Gerät, neue Daten fürs
   Repo erst fragen.
 
+- [ ] **Befehlsübersicht am Gerät prüfen** (gebaut 2026-09-16): „Alle Befehle
+  vorlesen" und die sechs „Befehle für …" mit echter Stimme; ist die ganze Liste
+  (144 s) zu lang? Offen: Unterbrechen während der Ansage geht nicht.
+
 - [ ] **Lizenzhinweis für Parakeet am Gerät** (2026-09-16): CC-BY-4.0 verlangt
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
   Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.

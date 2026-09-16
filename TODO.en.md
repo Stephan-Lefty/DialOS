@@ -28,6 +28,11 @@ finished too, and then move down together. That way no reference breaks.
   subject, fold marks). Personal data only on the device; ask before adding new
   data to the repo.
 
+- [ ] **Check the command overview on the device** (built 2026-09-16): "Alle
+  Befehle vorlesen" and the six "Befehle für …" with a real voice; is the full
+  list (144 s) too long? Open: interrupting during the announcement is not
+  possible.
+
 - [ ] **Parakeet licence notice on the device** (2026-09-16): CC-BY-4.0 requires
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
   that DialOS can show or read out on the device.

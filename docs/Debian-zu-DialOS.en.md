@@ -1042,6 +1042,16 @@ an honest answer (`WUNSCH_SAETZE`, logged as `WUNSCH`). Without a matching
 command: "Das kann ich noch nicht. Sage: Was kann ich sagen." Checked with
 `scripts/dialos-grammatik-pruefen.py`: all 42 sentences verbatim.
 
+**Command overview since 2026-09-16:** 49 command sentences - plus "alle befehle
+vorlesen" and "befehle für fragen/briefe/notizen/den einkauf/den bildschirm/das
+diktat". `befehls_themen()` in the command service builds the texts from the
+command tables (`AKTIONEN` labels them; the dictation commands come from
+`dialos-diktat.py`). One minute after start `befehle_vorbereiten()` stores all
+announcements in `dialos-say.py`'s cache at low priority (measured: about 50 s
+CPU time, 144 s of audio in total, each topic under 30 s).
+`befehle_ohne_uebersicht()` reports every sentence without a place at start. No
+new packages. Checked: all 49 sentences verbatim.
+
 **The desktop-look rule** ("umschalten" plus a target anywhere in the utterance)
 applies since 2026-09-16 only without `[unk]` and with at most two words more
 than "auf windows umschalten" - on 09-15 a twelve-word salad switched to

@@ -130,6 +130,16 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Befehlsübersicht zum Anhören: „Alle Befehle vorlesen" und „Befehle für …"**
+  (2026-09-16, Stephan: „Als blinder Nutzer kann man sich nicht alle Befehle
+  merken"). Sieben neue Sätze: alle Befehle (144 s) oder ein Thema - Fragen,
+  Briefe, Notizen, Einkauf, Bildschirm, Diktat (16-28 s). Die Texte entstehen
+  aus den Befehlstabellen, neue Befehle stehen also von selbst darin; ein Satz
+  ohne Platz wird beim Start gemeldet. Die Ansagen liegen als Audiodateien im
+  Speicher von dialos-say, erzeugt eine Minute nach dem Start im Hintergrund.
+  „Was kann ich sagen" weist darauf hin. Grammatik jetzt 49 Sätze, alle gegen
+  Piper geprüft. Beschrieben in `docs/sprachbefehle.md`.
+
 - **Persönliche Daten: ein Formular für alle Programme** (2026-09-16, Stephan:
   „fix für alle Programme definieren und eintragen"). Vorlage
   `persoenliche-daten-vorlage.txt` im Format `Feld: Wert` nach Stephans Entwurf,

@@ -122,6 +122,16 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Command overview to listen to: "Alle Befehle vorlesen" and "Befehle für …"**
+  (2026-09-16, Stephan: a blind user cannot remember all commands). Seven new
+  sentences: all commands (144 s) or one topic - questions, letters, notes,
+  shopping, screen, dictation (16-28 s). The texts are generated from the
+  command tables, so new commands appear by themselves; a sentence without a
+  place is reported at start. The announcements are kept as audio files in
+  dialos-say's cache, created one minute after start in the background. "Was
+  kann ich sagen" points to it. Grammar now 49 sentences, all checked against
+  Piper. Described in `docs/sprachbefehle.en.md`.
+
 - **Personal data: one form for all programs** (2026-09-16, Stephan: define it
   "fix für alle Programme" and enter it). Template
   `persoenliche-daten-vorlage.txt` in `Feld: Wert` format following Stephan's

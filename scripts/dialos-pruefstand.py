@@ -458,6 +458,10 @@ def wirkung(dienst, satz):
         return "foto"
     if satz in getattr(dienst, "UEBERSICHT_SAETZE", ()):
         return "uebersicht"
+    if satz == getattr(dienst, "ALLE_BEFEHLE_SATZ", None):
+        return "befehle:alle"
+    if satz in getattr(dienst, "UEBERSICHT_THEMEN_SAETZE", {}):
+        return "befehle:" + dienst.UEBERSICHT_THEMEN_SAETZE[satz]
     if satz in getattr(dienst, "WUNSCH_SAETZE", {}):
         return "wunsch:" + dienst.WUNSCH_SAETZE[satz][0]
     worte = satz.split()

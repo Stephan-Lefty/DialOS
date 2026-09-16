@@ -271,7 +271,9 @@ all four ways, the fourth later.
 
 | Sentence | Answer |
 |---|---|
-| **"Was kann ich sagen"**, **"Was kannst du"** | Overview: time, date, weather, letter, notes, shopping list, screenshot, stop - with the sentences. |
+| **"Was kann ich sagen"**, **"Was kannst du"** | Overview: time, date, weather, letter, notes, shopping list, screenshot, stop - with the sentences, ending with a pointer to "Alle Befehle vorlesen". |
+| **"Alle Befehle vorlesen"** | All commands with all phrasings, by topic - about two and a half minutes (measured with Michael: 144 s). Since 2026-09-16 (Stephan: a blind user cannot remember all commands). **Generated from the command tables:** a new command appears by itself; a grammar sentence without a place is reported in the log at start. Each topic announcement is kept as a ready audio file in dialos-say's cache (created one minute after start, in the background, low priority). **Cannot be interrupted** - that is what the topics are for. |
+| **"Befehle für Fragen"**, **"… für Briefe"**, **"… für Notizen"**, **"… für den Einkauf"**, **"… für den Bildschirm"**, **"… für das Diktat"** | Only this topic, 16 to 28 seconds. "Für das Diktat" names the commands INSIDE dictation (Absatz, neue Zeile, Satz löschen, Satz wiederholen, Betreff, Diktat beenden) - taken from dialos-diktat.py. All seven sentences in the vocabulary and checked against Piper (49 of 49 verbatim). |
 | **"Wie ist das Wetter"**, **"Wie wird das Wetter"** | Human instead of a weather report (Stephan's example: "Heute wird es regnen bei 15 Grad. Denke an einen Regenschirm, wenn Du raus gehst!"): one kind of weather for the rest of the day or the first change, the temperature range, a fitting tip, **always with the place**. Measured location, otherwise the **fallback place** from `~/.config/dialos/wetter-ort` (device only, later from the customer data). Without a place: "Für das Wetter fehlt mir Dein Wohnort." The greeting uses the same wording. |
 | "Nachrichten vorlesen", "Was gibt es Neues" | "Nachrichten kann ich noch nicht vorlesen." |
 | "Radio einschalten", "Musik abspielen" | "Radio und Musik kann ich noch nicht abspielen." |

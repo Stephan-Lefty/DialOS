@@ -1085,6 +1085,16 @@ ehrlicher Antwort (`WUNSCH_SAETZE`, protokolliert als `WUNSCH`). Ohne passenden
 Befehl: „Das kann ich noch nicht. Sage: Was kann ich sagen." Geprüft mit
 `scripts/dialos-grammatik-pruefen.py`: alle 42 Sätze wörtlich.
 
+**Befehlsübersicht seit 2026-09-16:** 49 Befehlssätze - dazu „alle befehle
+vorlesen" und „befehle für fragen/briefe/notizen/den einkauf/den bildschirm/das
+diktat". Die Texte baut `befehls_themen()` im Befehlsdienst aus den
+Befehlstabellen (`AKTIONEN` beschriftet sie; die Diktat-Befehle kommen aus
+`dialos-diktat.py`). Eine Minute nach dem Start legt `befehle_vorbereiten()` alle
+Ansagen mit niedriger Priorität im Speicher von `dialos-say.py` ab (gemessen:
+rund 50 s Rechenzeit, zusammen 144 s Audio, jedes Thema unter 30 s).
+`befehle_ohne_uebersicht()` meldet beim Start jeden Satz ohne Platz. Keine neuen
+Pakete. Geprüft: alle 49 Sätze wörtlich.
+
 **Die Optik-Regel** („umschalten" plus Ziel irgendwo in der Äußerung) gilt seit
 2026-09-16 nur noch ohne `[unk]` und mit höchstens zwei Wörtern mehr als „auf
 windows umschalten" - am 15.09. schaltete ein Wortsalat aus zwölf Wörtern auf
