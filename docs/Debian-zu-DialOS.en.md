@@ -3142,7 +3142,15 @@ before - the log says `PARAKEET: nicht eingerichtet` or `nicht ladbar`. Switch
 off per account: `touch ~/.config/dialos/parakeet-aus` (for comparisons on the
 test bench). The test switch file `parakeet-test` of 09-15 no longer applies and
 can be removed. Both models load at the same time: one after the other it took
-33 s until "Ich schreibe mit".
+33 s until "Ich schreibe mit", at the same time 12 s on the device (first letter
+14:19).
+
+**Post-processing after the first letter (2026-09-16):** "Absatz" alone at a
+sentence start counts as a paragraph (not before a number or a lower-case
+article), the subject ends at the first sentence end and without full stop
+(`betreff_richten`), the salutation gets its comma across chunk boundaries too
+(`anrede_richten`), "322,40 Cent" becomes "322,40 Euro". All combined in
+`brief_text()`, which the test bench calls as well.
 
 ## 16. Backup image (Clonezilla)
 

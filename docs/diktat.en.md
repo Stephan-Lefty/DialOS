@@ -784,6 +784,11 @@ someone speaks.
 > `parakeet-test` and the measurement folder no longer apply. Setup:
 > [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), section 15b. This section
 > describes the way there.
+>
+> **First letter afterwards (14:19):** loading 12 s instead of 33 s. "Absatz"
+> alone at a sentence start now counts as a paragraph, the subject ends at the
+> first sentence end - before, the whole letter stood bold in the subject line.
+> Test bench case `absatz-allein-1`: 3.8 % word errors, all punctuation right.
 
 Stephan: "test Parakeet now". Vosk stays in charge of everything that needs
 timestamps (speech pauses, end, "Satz löschen", cross-check). Every chunk Vosk

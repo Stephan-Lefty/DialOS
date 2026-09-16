@@ -1344,17 +1344,53 @@ def grussformel_richten(text):
 # steht am Briefanfang immer "Betreff: ..." ohne Punkt am Ende. FETT wird die Zeile
 # im PDF (dialos-archiv.py als_pdf) - eine Textdatei kennt kein Fett; deshalb
 # druckt dialos-drucken.py den Brief ueber dasselbe PDF.
-BETREFF = re.compile(r"(?i)^\s*betreff\s*[:,.]?\s*([^\n]+?)[.:,]?\s*(\n|$)")
+BETREFF = re.compile(r"(?i)^\s*betreff\b\s*[:,.]?\s*")
+
+
+ANREDE = re.compile(r"(?im)^((?:sehr geehrte|liebe|lieber|hallo)\b[^\n.!?]*?)[ \t]*[.!,]?[ \t]*\n\n")
+
+
+def anrede_richten(text):
+    """Die Anrede endet mit Komma - auch ueber Stueckgrenzen.
+
+    parakeet_natuerlich richtet das nur, wenn Anrede und Absatz im selben Stueck
+    kommen. Am 2026-09-16 sprach Stephan nach der Anrede eine Pause, der Absatz
+    kam im naechsten Stueck, und es blieb "Damen und Herren."
+    """
+    return ANREDE.sub(r"\1,\n\n", text, count=1)
 
 
 def betreff_richten(text):
+    """Macht aus "Betreff ..." am Anfang die Betreffzeile samt Absatz danach.
+
+    DER BETREFF ENDET AM ERSTEN SATZENDE, nicht erst am Absatz (2026-09-16,
+    Stephans erster Brief mit festem Parakeet): Er sagte "Absatz" statt "neuer
+    Absatz", es gab keinen Umbruch - und der ganze Brief stand fett in der
+    Betreffzeile. Der Punkt am Ende faellt weg, eine Betreffzeile hat keinen.
+    """
     treffer = BETREFF.match(text)
-    if not treffer or not treffer.group(1).strip():
+    if not treffer:
         return text
-    inhalt = treffer.group(1).strip()
+    rest = text[treffer.end():]
+    enden = satzenden(rest)
+    ende = enden[0] if enden else len(rest)
+    inhalt = rest[:ende].strip(" ,;:").rstrip(".")
+    if not inhalt:
+        return text
     inhalt = inhalt[:1].upper() + inhalt[1:]
-    rest = text[treffer.end():].lstrip("\n ")
+    rest = rest[ende + 1:].lstrip("\n ")
     return f"Betreff: {inhalt}\n\n{rest}" if rest else f"Betreff: {inhalt}"
+
+
+def brief_text(zeilen):
+    """Der Brieftext aus den Aeusserungen: Gruss, Anrede, Betreff gerichtet.
+
+    Leerzeichen am Zeilenanfang fallen weg - sie entstehen, wo ein Stueck mit
+    einem gesprochenen Absatz endet und das naechste mit Leerzeichen angehaengt
+    wird. Der Pruefstand ruft genau diese Funktion.
+    """
+    text = re.sub(r"[ \t]*\n[ \t]*", "\n", " ".join(zeilen))
+    return betreff_richten(anrede_richten(grussformel_richten(text)))
 
 
 def brief_schreiben(zeilen):
@@ -1386,7 +1422,7 @@ def brief_schreiben(zeilen):
         # konnte der Briefbogen einen Stueck-Uebergang nicht von einem
         # gesprochenen "neue zeile" unterscheiden - und zog beide zusammen: "Mit
         # freundlichen Gruessen neue zeile Stephan Roesner" stand in einer Zeile.
-        f.write(briefbogen(betreff_richten(grussformel_richten(" ".join(zeilen)))))
+        f.write(briefbogen(brief_text(zeilen)))
 
     # JEDER BRIEF WANDERT ALS PDF INS ARCHIV (Stephans Vorgabe vom
     # 2026-08-21). Nicht abwarten und nicht daran scheitern: Der Brief ist als
@@ -1663,6 +1699,16 @@ def parakeet_natuerlich(text):
     # ("Gruessen, neue Zeile, Stefan" -> "Gruessen\nStefan").
     text = re.sub(r"\s*\bneuer\s*[,.]?\s*absatz\b[,;:.!?]*\s*", "\n\n", text,
                   flags=re.IGNORECASE)
+    # "ABSATZ" ALLEIN AM SATZANFANG (2026-09-16, Stephans erster Brief mit festem
+    # Parakeet): Er sagte fuenfmal nur "Absatz" - Parakeet schrieb "Absatz." als
+    # eigenen Satz oder "Absatz mit freundlichen Gruessen", und der Brief hatte
+    # keinen einzigen Absatz. Nicht, wenn eine Zahl oder ein Artikel folgt:
+    # "Absatz 3 des Vertrags", "Absatz des Vertrags" bleiben Text. Nur klein
+    # geschrieben: "Absatz. Den Betrag ..." ist ein neuer Satz.
+    text = re.sub(r"(?:^|(?<=[.!?])\s+|\n\n)absatz\b"
+                  r"(?![,;:.!?]*\s*(?:\d|(?-i:des|der|dem|den|eins|zwei|drei|vier|fünf|sechs"
+                  r"|sieben|acht|neun|zehn)\b))[,;:.!?]*\s*",
+                  "\n\n", text, flags=re.IGNORECASE)
     # "zeil" auch: Am 2026-09-15 (TONOR) teilte Vosk genau in "neue Zeile" -
     # Parakeet schrieb "neue Zeil." und im naechsten Stueck "Zeile Stephan".
     text = re.sub(r"[,;]?\s*\bneue\s*[,.]?\s*zeile?\b[,;:.!?]*\s*", "\n", text,
@@ -1676,6 +1722,10 @@ def parakeet_natuerlich(text):
     # Kurze Zeile nach einem Zeilenwechsel (Name unter dem Gruss) ohne den Punkt,
     # den Parakeet ans Ende jedes Stuecks setzt: "Gruessen\nMax Muster."
     text = re.sub(r"(\n(?!\n)[^\n.?!]{1,40}?)\.\s*$", r"\1", text)
+    # "322,40 Cent" fuer "dreihundertzweiundzwanzig Euro und vierzig Cent"
+    # (2026-09-16): Parakeet fasste den Betrag zusammen und behielt die falsche
+    # Einheit. Ein Betrag mit zwei Nachkommastellen in Cent gibt es nicht.
+    text = re.sub(r"\b(\d+,\d\d)\s+Cent\b", r"\1 Euro", text)
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip(" ")
 

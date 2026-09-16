@@ -122,6 +122,18 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **First letter with Parakeet built in: "Absatz" alone is enough, subject ends
+  at the sentence end** (2026-09-16, 14:19). Loading until "Ich schreibe mit"
+  now 12 s instead of 33 s. Stephan said just "Absatz" five times instead of
+  "neuer Absatz" - the letter had no paragraph, and because the subject only
+  ended at a paragraph, the whole letter stood bold in the subject line. Now:
+  "Absatz" at a sentence start is a paragraph (not before a number or article:
+  "Absatz 3 des Vertrags"), the subject ends at the first sentence end and
+  without full stop, the salutation gets its comma across chunk boundaries too,
+  "322,40 Cent" becomes "322,40 Euro". On the test bench as the sixth case:
+  3.8 % word errors, all punctuation and paragraphs right; the other five cases
+  unchanged.
+
 - **Parakeet built in for good: letters and notes are now written by Parakeet**
   (2026-09-16, Stephan: "Ja, bau Parakeet fest ein"). Model (641 MB) to
   `/usr/local/share/dialos-parakeet`, sherpa-onnx system-wide - so the user

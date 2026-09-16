@@ -336,8 +336,12 @@ finished too, and then move down together. That way no reference breaks.
     /usr/local/share/dialos-parakeet, sherpa-onnx system-wide, checksums,
     self-test), dictation uses Parakeet by default, switch off with
     `parakeet-aus`, both models load at the same time; test bench unchanged
-    afterwards (2.8/9.9/4.2/3.4/4.2 %). **Open:** setup on the device
-    (Stephan), measure loading time, test in the user account after re-login. Closing/name lines and subject
+    afterwards (2.8/9.9/4.2/3.4/4.2 %). **Set up on the device, first letter 14:19:**
+    loading 12 s instead of 33 s; "Absatz" alone, subject up to sentence end,
+    salutation comma, "Cent"→"Euro" added (test bench case `absatz-allein-1`,
+    3.8 %). **Open:** test in the user account after re-login; grammar "ein
+    Brief geschrieben" (Parakeet, Vosk heard "einen") passes unchecked; date
+    following DIN 5008 ("31.08.2026") belongs to the letter work. Closing/name lines and subject
     line (bold in PDF and print) built. Open: "-ung" endings with Parakeet
     ("Rechn", "Nebenkostenabrechn"). Place stored in the admin account (wttr.in
     finds it correctly, 47.35/11.20); still missing in the user account. Open:

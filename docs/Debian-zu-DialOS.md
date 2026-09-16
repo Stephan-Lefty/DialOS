@@ -3386,7 +3386,14 @@ im Protokoll steht `PARAKEET: nicht eingerichtet` bzw. `nicht ladbar`.
 Abschalten je Konto: `touch ~/.config/dialos/parakeet-aus` (für Vergleiche auf
 dem Prüfstand). Die Test-Schalterdatei `parakeet-test` vom 15.09. gilt nicht
 mehr und kann weg. Beide Modelle laden gleichzeitig: Nacheinander dauerte es
-33 s bis „Ich schreibe mit".
+33 s bis „Ich schreibe mit", gleichzeitig am Gerät 12 s (erster Brief 14:19).
+
+**Nachbearbeitung nach dem ersten Brief (2026-09-16):** „Absatz" allein am
+Satzanfang gilt als Absatz (nicht vor Zahl oder klein geschriebenem Artikel),
+der Betreff endet am ersten Satzende und ohne Punkt (`betreff_richten`), die
+Anrede bekommt ihr Komma auch über Stückgrenzen (`anrede_richten`),
+„322,40 Cent" wird „322,40 Euro". Alles zusammen in `brief_text()`, die auch
+der Prüfstand ruft.
 
 ## 16. Sicherungs-Abbild (Clonezilla)
 

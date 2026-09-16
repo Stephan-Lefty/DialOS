@@ -130,6 +130,17 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Erster Brief mit festem Parakeet: „Absatz" allein reicht, Betreff endet am
+  Satzende** (2026-09-16, 14:19). Laden bis „Ich schreibe mit" jetzt 12 s statt
+  33 s. Stephan sagte fünfmal nur „Absatz" statt „neuer Absatz" - der Brief
+  hatte keinen Absatz, und weil der Betreff erst am Absatz endete, stand der
+  ganze Brief fett in der Betreffzeile. Jetzt: „Absatz" am Satzanfang ist ein
+  Absatz (nicht vor Zahl oder Artikel: „Absatz 3 des Vertrags"), der Betreff
+  endet am ersten Satzende und ohne Punkt, die Anrede bekommt ihr Komma auch
+  über Stückgrenzen, „322,40 Cent" wird „322,40 Euro". Auf dem Prüfstand als
+  sechster Fall: 3,8 % Wortfehler, alle Satzzeichen und Absätze richtig; die
+  übrigen fünf Fälle unverändert.
+
 - **Parakeet fest eingebaut: Brief und Notizen schreibt jetzt Parakeet**
   (2026-09-16, Stephan: „Ja, bau Parakeet fest ein"). Modell (641 MB) nach
   `/usr/local/share/dialos-parakeet`, sherpa-onnx systemweit - damit auch im

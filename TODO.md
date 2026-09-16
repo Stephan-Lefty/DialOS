@@ -337,8 +337,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     /usr/local/share/dialos-parakeet, sherpa-onnx systemweit, Prüfsummen,
     Selbsttest), Diktat standardmäßig mit Parakeet, abschaltbar mit
     `parakeet-aus`, beide Modelle laden gleichzeitig; Prüfstand danach
-    unverändert (2,8/9,9/4,2/3,4/4,2 %). **Offen:** Einrichtung am Gerät
-    (Stephan), Ladezeit messen, Probe im Nutzerkonto nach Neuanmeldung. Gruß/Name-Zeilen und
+    unverändert (2,8/9,9/4,2/3,4/4,2 %). **Am Gerät eingerichtet, erster Brief 14:19:**
+    Laden 12 s statt 33 s; „Absatz" allein, Betreff bis Satzende, Anrede-Komma,
+    „Cent"→„Euro" nachgebaut (Prüfstand-Fall `absatz-allein-1`, 3,8 %).
+    **Offen:** Probe im Nutzerkonto nach Neuanmeldung; Grammatik „ein Brief
+    geschrieben" (Parakeet, Vosk hörte „einen") kommt ungeprüft durch;
+    Datum nach DIN 5008 („31.08.2026") gehört zum Brief-Ausbau. Gruß/Name-Zeilen und
     Betreffzeile (fett im PDF und Druck) gebaut. Offen: „-ung"-Endungen bei
     Parakeet („Rechn", „Nebenkostenabrechn"). Ort im Admin-Konto hinterlegt (wttr.in
     findet ihn richtig, 47,35/11,20); im Nutzerkonto fehlt er noch. Offen:

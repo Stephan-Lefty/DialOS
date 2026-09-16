@@ -808,6 +808,11 @@ jemand spricht.
 > Schalterdatei `parakeet-test` und der Messordner gelten nicht mehr.
 > Einrichtung: [Debian-zu-DialOS.md](Debian-zu-DialOS.md), Abschnitt 15b.
 > Der Abschnitt hier beschreibt den Weg dorthin.
+>
+> **Erster Brief danach (14:19):** Laden 12 s statt 33 s. „Absatz" allein am
+> Satzanfang zählt jetzt als Absatz, der Betreff endet am ersten Satzende -
+> vorher stand der ganze Brief fett in der Betreffzeile. Prüfstand-Fall
+> `absatz-allein-1`: 3,8 % Wortfehler, alle Satzzeichen richtig.
 
 Stephan: „Parakeet jetzt testen". Vosk bleibt für alles, was Zeitmarken
 braucht (Sprechpausen, Schluss, „Satz löschen", Gegenprobe). Jedes Stück, das
