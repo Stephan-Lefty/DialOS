@@ -130,6 +130,98 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **DialOS bekommt eine Erweiterungsschnittstelle - Entwurf, noch kein Code**
+  (2026-09-17, Stephans Entscheidung: DialOS-Suche „als eigenständige
+  Erweiterung von DialOS aufbauen, so dass wir über die Zeit mehrere Tools
+  erstellen können"). Die erste Erweiterung wird **DialOS-Suche**: Briefe,
+  Dokumente, Notizen und E-Mails per Sprache finden und vorlesen. Vollständig
+  in [docs/erweiterungen.md](docs/erweiterungen.md), Aufgaben in
+  [TODO.md](TODO.md). **Bewusst getrennt von dem, was gebaut ist** - die Datei
+  trägt einen Entwurfs-Vermerk oben.
+
+  **Der Entwurfspunkt, an dem alles hängt: umschalten statt addieren.** Die
+  Kern-Grammatik wächst pro Erweiterung um genau EINEN Satz, ihren Startsatz;
+  alles Weitere erkennt die Erweiterung selbst mit eigener Grammatik, solange
+  sie läuft. Der Grund ist gemessen: Bei 27 Sätzen gab es am 2026-08-22 bereits
+  382 erlaubte Wortkombinationen ohne Befehl, und die Liste steht heute bei
+  **47 Sätzen** - ohne eine einzige Erweiterung. Die Zahl wächst nicht linear.
+  Eine Schnittstelle, die jedem zwanzig Sätze in die Kern-Grammatik erlaubt,
+  risse den Fehler wieder auf, der seit dem 2026-08-24 gerade erst entschärft
+  ist. Das Verfahren selbst ist nicht neu - `dialos-diktat.py` macht es seit
+  dem 2026-08-18 als Sonderfall.
+
+  **Vier Regeln, jede aus einem aufgetretenen Fehler:** Wortschatz beim
+  Einbauen prüfen und **verweigern** statt warnen („löschen" fehlt im
+  Wortschatz und wurde am 2026-08-18 still aus der Grammatik geworfen);
+  Kollisionen gegen die vollständige Grammatik prüfen; das Mikrofon gehört
+  immer genau einem, mit Wache gegen eine abgestürzte Erweiterung; gesprochen
+  wird ausschließlich über `dialos-say.py`, damit die Wahl zwischen Anna und
+  Michael auch für Erweiterungen gilt und der Assistentenname aus
+  `assistent-name.txt` kommt statt aus dem Quelltext.
+
+  **Der Aufspielweg bleibt derselbe** (Stephans Anforderung: nahtlos vom T490
+  aus installieren). Programm und Manifest fallen in bestehende Einträge der
+  Rechte-Tabelle von `dialos-aufspielen`; `QUELLE` muss vorerst nicht
+  angefasst werden, weil die erste Erweiterung im DialOS-Repo liegt.
+  **Beim Gegenlesen des Codes gefunden:** `dialos-aufspielen` startet den
+  Befehlsdienst nicht selbst, sondern druckt die Befehle nur - und zwar nur,
+  wenn sich `dialos-sprachbefehl-desktop.py` selbst geändert hat. Ein neues
+  Manifest allein löste damit gar nichts aus: Die Erweiterung läge installiert
+  da, der Dienst liefe mit alter Grammatik weiter, ihr Startsatz täte nichts,
+  ohne Fehlermeldung und ohne Ansage. Steht als Aufgabe in `TODO.md`.
+
+  **Als Motor ist MailBurg vorgesehen, kein vierter eigener Suchindex** (siehe
+  [docs/anwendungen.md](docs/anwendungen.md)). Es erfüllt das Auswahlkriterium
+  „Steuerbarkeit von außen" als einziges Programm der Familie vollständig:
+  `mailburg suchen` als Kommandozeile, SQLite-FTS5 mit Präfix- und
+  Trigramm-Index, PDF-Extraktion, OCR über tesseract, fertiges `.deb` für
+  Debian 13. Lizenz geprüft: MIT darf in ein GPL-3.0-Projekt. **Der Erkenner
+  für den Suchbegriff ist schon da:** Ein Suchbegriff ist Text, kein Befehl -
+  also Parakeet, dieselbe Arbeitsteilung wie beim Diktat. Zu prüfen bleibt nur,
+  ob sich Parakeet ein Wörterbuch aus den häufigsten Absendernamen des Archivs
+  mitgeben lässt.
+
+  **Auslieferung als `.deb` entschieden, aber nicht für die Entwicklung:** Auf
+  dem T490 bleibt `dialos-aufspielen` der Weg, für ein Kundengerät ist das
+  Paket der einzige - dort entfernt `dialos-aufraeumen.sh` `dialos-aufspielen`
+  samt sudoers-Regel. Der eigentliche Gewinn ist `postinst`: Dort sind die
+  Pflichtprüfungen nicht umgehbar, und `Depends: mailburg` erzwingt die
+  Abhängigkeit. **Erweiterungen wohnen vorerst im DialOS-Repo** - ein eigenes
+  Repo je Erweiterung ist das Ziel, aber solange sich die Schnittstelle ändert,
+  müssten zwei Repos synchron gehalten werden, während beide instabil sind.
+
+- **Symbol für DialOS-Suche: Entwurf liegt, bei 32 Pixeln gemessen durchgefallen**
+  (2026-09-17). Stephans Entwurf (`assets/suche-icon-entwurf.png`) sitzt
+  stilistisch - derselbe Kreis, dieselbe Dame, dieselbe tragende Hand, derselbe
+  Blau-Grün-Verlauf wie beim DialOS-App-Icon. Geprüft wurde aber das, worauf es
+  ankommt und was seit dem 2026-08-24 im Quelltext von
+  `Denkzettel/assets/icon-bauen.py` als Maßstab steht: Erkennbarkeit bei 32
+  Pixeln. Alle drei Icons auf 32/48/64 px gerechnet und nebeneinandergelegt
+  (`assets/suche-icon-groessenvergleich.png`): bei 64 und 48 px klar, bei
+  **32 px verschmelzen Dokument, Briefumschlag und Lupe zu einem Klumpen**,
+  während DialOS und Denkzettel dort klar bleiben. Ursache ist die Anzahl,
+  nicht die Zeichnung - rechts drei Objekte statt einem, und dafür bleiben bei
+  32 px nur etwa 14 × 20 Pixel. Vorschlag steht (auf die Lupe reduzieren),
+  entschieden ist nichts. **Größen und Transparenz bewusst noch nicht
+  abgeleitet**, solange sich die Gestaltung ändern kann.
+
+- **Dritte Namenskategorie festgehalten: Erweiterungen** (2026-09-17, in
+  `CLAUDE.md`). Bisher gab es Kernbestandteil und Familienmitglied ohne Präfix.
+  Eine Erweiterung trägt das Präfix zu Recht, weil sie ohne DialOS nicht läuft
+  und einzeln installiert keinen Sinn ergibt. Festgehalten, damit „neue
+  Familienmitglieder werden NICHT umbenannt" später nicht wie eine gebrochene
+  Regel aussieht - sie gilt unverändert für eigenständige Programme wie
+  Denkzettel.
+
+- **Vorlesen langer Texte ist nicht unterbrechbar - für ein Archiv wird das zum
+  Normalfall** (2026-09-17, als Aufgabe festgehalten). Kein neuer Fehler: „Alle
+  Befehle vorlesen" läuft 144 s und ist ausdrücklich „nicht unterbrechbar",
+  „Brief vorlesen" liest ebenso am Stück. Bei der Befehlsübersicht ist das eine
+  Unbequemlichkeit, die sich mit „Befehle für …" umgehen lässt; bei einem
+  Archiv ist es der Normalfall. Vorgesehen ist absatzweises Vorlesen mit einem
+  kurzen Lauschfenster dazwischen - gebaut gehört das in `dialos-say.py` und
+  nicht in eine Erweiterung, dann löst es die 144 Sekunden gleich mit.
+
 - **Empfänger-Dialog: Namen korrigieren, jederzeit abbrechen oder von vorne**
   (2026-09-17, Stephan: „keinen Einfluss, das noch mal zu ändern" und „kann den
   Brief nicht neu starten oder das Diktat einfach beenden"). „Stimmt das? Sage ja,

@@ -146,6 +146,59 @@ context, and that is exactly where it failed; so the comparison was
 worthless. **Whoever tests TLS must pass the verification context
 explicitly.**
 
+## Archive and search: MailBurg is the engine
+
+Settled with Stephan on 2026-09-17, when he asked for an archive solution
+with reading out and a voice dialogue - searching letters, documents,
+notes and e-mails by voice. This is being built as the first
+**extension**, called DialOS-Suche, see
+[erweiterungen.en.md](erweiterungen.en.md).
+
+**The decision went against a fourth archive of our own.** DialOS already
+has two halves: `dialos-archiv.py` (PDF archive in
+`~/Dokumente/Archiv/DialOS-DATA/` and on the stick) and
+`dialos-mailarchiv.py` (mail from Thunderbird's local mbox files). A third
+route alongside them would, by the one-player rule below, be exactly the
+mistake this file is meant to prevent.
+
+**MailBurg is the only program in the DialOS family that fully meets this
+file's selection criterion.** Controllability from outside is not
+retrofitted there but the normal case:
+
+| What DialOS-Suche needs | What MailBurg brings |
+|---|---|
+| Searchable from outside | `mailburg suchen ARCHIV "…"` as a command line |
+| Full text over everything | SQLite FTS5 with prefix **and** trigram index |
+| Making letters and scans readable | `pdftotext`/`pypdf`, Office extraction, OCR via `tesseract` |
+| Installable on Debian 13 | already builds as a `.deb` |
+| Licence position clear | MIT - may go into a GPL-3.0 project |
+
+**It is called over the command line, not imported as a library.** That
+keeps versions and licences apart, and DialOS does not hang off MailBurg's
+internal structure. What is still missing in MailBurg for that is a **JSON
+output** for `suchen`: a hit list laid out for humans is useless for a
+voice dialogue. That belongs in the MailBurg repository, not here.
+
+**What MailBurg does not do today:** it archives mail only. Letters from
+`~/Dokumente/`, scanned post and Denkzettel's notes have to be added as
+further sources - the extraction chain can already do all of that, it is
+simply only invoked over attachments so far.
+
+**The recognizer for the search term is already there.** A spoken search
+term is text, not a command - so the same division of labour applies as in
+dictation: Vosk takes the start sentence, **Parakeet** the term. The only
+new thing to clarify is whether Parakeet can be given a dictionary built
+from the most frequent sender names in one's own archive - the way
+dictation has its personal dictionary.
+
+**Open and deliberately not decided here:** whether the archive runs
+encrypted. MailBurg can do it (AES-256-GCM per file), but **the search
+index stays plain text** - and a blind user who would have to speak his
+archive password is a problem of its own. See
+[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md) and
+`TODO.en.md`. Equally open: whether `dialos-archiv.py` and
+`dialos-mailarchiv.py` are absorbed into MailBurg or stay alongside it.
+
 ## Two rules that follow from this list
 
 **Only one player may run at a time.** If the user says "louder" or "stop"

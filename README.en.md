@@ -122,6 +122,100 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **DialOS gets an extension interface - a draft, no code yet**
+  (2026-09-17, Stephan's decision: build DialOS Search "als eigenständige
+  Erweiterung von DialOS aufbauen, so dass wir über die Zeit mehrere Tools
+  erstellen können" ("as a standalone extension of DialOS, so that over time we
+  can create several tools")). The first extension will be **DialOS Search**:
+  find letters, documents, notes and mails by voice and have them read out. In
+  full in [docs/erweiterungen.en.md](docs/erweiterungen.en.md), tasks in
+  [TODO.en.md](TODO.en.md). **Deliberately kept apart from what is built** - the
+  file carries a draft note at the top.
+
+  **The design point everything hangs on: switch over instead of adding up.**
+  The core grammar grows by exactly ONE sentence per extension, its start
+  sentence; everything else the extension recognises itself with its own
+  grammar, as long as it is running. The reason is measured: with 27 sentences
+  there were already 382 permitted word combinations without a command on
+  2026-08-22, and the list stands at **47 sentences** today - without a single
+  extension. The number does not grow linearly. An interface that lets everyone
+  put twenty sentences into the core grammar would tear open again the fault
+  that has only just been defused since 2026-08-24. The procedure itself is not
+  new - `dialos-diktat.py` has been doing it as a special case since 2026-08-18.
+
+  **Four rules, each from a fault that actually occurred:** check the vocabulary
+  when installing and **refuse** instead of warning ("löschen" (delete) is
+  missing from the vocabulary and was silently thrown out of the grammar on
+  2026-08-18); check collisions against the complete grammar; the microphone
+  always belongs to exactly one party, with a guard against a crashed extension;
+  speaking goes exclusively through `dialos-say.py`, so that the choice between
+  Anna and Michael applies to extensions too and the assistant name comes from
+  `assistent-name.txt` instead of the source code.
+
+  **The installation path stays the same** (Stephan's requirement: install
+  seamlessly from the T490). Program and manifest fall into existing entries of
+  the rights table of `dialos-aufspielen`; `QUELLE` does not have to be touched
+  for now, because the first extension lives in the DialOS repo. **Found while
+  reviewing the code:** `dialos-aufspielen` does not start the command service
+  itself, it only prints the commands - and only if
+  `dialos-sprachbefehl-desktop.py` has changed itself. A new manifest alone
+  therefore triggered nothing at all: the extension would sit there installed,
+  the service would carry on with the old grammar, its start sentence would do
+  nothing, with no error message and no announcement. Recorded as a task in
+  `TODO.md`.
+
+  **MailBurg is intended as the engine, not a fourth search index of our own**
+  (see [docs/anwendungen.en.md](docs/anwendungen.en.md)). It is the only program
+  in the family that fully meets the selection criterion "controllable from
+  outside": `mailburg suchen` as a command line, SQLite FTS5 with prefix and
+  trigram index, PDF extraction, OCR via tesseract, a finished `.deb` for
+  Debian 13. Licence checked: MIT may go into a GPL-3.0 project. **The
+  recogniser for the search term is already there:** a search term is text, not
+  a command - so Parakeet, the same division of labour as in dictation. The only
+  thing left to check is whether Parakeet can be given a dictionary built from
+  the most frequent sender names in the archive.
+
+  **Delivery as a `.deb` decided, but not for development:** on the T490
+  `dialos-aufspielen` remains the way, for a customer device the package is the
+  only one - there `dialos-aufraeumen.sh` removes `dialos-aufspielen` together
+  with its sudoers rule. The real gain is `postinst`: there the mandatory checks
+  cannot be bypassed, and `Depends: mailburg` enforces the dependency.
+  **Extensions live in the DialOS repo for now** - a separate repo per extension
+  is the goal, but as long as the interface keeps changing, two repos would have
+  to be kept in sync while both are unstable.
+
+- **Icon for DialOS Search: a draft is there, measured at 32 pixels it failed**
+  (2026-09-17). Stephan's draft (`assets/suche-icon-entwurf.png`) fits
+  stylistically - the same circle, the same lady, the same carrying hand, the
+  same blue-green gradient as the DialOS app icon. But what was checked is what
+  matters, and what has stood as the yardstick in the source of
+  `Denkzettel/assets/icon-bauen.py` since 2026-08-24: recognisability at 32
+  pixels. All three icons rendered at 32/48/64 px and put side by side
+  (`assets/suche-icon-groessenvergleich.png`): clear at 64 and 48 px, at
+  **32 px document, envelope and magnifier merge into one blob**, while DialOS
+  and Denkzettel stay clear there. The cause is the number, not the drawing -
+  three objects on the right instead of one, and only about 14 × 20 pixels are
+  left for them at 32 px. A proposal is on the table (reduce it to the
+  magnifier), nothing is decided. **Sizes and transparency deliberately not
+  derived yet**, as long as the design can still change.
+
+- **Third naming category recorded: extensions** (2026-09-17, in `CLAUDE.md`).
+  So far there were core components and family members without a prefix. An
+  extension carries the prefix rightfully, because it does not run without
+  DialOS and makes no sense installed on its own. Recorded so that "new family
+  members are NOT renamed" does not look like a broken rule later - it applies
+  unchanged to standalone programs such as Denkzettel.
+
+- **Reading long texts aloud cannot be interrupted - for an archive that becomes
+  the normal case** (2026-09-17, recorded as a task). Not a new fault: "Alle
+  Befehle vorlesen" (read out all commands) runs for 144 s and is explicitly
+  "not interruptible", "Brief vorlesen" (read out the letter) likewise reads
+  straight through. For the command overview that is an inconvenience which can
+  be got around with "Befehle für …" (commands for …); for an archive it is the
+  normal case. Planned is reading out paragraph by paragraph with a short
+  listening window in between - that belongs in `dialos-say.py` and not in an
+  extension, then it solves the 144 seconds along with it.
+
 - **Recipient dialogue: correct names, abort or restart at any time** (2026-09-17,
   Stephan: no way to change it again, cannot restart the letter or simply end the
   dictation). "Stimmt das? Sage ja, nein oder buchstabieren.", "abbrechen"/"Diktat

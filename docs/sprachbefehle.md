@@ -92,6 +92,31 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |
+| „Unterlagen durchsuchen" / „Briefe durchsuchen" | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Wortlaut noch nicht endgültig**, er muss zuerst gegen das kleine Modell und gegen die bestehenden 47 Sätze geprüft werden. |
+
+### Warum bei DialOS-Suche nur EIN Satz hier steht
+
+Die Erweiterung kennt mehr Sätze als diesen - „vorlesen", „weiter",
+„zurück", „stopp" -, aber die stehen **nicht** in der Kern-Grammatik. Sie
+gehören zur eigenen Grammatik der Erweiterung und gelten nur, solange sie
+läuft.
+
+Der Grund ist der Punkt „Erlaubte Wortkombinationen ohne Befehl fallen
+LAUTLOS durch" aus `TODO.md`: Vosk baut aus der Satzliste ein Wortnetz und
+darf Wörter aus verschiedenen Sätzen kombinieren. Bei 27 Sätzen waren das
+am 2026-08-22 bereits 382 befehlslose Kombinationen - und die Liste ist
+seither auf 47 Sätze gewachsen, ohne dass eine einzige Erweiterung dabei
+war. Die Zahl wächst nicht linear. Jede Erweiterung, die ihre sämtlichen
+Sätze hier einträgt, würde einen Fehler wieder aufreißen, der seit dem
+2026-08-24 gerade erst entschärft ist.
+
+Vollständig steht das in [erweiterungen.md](erweiterungen.md), Abschnitt
+„Die Kernentscheidung: umschalten, nicht addieren".
+
+**Und der Programmname ist nicht der Sprachbefehl:** „dialos" steht nicht
+im Wortschatz (geprüft 2026-09-17) - „DialOS-Suche öffnen" wäre als Zuruf
+gar nicht möglich. Deshalb gewöhnliche Wörter, und nach der Regel unten
+ein Auslösewort zusätzlich zum Ziel.
 
 ## Regeln, die für jeden neuen Befehl gelten
 

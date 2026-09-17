@@ -57,6 +57,40 @@ anderer Hardware** ist. Ein Programm mit anderer Engine, anderer
 Zielgruppe oder anderer Lizenz bekommt es nicht - sonst behauptet der
 Name eine Zusammengehörigkeit, die technisch und rechtlich nicht besteht.
 
+### Die dritte Kategorie: Erweiterungen (seit 2026-09-17)
+
+Bis hierher kannte dieses Projekt zwei Fälle: **Kernbestandteil** (heißt
+`dialos-*.py` und liegt in diesem Repo) und **Familienmitglied ohne
+Präfix** (Denkzettel). Mit Stephans Entscheidung vom 2026-09-17 kommt ein
+dritter dazu: die **Erweiterung**.
+
+Eine Erweiterung **trägt das Präfix zu Recht** - anders als ein
+Familienmitglied:
+
+- Sie läuft ohne DialOS nicht, weil sie auf dessen Grammatik, Stimme und
+  Mikrofon-Übergabe angewiesen ist.
+- Einzeln installiert ergibt sie keinen Sinn.
+- Sie ist kein eigenes Produkt auf anderer Hardware (das ist
+  DialOS-Mobil) und kein eigenständiges Programm mit eigener Engine,
+  eigener Lizenz und eigener Zielgruppe (das ist Denkzettel).
+
+**Die erste ist DialOS-Suche** (Briefe, Dokumente, Notizen und Mails per
+Sprache finden und vorlesen). Der vollständige Entwurf der Schnittstelle
+steht in [docs/erweiterungen.md](docs/erweiterungen.md), die Aufgaben in
+[TODO.md](TODO.md).
+
+**Sie wird im DialOS-Repo gebaut, nicht in einem eigenen** (Stephan,
+2026-09-17). Ein eigenes Repo je Erweiterung ist das Ziel, aber nicht für
+die erste: Solange sich die Schnittstelle selbst noch ändert, müssten zwei
+Repos synchron gehalten werden, während beide instabil sind - und jeder
+Fehler wäre erst einmal nicht zuzuordnen, welchem von beiden er gehört.
+Das Herauslösen später ist billiger als das Zusammenführen jetzt.
+
+**Damit niemand später denkt, die Regel sei gebrochen worden:** „Neue
+Familienmitglieder werden NICHT umbenannt" gilt unverändert - für
+eigenständige Programme. Sie gilt nicht für das, was ohne DialOS gar
+nicht läuft.
+
 Stattdessen macht ein neues Familienmitglied fünf Dinge:
 
 1. Symbol vom DialOS-App-Icon ableiten, aber klar unterscheidbar

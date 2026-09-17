@@ -75,6 +75,32 @@ listen?".
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
 | "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |
 | "Ruf {person} an" (call {person}) | Telephony via SIM or paired phone, see [telefonie.en.md](telefonie.en.md). |
+| "Unterlagen durchsuchen" / "Briefe durchsuchen" (search the documents / search the letters) | Start sentence of the **DialOS-Suche** extension - finding letters, documents, notes and mails and reading them out. **Wording not final yet**, it first has to be checked against the small model and against the existing 47 sentences. |
+
+### Why only ONE sentence for DialOS-Suche stands here
+
+The extension knows more sentences than this one - "vorlesen" (read out),
+"weiter" (next), "zurück" (back), "stopp" (stop) - but those are **not**
+in the core grammar. They belong to the extension's own grammar and apply
+only for as long as it runs.
+
+The reason is the item "Erlaubte Wortkombinationen ohne Befehl fallen
+LAUTLOS durch" (permitted word combinations that are not a command fall
+through SILENTLY) from `TODO.en.md`: Vosk builds a word network out of the
+sentence list and is allowed to combine words from different sentences.
+With 27 sentences that already came to 382 command-less combinations on
+2026-08-22 - and the list has grown to 47 sentences since, without a
+single extension being among them. The number does not grow linearly.
+Every extension that entered all of its sentences here would tear open
+again a fault that has only just been defused since 2026-08-24.
+
+The full account is in [erweiterungen.en.md](erweiterungen.en.md),
+section "The core decision: switch over, do not add".
+
+**And the program name is not the voice command:** "dialos" is not in the
+vocabulary (checked 2026-09-17) - "DialOS-Suche öffnen" would not be
+possible at all as something to call out. Hence ordinary words, and by the
+rule below a trigger word in addition to the target.
 
 ## Rules that apply to every new command
 

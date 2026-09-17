@@ -58,6 +58,177 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
   Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
 
+- [ ] **Erweiterungsschnittstelle bauen, danach DialOS-Suche als erste
+  Erweiterung** (entschieden mit Stephan am 2026-09-17). Der Entwurf steht
+  vollständig in [docs/erweiterungen.md](docs/erweiterungen.md) - **hier nur
+  die abhakbaren Schritte, dort das Warum.**
+
+  **Die Reihenfolge ist Absicht.** Heute steht jeder Sprachbefehl an drei
+  Stellen in `dialos-sprachbefehl-desktop.py` (Satz in `GRAMMATIK_AN`, Eintrag
+  im Dict, Zweig in der Schleife). Ein viertes Programm nach demselben Muster
+  wäre die vierte Kopie. Die Schnittstelle kommt zuerst, und DialOS-Suche
+  beweist dabei, dass sie trägt.
+
+  **Der Entwurfspunkt, an dem alles hängt: umschalten, nicht addieren.** Die
+  Kern-Grammatik wächst pro Erweiterung um **genau einen Satz** - ihren
+  Startsatz. Alles Weitere erkennt die Erweiterung selbst, solange sie läuft.
+  Grund: Bei 27 Sätzen waren es am 2026-08-22 schon 382 befehlslose
+  Wortkombinationen, und die Liste steht heute bei **47 Sätzen** - ohne eine
+  einzige Erweiterung. Die Zahl wächst nicht linear. Eine Schnittstelle, die
+  jedem zwanzig Sätze in die Kern-Grammatik erlaubt, reißt den Fehler wieder
+  auf, der seit dem 2026-08-24 gerade erst entschärft ist.
+
+  **Schritt 1 - die Schnittstelle:**
+  - [ ] `dialos-sprachbefehl-desktop.py`: `GRAMMATIK_AN` beim Start aus den
+    Manifesten unter `/usr/local/share/dialos/erweiterungen/` ergänzen, statt
+    jeden Satz fest im Quelltext zu halten. Die bestehenden 47 Sätze bleiben,
+    wo sie sind - **nicht** im selben Zug auf Manifeste umstellen. Zwei
+    Umbauten gleichzeitig, und ein Fehler ist nicht mehr zuzuordnen.
+  - [ ] `dialos-erweiterung.py` mit `pruefen` / `einbauen` / `entfernen` /
+    `liste`.
+  - [ ] **Wortschatzprüfung, die VERWEIGERT statt warnt.** Jedes Wort aus
+    `startsaetze` und `eigene_grammatik` gegen das kleine Modell. Grund:
+    „löschen" fehlt im Wortschatz und wurde am 2026-08-18 still aus der
+    Grammatik geworfen. Eine Warnung beim Einbauen liest niemand wieder; der
+    Fehler zeigt sich erst, wenn der Nutzer allein mit dem Gerät ist.
+  - [ ] **Kollisionsprüfung gegen die vollständige Grammatik** - Piper
+    spricht, Vosk hört. `scripts/dialos-grammatik-pruefen.py` gibt es schon.
+  - [ ] **Mikrofon-Übergabe über eine Markierungsdatei, mit Wache.** Eine
+    abgestürzte Erweiterung darf das Mikrofon nicht behalten - der Nutzer
+    spräche sonst gegen ein taubes Gerät, und selbst das Ausschalten der
+    Sprachsteuerung wäre nicht mehr hörbar.
+
+  **Schritt 2 - der Aufspielweg** (Stephans Anforderung vom 2026-09-17: „wir
+  müssen nachher mit der fertigen Erweiterung nahtlos vom T490 zugreifen
+  können und die Erweiterung dort installieren können"):
+  - [ ] Die beiden Prüfungen aus Schritt 1 ins Aufspielen einhängen: Ist ein
+    Manifest unter den geänderten Dateien, wird geprüft, **bevor** es an
+    seinen Platz kommt. Erst dadurch ist „verweigern statt warnen"
+    erzwingbar.
+  - [ ] **Der Neustart-Hinweis muss auch bei einem neuen Manifest kommen**
+    (beim Gegenlesen am 2026-09-17 gefunden). `dialos-aufspielen` startet den
+    Befehlsdienst nicht selbst, sondern **druckt** die zwei Befehle dafür - und
+    zwar nur, wenn sich `dialos-sprachbefehl-desktop.py` **selbst** geändert
+    hat (`if any(rel.endswith(skript) …)`). Ein neues Manifest allein löst also
+    nichts aus: Die Erweiterung läge installiert da, der Dienst liefe mit der
+    alten Grammatik weiter, und ihr Startsatz täte nichts - ohne Fehlermeldung,
+    ohne Ansage. Für einen blinden Nutzer der schlechteste Ausgang.
+  - [ ] `scripts/dialos-installstand.sh` muss das Manifest mit vergleichen.
+    Sonst gilt „Installationsstand prüfen, nicht annehmen" für Erweiterungen
+    nicht - und genau dieser Fehler hat am 2026-08-19 zwei Tage gekostet.
+  - [ ] **Erst später fällig:** `QUELLE` in `dialos-aufspielen` von einem
+    einzelnen Pfad auf eine **Liste** umstellen. Für die erste Erweiterung
+    nicht nötig, weil sie im DialOS-Repo liegt; nötig, sobald die zweite in
+    ein eigenes Repo zieht. **Kein zweites Aufspielskript** - die bestehende
+    sudoers-Regel ist ausweislich ihres eigenen Kopfes „praktisch ein
+    Root-Zugang", ein zweiter Weg wäre ein zweiter.
+  - [ ] Nach dem ersten echten Aufspielen `--befehl` laufen lassen. Ein Commit
+    beweist nicht, dass etwas auf dem Gerät wirkt.
+
+  **Schritt 3 - DialOS-Suche**, erst wenn Schritt 1 und 2 stehen:
+  - [ ] **MailBurg als Motor**, kein neuer Suchindex. Es erfüllt das
+    Auswahlkriterium aus `docs/anwendungen.md` als einziges Programm der
+    Familie vollständig (`mailburg suchen ARCHIV "…"`), hat FTS5 mit Präfix-
+    und Trigramm-Index, PDF-Textextraktion, OCR über tesseract und baut sich
+    schon als `.deb` für Debian 13. Lizenz geprüft: MailBurg ist MIT, DialOS
+    GPL-3.0 - MIT-Code darf in ein GPL-Projekt.
+  - [ ] **Über die Kommandozeile aufrufen, nicht als Bibliothek importieren.**
+    Dann bleiben Versionen und Lizenzen getrennt.
+  - [ ] MailBurg braucht dafür eine **JSON-Ausgabe** bei `suchen` - eine für
+    Menschen gesetzte Trefferliste ist für einen Sprachdialog unbrauchbar.
+    Gehört ins MailBurg-Repo, nicht hierher.
+  - [ ] **Nicht-Mail-Quellen in MailBurg:** Briefe aus `~/Dokumente/`, Scans,
+    Denkzettels `notizen.db`. Die Extraktionskette kann das alles schon, sie
+    wird heute nur über Anhänge aufgerufen.
+  - [ ] **Freier Suchbegriff über Parakeet**, nicht über Vosk. Ein Suchbegriff
+    ist Text, kein Befehl - dieselbe Arbeitsteilung wie beim Diktat. Nichts neu
+    zu beschaffen. **Zu prüfen ist nur eines:** ob sich Parakeet ein Wörterbuch
+    aus den häufigsten Absendernamen des eigenen Index mitgeben lässt, so wie
+    das Diktat sein persönliches Wörterbuch hat. Daran scheitert sonst jede
+    freie Erkennung.
+  - [ ] **Phonetische Suche prüfen:** eine FTS5-Spalte mit der Kölner Phonetik
+    von Absendernamen, damit „Meier/Mayer/Maier" zusammenfallen. Fängt
+    Erkennungsunschärfe strukturell ab, statt sie dem Nutzer als Nachfrage
+    aufzubürden.
+  - [ ] **Trefferdialog:** 40 Treffer kann man nicht vorlesen. Erst eingrenzen,
+    Anzahl ansagen, Weg nennen - dieselbe Regel wie beim Einkaufszettel („ein
+    Befehl nimmt dem Nutzer keine Entscheidung ab, die er selbst treffen
+    kann").
+  - [ ] **Symbol: Entwurf liegt, trägt aber bei 32 Pixeln noch nicht.**
+    Stephans Entwurf vom 2026-09-17 liegt als `assets/suche-icon-entwurf.png`.
+    Stilistisch sitzt er - derselbe Kreis, dieselbe Dame, dieselbe Hand,
+    derselbe Blau-Grün-Verlauf. **Gemessen** (alle drei Icons auf 32/48/64 px
+    gerechnet, Beleg in `assets/suche-icon-groessenvergleich.png`): bei 64 und
+    48 px klar, bei **32 px fallen Dokument, Briefumschlag und Lupe zu einem
+    Klumpen zusammen** - während DialOS und Denkzettel dort klar bleiben.
+    Ursache ist die Anzahl, nicht die Zeichnung: rechts drei Objekte statt
+    einem, und für die rechte Hälfte bleiben bei 32 px nur etwa 14 × 20 px.
+    Der Maßstab steht seit dem 2026-08-24 im Quelltext von
+    `Denkzettel/assets/icon-bauen.py`.
+    - [ ] Entscheiden, ob auf **ein** Objekt reduziert wird (Vorschlag: die
+      Lupe - rund, bleibt auch als Klumpen eine erkennbare Form).
+    - [ ] Erst **danach** ableiten: Transparenz zurückrechnen (der Entwurf ist
+      RGB mit weißem Hintergrund, ein `.desktop`-Icon braucht einen
+      Alpha-Kanal, sonst steht ein weißer Kasten im Panel), Größen 32-512, und
+      eine dunkle Variante. Der Weg ist gebaut:
+      `Denkzettel/assets/icon-bauen.py`. **Nicht vorher** - sechs Dateien von
+      einem Entwurf abzuleiten, der sich noch ändert, heißt die Arbeit zweimal
+      machen.
+
+  **Auslieferung als `.deb`** (entschieden 2026-09-17), aber **nicht für die
+  Entwicklung**: Auf dem T490 bleibt `dialos-aufspielen` der Weg, weil ein
+  Paket bei jeder Iteration gebaut und hochgezählt werden müsste. Für ein
+  Kundengerät ist das Paket der einzige Weg - dort entfernt
+  `scripts/dialos-aufraeumen.sh` `dialos-aufspielen` samt sudoers-Regel. Der
+  eigentliche Gewinn ist `postinst`: Dort sind die beiden Pflichtprüfungen
+  nicht umgehbar, und `Depends: mailburg` erzwingt die Abhängigkeit. Achtung:
+  DialOS baut heute **kein einziges** Paket - das ist neue Infrastruktur
+  (`debian/control`, `changelog`, `rules`), und ohne Repository-Server bleibt
+  es bei `dpkg -i` von Hand.
+
+  **Erweiterungen wohnen vorerst im DialOS-Repo** (Stephan, 2026-09-17). Ein
+  eigenes Repo je Erweiterung ist das Ziel, aber nicht für die erste: Solange
+  sich die Schnittstelle ändert, müssten zwei Repos synchron gehalten werden,
+  während beide instabil sind - und jeder Fehler wäre erst einmal nicht
+  zuzuordnen.
+
+  **Noch offen** (in `docs/erweiterungen.md`): was bei einem Kern-Update
+  passiert; ob hassil hier endlich seinen Platz findet; ob das Archiv
+  verschlüsselt läuft (MailBurg kann es, aber der Suchindex bleibt Klartext).
+
+- [ ] **Vorlesen langer Texte ist nicht unterbrechbar - und für ein Archiv wird
+  das zum Normalfall** (2026-09-17). **Kein neuer Fehler:** Der Punkt
+  „Befehlsübersicht am Gerät prüfen" weiter oben nennt ihn schon - „Alle
+  Befehle vorlesen" läuft 144 s, und „Unterbrechen während der Ansage geht
+  nicht". „Brief vorlesen" liest ebenso am Stück.
+
+  **Was sich ändert:** Bei der Befehlsübersicht ist das eine Unbequemlichkeit,
+  die man mit „Befehle für …" umgehen kann. Bei einem Archiv ist es der
+  Normalfall - wer sucht, bekommt Treffer, die er nicht alle hören will, und
+  ein zweiseitiger Brief von der Krankenkasse dauert länger als die 144
+  Sekunden. Zum Vergleich: „Windows Desktop." dauert 1,5 s.
+
+  **Vorgesehen:** absatzweise vorlesen, zwischen den Absätzen ein kurzes
+  Lauschfenster mit einer Mini-Grammatik aus „stopp", „weiter", „zurück",
+  „nochmal". Das Muster gibt es zweimal - der zweite Erkenner für „Diktat
+  beenden" und der ja/nein-Erkenner vor dem Leeren des Zettels. Es braucht
+  keine neue Technik, nur die Zerlegung des Textes vor dem Sprechen.
+
+  **Gebaut gehört es in `dialos-say.py`, nicht in DialOS-Suche.** Die 144
+  Sekunden der Befehlsübersicht gehören keiner Erweiterung; wer es fürs Archiv
+  baut, löst sie für alles mit.
+
+  **Echtes Barge-in NICHT zuerst bauen.** Die echo-bereinigte Quelle
+  `dialos_mikrofon_ohne_echo` gibt es zwar schon, aber während der eigenen
+  Stimme zuzuhören heißt: „Soll ich stoppen?" im vorgelesenen Brief stoppt ihn.
+
+  **Und zweitens:** Ein vorgelesener Brief darf **nicht** in den
+  Ansagen-Speicher unter `~/.cache/dialos/ansagen`. Der ist für „Ich höre Dir
+  zu." gedacht, das täglich kommt; ein einmalig vorgelesenes Dokument füllt ihn
+  mit WAV-Dateien, die nie ein zweites Mal treffen. Einen Schalter dafür hat
+  `dialos-say.py` heute nicht - die Grenze ist, ob ein Text sich wiederholt,
+  nicht wie lang er ist.
+
 - [ ] **EIN GESPRÄCH IM RAUM HAT DIALOS BEDIENT - mit Druck, Diktat und
   Archiv** (2026-09-14, 11:01-11:31, während Stephans Pause). Der
   schwerwiegendste Befund bisher, weil er nicht nur stört, sondern **fremde

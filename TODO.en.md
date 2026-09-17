@@ -56,6 +56,177 @@ finished too, and then move down together. That way no reference breaks.
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
   that DialOS can show or read out on the device.
 
+- [ ] **Build the extension interface, then DialOS Search as the first
+  extension** (decided with Stephan on 2026-09-17). The draft is complete in
+  [docs/erweiterungen.en.md](docs/erweiterungen.en.md) - **only the checkable
+  steps here, the why is over there.**
+
+  **The order is deliberate.** Today every voice command sits in three places in
+  `dialos-sprachbefehl-desktop.py` (sentence in `GRAMMATIK_AN`, entry in the
+  dict, branch in the loop). A fourth program following the same pattern would
+  be the fourth copy. The interface comes first, and DialOS Search proves in
+  passing that it carries.
+
+  **The design point everything hangs on: switch over, do not add up.** The core
+  grammar grows by **exactly one sentence** per extension - its start sentence.
+  Everything else the extension recognises itself, as long as it is running.
+  Reason: with 27 sentences there were already 382 command-less word
+  combinations on 2026-08-22, and the list stands at **47 sentences** today -
+  without a single extension. The number does not grow linearly. An interface
+  that lets everyone put twenty sentences into the core grammar tears open again
+  the fault that has only just been defused since 2026-08-24.
+
+  **Step 1 - the interface:**
+  - [ ] `dialos-sprachbefehl-desktop.py`: extend `GRAMMATIK_AN` at start-up from
+    the manifests under `/usr/local/share/dialos/erweiterungen/` instead of
+    keeping every sentence hard-coded in the source. The existing 47 sentences
+    stay where they are - **do not** move them onto manifests in the same go.
+    Two rebuilds at once, and a fault can no longer be attributed.
+  - [ ] `dialos-erweiterung.py` with `pruefen` / `einbauen` / `entfernen` /
+    `liste`.
+  - [ ] **A vocabulary check that REFUSES instead of warning.** Every word from
+    `startsaetze` and `eigene_grammatik` against the small model. Reason:
+    "löschen" (delete) is missing from the vocabulary and was silently thrown
+    out of the grammar on 2026-08-18. Nobody reads a warning at install time a
+    second time; the fault only shows once the user is alone with the device.
+  - [ ] **Collision check against the complete grammar** - Piper speaks, Vosk
+    listens. `scripts/dialos-grammatik-pruefen.py` already exists.
+  - [ ] **Microphone handover via a marker file, with a guard.** A crashed
+    extension must not keep the microphone - the user would otherwise be
+    speaking against a deaf device, and even switching the voice control off
+    would no longer be audible.
+
+  **Step 2 - the installation path** (Stephan's requirement of 2026-09-17: "wir
+  müssen nachher mit der fertigen Erweiterung nahtlos vom T490 zugreifen können
+  und die Erweiterung dort installieren können" ("afterwards we have to be able
+  to reach the finished extension seamlessly from the T490 and install the
+  extension there")):
+  - [ ] Hook the two checks from step 1 into installing: if a manifest is among
+    the changed files, it is checked **before** it goes to its place. Only that
+    makes "refuse instead of warn" enforceable.
+  - [ ] **The restart notice must also come for a new manifest** (found while
+    reviewing the code on 2026-09-17). `dialos-aufspielen` does not start the
+    command service itself, it **prints** the two commands for it - and only if
+    `dialos-sprachbefehl-desktop.py` has changed **itself**
+    (`if any(rel.endswith(skript) …)`). A new manifest alone therefore triggers
+    nothing: the extension would sit there installed, the service would carry on
+    with the old grammar, and its start sentence would do nothing - with no
+    error message, no announcement. For a blind user the worst possible outcome.
+  - [ ] `scripts/dialos-installstand.sh` has to compare the manifest as well.
+    Otherwise "check the installation state, do not assume it" does not apply to
+    extensions - and exactly that fault cost two days on 2026-08-19.
+  - [ ] **Only due later:** change `QUELLE` in `dialos-aufspielen` from a single
+    path to a **list**. Not needed for the first extension, because it lives in
+    the DialOS repo; needed as soon as the second moves into a repo of its own.
+    **No second installation script** - by its own header the existing sudoers
+    rule is "practically root access", a second path would be a second one.
+  - [ ] Run `--befehl` after the first real installation. A commit does not
+    prove that anything takes effect on the device.
+
+  **Step 3 - DialOS Search**, only once steps 1 and 2 stand:
+  - [ ] **MailBurg as the engine**, no new search index. It is the only program
+    in the family that fully meets the selection criterion from
+    `docs/anwendungen.en.md` (`mailburg suchen ARCHIV "…"`), has FTS5 with
+    prefix and trigram index, PDF text extraction, OCR via tesseract and already
+    builds itself as a `.deb` for Debian 13. Licence checked: MailBurg is MIT,
+    DialOS GPL-3.0 - MIT code may go into a GPL project.
+  - [ ] **Call it over the command line, do not import it as a library.** That
+    keeps versions and licences apart.
+  - [ ] For that MailBurg needs a **JSON output** for `suchen` - a hit list
+    typeset for humans is unusable for a voice dialogue. Belongs in the MailBurg
+    repo, not here.
+  - [ ] **Non-mail sources in MailBurg:** letters from `~/Dokumente/`, scans,
+    Denkzettel's `notizen.db`. The extraction chain can already do all of that,
+    it is only called via attachments today.
+  - [ ] **Free search term via Parakeet**, not via Vosk. A search term is text,
+    not a command - the same division of labour as in dictation. Nothing new to
+    procure. **Only one thing needs checking:** whether Parakeet can be given a
+    dictionary built from the most frequent sender names in its own index, the
+    way dictation has its personal dictionary. Every free recognition fails on
+    that otherwise.
+  - [ ] **Check phonetic search:** an FTS5 column with the Cologne phonetics of
+    sender names, so that "Meier/Mayer/Maier" fall together. Catches recognition
+    fuzziness structurally instead of loading it onto the user as a question.
+  - [ ] **Hit dialogue:** 40 hits cannot be read out. Narrow down first, announce
+    the number, name the way - the same rule as with the shopping list ("a
+    command does not take a decision away from the user that he can make
+    himself").
+  - [ ] **Icon: a draft is there, but at 32 pixels it does not carry yet.**
+    Stephan's draft of 2026-09-17 is in `assets/suche-icon-entwurf.png`.
+    Stylistically it fits - the same circle, the same lady, the same hand, the
+    same blue-green gradient. **Measured** (all three icons rendered at
+    32/48/64 px, evidence in `assets/suche-icon-groessenvergleich.png`): clear at
+    64 and 48 px, at **32 px document, envelope and magnifier collapse into one
+    blob** - while DialOS and Denkzettel stay clear there. The cause is the
+    number, not the drawing: three objects on the right instead of one, and only
+    about 14 × 20 px are left for the right half at 32 px. The yardstick has
+    stood in the source of `Denkzettel/assets/icon-bauen.py` since 2026-08-24.
+    - [ ] Decide whether to reduce it to **one** object (proposal: the magnifier
+      - round, it stays a recognisable shape even as a blob).
+    - [ ] Only **afterwards** derive the rest: compute the transparency back (the
+      draft is RGB with a white background, a `.desktop` icon needs an alpha
+      channel, otherwise a white box sits in the panel), sizes 32-512, and a
+      dark variant. The way is built: `Denkzettel/assets/icon-bauen.py`. **Not
+      before** - deriving six files from a draft that can still change means
+      doing the work twice.
+
+  **Delivery as a `.deb`** (decided 2026-09-17), but **not for development**: on
+  the T490 `dialos-aufspielen` remains the way, because a package would have to
+  be built and counted up at every iteration. For a customer device the package
+  is the only way - there `scripts/dialos-aufraeumen.sh` removes
+  `dialos-aufspielen` together with its sudoers rule. The real gain is
+  `postinst`: there the two mandatory checks cannot be bypassed, and
+  `Depends: mailburg` enforces the dependency. Careful: DialOS builds **not a
+  single** package today - that is new infrastructure (`debian/control`,
+  `changelog`, `rules`), and without a repository server it stays at `dpkg -i`
+  by hand.
+
+  **Extensions live in the DialOS repo for now** (Stephan, 2026-09-17). A
+  separate repo per extension is the goal, but not for the first one: as long as
+  the interface keeps changing, two repos would have to be kept in sync while
+  both are unstable - and every fault would first of all not be attributable.
+
+  **Still open** (in `docs/erweiterungen.en.md`): what happens on a core update;
+  whether hassil finally finds its place here; whether the archive runs
+  encrypted (MailBurg can do it, but the search index stays plain text).
+
+- [ ] **Reading long texts aloud cannot be interrupted - and for an archive that
+  becomes the normal case** (2026-09-17). **Not a new fault:** the item "Check
+  the command overview on the device" further up already names it - "Alle
+  Befehle vorlesen" (read out all commands) runs for 144 s, and "interrupting
+  during the announcement is not possible". "Brief vorlesen" (read out the
+  letter) likewise reads straight through.
+
+  **What changes:** for the command overview that is an inconvenience one can
+  get around with "Befehle für …" (commands for …). For an archive it is the
+  normal case - whoever searches gets hits he does not want to hear in full, and
+  a two-page letter from the health insurer takes longer than the 144 seconds.
+  For comparison: "Windows Desktop." (the announcement after switching the look)
+  takes 1.5 s.
+
+  **Planned:** read out paragraph by paragraph, between the paragraphs a short
+  listening window with a mini grammar of "stopp" (stop), "weiter" (carry on),
+  "zurück" (back), "nochmal" (again). The pattern exists twice already - the
+  second recogniser for "Diktat beenden" (end dictation) and the yes/no
+  recogniser before emptying the note. It needs no new technology, only the text
+  split up before speaking.
+
+  **It belongs in `dialos-say.py`, not in DialOS Search.** The 144 seconds of
+  the command overview belong to no extension; whoever builds it for the archive
+  solves them for everything.
+
+  **Do NOT build real barge-in first.** The echo-cleaned source
+  `dialos_mikrofon_ohne_echo` does exist already, but listening during one's own
+  voice means: "Soll ich stoppen?" ("shall I stop?") inside the letter being
+  read out stops it.
+
+  **And secondly:** a letter read out must **not** go into the announcement
+  cache under `~/.cache/dialos/ansagen`. That one is meant for "Ich höre Dir
+  zu." ("I am listening to you"), which comes every day; a document read out
+  once fills it with WAV files that never match a second time.
+  `dialos-say.py` has no switch for that today - the line is whether a text
+  repeats, not how long it is.
+
 - [ ] **A CONVERSATION IN THE ROOM OPERATED DIALOS - with printing,
   dictation and archive** (2026-09-14, 11:01-11:31, during Stephan's break).
   The most serious finding so far, because it does not just annoy but
