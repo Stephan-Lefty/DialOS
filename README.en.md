@@ -2224,8 +2224,8 @@ background) and `splash.png` (boot/login screen).
     would be just that - recorded in `TODO.md` so a second occurrence
     yields a second data point instead of starting over.
 
-- **A switched-off headset took the system's entire audio output with it
-  - and the cause was my test configuration (2026-08-17).** After
+- **A switched-off headset took the system's entire audio output with
+  it - and the cause was my test configuration (2026-08-17).** After
   Stephan's reboot no announcement came in **either** account. The log
   only said "spd-say nach 20s abgebrochen - Sprachausgabe antwortet
   nicht." ("aborted after 20s - speech output not responding"); the
