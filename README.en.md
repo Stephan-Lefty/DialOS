@@ -122,6 +122,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Letter as a PDF following DIN 5008 wired in** (2026-09-17, Stephan's verdict on
+  two previews): no letterhead, return address without floor fits the window
+  completely, information block with address and date 17.09.2026 level with the
+  return address. Applies to "Brief als PDF speichern", "Brief drucken" and the
+  archive; lists and notes stay fixed width.
+
 - **In dictation: "von vorne" and "alles verwerfen", amounts with cents from Vosk**
   (2026-09-17, fourth trial). Both commands with a question and their own
   recogniser so "Diktat beenden" is not confused. If only Vosk hears "Cent", its

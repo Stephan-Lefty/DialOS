@@ -36,7 +36,9 @@ finished too, and then move down together. That way no reference breaks.
   (14:15 trial; 15:00 trial: "von vorne" ✓, "alles verwerfen" and cents rebuilt,
   checked with the real recording; 15:20 trial: both paths ✓, amounts ✓)** - open: chunk
   without a sentence end runs into the next sentence ("… 2027 In ihrem Schreiben"); wiring
-  the DIN PDF into dictation/printing/PDF; address suffix ("z. Hd."). **Mail
+  **DIN PDF wired in 2026-09-17** (archive, PDF, printing; no head, date
+  17.09.2026, info block level with the return address) - open: check the paper
+  printout; address suffix ("z. Hd."). **Mail
   signature installed** (17.09.). **Draft 2026-09-17:** `dialos-brief-din.py` (form B, preview with sample
   data) - open: Stephan's verdict, recipient address, wiring into
   dictation/printing/PDF. **Mail signature from the data built** (not installed).

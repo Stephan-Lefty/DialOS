@@ -130,6 +130,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Brief als PDF nach DIN 5008 eingebunden** (2026-09-17, Stephans Urteil über zwei
+  Vorschauen): kein Briefkopf, Rücksendeangabe ohne Etage passt ganz ins Fenster,
+  Informationsblock mit Anschrift und Datum 17.09.2026 auf Höhe der
+  Rücksendeangabe. Gilt für „Brief als PDF speichern", „Brief drucken" und das
+  Archiv; Zettel und Notizen bleiben festbreit.
+
 - **Im Diktat: „von vorne" und „alles verwerfen", Beträge mit Cent von Vosk**
   (2026-09-17, vierte Probe). Beide Befehle mit Rückfrage und eigenem Erkenner, damit
   „Diktat beenden" nicht verwechselt wird. Hört nur Vosk „Cent", gilt sein Betrag

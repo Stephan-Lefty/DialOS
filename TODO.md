@@ -38,7 +38,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   (14:15-Probe; 15:00-Probe: „von vorne" ✓, „alles verwerfen" und Cent nachgebaut,
   mit der echten Aufnahme geprüft; 15:20-Probe: beide Wege ✓, Beträge ✓)** - offen: Stück
   ohne Satzende läuft in den nächsten Satz („… 2027 In ihrem Schreiben");
-  Einbindung des DIN-PDF in Diktat/Drucken/PDF; Adresszusatz („z. Hd.").
+  **DIN-PDF eingebunden 2026-09-17** (Archiv, PDF, Drucken; ohne Kopf, Datum
+  17.09.2026, Infoblock auf Höhe der Rücksendeangabe) - offen: Ausdruck auf Papier
+  prüfen; Adresszusatz („z. Hd.").
   **Mail-Signatur installiert** (17.09.).
   **Entwurf 2026-09-17:** `dialos-brief-din.py` (Form B, Vorschau mit
   Beispieldaten) - offen: Stephans Urteil, Empfängeradresse, Einbindung in

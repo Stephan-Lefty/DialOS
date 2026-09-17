@@ -117,6 +117,9 @@ FUSS_SCHRIFTGROESSE = 7.0     # lesbar, aber leiser als der Inhalt (Stephan)
 SLOGAN_HOEHE = 12.5           # Punkt, etwa 4,4 mm - Buchstaben so hoch wie die 7-pt-Schrift
 
 
+BRIEF_DIN_SKRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dialos-brief-din.py")
+
+
 def fusszeile_zeichnen(stift, text, fuss_y, links=RAND, rechts=SEITE_B - RAND):
     """Fusszeile klein und grau links, Slogan mit Logo rechts - auf einer Grundlinie."""
     import cairo
@@ -149,6 +152,24 @@ def als_pdf(text, ziel):
     mitten auf dem Blatt. Jetzt wird sie aus dem Textfluss genommen und auf JEDE
     Seite unten gesetzt - an derselben Stelle, auf der ersten wie auf der letzten.
     """
+    # DER BRIEF NACH DIN 5008 (Stephan, 2026-09-17: "Ohne Kopf, Datum als
+    # 17.09.2026, bau es ein"). Ein Briefbogen des Diktats geht an
+    # dialos-brief-din.py - Anschriftfeld fuer den Fensterumschlag,
+    # Informationsblock, Falzmarken. Hier sitzt die Weiche, weil Archiv, "Brief
+    # als PDF speichern" und "Brief drucken" alle diese Funktion rufen: Papier,
+    # PDF und Archiv sehen gleich aus. Scheitert der DIN-Satz, entsteht das PDF
+    # wie bisher festbreit - lieber schlichter als gar nicht.
+    if "Dieser Brief wurde per Spracheingabe" in text and os.path.exists(BRIEF_DIN_SKRIPT):
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("brief_din", BRIEF_DIN_SKRIPT)
+            din = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(din)
+            din.briefbogen_als_pdf(text, ziel)
+            if os.path.exists(ziel) and os.path.getsize(ziel) > 0:
+                return True
+        except Exception as fehler:
+            melde(f"DIN-Satz fehlgeschlagen, PDF festbreit: {fehler}")
     import cairo
     zeilen = text.rstrip("\n").split("\n")
     fuss = [z for z in zeilen if FUSSZEILE_KENNUNG in z]

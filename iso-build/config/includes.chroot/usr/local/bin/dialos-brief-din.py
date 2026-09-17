@@ -62,7 +62,7 @@ GROESSE = 11
 # Informationsblock, oben hoechstens der Name zentriert.
 #   "ohne"  - kein Kopf
 #   "name"  - nur der Name, zentriert
-KOPF = "ohne"
+KOPF = "ohne"   # Stephans Wahl nach beiden Fassungen
 FUSS_OBEN = 282 * MM          # darunter nur noch die Fusszeile
 FOLGESEITE_OBEN = 25 * MM
 
@@ -118,6 +118,18 @@ def zerlegen(text):
     return betreff, [a.split("\n") for a in absaetze], gruss, name
 
 
+MONATE = ("januar", "februar", "märz", "april", "mai", "juni", "juli", "august",
+          "september", "oktober", "november", "dezember")
+
+
+def datum_numerisch(text):
+    """ "17. September 2026" -> "17.09.2026" (Stephans Wahl, 2026-09-17). Sonst None."""
+    m = re.fullmatch(r"(\d{1,2})\. (\w+) (\d{4})", text)
+    if not m or m.group(2).lower() not in MONATE:
+        return None
+    return f"{int(m.group(1)):02d}.{MONATE.index(m.group(2).lower()) + 1:02d}.{m.group(3)}"
+
+
 def aus_briefbogen(text):
     """Alter Briefbogen (reiner Text, Leerzeichen-Satz) -> Brieftext.
 
@@ -130,6 +142,7 @@ def aus_briefbogen(text):
     for i, zeile in enumerate(zeilen[:30]):
         if re.search(r"\b\d{1,2}\. \w+ \d{4}\s*$", zeile) and zeile.startswith("   "):
             start = i + 1
+            aus_briefbogen.datum = datum_numerisch(zeile.strip())
             # Empfaenger: linksbuendig vor der Datumszeile (seit 2026-09-17)
             aus_briefbogen.empfaenger = [z.strip() for z in zeilen[:i]
                                          if z.strip() and not z.startswith(" ")]
@@ -210,41 +223,44 @@ def zeilenhoehe(satz, groesse=GROESSE):
     return satz.layout("Hg", groesse).get_pixel_size()[1]
 
 
-def erste_seite(satz, daten, pd, empfaenger, datum):
-    """Briefkopf, Anschriftfeld, Informationsblock, Marken."""
-    s = satz.stift
-    grau = (0.35, 0.35, 0.35)
-    name = pd.voller_name(daten) if (pd and daten) else ""
-    # Anschrift OHNE Adresszusatz ("1. Etage rechts") und ohne Firma: Die Etage
-    # braucht der Brieftraeger, nicht der Empfaenger (Stephan, 2026-09-17).
+def absender(daten, pd):
+    """Name und Anschrift (Strasse, PLZ Ort) des Absenders - ohne Zusatz und Land.
+
+    Ohne Adresszusatz ("1. Etage rechts") und ohne Firma: Die Etage braucht der
+    Brieftraeger, nicht der Empfaenger (Stephan, 2026-09-17).
+    """
     daten = daten or {}
+    name = pd.voller_name(daten) if (pd and daten) else ""
     strasse = " ".join(daten[k] for k in ("strasse", "hausnummer") if daten.get(k))
     ort = " ".join(daten[k] for k in ("postleitzahl", "ort") if daten.get(k))
-    anschrift = [z for z in (strasse, ort) if z]
-    if name and KOPF == "name":
-        lay = satz.layout(name, groesse=14, fett=True)
-        satz.zeigen(lay, (SEITE_B - lay.get_pixel_size()[0]) / 2, 17 * MM)
+    return name, [z for z in (strasse, ort) if z]
 
-    # Anschriftfeld: Ruecksendeangabe unten in der Vermerkzone, darunter Empfaenger.
-    if name or anschrift:
-        # Ohne Land: Es passt sonst nicht in die 80 mm, und fuer die Ruecksendung
-        # reicht Strasse und Ort (das Land steht im Informationsblock).
-        ruecksende = " · ".join(([name] if name else []) + anschrift)
-        lay = satz.layout(ruecksende, groesse=7)
-        lay.set_width(int(80 * MM * Pango.SCALE))
-        lay.set_ellipsize(Pango.EllipsizeMode.END)
-        hoehe = lay.get_pixel_size()[1]
-        satz.zeigen(lay, 25 * MM, (45 + 17.7) * MM - hoehe - 1 * MM, grau)
-        s.set_source_rgb(*grau)
-        s.set_line_width(0.3)
-        s.move_to(25 * MM, (45 + 17.7) * MM - 0.8 * MM)
-        s.line_to(25 * MM + min(lay.get_pixel_size()[0], 80 * MM), (45 + 17.7) * MM - 0.8 * MM)
-        s.stroke()
-    y = (45 + 17.7) * MM + 1 * MM
-    for zeile in (empfaenger or [])[:9]:
-        y += satz.text(zeile, 25 * MM, y, groesse=10)
 
-    # Informationsblock.
+# Unterkante der Vermerkzone im Anschriftfeld (Form B: Feld ab 45 mm, 17,7 mm Zone).
+VERMERK_UNTEN = (45 + 17.7) * MM
+INFO_LINKS, INFO_WERT = 125 * MM, 145 * MM
+
+
+def ruecksende_layout(satz, name, anschrift):
+    # Ohne Land: Es passt sonst nicht in die 80 mm, und fuer die Ruecksendung
+    # reicht Strasse und Ort (das Land steht im Informationsblock).
+    lay = satz.layout(" · ".join(([name] if name else []) + anschrift) or "Hg", groesse=7)
+    lay.set_width(int(80 * MM * Pango.SCALE))
+    lay.set_ellipsize(Pango.EllipsizeMode.END)
+    oben = VERMERK_UNTEN - lay.get_pixel_size()[1] - 1 * MM
+    return lay, oben
+
+
+def informationsblock(satz, daten, pd, datum):
+    """[(y, bezeichnung_layout, y, wert_layout)] und die Unterkante des Blocks.
+
+    AUF DER HOEHE DER RUECKSENDEANGABE (Stephan, 2026-09-17: "meine Adresse fuer
+    das Umschlagfenster und die erste Zeile auf der rechten Seite Name: muessen auf
+    der selben Hoehe sein"). Ausgerichtet wird an der Grundlinie - die Schriften
+    sind verschieden gross (7, 8 und 9 pt), gleiche Oberkanten saehen schief aus.
+    """
+    daten = daten or {}
+    name, anschrift = absender(daten, pd)
     zeilen = []
     if daten:
         if name:
@@ -257,11 +273,47 @@ def erste_seite(satz, daten, pd, empfaenger, datum):
             if daten.get(schluessel):
                 zeilen.append((wort, daten[schluessel]))
     zeilen.append(("Datum", datum))
-    y = 50 * MM
+    r_lay, r_oben = ruecksende_layout(satz, name, anschrift)
+    grundlinie = r_oben + r_lay.get_baseline() / Pango.SCALE
+    ergebnis = []
     for wort, wert in zeilen:
-        satz.text(wort, 125 * MM, y, groesse=8, farbe=grau)
-        y += satz.text(wert, 145 * MM, y, groesse=9, breite=45 * MM)
-        y += 0.8 * MM
+        w_lay = satz.layout(wort, groesse=8)
+        v_lay = satz.layout(wert, groesse=9, breite=SEITE_B - RAND_RECHTS - INFO_WERT)
+        v_oben = grundlinie - v_lay.get_baseline() / Pango.SCALE
+        w_oben = grundlinie - w_lay.get_baseline() / Pango.SCALE
+        ergebnis.append((w_oben, w_lay, v_oben, v_lay))
+        grundlinie = v_oben + v_lay.get_pixel_size()[1] + 0.8 * MM \
+            + satz.layout("Hg", groesse=9).get_baseline() / Pango.SCALE
+    unten = ergebnis[-1][2] + ergebnis[-1][3].get_pixel_size()[1]
+    return ergebnis, unten
+
+
+def erste_seite(satz, daten, pd, empfaenger, datum):
+    """Anschriftfeld, Informationsblock, Marken - ein Briefkopf nur mit KOPF="name"."""
+    s = satz.stift
+    grau = (0.35, 0.35, 0.35)
+    name, anschrift = absender(daten, pd)
+    if name and KOPF == "name":
+        lay = satz.layout(name, groesse=14, fett=True)
+        satz.zeigen(lay, (SEITE_B - lay.get_pixel_size()[0]) / 2, 17 * MM)
+
+    # Anschriftfeld: Ruecksendeangabe unten in der Vermerkzone, darunter Empfaenger.
+    if name or anschrift:
+        lay, oben = ruecksende_layout(satz, name, anschrift)
+        satz.zeigen(lay, 25 * MM, oben, grau)
+        s.set_source_rgb(*grau)
+        s.set_line_width(0.3)
+        s.move_to(25 * MM, VERMERK_UNTEN - 0.8 * MM)
+        s.line_to(25 * MM + min(lay.get_pixel_size()[0], 80 * MM), VERMERK_UNTEN - 0.8 * MM)
+        s.stroke()
+    y = VERMERK_UNTEN + 1 * MM
+    for zeile in (empfaenger or [])[:9]:
+        y += satz.text(zeile, 25 * MM, y, groesse=10)
+
+    zeilen, _unten = informationsblock(satz, daten, pd, datum)
+    for w_oben, w_lay, v_oben, v_lay in zeilen:
+        satz.zeigen(w_lay, INFO_LINKS, w_oben, grau)
+        satz.zeigen(v_lay, INFO_WERT, v_oben)
 
     # Falz- und Lochmarken am linken Rand.
     s.set_source_rgb(0.5, 0.5, 0.5)
@@ -350,7 +402,10 @@ def zeichnen(flaeche_neu, text, daten=None, empfaenger=None, datum=None):
 
     # Erst messen, dann setzen: Fuer "Seite 1 von 2" muss die Seitenzahl vorher stehen.
     teile = bausteine(Satz(None), betreff, absaetze, gruss, name, bild)
-    platzierung, seite, y = [], 1, 98.5 * MM
+    # Der Text beginnt bei 98,5 mm - oder zwei Zeilen unter dem Informationsblock,
+    # wenn der laenger ist (Anschrift ueber drei Zeilen, Telefon UND Mobil).
+    _info, info_unten = informationsblock(Satz(None), daten, pd, datum)
+    platzierung, seite, y = [], 1, max(98.5 * MM, info_unten + 2 * zeilenhoehe(Satz(None)))
     # GRUSS, NAME UND HINWEIS BLEIBEN ZUSAMMEN: Ein "Mit freundlichen Gruessen"
     # allein unten auf der Seite und der Name oben auf der naechsten waere falsch.
     schluss_ab = next((i for i, t in enumerate(teile) if t[0] == "layout"
@@ -421,6 +476,21 @@ def als_pdf(text, ziel, daten=None, empfaenger=None, datum=None):
     return seiten
 
 
+def ist_briefbogen(text):
+    return "Dieser Brief wurde per Spracheingabe" in text
+
+
+def briefbogen_als_pdf(text, ziel):
+    """Briefbogen des Diktats -> PDF nach DIN 5008, mit den persoenlichen Daten
+    des angemeldeten Kontos. Fuer dialos-archiv.py (Archiv, "Brief als PDF
+    speichern" und damit auch "Brief drucken"). Seitenzahl."""
+    aus_briefbogen.empfaenger = aus_briefbogen.datum = None
+    brieftext = aus_briefbogen(text)
+    pd = holen(PERSOENLICHE_DATEN_SKRIPT, "persoenliche_daten")
+    daten = pd.lesen() if pd else {}
+    return als_pdf(brieftext, ziel, daten, aus_briefbogen.empfaenger, aus_briefbogen.datum)
+
+
 def als_png(text, ziel, daten=None, empfaenger=None, datum=None, dpi=110):
     """Vorschau aller Seiten nebeneinander - nur zum Ansehen."""
     faktor = dpi / 72
@@ -466,6 +536,8 @@ def main():
         text = aus_briefbogen(text)
         if "--empfaenger" not in optionen and getattr(aus_briefbogen, "empfaenger", None):
             optionen["--empfaenger"] = "|".join(aus_briefbogen.empfaenger)
+        if "--datum" not in optionen and getattr(aus_briefbogen, "datum", None):
+            optionen["--datum"] = aus_briefbogen.datum
     KOPF = optionen.get("--kopf", KOPF)
     pd = holen(PERSOENLICHE_DATEN_SKRIPT, "persoenliche_daten")
     daten = pd.lesen(optionen.get("--daten")) if pd else {}

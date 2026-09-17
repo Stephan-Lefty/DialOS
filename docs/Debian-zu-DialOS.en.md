@@ -1942,6 +1942,35 @@ sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/fuss
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-archiv.py iso-build/config/includes.chroot/usr/local/bin/dialos-drucken.py /usr/local/bin/
 ```
 
+**The letter as a PDF following DIN 5008 (since 2026-09-17, wired in).** `als_pdf()`
+in `dialos-archiv.py` recognises a dictated letter sheet by the note "Dieser Brief
+wurde per Spracheingabe …" and hands it to `dialos-brief-din.py`
+(`briefbogen_als_pdf`). Since the archive, "Brief als PDF speichern" and "Brief
+drucken" all call this function, paper, PDF and archive look the same. If DIN
+typesetting fails, the PDF is created in fixed width as before (message in the
+archive log). Lists and notes stay fixed width. The layout after Stephan's verdict
+on two previews:
+- **no letterhead** ("I don't like the head"; `KOPF = "name"` would put the name
+  centred at the top),
+- **address field** form B: return address without address suffix and country
+  ("Stephan Rösner · street · postcode town" fits the 80 mm completely - with the
+  floor it was cut off), below it the recipient from the dialogue,
+- **information block** on the right: name, address (street, postcode town,
+  country - without floor), phone/mobile, email, date as **17.09.2026** (from the
+  date line of the letter sheet, i.e. the date of dictation, not of printing). The
+  first line sits **on the baseline of the return address** (Stephan: "at the same
+  height"),
+- subject in bold without "Betreff:", fold and punch marks, footer with slogan; the
+  text starts at 98.5 mm or two lines below a longer information block; closing,
+  name and note stay on one page, from two pages "Seite 1 von 2".
+
+Personal data come from the logged-in account. Checked: letter with and without
+recipient, two-page letter, account without data file, list (fixed width).
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-brief-din.py iso-build/config/includes.chroot/usr/local/bin/dialos-archiv.py /usr/local/bin/
+```
+
 **File names with date and time (since 2026-09-15, Stephan's requirement "for
 searching").** Letters are named `2026-09-15-1343-Brief.txt` (and `.pdf`),
 screenshots `2026-09-14-1018-Bildschirmfoto.png`; two in one minute get `-2`.

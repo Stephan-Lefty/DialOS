@@ -2018,6 +2018,34 @@ sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/fuss
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-archiv.py iso-build/config/includes.chroot/usr/local/bin/dialos-drucken.py /usr/local/bin/
 ```
 
+**Der Brief als PDF nach DIN 5008 (seit 2026-09-17, eingebunden).** `als_pdf()` in
+`dialos-archiv.py` erkennt einen Briefbogen des Diktats am Hinweis „Dieser Brief
+wurde per Spracheingabe …" und gibt ihn an `dialos-brief-din.py`
+(`briefbogen_als_pdf`). Weil Archiv, „Brief als PDF speichern" und „Brief drucken"
+alle diese Funktion rufen, sehen Papier, PDF und Archiv gleich aus. Scheitert der
+DIN-Satz, entsteht das PDF wie vorher festbreit (Meldung im Archiv-Protokoll).
+Zettel und Notizen bleiben festbreit. Der Aufbau nach Stephans Urteil über zwei
+Vorschauen:
+- **kein Briefkopf** („Der Kopf gefällt mir nicht"; `KOPF = "name"` setzte den Namen
+  zentriert oben),
+- **Anschriftfeld** Form B: Rücksendeangabe ohne Adresszusatz und ohne Land
+  („Stephan Rösner · Straße · PLZ Ort" passt so ganz in die 80 mm - mit Etage wurde
+  sie abgeschnitten), darunter der Empfänger aus dem Dialog,
+- **Informationsblock** rechts: Name, Anschrift (Straße, PLZ Ort, Land - ohne
+  Etage), Telefon/Mobil, E-Mail, Datum als **17.09.2026** (aus der Datumszeile des
+  Briefbogens, also das Datum des Diktats, nicht des Drucks). Die erste Zeile steht
+  **auf der Grundlinie der Rücksendeangabe** (Stephan: „auf der selben Höhe"),
+- Betreff fett ohne „Betreff:", Falz- und Lochmarken, Fußzeile mit Slogan unten;
+  der Text beginnt bei 98,5 mm oder zwei Zeilen unter einem längeren Infoblock;
+  Gruß, Name und Hinweis bleiben auf einer Seite, ab zwei Seiten „Seite 1 von 2".
+
+Die persönlichen Daten kommen aus dem angemeldeten Konto. Geprüft: Brief mit und
+ohne Empfänger, zweiseitiger Brief, Konto ohne Datendatei, Zettel (festbreit).
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-brief-din.py iso-build/config/includes.chroot/usr/local/bin/dialos-archiv.py /usr/local/bin/
+```
+
 **Dateinamen mit Datum und Uhrzeit (seit 2026-09-15, Stephans Vorgabe „wegen
 der Suche").** Briefe heißen `2026-09-15-1343-Brief.txt` (und `.pdf`),
 Bildschirmfotos `2026-09-14-1018-Bildschirmfoto.png`; zwei in einer Minute
