@@ -130,6 +130,46 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Wache gegen verwaiste Mikrofon-Marken** (2026-09-17). `diktat_laeuft()`
+  liest jetzt die PID aus der Marke und prüft mit Signal 0, ob der Prozess noch
+  lebt; eine verwaiste Marke wird weggeräumt und gemeldet. **Ohne das bliebe
+  das Mikrofon nach einem harten Abbruch für immer belegt** - der Nutzer spräche
+  gegen ein taubes Gerät, und nicht einmal „Sprachsteuerung stoppen" käme noch
+  durch. Für einen blinden Nutzer gibt es aus diesem Zustand keinen Weg zurück.
+
+  **Rückwärtskompatibel:** `dialos-diktat.py` und `dialos-notiz.py` legen die
+  Marke leer an; ohne PID verhält sich die Prüfung wie bisher. Damit ist nichts
+  kaputtzumachen, was heute läuft - beide können später nachziehen, und bis
+  dahin gilt die Wache für Erweiterungen. Fünf Fälle geprüft: keine Marke,
+  leere Marke, lebende PID, tote PID (weggeräumt), unlesbarer Inhalt (gilt
+  sicherheitshalber als belegt).
+
+- **Erweiterung startbar: Grammatik-Einbau und Aufspielweg** (2026-09-17).
+  Der Befehlsdienst liest beim Start die Manifeste und ergänzt seine Grammatik
+  um deren Startsätze - **genau einen je Erweiterung**. Geprüft: 51 Einträge,
+  `unterlagen durchsuchen` drin, `[unk]` bleibt letzter Eintrag, der Satz ist
+  auch in `BEFEHLSSAETZE` und damit für die Fuzzy-Zuordnung sichtbar. Ein
+  kaputtes Manifest wird gefangen und nur gemeldet - die Sprachsteuerung darf
+  daran nicht ausfallen, sie ist das Einzige, womit der Nutzer das Gerät noch
+  erreicht.
+
+  **`dialos-aufspielen` zählt ein Manifest jetzt wie eine Änderung am Dienst**
+  und gibt den Neustart-Befehl aus. Ohne das läge die Erweiterung installiert
+  da, der Dienst liefe mit der alten Grammatik weiter, und ihr Startsatz täte
+  nichts - ohne Fehlermeldung.
+
+  **Zwei Stellen waren kleiner als gedacht.** `dialos-installstand.sh`
+  vergleicht das Manifest schon, weil es seit dem 2026-08-20 über den ganzen
+  Baum läuft statt über eine gepflegte Ordnerliste - die Entscheidung von
+  damals („eine Liste, die von Hand gepflegt werden muss, veraltet") zahlt sich
+  hier aus. Und für die Mikrofon-Übergabe war am Dienst **nichts** zu ändern:
+  Er prüft längst auf eine Markierungsdatei, und `dialos-notiz.py` benutzt für
+  Rückfragen exakt dieselbe.
+
+  **Offen bleibt die Wache:** Stürzt eine Erweiterung hart ab, bleibt das
+  Mikrofon belegt. Die PID steht jetzt in der Marke, aber niemand prüft sie -
+  das Diktat hat dasselbe Problem, seit es die Marke gibt.
+
 - **Wortschatz-Prüfung lief nie - auf Vosks eigene Meldung umgestellt**
   (2026-09-17, Stephans Befund am Gerät). Sie las `graph/words.txt`, **die es
   im kleinen Modell gar nicht gibt**:

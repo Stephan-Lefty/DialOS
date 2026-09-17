@@ -85,13 +85,15 @@ finished too, and then move down together. That way no reference breaks.
   the fault that has only just been defused since 2026-08-24.
 
   **Step 1 - the interface:**
-  - [ ] `dialos-sprachbefehl-desktop.py`: extend `GRAMMATIK_AN` at start-up from
-    the manifests under `/usr/local/share/dialos/erweiterungen/` instead of
-    keeping every sentence hard-coded in the source. The existing 47 sentences
-    stay where they are - **do not** move them onto manifests in the same go.
-    Two rebuilds at once, and a fault can no longer be attributed.
-  - [ ] `dialos-erweiterung.py` with `pruefen` / `einbauen` / `entfernen` /
-    `liste`.
+  - [x] **`GRAMMATIK_AN` is extended from the manifests** (2026-09-17). The
+    existing sentences stay where they are - not moved over in the same go,
+    two rebuilds at once could no longer be attributed. Checked: 51 entries,
+    start sentence in there, `[unk]` stays the last entry, sentence also in
+    `BEFEHLSSAETZE` (and therefore visible to the fuzzy matching). A broken
+    manifest is caught and only reported - the voice control is the only thing
+    the user still has to reach the device with.
+  - [x] **`dialos-erweiterung.py`** with `pruefen` / `einbauen` / `entfernen` /
+    `liste` (2026-09-17). Seven validation cases checked against.
   - [ ] **A vocabulary check that REFUSES instead of warning.** Every word from
     `startsaetze` and `eigene_grammatik` against the small model. Reason:
     "löschen" (delete) is missing from the vocabulary and was silently thrown
@@ -199,30 +201,52 @@ finished too, and then move down together. That way no reference breaks.
       Expected: "KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'"
       (candidate not in the model's vocabulary), return value 1. If a pass
       comes instead, it still checks nothing.
-  - [ ] **Microphone handover via a marker file, with a guard.** A crashed
-    extension must not keep the microphone - the user would otherwise be
-    speaking against a deaf device, and even switching the voice control off
-    would no longer be audible.
+  - [x] **Microphone handover** (2026-09-17) - smaller than expected: already
+    today the service checks for a marker file on every round of the loop and
+    then discards everything it has heard, and `dialos-notiz.py` uses **exactly
+    the same file** for follow-up questions, under the name
+    `FREMDE_AUFNAHME_MARKE`. So a general microphone marker has long existed,
+    only under a historical name ("dialos-diktat-aktiv", DialOS dictation
+    active). Nothing had to be changed in the service for the handover.
+    - [x] **Guard built** (2026-09-17). `diktat_laeuft()` reads the PID out of
+      the marker and checks with signal 0 whether the process is alive; an
+      orphaned marker is cleared away and reported. Without that the microphone
+      would stay taken **forever** after a hard abort (SIGKILL) - the user would
+      be speaking against a deaf device, and not even "Sprachsteuerung stoppen"
+      (stop voice control) would get through any more. For a blind user there is
+      no way back out of that state.
+
+      **Backwards compatible, and that is deliberate:** `dialos-diktat.py` and
+      `dialos-notiz.py` create the file empty. Without a PID the check behaves
+      as before - present means taken. That way nothing that runs today can be
+      broken. Five cases checked: no marker, empty marker, live PID, dead PID
+      (is cleared away), unreadable content (counts as taken, to be on the safe
+      side).
+      - [ ] **Follow suit:** `dialos-diktat.py` and `dialos-notiz.py` ought to
+        write their PID in there as well, otherwise the guard only applies to
+        extensions - and dictation has had the problem ever since the marker
+        exists.
 
   **Step 2 - the installation path** (Stephan's requirement of 2026-09-17: "wir
   müssen nachher mit der fertigen Erweiterung nahtlos vom T490 zugreifen können
   und die Erweiterung dort installieren können" ("afterwards we have to be able
   to reach the finished extension seamlessly from the T490 and install the
   extension there")):
-  - [ ] Hook the two checks from step 1 into installing: if a manifest is among
-    the changed files, it is checked **before** it goes to its place. Only that
-    makes "refuse instead of warn" enforceable.
-  - [ ] **The restart notice must also come for a new manifest** (found while
-    reviewing the code on 2026-09-17). `dialos-aufspielen` does not start the
-    command service itself, it **prints** the two commands for it - and only if
-    `dialos-sprachbefehl-desktop.py` has changed **itself**
-    (`if any(rel.endswith(skript) …)`). A new manifest alone therefore triggers
-    nothing: the extension would sit there installed, the service would carry on
-    with the old grammar, and its start sentence would do nothing - with no
-    error message, no announcement. For a blind user the worst possible outcome.
-  - [ ] `scripts/dialos-installstand.sh` has to compare the manifest as well.
-    Otherwise "check the installation state, do not assume it" does not apply to
-    extensions - and exactly that fault cost two days on 2026-08-19.
+  - [x] **The restart notice now comes for a manifest as well** (2026-09-17) -
+    `dialos-aufspielen` counts a file under `share/dialos/erweiterungen/` like
+    a change to the command service itself.
+    - [ ] **The mandatory checks deliberately stay with `dialos-erweiterung.py
+      einbauen`, not in installing.** The collision check has Piper speak every
+      sentence - that takes minutes and would have no place when installing a
+      single changed line. What has to be decided is whether that is enough:
+      anyone who copies a manifest file into the folder by hand bypasses the
+      check. A package with a `postinst` would close that.
+  - [x] **`scripts/dialos-installstand.sh` already compares the manifest**
+    (checked 2026-09-17) - since 2026-08-20 it has been running over the
+    **whole** tree under `includes.chroot`, not over a maintained list of
+    folders. That is exactly what it was rebuilt for back then: "Eine Liste,
+    die von Hand gepflegt werden muss, veraltet." (a list that has to be
+    maintained by hand goes stale). It pays off here - there was nothing to do.
   - [ ] **Only due later:** change `QUELLE` in `dialos-aufspielen` from a single
     path to a **list**. Not needed for the first extension, because it lives in
     the DialOS repo; needed as soon as the second moves into a repo of its own.

@@ -311,7 +311,18 @@ def main():
         print("  alten Fassung. Als angemeldeter Nutzer, OHNE sudo:")
         for skript in ("dialos-sprachbefehl-desktop.py",
                        "dialos-ton-ausgabe.py", "dialos-tts-indicator.py"):
-            if any(rel.endswith(skript) for rel, *_ in liste):
+            # MANIFESTE ZAEHLEN WIE EINE AENDERUNG AM DIENST SELBST. Er liest
+            # sie beim Start und baut daraus seine Grammatik; ohne Neustart
+            # laeuft er mit der alten weiter. Gefunden am 2026-09-17 beim
+            # Gegenlesen: Ein neues Manifest allein loeste hier gar nichts aus -
+            # die Erweiterung laege installiert da, ihr Startsatz taete nichts,
+            # ohne Fehlermeldung und ohne Ansage. Fuer einen blinden Nutzer der
+            # schlechteste Ausgang.
+            betrifft = any(rel.endswith(skript) for rel, *_ in liste)
+            if skript == "dialos-sprachbefehl-desktop.py":
+                betrifft = betrifft or any(
+                    "share/dialos/erweiterungen/" in rel for rel, *_ in liste)
+            if betrifft:
                 print(f"    pkill -f 'python3 /usr/local/bin/{skript}'")
                 print(f"    setsid /usr/local/bin/{skript} >/dev/null 2>&1 &")
 

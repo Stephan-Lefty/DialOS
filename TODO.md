@@ -88,13 +88,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   auf, der seit dem 2026-08-24 gerade erst entschärft ist.
 
   **Schritt 1 - die Schnittstelle:**
-  - [ ] `dialos-sprachbefehl-desktop.py`: `GRAMMATIK_AN` beim Start aus den
-    Manifesten unter `/usr/local/share/dialos/erweiterungen/` ergänzen, statt
-    jeden Satz fest im Quelltext zu halten. Die bestehenden 47 Sätze bleiben,
-    wo sie sind - **nicht** im selben Zug auf Manifeste umstellen. Zwei
-    Umbauten gleichzeitig, und ein Fehler ist nicht mehr zuzuordnen.
-  - [ ] `dialos-erweiterung.py` mit `pruefen` / `einbauen` / `entfernen` /
-    `liste`.
+  - [x] **`GRAMMATIK_AN` wird aus den Manifesten ergänzt** (2026-09-17). Die
+    bestehenden Sätze bleiben, wo sie sind - nicht im selben Zug umgestellt,
+    zwei Umbauten gleichzeitig wären nicht mehr zuzuordnen. Geprüft: 51
+    Einträge, Startsatz drin, `[unk]` bleibt letzter Eintrag, Satz auch in
+    `BEFEHLSSAETZE` (also für die Fuzzy-Zuordnung sichtbar). Ein kaputtes
+    Manifest wird gefangen und nur gemeldet - die Sprachsteuerung ist das
+    Einzige, womit der Nutzer das Gerät noch erreicht.
+  - [x] **`dialos-erweiterung.py`** mit `pruefen` / `einbauen` / `entfernen` /
+    `liste` (2026-09-17). Sieben Validierungsfälle gegengeprüft.
   - [ ] **Wortschatzprüfung, die VERWEIGERT statt warnt.** Jedes Wort aus
     `startsaetze` und `eigene_grammatik` gegen das kleine Modell. Grund:
     „löschen" fehlt im Wortschatz und wurde am 2026-08-18 still aus der
@@ -194,29 +196,47 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       Erwartet: „KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'",
       Rückgabewert 1. Kommt stattdessen ein Durchlauf, prüft sie weiterhin
       nichts.
-  - [ ] **Mikrofon-Übergabe über eine Markierungsdatei, mit Wache.** Eine
-    abgestürzte Erweiterung darf das Mikrofon nicht behalten - der Nutzer
-    spräche sonst gegen ein taubes Gerät, und selbst das Ausschalten der
-    Sprachsteuerung wäre nicht mehr hörbar.
+  - [x] **Mikrofon-Übergabe** (2026-09-17) - kleiner als gedacht: Der Dienst
+    prüft schon heute in jeder Schleifenrunde auf eine Markierungsdatei und
+    verwirft dann alles Gehörte, und `dialos-notiz.py` benutzt für Rückfragen
+    **exakt dieselbe Datei** unter dem Namen `FREMDE_AUFNAHME_MARKE`. Es gibt
+    also längst eine allgemeine Mikrofon-Marke, nur unter historischem Namen
+    („dialos-diktat-aktiv"). Für die Übergabe war am Dienst nichts zu ändern.
+    - [x] **Wache gebaut** (2026-09-17). `diktat_laeuft()` liest die PID aus der
+      Marke und prüft mit Signal 0, ob der Prozess lebt; eine verwaiste Marke
+      wird weggeräumt und gemeldet. Ohne das bliebe das Mikrofon nach einem
+      harten Abbruch (SIGKILL) **für immer** belegt - der Nutzer spräche gegen
+      ein taubes Gerät, und nicht einmal „Sprachsteuerung stoppen" käme noch
+      durch. Für einen blinden Nutzer gibt es aus diesem Zustand keinen Weg
+      zurück.
+
+      **Rückwärtskompatibel, und das ist Absicht:** `dialos-diktat.py` und
+      `dialos-notiz.py` legen die Datei leer an. Ohne PID verhält sich die
+      Prüfung wie bisher - vorhanden heißt belegt. Damit ist nichts
+      kaputtzumachen, was heute läuft. Fünf Fälle geprüft: keine Marke, leere
+      Marke, lebende PID, tote PID (wird weggeräumt), unlesbarer Inhalt (gilt
+      sicherheitshalber als belegt).
+      - [ ] **Nachziehen:** `dialos-diktat.py` und `dialos-notiz.py` sollten
+        ihre PID ebenfalls hineinschreiben, sonst gilt die Wache nur für
+        Erweiterungen - und das Diktat hat das Problem, seit es die Marke gibt.
 
   **Schritt 2 - der Aufspielweg** (Stephans Anforderung vom 2026-09-17: „wir
   müssen nachher mit der fertigen Erweiterung nahtlos vom T490 zugreifen
   können und die Erweiterung dort installieren können"):
-  - [ ] Die beiden Prüfungen aus Schritt 1 ins Aufspielen einhängen: Ist ein
-    Manifest unter den geänderten Dateien, wird geprüft, **bevor** es an
-    seinen Platz kommt. Erst dadurch ist „verweigern statt warnen"
-    erzwingbar.
-  - [ ] **Der Neustart-Hinweis muss auch bei einem neuen Manifest kommen**
-    (beim Gegenlesen am 2026-09-17 gefunden). `dialos-aufspielen` startet den
-    Befehlsdienst nicht selbst, sondern **druckt** die zwei Befehle dafür - und
-    zwar nur, wenn sich `dialos-sprachbefehl-desktop.py` **selbst** geändert
-    hat (`if any(rel.endswith(skript) …)`). Ein neues Manifest allein löst also
-    nichts aus: Die Erweiterung läge installiert da, der Dienst liefe mit der
-    alten Grammatik weiter, und ihr Startsatz täte nichts - ohne Fehlermeldung,
-    ohne Ansage. Für einen blinden Nutzer der schlechteste Ausgang.
-  - [ ] `scripts/dialos-installstand.sh` muss das Manifest mit vergleichen.
-    Sonst gilt „Installationsstand prüfen, nicht annehmen" für Erweiterungen
-    nicht - und genau dieser Fehler hat am 2026-08-19 zwei Tage gekostet.
+  - [x] **Der Neustart-Hinweis kommt jetzt auch bei einem Manifest**
+    (2026-09-17) - `dialos-aufspielen` zählt eine Datei unter
+    `share/dialos/erweiterungen/` wie eine Änderung am Befehlsdienst selbst.
+    - [ ] **Die Pflichtprüfungen bleiben bewusst bei `dialos-erweiterung.py
+      einbauen`, nicht im Aufspielen.** Die Kollisionsprüfung lässt Piper jeden
+      Satz sprechen - das dauert Minuten und hätte beim Aufspielen einer
+      geänderten Zeile nichts zu suchen. Zu entscheiden ist, ob das genügt:
+      Wer eine Manifest-Datei von Hand in den Ordner kopiert, umgeht die
+      Prüfung. Ein Paket mit `postinst` würde das schließen.
+  - [x] **`scripts/dialos-installstand.sh` vergleicht das Manifest bereits**
+    (geprüft 2026-09-17) - es läuft seit dem 2026-08-20 über den **ganzen**
+    Baum unter `includes.chroot`, nicht über eine gepflegte Liste von Ordnern.
+    Genau dafür wurde es damals umgebaut: „Eine Liste, die von Hand gepflegt
+    werden muss, veraltet." Hier zahlt sich das aus - es war nichts zu tun.
   - [ ] **Erst später fällig:** `QUELLE` in `dialos-aufspielen` von einem
     einzelnen Pfad auf eine **Liste** umstellen. Für die erste Erweiterung
     nicht nötig, weil sie im DialOS-Repo liegt; nötig, sobald die zweite in

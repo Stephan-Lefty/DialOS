@@ -122,6 +122,48 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Guard against orphaned microphone markers** (2026-09-17). `diktat_laeuft()`
+  now reads the PID out of the marker and checks with signal 0 whether the
+  process is still alive; an orphaned marker is cleared away and reported.
+  **Without that the microphone would stay taken forever after a hard abort** -
+  the user would be speaking against a deaf device, and not even
+  "Sprachsteuerung stoppen" (stop voice control) would get through any more. For
+  a blind user there is no way back out of that state.
+
+  **Backwards compatible:** `dialos-diktat.py` and `dialos-notiz.py` create the
+  marker empty; without a PID the check behaves as before. That way nothing that
+  runs today can be broken - both can follow suit later, and until then the
+  guard applies to extensions. Five cases checked: no marker, empty marker, live
+  PID, dead PID (cleared away), unreadable content (counts as taken, to be on
+  the safe side).
+
+- **Extension can be launched: grammar hook-up and installation path**
+  (2026-09-17). At start-up the command service reads the manifests and extends
+  its grammar by their start sentences - **exactly one per extension**.
+  Checked: 51 entries, `unterlagen durchsuchen` (search the documents) among
+  them, `[unk]` stays the last entry, and the sentence is in `BEFEHLSSAETZE`
+  as well and therefore visible to the fuzzy matching. A broken manifest is
+  caught and only reported - the voice control must not fail because of it, it
+  is the only thing the user still has to reach the device with.
+
+  **`dialos-aufspielen` now counts a manifest like a change to the service**
+  and prints the restart command. Without that the extension would sit there
+  installed, the service would carry on with the old grammar, and its start
+  sentence would do nothing - with no error message.
+
+  **Two places were smaller than expected.** `dialos-installstand.sh` already
+  compares the manifest, because it has been running over the whole tree since
+  2026-08-20 instead of over a maintained list of folders - the decision back
+  then ("eine Liste, die von Hand gepflegt werden muss, veraltet", a list that
+  has to be maintained by hand goes stale) pays off here. And for the
+  microphone handover there was **nothing** to change in the service: it has
+  long been checking for a marker file, and `dialos-notiz.py` uses exactly the
+  same one for follow-up questions.
+
+  **What stays open is the guard:** if an extension crashes hard, the
+  microphone remains taken. The PID is in the marker now, but nobody checks it
+  - dictation has had the same problem ever since the marker exists.
+
 - **The vocabulary check never ran - switched to Vosk's own message**
   (2026-09-17, Stephan's finding on the device). It read `graph/words.txt`,
   **which does not exist in the small model at all**:

@@ -118,6 +118,7 @@ import json
 import os
 import signal
 import subprocess
+import importlib.util
 import sys
 import threading
 import time
@@ -266,6 +267,51 @@ GRAMMATIK_AN = json.dumps([
     #   "fernwartung beenden",
     "[unk]",
 ], ensure_ascii=False)
+
+# ERWEITERUNGEN MELDEN SICH MIT EINER JSON-DATEI AN, statt hier eingetragen zu
+# werden. Der Entwurf steht in docs/erweiterungen.md; die Kernregel ist, dass
+# die Grammatik pro Erweiterung um GENAU EINEN Satz waechst - ihren Startsatz.
+# Alles Weitere erkennt die Erweiterung selbst, solange sie laeuft.
+#
+# WARUM NICHT MEHR: Vosk baut aus der Satzliste ein WORTNETZ und darf Woerter
+# aus verschiedenen Saetzen kombinieren. Bei 27 Saetzen standen am 2026-08-22
+# bereits 382 erlaubte Wortkombinationen ohne Befehl im Protokoll, und die Zahl
+# waechst nicht linear. Duerfte jede Erweiterung zwanzig Saetze beisteuern,
+# waere dieser Mechanismus der, der einen gerade entschaerften Fehler wieder
+# aufreisst.
+#
+# EIN KAPUTTES MANIFEST DARF DEN DIENST NICHT MITREISSEN. Die Sprachsteuerung
+# ist das Einzige, womit der Nutzer das Geraet noch erreicht - sie faellt
+# nicht wegen einer fehlerhaften Zusatzdatei aus. Deshalb wird jeder Fehler
+# hier gefangen und nur gemeldet.
+ERWEITERUNGEN_ORDNER = "/usr/local/share/dialos/erweiterungen"
+ERWEITERUNG_WERKZEUG = "/usr/local/bin/dialos-erweiterung.py"
+
+
+def erweiterungen_lesen():
+    """Startsatz -> Manifest, aus den angemeldeten Erweiterungen."""
+    zuordnung = {}
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "dialos_erweiterung", ERWEITERUNG_WERKZEUG)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        zuordnung = modul.satz_zu_erweiterung()
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        print(f"Erweiterungen nicht lesbar: {fehler}", file=sys.stderr)
+    return zuordnung
+
+
+ERWEITERUNG_SAETZE = erweiterungen_lesen()
+
+if ERWEITERUNG_SAETZE:
+    _liste = json.loads(GRAMMATIK_AN)
+    # "[unk]" bleibt der letzte Eintrag - es ist der Auffangeintrag, und die
+    # Reihenfolge ist in der Grammatik nicht bedeutungslos.
+    _liste = ([x for x in _liste if x != "[unk]"]
+              + [s for s in ERWEITERUNG_SAETZE if s not in _liste]
+              + ["[unk]"])
+    GRAMMATIK_AN = json.dumps(_liste, ensure_ascii=False)
 
 BEFEHLSSAETZE = tuple(x for x in json.loads(GRAMMATIK_AN)
                       if x not in ("[unk]", STARTSATZ, STOPPSATZ))
@@ -1089,7 +1135,45 @@ def spricht_gerade():
 
 
 def diktat_laeuft():
-    return os.path.exists(DIKTAT_MARKE)
+    """Haelt gerade jemand anders das Mikrofon? Mit Wache gegen verwaiste Marken.
+
+    Die Marke bedeutet "jemand anders hoert zu" - das Diktat, eine Rueckfrage
+    in dialos-notiz.py oder eine Erweiterung. Solange sie da ist, verwirft
+    dieser Dienst alles Gehoerte.
+
+    DIE WACHE, ergaenzt am 2026-09-17: Steht eine PID in der Datei, wird
+    geprueft, ob der Prozess noch lebt. Lebt er nicht, ist die Marke verwaist
+    und wird weggeraeumt. Ohne das bliebe das Mikrofon nach einem harten
+    Abbruch (SIGKILL, Stromausfall waehrend der Sitzung) FUER IMMER belegt -
+    der Nutzer spraeche gegen ein taubes Geraet, und nicht einmal
+    "Sprachsteuerung stoppen" kaeme noch durch. Fuer einen blinden Nutzer gibt
+    es aus diesem Zustand keinen Weg zurueck.
+
+    RUECKWAERTSKOMPATIBEL, und das ist Absicht: dialos-diktat.py und
+    dialos-notiz.py legen die Datei LEER an. Ohne PID verhaelt sich die Pruefung
+    wie bisher - vorhanden heisst belegt. Nur wer eine PID hineinschreibt,
+    bekommt die Wache dazu. Damit ist hier nichts kaputtzumachen, was heute
+    laeuft; die beiden koennen spaeter nachziehen.
+    """
+    if not os.path.exists(DIKTAT_MARKE):
+        return False
+    try:
+        with open(DIKTAT_MARKE, encoding="utf-8") as f:
+            pid = int(f.readline().split()[0])
+    except (OSError, ValueError, IndexError):
+        return True                      # keine PID - alte Form, wie bisher
+    try:
+        os.kill(pid, 0)                  # Signal 0 prueft nur, ob es ihn gibt
+    except ProcessLookupError:
+        melde(f"  verwaiste Mikrofon-Marke von PID {pid} - weggeraeumt")
+        try:
+            os.unlink(DIKTAT_MARKE)
+        except OSError:
+            pass
+        return False
+    except PermissionError:
+        return True                      # fremdes Konto, aber er lebt
+    return True
 
 
 NAMEN_SKRIPT = "/usr/local/bin/dialos-namen.py"
@@ -1391,6 +1475,33 @@ def umschalten(ziel):
     # Das Umschalt-Skript sagt selbst an, was es getan hat - deshalb hier
     # keine zweite Ansage.
     subprocess.run([UMSCHALT_SKRIPT, ziel], capture_output=True, timeout=120)
+
+
+def erweiterung_starten(manifest):
+    """Eine Erweiterung starten und ihr das Mikrofon ueberlassen.
+
+    NICHT BLOCKIEREND (Popen, eigene Sitzung) - wie beim Diktat. Der Dienst
+    muss weiterlaufen, sonst koennte der Nutzer die Sprachsteuerung nicht mehr
+    ausschalten.
+
+    DIE MARKE SETZT DIE ERWEITERUNG SELBST, und zwar bevor sie etwas Langsames
+    tut. Hier waere sie zu frueh: Zwischen Popen und dem ersten Befehl der
+    Erweiterung lagen sonst Millisekunden, in denen niemand das Mikrofon haelt -
+    und der Dienst wuerde die erste Silbe des Nutzers noch als Befehl werten.
+    """
+    befehl = manifest.get("befehl")
+    if not befehl or not os.access(befehl, os.X_OK):
+        melde(f"  Erweiterung {manifest.get('name')!r}: {befehl!r} fehlt "
+              "oder ist nicht ausfuehrbar")
+        sprich("Das Programm dazu fehlt.")
+        return
+    try:
+        subprocess.Popen([befehl], start_new_session=True,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        melde(f"  Erweiterung gestartet: {manifest.get('name')}")
+    except OSError as fehler:
+        melde(f"  Erweiterung liess sich nicht starten: {fehler}")
+        sprich("Das hat nicht geklappt.")
 
 
 def diktat_starten(notiz):
@@ -2125,6 +2236,16 @@ def main():
                           f"(+{len(worte) - len(genauer.split())} Wort zu viel)")
                     satz = genauer
                     worte = genauer.split()
+
+            # --- Befehle: Erweiterungen ---
+            # GANZ VORN, weil eine Erweiterung das Mikrofon uebernimmt: Sie
+            # setzt die Marke selbst, und der Dienst haelt sich danach heraus
+            # (dieselbe Marke wie beim Diktat, siehe diktat_laeuft()).
+            if satz in ERWEITERUNG_SAETZE:
+                erweiterung_starten(ERWEITERUNG_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
 
             # --- Befehle: Diktat ---
             # VOR der Umschaltung geprueft, weil diese Saetze das Wort
