@@ -32,7 +32,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   **(2)+(3) gebaut 2026-09-17:** geführter Empfänger-Dialog im Diktat, Suche in
   den Thunderbird-Kontakten, neuer Kontakt in `abook.sqlite` (Warteschlange,
   wenn Thunderbird läuft) - mit Piper simuliert (neu, gefunden, ohne). Offen:
-  Probe mit Stephans Stimme; ob Thunderbird die angelegte Karte anzeigt;
+  Probe mit Stephans Stimme (13:00 und 13:36: Namen, Abbruch - nachgebaut);
+  Thunderbird zeigt die angelegte Karte **(bestätigt 13:40)**;
   Einbindung des DIN-PDF in Diktat/Drucken/PDF; Adresszusatz („z. Hd.").
   **Mail-Signatur installiert** (17.09.).
   **Entwurf 2026-09-17:** `dialos-brief-din.py` (Form B, Vorschau mit

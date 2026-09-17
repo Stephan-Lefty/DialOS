@@ -2235,7 +2235,8 @@ def mitschnitt_speichern(ton, epochen, kurz, name, protokoll_ab, ergebnis, pfad,
 EMPFAENGER_FRAGEN = True        # der Pruefstand schaltet ab: seine Aufnahmen haben keinen Dialog
 EMPFAENGER_SKRIPT = "/usr/local/bin/dialos-empfaenger.py"
 ANSAGE_EMPFAENGER = ("An wen geht der Brief? Sage den Namen oder die Firma. "
-                     "Wenn es keinen Empfänger gibt, sage: ohne Empfänger.")
+                     "Wenn es keinen Empfänger gibt, sage: ohne Empfänger. "
+                     "Du kannst jederzeit sagen: abbrechen, oder: von vorne.")
 ANSAGE_STRASSE = "Wie heißen Straße und Hausnummer?"
 ANSAGE_PLZ_ORT = "Wie heißen Postleitzahl und Ort?"
 ANSAGE_LAND_FREI = "In welchem Land?"
@@ -2246,8 +2247,37 @@ ANTWORT_NACHLAUF_S = 1.2        # Stille nach dem letzten Wort, bis sie zu Ende 
 OHNE_EMPFAENGER = re.compile(r"(?i)\b(ohne|kein\w*)\s+empf")
 
 
+# JEDERZEIT ABBRECHEN ODER NEU BEGINNEN (Stephan, 2026-09-17: "wenn Gesobau nicht
+# verstanden wird, dann habe ich keinen Einfluss, das noch mal zu aendern. Und ich
+# kann den Brief nicht neu starten oder das Diktat einfach beenden!"). Sein
+# "Diktat beenden" landete als Strassenname "Um die Tat beenden" im Dialog. Jetzt
+# prueft JEDE Antwort - frei, ja/nein, Buchstaben - zuerst diese Saetze.
+class DialogAbbruch(Exception):
+    pass
+
+
+class DialogNeustart(Exception):
+    pass
+
+
+DIALOG_ABBRUCH = re.compile(r"(?i)\b(?:diktat|brief)\s+(?:beenden|abbrechen)\b|\babbrechen\b")
+DIALOG_NEUSTART = re.compile(r"(?i)\bvon\s+vorn(?:e)?\b|\bneu\s+anfangen\b")
+STEUERWOERTER = ["abbrechen", "diktat", "brief", "beenden", "von", "vorne"]
+ABBRUCH = "abbruch"
+ANSAGE_ABBRUCH = "Ich breche den Brief ab."
+ANSAGE_NEUSTART = "Gut, noch einmal von vorne."
+
+
+def steuerung_pruefen(*texte):
+    for text in texte:
+        if text and DIALOG_ABBRUCH.search(text):
+            raise DialogAbbruch()
+        if text and DIALOG_NEUSTART.search(text):
+            raise DialogNeustart()
+
+
 def antwort_hoeren(frage, prozess, modell, parakeet):
-    """Stellt die Frage und liefert die Antwort als Text (Parakeet, sonst Vosk) oder ""."""
+    """Stellt die Frage; liefert (Text, Vosk-Text) - Text von Parakeet, sonst Vosk - oder ("", "")."""
     import vosk
     vorrat = sprechen_bei_offener_aufnahme(frage, prozess)
     erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
@@ -2284,7 +2314,8 @@ def antwort_hoeren(frage, prozess, modell, parakeet):
     vosk_text = " ".join(texte).strip()
     if not vosk_text:
         melde(f"  Empfaenger-Dialog: keine Antwort auf {frage[:30]!r}")
-        return ""
+        return "", ""
+    steuerung_pruefen(vosk_text)
     text = vosk_text
     if parakeet is not None and worte:
         try:
@@ -2295,7 +2326,8 @@ def antwort_hoeren(frage, prozess, modell, parakeet):
             melde(f"  Empfaenger-Dialog: Parakeet-Fehler ({fehler})")
     text = woerterbuch_anwenden(komposita_nach_vosk(re.sub(r"[.!?]+$", "", text.strip()), vosk_text))
     melde(f"  Empfaenger-Dialog: Vosk {vosk_text!r}, geschrieben {text!r}")
-    return text
+    steuerung_pruefen(text)
+    return text, vosk_text
 
 
 def komposita_nach_vosk(text, vosk_text):
@@ -2318,14 +2350,13 @@ def komposita_nach_vosk(text, vosk_text):
     return " ".join(woerter)
 
 
-def ja_oder_nein_hoeren(frage, prozess, modell_klein):
-    """True, False oder None - zwei Versuche, wie die Rueckfragen in dialos-notiz.py."""
+def auswahl_hoeren(frage, prozess, modell_klein, optionen, nochmal):
+    """Eine der optionen (Woerter) - zwei Versuche - oder None. Steuerwoerter gelten immer."""
     import vosk
+    grammatik = json.dumps(list(optionen) + STEUERWOERTER + ["[unk]"], ensure_ascii=False)
     for versuch in (1, 2):
-        vorrat = sprechen_bei_offener_aufnahme(frage if versuch == 1 else ANSAGE_JA_NEIN_NOCHMAL,
-                                               prozess)
-        erkenner = vosk.KaldiRecognizer(modell_klein, ABTASTRATE,
-                                        json.dumps(["ja", "nein", "[unk]"], ensure_ascii=False))
+        vorrat = sprechen_bei_offener_aufnahme(frage if versuch == 1 else nochmal, prozess)
+        erkenner = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, grammatik)
         bis = time.time() + 8.0
         while time.time() < bis:
             if vorrat:
@@ -2337,14 +2368,22 @@ def ja_oder_nein_hoeren(frage, prozess, modell_klein):
             if not erkenner.AcceptWaveform(block):
                 continue
             worte = json.loads(erkenner.Result()).get("text", "").split()
-            if not worte or "[unk]" in worte:
+            if not worte:
                 continue
             melde(f"  Empfaenger-Dialog: Antwort {worte!r}")
-            if "ja" in worte and "nein" not in worte:
-                return True
-            if "nein" in worte:
-                return False
+            steuerung_pruefen(" ".join(worte))
+            if "[unk]" in worte:
+                continue
+            treffer = [o for o in optionen if o in worte]
+            if len(treffer) == 1:
+                return treffer[0]
     return None
+
+
+def ja_oder_nein_hoeren(frage, prozess, modell_klein):
+    """True, False oder None."""
+    antwort = auswahl_hoeren(frage, prozess, modell_klein, ("ja", "nein"), ANSAGE_JA_NEIN_NOCHMAL)
+    return None if antwort is None else antwort == "ja"
 
 
 # BUCHSTABIEREN (Stephan, 2026-09-17, nachdem "Gesobau" als "G so bau" im Brief
@@ -2392,7 +2431,7 @@ def buchstaben_hoeren(prozess, modell_klein):
     """Buchstaben bis "fertig" (oder 10 s Stille). Der Name mit grossen Wortanfaengen, oder ""."""
     import vosk
     vorrat = sprechen_bei_offener_aufnahme(ANSAGE_BUCHSTABIEREN, prozess)
-    woerter = list(BUCHSTABEN_HOEREN) + ["scharfes", "fertig", "zurück", "[unk]"]
+    woerter = list(BUCHSTABEN_HOEREN) + ["scharfes", "fertig", "zurück", "abbrechen", "[unk]"]
     erkenner = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, json.dumps(woerter, ensure_ascii=False))
     zeichen = []
     bis = time.time() + 15.0
@@ -2412,6 +2451,8 @@ def buchstaben_hoeren(prozess, modell_klein):
             continue
         bis = time.time() + 10.0
         melde(f"  Buchstabieren: {gehoert!r}")
+        if "abbrechen" in gehoert:
+            raise DialogAbbruch()
         i = 0
         while i < len(gehoert):
             w = gehoert[i]
@@ -2430,26 +2471,74 @@ def buchstaben_hoeren(prozess, modell_klein):
     return " ".join(t[:1].upper() + t[1:] for t in name.split(" ") if t)
 
 
-def schreibweise_pruefen(name, prozess, modell_klein):
-    """Bietet das Buchstabieren an. Liefert den (ggf. korrigierten) Namen oder None."""
-    antwort = ja_oder_nein_hoeren(f"Der Name ist: {name}. Soll ich ihn buchstabieren? "
-                                  "Sage ja oder nein.", prozess, modell_klein)
-    if not antwort:
-        return name
-    for _ in (1, 2):
-        stimmt = ja_oder_nein_hoeren(f"{buchstabiert(name)} Stimmt die Schreibweise? "
-                                     "Sage ja oder nein.", prozess, modell_klein)
-        if stimmt or stimmt is None:
-            return name
-        neu = buchstaben_hoeren(prozess, modell_klein)
-        melde(f"  Name buchstabiert: {neu!r}")
-        if neu:
-            name = neu
-    return name
+def name_erfragen(prozess, modell, modell_klein, parakeet, em):
+    """Name bis zur Bestaetigung. Liefert ein Kontakt-dict, {"name": ...} oder None.
+
+    "Der Name ist: X. Stimmt das? Sage ja, nein oder buchstabieren." Bei "nein"
+    wird der Name neu gesagt, bei "buchstabieren" liest DialOS ihn im Alphabet
+    vor und laesst ihn bei Bedarf buchstabieren (Stephan, 2026-09-17: sein "nein"
+    auf "Soll ich ihn buchstabieren?" meinte "der Name stimmt nicht").
+    """
+    frage = ANSAGE_EMPFAENGER
+    for _ in range(4):
+        text, vosk_text = antwort_hoeren(frage, prozess, modell, parakeet)
+        if not text:
+            return None
+        if OHNE_EMPFAENGER.search(text) or OHNE_EMPFAENGER.search(vosk_text):
+            return None
+        if re.match(r"(?i)\s*buchstab", vosk_text):
+            name = buchstaben_hoeren(prozess, modell_klein)
+            if not name:
+                frage = "Sage den Namen noch einmal. Du kannst auch sagen: buchstabieren."
+                continue
+        else:
+            name = text[:1].upper() + text[1:]
+        # Kontakte mit beiden Erkennungen suchen: "Gesobau" kam als "wieso bau"
+        # (Vosk) und "Gilball" (Parakeet) an. Ein falscher Treffer schadet nicht -
+        # er wird ja erst nach "ja" genommen.
+        gefunden = []
+        for such in (name, vosk_text):
+            for k in em.suchen(such):
+                if k not in gefunden:
+                    gefunden.append(k)
+        for k in gefunden[:2]:
+            kontakt = {"name": k["name"] or k["firma"], "zusatz": k["zusatz"],
+                       "strasse": k["strasse"], "plz": k["plz"], "ort": k["ort"], "land": k["land"]}
+            antwort = ja_oder_nein_hoeren(f"In den Kontakten steht: {em.gesprochen(kontakt)}. "
+                                          "Ist das der Empfänger? Sage ja oder nein.",
+                                          prozess, modell_klein)
+            if antwort:
+                melde(f"  Empfaenger aus den Kontakten: {kontakt!r}")
+                return kontakt
+            if antwort is None:
+                return None
+        while True:
+            wahl = auswahl_hoeren(f"Der Name ist: {name}. Stimmt das? Sage ja, nein oder buchstabieren.",
+                                  prozess, modell_klein, ("ja", "nein", "buchstabieren"),
+                                  "Das habe ich nicht verstanden. Sage ja, nein oder buchstabieren.")
+            if wahl == "ja":
+                return {"name": name}
+            if wahl is None:
+                return None
+            if wahl == "nein":
+                frage = "Sage den Namen noch einmal. Du kannst auch sagen: buchstabieren."
+                break
+            stimmt = ja_oder_nein_hoeren(f"Ich buchstabiere: {buchstabiert(name)} "
+                                         "Stimmt die Schreibweise? Sage ja oder nein.",
+                                         prozess, modell_klein)
+            if stimmt:
+                return {"name": name}
+            if stimmt is None:
+                return None
+            neu = buchstaben_hoeren(prozess, modell_klein)
+            melde(f"  Name buchstabiert: {neu!r}")
+            if neu:
+                name = neu
+    return None
 
 
 def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
-    """Der Dialog. Liefert ein Empfaenger-dict (name, strasse, plz, ort, land) oder None."""
+    """Der Dialog. Liefert ein Empfaenger-dict, None (ohne Empfaenger) oder ABBRUCH."""
     em = holen(EMPFAENGER_SKRIPT, "empfaenger")
     if em is None or modell_klein is None:
         melde("  Empfaenger-Dialog nicht moeglich (dialos-empfaenger.py oder kleines Modell fehlt)")
@@ -2460,64 +2549,61 @@ def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
     zahlen = types.SimpleNamespace(grundzahl=grundzahl)
     prozess = aufnahme_starten(quelle)
     try:
-        for runde in (1, 2):
-            name = antwort_hoeren(ANSAGE_EMPFAENGER if runde == 1 else
-                                  "Dann noch einmal. " + ANSAGE_EMPFAENGER, prozess, modell, parakeet)
-            if not name or OHNE_EMPFAENGER.search(name):
-                sprich(ANSAGE_OHNE_EMPFAENGER)
-                return None
-            name = name[:1].upper() + name[1:]
-            gefunden = em.suchen(name)
-            if gefunden:
-                k = gefunden[0]
-                kontakt = {"name": k["name"] or k["firma"], "zusatz": k["zusatz"],
-                           "strasse": k["strasse"], "plz": k["plz"], "ort": k["ort"],
-                           "land": k["land"]}
-                antwort = ja_oder_nein_hoeren(
-                    f"In den Kontakten steht: {em.gesprochen(kontakt)}. "
-                    "Ist das der Empfänger? Sage ja oder nein.", prozess, modell_klein)
+        for _ in range(3):
+            try:
+                ergebnis = name_erfragen(prozess, modell, modell_klein, parakeet, em)
+                if ergebnis is None:
+                    sprich(ANSAGE_OHNE_EMPFAENGER)
+                    return None
+                if "strasse" in ergebnis:
+                    return ergebnis
+                name = ergebnis["name"]
+                # KEINE ANTWORT = OHNE EMPFAENGER (Simulation 2026-09-17): sonst fragte
+                # der Dialog bei Stille stur weiter, eine halbe Minute ins Leere.
+                gehoert, _ = antwort_hoeren(ANSAGE_STRASSE, prozess, modell, parakeet)
+                if not gehoert:
+                    sprich(ANSAGE_OHNE_EMPFAENGER)
+                    return None
+                strasse = em.strasse_richten(gehoert, zahlen)
+                land = eigenes_land
+                if eigenes_land:
+                    im_land = ja_oder_nein_hoeren(f"Liegt die Adresse in {eigenes_land}? "
+                                                  "Sage ja oder nein.", prozess, modell_klein)
+                    if im_land is None:
+                        sprich(ANSAGE_OHNE_EMPFAENGER)
+                        return None
+                    if im_land is False:
+                        land, _ = antwort_hoeren(ANSAGE_LAND_FREI, prozess, modell, parakeet)
+                        land = land[:1].upper() + land[1:]
+                gehoert, _ = antwort_hoeren(ANSAGE_PLZ_ORT, prozess, modell, parakeet)
+                if not gehoert:
+                    sprich(ANSAGE_OHNE_EMPFAENGER)
+                    return None
+                plz, ort = em.plz_ort_richten(gehoert, zahlen, em.plz_laenge(land))
+                neu = {"name": name, "zusatz": "", "strasse": strasse, "plz": plz, "ort": ort,
+                       "land": land}
+                antwort = ja_oder_nein_hoeren(f"Der Brief geht an: {em.gesprochen(neu)}. "
+                                              "Stimmt das? Sage ja oder nein.", prozess, modell_klein)
                 if antwort:
-                    melde(f"  Empfaenger aus den Kontakten: {kontakt!r}")
-                    return kontakt
+                    melde(f"  Empfaenger neu: {neu!r}")
+                    try:
+                        em.eintragen(neu)
+                    except Exception as fehler:
+                        melde(f"  Kontakt nicht angelegt: {fehler}")
+                    return neu
                 if antwort is None:
                     sprich(ANSAGE_OHNE_EMPFAENGER)
                     return None
-            name = schreibweise_pruefen(name, prozess, modell_klein)
-            # KEINE ANTWORT = ABBRUCH (Simulation 2026-09-17): Ohne diese Pruefung
-            # fragte der Dialog bei Stille stur weiter - Land, Postleitzahl, "Stimmt
-            # das?" - eine halbe Minute ins Leere, bevor der Brief begann.
-            gehoert = antwort_hoeren(ANSAGE_STRASSE, prozess, modell, parakeet)
-            if not gehoert:
-                break
-            strasse = em.strasse_richten(gehoert, zahlen)
-            land = eigenes_land
-            if eigenes_land:
-                im_land = ja_oder_nein_hoeren(f"Liegt die Adresse in {eigenes_land}? Sage ja oder nein.",
-                                              prozess, modell_klein)
-                if im_land is None:
-                    break
-                if im_land is False:
-                    land = antwort_hoeren(ANSAGE_LAND_FREI, prozess, modell, parakeet)
-                    land = land[:1].upper() + land[1:]
-            gehoert = antwort_hoeren(ANSAGE_PLZ_ORT, prozess, modell, parakeet)
-            if not gehoert:
-                break
-            plz, ort = em.plz_ort_richten(gehoert, zahlen, em.plz_laenge(land))
-            neu = {"name": name, "zusatz": "", "strasse": strasse, "plz": plz, "ort": ort,
-                   "land": land}
-            antwort = ja_oder_nein_hoeren(f"Der Brief geht an: {em.gesprochen(neu)}. "
-                                          "Stimmt das? Sage ja oder nein.", prozess, modell_klein)
-            if antwort:
-                melde(f"  Empfaenger neu: {neu!r}")
-                try:
-                    em.eintragen(neu)
-                except Exception as fehler:
-                    melde(f"  Kontakt nicht angelegt: {fehler}")
-                return neu
-            if antwort is None:
-                break
+                raise DialogNeustart()
+            except DialogNeustart:
+                melde("  Empfaenger-Dialog: von vorne")
+                sprich(ANSAGE_NEUSTART)
         sprich(ANSAGE_OHNE_EMPFAENGER)
         return None
+    except DialogAbbruch:
+        melde("  Empfaenger-Dialog: Brief abgebrochen")
+        sprich(ANSAGE_ABBRUCH)
+        return ABBRUCH
     finally:
         try:
             prozess.terminate()
@@ -2585,6 +2671,9 @@ def diktat_fuehren(zweck, name, quelle):
         except Exception as fehler:
             melde(f"  Empfaenger-Dialog abgebrochen: {fehler}")
             empfaenger = None
+        if empfaenger == ABBRUCH:
+            # "abbrechen" oder "Diktat beenden" im Dialog: kein Brief, nichts geschrieben.
+            return 0
     # Aufnahme der aktuellen Epoche - gleiche Zeitachse wie die Vosk-Woerter.
     epoche_audio = bytearray()
 

@@ -122,6 +122,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Recipient dialogue: correct names, abort or restart at any time** (2026-09-17,
+  Stephan: no way to change it again, cannot restart the letter or simply end the
+  dictation). "Stimmt das? Sage ja, nein oder buchstabieren.", "abbrechen"/"Diktat
+  beenden" and "von vorne" at every question; contact search with both
+  recognisers and a more generous sound comparison. Thunderbird shows externally
+  created contacts (confirmed on the device).
+
 - **Spelling names, contacts by sound, reading without sender** (2026-09-17, after
   Stephan's first trial with "Gesobau"). New names can be checked and dictated
   in the spelling alphabet (measured 26/26 against 15/26 with letter names); the

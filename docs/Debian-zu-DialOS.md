@@ -2085,6 +2085,22 @@ vorlesen" ohne Absender (kommt aus den Daten), Telefonnummern in Dreierblöcken
 Ziffer für Ziffer, danach „Du kannst sagen: Brief drucken oder Brief als PDF
 speichern." Prüfstand: neuer Fall `brief-zahlen-2` 1,7 %, keiner schlechter.
 
+**Nach der zweiten Probe (13:36):** Stephan: „wenn Gesobau nicht verstanden wird,
+dann habe ich keinen Einfluss, das noch mal zu ändern. Und ich kann den Brief
+nicht neu starten oder das Diktat einfach beenden!" Sein „Diktat beenden" wurde
+zur Straße „Um die Tat beenden". Jetzt: Nach dem Namen fragt DialOS „Stimmt das?
+Sage ja, nein oder buchstabieren." - „nein": Namen neu sagen; „buchstabieren":
+DialOS liest ihn im Alphabet vor und lässt ihn buchstabieren; auch als Antwort auf
+„An wen geht der Brief?". **Jederzeit** gelten „abbrechen" / „Diktat beenden" /
+„Brief abbrechen" (kein Brief) und „von vorne" (Dialog neu), in freien Antworten
+wie in ja/nein und beim Buchstabieren. Die Kontaktsuche nimmt Vosk- und
+Parakeet-Text und vergleicht den Klang großzügiger, aber nur bei ähnlich langem
+Schlüssel („wieso bau" → GESOBAU AG, „Sparkasse" nicht). Simuliert: Name
+korrigiert per Buchstabieren und im Adressbuch gefunden, Abbruch bei der Straße,
+„von vorne" mit anschließendem „ohne Empfänger". Den Kontakt „G so bau" hat
+Claude auf Stephans Wunsch in „GESOBAU AG" (Firma) korrigiert; Thunderbird zeigt
+extern angelegte und korrigierte Kontakte an (am Gerät bestätigt).
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

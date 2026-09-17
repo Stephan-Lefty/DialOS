@@ -2008,6 +2008,21 @@ vorlesen" without sender (it comes from the data), phone numbers digit by digit
 in blocks of three, then "Du kannst sagen: Brief drucken oder Brief als PDF
 speichern." Test bench: new case `brief-zahlen-2` 1.7 %, none worse.
 
+**After the second trial (13:36):** Stephan: if Gesobau is not understood he has no
+way to change it, and he cannot restart the letter or simply end the dictation.
+His "Diktat beenden" became the street "Um die Tat beenden". Now: after the name
+DialOS asks "Stimmt das? Sage ja, nein oder buchstabieren." - "nein": say the name
+again; "buchstabieren": DialOS reads it in the alphabet and lets it be spelled;
+also as the answer to "An wen geht der Brief?". **At any time** "abbrechen" /
+"Diktat beenden" / "Brief abbrechen" (no letter) and "von vorne" (restart the
+dialogue) apply, in free answers as well as yes/no and spelling. The contact
+search uses Vosk and Parakeet text and compares sound more generously, but only
+for keys of similar length ("wieso bau" → GESOBAU AG, "Sparkasse" not).
+Simulated: name corrected by spelling and found in the address book, abort at
+the street, "von vorne" followed by "ohne Empfänger". Claude corrected the contact
+"G so bau" to "GESOBAU AG" (company) at Stephan's request; Thunderbird shows
+externally created and corrected contacts (confirmed on the device).
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

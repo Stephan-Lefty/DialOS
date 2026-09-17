@@ -226,7 +226,10 @@ def suchen(gesprochen, liste=None):
         if not (k["strasse"] or k["ort"]):
             continue
         besten = 0.0
-        for feld in (k["name"], k["firma"], f"{k['name']} {k['firma']}"):
+        felder = {k["name"], k["firma"]}
+        if k["name"] and k["firma"] and _vergleichbar(k["firma"]) not in _vergleichbar(k["name"]):
+            felder.add(f"{k['name']} {k['firma']}")
+        for feld in felder:
             v = _vergleichbar(feld)
             if not v:
                 continue
@@ -235,7 +238,11 @@ def suchen(gesprochen, liste=None):
             # Rechtsform zaehlt nicht: "Gesobau" ist gemeint, im Kontakt steht "GESOBAU AG".
             ohne_form = " ".join(w for w in v.split() if w not in RECHTSFORMEN) or v
             klang_ziel, klang_v = koelner_phonetik(ziel), koelner_phonetik(ohne_form)
-            if len(klang_ziel) >= 3 and difflib.SequenceMatcher(None, klang_ziel, klang_v).ratio() >= 0.9:
+            # Grosszuegig (0,66: "wieso bau" 381 ~ "GESOBAU" 481, 2026-09-17) - ein
+            # Treffer wird nur nach "Ist das der Empfaenger? ja" genommen.
+            # Gleich lang muessen die Schluessel sein, sonst passt "Sparkasse" zu "GESOBAU".
+            if (len(klang_ziel) >= 3 and abs(len(klang_ziel) - len(klang_v)) <= 1
+                    and difflib.SequenceMatcher(None, klang_ziel, klang_v).ratio() >= 0.66):
                 wert = max(wert, 0.85)
             if all(any(difflib.SequenceMatcher(None, w, x).ratio() >= 0.8 for x in v.split())
                    for w in ziel.split()):

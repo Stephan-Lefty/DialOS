@@ -130,6 +130,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Empfänger-Dialog: Namen korrigieren, jederzeit abbrechen oder von vorne**
+  (2026-09-17, Stephan: „keinen Einfluss, das noch mal zu ändern" und „kann den
+  Brief nicht neu starten oder das Diktat einfach beenden"). „Stimmt das? Sage ja,
+  nein oder buchstabieren.", „abbrechen"/„Diktat beenden" und „von vorne" bei jeder
+  Frage; Kontaktsuche mit beiden Erkennungen und großzügigerem Klangvergleich.
+  Thunderbird zeigt extern angelegte Kontakte an (am Gerät bestätigt).
+
 - **Namen buchstabieren, Kontakte nach Klang, Vorlesen ohne Absender** (2026-09-17,
   nach Stephans erster Probe mit „Gesobau"). Neue Namen lassen sich im
   Buchstabieralphabet prüfen und einsprechen (gemessen 26/26 gegen 15/26 mit

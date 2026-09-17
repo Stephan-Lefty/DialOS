@@ -30,7 +30,8 @@ finished too, and then move down together. That way no reference breaks.
   Thunderbird. **(2)+(3) built 2026-09-17:** guided recipient dialogue in
   dictation, search in the Thunderbird contacts, new contact in `abook.sqlite`
   (queue while Thunderbird runs) - simulated with Piper (new, found, none). Open:
-  test with Stephan's voice; whether Thunderbird shows the created card; wiring
+  test with Stephan's voice (13:00 and 13:36: names, abort - rebuilt);
+  Thunderbird shows the created card **(confirmed 13:40)**; wiring
   the DIN PDF into dictation/printing/PDF; address suffix ("z. Hd."). **Mail
   signature installed** (17.09.). **Draft 2026-09-17:** `dialos-brief-din.py` (form B, preview with sample
   data) - open: Stephan's verdict, recipient address, wiring into
