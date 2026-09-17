@@ -669,32 +669,44 @@ function dialos_child_englische_anfuehrungszeichen( $text ) {
 }
 
 /**
- * Die drei neuesten Beitraege als eigene Bloecke in der rechten Spalte
- * der Startseite (Stephan, 2026-09-17).
+ * Die drei neuesten Beitraege als EIN Block in der rechten Spalte der
+ * Startseite (Stephan, 2026-09-17, praezisiert am selben Abend).
  *
  * WARUM KEIN LAUFBAND: Stephan hatte zuerst nach einem Ticker gefragt und
- * die Idee selbst wieder verworfen. Bewegter Text ist fuer diese Zielgruppe
- * der falsche Weg - ein Screenreader liest Inhalte vor, die sich unter ihm
+ * die Idee selbst verworfen. Bewegter Text ist fuer diese Zielgruppe der
+ * falsche Weg - ein Screenreader liest Inhalte vor, die sich unter ihm
  * wegbewegen, wer nur noch Umrisse erkennt kann wanderndem Text nicht
  * folgen, und die Richtlinien verlangen fuer Bewegung ueber fuenf Sekunden
- * einen Anhalteknopf. Drei ruhende Bloecke leisten dasselbe: Sie zeigen,
- * dass sich etwas bewegt, ohne sich zu bewegen.
+ * einen Anhalteknopf. Ein ruhender Block leistet dasselbe.
+ *
+ * DREI KAESTEN, ABER GROESSER (Aenderung gegenueber 1.6.5): Stephans
+ * Vorgabe war, dass ein Kasten so gross wird, wie die drei vorher zusammen
+ * waren. Dafuer bekommt jeder Eintrag jetzt zusaetzlich den Textschnipsel
+ * des Beitrags. Die Hoehe ergibt sich daraus - bewusst KEINE feste Hoehe
+ * und kein min-height: Der Kasten soll so hoch sein, wie sein Inhalt es
+ * verlangt, und in keinem Fall scrollen. Soll er groesser werden, wird der
+ * Schnipsel laenger, nicht der Kasten gestreckt.
+ *
+ * OBERKANTE AUF HOEHE DER GRAFIK (Stephans Vorgabe): Der Kasten soll nicht
+ * neben der Ueberschrift beginnen, sondern neben dem Bild darunter. Der
+ * Abstand wird GEMESSEN, nicht geraten: Das Skript liest die tatsaechliche
+ * Position des ersten Bildes im Hauptblock und setzt den oberen Abstand
+ * danach. So stimmt es auch bei anderer Schriftgroesse, anderer Zoomstufe
+ * und in jeder Sprache - eine feste Pixelzahl waere bei der naechsten
+ * Textaenderung falsch, ohne dass es jemand merkt. Neu berechnet wird bei
+ * Groessenaenderung und sobald das Bild geladen ist (vorher ist seine
+ * Position noch null).
  *
  * WOHIN: Das Eltern-Theme legt neben main#main (col-md-9) bereits ein
- * leeres <aside id="sidebar" class="col-md-3"> an. Es muss also nichts am
- * Layout umgebaut werden - die Bloecke kommen in dessen .content-sidebar,
- * und Bootstrap stellt sie von selbst neben den weissen Hauptblock. Auf
- * schmalen Bildschirmen rutschen sie darunter, auch das erledigt Bootstrap.
+ * leeres <aside id="sidebar" class="col-md-3"> an - am Layout war nichts
+ * umzubauen. Unter 992 px schiebt Bootstrap die Spalte unter den
+ * Hauptblock; dort entfaellt der gemessene Abstand wieder, sonst klaffte
+ * eine Luecke.
  *
  * SPRACHE: Auf /en/ die drei neuesten englischen Beitraege, sonst die
- * deutschen. Erkannt am Marker '>Deutsch<' im Inhalt - dieselbe Konvention,
- * die dialos_child_english_post_link() schon benutzt. Wer sie aendert, muss
- * beide Stellen anfassen.
- *
- * GLIEDERUNG: eine <section> mit Ueberschrift, darin drei <article> mit je
- * einer h3. So findet ein Screenreader den Bereich ueber die
- * Ueberschriften-Navigation und weiss, dass drei gleichrangige Beitraege
- * darin stehen - nicht drei zusammenhanglose Kaesten.
+ * deutschen, erkannt am Marker '>Deutsch<' - dieselbe Konvention wie in
+ * dialos_child_english_post_link(). Wer sie aendert, muss beide Stellen
+ * anfassen.
  */
 add_action( 'wp_footer', 'dialos_child_neueste_beitraege', 22 );
 
@@ -718,9 +730,9 @@ function dialos_child_neueste_beitraege() {
 		return;
 	}
 
-	// date_i18n liefert die Monate in der Sprache der Installation, und die
-	// ist Deutsch. Fuer /en/ deshalb uebersetzen - sonst stuende dort
-	// "17 September 2026" neben "16 August 2026" auf Deutsch gemischt.
+	// date_i18n folgt der Sprache der Installation, und die ist Deutsch.
+	// Fuer /en/ deshalb uebersetzen - sonst stuende dort ein deutscher
+	// Monatsname mitten im englischen Block.
 	$monate_de = array( 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
 		'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember' );
 	$monate_en = array( 'January', 'February', 'March', 'April', 'May', 'June',
@@ -731,11 +743,28 @@ function dialos_child_neueste_beitraege() {
 		$datum = $englisch
 			? str_replace( $monate_de, $monate_en, date_i18n( 'j F Y', strtotime( $beitrag->post_date ) ) )
 			: date_i18n( 'j. F Y', strtotime( $beitrag->post_date ) );
+
+		// Derselbe Textschnipsel wie auf der Neuigkeiten-Seite. Dreissig
+		// Woerter sind der Kompromiss: genug, damit der Kasten die von
+		// Stephan gewuenschte Groesse bekommt, wenig genug, dass in einer
+		// schmalen Spalte keine Textwand steht.
+		// Der Sprachmarker ist per CSS versteckt, steht aber im Inhalt.
+		// Ohne diese Zeile begaenne ein Schnipsel ohne eigenen Auszug mit
+		// dem Wort "English" - derselbe Stolperstein wie bei den
+		// Hoerfassungen am 2026-09-17, wo Anna ihn mitten im Beitrag
+		// vorgelesen hat. Wer Beitragstext maschinell weiterverarbeitet,
+		// muss ihn herausnehmen.
+		$roh  = preg_replace( '#<p class="[^"]*dialos-lang-marker[^"]*".*?</p>#s', '',
+			$beitrag->post_content );
+		$text = has_excerpt( $beitrag ) ? $beitrag->post_excerpt : $roh;
+		$text = wp_trim_words( wp_strip_all_tags( $text ), 30, ' …' );
+
 		$eintraege[] = array(
 			'titel' => get_the_title( $beitrag ),
 			'url'   => get_permalink( $beitrag ),
 			'datum' => $datum,
 			'iso'   => mysql2date( 'Y-m-d', $beitrag->post_date ),
+			'text'  => $text,
 		);
 	}
 
@@ -748,39 +777,47 @@ function dialos_child_neueste_beitraege() {
 	<script>
 	document.addEventListener('DOMContentLoaded', function () {
 		var spalte = document.querySelector('#sidebar .content-sidebar');
-		if (!spalte) return;
+		var haupt  = document.getElementById('main');
+		if (!spalte || !haupt) return;
 
 		var daten = <?php echo wp_json_encode( $eintraege ); ?>;
 		var texte = <?php echo wp_json_encode( $texte ); ?>;
 
-		var bereich = document.createElement('section');
-		bereich.className = 'dialos-neueste';
-		bereich.setAttribute('aria-labelledby', 'dialos-neueste-titel');
+		var block = document.createElement('section');
+		block.className = 'dialos-neueste';
+		block.setAttribute('aria-labelledby', 'dialos-neueste-titel');
 
 		var titel = document.createElement('h2');
 		titel.id = 'dialos-neueste-titel';
 		titel.className = 'dialos-neueste-titel';
 		titel.textContent = texte.ueberschrift;
-		bereich.appendChild(titel);
+		block.appendChild(titel);
 
 		daten.forEach(function (e) {
-			var kasten = document.createElement('article');
-			kasten.className = 'dialos-neueste-block';
+			var eintrag = document.createElement('article');
+			eintrag.className = 'dialos-neueste-block';
 
 			var h = document.createElement('h3');
 			var link = document.createElement('a');
 			link.href = e.url;
 			link.textContent = e.titel;
 			h.appendChild(link);
-			kasten.appendChild(h);
+			eintrag.appendChild(h);
 
 			var datum = document.createElement('time');
 			datum.className = 'dialos-neueste-datum';
 			datum.setAttribute('datetime', e.iso);
 			datum.textContent = e.datum;
-			kasten.appendChild(datum);
+			eintrag.appendChild(datum);
 
-			bereich.appendChild(kasten);
+			if (e.text) {
+				var text = document.createElement('p');
+				text.className = 'dialos-neueste-text';
+				text.textContent = e.text;
+				eintrag.appendChild(text);
+			}
+
+			block.appendChild(eintrag);
 		});
 
 		var alle = document.createElement('p');
@@ -789,9 +826,32 @@ function dialos_child_neueste_beitraege() {
 		alleLink.href = texte.alle_url;
 		alleLink.textContent = texte.alle;
 		alle.appendChild(alleLink);
-		bereich.appendChild(alle);
+		block.appendChild(alle);
 
-		spalte.appendChild(bereich);
+		spalte.appendChild(block);
+
+		// Oberkante auf Hoehe der Grafik im Hauptblock - gemessen, nicht
+		// geraten. Unter 992 px stehen die Spalten untereinander, dort waere
+		// ein Abstand eine Luecke.
+		function ausrichten() {
+			block.style.marginTop = '';
+			if (window.innerWidth < 992) return;
+			var bild = haupt.querySelector('figure img, img');
+			if (!bild) return;
+			var abstand = bild.getBoundingClientRect().top - spalte.getBoundingClientRect().top;
+			if (abstand > 0) block.style.marginTop = Math.round(abstand) + 'px';
+		}
+
+		ausrichten();
+		window.addEventListener('load', ausrichten);
+		var bild = haupt.querySelector('figure img, img');
+		if (bild && !bild.complete) bild.addEventListener('load', ausrichten);
+
+		var warten;
+		window.addEventListener('resize', function () {
+			clearTimeout(warten);
+			warten = setTimeout(ausrichten, 150);
+		});
 	});
 	</script>
 	<?php

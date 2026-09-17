@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.5
+Version: 1.6.6
 Text Domain: dialos
 */
 
@@ -539,19 +539,19 @@ body.dialos-a11y-mode *:focus {
 
 /* ------------------------------------------------------------------
    Die drei neuesten Beitraege in der rechten Spalte der Startseiten
-   (Stephan, 2026-09-17). Bewusst dieselben Werte wie main#main auf
-   den Startseiten - weiss, 16 px Radius -, damit es nicht "fast
-   gleich" aussieht; das waere schlimmer als deutlich anders. Nur der
-   Innenabstand ist kleiner (1,25 statt 2 rem), weil die Spalte
-   schmal ist.
+   (Stephan, 2026-09-17). Dieselben Werte wie main#main auf den
+   Startseiten - weiss, 16 px Radius -, nur mit kleinerem Innenabstand,
+   weil die Spalte schmal ist. Die Breite hat Stephan abgenommen, sie
+   bleibt unveraendert.
 
-   NICHT UEBER DIE KANTE (Stephans Vorgabe): Die Bloecke duerfen nicht
-   breiter werden als die Spalte, deren rechte Kante mit der Suchleiste
-   im Kopf abschliesst. Dafuer drei Schranken - max-width, border-box
-   und Wortumbruch. Die dritte ist die wichtige: Die Chronik-Titel sind
-   lang ("DialOS - Tag 34 bis 40: Als die Landkarte wieder zum Gebiet
-   passte"), und ein einzelnes langes Wort wuerde den Kasten sonst
-   aufdruecken, statt umzubrechen.
+   KEINE FESTE HOEHE, KEIN min-height, KEIN overflow. Die Kaesten sind
+   so hoch, wie ihr Inhalt es verlangt, duerfen unterschiedlich hoch
+   sein und scrollen nie (Stephans Vorgabe). Soll ein Kasten groesser
+   werden, wird der Textschnipsel laenger - gestreckt wird nichts.
+
+   NICHT UEBER DIE KANTE: max-width, box-sizing und Wortumbruch. Die
+   dritte Schranke ist die wichtige - die Chronik-Titel sind lang, und
+   ein einzelnes langes Wort wuerde den Kasten sonst aufdruecken.
    ------------------------------------------------------------------ */
 .dialos-neueste {
   max-width: 100%;
@@ -578,13 +578,16 @@ body.dialos-a11y-mode *:focus {
   line-height: 1.35;
   font-weight: 700;
 }
-.dialos-neueste-block h3 a {
-  overflow-wrap: break-word;
-}
 .dialos-neueste-datum {
   display: block;
   font-size: 0.85rem;
   color: #666;
+  margin-bottom: 0.6rem;
+}
+.dialos-neueste-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
 }
 .dialos-neueste-alle {
   margin: 0;
@@ -592,17 +595,15 @@ body.dialos-a11y-mode *:focus {
 }
 
 /* Im Barrierefreiheits-Modus reicht die globale Linkfarbe nicht: Das
-   graue Datum faellt unter den geforderten Kontrast. */
+   graue Datum faellt dort unter den geforderten Kontrast. */
 body.dialos-a11y-mode .dialos-neueste-datum {
   color: #000;
 }
 
-/* Handy und Tablet: Bootstrap schiebt die col-md-3-Spalte unter den
-   Hauptblock, sobald der Bildschirm schmaler als 992 px ist. Dort
-   braucht der Bereich oben Abstand, sonst klebt er am weissen Block
-   darueber. Kein max-height und kein overflow - die Bloecke duerfen
-   unterschiedlich hoch sein, aber in keinem Fall soll in ihnen
-   gescrollt werden (Stephans Vorgabe, 2026-09-17). */
+/* Handy und Tablet: Bootstrap schiebt die Spalte unter den Hauptblock,
+   sobald der Bildschirm schmaler als 992 px ist. Den gemessenen oberen
+   Abstand nimmt das Skript dort selbst wieder zurueck - hier nur der
+   Abstand nach oben, damit die Kaesten nicht am weissen Block kleben. */
 @media (max-width: 991px) {
   .dialos-neueste {
     margin-top: 1.5rem;
