@@ -151,24 +151,41 @@ finished too, and then move down together. That way no reference breaks.
     the number, name the way - the same rule as with the shopping list ("a
     command does not take a decision away from the user that he can make
     himself").
-  - [ ] **Icon: a draft is there, but at 32 pixels it does not carry yet.**
-    Stephan's draft of 2026-09-17 is in `assets/suche-icon-entwurf.png`.
-    Stylistically it fits - the same circle, the same lady, the same hand, the
-    same blue-green gradient. **Measured** (all three icons rendered at
-    32/48/64 px, evidence in `assets/suche-icon-groessenvergleich.png`): clear at
-    64 and 48 px, at **32 px document, envelope and magnifier collapse into one
-    blob** - while DialOS and Denkzettel stay clear there. The cause is the
-    number, not the drawing: three objects on the right instead of one, and only
-    about 14 × 20 px are left for the right half at 32 px. The yardstick has
-    stood in the source of `Denkzettel/assets/icon-bauen.py` since 2026-08-24.
-    - [ ] Decide whether to reduce it to **one** object (proposal: the magnifier
-      - round, it stays a recognisable shape even as a blob).
-    - [ ] Only **afterwards** derive the rest: compute the transparency back (the
-      draft is RGB with a white background, a `.desktop` icon needs an alpha
-      channel, otherwise a white box sits in the panel), sizes 32-512, and a
-      dark variant. The way is built: `Denkzettel/assets/icon-bauen.py`. **Not
-      before** - deriving six files from a draft that can still change means
-      doing the work twice.
+  - [x] **Icon - done on 2026-09-17.** Stephan's draft
+    (`assets/suche-icon-entwurf.png`) fitted stylistically, but measured it
+    failed at 32 px: document, envelope and magnifier merged into one blob,
+    while DialOS and Denkzettel stayed clear there. The cause was the number,
+    not the drawing - three objects on the right instead of one, and only about
+    14 × 20 px are left for the right half at 32 px. The yardstick has stood in
+    the source of `Denkzettel/assets/icon-bauen.py` since 2026-08-24.
+
+    Stephan's decision afterwards: "reduziere den rechten Bereich auf die Lupe"
+    ("reduce the right-hand area to the magnifier"). Built with
+    `assets/suche-icon-bauen.py`, derived from
+    `Denkzettel/assets/icon-bauen.py`. The magnifier is **drawn**, not cut out
+    of the draft - copied it would come with the cut edges of the overlapping
+    envelope. Two variants built and compared: "magnifier only" carries at
+    32 px, "waves and magnifier" blobs up just like the draft. That makes it
+    follow the family pattern - Denkzettel replaces the sound waves with the
+    pen, DialOS Search with the magnifier. **Replace, do not add.**
+
+    Twelve files: `suche-icon-light-*.png` and `suche-icon-dark-*.png` at 32,
+    48, 64, 128, 256, 512 px, all with an alpha channel. Evidence on a light
+    and a dark panel in `assets/suche-icon-groessenvergleich.png`. The script
+    checks the distance to the ring before drawing and aborts when it is
+    broken - the first attempt ran into exactly that (193.6 against a permitted
+    192, at the end of the handle).
+
+    **Found along the way and recorded in the script: DialOS and Denkzettel
+    name in opposite directions.** `DialOS/assets/app-icon-light.png` has a
+    light disc, `Denkzettel/assets/app-icon-dark.png` a light one as well. So
+    at Denkzettel "-dark" means "for dark surroundings", at DialOS "dark icon".
+    DialOS Search follows DialOS, because the files sit in the same folder -
+    two meanings of the same suffix in one place would be the sure way to the
+    wrong file.
+    - [ ] **Look at it on the device**, as soon as a `.desktop` entry exists: in
+      the panel, in the start menu and in the window list next to DialOS and
+      Denkzettel. Decided on screen is not the same as seen in the panel.
 
   **Delivery as a `.deb`** (decided 2026-09-17), but **not for development**: on
   the T490 `dialos-aufspielen` remains the way, because a package would have to

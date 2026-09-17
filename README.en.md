@@ -184,20 +184,36 @@ background) and `splash.png` (boot/login screen).
   is the goal, but as long as the interface keeps changing, two repos would have
   to be kept in sync while both are unstable.
 
-- **Icon for DialOS Search: a draft is there, measured at 32 pixels it failed**
-  (2026-09-17). Stephan's draft (`assets/suche-icon-entwurf.png`) fits
+- **Icon for DialOS Search: reduced to the magnifier, twelve files done**
+  (2026-09-17). Stephan's draft (`assets/suche-icon-entwurf.png`) fitted
   stylistically - the same circle, the same lady, the same carrying hand, the
-  same blue-green gradient as the DialOS app icon. But what was checked is what
-  matters, and what has stood as the yardstick in the source of
-  `Denkzettel/assets/icon-bauen.py` since 2026-08-24: recognisability at 32
-  pixels. All three icons rendered at 32/48/64 px and put side by side
-  (`assets/suche-icon-groessenvergleich.png`): clear at 64 and 48 px, at
-  **32 px document, envelope and magnifier merge into one blob**, while DialOS
-  and Denkzettel stay clear there. The cause is the number, not the drawing -
-  three objects on the right instead of one, and only about 14 × 20 pixels are
-  left for them at 32 px. A proposal is on the table (reduce it to the
-  magnifier), nothing is decided. **Sizes and transparency deliberately not
-  derived yet**, as long as the design can still change.
+  same blue-green gradient. But what was checked is what matters, and what has
+  stood as the yardstick in the source of `Denkzettel/assets/icon-bauen.py`
+  since 2026-08-24: recognisability at 32 pixels. There **document, envelope and
+  magnifier merged into one blob**, while DialOS and Denkzettel stayed clear -
+  the cause was the number, not the drawing: three objects on the right instead
+  of one, and only about 14 × 20 pixels are left for them at 32 px.
+
+  Stephan's decision afterwards: "reduziere den rechten Bereich auf die Lupe"
+  ("reduce the right-hand area to the magnifier"). Built with
+  `assets/suche-icon-bauen.py`, derived from Denkzettel's `icon-bauen.py` - the
+  magnifier is **drawn**, not cut out of the draft, because copied it would
+  bring along the cut edges of the overlapping envelope. Two variants built and
+  compared: "magnifier only" carries at 32 px, "waves and magnifier" blobs up
+  just like the draft. That makes it follow the family pattern - Denkzettel
+  replaces the sound waves with the pen, DialOS Search with the magnifier.
+  **Replace, do not add.** The result is twelve files
+  (`suche-icon-light-*.png` and `suche-icon-dark-*.png` at 32 to 512 px, all
+  with an alpha channel), evidence on a light and a dark panel in
+  `assets/suche-icon-groessenvergleich.png`.
+
+  **Found along the way: DialOS and Denkzettel name their two versions in
+  opposite directions.** `DialOS/assets/app-icon-light.png` has a light disc,
+  `Denkzettel/assets/app-icon-dark.png` a light one as well - so at Denkzettel
+  "-dark" means "for dark surroundings", at DialOS "dark icon". Each is coherent
+  on its own, together they are a trap. DialOS Search follows DialOS, because
+  the files sit in the same folder; the measurement is recorded in the head of
+  the script so that nobody has to make it a second time.
 
 - **Third naming category recorded: extensions** (2026-09-17, in `CLAUDE.md`).
   So far there were core components and family members without a prefix. An

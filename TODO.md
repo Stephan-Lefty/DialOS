@@ -154,26 +154,42 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Anzahl ansagen, Weg nennen - dieselbe Regel wie beim Einkaufszettel („ein
     Befehl nimmt dem Nutzer keine Entscheidung ab, die er selbst treffen
     kann").
-  - [ ] **Symbol: Entwurf liegt, trägt aber bei 32 Pixeln noch nicht.**
-    Stephans Entwurf vom 2026-09-17 liegt als `assets/suche-icon-entwurf.png`.
-    Stilistisch sitzt er - derselbe Kreis, dieselbe Dame, dieselbe Hand,
-    derselbe Blau-Grün-Verlauf. **Gemessen** (alle drei Icons auf 32/48/64 px
-    gerechnet, Beleg in `assets/suche-icon-groessenvergleich.png`): bei 64 und
-    48 px klar, bei **32 px fallen Dokument, Briefumschlag und Lupe zu einem
-    Klumpen zusammen** - während DialOS und Denkzettel dort klar bleiben.
-    Ursache ist die Anzahl, nicht die Zeichnung: rechts drei Objekte statt
-    einem, und für die rechte Hälfte bleiben bei 32 px nur etwa 14 × 20 px.
-    Der Maßstab steht seit dem 2026-08-24 im Quelltext von
-    `Denkzettel/assets/icon-bauen.py`.
-    - [ ] Entscheiden, ob auf **ein** Objekt reduziert wird (Vorschlag: die
-      Lupe - rund, bleibt auch als Klumpen eine erkennbare Form).
-    - [ ] Erst **danach** ableiten: Transparenz zurückrechnen (der Entwurf ist
-      RGB mit weißem Hintergrund, ein `.desktop`-Icon braucht einen
-      Alpha-Kanal, sonst steht ein weißer Kasten im Panel), Größen 32-512, und
-      eine dunkle Variante. Der Weg ist gebaut:
-      `Denkzettel/assets/icon-bauen.py`. **Nicht vorher** - sechs Dateien von
-      einem Entwurf abzuleiten, der sich noch ändert, heißt die Arbeit zweimal
-      machen.
+  - [x] **Symbol - fertig am 2026-09-17.** Stephans Entwurf
+    (`assets/suche-icon-entwurf.png`) saß stilistisch, fiel aber gemessen bei
+    32 px durch: Dokument, Briefumschlag und Lupe verschmolzen zu einem
+    Klumpen, während DialOS und Denkzettel dort klar blieben. Ursache war die
+    Anzahl, nicht die Zeichnung - rechts drei Objekte statt einem, und für die
+    rechte Hälfte bleiben bei 32 px nur etwa 14 × 20 px. Der Maßstab steht
+    seit dem 2026-08-24 im Quelltext von `Denkzettel/assets/icon-bauen.py`.
+
+    Stephans Entscheidung danach: „reduziere den rechten Bereich auf die
+    Lupe". Gebaut mit `assets/suche-icon-bauen.py`, abgeleitet von
+    `Denkzettel/assets/icon-bauen.py`. Die Lupe wird **gezeichnet**, nicht aus
+    dem Entwurf ausgeschnitten - kopiert käme sie mit den Schnittkanten des
+    überlappenden Briefumschlags. Zwei Varianten gebaut und verglichen: „nur
+    Lupe" trägt bei 32 px, „Wellen und Lupe" verklumpt genauso wie der
+    Entwurf. Damit folgt es dem Familienmuster - Denkzettel ersetzt die
+    Schallwellen durch den Stift, DialOS-Suche durch die Lupe. **Ersetzen,
+    nicht ergänzen.**
+
+    Zwölf Dateien: `suche-icon-light-*.png` und `suche-icon-dark-*.png` in 32,
+    48, 64, 128, 256, 512 px, alle mit Alpha-Kanal. Beleg auf hellem und
+    dunklem Panel in `assets/suche-icon-groessenvergleich.png`. Das Skript
+    prüft den Abstand zum Ring vor dem Zeichnen und bricht ab, wenn er
+    gerissen wird - der erste Versuch ist genau daran aufgelaufen (193,6 gegen
+    erlaubte 192, am Griffende).
+
+    **Dabei gefunden und im Skript festgehalten: DialOS und Denkzettel
+    benennen gegenläufig.** `DialOS/assets/app-icon-light.png` hat eine helle
+    Scheibe, `Denkzettel/assets/app-icon-dark.png` ebenfalls eine helle. Bei
+    Denkzettel heißt „-dark" also „für dunkle Umgebungen", bei DialOS
+    „dunkles Icon". DialOS-Suche folgt DialOS, weil die Dateien im selben
+    Ordner liegen - zwei Bedeutungen desselben Suffixes an einem Ort wären der
+    sichere Weg zur falschen Datei.
+    - [ ] **Am Gerät ansehen**, sobald ein `.desktop`-Eintrag existiert: im
+      Panel, im Startmenü und in der Fensterleiste neben DialOS und
+      Denkzettel. Am Bildschirm entschieden ist nicht dasselbe wie im Panel
+      gesehen.
 
   **Auslieferung als `.deb`** (entschieden 2026-09-17), aber **nicht für die
   Entwicklung**: Auf dem T490 bleibt `dialos-aufspielen` der Weg, weil ein

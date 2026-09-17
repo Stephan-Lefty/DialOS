@@ -4,12 +4,16 @@
 
 How a program joins DialOS without anything in the core having to change.
 
-> **Status on 2026-09-17: DRAFT. None of this is built.** This file
-> describes how it is meant to become, and is deliberately kept separate
-> from [sprachbefehle.en.md](sprachbefehle.en.md) and
-> [anwendungen.en.md](anwendungen.en.md), which describe what exists. The
-> separation is the same one as there: mixed together, the planned would
-> look like the existing.
+> **Status on 2026-09-17: the interface is a DRAFT, not a line of its code
+> is built.** This file describes how it is meant to become, and is
+> deliberately kept separate from [sprachbefehle.en.md](sprachbefehle.en.md)
+> and [anwendungen.en.md](anwendungen.en.md), which describe what exists.
+> The separation is the same one as there: mixed together, the planned
+> would look like the existing.
+>
+> **The only exception is the icon** - that one is built and sits in the
+> repo as twelve files, see "The icon" further down. It is stated here
+> explicitly so that the exception does not soften the rule.
 
 Decided with Stephan on 2026-09-17: DialOS gets an extension interface,
 and the first extension will be **DialOS-Suche** (finding and reading out
@@ -309,7 +313,7 @@ So **DialOS-Suche** is named correctly, and the rule "new family members
 are NOT renamed" stays untouched - it applies to standalone programs, not
 to something that does not run without DialOS at all.
 
-## The icon - and why it does not yet carry at 32 pixels
+## The icon: the draft failed at 32 pixels, the magnifying glass carries
 
 Stephan delivered a draft on 2026-09-17. It sits in the repo as
 `assets/suche-icon-entwurf.png`, **deliberately with „Entwurf" (draft) in
@@ -344,27 +348,63 @@ apart there and run together. On top of that, the space needed on the
 right pushes the face to the left, which makes the left-hand half look
 tighter than in the other two as well.
 
-**A proposal, not yet decided: reduce it to ONE object, namely the
-magnifying glass.** It is the strongest symbol for "search", it is round
-and therefore stays a recognizable shape even as a blob, and it differs
-from the sound waves and from the pen. The document with its text lines
-cannot be saved at 32 pixels in any variant.
+### Built on 2026-09-17: reduced to the magnifying glass
 
-**What is still missing technically**, regardless of the design:
+Stephan's decision after the measurement: „reduziere den rechten Bereich
+auf die Lupe" (reduce the right-hand area to the magnifying glass). Built
+with `assets/suche-icon-bauen.py`, derived from
+`Denkzettel/assets/icon-bauen.py` - the same technique, because it already
+solved exactly this problem there once.
 
-- **Transparency.** The draft is RGB with a white background. A
-  `.desktop` icon needs an alpha channel, otherwise a white box sits in
-  the panel. The route for that is built: `icon-bauen.py` at Denkzettel
-  converts the template back into a line drawing with transparency
-  (white = transparent, color = line) - exactly for this case.
-- **The sizes** 32, 48, 64, 128, 256, 512 as with Denkzettel, and a dark
-  variant as the counterpart to `app-icon-dark.png`.
-- **The edge length:** 1254 × 1254 instead of the family's 512.
+**The magnifying glass is drawn, not cut out of the draft.** Copied, it
+would come along with the cut edges of the overlapping envelope. Drawn, it
+has clean edges and a free size. Denkzettel drew the pen for the same
+reason.
 
-**Deliberately not built yet.** Deriving sizes and transparency from a
-draft whose design is still going to change would mean doing the work
-twice - and in the end six files would sit in the repo that no longer
-match the original.
+**Two variants were built and compared**, so that nobody checks it a
+second time:
+
+| Variant | Result at 32 px |
+|---|---|
+| **magnifier only** (sound waves removed) | **clear** - circle with a handle, unmistakably distinguishable from DialOS and Denkzettel. **Chosen.** |
+| waves **and** magnifier (closer to the draft) | rejected - waves and ring overlap into the same blob the draft already had |
+
+That makes the result follow the family pattern: Denkzettel replaces the
+sound waves with the pen, DialOS-Suche with the magnifying glass.
+**Replace, do not add** - exactly the lesson from the draft.
+
+The handle is deliberately short. It explains the shape at 512 pixels,
+contributes nothing at 32 any more, and the longer it is, the closer it
+comes to the arc. The script **checks the distance to the ring before
+drawing** and aborts when it is broken - the first attempt ran into
+exactly that (193.6 against a permitted 192, at the end of the handle).
+
+**Twelve files are produced:** `suche-icon-light-*.png` and
+`suche-icon-dark-*.png`, each at 32, 48, 64, 128, 256 and 512 pixels, all
+with an alpha channel. The comparison comes with it as
+`assets/suche-icon-groessenvergleich.png` - on the left on a light panel,
+on the right on a dark one, each in the version that belongs there.
+
+**A trap, measured and recorded: DialOS and Denkzettel name their two
+versions in opposite directions.**
+
+| File | Disc |
+|---|---|
+| `DialOS/assets/app-icon-light.png` | rgb(254,255,255) - light |
+| `DialOS/assets/app-icon-dark.png` | rgb(4,22,47) - dark |
+| `Denkzettel/assets/app-icon-dark.png` | rgb(255,255,255) - **light** |
+
+So at Denkzettel "-dark" means "file for dark surroundings" (Stephan's
+decision of 2026-08-24), at DialOS plainly "dark icon". Each is coherent
+on its own, together they are a trap. **DialOS-Suche follows DialOS**,
+because the files sit in the same folder next to `app-icon-light.png` -
+two opposing meanings of the same suffix in one place would be the sure
+way to grab the wrong file when wiring it up. And a wrong icon never
+strikes a blind user, but strikes the sighted helper at once.
+
+**The draft stays where it is** (`assets/suche-icon-entwurf.png`). It is
+the template of the idea, and the measurement it failed is above - the two
+belong together.
 
 ## Where an extension lives, and how it is shipped
 

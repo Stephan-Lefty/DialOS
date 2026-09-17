@@ -190,20 +190,35 @@ das Erfolg meldet, während es versagt.
   Repo je Erweiterung ist das Ziel, aber solange sich die Schnittstelle ändert,
   müssten zwei Repos synchron gehalten werden, während beide instabil sind.
 
-- **Symbol für DialOS-Suche: Entwurf liegt, bei 32 Pixeln gemessen durchgefallen**
-  (2026-09-17). Stephans Entwurf (`assets/suche-icon-entwurf.png`) sitzt
+- **Symbol für DialOS-Suche: auf die Lupe reduziert, zwölf Dateien fertig**
+  (2026-09-17). Stephans Entwurf (`assets/suche-icon-entwurf.png`) saß
   stilistisch - derselbe Kreis, dieselbe Dame, dieselbe tragende Hand, derselbe
-  Blau-Grün-Verlauf wie beim DialOS-App-Icon. Geprüft wurde aber das, worauf es
-  ankommt und was seit dem 2026-08-24 im Quelltext von
-  `Denkzettel/assets/icon-bauen.py` als Maßstab steht: Erkennbarkeit bei 32
-  Pixeln. Alle drei Icons auf 32/48/64 px gerechnet und nebeneinandergelegt
-  (`assets/suche-icon-groessenvergleich.png`): bei 64 und 48 px klar, bei
-  **32 px verschmelzen Dokument, Briefumschlag und Lupe zu einem Klumpen**,
-  während DialOS und Denkzettel dort klar bleiben. Ursache ist die Anzahl,
-  nicht die Zeichnung - rechts drei Objekte statt einem, und dafür bleiben bei
-  32 px nur etwa 14 × 20 Pixel. Vorschlag steht (auf die Lupe reduzieren),
-  entschieden ist nichts. **Größen und Transparenz bewusst noch nicht
-  abgeleitet**, solange sich die Gestaltung ändern kann.
+  Blau-Grün-Verlauf. Geprüft wurde aber das, worauf es ankommt und was seit dem
+  2026-08-24 im Quelltext von `Denkzettel/assets/icon-bauen.py` als Maßstab
+  steht: Erkennbarkeit bei 32 Pixeln. Dort **verschmolzen Dokument,
+  Briefumschlag und Lupe zu einem Klumpen**, während DialOS und Denkzettel klar
+  blieben - Ursache war die Anzahl, nicht die Zeichnung: rechts drei Objekte
+  statt einem, und dafür bleiben bei 32 px nur etwa 14 × 20 Pixel.
+
+  Stephans Entscheidung danach: „reduziere den rechten Bereich auf die Lupe".
+  Gebaut mit `assets/suche-icon-bauen.py`, abgeleitet von Denkzettels
+  `icon-bauen.py` - die Lupe wird **gezeichnet**, nicht aus dem Entwurf
+  ausgeschnitten, weil sie kopiert die Schnittkanten des überlappenden
+  Briefumschlags mitbrächte. Zwei Varianten gebaut und verglichen: „nur Lupe"
+  trägt bei 32 px, „Wellen und Lupe" verklumpt genauso wie der Entwurf. Damit
+  folgt es dem Muster der Familie - Denkzettel ersetzt die Schallwellen durch
+  den Stift, DialOS-Suche durch die Lupe. **Ersetzen, nicht ergänzen.**
+  Ergebnis sind zwölf Dateien (`suche-icon-light-*.png` und
+  `suche-icon-dark-*.png` in 32 bis 512 px, alle mit Alpha-Kanal), Beleg auf
+  hellem und dunklem Panel in `assets/suche-icon-groessenvergleich.png`.
+
+  **Dabei gefunden: DialOS und Denkzettel benennen ihre beiden Fassungen
+  gegenläufig.** `DialOS/assets/app-icon-light.png` hat eine helle Scheibe,
+  `Denkzettel/assets/app-icon-dark.png` ebenfalls eine helle - bei Denkzettel
+  heißt „-dark" also „für dunkle Umgebungen", bei DialOS „dunkles Icon". Beide
+  sind für sich stimmig, zusammen eine Falle. DialOS-Suche folgt DialOS, weil
+  die Dateien im selben Ordner liegen; die Messung steht im Kopf des Skripts,
+  damit sie niemand ein zweites Mal machen muss.
 
 - **Dritte Namenskategorie festgehalten: Erweiterungen** (2026-09-17, in
   `CLAUDE.md`). Bisher gab es Kernbestandteil und Familienmitglied ohne Präfix.

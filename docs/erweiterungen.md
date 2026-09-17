@@ -5,11 +5,15 @@
 Wie ein Programm zu DialOS dazukommt, ohne dass am Kern etwas geändert
 werden muss.
 
-> **Stand am 2026-09-17: ENTWURF. Nichts davon ist gebaut.** Diese Datei
-> beschreibt, wie es werden soll, und steht bewusst getrennt von
-> [sprachbefehle.md](sprachbefehle.md) und [anwendungen.md](anwendungen.md),
-> die beschreiben, was ist. Die Trennung ist dieselbe wie dort: Vermischt
-> sähe Geplantes wie Vorhandenes aus.
+> **Stand am 2026-09-17: Die Schnittstelle ist ENTWURF, keine Zeile Code
+> davon ist gebaut.** Diese Datei beschreibt, wie es werden soll, und steht
+> bewusst getrennt von [sprachbefehle.md](sprachbefehle.md) und
+> [anwendungen.md](anwendungen.md), die beschreiben, was ist. Die Trennung
+> ist dieselbe wie dort: Vermischt sähe Geplantes wie Vorhandenes aus.
+>
+> **Die einzige Ausnahme ist das Symbol** - das ist gebaut und liegt als
+> zwölf Dateien im Repo, siehe „Das Symbol" weiter unten. Es steht hier
+> ausdrücklich, damit die Ausnahme nicht die Regel aufweicht.
 
 Entschieden mit Stephan am 2026-09-17: DialOS bekommt eine
 Erweiterungsschnittstelle, und die erste Erweiterung wird **DialOS-Suche**
@@ -314,7 +318,7 @@ Familienmitglieder werden NICHT umbenannt" bleibt unangetastet - sie gilt
 für eigenständige Programme, nicht für das, was ohne DialOS gar nicht
 läuft.
 
-## Das Symbol - und warum es bei 32 Pixeln noch nicht trägt
+## Das Symbol: der Entwurf fiel bei 32 Pixeln durch, die Lupe trägt
 
 Stephan hat am 2026-09-17 einen Entwurf geliefert. Er liegt als
 `assets/suche-icon-entwurf.png` im Repo, **bewusst „Entwurf" im Namen**:
@@ -347,27 +351,63 @@ dort unter einem Pixel Abstand und laufen zusammen. Zusätzlich drängt der
 Platzbedarf rechts das Gesicht nach links, wodurch auch die linke Hälfte
 enger wirkt als bei den beiden anderen.
 
-**Vorschlag, noch nicht entschieden: auf EIN Objekt reduzieren, und zwar
-die Lupe.** Sie ist das stärkste Symbol für „suchen", sie ist rund und
-bleibt damit auch als Klumpen noch eine erkennbare Form, und sie
-unterscheidet sich von den Schallwellen und vom Stift. Das Dokument mit
-Textzeilen ist bei 32 Pixeln in keiner Variante zu retten.
+### Gebaut am 2026-09-17: auf die Lupe reduziert
 
-**Was technisch noch fehlt**, unabhängig von der Gestaltung:
+Stephans Entscheidung nach der Messung: „reduziere den rechten Bereich auf
+die Lupe". Gebaut mit `assets/suche-icon-bauen.py`, abgeleitet von
+`Denkzettel/assets/icon-bauen.py` - dieselbe Technik, weil sie dort schon
+einmal genau dieses Problem gelöst hat.
 
-- **Transparenz.** Der Entwurf ist RGB mit weißem Hintergrund. Ein
-  `.desktop`-Icon braucht einen Alpha-Kanal, sonst steht ein weißer
-  Kasten im Panel. Der Weg dafür ist gebaut: `icon-bauen.py` bei
-  Denkzettel rechnet die Vorlage in eine Strichzeichnung mit Transparenz
-  zurück (Weiß = durchsichtig, Farbe = Linie) - genau für diesen Fall.
-- **Die Größen** 32, 48, 64, 128, 256, 512 wie bei Denkzettel, und eine
-  dunkle Variante als Gegenstück zu `app-icon-dark.png`.
-- **Die Kantenlänge:** 1254 × 1254 statt der 512 der Familie.
+**Die Lupe wird gezeichnet, nicht aus dem Entwurf ausgeschnitten.**
+Kopiert käme sie mit den Schnittkanten des überlappenden Briefumschlags.
+Gezeichnet hat sie saubere Kanten und freie Größe. Denkzettel hat den
+Stift aus demselben Grund gezeichnet.
 
-**Bewusst noch nicht gebaut.** Größen und Transparenz von einem Entwurf
-abzuleiten, der sich in der Gestaltung noch ändert, hieße die Arbeit
-zweimal zu machen - und am Ende lägen sechs Dateien im Repo, die nicht
-mehr zum Original passen.
+**Zwei Varianten wurden gebaut und verglichen**, damit es niemand ein
+zweites Mal prüft:
+
+| Variante | Ergebnis bei 32 px |
+|---|---|
+| **nur Lupe** (Schallwellen entfernt) | **klar** - Kreis mit Griff, von DialOS und Denkzettel eindeutig unterscheidbar. **Gewählt.** |
+| Wellen **und** Lupe (näher am Entwurf) | verworfen - Wellen und Ring überlagern sich zu demselben Klumpen, den der Entwurf schon hatte |
+
+Damit folgt das Ergebnis dem Muster der Familie: Denkzettel ersetzt die
+Schallwellen durch den Stift, DialOS-Suche durch die Lupe. **Ersetzen,
+nicht ergänzen** - genau die Lehre aus dem Entwurf.
+
+Der Griff ist bewusst kurz. Er erklärt die Form bei 512 Pixeln, trägt bei
+32 nichts mehr bei, und je länger er ist, desto näher kommt er dem Bogen.
+Das Skript **prüft den Abstand zum Ring vor dem Zeichnen** und bricht ab,
+wenn er gerissen wird - der erste Versuch ist genau daran aufgelaufen
+(193,6 gegen erlaubte 192, am Griffende).
+
+**Erzeugt werden zwölf Dateien:** `suche-icon-light-*.png` und
+`suche-icon-dark-*.png`, je in 32, 48, 64, 128, 256 und 512 Pixeln, alle
+mit Alpha-Kanal. Der Vergleich liegt als
+`assets/suche-icon-groessenvergleich.png` bei - links auf hellem Panel,
+rechts auf dunklem, jeweils in der Fassung, die dort hingehört.
+
+**Eine Falle, gemessen und festgehalten: DialOS und Denkzettel benennen
+gegenläufig.**
+
+| Datei | Scheibe |
+|---|---|
+| `DialOS/assets/app-icon-light.png` | rgb(254,255,255) - hell |
+| `DialOS/assets/app-icon-dark.png` | rgb(4,22,47) - dunkel |
+| `Denkzettel/assets/app-icon-dark.png` | rgb(255,255,255) - **hell** |
+
+Bei Denkzettel heißt „-dark" also „Datei für dunkle Umgebungen" (Stephans
+Entscheidung vom 2026-08-24), bei DialOS schlicht „dunkles Icon". Beide
+sind für sich stimmig, zusammen sind sie eine Falle. **DialOS-Suche folgt
+DialOS**, weil die Dateien in demselben Ordner neben `app-icon-light.png`
+liegen - zwei gegenläufige Bedeutungen desselben Suffixes an einem Ort
+wären der sichere Weg, beim Einbinden die falsche Datei zu erwischen. Und
+ein falsches Icon fällt einem blinden Nutzer nie auf, dem sehenden Helfer
+aber sofort.
+
+**Der Entwurf bleibt liegen** (`assets/suche-icon-entwurf.png`). Er ist
+die Vorlage der Idee, und die Messung, an der er gescheitert ist, steht
+oben - beides gehört zusammen.
 
 ## Wo eine Erweiterung wohnt, und wie sie ausgeliefert wird
 
