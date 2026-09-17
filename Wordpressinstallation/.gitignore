@@ -7,3 +7,6 @@
 *.html
 *.har
 tmp/
+
+# Erzeugte Hörfassungen – gehören in die Mediathek, nicht ins Repo
+sprechfassungen/*.mp3

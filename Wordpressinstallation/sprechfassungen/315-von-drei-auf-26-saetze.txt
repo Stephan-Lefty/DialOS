@@ -1,0 +1,13 @@
+Von drei Sätzen auf über zwei Dutzend.
+
+Als DialOS zum ersten Mal zuhörte, verstand es genau drei Sätze. Heute sind es über zwei Dutzend. Das klingt, als müsste man nur etwas hinzufügen. So einfach ist es nicht.
+
+Jeder neue Befehl verändert nicht nur sich selbst. Er verändert alles, was das Gerät bisher verstanden hat. Wörter aus einem neuen Satz können sich mit Wörtern aus alten Sätzen zu etwas verbinden, das niemand gemeint hat. Deshalb wird bei jedem einzelnen Schritt neu geprüft, ob das Bestehende noch zuverlässig funktioniert.
+
+Dabei sind zwei Regeln entstanden.
+
+Regel eins. Ein neues Wort muss der Spracherkennung überhaupt bekannt sein. Das klingt selbstverständlich, ist es aber nicht. Wörter wie löschen oder später kennt sie nicht. Ein Befehl damit wäre lautlos ins Leere gelaufen. Und für einen blinden Menschen ist das der schlechteste aller Ausgänge. Er hat gesprochen, das Gerät hat zugehört, und nichts sagt ihm, dass nichts geschehen ist.
+
+Regel zwei. Ein Satz gilt auch dann, wenn ein Wort verschluckt wird. Wer spricht, spricht nicht wie ein Diktat. Wer auf dem perfekten Wortlaut besteht, baut ein Gerät, das beim Entwickler funktioniert und im Wohnzimmer nicht mehr.
+
+Beide Regeln zusammen bedeuten eines. Wenn DialOS einen neuen Befehl dazulernt, wird nicht einfach die Liste länger. Es ändert sich, wie das Gerät alles Bisherige hört. Wachsen heißt hier also nicht dazukommen, sondern sich behaupten. Jeder neue Satz muss zeigen, dass er keinen der bisherigen stört, bevor er bleiben darf.

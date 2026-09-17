@@ -26,6 +26,18 @@ Servers), sondern die Analyse-, Konfigurations- und Skriptablage dazu.
   ./sync-changelog.py --dry-run   # nur Vorschau
   ./sync-changelog.py             # schreibt wirklich auf die Website
   ```
+- [sprechfassungen/](sprechfassungen/) – die Texte, aus denen die Hörfassungen
+  der deutschen Neuigkeiten entstehen, gesprochen von Anna. Eigene Texte, nicht
+  die vorgelesenen Beiträge: Ein Text zum Lesen und ein Text zum Hören sind
+  nicht derselbe Text. Regeln und Ablauf in
+  [sprechfassungen/README.md](sprechfassungen/README.md).
+- [dialos-hoerfassung-sprechen.py](dialos-hoerfassung-sprechen.py) – erzeugt aus
+  einer Sprechfassung die MP3-Datei (Piper + `de_DE-kerstin-low`, Tempo 0,95 wie
+  am Gerät). Meldet Ziffern und Wörter, die Anna schlecht ausspricht, und warnt
+  bei Überlänge.
+- [dialos-hoerfassung-hochladen.py](dialos-hoerfassung-hochladen.py) – lädt die
+  fertige Datei in die Mediathek und setzt den Audio-Block in den Beitrag.
+  **Läuft nur auf Zuruf** – erst anhören, dann hochladen.
 - [.env.example](.env.example) – Vorlage für die Zugangsdaten
 
 ## Zugang einrichten
@@ -70,6 +82,23 @@ Verbindungstest erfolgreich: `wp-api.sh GET wp/v2/users/me?context=edit`
 liefert Benutzer `ClaudIA` mit Administrator-Rechten.
 
 ## Änderungsprotokoll
+
+### 0.3.0 (17.09.2026)
+- Hörfassungen der deutschen Neuigkeiten, gesprochen von Anna
+  (`de_DE-kerstin-low`, Tempo 0,95 wie am Gerät). Erster Beitrag ist
+  „Von drei auf 26 Sätze", 1:43 Minuten.
+- Dabei gelernt und in `sprechfassungen/README.md` festgehalten: Der
+  vorgelesene Blogbeitrag taugt nicht. Der erste Versuch war 2:23 lang und
+  zu technisch – seitdem wird eine eigene Sprechfassung von Hand geschrieben,
+  höchstens zwei Minuten, ohne Ziffern und ohne Fachbegriffe.
+- Gemessen, warum: Anna schreibt Zahlen zwar aus, hetzt sie aber („26" ist
+  22 % kürzer als „sechsundzwanzig"), und „Grammatik" hat die richtige Länge
+  bei falscher Betonung. Beides wird umgangen, nicht repariert. **Offen:** ob
+  das auch die Ansagen am Gerät betrifft (Akkustand, Uhrzeit) – das ist ein
+  Hörtest, den nur Stephan machen kann.
+- Beim Vertonen gefunden: Der per CSS versteckte Sprachmarker steht im HTML
+  und wurde mitgelesen – Anna sagte „English" mitten im Beitrag. Wer den
+  Beitragstext maschinell abgreift, muss ihn herausfiltern.
 
 ### 0.2.0 (16.08.2026)
 - SEOPress PRO eingerichtet: Titel/Description auf allen 6 Seiten, Open-Graph-
