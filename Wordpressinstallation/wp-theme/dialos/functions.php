@@ -640,9 +640,16 @@ function dialos_child_englische_anfuehrungszeichen( $text ) {
 	if ( ! dialos_child_ist_englisch() ) {
 		return $text;
 	}
+	// Beide Schreibweisen: numerisch (so liefert wptexturize) UND benannt
+	// (so steht es teilweise im Inhalt, geschrieben von der
+	// Uebersetzungsroutine). Am 2026-09-17 blieben nach dem ersten Anlauf
+	// genau vier Zeichen stehen, alle als &bdquo; auf /en/idea/ - der Filter
+	// kannte nur die numerische Form.
 	$text = str_replace(
-		array( '&#8222;', '&#8220;', '&#8221;', '&#8218;', '&#8216;', '&#8217;' ),
-		array( '„', '“', '”', '‚', '‘', '’' ),
+		array( '&#8222;', '&#8220;', '&#8221;', '&#8218;', '&#8216;', '&#8217;',
+			'&bdquo;', '&ldquo;', '&rdquo;', '&sbquo;', '&lsquo;', '&rsquo;' ),
+		array( '„', '“', '”', '‚', '‘', '’',
+			'„', '“', '”', '‚', '‘', '’' ),
 		$text
 	);
 	// Deutsches Paar „...“ wird zum englischen “...”, ebenso die einfachen.
