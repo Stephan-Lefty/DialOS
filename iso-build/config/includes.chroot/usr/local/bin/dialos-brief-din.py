@@ -33,6 +33,7 @@ WOHER DIE TEILE KOMMEN:
 Aufruf (zum Pruefen, noch nicht im Diktat eingebunden):
   dialos-brief-din.py BRIEF.txt ZIEL.pdf [--empfaenger "Zeile|Zeile|..."]
                       [--daten PERSOENLICHE-DATEN.txt] [--png VORSCHAU.png]
+                      [--kopf ohne|name]
 BRIEF.txt darf der reine Brieftext (Betreff, Absaetze, Gruss) oder ein alter
 Briefbogen von dialos-diktat.py sein - der wird zurueckgewandelt.
 """
@@ -56,6 +57,12 @@ RAND_LINKS, RAND_RECHTS = 25 * MM, 20 * MM
 TEXTBREITE = SEITE_B - RAND_LINKS - RAND_RECHTS
 SCHRIFT = "Liberation Sans, DejaVu Sans, Sans"
 GROESSE = 11
+# KOPF (Stephan, 2026-09-17): "Der Kopf gefaellt mir nicht" - Name gross links
+# und die Anschrift in einer Zeile darunter fielen weg. Die Anschrift steht im
+# Informationsblock, oben hoechstens der Name zentriert.
+#   "ohne"  - kein Kopf
+#   "name"  - nur der Name, zentriert
+KOPF = "ohne"
 FUSS_OBEN = 282 * MM          # darunter nur noch die Fusszeile
 FOLGESEITE_OBEN = 25 * MM
 
@@ -207,20 +214,22 @@ def erste_seite(satz, daten, pd, empfaenger, datum):
     """Briefkopf, Anschriftfeld, Informationsblock, Marken."""
     s = satz.stift
     grau = (0.35, 0.35, 0.35)
-    # Briefkopf: Name gross, Anschrift in einer Zeile darunter.
     name = pd.voller_name(daten) if (pd and daten) else ""
-    anschrift = pd.absenderzeilen(daten)[1:] if (pd and daten) else []
-    if name:
-        satz.text(name, RAND_LINKS, 17 * MM, groesse=16, fett=True)
-    if anschrift:
-        satz.text(" · ".join(anschrift), RAND_LINKS, 26 * MM, groesse=9, farbe=grau)
+    # Anschrift OHNE Adresszusatz ("1. Etage rechts") und ohne Firma: Die Etage
+    # braucht der Brieftraeger, nicht der Empfaenger (Stephan, 2026-09-17).
+    daten = daten or {}
+    strasse = " ".join(daten[k] for k in ("strasse", "hausnummer") if daten.get(k))
+    ort = " ".join(daten[k] for k in ("postleitzahl", "ort") if daten.get(k))
+    anschrift = [z for z in (strasse, ort) if z]
+    if name and KOPF == "name":
+        lay = satz.layout(name, groesse=14, fett=True)
+        satz.zeigen(lay, (SEITE_B - lay.get_pixel_size()[0]) / 2, 17 * MM)
 
     # Anschriftfeld: Ruecksendeangabe unten in der Vermerkzone, darunter Empfaenger.
     if name or anschrift:
         # Ohne Land: Es passt sonst nicht in die 80 mm, und fuer die Ruecksendung
-        # reicht Strasse und Ort (das Land steht im Briefkopf).
-        ohne_land = [z for z in anschrift if not (daten.get("land") and z == daten["land"].upper())]
-        ruecksende = " · ".join(([name] if name else []) + ohne_land)
+        # reicht Strasse und Ort (das Land steht im Informationsblock).
+        ruecksende = " · ".join(([name] if name else []) + anschrift)
         lay = satz.layout(ruecksende, groesse=7)
         lay.set_width(int(80 * MM * Pango.SCALE))
         lay.set_ellipsize(Pango.EllipsizeMode.END)
@@ -240,6 +249,9 @@ def erste_seite(satz, daten, pd, empfaenger, datum):
     if daten:
         if name:
             zeilen.append(("Name", name))
+        adresse = anschrift + ([daten["land"]] if daten.get("land") else [])
+        if adresse:
+            zeilen.append(("Anschrift", "\n".join(adresse)))
         for schluessel, wort in (("festnetz_privat", "Telefon"), ("handy_privat", "Mobil"),
                                  ("mail", "E-Mail")):
             if daten.get(schluessel):
@@ -439,7 +451,8 @@ def als_png(text, ziel, daten=None, empfaenger=None, datum=None, dpi=110):
 def main():
     argumente = sys.argv[1:]
     optionen = {}
-    for schalter in ("--empfaenger", "--daten", "--png", "--datum"):
+    global KOPF
+    for schalter in ("--empfaenger", "--daten", "--png", "--datum", "--kopf"):
         if schalter in argumente:
             i = argumente.index(schalter)
             optionen[schalter] = argumente[i + 1]
@@ -453,6 +466,7 @@ def main():
         text = aus_briefbogen(text)
         if "--empfaenger" not in optionen and getattr(aus_briefbogen, "empfaenger", None):
             optionen["--empfaenger"] = "|".join(aus_briefbogen.empfaenger)
+    KOPF = optionen.get("--kopf", KOPF)
     pd = holen(PERSOENLICHE_DATEN_SKRIPT, "persoenliche_daten")
     daten = pd.lesen(optionen.get("--daten")) if pd else {}
     empfaenger = optionen["--empfaenger"].split("|") if "--empfaenger" in optionen else None
