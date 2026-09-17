@@ -126,22 +126,77 @@ finished too, and then move down together. That way no reference breaks.
     check via that Vosk message instead of the file (fits the "bildschirmfoto"
     side finding below).
 
+    **The 51 have an explanation, and it is a fault in the tool** (see next
+    point): 49 existing sentences plus the candidate makes 50 - the candidate
+    was checked twice. That changes nothing about the result.
+
         scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
 
-    "unterlagen" (documents) and "durchsuchen" (search) appear in none of the 49
-    existing sentences (counted on 2026-09-17: 69 different words). "briefe"
-    (letters), by contrast, would already be in there, "brief" (letter) even six
-    times - which is why "Briefe durchsuchen" (search the letters) has been
-    dropped as a second phrasing. **That does not replace the check, it only
-    sorts out beforehand.**
-  - [ ] **Side finding while building the tool, an item of its own:** checked
-    against the large Tuda model, **"bildschirmfoto"** (screenshot) is missing
-    from the vocabulary - although "Bildschirmfoto erstellen" (take a
-    screenshot) is a documented command. That means either that the small model
-    has a different vocabulary than the large one (in which case every
-    pre-check against the large one is worthless), or that the command works by
-    some other route. **To be clarified before anyone draws conclusions from a
-    pre-check.**
+    With that, "Unterlagen durchsuchen" (search the documents) is the start
+    sentence of DialOS-Suche - it is recognized itself, and **none of the
+    existing commands breaks because of it**.
+
+    The pre-selection has been confirmed: "unterlagen" (documents) and
+    "durchsuchen" (search) appear in none of the 49 existing sentences (counted:
+    71 different words). "briefe" (letters), by contrast, would already be in
+    there, "brief" (letter) even six times - which is why "Briefe durchsuchen"
+    (search the letters) has been dropped as a second phrasing.
+
+    **What the run still does not replace:** Piper speaks more clearly than a
+    human being, more evenly and always from the same distance. That does not
+    make the sentence broken - but it is only proven with a real voice.
+  - [x] **A counting fault in the tool, found by the first real run and fixed**
+    (2026-09-17). The run reported **51 instead of 50** sentences, and Stephan
+    saw the cause in the log: "Unterlagen durchsuchen wurde 2x aufgeführt"
+    ("Unterlagen durchsuchen was listed twice"). That is exactly what it was -
+    `alle` already contained the candidate (appended at the top), and
+    `neu + alle` checked it a second time. **Only the number was wrong, not the
+    result** - the candidate was checked twice instead of not at all. Fixed, the
+    candidate now stands first and exactly once.
+
+    Recorded because the lesson is bigger than the fault: a number that cannot
+    be explained has more than once been the beginning of a wrong diagnosis in
+    this project. Here it was the beginning of the right one.
+  - [ ] **"bildschirmfoto" (screenshot) is missing from the large Tuda model** -
+    a side finding from building the tool.
+    "Bildschirmfoto erstellen" (take a screenshot) is a documented command and
+    works on the device, and the word appears **three times** in the grammar. So
+    the small model knows it; the large Tuda model does not.
+
+    **A rule follows from that:** a pre-check of the vocabulary against the
+    large model is **worthless** - it has a different vocabulary than the small
+    one, and in both directions. Checks are run exclusively against
+    `/usr/local/share/vosk-model-de-small`, that is, on the device.
+
+    **The cross-check is done** (Stephan, 2026-09-17): the line
+    `ALTLAST … 'bildschirmfoto'` did **not** come - but not because the word
+    would be known, rather because the check did not run at all for lack of
+    `words.txt`. Fixed in the next point.
+  - [x] **Vocabulary check switched to Vosk's own message** (2026-09-17,
+    Stephan's finding and suggestion). It read `graph/words.txt` - **which does
+    not exist in the small model at all**:
+    `/usr/local/share/vosk-model-de-small/graph/` contains only `Gr.fst`,
+    `HCLr.fst` and `phones/`. The check therefore never ran there and honestly
+    reported "Wortschatz UNGEPRUEFT" (vocabulary UNCHECKED) - that is how it
+    stood in the log of the run on the device, too.
+
+    **A mandatory check that never fires cannot be told apart from a missing
+    one.** That is exactly what it was until today.
+
+    The check now works the way Vosk does anyway: the grammar is built, and
+    Vosk's message `Ignoring word missing in vocabulary` is caught. For that,
+    `SetLogLevel` has to be raised briefly and stderr redirected at the
+    file-descriptor level - the message comes from the C++ layer, not from
+    Python, and `contextlib.redirect_stderr` does not reach it there. That is
+    the only way that works independently of how the model is built.
+    - [ ] **Cross-check on the device that the new check really fires:** an
+      invented word as a candidate has to be refused.
+
+          scripts/dialos-grammatik-pruefen.py --neu "xylofonquark durchsuchen"
+
+      Expected: "KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'"
+      (candidate not in the model's vocabulary), return value 1. If a pass
+      comes instead, it still checks nothing.
   - [ ] **Microphone handover via a marker file, with a guard.** A crashed
     extension must not keep the microphone - the user would otherwise be
     speaking against a deaf device, and even switching the voice control off

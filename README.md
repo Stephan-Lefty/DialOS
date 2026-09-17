@@ -135,6 +135,54 @@ das Erfolg meldet, während es versagt.
   Informationsblock mit Anschrift und Datum 17.09.2026 auf Höhe der
   Rücksendeangabe. Gilt für „Brief als PDF speichern", „Brief drucken" und das
   Archiv; Zettel und Notizen bleiben festbreit.
+- **Wortschatz-Prüfung lief nie - auf Vosks eigene Meldung umgestellt**
+  (2026-09-17, Stephans Befund am Gerät). Sie las `graph/words.txt`, **die es
+  im kleinen Modell gar nicht gibt**:
+  `/usr/local/share/vosk-model-de-small/graph/` enthält nur `Gr.fst`,
+  `HCLr.fst` und `phones/`. Das Werkzeug meldete das zwar ehrlich („Wortschatz
+  UNGEPRUEFT"), aber **eine Pflichtprüfung, die nie anschlägt, ist von einer
+  fehlenden nicht zu unterscheiden** - und sie war seit ihrem Einbau am selben
+  Tag wirkungslos.
+
+  Gefragt wird jetzt Vosk selbst: Die Grammatik wird gebaut und die Meldung
+  `Ignoring word missing in vocabulary` abgefangen. Dafür muss `SetLogLevel`
+  kurz hochgesetzt und stderr auf **Dateideskriptor-Ebene** umgeleitet werden -
+  die Meldung kommt aus der C++-Ebene, `contextlib.redirect_stderr` greift dort
+  nicht. Das Verfahren ist unabhängig vom Aufbau des Modells, weil es dasselbe
+  ist, das später auch im Betrieb greift.
+
+  **Damit ist auch der Nebenbefund „bildschirmfoto" erledigt:** Das Wort fehlt
+  im großen Tuda-Modell, steht aber dreimal in der Grammatik, und
+  „Bildschirmfoto erstellen" funktioniert am Gerät. Das kleine Modell kennt es
+  also, das große nicht. **Regel daraus:** Eine Wortschatz-Vorprüfung gegen das
+  große Modell ist wertlos - geprüft wird am Gerät, gegen das Modell, das dort
+  auch läuft.
+
+- **Startsatz „Unterlagen durchsuchen" am Gerät geprüft und bestanden**
+  (2026-09-17). `dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`
+  am T490: **alle Sätze wörtlich erkannt, der Kandidat ist einbaubar** - er
+  wird selbst erkannt, und keiner der 49 bestehenden Befehle geht durch ihn
+  kaputt. Die Vorauswahl hat sich bestätigt: „unterlagen" und „durchsuchen"
+  kommen in keinem bestehenden Satz vor, „brief" dagegen sechsmal. Der Test
+  mit echter Stimme bleibt der Abschluss - Piper spricht deutlicher als ein
+  Mensch.
+
+- **Zählfehler im Prüfwerkzeug, vom ersten echten Lauf gefunden** (2026-09-17).
+  Der Lauf meldete 51 statt 50 Sätze, und Stephan hat die Ursache im Protokoll
+  gesehen: „Unterlagen durchsuchen wurde 2x aufgeführt". Genau so war es - die
+  Satzliste enthielt den Kandidaten bereits, und er wurde ihr ein zweites Mal
+  vorangestellt. **Falsch war nur die Zahl, nicht das Ergebnis:** Der Kandidat
+  wurde doppelt geprüft, nicht gar nicht. Behoben; er steht jetzt zuerst und
+  genau einmal. Festgehalten, weil die Lehre größer ist als der Fehler - eine
+  Zahl, die sich nicht erklären lässt, war hier schon mehrfach der Anfang
+  einer falschen Diagnose, und diesmal der Anfang der richtigen.
+
+- **Zwei Zahlen in der Doku berichtigt** (2026-09-17). Die Auszählung der
+  Grammatik vom selben Tag nannte 69 verschiedene Wörter; richtig sind **71**.
+  Ursache war die Zählmethode: `STARTSATZ` und `STOPPSATZ` stehen in
+  `GRAMMATIK_AN` als Konstanten und nicht als Zeichenketten, eine Textsuche
+  übersieht sie. Gezählt wird jetzt über den Syntaxbaum. Die Satzzahl 49 und
+  alle Schlussfolgerungen bleiben unberührt.
 
 - **Im Diktat: „von vorne" und „alles verwerfen", Beträge mit Cent von Vosk**
   (2026-09-17, vierte Probe). Beide Befehle mit Rückfrage und eigenem Erkenner, damit
@@ -170,7 +218,8 @@ das Erfolg meldet, während es versagt.
 
 - **Startsatz für DialOS-Suche vorbereitet: „Unterlagen durchsuchen"**
   (2026-09-17), zweite Formulierung „Briefe durchsuchen" gestrichen. Grundlage
-  ist eine Auszählung der Grammatik: 49 Sätze, **69 verschiedene Wörter**.
+  ist eine Auszählung der Grammatik: 49 Sätze, **71 verschiedene Wörter**
+  (im Eintrag stand zuerst 69 - berichtigt, siehe oben).
   „brief" steht darin **sechsmal**, „briefe" einmal (in „befehle für briefe") -
   ein Startsatz aus schon vorhandenen Wörtern vergrößert das Wortnetz genau
   dort, wo es ohnehin am dichtesten ist. „unterlagen" und „durchsuchen" kommen

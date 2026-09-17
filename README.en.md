@@ -127,6 +127,56 @@ background) and `splash.png` (boot/login screen).
   completely, information block with address and date 17.09.2026 level with the
   return address. Applies to "Brief als PDF speichern", "Brief drucken" and the
   archive; lists and notes stay fixed width.
+- **The vocabulary check never ran - switched to Vosk's own message**
+  (2026-09-17, Stephan's finding on the device). It read `graph/words.txt`,
+  **which does not exist in the small model at all**:
+  `/usr/local/share/vosk-model-de-small/graph/` contains only `Gr.fst`,
+  `HCLr.fst` and `phones/`. The tool did report that honestly ("Wortschatz
+  UNGEPRUEFT", vocabulary UNCHECKED), but **a mandatory check that never fires
+  cannot be told apart from a missing one** - and it had been without effect
+  ever since it was built in on the same day.
+
+  Vosk itself is asked now: the grammar is built and the message
+  `Ignoring word missing in vocabulary` is caught. For that, `SetLogLevel` has
+  to be raised briefly and stderr redirected at the **file-descriptor level** -
+  the message comes from the C++ layer, and `contextlib.redirect_stderr` does
+  not reach it there. The procedure is independent of how the model is built,
+  because it is the same one that takes effect later in operation as well.
+
+  **That also settles the "bildschirmfoto" (screenshot) side finding:** the
+  word is missing from the large Tuda model, but stands **three times** in the
+  grammar, and "Bildschirmfoto erstellen" (take a screenshot) works on the
+  device. So the small model knows it, the large one does not. **The rule that
+  follows:** a vocabulary pre-check against the large model is worthless -
+  checking is done on the device, against the model that runs there as well.
+
+- **Start sentence "Unterlagen durchsuchen" (search the documents) checked on
+  the device and passed** (2026-09-17).
+  `dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"` on the T490:
+  **every sentence recognized word for word, the candidate can be built in** -
+  it is recognized itself, and none of the 49 existing commands breaks because
+  of it. The pre-selection has been confirmed: "unterlagen" (documents) and
+  "durchsuchen" (search) appear in no existing sentence, "brief" (letter) by
+  contrast six times. The test with a real voice remains the conclusion - Piper
+  speaks more clearly than a human being.
+
+- **A counting fault in the checking tool, found by the first real run**
+  (2026-09-17). The run reported 51 instead of 50 sentences, and Stephan saw the
+  cause in the log: "Unterlagen durchsuchen wurde 2x aufgeführt" ("Unterlagen
+  durchsuchen was listed twice"). That is exactly what it was - the sentence
+  list already contained the candidate, and it was prepended to it a second
+  time. **Only the number was wrong, not the result:** the candidate was checked
+  twice rather than not at all. Fixed; it now stands first and exactly once.
+  Recorded because the lesson is bigger than the fault - a number that cannot be
+  explained has more than once been the beginning of a wrong diagnosis here, and
+  this time the beginning of the right one.
+
+- **Two numbers in the documentation corrected** (2026-09-17). The count of the
+  grammar from the same day named 69 different words; **71** is correct. The
+  cause was the counting method: `STARTSATZ` and `STOPPSATZ` stand in
+  `GRAMMATIK_AN` as constants and not as strings, and a text search overlooks
+  them. Counting now goes via the syntax tree. The sentence count of 49 and all
+  conclusions remain untouched.
 
 - **In dictation: "von vorne" and "alles verwerfen", amounts with cents from Vosk**
   (2026-09-17, fourth trial). Both commands with a question and their own
@@ -163,7 +213,8 @@ background) and `splash.png` (boot/login screen).
 - **Start sentence for DialOS Search prepared: "Unterlagen durchsuchen"**
   (search the documents) (2026-09-17), second phrasing "Briefe durchsuchen"
   (search the letters) dropped. The basis is a count of the grammar: 49
-  sentences, **69 different words**. "brief" (letter) appears in it **six
+  sentences, **71 different words** (the entry first said 69 - corrected, see
+  above). "brief" (letter) appears in it **six
   times**, "briefe" (letters) once (in "befehle für briefe" - commands for
   letters) - a start sentence made of words that are already there enlarges the
   word network exactly where it is densest anyway. "unterlagen" (documents) and

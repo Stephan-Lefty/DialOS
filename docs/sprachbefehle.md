@@ -94,11 +94,11 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |
-| „Unterlagen durchsuchen" | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Wortlaut noch nicht endgültig**, die Prüfung am Gerät steht aus: `scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`. |
+| **„Unterlagen durchsuchen"** | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Am 2026-09-17 am Gerät geprüft und bestanden:** alle Sätze wörtlich erkannt, kein bestehender Befehl geht durch ihn kaputt (`scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). Der Test mit echter Stimme bleibt der Abschluss. |
 
 ### Warum „Unterlagen durchsuchen" und nicht „Briefe durchsuchen"
 
-Am 2026-09-17 wurde die Wortmenge der Grammatik ausgezählt: 49 Sätze, **69
+Am 2026-09-17 wurde die Wortmenge der Grammatik ausgezählt: 49 Sätze, **71
 verschiedene Wörter**. Daraus folgt die Wahl, und zwar bevor jemand sprechen
 musste:
 

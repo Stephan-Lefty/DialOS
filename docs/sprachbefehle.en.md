@@ -77,11 +77,11 @@ listen?".
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
 | "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |
 | "Ruf {person} an" (call {person}) | Telephony via SIM or paired phone, see [telefonie.en.md](telefonie.en.md). |
-| "Unterlagen durchsuchen" (search the documents) | Start sentence of the **DialOS-Suche** extension - finding letters, documents, notes and mails and reading them out. **Wording not final yet**, the check on the device is still pending: `scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`. |
+| **"Unterlagen durchsuchen"** (search the documents) | Start sentence of the **DialOS-Suche** extension - finding letters, documents, notes and mails and reading them out. **Checked on the device on 2026-09-17 and passed:** every sentence recognized word for word, no existing command breaks because of it (`scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). The test with a real voice remains the conclusion. |
 
 ### Why "Unterlagen durchsuchen" and not "Briefe durchsuchen" (search the letters)
 
-On 2026-09-17 the word set of the grammar was counted: 49 sentences, **69
+On 2026-09-17 the word set of the grammar was counted: 49 sentences, **71
 different words**. The choice follows from that, and it did so before anyone
 had to speak:
 

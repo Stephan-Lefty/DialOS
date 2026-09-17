@@ -129,20 +129,68 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Werkzeug sollte deshalb über diese Vosk-Meldung prüfen statt über die Datei
     (passt auch zum Nebenbefund „bildschirmfoto" unten).
 
-        scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+    **Die 51 erklären sich, und zwar durch einen Fehler im Werkzeug** (siehe
+    nächster Punkt): Es sind 49 bestehende Sätze plus der Kandidat, macht 50 -
+    der Kandidat wurde doppelt geprüft. Am Ergebnis ändert das nichts.
+    Die Vorauswahl hat sich damit bestätigt: „unterlagen" und „durchsuchen"
+    kommen in keinem der 49 bestehenden Sätze vor (ausgezählt: **71**
+    verschiedene Wörter - die zwischenzeitlich genannten 69 waren eine
+    Fehlzählung). „briefe" stünde dagegen schon drin, „brief" sogar sechsmal -
+    deshalb ist „Briefe durchsuchen" als zweite Formulierung gestrichen.
 
-    „unterlagen" und „durchsuchen" kommen in keinem der 49 bestehenden Sätze
-    vor (ausgezählt am 2026-09-17: 69 verschiedene Wörter). „briefe" stünde
-    dagegen schon drin, „brief" sogar sechsmal - deshalb ist „Briefe
-    durchsuchen" als zweite Formulierung gestrichen. **Das ersetzt die Prüfung
-    nicht, es sortiert nur vorher aus.**
-  - [ ] **Nebenbefund beim Bauen des Werkzeugs, eigener Punkt:** Gegen das
-    große Tuda-Modell geprüft fehlt **„bildschirmfoto"** im Wortschatz -
-    obwohl „Bildschirmfoto erstellen" ein belegter Befehl ist. Das heißt
-    entweder, dass das kleine Modell einen anderen Wortschatz hat als das
-    große (dann ist jede Vorprüfung gegen das große wertlos), oder dass der
-    Befehl auf einem anderen Weg funktioniert. **Zu klären, bevor jemand aus
-    einer Vorprüfung Schlüsse zieht.**
+    **Was der Lauf nicht ersetzt:** Piper spricht deutlicher als ein Mensch,
+    gleichmäßiger und immer aus derselben Entfernung. Der Satz ist damit nicht
+    kaputt - bewiesen ist er erst mit echter Stimme.
+  - [x] **Zählfehler im Werkzeug, vom ersten echten Lauf gefunden und behoben**
+    (2026-09-17). Der Lauf meldete **51 statt 50** Sätze, und Stephan hat die
+    Ursache im Protokoll gesehen: „Unterlagen durchsuchen wurde 2x aufgeführt".
+    Genau so war es - `alle` enthielt den Kandidaten bereits (oben angehängt),
+    und `neu + alle` hat ihn ein zweites Mal geprüft. **Falsch war nur die
+    Zahl, nicht das Ergebnis** - der Kandidat wurde doppelt statt gar nicht
+    geprüft. Behoben, der Kandidat steht jetzt zuerst und genau einmal.
+
+    Festgehalten, weil die Lehre größer ist als der Fehler: Eine Zahl, die man
+    nicht erklären kann, war in diesem Projekt schon mehrfach der Anfang einer
+    falschen Diagnose. Hier war sie der Anfang der richtigen.
+  - [ ] **„bildschirmfoto" fehlt im großen Tuda-Modell** - Nebenbefund vom
+    Bau des Werkzeugs. „Bildschirmfoto erstellen" ist ein belegter Befehl und
+    funktioniert am Gerät, das Wort kommt **dreimal** in der Grammatik vor. Das
+    kleine Modell kennt es also; das große Tuda-Modell nicht.
+
+    **Daraus folgt eine Regel:** Eine Vorprüfung des Wortschatzes gegen das
+    große Modell ist **wertlos** - die Modelle haben verschiedene Wortschätze,
+    und zwar in beide Richtungen. Geprüft wird ausschließlich am Gerät, gegen
+    das Modell, das dort auch läuft.
+
+    **Die Gegenprobe ist erledigt** (Stephan, 2026-09-17): Die Zeile
+    `ALTLAST … 'bildschirmfoto'` kam **nicht** - aber nicht, weil das Wort
+    bekannt wäre, sondern weil die Prüfung mangels `words.txt` gar nicht lief.
+    Behoben im nächsten Punkt.
+  - [x] **Wortschatz-Prüfung auf Vosks eigene Meldung umgestellt** (2026-09-17,
+    Stephans Befund und Vorschlag). Sie las `graph/words.txt` - **die es im
+    kleinen Modell gar nicht gibt**: `/usr/local/share/vosk-model-de-small/graph/`
+    enthält nur `Gr.fst`, `HCLr.fst` und `phones/`. Die Prüfung lief dort also
+    nie und meldete ehrlich „Wortschatz UNGEPRUEFT" - so stand es auch im
+    Protokoll des Laufs am Gerät.
+
+    **Eine Pflichtprüfung, die nie anschlägt, ist von einer fehlenden nicht zu
+    unterscheiden.** Genau das war sie bis heute.
+
+    Geprüft wird jetzt so, wie Vosk es ohnehin tut: Die Grammatik wird gebaut,
+    und Vosks Meldung `Ignoring word missing in vocabulary` wird abgefangen.
+    Dafür muss `SetLogLevel` kurz hochgesetzt und stderr auf
+    Dateideskriptor-Ebene umgeleitet werden - die Meldung kommt aus der
+    C++-Ebene, nicht aus Python, und `contextlib.redirect_stderr` greift dort
+    nicht. Das ist der einzige Weg, der unabhängig vom Aufbau des Modells
+    funktioniert.
+    - [ ] **Am Gerät gegenprüfen, dass die neue Prüfung wirklich anschlägt:**
+      ein erfundenes Wort als Kandidat muss abgewiesen werden.
+
+          scripts/dialos-grammatik-pruefen.py --neu "xylofonquark durchsuchen"
+
+      Erwartet: „KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'",
+      Rückgabewert 1. Kommt stattdessen ein Durchlauf, prüft sie weiterhin
+      nichts.
   - [ ] **Mikrofon-Übergabe über eine Markierungsdatei, mit Wache.** Eine
     abgestürzte Erweiterung darf das Mikrofon nicht behalten - der Nutzer
     spräche sonst gegen ein taubes Gerät, und selbst das Ausschalten der
