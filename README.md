@@ -130,6 +130,11 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **„Brief vorlesen" ohne Fußzeile und Unterschrift-Hinweis** (2026-09-17,
+  Stephan: „eher eine Info für den Empfänger und brauche ich nicht für die
+  Kontrolle"). Beides bleibt im Brief, im PDF und auf dem Ausdruck; die Satzzahl
+  stimmt jetzt (der Hinweis zählte als Satz mit).
+
 - **Mail-Signatur mit Name und Kontakt** (2026-09-17). Aus den persönlichen Daten
   je Konto: Name, Anschrift, Telefon, Mail über der DialOS-Zeile, beim Anmelden
   neu geschrieben (`dialos-mail-signatur.service`). Ohne Daten wie bisher.

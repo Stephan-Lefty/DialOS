@@ -122,6 +122,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **"Brief vorlesen" without footer and signature note** (2026-09-17, Stephan:
+  rather information for the recipient, not needed for checking). Both stay in
+  the letter, the PDF and the printout; the sentence count is now right (the
+  note counted as a sentence).
+
 - **Mail signature with name and contact** (2026-09-17). From the personal data
   per account: name, address, phone, mail above the DialOS line, rewritten at
   login (`dialos-mail-signatur.service`). Without data as before.

@@ -406,6 +406,20 @@ def _antwort_hoeren(modell, prozess, vorrat=b""):
 
 # ------------------------------------------------------------ Unterbefehle
 
+UNTERSCHRIFT_HINWEIS_ANFANG = "Dieser Brief wurde per Spracheingabe erstellt"
+
+
+def ohne_unterschrift_hinweis(text):
+    """Schneidet den Hinweis (mit seiner umgebrochenen Fortsetzung) am Briefende ab."""
+    for i, zeile in enumerate(text):
+        if zeile.startswith(UNTERSCHRIFT_HINWEIS_ANFANG):
+            text = text[:i]
+            break
+    while text and not text[-1]:
+        text.pop()
+    return text
+
+
 def briefteile(pfad):
     """Zerlegt den Briefbogen in Kopf, Text und Fusszeile.
 
@@ -471,9 +485,10 @@ def saetze_zaehlen(fliesstext):
 
 
 def brief_vorlesen(name):
-    """Liest den Brief am Stueck vor - alles, mit benannten Teilen.
+    """Liest den Brief am Stueck vor - mit benannten Teilen, ohne Fusszeile und Hinweis.
 
-    ALLES, auf Stephans Einwand vom 2026-08-21: "Es sollte immer alles
+    SEIT 2026-09-17 OHNE FUSSZEILE UND UNTERSCHRIFT-HINWEIS (siehe unten). Kopf und
+    Text bleiben ganz, aus dem Grund von damals - Stephans Einwand vom 2026-08-21: "Es sollte immer alles
     vorgelesen werden oder?" Der erste Entwurf liess Kopf und Fusszeile weg,
     weil sie sich bei jedem Hoeren wiederholen. Das war zu kurz gedacht - was
     der Nutzer nicht hoert, existiert fuer ihn nicht. Steht im Absender ein
@@ -485,6 +500,7 @@ def brief_vorlesen(name):
     """
     pfad = pfad_fuer(name)
     kopf, text, fuss = briefteile(pfad)
+    text = ohne_unterschrift_hinweis(text)
     bez, ist, _hat, _ihn = benennen(name)
     if not text:
         sprich(f"{bez} {ist} leer.")
@@ -500,8 +516,11 @@ def brief_vorlesen(name):
             teile.append("Absender: " + ", ".join(kopf[:-1]) + ".")
         teile.append("Datum: " + kopf[-1] + ".")
     teile.append(fliesstext)
-    if fuss:
-        teile.append("Fußzeile: " + " ".join(fuss))
+    # FUSSZEILE UND UNTERSCHRIFT-HINWEIS WERDEN NICHT MEHR VORGELESEN (Stephan,
+    # 2026-09-17: "Das ist ja eher eine Info fuer den Empfaenger und brauche ich
+    # nicht fuer die Kontrolle"). Beides steht weiter im Brief, im PDF und auf dem
+    # Ausdruck - es aendert sich nie und ist beim Kontrollhoeren nur Laenge. Der
+    # Hinweis zaehlte ausserdem als Satz mit: "9 Saetze" fuer einen Brief mit 8.
     melde(f"  vorlesen: Brief mit {len(saetze)} Saetzen aus {pfad}")
     sprich(" ".join(teile))
     return 0
