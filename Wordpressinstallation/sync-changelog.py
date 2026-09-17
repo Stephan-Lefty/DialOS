@@ -141,6 +141,17 @@ def md_inline_to_html(text):
     # Sternchen stehen (2026-09-17 auf der englischen Idee-Seite gefunden).
     ergebnis = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', ergebnis,
                       flags=re.DOTALL)
+    # Kursiv NUR fuer einzelne Woerter. Ein gieriges *...* waere hier
+    # gefaehrlich: Im Protokoll stehen Dateinamen mit Platzhalter
+    # ("suche-icon-light-*.png und suche-icon-dark-*.png"), und deren beide
+    # Sternchen wuerden sonst zu einem Kursiv-Bereich zusammengezogen - aus
+    # zwei Dateinamen wird ein halber. Deshalb: kein Leerzeichen, kein Punkt,
+    # kein Schraegstrich im Inhalt. Gemessen am 2026-09-17: 26 von 27 Stellen
+    # sind einzelne Woerter, der eine Rest ist genau dieses Dateinamen-Paar.
+    ergebnis = re.sub(r'\*([^*\s/.]+)\*', r'<em>\1</em>', ergebnis)
+    if '*' in ergebnis:
+        print(f"  WARNUNG: einzelnes * bleibt stehen - {text[:80]}...",
+              file=sys.stderr)
     for nummer, inhalt in enumerate(spannen):
         ergebnis = ergebnis.replace(f"\x00{nummer}\x00",
                                     f'<code>{html.escape(inhalt)}</code>')
