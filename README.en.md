@@ -120,6 +120,16 @@ background) and `splash.png` (boot/login screen).
 
 ## Changelog
 
+### 0.5.2
+
+- **Version 0.5.2 started** (2026-09-17, Stephan's call: "start version 0.5.2 from
+  what we have achieved up to today"). 0.5.1 is thereby closed - from 2026-08-17 to
+  2026-09-17: applications (dictation, notes, shopping list, printing, archive,
+  information, weather, screenshot, update automation), test bench and Parakeet for
+  free text, personal data with an input form, command overview, seasonal wallpaper
+  and the letter following DIN 5008 with recipient dialogue, Thunderbird contacts,
+  contact person and email addresses. New entries go here from now on.
+
 ### 0.5.1
 
 - **Email addresses in dictation** (2026-09-17): "meine Mailadresse" inserts your

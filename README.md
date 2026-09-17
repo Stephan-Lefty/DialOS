@@ -128,6 +128,17 @@ das Erfolg meldet, während es versagt.
 
 ## Änderungsprotokoll
 
+### 0.5.2
+
+- **Version 0.5.2 begonnen** (2026-09-17, Stephans Ansage: „aus dem, was wir bis
+  heute geschafft haben, mit der Version 0.5.2 starten"). 0.5.1 ist damit
+  abgeschlossen - vom 2026-08-17 bis 2026-09-17: Anwendungen (Diktat, Notizen,
+  Einkaufszettel, Drucken, Archiv, Auskunft, Wetter, Bildschirmfoto,
+  Update-Automatik), Prüfstand und Parakeet für freien Text, persönliche Daten mit
+  Eingabemaske, Befehlsübersicht, Hintergrund nach Jahreszeit und der Brief nach
+  DIN 5008 mit Empfänger-Dialog, Thunderbird-Kontakten, Ansprechpartner und
+  Mailadressen. Neue Einträge stehen ab hier.
+
 ### 0.5.1
 
 - **Mailadressen im Diktat** (2026-09-17): „meine Mailadresse" setzt die eigene

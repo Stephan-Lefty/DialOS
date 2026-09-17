@@ -125,7 +125,34 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-16, abends - weiter am Donnerstag 2026-09-17)
+## Aktueller Stand (Stand: 2026-09-17, nachmittags - ab jetzt Version 0.5.2)
+
+**Der 2026-09-17 in Stichpunkten - Einzelheiten im Aenderungsprotokoll unter 0.5.1.**
+Brief fertig ausgebaut, jeweils nach Stephans Proben am Geraet:
+- **Empfaenger-Dialog** vor dem Diktat: Suche in den Thunderbird-Kontakten, neuer
+  Kontakt in `abook.sqlite` (Warteschlange bei laufendem Thunderbird), Namen
+  buchstabieren (Buchstabieralphabet), **Ansprechpartner** bei Firmen, jederzeit
+  "abbrechen" / "von vorne".
+- **Im Diktat:** "von vorne" und "alles verwerfen" (eigener Steuer-Erkenner, Rueckfrage),
+  **Mailadressen** ("meine Mailadresse", "Mailadresse von X", "Mailadresse
+  buchstabieren"), Zahlen in Ziffern nach DIN 5008 (Datum, Betraege mit Cent, Uhrzeit).
+- **Brief als PDF nach DIN 5008** eingebunden (`dialos-brief-din.py` ueber
+  `dialos-archiv.py`): kein Kopf, Anschriftfeld fuer den Fensterumschlag,
+  Infoblock auf Hoehe der Ruecksendeangabe, Datum 17.09.2026, Fusszeile mit Slogan.
+- Vorlesen ohne Absender/Fusszeile, Telefonnummern in Dreierbloecken, danach das
+  Angebot Drucken/PDF. Mail-Signatur aus den persoenlichen Daten. Hardware-Einschaetzung
+  in `docs/hardware.md` (32 GB RAM Minimum, AMD-Variante).
+- **Parallel auf Stephans zweitem Rechner:** Erweiterungsschnittstelle und
+  DialOS-Suche ("unterlagen durchsuchen", Pruefung am T490 bestanden) - dort gebaut,
+  hier nicht anfassen; vor jedem Push `git pull --rebase`.
+
+**Noch nicht am Geraet geprueft bzw. installiert (Stand 16:20):** DIN-PDF,
+Ansprechpartner und Mailadressen - Installationsbefehl in `docs/Debian-zu-DialOS.md`
+bzw. `scripts/dialos-installstand.sh --befehl`. Stephans eigene E-Mail steht in der
+Maske noch als Proband-Adresse. Offen: Satzende bei abgebrochenem Satz, Befehlsuebersicht
+unterbrechbar, Du/Sie aus den Daten, Parakeet-Namensfehler.
+
+## Stand vom 2026-09-16, abends
 
 **Der 2026-09-16 in Stichpunkten - Einzelheiten im Aenderungsprotokoll 0.5.1.**
 Luecke nach Annas Ansage geschlossen (Stephan: "wie in einem normalen
@@ -465,12 +492,13 @@ mehr, sondern der etablierte Ansatz:
    Sicherungs-Abbild mit **[Rescuezilla](https://rescuezilla.com/)**
    (seit 2026-08-16; Penguins' Eggs ist entfallen, siehe Schritt 16).
 
-**Aktuelle Version: 0.5.1** (in Arbeit seit 2026-08-17). 0.5.0 ist mit
-dem Sprachbefehl für die Desktop-Umschaltung abgeschlossen. Alle Details
+**Aktuelle Version: 0.5.2** (in Arbeit seit 2026-09-17, Stephans Ansage). 0.5.1
+(2026-08-17 bis 2026-09-17) ist mit dem Brief nach DIN 5008 abgeschlossen, 0.5.0
+mit dem Sprachbefehl für die Desktop-Umschaltung. Alle Details
 im [README.md-Änderungsprotokoll](README.md#änderungsprotokoll).
 
 > **Dauerregel (Stephan, 2026-08-17):** Neue Änderungsprotokoll-Einträge
-> kommen unter die **oberste Versionsnummer** - derzeit `### 0.5.1` -
+> kommen unter die **oberste Versionsnummer** - derzeit `### 0.5.2` -
 > **bis Stephan ausdrücklich eine andere ansagt.** Nicht selbst eine neue
 > Nummer erfinden, weil viel dazugekommen ist, und nicht auf eine
 > abgeschlossene zurückfallen. Sagt Stephan eine neue Nummer an: neuen
