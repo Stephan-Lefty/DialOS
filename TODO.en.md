@@ -31,7 +31,9 @@ finished too, and then move down together. That way no reference breaks.
   dictation, search in the Thunderbird contacts, new contact in `abook.sqlite`
   (queue while Thunderbird runs) - simulated with Piper (new, found, none). Open:
   test with Stephan's voice (13:00 and 13:36: names, abort - rebuilt);
-  Thunderbird shows the created card **(confirmed 13:40)**; wiring
+  Thunderbird shows the created card **(confirmed 13:40)**;
+  **"von vorne"/"alles verwerfen" in dictation and cent amounts from Vosk built
+  (14:15 trial, simulated, not installed)** - open: trial with Stephan's voice; wiring
   the DIN PDF into dictation/printing/PDF; address suffix ("z. Hd."). **Mail
   signature installed** (17.09.). **Draft 2026-09-17:** `dialos-brief-din.py` (form B, preview with sample
   data) - open: Stephan's verdict, recipient address, wiring into
