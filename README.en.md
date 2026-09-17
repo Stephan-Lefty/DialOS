@@ -3353,7 +3353,7 @@ background) and `splash.png` (boot/login screen).
   suggestion.
 - **`nutzer` would have got a home they don't own - found during the
   first real run of script 3 (2026-08-16).** `adduser` reported "The home
-  directory `/home/nutzer' already exists. Not touching this directory"
+  directory `/home/nutzer'` already exists. Not touching this directory"
   and consequently skipped **both** the `chown` to the new account *and*
   copying `/etc/skel`. The home was left owned by `root:root` - `nutzer`
   could not have written to their own directory, and GNOME could have

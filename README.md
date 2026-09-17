@@ -3527,7 +3527,7 @@ abgeschlossen.*
   Punkt zum falschen GeoIP-Standortvorschlag von Calamares.
 - **`nutzer` hätte ein Home bekommen, das ihm nicht gehört - gefunden
   beim ersten echten Lauf von Skript 3 (2026-08-16).** `adduser` meldete
-  "The home directory `/home/nutzer' already exists. Not touching this
+  "The home directory `/home/nutzer'` already exists. Not touching this
   directory" und ließ daraufhin **beides** bleiben: den `chown` auf das
   neue Konto *und* das Kopieren von `/etc/skel`. Das Home gehörte danach
   `root:root` - `nutzer` hätte sein eigenes Verzeichnis nicht beschreiben
