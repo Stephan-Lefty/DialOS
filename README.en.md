@@ -122,6 +122,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Email addresses in dictation** (2026-09-17): "meine Mailadresse" inserts your
+  own email from the personal data, "Mailadresse von GESOBAU" the one from the
+  Thunderbird contacts, and "Mailadresse buchstabieren" takes any other address
+  character by character. Read out as "max at beispiel Punkt de".
+
 - **Contact person in the recipient dialogue** (2026-09-17): for a company DialOS
   asks for the person ("Frau Erika Muster"); following DIN 5008 the line sits below
   the company, without "z. Hd.". "in Musterhausen" becomes "Musterhausen".

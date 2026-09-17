@@ -2098,6 +2098,28 @@ Also: "12345 in Musterhausen" → town "Musterhausen" (the "in" was not dropped)
 Simulated with Piper: company from contacts with and without contact person, new
 company with contact person, person without the question.
 
+**Email addresses in dictation (2026-09-17).** Stephan: "The system can't cope with
+an email address either." Spoken freely, Vosk heard the domain as "geit o s t",
+Parakeet as "guides" - an unknown address is never recognised reliably. Three ways,
+Stephan's choice, none needs the address itself to be recognised:
+- **"meine Mailadresse"** in a sentence ("unter meiner Mailadresse erreichen") - the
+  email from the personal data goes after the words, also after "lautet"/"ist"; if an
+  address is already there, nothing changes.
+- **"Mailadresse von GESOBAU"** - the email from the Thunderbird card (search as in
+  the recipient dialogue, up to three words after "von"). `kontakte()` now returns
+  `mail` (vCard `EMAIL`). Without a match the text stays, message in the log.
+- **"Mailadresse buchstabieren"** - command in dictation (third sentence in the
+  control recogniser, cross-check "buchstab"): spelling alphabet plus at, Punkt,
+  Minus, Unterstrich and digits, confirmation character by character, then the
+  address goes to the end of the text - bypassing the writing aid. Parakeet's full
+  stop on the chunk before is dropped, and the next chunk starts in lower case if
+  hunspell knows the word in lower case ("… an ste@beispiel.de oder telefonisch").
+
+A full stop inside an address does not count as a sentence end (Satz
+löschen/wiederholen). "Brief vorlesen" reads addresses as "max at beispiel Punkt de".
+The overview "Befehle für das Diktat" now also names von vorne, alles verwerfen and
+the email address. Simulated with Piper; test bench 9 cases unchanged.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

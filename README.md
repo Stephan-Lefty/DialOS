@@ -130,6 +130,11 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Mailadressen im Diktat** (2026-09-17): „meine Mailadresse" setzt die eigene
+  E-Mail aus den persönlichen Daten ein, „Mailadresse von GESOBAU" die aus den
+  Thunderbird-Kontakten, und „Mailadresse buchstabieren" nimmt jede fremde Adresse
+  Zeichen für Zeichen auf. Vorlesen als „max at beispiel Punkt de".
+
 - **Ansprechpartner im Empfänger-Dialog** (2026-09-17): Bei einer Firma fragt DialOS
   nach der Person („Frau Erika Muster"), die Zeile steht nach DIN 5008 unter der
   Firma, ohne „z. Hd.". „in Musterhausen" wird „Musterhausen".

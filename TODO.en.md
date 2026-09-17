@@ -38,7 +38,9 @@ finished too, and then move down together. That way no reference breaks.
   without a sentence end runs into the next sentence ("… 2027 In ihrem Schreiben"); wiring
   **DIN PDF wired in 2026-09-17** (archive, PDF, printing; no head, date
   17.09.2026, info block level with the return address) - open: check the paper
-  printout; **contact person built 2026-09-17** (simulated, device trial open). **Mail
+  printout; **contact person built 2026-09-17** (simulated, device trial open).
+  **Email addresses in dictation built 2026-09-17** (own / from contact / spelled;
+  simulated, device trial open - enter own email in the form). **Mail
   signature installed** (17.09.). **Draft 2026-09-17:** `dialos-brief-din.py` (form B, preview with sample
   data) - open: Stephan's verdict, recipient address, wiring into
   dictation/printing/PDF. **Mail signature from the data built** (not installed).
