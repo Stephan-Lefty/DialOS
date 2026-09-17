@@ -2052,6 +2052,12 @@ phrase). (3) "322 Euro und 40 Cent" becomes "322,40 Euro"; if Parakeet swallows
 recording replayed: both "alles verwerfen" with a question, amount 322,40 Euro; with
 "ja" dictation ends without a file. Piper simulation and test bench unchanged.
 
+**Sixth trial (15:20):** "alles verwerfen" → nein → continue, and → ja → nothing
+saved, both ✓; a simultaneously heard "satz löschen" correctly discarded. Amounts
+"3675,75 Euro" and "1746,78 Euro" ✓. Newly fixed: "31.05. 2027" (year spoken in two
+parts) → "31.05.2027". Open: a chunk without a sentence end runs into the next
+sentence ("… 2027 In ihrem Schreiben").
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

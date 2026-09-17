@@ -2287,7 +2287,11 @@ def zahlen_in_ziffern(text):
     for start, ende, ersatz in reversed(ergebnis):
         text = text[:start] + ersatz + text[ende:]
     # "am 20.12." am Satzende: der Satzpunkt kam dazu - "20.12.." wird "20.12."
-    return re.sub(r"(\d{2}\.\d{2}\.)\.", r"\1", text)
+    text = re.sub(r"(\d{2}\.\d{2}\.)\.", r"\1", text)
+    # "31.05. 2027" (2026-09-17, 15:21): Das zweigeteilte Jahr ("zwanzig
+    # siebenundzwanzig") wird erst nach dem Datum zusammengesetzt und blieb mit
+    # Leerzeichen stehen. DIN 5008: 31.05.2027.
+    return re.sub(r"\b(\d{2}\.\d{2}\.) ((?:19|20)\d{2})\b", r"\1\2", text)
 
 
 def parakeet_erkennen(erkenner, audio, worte):

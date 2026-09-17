@@ -2130,6 +2130,12 @@ der erste stehen, der zweite wird Alternative, und die freie Erkennung entscheid
 wiederholt: beide „alles verwerfen" mit Rückfrage, Betrag 322,40 Euro; mit „ja"
 endet das Diktat ohne Datei. Piper-Simulation und Prüfstand unverändert.
 
+**Sechste Probe (15:20):** „alles verwerfen" → nein → weiter, und → ja → nichts
+gespeichert, beide ✓; gleichzeitig gehörtes „satz löschen" richtig verworfen.
+Beträge „3675,75 Euro" und „1746,78 Euro" ✓. Neu korrigiert: „31.05. 2027" (Jahr
+zweigeteilt gesprochen) → „31.05.2027". Offen: ein Stück ohne Satzende läuft in den
+nächsten Satz („… 2027 In ihrem Schreiben").
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/
