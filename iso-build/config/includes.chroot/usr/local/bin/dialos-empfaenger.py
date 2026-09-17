@@ -122,7 +122,7 @@ def _vcard_sicher(text):
 
 
 def kontakte(pfad=None):
-    """[{'uid', 'name', 'firma', 'strasse', 'plz', 'ort', 'land'}] aus abook.sqlite."""
+    """[{'uid', 'name', 'firma', 'strasse', 'plz', 'ort', 'land', 'mail'}] aus abook.sqlite."""
     if pfad is None:
         ordner = profil()
         if not ordner:
@@ -145,7 +145,8 @@ def kontakte(pfad=None):
         adr = _vcard_teile((_vcard_feld(vcard, "ADR") or [";;;;;;"])[0]) + [""] * 7
         ergebnis.append({"uid": karte, "name": _vcard_teile(fn)[0] if fn else "",
                          "firma": org, "zusatz": adr[1], "strasse": adr[2], "ort": adr[3],
-                         "plz": adr[5], "land": adr[6]})
+                         "plz": adr[5], "land": adr[6],
+                         "mail": (_vcard_feld(vcard, "EMAIL") or [""])[0].strip()})
     return ergebnis
 
 

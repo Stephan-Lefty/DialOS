@@ -424,6 +424,10 @@ def diktat_befehle():
         ("Den letzten Satz streichen, mit kurzer Pause davor und danach", [loeschen]),
         ("Den letzten Satz noch einmal hören, ebenso mit Pause", [wiederholen]),
         ("Eine Betreffzeile, ganz am Anfang des Briefs", ["betreff"]),
+        ("Alles bisher Diktierte verwerfen und neu beginnen, mit Rückfrage", ["von vorne"]),
+        ("Das Diktat abbrechen, ohne etwas zu speichern, mit Rückfrage", ["alles verwerfen"]),
+        ("Eine Mailadresse Zeichen für Zeichen einfügen", ["mailadresse buchstabieren"]),
+        ("Die eigene Mailadresse einsetzen: im Satz sagen", ["meine mailadresse"]),
         ("Das Diktat beenden, nach einer kurzen Pause", [schluss]),
     ]
 

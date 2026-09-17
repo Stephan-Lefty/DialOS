@@ -2175,6 +2175,28 @@ Firma. Außerdem: „12345 in Musterhausen" → Ort „Musterhausen" (das „in"
 weg). Mit Piper simuliert: Firma aus den Kontakten mit und ohne Ansprechpartner,
 neue Firma mit Ansprechpartner, Person ohne Frage.
 
+**Mailadressen im Diktat (2026-09-17).** Stephan: „Mit einer Mailadresse kommt das
+System auch nicht klar." Frei gesprochen hörte Vosk den Domainnamen als „geit o s
+t", Parakeet als „guides" - eine fremde Adresse wird nie zuverlässig erkannt. Drei
+Wege, Stephans Wahl, keiner braucht die Erkennung der Adresse selbst:
+- **„meine Mailadresse"** im Satz („unter meiner Mailadresse erreichen") - die
+  E-Mail aus den persönlichen Daten kommt hinter die Worte, auch nach „lautet"/„ist";
+  steht schon eine Adresse dort, bleibt alles, wie es ist.
+- **„Mailadresse von GESOBAU"** - die E-Mail aus der Thunderbird-Karte (Suche wie im
+  Empfänger-Dialog, bis zu drei Wörter nach „von"). `kontakte()` liefert dafür jetzt
+  `mail` (vCard `EMAIL`). Ohne Treffer bleibt der Text, Meldung im Protokoll.
+- **„Mailadresse buchstabieren"** - Befehl im Diktat (dritter Satz im Steuer-Erkenner,
+  Gegenprobe „buchstab"): Buchstabieralphabet plus at, Punkt, Minus, Unterstrich und
+  Ziffern, Rückfrage Zeichen für Zeichen, dann steht die Adresse am Textende - an der
+  Schreibhilfe vorbei. Parakeets Punkt am Stück davor fällt weg, und das nächste
+  Stück beginnt klein, wenn hunspell das Wort klein kennt („… an ste@beispiel.de
+  oder telefonisch").
+
+Ein Punkt mitten in einer Adresse zählt nicht als Satzende (Satz löschen/wiederholen).
+„Brief vorlesen" liest Adressen als „max at beispiel Punkt de". Die Befehlsübersicht
+„Befehle für das Diktat" nennt jetzt auch von vorne, alles verwerfen und die
+Mailadresse. Simuliert mit Piper; Prüfstand 9 Fälle unverändert.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

@@ -542,7 +542,7 @@ def brief_vorlesen(name):
     # Vorlesen muss die Option des Druckens und der PDF kommen").
     teile.append("Du kannst sagen: Brief drucken oder Brief als PDF speichern.")
     melde(f"  vorlesen: Brief mit {len(saetze)} Saetzen aus {pfad}")
-    sprich(telefon_vorlesbar(" ".join(teile)))
+    sprich(mail_vorlesbar(telefon_vorlesbar(" ".join(teile))))
     return 0
 
 
@@ -553,6 +553,22 @@ def brief_vorlesen(name):
 # 2026-08-24: Punkt 220 ms, Komma 0 ms). Erkannt wird eine Nummer an "+" oder
 # "0" am Anfang und mindestens sechs Ziffern.
 TELEFON = re.compile(r"(?<![\w.,])(\+|00?)(\d[\d /-]{4,}\d)(?![\w.,]\d)")
+
+
+MAILADRESSE = re.compile(r"\b([\w.+-]+)@([\w-]+(?:\.[\w-]+)+)")
+
+
+def mail_vorlesbar(text):
+    """"stephan@beispiel.de" -> "stephan at beispiel Punkt de" (2026-09-17).
+
+    Piper liest das @ sonst nicht oder als Fremdwort, und der Punkt in der Adresse
+    klaenge wie ein Satzende. Zur Kontrolle der Schreibweise gibt es beim
+    Buchstabieren im Diktat die Rueckfrage Zeichen fuer Zeichen.
+    """
+    def lesbar(teil):
+        return (teil.replace(".", " Punkt ").replace("-", " Minus ")
+                .replace("_", " Unterstrich ").replace("  ", " ").strip())
+    return MAILADRESSE.sub(lambda m: f"{lesbar(m.group(1))} at {lesbar(m.group(2))}", text)
 
 
 def telefon_vorlesbar(text):

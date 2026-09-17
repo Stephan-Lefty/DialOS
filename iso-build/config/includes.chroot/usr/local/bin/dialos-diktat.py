@@ -117,9 +117,14 @@ BEFEHL_VON_VORNE = "von vorne"
 # speichert, der andere wirft alles weg (Pruefstand/Simulation 2026-09-17: das
 # kleine Modell hoerte beides fuereinander).
 BEFEHL_ABBRECHEN = "alles verwerfen"
-BEFEHLE_IM_DIKTAT = (BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN)
+# MAILADRESSE BUCHSTABIEREN (Stephan, 2026-09-17: "Mit einer Mailadresse kommt das
+# System auch nicht klar"). Frei gesprochen wird eine fremde Adresse nie
+# zuverlaessig - "guideos" hoerte Vosk als "geit o s t", Parakeet als "guides".
+BEFEHL_MAIL = "mailadresse buchstabieren"
+BEFEHLE_IM_DIKTAT = (BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN,
+                     BEFEHL_MAIL)
 BEFEHL_STAMM = {BEFEHL_LOESCHEN: "lösch", BEFEHL_WIEDERHOLEN: "wiederhol",
-                BEFEHL_VON_VORNE: "vorn", BEFEHL_ABBRECHEN: "verwerf"}
+                BEFEHL_VON_VORNE: "vorn", BEFEHL_ABBRECHEN: "verwerf", BEFEHL_MAIL: "buchstab"}
 # Nur fuer die Entscheidung zwischen zwei gleichzeitig gehoerten Befehlen
 # (befehl_vormerken) - der Schluss selbst hat keine Gegenprobe.
 SCHLUSS_STAMM = "beend"
@@ -127,7 +132,8 @@ SCHLUSS_STAMM = "beend"
 # wie der Schluss hoerte das kleine Modell Stephans "Diktat beenden" als "diktat
 # vorne" - ein Brief endete nicht mehr. Ein dritter Erkenner mit nur diesen beiden
 # Saetzen laesst den Schluss-Erkenner, wie er war.
-GRAMMATIK_STEUER = json.dumps([BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN, "[unk]"], ensure_ascii=False)
+GRAMMATIK_STEUER = json.dumps([BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN, BEFEHL_MAIL, "[unk]"],
+                              ensure_ascii=False)
 GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, "[unk]"],
                                ensure_ascii=False)
 SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
@@ -949,9 +955,33 @@ class Aeusserungen:
                 if neu != vorige.rstrip():
                     self.liste[-1]["eintraege"][-1] = neu
         eintraege = aeusserung_verarbeiten(self.name, text, self.umschreiben is not None)
+        if self.name not in LISTEN_ZIELE:
+            eintraege = [mailadressen_einsetzen(e) for e in eintraege]
+            # NACH EINER EINGESETZTEN ADRESSE geht der Satz weiter ("... unter
+            # stephan@beispiel.de | Erreichen."): Parakeet schreibt jedes Stueck gross.
+            # Klein, wenn hunspell das Wort klein kennt - ein Substantiv bleibt gross.
+            if (eintraege and self.liste and self.liste[-1].get("adresse")
+                    and eintraege[0][:1].isupper()):
+                erstes = re.match(r"\s*([A-ZÄÖÜ][a-zäöüß]+)", eintraege[0])
+                if erstes and erstes.group(1).lower() not in unbekannte_woerter([erstes.group(1).lower()]):
+                    eintraege[0] = eintraege[0][:erstes.start(1)] + erstes.group(1).lower() \
+                        + eintraege[0][erstes.end(1):]
         self.liste.append({"epoche": epoche, "worte": list(worte), "eintraege": eintraege,
                            "text": text})
         return eintraege
+
+    def einsetzen(self, epoche, adresse):
+        """Buchstabierte Mailadresse ans Textende - an der Schreibhilfe vorbei."""
+        melde(f"  Mailadresse eingesetzt: {adresse!r}")
+        # Parakeet setzt ans Ende JEDES Stuecks einen Punkt: "unter der Adresse." -
+        # der Satz geht mit der Adresse aber weiter (Simulation 2026-09-17).
+        if self.liste and self.liste[-1]["eintraege"]:
+            vorher = self.liste[-1]["eintraege"][-1]
+            wort = re.search(r"([A-Za-zÄÖÜäöüß]+)\.\s*$", vorher)
+            if wort and wort.group(1).lower() not in ABKUERZUNGEN:
+                self.liste[-1]["eintraege"][-1] = vorher.rstrip()[:-1]
+        self.liste.append({"epoche": epoche, "worte": [], "eintraege": [adresse],
+                           "text": adresse, "adresse": True})
 
     def ab_zeit_entfernen(self, epoche, ab_s, nach_ende=False):
         """Entfernt alle Woerter dieser Epoche, die ab ab_s beginnen (Befehlswoerter).
@@ -1176,6 +1206,9 @@ def satzenden(text):
     """Positionen der Zeichen, die einen Satz beenden (. ? ! und Zeilenwechsel)."""
     stellen = []
     for m in re.finditer(r"[.?!\n]", text):
+        # Punkt MITTEN in einer Mail- oder Webadresse ("guideos.de") beendet nichts.
+        if m.group() == "." and re.match(r"[\w-]", text[m.end():m.end() + 1]):
+            continue
         if m.group() == ".":
             davor = re.search(r"([\wäöüÄÖÜß]+)$", text[:m.start()])
             if davor and (davor.group(1).isdigit() or davor.group(1).lower() in ABKUERZUNGEN):
@@ -1727,6 +1760,83 @@ def woerterbuch_anwenden(text, eintraege=None):
             melde(f"  Woerterbuch: {_!r} -> {geschrieben!r}")
             text = neu
     return text
+
+
+# MAILADRESSEN IM TEXT (Stephan, 2026-09-17: "Mit einer Mailadresse kommt das
+# System auch nicht klar. Sie haette stephan@... lauten muessen"). Zwei Wege ohne
+# Erkennung der Adresse selbst:
+#   "meine Mailadresse"                -> die E-Mail aus den persoenlichen Daten
+#   "Mailadresse von GESOBAU"          -> die E-Mail aus der Thunderbird-Karte
+# Die Adresse kommt HINTER die Worte, der Satz bleibt stehen: "unter meiner
+# Mailadresse stephan@beispiel.de erreichen". Der dritte Weg ist der Befehl
+# "Mailadresse buchstabieren" (BEFEHL_MAIL).
+MAIL_WORT = r"(?:E-?Mail-?Adresse|Mail-?Adresse|E-?Mail Adresse|Mail Adresse)"
+MAIL_EIGENE = re.compile(r"(?i)\b(mein(?:e|er|en)?\s+" + MAIL_WORT + r"(?:\s+(?:lautet|ist))?)")
+MAIL_KONTAKT = re.compile(r"(?i)\b(" + MAIL_WORT + r"\s+(?:von|der|des)\s+)"
+                          r"((?:[\wÄÖÜäöüß&.-]+\s*){1,4})")
+
+
+def mailadressen_einsetzen(text):
+    if not re.search(r"(?i)mail", text):
+        return text
+    _, daten = persoenliche_daten()
+    eigene = (daten or {}).get("mail", "").strip()
+    if eigene:
+        # Steht schon eine Adresse dahinter, bleibt alles, wie es ist.
+        text = MAIL_EIGENE.sub(lambda m: m.group(0) if re.match(
+            r"[\s:]*(?:(?:lautet|ist)\s+)?\S+@", text[m.end():m.end() + 60])
+            else f"{m.group(1)} {eigene}", text)
+    treffer = MAIL_KONTAKT.search(text)
+    if treffer and "@" not in text[treffer.end(1):treffer.end(1) + 60]:
+        em = holen(EMPFAENGER_SKRIPT, "empfaenger")
+        woerter = treffer.group(2).split()
+        for anzahl in range(min(3, len(woerter)), 0, -1):
+            gesucht = " ".join(w.strip(".,;:!?") for w in woerter[:anzahl])
+            kontakte = [k for k in (em.suchen(gesucht) if em else []) if k.get("mail")]
+            if kontakte:
+                # Ende des Namens im Text: nach dem anzahl-ten Wort (ohne Satzzeichen).
+                pos = treffer.start(2)
+                for w in woerter[:anzahl]:
+                    pos = text.index(w, pos) + len(w.rstrip(".,;:!?"))
+                melde(f"  Mailadresse aus den Kontakten: {gesucht!r} -> {kontakte[0]['mail']!r}")
+                text = text[:pos] + " " + kontakte[0]["mail"] + text[pos:]
+                break
+        else:
+            melde(f"  Mailadresse: kein Kontakt mit E-Mail zu {treffer.group(2)!r}")
+    elif re.search(r"(?i)\bmein(?:e|er|en)?\s+" + MAIL_WORT, text) and not eigene:
+        melde("  Mailadresse: keine E-Mail in den persoenlichen Daten")
+    return text
+
+
+MAIL_ZEICHEN = {"at": "@", "punkt": ".", "minus": "-", "bindestrich": "-", "unterstrich": "_",
+                "null": "0", "eins": "1", "zwei": "2", "drei": "3", "vier": "4", "fünf": "5",
+                "sechs": "6", "sieben": "7", "acht": "8", "neun": "9"}
+ANSAGE_MAIL_BUCHSTABIEREN = ("Buchstabiere die Mailadresse mit dem Buchstabieralphabet. "
+                             "Für das At-Zeichen sage at, dazu Punkt, Minus, Unterstrich und "
+                             "Ziffern. Für einen Fehler sage zurück. Am Ende sage: fertig.")
+
+
+def mail_vorlesbar(adresse):
+    teile = []
+    for z in adresse.lower():
+        wort = next((w for w, c in MAIL_ZEICHEN.items() if c == z and w != "bindestrich"), None)
+        teile.append("At" if z == "@" else (wort.capitalize() if wort else BUCHSTABEN_SPRECHEN.get(z, z)))
+    return ". ".join(teile) + "."
+
+
+def mailadresse_buchstabieren(prozess, modell_klein):
+    """Mailadresse Zeichen fuer Zeichen, mit Rueckfrage. Adresse oder ""."""
+    try:
+        adresse = buchstaben_hoeren(prozess, modell_klein, ansage=ANSAGE_MAIL_BUCHSTABIEREN,
+                                    zusatz=MAIL_ZEICHEN).replace(" ", "").lower()
+        melde(f"  Mailadresse buchstabiert: {adresse!r}")
+        if not adresse:
+            return ""
+        stimmt = ja_oder_nein_hoeren(f"Die Mailadresse ist: {mail_vorlesbar(adresse)} "
+                                     "Stimmt das? Sage ja oder nein.", prozess, modell_klein)
+        return adresse if stimmt else ""
+    except (DialogAbbruch, DialogNeustart):
+        return ""
 
 
 def aeusserung_verarbeiten(name, text, satzzeichen_fertig=False):
@@ -2569,11 +2679,15 @@ def buchstabiert(name):
     return ". ".join(BUCHSTABEN_SPRECHEN[z] for z in name.lower() if z in BUCHSTABEN_SPRECHEN) + "."
 
 
-def buchstaben_hoeren(prozess, modell_klein):
-    """Buchstaben bis "fertig" (oder 10 s Stille). Der Name mit grossen Wortanfaengen, oder ""."""
+def buchstaben_hoeren(prozess, modell_klein, ansage=None, zusatz=None):
+    """Buchstaben bis "fertig" (oder 10 s Stille). Der Name mit grossen Wortanfaengen, oder "".
+
+    zusatz: weitere Woerter -> Zeichen (fuer Mailadressen: at, Punkt, Ziffern).
+    """
     import vosk
-    vorrat = sprechen_bei_offener_aufnahme(ANSAGE_BUCHSTABIEREN, prozess)
-    woerter = list(BUCHSTABEN_HOEREN) + ["scharfes", "fertig", "zurück", "abbrechen", "[unk]"]
+    vorrat = sprechen_bei_offener_aufnahme(ansage or ANSAGE_BUCHSTABIEREN, prozess)
+    tabelle = dict(BUCHSTABEN_HOEREN, **(zusatz or {}))
+    woerter = list(tabelle) + ["scharfes", "fertig", "zurück", "abbrechen", "[unk]"]
     erkenner = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, json.dumps(woerter, ensure_ascii=False))
     zeichen = []
     bis = time.time() + 15.0
@@ -2606,8 +2720,8 @@ def buchstaben_hoeren(prozess, modell_klein):
             elif w == "scharfes" and i + 1 < len(gehoert) and gehoert[i + 1] == "es":
                 zeichen.append("ß")
                 i += 1
-            elif w in BUCHSTABEN_HOEREN:
-                zeichen.append(BUCHSTABEN_HOEREN[w])
+            elif w in tabelle:
+                zeichen.append(tabelle[w])
             i += 1
     name = "".join(zeichen).strip()
     return " ".join(t[:1].upper() + t[1:] for t in name.split(" ") if t)
@@ -3098,6 +3212,13 @@ def diktat_fuehren(zweck, name, quelle):
                                 antwort = "Gut, ich fange von vorne an. Ich schreibe mit."
                             else:
                                 antwort = "Gut, ich schreibe weiter mit."
+                        elif b["satz"] == BEFEHL_MAIL:
+                            adresse = mailadresse_buchstabieren(prozess, modell_klein)
+                            if adresse:
+                                aeusserungen.einsetzen(epoche, adresse)
+                                antwort = "Eingefügt. Ich schreibe weiter mit."
+                            else:
+                                antwort = "Ich habe keine Mailadresse eingefügt. Ich schreibe weiter mit."
                         elif b["satz"] == BEFEHL_LOESCHEN:
                             weg = aeusserungen.satz_entfernen()
                             melde(f"  SATZ LOESCHEN: gestrichen {weg!r}")
@@ -3140,7 +3261,7 @@ def diktat_fuehren(zweck, name, quelle):
                 ergebnis_steuer = json.loads(steuer.Result())
                 gehoert_steuer = ergebnis_steuer.get("text", "").strip()
                 worte_steuer = ergebnis_steuer.get("result", [])
-                if gehoert_steuer in (BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN) and len(worte_steuer) == 2:
+                if gehoert_steuer in (BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN, BEFEHL_MAIL) and len(worte_steuer) == 2:
                     luecke = schluss_luecke(worte_steuer)
                     anfang, ende = worte_steuer[0].get("start", 0), worte_steuer[1].get("end", 0)
                     if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
