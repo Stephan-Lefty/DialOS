@@ -1570,6 +1570,24 @@ plain text a spelled-out address would be a second version of the same
 sentence, and the recipient would have to retype it; their mail client
 usually turns "DialOS.org" into a link by itself anyway.
 
+**Name and contact in the signature (since 2026-09-17).** If there is personal
+data, `dialos-mail-signatur.py` writes a signature PER ACCOUNT to
+`~/.config/dialos/mail-signatur.html` (and `.txt` with the `-- ` delimiter):
+name, street and town, phone/mobile and mail, small and grey on the left, below
+it the DialOS line from `/usr/local/share/dialos/mail-signatur.html`. `user.js`
+then points to the file in the account; without data the plain DialOS line
+stays. The user service `dialos-mail-signatur.service` runs
+`dialos-mail-signatur.py --anmelden` at login: rewrite the signature, touch
+`user.js` only if something changes and Thunderbird is not running. So a phone
+number changed in the input form - also for `nutzer` - is in the mail after the
+next login.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mail-signatur.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-mail-signatur.service /etc/systemd/user/
+sudo systemctl --global enable dialos-mail-signatur.service
+```
+
 **This covers one of two mail paths.** According to `docs/anwendungen.md`
 Thunderbird is the interface, not the engine: DialOS is to send via IMAP/SMTP
 itself later, because Thunderbird cannot be driven from outside. The signature

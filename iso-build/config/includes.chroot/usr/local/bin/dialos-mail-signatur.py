@@ -27,6 +27,18 @@ soll, ist das genau richtig.
 Aufruf:
     dialos-mail-signatur.py            eintragen
     dialos-mail-signatur.py --zeigen   nur anzeigen, nichts aendern
+    dialos-mail-signatur.py --anmelden beim Anmelden: eigene Signatur neu schreiben,
+                                       user.js nur, wenn sich etwas aendert
+
+NAME UND KONTAKT AUS DEN PERSOENLICHEN DATEN (2026-09-17). Seit es
+~/.config/dialos/persoenliche-daten.txt gibt, steht ueber der DialOS-Zeile die
+Signatur der Person: Name, Anschrift, Telefon, Mail. Sie ist je KONTO
+verschieden und liegt deshalb im Konto (~/.config/dialos/mail-signatur.html),
+nicht in /usr/local/share - dort bleibt die reine DialOS-Zeile fuer Konten
+ohne Daten. Die Datei wird bei jedem Anmelden neu geschrieben
+(dialos-mail-signatur.service), damit eine in der Eingabemaske geaenderte
+Telefonnummer spaetestens beim naechsten Anmelden in der Mail steht.
+Thunderbird liest die Signaturdatei beim Verfassen, nicht beim Start.
 """
 
 import os
@@ -36,6 +48,63 @@ import sys
 
 SIGNATUR_HTML = "/usr/local/share/dialos/mail-signatur.html"
 SIGNATUR_TEXT = "/usr/local/share/dialos/mail-signatur.txt"
+EIGENE_HTML = os.path.join(os.path.expanduser("~"), ".config", "dialos", "mail-signatur.html")
+EIGENE_TEXT = os.path.join(os.path.expanduser("~"), ".config", "dialos", "mail-signatur.txt")
+PERSOENLICHE_DATEN_SKRIPT = "/usr/local/bin/dialos-persoenliche-daten.py"
+
+
+def html_sicher(text):
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def eigene_signatur():
+    """Schreibt die Signatur mit Name und Kontakt ins Konto. Pfad oder None.
+
+    None heisst: keine persoenlichen Daten - dann gilt die reine DialOS-Zeile.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("persoenliche_daten",
+                                                      PERSOENLICHE_DATEN_SKRIPT)
+        pd = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(pd)
+        daten = pd.lesen()
+    except Exception:
+        return None
+    name = pd.voller_name(daten)
+    if not name:
+        return None
+    anschrift = " · ".join(z for z in (
+        " ".join(daten[k] for k in ("strasse", "hausnummer") if daten.get(k)),
+        " ".join(daten[k] for k in ("postleitzahl", "ort") if daten.get(k))) if z)
+    kontakt = " · ".join(f"{wort} {daten[k]}" for k, wort in (
+        ("festnetz_privat", "Tel."), ("handy_privat", "Mobil"), ("mail", "E-Mail"))
+        if daten.get(k))
+    zeilen = [z for z in (name, anschrift, kontakt) if z]
+    try:
+        with open(SIGNATUR_HTML, encoding="utf-8") as f:
+            fuss_html = f.read().strip()
+        with open(SIGNATUR_TEXT, encoding="utf-8") as f:
+            fuss_text = f.read().strip()
+    except OSError:
+        fuss_html = fuss_text = ""
+    # Dezent wie die DialOS-Zeile, aber links: Das ist der Absender, keine Werbung.
+    html = ('<div style="font-size:90%; color:#555555;">'
+            + "<br>".join(html_sicher(z) for z in zeilen) + "</div>\n" + fuss_html + "\n")
+    text = "-- \n" + "\n".join(zeilen) + ("\n\n" + fuss_text if fuss_text else "") + "\n"
+    os.makedirs(os.path.dirname(EIGENE_HTML), exist_ok=True)
+    for ziel, inhalt in ((EIGENE_HTML, html), (EIGENE_TEXT, text)):
+        vorher = None
+        try:
+            with open(ziel, encoding="utf-8") as f:
+                vorher = f.read()
+        except OSError:
+            pass
+        if vorher != inhalt:
+            with open(ziel + ".neu", "w", encoding="utf-8") as f:
+                f.write(inhalt)
+            os.replace(ziel + ".neu", ziel)
+    return EIGENE_HTML
 
 ANFANG = "// >>> DialOS Fusszeile - erzeugt von dialos-mail-signatur.py"
 ENDE = "// <<< DialOS Fusszeile"
@@ -132,6 +201,10 @@ def einsetzen(vorher, neu):
 
 def main():
     nur_zeigen = "--zeigen" in sys.argv[1:]
+    anmelden = "--anmelden" in sys.argv[1:]
+    datei = (None if nur_zeigen else eigene_signatur()) or SIGNATUR_HTML
+    if nur_zeigen and os.path.isfile(EIGENE_HTML):
+        datei = EIGENE_HTML
     gefunden = profile()
     if not gefunden:
         print("Kein Thunderbird-Profil mit Konto gefunden - nichts zu tun.",
@@ -143,7 +216,7 @@ def main():
         print(f"{SIGNATUR_HTML} fehlt. Erst erzeugen mit:", file=sys.stderr)
         print("    dialos-fusszeile.py signatur", file=sys.stderr)
         return 1
-    if not nur_zeigen and thunderbird_laeuft():
+    if not nur_zeigen and not anmelden and thunderbird_laeuft():
         print("Thunderbird laeuft. Bitte beenden und erneut aufrufen -",
               file=sys.stderr)
         print("sonst ist die Aenderung beim naechsten Beenden wieder weg.",
@@ -153,7 +226,7 @@ def main():
     for ordner, ids in gefunden:
         beschreibung = ", ".join(f"{k}={v}" for k, v in sorted(ids.items()))
         print(f"{os.path.basename(ordner)}: {beschreibung}")
-        neu = block(ids)
+        neu = block(ids, datei)
         if nur_zeigen:
             print(neu.rstrip())
             continue
@@ -162,6 +235,14 @@ def main():
         if os.path.isfile(pfad):
             with open(pfad, encoding="utf-8", errors="replace") as f:
                 vorher = f.read()
+            if einsetzen(vorher, neu) == vorher:
+                # Beim Anmelden der Normalfall: nichts zu tun, keine Sicherungskopie.
+                continue
+        if anmelden and thunderbird_laeuft():
+            # Laeuft Thunderbird schon, waere die Aenderung beim Beenden weg - dann
+            # beim naechsten Anmelden. Die Signaturdatei selbst ist schon neu.
+            print("    Thunderbird laeuft - user.js beim naechsten Anmelden")
+            continue
             shutil.copy2(pfad, pfad + ".vorher")
         with open(pfad, "w", encoding="utf-8") as f:
             f.write(einsetzen(vorher, neu))

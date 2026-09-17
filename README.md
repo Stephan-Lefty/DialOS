@@ -130,6 +130,17 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Mail-Signatur mit Name und Kontakt** (2026-09-17). Aus den persönlichen Daten
+  je Konto: Name, Anschrift, Telefon, Mail über der DialOS-Zeile, beim Anmelden
+  neu geschrieben (`dialos-mail-signatur.service`). Ohne Daten wie bisher.
+- **Entwurf: Brief als PDF nach DIN 5008** (2026-09-17, noch nicht eingebunden).
+  `dialos-brief-din.py` setzt den Brief mit echter Schrift statt Leerzeichen:
+  Briefkopf, Anschriftfeld für den Fensterumschlag mit Rücksendeangabe,
+  Informationsblock mit Datum, Betreff, Falz- und Lochmarken, Seitenzahlen;
+  Gruß und Name bleiben auf einer Seite (bei 97 Brieflängen geprüft). Absender
+  und Unterschrift aus den persönlichen Daten, Empfänger folgt mit dem
+  Einsprechen der Adresse.
+
 - **Hintergrundbild wechselt mit der Jahreszeit** (2026-09-16, Stephan: „etwas
   Schwung in unser Wallpaper bringen"). Vier Bilder desselben Bergsees - Frühling,
   Sommer, Herbst, Winter. `dialos-jahreszeit.py` berechnet den kalendarischen

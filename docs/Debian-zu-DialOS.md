@@ -1635,6 +1635,24 @@ Im reinen Text waere eine ausgeschriebene Adresse eine zweite Fassung
 desselben Satzes, und der Empfaenger muesste sie abtippen; sein Mailprogramm
 macht aus "DialOS.org" ohnehin meist selbst einen Verweis.
 
+**Name und Kontakt in der Signatur (seit 2026-09-17).** Gibt es persönliche
+Daten, schreibt `dialos-mail-signatur.py` eine Signatur JE KONTO nach
+`~/.config/dialos/mail-signatur.html` (und `.txt` mit `-- `-Trenner): Name,
+Straße und Ort, Telefon/Mobil und Mail, klein und grau links, darunter die
+DialOS-Zeile aus `/usr/local/share/dialos/mail-signatur.html`. `user.js` zeigt
+dann auf die Datei im Konto; ohne Daten bleibt es bei der reinen DialOS-Zeile.
+Der Nutzerdienst `dialos-mail-signatur.service` ruft beim Anmelden
+`dialos-mail-signatur.py --anmelden` auf: Signatur neu schreiben, `user.js` nur,
+wenn sich etwas ändert und Thunderbird nicht läuft. So kommt eine in der
+Eingabemaske geänderte Telefonnummer - auch für `nutzer` - beim nächsten
+Anmelden in die Mail.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mail-signatur.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-mail-signatur.service /etc/systemd/user/
+sudo systemctl --global enable dialos-mail-signatur.service
+```
+
 **Das deckt einen von zwei Mailwegen.** Laut `docs/anwendungen.md` ist
 Thunderbird die Oberflaeche, nicht der Motor: DialOS soll spaeter selbst ueber
 IMAP/SMTP versenden, weil Thunderbird von aussen nicht steuerbar ist. Die

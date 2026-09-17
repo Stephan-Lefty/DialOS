@@ -29,6 +29,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   durchsehen, Mail-Signatur,
   Du/Sie, Unterschrift als Bild. (2) Die genaue Empfängeradresse wird eingesprochen.
   (3) Diese Adresse wird automatisch als Kontakt in Thunderbird angelegt.
+  **Entwurf 2026-09-17:** `dialos-brief-din.py` (Form B, Vorschau mit
+  Beispieldaten) - offen: Stephans Urteil, Empfängeradresse, Einbindung in
+  Diktat/Drucken/PDF. **Mail-Signatur aus den Daten gebaut** (nicht installiert).
   (4) Aufbau nach DIN 5008, damit das PDF immer sauber ist - ob gedruckt oder
   per Mail verschickt (Anschriftfeld für Fensterumschlag, Bezugszeichen/Datum,
   Betreff, Falzmarken). Persönliche Daten nur auf dem Gerät, neue Daten fürs

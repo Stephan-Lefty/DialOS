@@ -27,7 +27,10 @@ finished too, and then move down together. That way no reference breaks.
   polkit rule, mail
   signature, Du/Sie, signature as image. (2) The recipient's exact
   address is dictated. (3) That address is automatically added as a contact in
-  Thunderbird. (4) Layout following DIN 5008 so the PDF is always clean - printed
+  Thunderbird. **Draft 2026-09-17:** `dialos-brief-din.py` (form B, preview with sample
+  data) - open: Stephan's verdict, recipient address, wiring into
+  dictation/printing/PDF. **Mail signature from the data built** (not installed).
+  (4) Layout following DIN 5008 so the PDF is always clean - printed
   or sent by mail (address field for window envelopes, reference line/date,
   subject, fold marks). Personal data only on the device; ask before adding new
   data to the repo.

@@ -1,0 +1,19 @@
+[Unit]
+# Schreibt beim Anmelden die Mail-Signatur des Kontos neu: Name und Kontakt aus
+# den persoenlichen Daten, darunter die DialOS-Zeile (2026-09-17).
+#
+# WARUM BEIM ANMELDEN: Die persoenlichen Daten aendern sich in der
+# Eingabemaske - oft fuer ein ANDERES Konto, in das die Maske kein Programm
+# starten kann. Beim naechsten Anmelden dieses Kontos steht die neue Angabe in
+# der Signatur. Aendert sich nichts, wird nichts geschrieben.
+Description=DialOS: Mail-Signatur aus den persoenlichen Daten
+Documentation=file:///usr/local/bin/dialos-mail-signatur.py
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dialos-mail-signatur.py --anmelden
+Nice=15
+
+[Install]
+WantedBy=default.target

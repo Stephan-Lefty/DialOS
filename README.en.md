@@ -122,6 +122,16 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Mail signature with name and contact** (2026-09-17). From the personal data
+  per account: name, address, phone, mail above the DialOS line, rewritten at
+  login (`dialos-mail-signatur.service`). Without data as before.
+- **Draft: letter as PDF following DIN 5008** (2026-09-17, not yet wired in).
+  `dialos-brief-din.py` typesets the letter with real fonts instead of spaces:
+  letterhead, address field for window envelopes with return address, info block
+  with date, subject, fold and punch marks, page numbers; closing and name stay
+  on one page (checked with 97 letter lengths). Sender and signature from the
+  personal data, recipient follows with dictating the address.
+
 - **Wallpaper changes with the season** (2026-09-16, Stephan: bring "some swing"
   into the wallpaper). Four pictures of the same mountain lake - spring, summer,
   autumn, winter. `dialos-jahreszeit.py` computes the astronomical start of the
