@@ -39,6 +39,7 @@ Aufruf:  dialos-suche.py            (startet der Befehlsdienst)
          dialos-suche.py --pruefen  (nur Selbsttest, ohne Mikrofon)
 """
 
+import json
 import os
 import signal
 import subprocess
@@ -46,6 +47,7 @@ import sys
 import time
 
 SAY = "/usr/local/bin/dialos-say.py"
+INDEX = "/usr/local/bin/dialos-suche-index.py"
 ABTASTRATE = 16000
 BLOCK = 4000
 ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
@@ -64,7 +66,7 @@ PEGEL_SCHWELLE = 150.0
 
 ANSAGE_START = "Wonach soll ich suchen?"
 ANSAGE_NICHTS = "Ich habe nichts verstanden. Die Suche ist beendet."
-ANSAGE_NOCH_NICHT = ("Das Archiv ist noch nicht eingerichtet. "
+ANSAGE_NOCH_NICHT = ("Der Suchindex ist noch nicht eingerichtet. "
                      "Ich konnte deshalb nicht nachsehen.")
 
 PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-suche.log")
@@ -195,15 +197,50 @@ def begriff_hoeren(erkenner):
 
 
 def suchen(begriff):
-    """Hier kommt der Index hinein - noch nicht gebaut.
+    """Den Index fragen und das Ergebnis ansagen.
 
-    Vorgesehen: ein eigener SQLite-FTS5-Index ueber die vorhandenen Dateien,
-    mit einer Koelner-Phonetik-Spalte gegen Erkennungsunschaerfe. Danach der
-    Trefferdialog: 40 Treffer kann man nicht vorlesen; erst eingrenzen, Anzahl
-    ansagen, Weg nennen.
+    DIE ANZAHL KOMMT ZUERST, dann der neueste Treffer - nicht die Liste. Wer
+    vierzig Briefe findet, will sie nicht hoeren; er will wissen, dass es
+    vierzig sind, und dann eingrenzen. Dieselbe Regel wie beim Einkaufszettel:
+    Ein Befehl nimmt dem Nutzer keine Entscheidung ab, die er selbst treffen
+    kann - er sagt die Zahl und nennt den Weg.
+
+    "KLINGT WIE" WIRD AUSGESPROCHEN. Findet der Index nur ueber die Koelner
+    Phonetik, stimmt die Schreibweise nicht mit dem Gesprochenen ueberein
+    ("Meier" gesagt, "Mayer" gefunden). Das gehoert gesagt, sonst wundert sich
+    der Nutzer beim Vorlesen - und er kann den Bildschirm nicht danebenhalten.
     """
-    melde(f"  Suche nach {begriff!r} - Motor fehlt noch")
-    sprich(f"Du suchst nach {begriff}. " + ANSAGE_NOCH_NICHT)
+    if not os.access(INDEX, os.X_OK):
+        melde(f"  Index-Werkzeug fehlt: {INDEX}")
+        sprich(ANSAGE_NOCH_NICHT)
+        return 1
+    try:
+        r = subprocess.run([INDEX, "suchen", begriff],
+                           capture_output=True, timeout=120)
+        treffer = json.loads(r.stdout.decode("utf-8", errors="replace") or "[]")
+    except (OSError, subprocess.TimeoutExpired, ValueError) as fehler:
+        melde(f"  Suche fehlgeschlagen: {fehler}")
+        sprich("Bei der Suche ist etwas schiefgegangen.")
+        return 1
+
+    melde(f"  {len(treffer)} Treffer fuer {begriff!r}")
+    if not treffer:
+        sprich(f"Zu {begriff} habe ich nichts gefunden.")
+        return 0
+
+    nur_klang = all(x.get("wie") == "klang" for x in treffer)
+    klang = " Die Schreibweise klingt nur aehnlich." if nur_klang else ""
+    erster = treffer[0]
+    art = erster.get("art", "Schreiben")
+    name = os.path.basename(erster.get("pfad", ""))
+    wann = time.strftime("%d. %B", time.localtime(erster.get("geaendert", 0)))
+
+    if len(treffer) == 1:
+        sprich(f"Ich habe einen Treffer zu {begriff}.{klang} "
+               f"Es ist {art} {name} vom {wann}.")
+    else:
+        sprich(f"Ich habe {len(treffer)} Treffer zu {begriff}.{klang} "
+               f"Der neueste ist {art} {name} vom {wann}.")
     return 0
 
 
@@ -216,6 +253,8 @@ def selbsttest():
         fehlt.append(MODELL_KLEIN)
     if not os.path.isfile(os.path.join(PARAKEET_MODELL, "tokens.txt")):
         fehlt.append(PARAKEET_MODELL + " (Suchbegriff bliebe unerkannt)")
+    if not os.access(INDEX, os.X_OK):
+        fehlt.append(INDEX + " (es gaebe nichts zu durchsuchen)")
     print(f"Marke:     {MARKE}")
     print(f"Protokoll: {PROTOKOLL}")
     for f in fehlt:

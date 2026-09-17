@@ -130,6 +130,34 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Der Suchindex ist gebaut - DialOS-Suche findet jetzt wirklich**
+  (2026-09-17, `dialos-suche-index.py`). Ein eigener SQLite-FTS5-Index über die
+  Dateien, die ohnehin schon da liegen: Briefe aus `~/Dokumente/`, Notizen aus
+  `~/Notizen/`, PDFs aus dem Archiv. **Er indiziert nur** - Pfad, Zeitstempel,
+  Text; die Datei bleibt, wo sie ist. Fällt der Index aus, ist nichts verloren,
+  er lässt sich jederzeit neu bauen. `auffrischen` liest nur Geändertes,
+  verschwundene Dateien werden ausgetragen: Ein Treffer, den es nicht mehr
+  gibt, ist schlimmer als kein Treffer - der Nutzer sucht ihn dann am Gerät.
+
+  **Von MailBurg wird `extract/` geteilt**, nicht das Programm - PDF, OCR,
+  Office. Fehlt es, fällt der Index auf `pdftotext` und Klartext zurück:
+  schlechter, aber nicht tot.
+
+  **Die Kölner Phonetik ist der Unterschied zu MailBurg** - dort tippt man,
+  hier spricht man, und keine Spracherkennung trifft Eigennamen zuverlässig.
+  Geprüft: „Meier", „Mayer", „Maier" und „Mayr" fallen auf `67` zusammen,
+  „Müller"/„Mueller"/„Miller" auf `657`. Im Test findet der gesprochene Begriff
+  „Meier" den Brief mit „Mayer" und „Schmidt" die Notiz mit „Schmitt"; „Fahrrad"
+  liefert korrekt nichts. **Sie läuft als zweiter Durchgang**, weil sie
+  naturgemäß kollidiert („Müller" und „Mahler" teilen sich `657`) - wörtliche
+  Treffer stehen vorn.
+
+  **Die Ansage nennt die Anzahl, nicht die Liste.** Wer vierzig Briefe findet,
+  will sie nicht hören; er will wissen, dass es vierzig sind, und dann
+  eingrenzen - dieselbe Regel wie beim Einkaufszettel. Kam der Treffer nur über
+  den Klang, sagt DialOS „die Schreibweise klingt nur ähnlich": Sonst wundert
+  sich der Nutzer beim Vorlesen, und den Bildschirm kann er nicht danebenhalten.
+
 - **Wache gegen verwaiste Mikrofon-Marken** (2026-09-17). `diktat_laeuft()`
   liest jetzt die PID aus der Marke und prüft mit Signal 0, ob der Prozess noch
   lebt; eine verwaiste Marke wird weggeräumt und gemeldet. **Ohne das bliebe

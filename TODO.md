@@ -269,15 +269,25 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     - [ ] **Offen, gehört ins MailBurg-Repo:** ob `extract/` in ein eigenes
       kleines Paket wandert, das beide benutzen. Sauberer als der Import aus
       dem Kern, aber ein Umbau an MailBurg - und dort zu entscheiden.
-  - [ ] **Eigener Index, schlank.** SQLite-FTS5 gehört zur Standardbibliothek;
+  - [x] **Eigener Index, schlank - gebaut am 2026-09-17**
+    (`dialos-suche-index.py`). SQLite-FTS5 gehört zur Standardbibliothek;
     ein Index über Dateien, die schon da sind, sind einige hundert Zeilen -
     ohne Archivablage, ohne Journal, ohne Fristen. Quellen: Briefe aus
     `~/Dokumente/`, PDFs aus `~/Dokumente/Archiv/DialOS-DATA/`, Notizen aus
     `~/Notizen/`, Mails aus Thunderbirds mbox.
-    - [ ] **Kölner-Phonetik-Spalte** für Absendernamen, damit „Meier", „Mayer"
-      und „Maier" zusammenfallen. Fängt Erkennungsunschärfe strukturell ab,
-      statt sie dem Nutzer als Nachfrage aufzubürden. Hat MailBurg nicht, weil
-      es dort niemand braucht - dort tippt man.
+    - [x] **Kölner-Phonetik-Spalte gebaut.** Geprüft: „Meier"/„Mayer"/„Maier"/
+      „Mayr" fallen auf `67` zusammen, „Müller"/„Mueller"/„Miller" auf `657`.
+      Im Test findet der gesprochene Begriff „Meier" den Brief mit „Mayer", und
+      „Schmidt" die Notiz mit „Schmitt" - beides über den Klang. „Fahrrad"
+      liefert korrekt nichts.
+
+      **Die Phonetik läuft als ZWEITER Durchgang**, nicht als erster: Sie
+      kollidiert naturgemäß („Müller" und „Mahler" haben beide `657`). Wörtlich
+      gefundene Treffer stehen deshalb vorn, und die Ansage sagt „klingt nur
+      ähnlich", wenn es nur phonetische gab - sonst wundert sich der Nutzer
+      beim Vorlesen über die Schreibweise.
+    - [ ] **Am Gerät mit echten Dokumenten prüfen.** Bisher nur mit zwei
+      Testdateien belegt. Interessant wird die Laufzeit bei den PDFs im Archiv.
   - [ ] **Freier Suchbegriff über Parakeet**, nicht über Vosk. Ein Suchbegriff
     ist Text, kein Befehl - dieselbe Arbeitsteilung wie beim Diktat. Nichts neu
     zu beschaffen. **Zu prüfen ist nur eines:** ob sich Parakeet ein Wörterbuch
