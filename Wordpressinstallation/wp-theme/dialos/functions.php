@@ -38,6 +38,13 @@ function dialos_child_enqueue_styles() {
  * das Plugin einmal deaktiviert wird.
  */
 add_action( 'save_post', 'dialos_child_cache_leeren' );
+// Zeitgesteuert veroeffentlichte Beitraege laufen nicht zwingend ueber
+// save_post - ohne diese Zeile blieben die Bloecke mit den neuesten
+// Beitraegen auf der Startseite stehen, bis irgendwer etwas anderes
+// speichert (Stephan, 2026-09-17: "ein Automatismus, der prueft, ob es
+// Neuigkeiten gibt"). Genau das ist er, nur ereignisgesteuert statt
+// taeglich - und damit in Sekunden statt in bis zu 24 Stunden.
+add_action( 'publish_future_post', 'dialos_child_cache_leeren' );
 
 function dialos_child_cache_leeren() {
 	if ( function_exists( 'wp_cache_clear_cache' ) ) {
@@ -659,4 +666,133 @@ function dialos_child_englische_anfuehrungszeichen( $text ) {
 	// als ein deutsches, das dort ganz sicher falsch ist.
 	$text = str_replace( array( '„', '‚' ), array( '“', '‘' ), $text );
 	return $text;
+}
+
+/**
+ * Die drei neuesten Beitraege als eigene Bloecke in der rechten Spalte
+ * der Startseite (Stephan, 2026-09-17).
+ *
+ * WARUM KEIN LAUFBAND: Stephan hatte zuerst nach einem Ticker gefragt und
+ * die Idee selbst wieder verworfen. Bewegter Text ist fuer diese Zielgruppe
+ * der falsche Weg - ein Screenreader liest Inhalte vor, die sich unter ihm
+ * wegbewegen, wer nur noch Umrisse erkennt kann wanderndem Text nicht
+ * folgen, und die Richtlinien verlangen fuer Bewegung ueber fuenf Sekunden
+ * einen Anhalteknopf. Drei ruhende Bloecke leisten dasselbe: Sie zeigen,
+ * dass sich etwas bewegt, ohne sich zu bewegen.
+ *
+ * WOHIN: Das Eltern-Theme legt neben main#main (col-md-9) bereits ein
+ * leeres <aside id="sidebar" class="col-md-3"> an. Es muss also nichts am
+ * Layout umgebaut werden - die Bloecke kommen in dessen .content-sidebar,
+ * und Bootstrap stellt sie von selbst neben den weissen Hauptblock. Auf
+ * schmalen Bildschirmen rutschen sie darunter, auch das erledigt Bootstrap.
+ *
+ * SPRACHE: Auf /en/ die drei neuesten englischen Beitraege, sonst die
+ * deutschen. Erkannt am Marker '>Deutsch<' im Inhalt - dieselbe Konvention,
+ * die dialos_child_english_post_link() schon benutzt. Wer sie aendert, muss
+ * beide Stellen anfassen.
+ *
+ * GLIEDERUNG: eine <section> mit Ueberschrift, darin drei <article> mit je
+ * einer h3. So findet ein Screenreader den Bereich ueber die
+ * Ueberschriften-Navigation und weiss, dass drei gleichrangige Beitraege
+ * darin stehen - nicht drei zusammenhanglose Kaesten.
+ */
+add_action( 'wp_footer', 'dialos_child_neueste_beitraege', 22 );
+
+function dialos_child_neueste_beitraege() {
+	if ( ! is_page( array( 2, 135 ) ) ) {
+		return;
+	}
+	$englisch = dialos_child_ist_englisch();
+	$treffer  = array();
+
+	foreach ( get_posts( array( 'numberposts' => 40, 'post_status' => 'publish' ) ) as $beitrag ) {
+		$ist_englisch = ( false !== strpos( $beitrag->post_content, '>Deutsch<' ) );
+		if ( $ist_englisch === $englisch ) {
+			$treffer[] = $beitrag;
+		}
+		if ( count( $treffer ) === 3 ) {
+			break;
+		}
+	}
+	if ( ! $treffer ) {
+		return;
+	}
+
+	// date_i18n liefert die Monate in der Sprache der Installation, und die
+	// ist Deutsch. Fuer /en/ deshalb uebersetzen - sonst stuende dort
+	// "17 September 2026" neben "16 August 2026" auf Deutsch gemischt.
+	$monate_de = array( 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+		'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember' );
+	$monate_en = array( 'January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December' );
+
+	$eintraege = array();
+	foreach ( $treffer as $beitrag ) {
+		$datum = $englisch
+			? str_replace( $monate_de, $monate_en, date_i18n( 'j F Y', strtotime( $beitrag->post_date ) ) )
+			: date_i18n( 'j. F Y', strtotime( $beitrag->post_date ) );
+		$eintraege[] = array(
+			'titel' => get_the_title( $beitrag ),
+			'url'   => get_permalink( $beitrag ),
+			'datum' => $datum,
+			'iso'   => mysql2date( 'Y-m-d', $beitrag->post_date ),
+		);
+	}
+
+	$texte = array(
+		'ueberschrift' => $englisch ? 'Latest posts' : 'Neueste Beiträge',
+		'alle'         => $englisch ? 'All news' : 'Alle Neuigkeiten',
+		'alle_url'     => $englisch ? home_url( '/en/news/' ) : home_url( '/neuigkeiten/' ),
+	);
+	?>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var spalte = document.querySelector('#sidebar .content-sidebar');
+		if (!spalte) return;
+
+		var daten = <?php echo wp_json_encode( $eintraege ); ?>;
+		var texte = <?php echo wp_json_encode( $texte ); ?>;
+
+		var bereich = document.createElement('section');
+		bereich.className = 'dialos-neueste';
+		bereich.setAttribute('aria-labelledby', 'dialos-neueste-titel');
+
+		var titel = document.createElement('h2');
+		titel.id = 'dialos-neueste-titel';
+		titel.className = 'dialos-neueste-titel';
+		titel.textContent = texte.ueberschrift;
+		bereich.appendChild(titel);
+
+		daten.forEach(function (e) {
+			var kasten = document.createElement('article');
+			kasten.className = 'dialos-neueste-block';
+
+			var h = document.createElement('h3');
+			var link = document.createElement('a');
+			link.href = e.url;
+			link.textContent = e.titel;
+			h.appendChild(link);
+			kasten.appendChild(h);
+
+			var datum = document.createElement('time');
+			datum.className = 'dialos-neueste-datum';
+			datum.setAttribute('datetime', e.iso);
+			datum.textContent = e.datum;
+			kasten.appendChild(datum);
+
+			bereich.appendChild(kasten);
+		});
+
+		var alle = document.createElement('p');
+		alle.className = 'dialos-neueste-alle';
+		var alleLink = document.createElement('a');
+		alleLink.href = texte.alle_url;
+		alleLink.textContent = texte.alle;
+		alle.appendChild(alleLink);
+		bereich.appendChild(alle);
+
+		spalte.appendChild(bereich);
+	});
+	</script>
+	<?php
 }
