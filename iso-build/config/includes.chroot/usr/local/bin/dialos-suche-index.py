@@ -211,6 +211,89 @@ def text_aus_datei(pfad):
 
 
 # --------------------------------------------------------------------------
+# Wer steht drin? - fuer das Eingrenzen nach Ansprechpartner oder Firma
+# --------------------------------------------------------------------------
+
+# Rechtsformen und Anreden, an denen sich ein Gegenueber erkennen laesst. Die
+# Liste ist bewusst kurz und nicht vollstaendig: Sie muss nicht jeden Fall
+# treffen, sie muss dem Nutzer eine Handvoll Namen zum Eingrenzen anbieten.
+FIRMA_WORTE = ("GmbH", "AG", "KG", "OHG", "mbH", "e.V", "eG", "SE", "UG",
+               "Versicherung", "Krankenkasse", "Bank", "Sparkasse", "Amt",
+               "Finanzamt", "Stadtwerke", "Praxis", "Kanzlei", "Apotheke")
+ANREDEN = ("Herr", "Herrn", "Frau", "Dr", "Prof")
+
+# Woerter, die gross geschrieben am Satzanfang stehen und keine Namen sind.
+KEIN_NAME = {"Sehr", "Mit", "Ich", "Wir", "Sie", "Der", "Die", "Das", "Ein",
+             "Eine", "Bitte", "Danke", "Betreff", "Datum", "Liebe", "Lieber",
+             "Guten", "Hallo", "Anbei", "Hiermit", "Zu", "Am", "In", "Bei",
+             "Für", "Von", "Nach", "Über", "Und", "Aber", "Auch", "Dann"}
+
+
+def personen_aus_text(text, hoechstens=12):
+    """Namen und Firmen, nach denen sich eingrenzen laesst.
+
+    KEIN VOLLSTAENDIGES VERFAHREN, und das ist Absicht: Der Nutzer soll aus
+    fuenfzig Funden auf einen kommen, dazu genuegen ein paar brauchbare Namen.
+    Ein Erkenner, der jeden Fall trifft, waere ein eigenes Projekt - und bei
+    fuenf falschen Vorschlaegen von zwoelf verliert der Nutzer nichts, er waehlt
+    einfach einen anderen.
+
+    Der KOPF DES BRIEFES zaehlt mehr als der Rest: Dort steht der Empfaenger,
+    und danach sucht man. Deshalb nur die ersten 2000 Zeichen.
+    """
+    kopf = text[:2000]
+    gefunden = []
+
+    for zeile in kopf.splitlines():
+        zeile = zeile.strip()
+        if not zeile or len(zeile) > 80:
+            continue
+        if re.match(r"(?i)^(sehr geehrt|liebe|hallo|guten)", zeile):
+            continue                       # Anrede, nicht der Empfaenger
+        # Firma: Zeile enthaelt eine Rechtsform oder ein Sachwort
+        # MIT WORTGRENZEN, und das ist kein Feinschliff: Ohne sie steckte "AG"
+        # in "Frage" und "Abschlagszahlung", und jede Zeile mit einem dieser
+        # Woerter wurde als Firma vorgeschlagen. Im ersten Test war jeder
+        # zweite Vorschlag so entstanden.
+        if any(re.search(r"\b" + re.escape(w) + r"\b", zeile, re.I)
+               for w in FIRMA_WORTE):
+            name = re.sub(r"[,;].*$", "", zeile).strip()
+            if 3 <= len(name) <= 60 and name not in gefunden:
+                gefunden.append(name)
+                continue
+        # Person: Anrede plus Name
+        m = re.match(r"^(?:%s)\.?\s+([A-ZÄÖÜ][\wäöüß-]+(?:\s+[A-ZÄÖÜ][\wäöüß-]+)?)"
+                     % "|".join(ANREDEN), zeile)
+        if m and m.group(1) not in gefunden:
+            gefunden.append(m.group(1))
+
+    # DIE GROSSSCHREIBUNGS-HEURISTIK IST BEWUSST DRAUSSEN. Sie stand hier und
+    # lieferte im ersten Test drei unbrauchbare von vier Vorschlaegen ("zu
+    # meiner Zuzahlung von 42", "Nordost"). Ein falscher Name zum Eingrenzen
+    # ist schlimmer als ein fehlender: Der Nutzer waehlt ihn, landet bei null
+    # Treffern und muss von vorn anfangen - und er kann nicht nachsehen, warum.
+    # Lieber wenige sichere Namen als viele geratene.
+    return gefunden[:hoechstens]
+
+
+def jahr_aus(pfad, text, zeitstempel):
+    """Das Jahr des Dokuments - aus dem Dateinamen, sonst aus dem Text.
+
+    DER DATEINAME ZUERST, weil DialOS seine Briefe seit dem 2026-09-15 mit
+    Datum benennt (2026-09-17-1343-Brief.txt) und das verlaesslicher ist als
+    der Zeitstempel: Eine Datei, die kopiert wurde, hat ein neues mtime, aber
+    denselben Namen.
+    """
+    m = re.search(r"\b(19|20)\d{2}\b", os.path.basename(pfad))
+    if m:
+        return int(m.group(0))
+    m = re.search(r"\b(19|20)\d{2}\b", text[:2000])
+    if m:
+        return int(m.group(0))
+    return int(time.strftime("%Y", time.localtime(zeitstempel)))
+
+
+# --------------------------------------------------------------------------
 # Index
 # --------------------------------------------------------------------------
 
@@ -221,8 +304,12 @@ CREATE TABLE IF NOT EXISTS dateien (
     art      TEXT NOT NULL,
     geaendert REAL NOT NULL,
     groesse  INTEGER NOT NULL,
-    gelesen  REAL NOT NULL
+    gelesen  REAL NOT NULL,
+    jahr     INTEGER,
+    personen TEXT
 );
+CREATE INDEX IF NOT EXISTS dateien_jahr ON dateien(jahr);
+CREATE INDEX IF NOT EXISTS dateien_art  ON dateien(art);
 CREATE VIRTUAL TABLE IF NOT EXISTS suche USING fts5(
     name, inhalt, klang,
     content='', tokenize="unicode61 remove_diacritics 2"
@@ -270,8 +357,11 @@ def aufbauen(db, nur_neue=False):
         db.execute("DELETE FROM suche WHERE rowid IN "
                    "(SELECT id FROM dateien WHERE pfad = ?)", (pfad,))
         db.execute("INSERT OR REPLACE INTO dateien "
-                   "(pfad, art, geaendert, groesse, gelesen) VALUES (?,?,?,?,?)",
-                   (pfad, art, st.st_mtime, st.st_size, time.time()))
+                   "(pfad, art, geaendert, groesse, gelesen, jahr, personen) "
+                   "VALUES (?,?,?,?,?,?,?)",
+                   (pfad, art, st.st_mtime, st.st_size, time.time(),
+                    jahr_aus(pfad, inhalt, st.st_mtime),
+                    "\n".join(personen_aus_text(inhalt))))
         neue_id = db.execute("SELECT id FROM dateien WHERE pfad = ?",
                              (pfad,)).fetchone()[0]
         db.execute("INSERT INTO suche (rowid, name, inhalt, klang) VALUES (?,?,?,?)",
@@ -305,7 +395,8 @@ def suchen(db, begriff, hoechstens=40):
 
     def hole(bedingung, parameter, wie):
         for zeile in db.execute(
-                "SELECT d.pfad, d.art, d.geaendert FROM suche s "
+                "SELECT d.pfad, d.art, d.geaendert, d.jahr, d.personen "
+                "FROM suche s "
                 "JOIN dateien d ON d.id = s.rowid "
                 f"WHERE {bedingung} ORDER BY d.geaendert DESC LIMIT ?",
                 parameter + (hoechstens,)):
@@ -313,7 +404,9 @@ def suchen(db, begriff, hoechstens=40):
                 continue
             gesehen.add(zeile[0])
             treffer.append({"pfad": zeile[0], "art": zeile[1],
-                            "geaendert": zeile[2], "wie": wie})
+                            "geaendert": zeile[2], "jahr": zeile[3],
+                            "personen": (zeile[4] or "").split("\n") if zeile[4] else [],
+                            "wie": wie})
 
     hole("suche MATCH ?", (" OR ".join(f'"{w}"' for w in worte),), "wort")
     if len(treffer) < hoechstens:
