@@ -122,6 +122,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **In dictation: "von vorne" and "alles verwerfen", amounts with cents from Vosk**
+  (2026-09-17, fourth trial). Both commands with a question and their own
+  recogniser so "Diktat beenden" is not confused. If only Vosk hears "Cent", its
+  amount applies ("12 Euro und 40" → "322,40 Euro"). Test bench unchanged.
+
 - **DialOS gets an extension interface - a draft, no code yet**
   (2026-09-17, Stephan's decision: build DialOS Search "als eigenständige
   Erweiterung von DialOS aufbauen, so dass wir über die Zeit mehrere Tools

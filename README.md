@@ -130,6 +130,11 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Im Diktat: „von vorne" und „alles verwerfen", Beträge mit Cent von Vosk**
+  (2026-09-17, vierte Probe). Beide Befehle mit Rückfrage und eigenem Erkenner, damit
+  „Diktat beenden" nicht verwechselt wird. Hört nur Vosk „Cent", gilt sein Betrag
+  („12 Euro und 40" → „322,40 Euro"). Prüfstand unverändert.
+
 - **DialOS bekommt eine Erweiterungsschnittstelle - Entwurf, noch kein Code**
   (2026-09-17, Stephans Entscheidung: DialOS-Suche „als eigenständige
   Erweiterung von DialOS aufbauen, so dass wir über die Zeit mehrere Tools

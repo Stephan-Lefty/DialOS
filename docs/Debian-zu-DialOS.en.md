@@ -2029,6 +2029,18 @@ freundlichen Grüßen." - an "Absatz" in mid-sentence before a closing or
 salutation is now always the command (otherwise the closing stayed in the
 sentence and the signature from the data did not apply). Test bench unchanged.
 
+**Fourth trial (14:15):** name corrected ("Gizzle ball" → nein → GESOBAU AG found),
+"abbrechen" in the dialogue ✓. New: (1) amounts - Parakeet wrote "12 Euro und
+vierzig" for Vosk's "dreihundert zweiundzwanzig euro und vierzig cent": if only
+Vosk hears "cent", Vosk's whole amount applies. (2) In **dictation** there are now
+**"von vorne"** (discard what was dictated, the recipient stays) and **"alles
+verwerfen"** (save nothing), both with a yes/no question and the same safeguards
+as "Satz löschen". A separate third recogniser (`GRAMMATIK_STEUER`): in the
+closing grammar the small model heard "Diktat beenden" as "diktat vorne", and a
+letter on the test bench no longer ended. Not "Diktat abbrechen" - it sounds like
+"Diktat beenden", and one command saves while the other discards. Simulated: von
+vorne, alles verwerfen, Diktat beenden - each right; test bench 9 cases as before.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

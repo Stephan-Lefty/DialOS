@@ -2107,6 +2107,18 @@ Absatz mit freundlichen Grüßen." - ein „Absatz" mitten im Satz vor Gruß ode
 Anrede ist jetzt immer der Befehl (sonst stand der Gruß im Satz und die
 Unterschrift aus den Daten griff nicht). Prüfstand unverändert.
 
+**Vierte Probe (14:15):** Name korrigiert („Gizzle ball" → nein → GESOBAU AG
+gefunden), „abbrechen" im Dialog ✓. Neu: (1) Beträge - Parakeet schrieb „12 Euro
+und vierzig" für Vosks „dreihundert zweiundzwanzig euro und vierzig cent": Hört nur
+Vosk „cent", gilt Vosks ganzer Betrag. (2) Im **Diktat** gibt es jetzt **„von
+vorne"** (bisher Diktiertes verwerfen, Empfänger bleibt) und **„alles verwerfen"**
+(nichts speichern), beide mit Rückfrage ja/nein und denselben Sicherungen wie
+„Satz löschen". Eigener dritter Erkenner (`GRAMMATIK_STEUER`): In der
+Schluss-Grammatik hörte das kleine Modell „Diktat beenden" als „diktat vorne", und
+ein Brief im Prüfstand endete nicht mehr. Nicht „Diktat abbrechen" - es klingt wie
+„Diktat beenden", und der eine Befehl speichert, der andere verwirft. Simuliert:
+von vorne, alles verwerfen, Diktat beenden - je richtig; Prüfstand 9 Fälle wie vorher.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

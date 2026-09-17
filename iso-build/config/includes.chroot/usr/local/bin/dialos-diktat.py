@@ -107,6 +107,24 @@ SCHLUSSSATZ = "diktat beenden"
 # gelten die Befehle nur mit Ruhe davor UND danach - siehe BEFEHL_*.
 BEFEHL_LOESCHEN = "satz löschen"
 BEFEHL_WIEDERHOLEN = "satz wiederholen"
+# VON VORNE UND ABBRECHEN IM DIKTAT (Stephan, 2026-09-17: "ich kann den Brief nicht
+# neu starten oder das Diktat einfach beenden" - sein "von vorne" stand danach als
+# Satz im Brief). Dieselben Sicherungen wie "Satz loeschen" (Ruhe davor und danach,
+# Gegenprobe der freien Erkennung) und zusaetzlich eine Rueckfrage: Beides wirft
+# Diktiertes weg.
+BEFEHL_VON_VORNE = "von vorne"
+# NICHT "Diktat abbrechen": Es klingt wie "Diktat beenden", und der eine Befehl
+# speichert, der andere wirft alles weg (Pruefstand/Simulation 2026-09-17: das
+# kleine Modell hoerte beides fuereinander).
+BEFEHL_ABBRECHEN = "alles verwerfen"
+BEFEHLE_IM_DIKTAT = (BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN)
+BEFEHL_STAMM = {BEFEHL_LOESCHEN: "lösch", BEFEHL_WIEDERHOLEN: "wiederhol",
+                BEFEHL_VON_VORNE: "vorn", BEFEHL_ABBRECHEN: "verwerf"}
+# EIGENER ERKENNER FUER DIESE ZWEI (Pruefstand 2026-09-17): In derselben Grammatik
+# wie der Schluss hoerte das kleine Modell Stephans "Diktat beenden" als "diktat
+# vorne" - ein Brief endete nicht mehr. Ein dritter Erkenner mit nur diesen beiden
+# Saetzen laesst den Schluss-Erkenner, wie er war.
+GRAMMATIK_STEUER = json.dumps([BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN, "[unk]"], ensure_ascii=False)
 GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, "[unk]"],
                                ensure_ascii=False)
 SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
@@ -2017,6 +2035,28 @@ def zahlwoerter_aus_vosk(text, vosk_worte):
     # vierzig" fehlte. Fuegt Vosk nur Zahl- und Waehrungswoerter zwischen zwei
     # Zahl-/Waehrungswoertern ein, kommen sie in den Text.
     betrag = {"euro", "cent", "und", "komma"}
+    # BETRAG MIT CENT, DEN PARAKEET VERKUERZTE (2026-09-17, 14:17): Vosk "dreihundert
+    # zweiundzwanzig euro und vierzig cent", Parakeet "12 Euro und vierzig". Hoert nur
+    # Vosk "cent", gilt Vosks ganzer Betrag - Zahlwoerter vor "euro" bis "cent".
+    if "euro" in v and "cent" in v and "euro" in p and "cent" not in p:
+        je, jc = v.index("euro"), v.index("cent")
+        js = je
+        while js > 0 and _ist_zahlwort(v[js - 1]):
+            js -= 1
+        ie = p.index("euro")
+        i_start = ie
+        while i_start > 0 and (_ist_zahlwort(p[i_start - 1]) or p[i_start - 1].replace(",", "").isdigit()):
+            i_start -= 1
+        i_ende = ie + 1
+        if i_ende < len(p) and p[i_ende] == "und":
+            i_ende += 1
+        if i_ende < len(p) and (_ist_zahlwort(p[i_ende]) or p[i_ende].isdigit()):
+            i_ende += 1
+        if js < je and jc - je <= 4 and i_start < ie:
+            text = (text[:stellen[i_start][0]] + " ".join(v[js:jc + 1])
+                    + text[stellen[i_ende - 1][1]:])
+            stellen = [(m.start(), m.end(), m.group(0)) for m in WORT.finditer(text)]
+            p = [w.lower() for _, _, w in stellen]
     opcodes = difflib.SequenceMatcher(None, p, v, autojunk=False).get_opcodes()
     for tag, i1, i2, j1, j2 in reversed(opcodes):
         if tag != "insert" or i1 == 0 or i1 >= len(stellen):
@@ -2753,6 +2793,10 @@ def diktat_fuehren(zweck, name, quelle):
         erkenner.SetWords(True)
         if schluss is not None:
             schluss.SetWords(True)
+        steuer = (vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_STEUER)
+                  if modell_klein and name in BRIEF_ZIELE + ("notizen",) else None)
+        if steuer is not None:
+            steuer.SetWords(True)
         prozess = aufnahme_starten(quelle)
         vorrat = sprechen_bei_offener_aufnahme(
             ANSAGE_BEREIT_LISTE if name in LISTEN_ZIELE else ANSAGE_BEREIT, prozess)
@@ -2772,6 +2816,7 @@ def diktat_fuehren(zweck, name, quelle):
         zeitverlauf = []
         epoche = 0
         befehl_offen = None
+        abgebrochen = False
         while True:
             # Zeitgrenze: Sie wird bei JEDER Aeusserung zurueckgesetzt, auch
             # bei einer, die verworfen wird - wer spricht, ist da.
@@ -2849,7 +2894,7 @@ def diktat_fuehren(zweck, name, quelle):
                     # wiederholen", "satz wiederholen". Also gilt der Befehl nur,
                     # wenn die freie Erkennung im selben Zeitraum "loesch..." bzw.
                     # "wiederhol..." gehoert hat.
-                    stamm = "lösch" if b["satz"] == BEFEHL_LOESCHEN else "wiederhol"
+                    stamm = BEFEHL_STAMM[b["satz"]]
                     gegen = aeusserungen.worte_nach(epoche, b["start"] - BEFEHL_SPIELRAUM_S)
                     if not any(stamm in w.get("word", "") for w in gegen):
                         melde(f"  {b['satz']!r} verworfen - die freie Erkennung hoerte "
@@ -2868,7 +2913,27 @@ def diktat_fuehren(zweck, name, quelle):
                         aeusserungen.ab_zeit_entfernen(epoche, b["start"] - BEFEHL_SPIELRAUM_S,
                                                        nach_ende=True)
                         aeusserungen.befehlsrest_entfernen()
-                        if b["satz"] == BEFEHL_LOESCHEN:
+                        if b["satz"] in (BEFEHL_ABBRECHEN, BEFEHL_VON_VORNE):
+                            frage = ("Soll ich alles verwerfen? Es wird nichts gespeichert. "
+                                     "Sage ja oder nein." if b["satz"] == BEFEHL_ABBRECHEN else
+                                     "Soll ich alles bisher Diktierte verwerfen und von vorne "
+                                     "beginnen? Sage ja oder nein.")
+                            try:
+                                ok = ja_oder_nein_hoeren(frage, prozess, modell_klein)
+                            except DialogAbbruch:
+                                ok, b["satz"] = True, BEFEHL_ABBRECHEN
+                            except DialogNeustart:
+                                ok, b["satz"] = True, BEFEHL_VON_VORNE
+                            melde(f"  {b['satz'].upper()}: Rueckfrage {ok!r}")
+                            if ok and b["satz"] == BEFEHL_ABBRECHEN:
+                                abgebrochen = True
+                                break
+                            if ok:
+                                aeusserungen.liste.clear()
+                                antwort = "Gut, ich fange von vorne an. Ich schreibe mit."
+                            else:
+                                antwort = "Gut, ich schreibe weiter mit."
+                        elif b["satz"] == BEFEHL_LOESCHEN:
                             weg = aeusserungen.satz_entfernen()
                             melde(f"  SATZ LOESCHEN: gestrichen {weg!r}")
                             antwort = (f"Gestrichen: {zum_vorlesen(weg)}" if weg
@@ -2885,6 +2950,9 @@ def diktat_fuehren(zweck, name, quelle):
                         erkenner.SetWords(True)
                         schluss = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_SCHLUSS)
                         schluss.SetWords(True)
+                        if steuer is not None:
+                            steuer = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, GRAMMATIK_STEUER)
+                            steuer.SetWords(True)
                         epoche += 1
                         zeitverlauf = []
                         del epoche_audio[:]
@@ -2903,13 +2971,29 @@ def diktat_fuehren(zweck, name, quelle):
             # Block; wer zuerst fertig ist, ist unerheblich - entscheidend
             # ist, dass der Schlusssatz nicht erst durch die freie
             # Erkennung muss, wo er verloren geht.
+            if steuer is not None and steuer.AcceptWaveform(block):
+                ergebnis_steuer = json.loads(steuer.Result())
+                gehoert_steuer = ergebnis_steuer.get("text", "").strip()
+                worte_steuer = ergebnis_steuer.get("result", [])
+                if (gehoert_steuer in (BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN) and len(worte_steuer) == 2
+                        and befehl_offen is None):
+                    luecke = schluss_luecke(worte_steuer)
+                    anfang, ende = worte_steuer[0].get("start", 0), worte_steuer[1].get("end", 0)
+                    if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
+                        melde(f"  {gehoert_steuer!r} verworfen - Woerter nicht zusammenhaengend ({luecke:.2f} s)")
+                    elif not ruhig(zeitverlauf, anfang - BEFEHL_RAND_DAVOR_S - BEFEHL_RUHE_DAVOR_S,
+                                   anfang - BEFEHL_RAND_DAVOR_S, ruhe_schwelle):
+                        melde(f"  {gehoert_steuer!r} verworfen - davor nicht still ({anfang:.2f} s)")
+                    else:
+                        melde(f"  {gehoert_steuer!r} erkannt ({anfang:.2f}-{ende:.2f} s) - warte auf Ruhe danach")
+                        befehl_offen = {"satz": gehoert_steuer, "start": anfang, "ende": ende}
             if schluss is not None and schluss.AcceptWaveform(block):
                 ergebnis_schluss = json.loads(schluss.Result())
                 gehoert = ergebnis_schluss.get("text", "").strip()
                 mittel = ((sum(pegel_puffer) / len(pegel_puffer))
                           if pegel_puffer else 0.0)
                 worte_befehl = ergebnis_schluss.get("result", [])
-                if gehoert in (BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN) and len(worte_befehl) == 2:
+                if gehoert in BEFEHLE_IM_DIKTAT and len(worte_befehl) == 2:
                     luecke = schluss_luecke(worte_befehl)
                     anfang, ende = worte_befehl[0].get("start", 0), worte_befehl[1].get("end", 0)
                     if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
@@ -3050,6 +3134,10 @@ def diktat_fuehren(zweck, name, quelle):
             except Exception:
                 pass
 
+    if locals().get("abgebrochen"):
+        melde("  Diktat abgebrochen - nichts gespeichert")
+        sprich("Ich habe das Diktat abgebrochen. Es wurde nichts gespeichert.")
+        return 0
     aeusserungen.schlussrest_entfernen()
     gesammelt = aeusserungen.eintraege()
 
