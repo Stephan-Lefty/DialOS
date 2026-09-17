@@ -2046,6 +2046,35 @@ sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/pers
 Im Konto der Person: `dialos-persoenliche-daten.py anlegen`, ausfüllen, dann
 `dialos-persoenliche-daten.py pruefen`. **Die Datei nie ins Repo.**
 
+**Empfänger-Dialog und Thunderbird-Kontakte (seit 2026-09-17).** Stephan: die
+Empfängeradresse einsprechen und „automatisch als Kontakt bei Thunderbird"
+hinterlegen; seine Wahl: geführter Dialog, bekannte Kontakte zuerst suchen. Nach
+„Brief schreiben" und dem Laden der Modelle fragt `dialos-diktat.py`: „An wen geht
+der Brief?" - gefunden in den Thunderbird-Kontakten → Adresse vorlesen, ja/nein;
+sonst Straße und Hausnummer, Land (nur wenn nicht das eigene aus den persönlichen
+Daten), Postleitzahl und Ort, dann die ganze Adresse vorlesen (Postleitzahl Ziffer
+für Ziffer) und „Stimmt das?". Antworten hören Vosk (Ende der Antwort: 1,2 s
+Stille) und Parakeet (Schreibweise); Ja/Nein das kleine Modell mit Grammatik. „Ohne
+Empfänger" oder keine Antwort: Brief ohne Anschrift. Hausnummer und
+Postleitzahl immer als Ziffern (auch „fünf a" → „5a", „eins zwei sechs zwei neun"
+→ „12629", Länge nach Land). Im Briefbogen steht der Empfänger links zwischen
+Absender und Datum; „Brief vorlesen" nennt ihn, der DIN-Entwurf setzt ihn ins
+Anschriftfeld.
+
+`dialos-empfaenger.py` liest und schreibt das Adressbuch `abook.sqlite` des
+Thunderbird-Profils (Karte als vCard 4.0 in `_vCard`, dazu `DisplayName`,
+`FirstName`, `LastName`). **Geschrieben wird nur, wenn Thunderbird nicht läuft**;
+sonst kommt der Kontakt nach `~/.config/dialos/kontakte-neu.json` und
+`dialos-kontakte.service` trägt ihn beim Anmelden ein. Geprüft mit Piper-Stimme
+(neuer Empfänger im Ausland, gefundener Kontakt, ohne Empfänger); Prüfstand
+unverändert.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/
+sudo systemctl --global enable dialos-kontakte.service
+```
+
 **Eingabemaske (seit 2026-09-16, fester Teil der Einrichtung).** Stephan: „eine
 richtige Eingabemaske … Auch die von einem Nutzer, den ich einrichte" und „fester
 Bestandteil der Einrichtung". `dialos-persoenliche-daten-maske.py` (GTK 4,

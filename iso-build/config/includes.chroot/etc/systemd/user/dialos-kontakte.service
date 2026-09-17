@@ -1,0 +1,18 @@
+[Unit]
+# Traegt beim Anmelden Kontakte ins Thunderbird-Adressbuch ein, die beim Brief
+# vorgemerkt wurden, weil Thunderbird gerade lief (2026-09-17).
+#
+# WARUM NICHT SOFORT: Thunderbird haelt das Adressbuch im Speicher und koennte
+# einen Eintrag von aussen beim Beenden verlieren. Beim Anmelden laeuft es noch
+# nicht. Ist die Warteschlange leer, tut der Dienst nichts.
+Description=DialOS: vorgemerkte Brief-Empfaenger in die Kontakte
+Documentation=file:///usr/local/bin/dialos-empfaenger.py
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dialos-empfaenger.py nachholen
+Nice=15
+
+[Install]
+WantedBy=default.target

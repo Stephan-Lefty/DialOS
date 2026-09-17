@@ -29,6 +29,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   durchsehen, Mail-Signatur,
   Du/Sie, Unterschrift als Bild. (2) Die genaue Empfängeradresse wird eingesprochen.
   (3) Diese Adresse wird automatisch als Kontakt in Thunderbird angelegt.
+  **(2)+(3) gebaut 2026-09-17:** geführter Empfänger-Dialog im Diktat, Suche in
+  den Thunderbird-Kontakten, neuer Kontakt in `abook.sqlite` (Warteschlange,
+  wenn Thunderbird läuft) - mit Piper simuliert (neu, gefunden, ohne). Offen:
+  Probe mit Stephans Stimme; ob Thunderbird die angelegte Karte anzeigt;
+  Einbindung des DIN-PDF in Diktat/Drucken/PDF; Adresszusatz („z. Hd.").
+  **Mail-Signatur installiert** (17.09.).
   **Entwurf 2026-09-17:** `dialos-brief-din.py` (Form B, Vorschau mit
   Beispieldaten) - offen: Stephans Urteil, Empfängeradresse, Einbindung in
   Diktat/Drucken/PDF. **Mail-Signatur aus den Daten gebaut** (nicht installiert).

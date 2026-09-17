@@ -130,6 +130,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Empfänger-Dialog vor dem Brief, Adresse als Thunderbird-Kontakt** (2026-09-17,
+  Stephans Wahl: geführter Dialog, Kontakte zuerst suchen). „An wen geht der
+  Brief?" - bekannter Kontakt wird vorgelesen und bestätigt, sonst Straße, Land,
+  Postleitzahl und Ort einzeln, vorgelesen und als Kontakt ins Thunderbird-
+  Adressbuch geschrieben (bei laufendem Thunderbird beim nächsten Anmelden).
+  Empfänger im Briefbogen, beim Vorlesen und im DIN-Entwurf. Mit Piper simuliert.
+
 - **Dritter Brief: Zahlen als Ziffern, Anrede für sich, Fußzeile unten mit Slogan**
   (2026-09-17). Zahlwörter werden Ziffern nach Schreibregeln („31. August 2026",
   „01.10.2026", „322,40 Euro"), verstümmelte Parakeet-Zahlen kommen von Vosk; die

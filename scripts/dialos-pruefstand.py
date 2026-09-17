@@ -238,6 +238,8 @@ def fall_abspielen(fall, parakeet, tempo):
     d.MITSCHNITT_SCHALTER = os.path.join(tmp, "kein-mitschnitt")
     # Ohne persoenliche Daten: Der Fall misst die Erkennung, nicht die Unterschrift.
     d.PERSOENLICHE_DATEN_SKRIPT = "/nicht/vorhanden"
+    # Die Aufnahmen haben keinen Empfaenger-Dialog (gibt es erst seit 2026-09-17).
+    d.EMPFAENGER_FRAGEN = False
     d.PARAKEET_AUS = os.path.join(tmp, "parakeet-aus")
     if not parakeet:
         open(d.PARAKEET_AUS, "w").close()
@@ -252,7 +254,7 @@ def fall_abspielen(fall, parakeet, tempo):
     d.aufnahme_starten = lambda quelle: Prozess(Strom(daten, info.get("kurze_bloecke", []), tempo))
     ergebnis = {}
 
-    def brief(zeilen):
+    def brief(zeilen, empfaenger=None):
         ergebnis["text"] = d.brief_text(zeilen)
         return os.path.join(tmp, "brief.txt")
 

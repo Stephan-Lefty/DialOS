@@ -122,6 +122,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Recipient dialogue before the letter, address as Thunderbird contact**
+  (2026-09-17, Stephan's choice: guided dialogue, search contacts first). "An wen
+  geht der Brief?" - a known contact is read out and confirmed, otherwise street,
+  country, postcode and town one by one, read back and written as a contact to the
+  Thunderbird address book (at the next login if Thunderbird is running).
+  Recipient in the letter sheet, when reading aloud and in the DIN draft.
+  Simulated with Piper.
+
 - **Third letter: numbers as digits, salutation on its own, footer at the bottom
   with slogan** (2026-09-17). Number words become digits following the writing
   rules ("31. August 2026", "01.10.2026", "322,40 Euro"), mangled Parakeet

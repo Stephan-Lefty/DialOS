@@ -436,6 +436,19 @@ def briefteile(pfad):
         return [], [], []
     eingerueckt = [bool(z) and z.startswith(" ") for z in zeilen]
     kopf, text, fuss = [], [], []
+    # EMPFAENGER (seit 2026-09-17): linksbuendige Zeilen VOR der rechtsbuendigen
+    # Datumszeile. Sie gehoeren nicht zum Text - sonst zaehlten sie als Saetze.
+    datum = next((i for i, (z, r) in enumerate(zip(zeilen, eingerueckt))
+                  if r and re.search(r"\b\d{1,2}\. \w+ \d{4}\s*$", z)), None)
+    empfaenger = []
+    if datum is not None:
+        for zeile, rechts in zip(zeilen[:datum + 1], eingerueckt[:datum + 1]):
+            if rechts:
+                kopf.append(zeile.strip())
+            elif zeile.strip():
+                empfaenger.append(zeile.strip())
+        zeilen, eingerueckt = zeilen[datum + 1:], eingerueckt[datum + 1:]
+    briefteile.empfaenger = empfaenger
     gesehen_text = False
     for zeile, rechts in zip(zeilen, eingerueckt):
         if rechts:
@@ -514,6 +527,8 @@ def brief_vorlesen(name):
         # alles davor der Absender.
         if len(kopf) > 1:
             teile.append("Absender: " + ", ".join(kopf[:-1]) + ".")
+        if getattr(briefteile, "empfaenger", None):
+            teile.append("Empfänger: " + ", ".join(briefteile.empfaenger) + ".")
         teile.append("Datum: " + kopf[-1] + ".")
     teile.append(fliesstext)
     # FUSSZEILE UND UNTERSCHRIFT-HINWEIS WERDEN NICHT MEHR VORGELESEN (Stephan,

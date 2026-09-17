@@ -1281,7 +1281,19 @@ def absenderzeilen():
     return zeilen
 
 
-def briefbogen(text):
+def empfaenger_zeilen(empfaenger):
+    """Anschriftzeilen des Empfaengers nach DIN 5008 - Land nur bei Auslandspost."""
+    if not empfaenger:
+        return []
+    em = holen(EMPFAENGER_SKRIPT, "empfaenger")
+    _, daten = persoenliche_daten()
+    if em:
+        return em.zeilen(empfaenger, (daten or {}).get("land", ""))
+    return [z for z in (empfaenger.get("name"), empfaenger.get("strasse"),
+                        f"{empfaenger.get('plz', '')} {empfaenger.get('ort', '')}".strip()) if z]
+
+
+def briefbogen(text, empfaenger=()):
     """Setzt den diktierten Text in einen Briefbogen aus reinem Text.
 
     Absender und Datum rechtsbuendig, der Text linksbuendig, die Fusszeile
@@ -1300,6 +1312,11 @@ def briefbogen(text):
     absender = absenderzeilen()
     if absender:
         teile += [rechts(z) for z in absender]
+        teile.append("")
+    # EMPFAENGER LINKS ZWISCHEN ABSENDER UND DATUM (2026-09-17) - wie im Anschriftfeld
+    # eines Briefs. dialos-notiz.py erkennt ihn daran: links, vor der Datumszeile.
+    if empfaenger:
+        teile += list(empfaenger)
         teile.append("")
     teile.append(rechts(datum_ausgeschrieben()))
     teile.append("")
@@ -1472,7 +1489,7 @@ def brief_text(zeilen):
     return betreff_richten(anrede_richten(anrede_absetzen(grussformel_richten(text))))
 
 
-def brief_schreiben(zeilen):
+def brief_schreiben(zeilen, empfaenger=None):
     """Schreibt den Brief unter einem eigenen Namen mit Datum und Uhrzeit.
 
     JEDER BRIEF BEHAELT SEINEN NAMEN (Stephan, 2026-09-15): "2026-09-15-1343-
@@ -1501,7 +1518,7 @@ def brief_schreiben(zeilen):
         # konnte der Briefbogen einen Stueck-Uebergang nicht von einem
         # gesprochenen "neue zeile" unterscheiden - und zog beide zusammen: "Mit
         # freundlichen Gruessen neue zeile Stephan Roesner" stand in einer Zeile.
-        f.write(briefbogen(brief_text(zeilen)))
+        f.write(briefbogen(brief_text(zeilen), empfaenger_zeilen(empfaenger)))
 
     # JEDER BRIEF WANDERT ALS PDF INS ARCHIV (Stephans Vorgabe vom
     # 2026-08-21). Nicht abwarten und nicht daran scheitern: Der Brief ist als
@@ -2159,6 +2176,202 @@ def mitschnitt_speichern(ton, epochen, kurz, name, protokoll_ab, ergebnis, pfad,
         melde(f"  Mitschnitt nicht gespeichert: {fehler}")
 
 
+# EMPFAENGER-DIALOG VOR DEM BRIEF (Stephan, 2026-09-17: "Gefuehrter Dialog",
+# "Ja, erst suchen"). Nach dem Laden der Modelle, vor "Ich schreibe mit":
+#
+#   "An wen geht der Brief?"  -> Name oder Firma
+#       im Thunderbird-Adressbuch gefunden -> Adresse vorlesen, "ja oder nein"
+#       sonst / "nein" -> Strasse und Hausnummer, Postleitzahl und Ort, Land
+#   Adresse vorlesen (Postleitzahl Ziffer fuer Ziffer), "Stimmt das?"
+#   neue Adresse -> Kontakt in Thunderbird (dialos-empfaenger.py)
+#
+# JEDE ANTWORT HOEREN BEIDE ERKENNER: Vosk bestimmt, wann die Antwort zu Ende
+# ist (eine Sekunde Stille nach dem letzten Wort), Parakeet schreibt den Text -
+# Namen und Strassen gross und richtig. Ja/Nein erkennt das kleine Modell mit
+# einer Grammatik aus genau diesen zwei Woertern (wie die Rueckfragen in
+# dialos-notiz.py). Wer nichts sagt oder "ohne Empfaenger", bekommt den Brief
+# ohne Anschrift - das Diktat faellt nie wegen des Dialogs aus.
+EMPFAENGER_FRAGEN = True        # der Pruefstand schaltet ab: seine Aufnahmen haben keinen Dialog
+EMPFAENGER_SKRIPT = "/usr/local/bin/dialos-empfaenger.py"
+ANSAGE_EMPFAENGER = ("An wen geht der Brief? Sage den Namen oder die Firma. "
+                     "Wenn es keinen Empfänger gibt, sage: ohne Empfänger.")
+ANSAGE_STRASSE = "Wie heißen Straße und Hausnummer?"
+ANSAGE_PLZ_ORT = "Wie heißen Postleitzahl und Ort?"
+ANSAGE_LAND_FREI = "In welchem Land?"
+ANSAGE_JA_NEIN_NOCHMAL = "Das habe ich nicht verstanden. Sage bitte ja oder nein."
+ANSAGE_OHNE_EMPFAENGER = "Ich schreibe den Brief ohne Empfänger."
+ANTWORT_ZEITGRENZE_S = 12.0     # bis die Antwort BEGINNT
+ANTWORT_NACHLAUF_S = 1.2        # Stille nach dem letzten Wort, bis sie zu Ende ist
+OHNE_EMPFAENGER = re.compile(r"(?i)\b(ohne|kein\w*)\s+empf")
+
+
+def antwort_hoeren(frage, prozess, modell, parakeet):
+    """Stellt die Frage und liefert die Antwort als Text (Parakeet, sonst Vosk) oder ""."""
+    import vosk
+    vorrat = sprechen_bei_offener_aufnahme(frage, prozess)
+    erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
+    erkenner.SetWords(True)
+    audio = bytearray()
+    worte, texte = [], []
+    beginn_bis = time.time() + ANTWORT_ZEITGRENZE_S
+    ende = None
+    while True:
+        jetzt = time.time()
+        if (ende is None and jetzt > beginn_bis) or (ende is not None and jetzt > ende):
+            break
+        if vorrat:
+            block, vorrat = vorrat[:4000], vorrat[4000:]
+        else:
+            block = prozess.stdout.read(4000)
+        if not block:
+            break
+        audio.extend(block)
+        if erkenner.AcceptWaveform(block):
+            ergebnis = json.loads(erkenner.Result())
+            if ergebnis.get("text", "").strip():
+                texte.append(ergebnis["text"])
+                worte += ergebnis.get("result", [])
+                ende = time.time() + ANTWORT_NACHLAUF_S
+        elif json.loads(erkenner.PartialResult()).get("partial", "").strip():
+            # Es wird noch gesprochen - die Antwort ist nicht zu Ende.
+            ende = time.time() + ANTWORT_NACHLAUF_S + 2.0
+    if not texte:
+        schluss = json.loads(erkenner.FinalResult())
+        if schluss.get("text", "").strip():
+            texte.append(schluss["text"])
+            worte += schluss.get("result", [])
+    vosk_text = " ".join(texte).strip()
+    if not vosk_text:
+        melde(f"  Empfaenger-Dialog: keine Antwort auf {frage[:30]!r}")
+        return ""
+    text = vosk_text
+    if parakeet is not None and worte:
+        try:
+            roh = parakeet_erkennen(parakeet, audio, worte)
+            if roh and not parakeet_fuellwort(roh):
+                text = roh
+        except Exception as fehler:
+            melde(f"  Empfaenger-Dialog: Parakeet-Fehler ({fehler})")
+    text = woerterbuch_anwenden(komposita_nach_vosk(re.sub(r"[.!?]+$", "", text.strip()), vosk_text))
+    melde(f"  Empfaenger-Dialog: Vosk {vosk_text!r}, geschrieben {text!r}")
+    return text
+
+
+def komposita_nach_vosk(text, vosk_text):
+    """"Muster Strasse 5a" -> "Musterstrasse 5a", wenn Vosk das Wort zusammen hoerte.
+
+    Parakeet trennt zusammengesetzte Strassennamen (Simulation 2026-09-17), Vosk
+    kennt sie als ein Wort. Zwei Parakeet-Woerter, die zusammen genau ein
+    Vosk-Wort ergeben, werden verbunden. "Berliner Strasse" bleibt getrennt,
+    denn Vosk schreibt es ebenfalls getrennt.
+    """
+    vosk = {w.lower() for w in vosk_text.split()}
+    woerter = text.split()
+    i = 0
+    while i < len(woerter) - 1:
+        zusammen = woerter[i] + woerter[i + 1].lower()
+        if zusammen.lower() in vosk and woerter[i].lower() not in vosk:
+            woerter[i:i + 2] = [zusammen]
+        else:
+            i += 1
+    return " ".join(woerter)
+
+
+def ja_oder_nein_hoeren(frage, prozess, modell_klein):
+    """True, False oder None - zwei Versuche, wie die Rueckfragen in dialos-notiz.py."""
+    import vosk
+    for versuch in (1, 2):
+        vorrat = sprechen_bei_offener_aufnahme(frage if versuch == 1 else ANSAGE_JA_NEIN_NOCHMAL,
+                                               prozess)
+        erkenner = vosk.KaldiRecognizer(modell_klein, ABTASTRATE,
+                                        json.dumps(["ja", "nein", "[unk]"], ensure_ascii=False))
+        bis = time.time() + 8.0
+        while time.time() < bis:
+            if vorrat:
+                block, vorrat = vorrat[:4000], vorrat[4000:]
+            else:
+                block = prozess.stdout.read(4000)
+            if not block:
+                break
+            if not erkenner.AcceptWaveform(block):
+                continue
+            worte = json.loads(erkenner.Result()).get("text", "").split()
+            if not worte or "[unk]" in worte:
+                continue
+            melde(f"  Empfaenger-Dialog: Antwort {worte!r}")
+            if "ja" in worte and "nein" not in worte:
+                return True
+            if "nein" in worte:
+                return False
+    return None
+
+
+def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
+    """Der Dialog. Liefert ein Empfaenger-dict (name, strasse, plz, ort, land) oder None."""
+    em = holen(EMPFAENGER_SKRIPT, "empfaenger")
+    if em is None or modell_klein is None:
+        melde("  Empfaenger-Dialog nicht moeglich (dialos-empfaenger.py oder kleines Modell fehlt)")
+        return None
+    modul, daten = persoenliche_daten()
+    eigenes_land = daten.get("land", "") if daten else ""
+    import types
+    zahlen = types.SimpleNamespace(grundzahl=grundzahl)
+    prozess = aufnahme_starten(quelle)
+    try:
+        for runde in (1, 2):
+            name = antwort_hoeren(ANSAGE_EMPFAENGER if runde == 1 else
+                                  "Dann noch einmal. " + ANSAGE_EMPFAENGER, prozess, modell, parakeet)
+            if not name or OHNE_EMPFAENGER.search(name):
+                sprich(ANSAGE_OHNE_EMPFAENGER)
+                return None
+            name = name[:1].upper() + name[1:]
+            gefunden = em.suchen(name)
+            if gefunden:
+                k = gefunden[0]
+                kontakt = {"name": k["name"] or k["firma"], "zusatz": k["zusatz"],
+                           "strasse": k["strasse"], "plz": k["plz"], "ort": k["ort"],
+                           "land": k["land"]}
+                antwort = ja_oder_nein_hoeren(
+                    f"In den Kontakten steht: {em.gesprochen(kontakt)}. "
+                    "Ist das der Empfänger? Sage ja oder nein.", prozess, modell_klein)
+                if antwort:
+                    melde(f"  Empfaenger aus den Kontakten: {kontakt!r}")
+                    return kontakt
+                if antwort is None:
+                    sprich(ANSAGE_OHNE_EMPFAENGER)
+                    return None
+            strasse = em.strasse_richten(antwort_hoeren(ANSAGE_STRASSE, prozess, modell, parakeet), zahlen)
+            land = eigenes_land
+            if eigenes_land:
+                im_land = ja_oder_nein_hoeren(f"Liegt die Adresse in {eigenes_land}? Sage ja oder nein.",
+                                              prozess, modell_klein)
+                if im_land is False:
+                    land = antwort_hoeren(ANSAGE_LAND_FREI, prozess, modell, parakeet)
+                    land = land[:1].upper() + land[1:]
+            plz, ort = em.plz_ort_richten(antwort_hoeren(ANSAGE_PLZ_ORT, prozess, modell, parakeet),
+                                          zahlen, em.plz_laenge(land))
+            neu = {"name": name, "zusatz": "", "strasse": strasse, "plz": plz, "ort": ort,
+                   "land": land}
+            antwort = ja_oder_nein_hoeren(f"Der Brief geht an: {em.gesprochen(neu)}. "
+                                          "Stimmt das? Sage ja oder nein.", prozess, modell_klein)
+            if antwort:
+                melde(f"  Empfaenger neu: {neu!r}")
+                try:
+                    em.eintragen(neu)
+                except Exception as fehler:
+                    melde(f"  Kontakt nicht angelegt: {fehler}")
+                return neu
+            if antwort is None:
+                break
+        sprich(ANSAGE_OHNE_EMPFAENGER)
+        return None
+    finally:
+        try:
+            prozess.terminate()
+        except Exception:
+            pass
+
+
 def diktat_fuehren(zweck, name, quelle):
     import vosk
     vosk.SetLogLevel(-1)
@@ -2212,6 +2425,13 @@ def diktat_fuehren(zweck, name, quelle):
     if parakeet_faden is not None:
         parakeet_faden.join()
     parakeet = parakeet_geladen.get("erkenner")
+    empfaenger = None
+    if name in BRIEF_ZIELE and EMPFAENGER_FRAGEN:
+        try:
+            empfaenger = empfaenger_erfragen(quelle, modell, modell_klein, parakeet)
+        except Exception as fehler:
+            melde(f"  Empfaenger-Dialog abgebrochen: {fehler}")
+            empfaenger = None
     # Aufnahme der aktuellen Epoche - gleiche Zeitachse wie die Vosk-Woerter.
     epoche_audio = bytearray()
 
@@ -2648,7 +2868,7 @@ def diktat_fuehren(zweck, name, quelle):
         sprich(ANSAGE_LEER)
         return 0
 
-    pfad = (brief_schreiben(gesammelt) if name in BRIEF_ZIELE
+    pfad = (brief_schreiben(gesammelt, empfaenger) if name in BRIEF_ZIELE
             else notiz_schreiben(name, gesammelt))
     melde(f"  geschrieben nach {pfad}")
     if mitschnitt is not None:

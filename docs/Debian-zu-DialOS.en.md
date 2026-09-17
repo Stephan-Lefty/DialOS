@@ -1971,6 +1971,33 @@ In the person's account: `dialos-persoenliche-daten.py anlegen`, fill it in,
 then `dialos-persoenliche-daten.py pruefen`. **Never put the file into the
 repo.**
 
+**Recipient dialogue and Thunderbird contacts (since 2026-09-17).** Stephan: dictate
+the recipient's address and store it "automatically as a contact in Thunderbird";
+his choice: guided dialogue, search known contacts first. After "Brief schreiben"
+and loading the models, `dialos-diktat.py` asks "An wen geht der Brief?" - found in
+the Thunderbird contacts → read the address, yes/no; otherwise street and house
+number, country (only if not the own one from the personal data), postcode and
+town, then read the whole address (postcode digit by digit) and "Stimmt das?".
+Answers are heard by Vosk (end of answer: 1.2 s of silence) and Parakeet
+(spelling); yes/no by the small model with a grammar. "Ohne Empfänger" or no
+answer: letter without address. House number and postcode always as digits (also
+"fünf a" → "5a", "eins zwei sechs zwei neun" → "12629", length by country). In
+the letter sheet the recipient stands on the left between sender and date; "Brief
+vorlesen" names it, the DIN draft puts it in the address field.
+
+`dialos-empfaenger.py` reads and writes the Thunderbird profile's address book
+`abook.sqlite` (card as vCard 4.0 in `_vCard`, plus `DisplayName`, `FirstName`,
+`LastName`). **It only writes while Thunderbird is not running**; otherwise the
+contact goes to `~/.config/dialos/kontakte-neu.json` and `dialos-kontakte.service`
+adds it at login. Checked with a Piper voice (new recipient abroad, found contact,
+no recipient); test bench unchanged.
+
+```bash
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
+sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/
+sudo systemctl --global enable dialos-kontakte.service
+```
+
 **Input form (since 2026-09-16, fixed part of the setup).** Stephan asked for "a
 proper input form … also for a user I set up" and for it to be "a fixed part of
 setting up DialOS". `dialos-persoenliche-daten-maske.py` (GTK 4, libadwaita)

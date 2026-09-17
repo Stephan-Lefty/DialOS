@@ -120,9 +120,13 @@ def aus_briefbogen(text):
     """
     zeilen = text.split("\n")
     start = 0
-    for i, zeile in enumerate(zeilen[:12]):
+    for i, zeile in enumerate(zeilen[:30]):
         if re.search(r"\b\d{1,2}\. \w+ \d{4}\s*$", zeile) and zeile.startswith("   "):
             start = i + 1
+            # Empfaenger: linksbuendig vor der Datumszeile (seit 2026-09-17)
+            aus_briefbogen.empfaenger = [z.strip() for z in zeilen[:i]
+                                         if z.strip() and not z.startswith(" ")]
+            break
     rumpf = []
     for zeile in zeilen[start:]:
         if zeile.startswith("Dieser Brief wurde per Spracheingabe") or \
@@ -447,6 +451,8 @@ def main():
         text = f.read()
     if "powered by DialOS" in text or "Dieser Brief wurde per Spracheingabe" in text:
         text = aus_briefbogen(text)
+        if "--empfaenger" not in optionen and getattr(aus_briefbogen, "empfaenger", None):
+            optionen["--empfaenger"] = "|".join(aus_briefbogen.empfaenger)
     pd = holen(PERSOENLICHE_DATEN_SKRIPT, "persoenliche_daten")
     daten = pd.lesen(optionen.get("--daten")) if pd else {}
     empfaenger = optionen["--empfaenger"].split("|") if "--empfaenger" in optionen else None
