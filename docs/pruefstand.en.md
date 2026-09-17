@@ -207,3 +207,19 @@ speaking only 2.3-2.7 s after the call, cached ones after 0.2 s.
 6. **Noise simulation:** mix street, wind and café noise into the existing
    recordings - at what noise level does what break, per microphone and
    recogniser.
+
+## 9. Addendum 2026-09-16/17: nine cases, and what they were needed for
+
+Added: `absatz-allein-1/-2`, `frei-brief-1` (16.09.) and `brief-zahlen-1/-2`
+(17.09., Stephan's letters with date, amount and year). Last run (17.09., 16:17,
+`--tempo 4`): 3.8 / 4.5 / 5.6 / 1.7 / 2.8 / 9.9 / 4.2 / 1.7 / 2.8 % word errors,
+**all punctuation right, all commands as recorded.**
+
+On 17.09. it prevented something three times: "von vorne" in the closing grammar
+stopped a letter from ending (→ separate control recogniser), and every change to
+numbers, commands and email addresses ran over all nine cases before being built in.
+**New is replaying a real trial with scripted answers** (recording from
+`mitschnitte/`, questions answered by a stand-in function): this is how "alles
+verwerfen" from Stephan's 15:00 recording was reproduced before he had to test a
+second time. The question itself is not in the recording - the recording starts a
+new epoch after every command.

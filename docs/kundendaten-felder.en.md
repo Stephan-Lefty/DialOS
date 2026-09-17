@@ -40,8 +40,14 @@ the values onto the device only.
 >   `nutzer` (via pkexec, writes as that account, never onto an unmounted
 >   encrypted partition). Fixed step 6/6 in `dialos-buero-setup-abschliessen.sh`.
 >   Recipe: Debian-zu-DialOS.en.md.
-> - **Not connected yet:** mail signature, Thunderbird contacts, Du/Sie,
->   signature as image. The description below is the state of 2026-08-24.
+> - **Also connected since 2026-09-17:** mail signature
+>   (`dialos-mail-signatur.py`), letter PDF following DIN 5008 (return address and
+>   information block: name, street, postcode town, country, phone/mobile, `mail`;
+>   address suffix deliberately not), signature as image in the PDF
+>   (`unterschrift_bild`, PNG), "meine Mailadresse" in dictation (`mail`).
+>   Thunderbird contacts are used for **recipients**, not for one's own data.
+> - **Not connected yet:** Du/Sie. The description below is the state of
+>   2026-08-24.
 
 ## The fields
 

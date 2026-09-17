@@ -146,11 +146,21 @@ Brief fertig ausgebaut, jeweils nach Stephans Proben am Geraet:
   DialOS-Suche ("unterlagen durchsuchen", Pruefung am T490 bestanden) - dort gebaut,
   hier nicht anfassen; vor jedem Push `git pull --rebase`.
 
-**Noch nicht am Geraet geprueft bzw. installiert (Stand 16:20):** DIN-PDF,
-Ansprechpartner und Mailadressen - Installationsbefehl in `docs/Debian-zu-DialOS.md`
-bzw. `scripts/dialos-installstand.sh --befehl`. Stephans eigene E-Mail steht in der
-Maske noch als Proband-Adresse. Offen: Satzende bei abgebrochenem Satz, Befehlsuebersicht
-unterbrechbar, Du/Sie aus den Daten, Parakeet-Namensfehler.
+**Feierabend 2026-09-17, ~16:40 - alles gepusht UND installiert** (`dialos-installstand.sh`:
+nur `piper-generic.conf` weicht ab, gewollt - Stimmwahl). Stephan hat sich nach dem
+Installieren noch nicht neu angemeldet; die neue Befehlsuebersicht laedt erst danach.
+
+**Weiter am Freitag 2026-09-18, in dieser Reihenfolge:**
+1. Ab- und anmelden; in der Maske die eigene E-Mail eintragen (steht noch als
+   Proband-Adresse - "meine Mailadresse" setzt sonst diese ein).
+2. Probe am Geraet: Brief an "Gesobau" (aus den Kontakten) mit Ansprechpartner,
+   "unter meiner Mailadresse", "Mailadresse buchstabieren", "Diktat beenden",
+   "Brief als PDF speichern" und "Brief drucken" (DIN-PDF auf Papier:
+   Fensterumschlag, Falzmarken) - danach ins Protokoll schauen.
+3. Offen aus dem Tag: Satzende bei abgebrochenem Satz ("… 2027 In ihrem
+   Schreiben"), Befehlsuebersicht unterbrechbar, Du/Sie aus den Daten,
+   Parakeet-Namensfehler (Vosk hatte den Namen richtig), polkit-Regel von Stephan
+   durchsehen lassen, Parakeet-Lizenzhinweis auf dem Geraet.
 
 ## Stand vom 2026-09-16, abends
 

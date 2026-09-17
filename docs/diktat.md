@@ -1009,3 +1009,35 @@ Dazu gebaut:
   im PDF (`als_pdf` in `dialos-archiv.py`, DejaVu Sans Mono Bold - gleiche
   Zeichenbreite); `dialos-drucken.py` druckt den Brief deshalb über dasselbe PDF
   (Rückfall: Text).
+
+## Der Brief wird fertig (2026-09-17)
+
+Sieben Proben mit Stephans Stimme an einem Tag; jede Regel ist dort und in
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md) (Abschnitt Empfänger-Dialog, erste bis
+siebte Probe) mit dem Fehler beschrieben, aus dem sie kommt. Hier nur die Landkarte:
+
+- **Empfänger-Dialog vor dem Diktat** (`empfaenger_erfragen`): Name oder Firma →
+  Suche in den Thunderbird-Kontakten (difflib + Kölner Phonetik) → sonst Straße,
+  Land, PLZ und Ort einzeln, Bestätigung mit „ja, nein oder buchstabieren",
+  Ansprechpartner bei Firmen. Neue Anschriften werden Kontakte. Jederzeit
+  „abbrechen" oder „von vorne".
+- **Buchstabieren mit dem Buchstabieralphabet** (Anton … Zacharias): das kleine
+  Modell traf 26 von 26, bei Buchstabennamen („be", „pe") nur 15.
+- **Zahlen nach DIN 5008** (`zahlwoerter_aus_vosk`, `zahlen_in_ziffern`): Datum
+  31.08.2026 bzw. „31. August 2026", Beträge 322,40 Euro (auch wenn Parakeet „Euro"
+  oder „Cent" verschluckt - dann gilt Vosks Betrag), Uhrzeit, bis zwölf als Wort,
+  zweigeteilte Jahreszahl.
+- **Befehle im Diktat**, zusätzlich zu Satz löschen/wiederholen: „von vorne" und
+  „alles verwerfen" (Rückfrage), „Mailadresse buchstabieren". Eigener
+  Steuer-Erkenner - in der Schluss-Grammatik wurde „Diktat beenden" sonst zu
+  „diktat vorne". Hören zwei Erkenner gleichzeitig verschiedene Befehle,
+  entscheidet die freie Erkennung; die Gegenprobe sieht auch Parakeets Text.
+- **Mailadressen:** „meine Mailadresse" (persönliche Daten), „Mailadresse von …"
+  (Kontakte), „Mailadresse buchstabieren" - frei gesprochen trifft kein Erkenner
+  einen unbekannten Domainnamen.
+- **Anrede, Betreff, Absatz:** Anrede als eigener Absatz mit Komma, „Absatz"
+  allein oder mitten im Satz vor Gruß/Anrede als Umbruch, Betreff bis zum
+  Satzende.
+
+Offen: Ein abgebrochener Satz ohne Punkt läuft in den nächsten („… 2027 In ihrem
+Schreiben"); Parakeet verhört Namen, die Vosk richtig hatte.

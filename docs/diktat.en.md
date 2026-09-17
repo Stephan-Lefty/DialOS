@@ -982,3 +982,35 @@ Built along with it:
   (`als_pdf` in `dialos-archiv.py`, DejaVu Sans Mono Bold - same character
   width); `dialos-drucken.py` therefore prints the letter via the same PDF
   (fallback: text).
+
+## The letter gets finished (2026-09-17)
+
+Seven trials with Stephan's voice in one day; every rule is described there and in
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md) (section recipient dialogue, first
+to seventh trial) together with the error it comes from. Only the map here:
+
+- **Recipient dialogue before dictation** (`empfaenger_erfragen`): name or company →
+  search in the Thunderbird contacts (difflib + Kölner Phonetik) → otherwise street,
+  country, postcode and town one by one, confirmation with "ja, nein oder
+  buchstabieren", contact person for companies. New addresses become contacts.
+  "abbrechen" or "von vorne" at any time.
+- **Spelling with the German spelling alphabet** (Anton … Zacharias): the small
+  model got 26 of 26, with letter names ("be", "pe") only 15.
+- **Numbers following DIN 5008** (`zahlwoerter_aus_vosk`, `zahlen_in_ziffern`): date
+  31.08.2026 or "31. August 2026", amounts 322,40 Euro (also when Parakeet swallows
+  "Euro" or "Cent" - then Vosk's amount applies), time, up to twelve as a word, year
+  spoken in two parts.
+- **Commands in dictation**, in addition to Satz löschen/wiederholen: "von vorne" and
+  "alles verwerfen" (confirmation), "Mailadresse buchstabieren". A separate control
+  recogniser - in the closing grammar "Diktat beenden" otherwise became "diktat
+  vorne". If two recognisers hear different commands at once, free recognition
+  decides; the cross-check also sees Parakeet's text.
+- **Email addresses:** "meine Mailadresse" (personal data), "Mailadresse von …"
+  (contacts), "Mailadresse buchstabieren" - spoken freely, no recogniser gets an
+  unknown domain name right.
+- **Salutation, subject, paragraph:** salutation as its own paragraph with a comma,
+  "Absatz" alone or mid-sentence before closing/salutation as a break, subject up to
+  the end of the sentence.
+
+Open: an abandoned sentence without a full stop runs into the next ("… 2027 In
+ihrem Schreiben"); Parakeet mishears names that Vosk had right.

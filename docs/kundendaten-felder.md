@@ -39,9 +39,14 @@ das Gerät.
 >   `nutzer` (über pkexec, schreibt als das Konto, nie auf eine nicht
 >   eingehängte verschlüsselte Partition). Fester Schritt 6/6 in
 >   `dialos-buero-setup-abschliessen.sh`. Rezept: Debian-zu-DialOS.md.
-> - **Noch nicht angebunden:** Mail-Signatur, Thunderbird-Kontakte, Ansprache
->   Du/Sie, Unterschrift als Bild. Die Beschreibung unten ist der Stand vom
->   2026-08-24.
+> - **Seit 2026-09-17 außerdem angebunden:** Mail-Signatur
+>   (`dialos-mail-signatur.py`), Brief-PDF nach DIN 5008 (Rücksendeangabe und
+>   Informationsblock: Name, Straße, PLZ Ort, Land, Telefon/Mobil, `mail`;
+>   Adresszusatz bewusst nicht), Unterschrift als Bild im PDF (`unterschrift_bild`,
+>   PNG), „meine Mailadresse" im Diktat (`mail`). Thunderbird-Kontakte werden für
+>   **Empfänger** genutzt, nicht für die eigenen Daten.
+> - **Noch nicht angebunden:** Ansprache Du/Sie. Die Beschreibung unten ist der
+>   Stand vom 2026-08-24.
 
 ## Die Felder
 

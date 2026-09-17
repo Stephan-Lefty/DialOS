@@ -215,3 +215,19 @@ beginnen erst 2,3-2,7 s nach dem Aufruf zu sprechen, gespeicherte nach 0,2 s.
 6. **Geräusch-Simulation:** Straßen-, Wind- und Cafégeräusche in die
    vorhandenen Aufnahmen mischen - ab welchem Lärm kippt was, je Mikrofon und
    Erkenner.
+
+## 9. Nachtrag 2026-09-16/17: neun Fälle, und wofür sie gebraucht wurden
+
+Dazugekommen sind `absatz-allein-1/-2`, `frei-brief-1` (16.09.) sowie
+`brief-zahlen-1/-2` (17.09., Stephans Briefe mit Datum, Betrag und Jahr). Letzter
+Lauf (17.09., 16:17, `--tempo 4`): 3,8 / 4,5 / 5,6 / 1,7 / 2,8 / 9,9 / 4,2 / 1,7 /
+2,8 % Wortfehler, **alle Satzzeichen richtig, alle Befehle wie aufgenommen.**
+
+Am 17.09. hat er dreimal etwas verhindert: „von vorne" in der Schluss-Grammatik
+ließ einen Brief nicht mehr enden (→ eigener Steuer-Erkenner), und jede Änderung
+an Zahlen, Befehlen und Mailadressen lief vor dem Einbau über alle neun Fälle.
+**Neu ist die Wiederholung einer echten Probe mit gestellten Antworten**
+(Aufnahme aus `mitschnitte/`, Rückfragen per Ersatzfunktion beantwortet): So
+wurde „alles verwerfen" aus Stephans 15:00-Aufnahme nachgestellt, bevor er ein
+zweites Mal testen musste. Die Rückfrage selbst ist in der Aufnahme nicht
+enthalten - der Mitschnitt beginnt nach jedem Befehl eine neue Epoche.
