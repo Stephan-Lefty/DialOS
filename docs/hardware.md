@@ -43,11 +43,37 @@ aus und hängt spürbar; 16 GB reichen knapp, solange nebenher wenig offen ist.
 **32 GB als Minimum** (Stephans Vorgabe) lassen Reserve für Browser mit vielen
 Tabs, Videotelefonie und künftige, größere Sprachmodelle.
 
+**Warum nicht 16 GB, obwohl die Messung sie hergäbe** (Stephan, 2026-09-17).
+Die Frage ist berechtigt und wurde gestellt: Gemessen reichen 16 GB, gebrauchte
+Geräte mit 16 GB sind reichlich vorhanden und deutlich günstiger, und die
+Zielgruppe hat selten viel Geld. Drei Gründe geben trotzdem den Ausschlag:
+
+1. **Nachrüsten gibt es hier nicht als Option.** Die Geräte werden fertig
+   eingerichtet ausgeliefert und aus der Ferne betreut. Ein Speicher-Upgrade
+   heißt: Versand hin, Versand zurück, Arbeitszeit - und dazwischen ist ein
+   blinder Mensch eine Woche ohne seinen Computer. Das ist nicht dasselbe wie
+   bei einem sehenden Nutzer, der solange zum Handy greift. Allein der Versand
+   in beide Richtungen frisst den Aufpreis beim Kauf auf.
+2. **Bei verlötetem Speicher gibt es die Nachrüstung gar nicht.** Siehe unten
+   unter „Aufgelöteter Speicher". Die Entscheidung fällt beim Kauf, einmal und
+   endgültig.
+3. **Die ersten Auslieferungen sind für 2027 geplant**, dann voraussichtlich
+   schon mit Debian 14 und GNOME 50. Die Untergrenze wird also für Systeme
+   festgelegt, die es heute noch nicht gibt, und das Gerät soll danach Jahre
+   halten.
+
+**Gesteckter Speicher hat Vorrang vor verlötetem** (Stephan, 2026-09-17) - und
+zwar nicht, um später aufzurüsten, sondern damit ein defektes Modul ein
+Modultausch bleibt und kein Gerätetausch wird. Bei einem Gerät, das der Nutzer
+nicht entbehren kann, ist Reparierbarkeit dasselbe Argument wie Reserve, nur
+für den anderen Fehlerfall. Wo es nur verlöteten gibt, gilt unverändert: ab
+Werk 32 GB.
+
 ### Anforderungen
 
 | | Minimum | Empfohlen |
 |---|---|---|
-| **Arbeitsspeicher** | **32 GB** | 32 GB, aufrüstbar oder 64 GB |
+| **Arbeitsspeicher** | **32 GB**, gesteckt bevorzugt | 32 GB gesteckt oder 64 GB |
 | **Prozessor** | 4 Kerne/8 Threads mit AVX2 (Leistung wie i7-8665U) | 6–8 Kerne, aktuelle Generation (siehe unten) |
 | **SSD** | 256 GB NVMe | **512 GB NVMe** (100 GB System + verschlüsselte Nutzerpartition) |
 | **Grafik** | integriert (Intel/AMD) | integriert mit Hardware-Dekodierung für H.264, HEVC, VP9, **AV1** |

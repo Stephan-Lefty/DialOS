@@ -42,11 +42,35 @@ processor: with 8 GB the system swaps while dictating and stalls noticeably;
 (Stephan's requirement) leaves headroom for a browser with many tabs, video calls
 and future, larger speech models.
 
+**Why not 16 GB, even though the measurements would allow it** (Stephan,
+2026-09-17). The question is a fair one and it was asked: measured, 16 GB is
+enough, used devices with 16 GB are plentiful and considerably cheaper, and the
+target group rarely has much money. Three reasons settle it anyway:
+
+1. **Upgrading later is not an option here.** The devices are shipped fully
+   configured and supported remotely. A memory upgrade means shipping the
+   device there and back plus working time - and in between, a blind person is
+   without their computer for a week. That is not the same as for a sighted
+   user who reaches for their phone in the meantime. The shipping alone, both
+   ways, eats up the surcharge paid at purchase.
+2. **With soldered memory, upgrading does not exist at all.** See "Soldered
+   memory" below. The decision is made once, at purchase, and it is final.
+3. **The first deliveries are planned for 2027**, presumably already with
+   Debian 14 and GNOME 50. The lower bound is therefore being set for systems
+   that do not exist yet, and the device is meant to last for years after that.
+
+**Socketed memory takes precedence over soldered** (Stephan, 2026-09-17) - not
+in order to upgrade later, but so that a faulty module stays a module
+replacement instead of becoming a device replacement. For a device the user
+cannot do without, repairability is the same argument as headroom, just for the
+other failure case. Where only soldered memory is available, the rule stands:
+32 GB from the factory.
+
 ### Requirements
 
 | | Minimum | Recommended |
 |---|---|---|
-| **RAM** | **32 GB** | 32 GB, upgradeable, or 64 GB |
+| **RAM** | **32 GB**, socketed preferred | 32 GB socketed, or 64 GB |
 | **Processor** | 4 cores/8 threads with AVX2 (performance like i7-8665U) | 6–8 cores, current generation (see below) |
 | **SSD** | 256 GB NVMe | **512 GB NVMe** (100 GB system + encrypted user partition) |
 | **Graphics** | integrated (Intel/AMD) | integrated with hardware decoding for H.264, HEVC, VP9, **AV1** |
