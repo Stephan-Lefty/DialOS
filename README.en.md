@@ -122,6 +122,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Spelling names, contacts by sound, reading without sender** (2026-09-17, after
+  Stephan's first trial with "Gesobau"). New names can be checked and dictated
+  in the spelling alphabet (measured 26/26 against 15/26 with letter names); the
+  contact search recognises the same sound ("G so bau" → "GESOBAU AG"); companies
+  get no first/last name; silence ends the dialogue. Dates with a month number,
+  split year numbers and swallowed amount parts come out right. "Brief vorlesen"
+  without sender, phone numbers in blocks of three, then the pointer to printing
+  and PDF.
+
 - **Recipient dialogue before the letter, address as Thunderbird contact**
   (2026-09-17, Stephan's choice: guided dialogue, search contacts first). "An wen
   geht der Brief?" - a known contact is read out and confirmed, otherwise street,

@@ -1992,6 +1992,22 @@ contact goes to `~/.config/dialos/kontakte-neu.json` and `dialos-kontakte.servic
 adds it at login. Checked with a Piper voice (new recipient abroad, found contact,
 no recipient); test bench unchanged.
 
+**After the first trial (2026-09-17, 13:00):** "Gesobau" arrived as "Visual" and "G
+so bau" - and sounded right when read back. Hence: (1) after a new name DialOS
+asks "Soll ich ihn buchstabieren?", reads it in the **spelling alphabet**
+("Gustav. Emil. Samuel. …") and lets it be dictated that way if needed - measured
+Piper → Vosk: letter names 15/26, alphabet 26/26. (2) The contact search also
+compares the **sound** (Kölner Phonetik, legal forms like "AG" ignored): "G so
+bau" finds "GESOBAU AG". (3) First and last name only with "Herr/Frau/Dr." at the
+start, otherwise company. (4) No answer ends the dialogue (letter without
+address). The personal dictionary also applies in the dialogue. In dictation:
+dates with the month as a number ("31.08.2026", also Parakeet's
+"einunddreißigten"), year "zwanzig fünfundzwanzig" → "2025", amount parts
+swallowed by Parakeet taken from Vosk ("322 Cent" → "322,40 Euro"). "Brief
+vorlesen" without sender (it comes from the data), phone numbers digit by digit
+in blocks of three, then "Du kannst sagen: Brief drucken oder Brief als PDF
+speichern." Test bench: new case `brief-zahlen-2` 1.7 %, none worse.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

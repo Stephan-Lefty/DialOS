@@ -2069,6 +2069,22 @@ sonst kommt der Kontakt nach `~/.config/dialos/kontakte-neu.json` und
 (neuer Empfänger im Ausland, gefundener Kontakt, ohne Empfänger); Prüfstand
 unverändert.
 
+**Nach der ersten Probe (2026-09-17, 13:00):** „Gesobau" kam als „Visual" und „G so
+bau" an - und klang beim Vorlesen richtig. Deshalb: (1) Nach einem neuen Namen
+fragt DialOS „Soll ich ihn buchstabieren?", liest ihn im **Buchstabieralphabet**
+vor („Gustav. Emil. Samuel. …") und lässt ihn bei Bedarf so einsprechen -
+gemessen Piper → Vosk: Buchstabennamen 15/26, Alphabet 26/26. (2) Die
+Kontaktsuche vergleicht auch den **Klang** (Kölner Phonetik, Rechtsform wie „AG"
+ohne Gewicht): „G so bau" findet „GESOBAU AG". (3) Vor- und Nachname nur bei
+„Herr/Frau/Dr." am Anfang, sonst Firma. (4) Keine Antwort bricht den Dialog ab
+(Brief ohne Anschrift). Das persönliche Wörterbuch gilt auch im Dialog. Dazu im
+Diktat: Datum mit Monat als Zahl („31.08.2026", auch Parakeets
+„einunddreißigten"), Jahreszahl „zwanzig fünfundzwanzig" → „2025", von Parakeet
+verschluckte Betragsteile aus Vosk („322 Cent" → „322,40 Euro"). „Brief
+vorlesen" ohne Absender (kommt aus den Daten), Telefonnummern in Dreierblöcken
+Ziffer für Ziffer, danach „Du kannst sagen: Brief drucken oder Brief als PDF
+speichern." Prüfstand: neuer Fall `brief-zahlen-2` 1,7 %, keiner schlechter.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

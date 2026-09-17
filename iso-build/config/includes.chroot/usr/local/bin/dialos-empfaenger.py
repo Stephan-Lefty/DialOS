@@ -156,6 +156,60 @@ def _vergleichbar(text):
     return " ".join(re.sub(r"[^a-z0-9 ]", " ", text).split())
 
 
+def koelner_phonetik(text):
+    """Klangschluessel nach Koelner Phonetik: "G so bau" und "GESOBAU" -> "481".
+
+    Am 2026-09-17 kam Stephans "Gesobau" als "G so bau" an - kein Buchstabenvergleich
+    findet das, der Klang ist aber derselbe. Der Schluessel fasst gleich klingende
+    Buchstaben zusammen und laesst Vokale weg.
+    """
+    w = _vergleichbar(text).replace(" ", "")
+    code = []
+    for i, z in enumerate(w):
+        vor = w[i - 1] if i else ""
+        nach = w[i + 1] if i + 1 < len(w) else ""
+        if z in "aeijouy":
+            c = "0"
+        elif z == "h":
+            c = ""
+        elif z == "b":
+            c = "1"
+        elif z == "p":
+            c = "3" if nach == "h" else "1"
+        elif z in "dt":
+            c = "8" if nach in "csz" else "2"
+        elif z in "fvw":
+            c = "3"
+        elif z in "gkq":
+            c = "4"
+        elif z == "c":
+            if i == 0:
+                c = "4" if nach in "ahkloqrux" else "8"
+            else:
+                c = "8" if vor in "sz" or nach not in "ahkoqux" else "4"
+        elif z == "x":
+            c = "8" if vor in "ckq" else "48"
+        elif z == "l":
+            c = "5"
+        elif z in "mn":
+            c = "6"
+        elif z == "r":
+            c = "7"
+        elif z in "sz":
+            c = "8"
+        elif z.isdigit():
+            c = z
+        else:
+            c = ""
+        code.append(c)
+    zusammen = []
+    for c in "".join(code):
+        if not zusammen or zusammen[-1] != c:
+            zusammen.append(c)
+    ergebnis = "".join(zusammen)
+    return ergebnis[:1] + ergebnis[1:].replace("0", "")
+
+
 def suchen(gesprochen, liste=None):
     """Kontakte mit Adresse, die zum gesprochenen Namen passen - beste zuerst.
 
@@ -177,6 +231,12 @@ def suchen(gesprochen, liste=None):
             if not v:
                 continue
             wert = difflib.SequenceMatcher(None, ziel, v).ratio()
+            # Gleicher Klang ("G so bau" / "GESOBAU") zaehlt wie ein Treffer.
+            # Rechtsform zaehlt nicht: "Gesobau" ist gemeint, im Kontakt steht "GESOBAU AG".
+            ohne_form = " ".join(w for w in v.split() if w not in RECHTSFORMEN) or v
+            klang_ziel, klang_v = koelner_phonetik(ziel), koelner_phonetik(ohne_form)
+            if len(klang_ziel) >= 3 and difflib.SequenceMatcher(None, klang_ziel, klang_v).ratio() >= 0.9:
+                wert = max(wert, 0.85)
             if all(any(difflib.SequenceMatcher(None, w, x).ratio() >= 0.8 for x in v.split())
                    for w in ziel.split()):
                 wert = max(wert, 0.9)
@@ -190,10 +250,22 @@ def ist_firma(name):
     return any(w in FIRMEN_WOERTER for w in _vergleichbar(name).split())
 
 
+ANREDEN = ("herr", "frau", "dr", "prof")
+RECHTSFORMEN = ("ag", "gmbh", "kg", "ohg", "ev", "ug", "se", "co", "mbh", "gbr", "eg")
+
+
+def ist_person(name):
+    """Nur mit Anrede ("Frau Erika Musterfrau") - "G so bau" wurde 2026-09-17 zu
+    Vorname "G so", Nachname "bau". Ohne Anrede ist nicht zu entscheiden, also
+    kein Vor- und Nachname, nur der Anzeigename."""
+    woerter = [w.strip(".").lower() for w in name.split()]
+    return bool(woerter) and woerter[0] in ANREDEN and len(woerter) >= 3 - (woerter[0] in ("dr", "prof"))
+
+
 def vcard(empfaenger, uid):
     name = empfaenger["name"]
     zeilen = ["BEGIN:VCARD", "VERSION:4.0", f"UID:{uid}", f"FN:{_vcard_sicher(name)}"]
-    if ist_firma(name):
+    if not ist_person(name):
         zeilen.append(f"ORG:{_vcard_sicher(name)}")
     else:
         teile = name.split()
@@ -224,7 +296,7 @@ def eintragen(empfaenger, pfad=None):
     eigenschaften = [("_vCard", karte), ("DisplayName", empfaenger["name"]),
                      ("LastModifiedDate", str(int(time.time())))]
     teile = [t for t in teile if t.lower().strip(".") not in ("herr", "frau", "dr", "prof")]
-    if not ist_firma(empfaenger["name"]) and len(teile) >= 2:
+    if ist_person(empfaenger["name"]) and len(teile) >= 2:
         eigenschaften += [("FirstName", " ".join(teile[:-1])), ("LastName", teile[-1])]
     try:
         verbindung = sqlite3.connect(pfad, timeout=5)

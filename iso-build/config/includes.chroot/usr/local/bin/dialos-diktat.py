@@ -1982,6 +1982,10 @@ def ordnungszahl(s):
             wert = ORDINAL_UNREGELMAESSIG.get(stamm + "t") or ORDINAL_UNREGELMAESSIG.get(stamm)
             if wert:
                 return wert
+            # "einunddreissigten" statt "-sten" (Parakeet, 2026-09-17)
+            wert = grundzahl(stamm)
+            if wert is not None and wert >= 20:
+                return wert
     return None
 
 
@@ -1999,6 +2003,23 @@ def zahlwoerter_aus_vosk(text, vosk_worte):
     stellen = [(m.start(), m.end(), m.group(0)) for m in WORT.finditer(text)]
     p = [w.lower() for _, _, w in stellen]
     v = [w.lower() for w in vosk_worte]
+    # VERSCHLUCKTE BETRAGSTEILE (2026-09-17): Vosk "dreihundert zweiundzwanzig euro
+    # und vierzig cent", Parakeet "dreihundert zweiundzwanzig Cent" - "Euro und
+    # vierzig" fehlte. Fuegt Vosk nur Zahl- und Waehrungswoerter zwischen zwei
+    # Zahl-/Waehrungswoertern ein, kommen sie in den Text.
+    betrag = {"euro", "cent", "und", "komma"}
+    opcodes = difflib.SequenceMatcher(None, p, v, autojunk=False).get_opcodes()
+    for tag, i1, i2, j1, j2 in reversed(opcodes):
+        if tag != "insert" or i1 == 0 or i1 >= len(stellen):
+            continue
+        neu = v[j1:j2]
+        nachbarn = (p[i1 - 1], p[i1])
+        if (all(_ist_zahlwort(w) or w in betrag for w in neu)
+                and any(_ist_zahlwort(w) or w in ("euro", "cent") for w in neu)
+                and all(_ist_zahlwort(w) or w in ("euro", "cent") for w in nachbarn)):
+            text = text[:stellen[i1][0]] + " ".join(neu) + " " + text[stellen[i1][0]:]
+            stellen = [(m.start(), m.end(), m.group(0)) for m in WORT.finditer(text)]
+            p = [w.lower() for _, _, w in stellen]
     kandidaten = [(i1, i2, j1, j2) for tag, i1, i2, j1, j2
                   in difflib.SequenceMatcher(None, p, v, autojunk=False).get_opcodes()
                   if tag == "replace"
@@ -2063,6 +2084,26 @@ def zahlen_in_ziffern(text):
             ergebnis.append((start, stellen[ende - 1][1], ersatz))
             i = ende
             continue
+        # Datum mit Monat als Zahl und Jahr: "einunddreissig(sten) acht zweitausendsechsundzwanzig"
+        # -> "31.08.2026" (2026-09-17). Das Jahr ist Pflicht - ohne es waere
+        # "drei vier" schon ein Datum.
+        tageswert = tag or (grund[0] if grund and grund[1] == i + 1 else None)
+        if tageswert and 1 <= tageswert <= 31 and i + 1 < len(stellen):
+            monat_wort = stellen[i + 1][2]
+            monat_wert = ordnungszahl(monat_wort) or grundzahl(monat_wort.lower())
+            jahr = zahl_ab(i + 2) if monat_wert and 1 <= monat_wert <= 12 and i + 2 < len(stellen) else None
+            if jahr and 1000 <= jahr[0] <= 2999:
+                ergebnis.append((start, stellen[jahr[1] - 1][1],
+                                 f"{tageswert:02d}.{monat_wert:02d}.{jahr[0]}"))
+                i = jahr[1]
+                continue
+        # Jahreszahl zweigeteilt gesprochen: "zwanzig fuenfundzwanzig" -> "2025"
+        if grund and grund[1] == i + 1 and grund[0] in (19, 20) and i + 1 < len(stellen):
+            zweiter = zahl_ab(i + 1)
+            if zweiter and zweiter[1] == i + 2 and 10 <= zweiter[0] <= 99:
+                ergebnis.append((start, stellen[i + 1][1], f"{grund[0]}{zweiter[0]:02d}"))
+                i += 2
+                continue
         # Datum aus zwei Ordnungszahlen: "ersten zehnten [zweitausendsechsundzwanzig]"
         monat = ordnungszahl(naechstes) if tag else None
         if tag and monat and 1 <= tag <= 31 and 1 <= monat <= 12:
@@ -2306,6 +2347,107 @@ def ja_oder_nein_hoeren(frage, prozess, modell_klein):
     return None
 
 
+# BUCHSTABIEREN (Stephan, 2026-09-17, nachdem "Gesobau" als "G so bau" im Brief
+# stand - und beim Vorlesen richtig klang). Nach einem NEUEN Namen bietet DialOS
+# an, ihn zu buchstabieren; stimmt die Schreibweise nicht, spricht der Nutzer die
+# Buchstaben ein. Erkannt mit dem kleinen Modell und einer Grammatik nur aus
+# Buchstaben. GEMESSEN (Piper -> Vosk, 2026-09-17): Buchstabennamen ("Ge", "E",
+# "Es") 15 von 26 richtig, das Buchstabieralphabet ("Gustav", "Emil", "Samuel")
+# 26 von 26. Angesagt wird deshalb das Alphabet; die Buchstabennamen gelten
+# trotzdem, falls jemand sie sagt. Nicht im Wortschatz sind "ef", "vau",
+# "ix", "eszett" - dafuer gelten "f", "v", "x", "friedrich", "viktor", "xaver"
+# und "scharfes es".
+BUCHSTABEN_HOEREN = {
+    "a": "a", "anton": "a", "be": "b", "berta": "b", "ce": "c", "ze": "c", "cäsar": "c",
+    "de": "d", "dora": "d", "e": "e", "emil": "e", "f": "f", "friedrich": "f", "ge": "g",
+    "gustav": "g", "ha": "h", "heinrich": "h", "i": "i", "ida": "i", "jot": "j", "julius": "j",
+    "ka": "k", "kaufmann": "k", "el": "l", "ludwig": "l", "em": "m", "martha": "m", "en": "n",
+    "nordpol": "n", "o": "o", "otto": "o", "pe": "p", "paula": "p", "ku": "q", "quelle": "q",
+    "er": "r", "richard": "r", "es": "s", "samuel": "s", "te": "t", "theodor": "t", "u": "u",
+    "ulrich": "u", "v": "v", "viktor": "v", "we": "w", "wilhelm": "w", "x": "x", "xaver": "x",
+    "ypsilon": "y", "zett": "z", "zeppelin": "z", "zacharias": "z", "ä": "ä", "ö": "ö", "ü": "ü",
+    "leerzeichen": " ", "bindestrich": "-", "punkt": ".",
+}
+# Vorgelesen wird ebenfalls mit dem Alphabet: "Berta" und "Paula" verwechselt
+# niemand, "Be" und "Pe" schon.
+BUCHSTABEN_SPRECHEN = {
+    "a": "Anton", "b": "Berta", "c": "Cäsar", "d": "Dora", "e": "Emil", "f": "Friedrich",
+    "g": "Gustav", "h": "Heinrich", "i": "Ida", "j": "Julius", "k": "Kaufmann", "l": "Ludwig",
+    "m": "Martha", "n": "Nordpol", "o": "Otto", "p": "Paula", "q": "Quelle", "r": "Richard",
+    "s": "Samuel", "t": "Theodor", "u": "Ulrich", "v": "Viktor", "w": "Wilhelm", "x": "Xaver",
+    "y": "Ypsilon", "z": "Zacharias", "ä": "Ä", "ö": "Ö", "ü": "Ü", "ß": "scharfes S",
+    " ": "Leerzeichen", "-": "Bindestrich", ".": "Punkt",
+}
+ANSAGE_BUCHSTABIEREN = ("Buchstabiere den Namen mit dem Buchstabieralphabet, zum Beispiel: "
+                        "Gustav, Emil, Samuel. Für ein Leerzeichen sage Leerzeichen, für einen "
+                        "Fehler sage zurück. Am Ende sage: fertig.")
+
+
+def buchstabiert(name):
+    """"GESOBAU" -> "Gustav. Emil. Samuel. ..." - Satzpunkte, weil nur sie bei Piper Pausen machen."""
+    return ". ".join(BUCHSTABEN_SPRECHEN[z] for z in name.lower() if z in BUCHSTABEN_SPRECHEN) + "."
+
+
+def buchstaben_hoeren(prozess, modell_klein):
+    """Buchstaben bis "fertig" (oder 10 s Stille). Der Name mit grossen Wortanfaengen, oder ""."""
+    import vosk
+    vorrat = sprechen_bei_offener_aufnahme(ANSAGE_BUCHSTABIEREN, prozess)
+    woerter = list(BUCHSTABEN_HOEREN) + ["scharfes", "fertig", "zurück", "[unk]"]
+    erkenner = vosk.KaldiRecognizer(modell_klein, ABTASTRATE, json.dumps(woerter, ensure_ascii=False))
+    zeichen = []
+    bis = time.time() + 15.0
+    ende_gesamt = time.time() + 90.0
+    fertig = False
+    while not fertig and time.time() < min(bis, ende_gesamt):
+        if vorrat:
+            block, vorrat = vorrat[:4000], vorrat[4000:]
+        else:
+            block = prozess.stdout.read(4000)
+        if not block:
+            break
+        if not erkenner.AcceptWaveform(block):
+            continue
+        gehoert = json.loads(erkenner.Result()).get("text", "").split()
+        if not gehoert:
+            continue
+        bis = time.time() + 10.0
+        melde(f"  Buchstabieren: {gehoert!r}")
+        i = 0
+        while i < len(gehoert):
+            w = gehoert[i]
+            if w == "fertig":
+                fertig = True
+                break
+            if w == "zurück" and zeichen:
+                zeichen.pop()
+            elif w == "scharfes" and i + 1 < len(gehoert) and gehoert[i + 1] == "es":
+                zeichen.append("ß")
+                i += 1
+            elif w in BUCHSTABEN_HOEREN:
+                zeichen.append(BUCHSTABEN_HOEREN[w])
+            i += 1
+    name = "".join(zeichen).strip()
+    return " ".join(t[:1].upper() + t[1:] for t in name.split(" ") if t)
+
+
+def schreibweise_pruefen(name, prozess, modell_klein):
+    """Bietet das Buchstabieren an. Liefert den (ggf. korrigierten) Namen oder None."""
+    antwort = ja_oder_nein_hoeren(f"Der Name ist: {name}. Soll ich ihn buchstabieren? "
+                                  "Sage ja oder nein.", prozess, modell_klein)
+    if not antwort:
+        return name
+    for _ in (1, 2):
+        stimmt = ja_oder_nein_hoeren(f"{buchstabiert(name)} Stimmt die Schreibweise? "
+                                     "Sage ja oder nein.", prozess, modell_klein)
+        if stimmt or stimmt is None:
+            return name
+        neu = buchstaben_hoeren(prozess, modell_klein)
+        melde(f"  Name buchstabiert: {neu!r}")
+        if neu:
+            name = neu
+    return name
+
+
 def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
     """Der Dialog. Liefert ein Empfaenger-dict (name, strasse, plz, ort, land) oder None."""
     em = holen(EMPFAENGER_SKRIPT, "empfaenger")
@@ -2340,16 +2482,27 @@ def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
                 if antwort is None:
                     sprich(ANSAGE_OHNE_EMPFAENGER)
                     return None
-            strasse = em.strasse_richten(antwort_hoeren(ANSAGE_STRASSE, prozess, modell, parakeet), zahlen)
+            name = schreibweise_pruefen(name, prozess, modell_klein)
+            # KEINE ANTWORT = ABBRUCH (Simulation 2026-09-17): Ohne diese Pruefung
+            # fragte der Dialog bei Stille stur weiter - Land, Postleitzahl, "Stimmt
+            # das?" - eine halbe Minute ins Leere, bevor der Brief begann.
+            gehoert = antwort_hoeren(ANSAGE_STRASSE, prozess, modell, parakeet)
+            if not gehoert:
+                break
+            strasse = em.strasse_richten(gehoert, zahlen)
             land = eigenes_land
             if eigenes_land:
                 im_land = ja_oder_nein_hoeren(f"Liegt die Adresse in {eigenes_land}? Sage ja oder nein.",
                                               prozess, modell_klein)
+                if im_land is None:
+                    break
                 if im_land is False:
                     land = antwort_hoeren(ANSAGE_LAND_FREI, prozess, modell, parakeet)
                     land = land[:1].upper() + land[1:]
-            plz, ort = em.plz_ort_richten(antwort_hoeren(ANSAGE_PLZ_ORT, prozess, modell, parakeet),
-                                          zahlen, em.plz_laenge(land))
+            gehoert = antwort_hoeren(ANSAGE_PLZ_ORT, prozess, modell, parakeet)
+            if not gehoert:
+                break
+            plz, ort = em.plz_ort_richten(gehoert, zahlen, em.plz_laenge(land))
             neu = {"name": name, "zusatz": "", "strasse": strasse, "plz": plz, "ort": ort,
                    "land": land}
             antwort = ja_oder_nein_hoeren(f"Der Brief geht an: {em.gesprochen(neu)}. "

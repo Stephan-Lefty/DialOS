@@ -523,22 +523,64 @@ def brief_vorlesen(name):
 
     teile = ["Ein Satz." if len(saetze) == 1 else f"{len(saetze)} Sätze."]
     if kopf:
-        # Die letzte Kopfzeile ist das Datum (so baut dialos-diktat.py sie),
-        # alles davor der Absender.
-        if len(kopf) > 1:
-            teile.append("Absender: " + ", ".join(kopf[:-1]) + ".")
+        # Die letzte Kopfzeile ist das Datum (so baut dialos-diktat.py sie).
+        # DER ABSENDER WIRD NICHT MEHR VORGELESEN (Stephan, 2026-09-17: "Meine
+        # Absenderadresse ist ja auch immer fix und muss nicht vorgelesen
+        # werden"). Er kommt seit dem 16.09. aus den persoenlichen Daten und nicht
+        # aus der Erkennung - pruefen muss man ihn einmal in der Eingabemaske,
+        # nicht bei jedem Brief.
         if getattr(briefteile, "empfaenger", None):
             teile.append("Empfänger: " + ", ".join(briefteile.empfaenger) + ".")
         teile.append("Datum: " + kopf[-1] + ".")
-    teile.append(fliesstext)
+    teile.append(fliesstext if re.search(r"[.!?]$", fliesstext) else fliesstext + ".")
     # FUSSZEILE UND UNTERSCHRIFT-HINWEIS WERDEN NICHT MEHR VORGELESEN (Stephan,
     # 2026-09-17: "Das ist ja eher eine Info fuer den Empfaenger und brauche ich
     # nicht fuer die Kontrolle"). Beides steht weiter im Brief, im PDF und auf dem
     # Ausdruck - es aendert sich nie und ist beim Kontrollhoeren nur Laenge. Der
     # Hinweis zaehlte ausserdem als Satz mit: "9 Saetze" fuer einen Brief mit 8.
+    # NACH DEM VORLESEN DIE NAECHSTEN SCHRITTE (Stephan, 2026-09-17: "nach dem
+    # Vorlesen muss die Option des Druckens und der PDF kommen").
+    teile.append("Du kannst sagen: Brief drucken oder Brief als PDF speichern.")
     melde(f"  vorlesen: Brief mit {len(saetze)} Saetzen aus {pfad}")
-    sprich(" ".join(teile))
+    sprich(telefon_vorlesbar(" ".join(teile)))
     return 0
+
+
+# TELEFONNUMMERN IN DREIERBLOECKEN (Stephan, 2026-09-17). Als Zahl gesprochen wird
+# aus "664 1234567" "sechshundertvierundsechzig eine Million ..." - zum
+# Mitschreiben unbrauchbar. Jede Ziffer einzeln, je drei zusammen, mit Satzpause
+# dazwischen: Nur Satzzeichen erzeugen bei Piper hoerbare Pausen (gemessen
+# 2026-08-24: Punkt 220 ms, Komma 0 ms). Erkannt wird eine Nummer an "+" oder
+# "0" am Anfang und mindestens sechs Ziffern.
+TELEFON = re.compile(r"(?<![\w.,])(\+|00?)(\d[\d /-]{4,}\d)(?![\w.,]\d)")
+
+
+def telefon_vorlesbar(text):
+    """"+43 664 1234567" -> "plus 4 3. 6 6 4. 1 2 3. 4 5 6. 7."
+
+    Laendervorwahl und Ortsvorwahl bleiben je ein Block, so wie sie geschrieben
+    sind; die Rufnummer danach in Dreierbloecken.
+    """
+    def bloecke(m):
+        vorne, rest = m.group(1), m.group(2)
+        if len(re.sub(r"\D", "", vorne + rest)) < 6:
+            return m.group(0)
+        teile = [t for t in re.split(r"[ /-]+", rest) if t]
+        if vorne != "+":
+            teile[0] = vorne + teile[0]
+        feste = []
+        if vorne == "+" and len(teile) == 1 and len(teile[0]) > 6:
+            # "+436933011151" ohne Leerzeichen: Laendervorwahl zweistellig (43, 49, 41)
+            teile = [teile[0][:2], teile[0][2:]]
+        if vorne == "+" or vorne == "00":
+            feste.append(teile.pop(0))          # Laendervorwahl
+        if len(teile) > 1 and len(teile[0]) <= 5:
+            feste.append(teile.pop(0))          # Ortsvorwahl
+        nummer = "".join(teile)
+        gruppen = feste + [nummer[i:i + 3] for i in range(0, len(nummer), 3)]
+        gesprochen = ". ".join(" ".join(g) for g in gruppen if g)
+        return ("plus " if vorne == "+" else "") + gesprochen + "."
+    return re.sub(r"\.\.", ".", TELEFON.sub(bloecke, text))
 
 
 def _vorlesen_liste(name):

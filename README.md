@@ -130,6 +130,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Namen buchstabieren, Kontakte nach Klang, Vorlesen ohne Absender** (2026-09-17,
+  nach Stephans erster Probe mit „Gesobau"). Neue Namen lassen sich im
+  Buchstabieralphabet prüfen und einsprechen (gemessen 26/26 gegen 15/26 mit
+  Buchstabennamen); die Kontaktsuche erkennt gleichen Klang („G so bau" →
+  „GESOBAU AG"); Firmen bekommen keinen Vor-/Nachnamen; Stille bricht den Dialog
+  ab. Datum mit Monatszahl, zweigeteilte Jahreszahl und verschluckte Betragsteile
+  werden richtig. „Brief vorlesen" ohne Absender, Telefonnummern in Dreierblöcken,
+  danach der Hinweis auf Drucken und PDF.
+
 - **Empfänger-Dialog vor dem Brief, Adresse als Thunderbird-Kontakt** (2026-09-17,
   Stephans Wahl: geführter Dialog, Kontakte zuerst suchen). „An wen geht der
   Brief?" - bekannter Kontakt wird vorgelesen und bestätigt, sonst Straße, Land,
