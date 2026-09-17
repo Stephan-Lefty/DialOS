@@ -2381,6 +2381,9 @@ ANSAGE_PLZ_ORT = "Wie heißen Postleitzahl und Ort?"
 ANSAGE_LAND_FREI = "In welchem Land?"
 ANSAGE_JA_NEIN_NOCHMAL = "Das habe ich nicht verstanden. Sage bitte ja oder nein."
 ANSAGE_OHNE_EMPFAENGER = "Ich schreibe den Brief ohne Empfänger."
+ANSAGE_ANSPRECHPARTNER = ("Gibt es einen Ansprechpartner? Sage den Namen mit Frau oder Herr, "
+                          "zum Beispiel: Frau Erika Muster. Sonst sage: nein.")
+KEIN_ANSPRECHPARTNER = re.compile(r"(?i)^\s*(nein|nee|kein\w*|ohne|gibt es nicht)\b")
 ANTWORT_ZEITGRENZE_S = 12.0     # bis die Antwort BEGINNT
 ANTWORT_NACHLAUF_S = 1.2        # Stille nach dem letzten Wort, bis sie zu Ende ist
 OHNE_EMPFAENGER = re.compile(r"(?i)\b(ohne|kein\w*)\s+empf")
@@ -2676,6 +2679,61 @@ def name_erfragen(prozess, modell, modell_klein, parakeet, em):
     return None
 
 
+def ansprechpartner_erfragen(prozess, modell, modell_klein, parakeet, em, empfaenger):
+    """Fragt bei einer Firma nach der Person, an die der Brief geht. Name oder "".
+
+    (Stephan, 2026-09-17: "Ich konnte noch keinen Ansprechpartner in die Adresse
+    einfuegen".) Bei einer Person ("Frau Erika Muster") entfaellt die Frage. Der
+    Ansprechpartner steht nur im Brief, nicht in der Thunderbird-Karte der Firma -
+    beim naechsten Brief an dieselbe Firma kann es jemand anderes sein.
+    Keine Antwort heisst: keiner. Abbrechen und "von vorne" gelten wie ueberall.
+    """
+    # Mit Anrede ist der Empfaenger selbst eine Person ("Frau Muster" reicht -
+    # em.ist_person verlangt fuer die Karte auch den Vornamen).
+    erstes = (empfaenger.get("name", "").split() or [""])[0].strip(".").lower()
+    if erstes in ("herr", "frau", "dr", "prof"):
+        return ""
+    frage = ANSAGE_ANSPRECHPARTNER
+    for _ in range(3):
+        text, vosk_text = antwort_hoeren(frage, prozess, modell, parakeet)
+        if not text or KEIN_ANSPRECHPARTNER.search(vosk_text) or KEIN_ANSPRECHPARTNER.search(text):
+            return ""
+        if re.match(r"(?i)\s*buchstab", vosk_text):
+            name = buchstaben_hoeren(prozess, modell_klein)
+        else:
+            name = " ".join(w[:1].upper() + w[1:] for w in text.split())
+        if not name:
+            frage = "Sage den Ansprechpartner noch einmal, oder: nein."
+            continue
+        while True:
+            wahl = auswahl_hoeren(f"Der Ansprechpartner ist: {name}. Stimmt das? "
+                                  "Sage ja, nein oder buchstabieren.",
+                                  prozess, modell_klein, ("ja", "nein", "buchstabieren"),
+                                  "Das habe ich nicht verstanden. Sage ja, nein oder buchstabieren.")
+            if wahl == "ja":
+                melde(f"  Ansprechpartner: {name!r}")
+                return name
+            if wahl is None:
+                return ""
+            if wahl == "nein":
+                frage = "Sage den Ansprechpartner noch einmal, oder: nein."
+                break
+            stimmt = ja_oder_nein_hoeren(f"Ich buchstabiere: {buchstabiert(name)} "
+                                         "Stimmt die Schreibweise? Sage ja oder nein.",
+                                         prozess, modell_klein)
+            if stimmt:
+                melde(f"  Ansprechpartner: {name!r}")
+                return name
+            if stimmt is None:
+                return ""
+            neu = buchstaben_hoeren(prozess, modell_klein)
+            if neu:
+                # Die Anrede bleibt: "Frau" + buchstabierter Nachname.
+                anrede = name.split()[0] if name.split()[0].lower() in ("frau", "herr") else ""
+                name = f"{anrede} {neu}".strip() if anrede and not neu.lower().startswith(anrede.lower()) else neu
+    return ""
+
+
 def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
     """Der Dialog. Liefert ein Empfaenger-dict, None (ohne Empfaenger) oder ABBRUCH."""
     em = holen(EMPFAENGER_SKRIPT, "empfaenger")
@@ -2695,8 +2753,12 @@ def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
                     sprich(ANSAGE_OHNE_EMPFAENGER)
                     return None
                 if "strasse" in ergebnis:
+                    ergebnis["ansprechpartner"] = ansprechpartner_erfragen(
+                        prozess, modell, modell_klein, parakeet, em, ergebnis)
                     return ergebnis
                 name = ergebnis["name"]
+                ansprechpartner = ansprechpartner_erfragen(
+                    prozess, modell, modell_klein, parakeet, em, ergebnis)
                 # KEINE ANTWORT = OHNE EMPFAENGER (Simulation 2026-09-17): sonst fragte
                 # der Dialog bei Stille stur weiter, eine halbe Minute ins Leere.
                 gehoert, _ = antwort_hoeren(ANSAGE_STRASSE, prozess, modell, parakeet)
@@ -2719,14 +2781,15 @@ def empfaenger_erfragen(quelle, modell, modell_klein, parakeet):
                     sprich(ANSAGE_OHNE_EMPFAENGER)
                     return None
                 plz, ort = em.plz_ort_richten(gehoert, zahlen, em.plz_laenge(land))
-                neu = {"name": name, "zusatz": "", "strasse": strasse, "plz": plz, "ort": ort,
-                       "land": land}
+                neu = {"name": name, "ansprechpartner": ansprechpartner, "zusatz": "",
+                       "strasse": strasse, "plz": plz, "ort": ort, "land": land}
                 antwort = ja_oder_nein_hoeren(f"Der Brief geht an: {em.gesprochen(neu)}. "
                                               "Stimmt das? Sage ja oder nein.", prozess, modell_klein)
                 if antwort:
                     melde(f"  Empfaenger neu: {neu!r}")
                     try:
-                        em.eintragen(neu)
+                        # Die Karte gehoert der Firma, nicht dem Ansprechpartner.
+                        em.eintragen({k: v for k, v in neu.items() if k != "ansprechpartner"})
                     except Exception as fehler:
                         melde(f"  Kontakt nicht angelegt: {fehler}")
                     return neu

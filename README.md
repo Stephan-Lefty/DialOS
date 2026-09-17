@@ -130,6 +130,10 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Ansprechpartner im Empfänger-Dialog** (2026-09-17): Bei einer Firma fragt DialOS
+  nach der Person („Frau Erika Muster"), die Zeile steht nach DIN 5008 unter der
+  Firma, ohne „z. Hd.". „in Musterhausen" wird „Musterhausen".
+
 - **Brief als PDF nach DIN 5008 eingebunden** (2026-09-17, Stephans Urteil über zwei
   Vorschauen): kein Briefkopf, Rücksendeangabe ohne Etage passt ganz ins Fenster,
   Informationsblock mit Anschrift und Datum 17.09.2026 auf Höhe der

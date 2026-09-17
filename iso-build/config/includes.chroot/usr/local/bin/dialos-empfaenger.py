@@ -396,6 +396,9 @@ def plz_ort_richten(text, zahlen, laenge=5):
             and woerter[0].lower() not in ("ein", "eine"):
         zahlteile.append(woerter.pop(0).strip(","))
     ort = " ".join(woerter).strip(" ,")
+    # "12345 in Musterhausen" (2026-09-17, 15:54): Wer "Postleitzahl und Ort"
+    # beantwortet, sagt oft "in". Kein deutscher Ortsname beginnt mit "In ".
+    ort = re.sub(r"(?i)^in\s+(?=\S)", "", ort)
     ort = ort[:1].upper() + ort[1:]
     if not zahlteile:
         return "", ort
@@ -412,8 +415,16 @@ def plz_laenge(land):
 
 
 def zeilen(empfaenger, eigenes_land=""):
-    """Anschriftzeilen nach DIN 5008: Name, Zusatz, Strasse, PLZ Ort, LAND (nur Ausland)."""
+    """Anschriftzeilen nach DIN 5008: Name, Ansprechpartner, Zusatz, Strasse, PLZ Ort,
+    LAND (nur Ausland).
+
+    ANSPRECHPARTNER (Stephan, 2026-09-17: "Ich konnte noch keinen Ansprechpartner in
+    die Adresse einfuegen"): direkt unter der Firma, ohne "z. Hd." - DIN 5008 sieht
+    die Person seit 2011 ohne diesen Zusatz vor ("GESOBAU AG" / "Frau Erika Muster").
+    """
     ergebnis = [empfaenger["name"]]
+    if empfaenger.get("ansprechpartner"):
+        ergebnis.append(empfaenger["ansprechpartner"])
     if empfaenger.get("zusatz"):
         ergebnis.append(empfaenger["zusatz"])
     if empfaenger.get("strasse"):
@@ -430,6 +441,8 @@ def zeilen(empfaenger, eigenes_land=""):
 def gesprochen(empfaenger):
     """Fuer die Ansage: Postleitzahl Ziffer fuer Ziffer, damit ein Hoerfehler auffaellt."""
     teile = [empfaenger["name"]]
+    if empfaenger.get("ansprechpartner"):
+        teile.append(empfaenger["ansprechpartner"])
     if empfaenger.get("strasse"):
         teile.append(empfaenger["strasse"])
     if empfaenger.get("plz"):

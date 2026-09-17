@@ -40,7 +40,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   ohne Satzende läuft in den nächsten Satz („… 2027 In ihrem Schreiben");
   **DIN-PDF eingebunden 2026-09-17** (Archiv, PDF, Drucken; ohne Kopf, Datum
   17.09.2026, Infoblock auf Höhe der Rücksendeangabe) - offen: Ausdruck auf Papier
-  prüfen; Adresszusatz („z. Hd.").
+  prüfen; **Ansprechpartner gebaut 2026-09-17** (simuliert, Probe am Gerät offen).
   **Mail-Signatur installiert** (17.09.).
   **Entwurf 2026-09-17:** `dialos-brief-din.py` (Form B, Vorschau mit
   Beispieldaten) - offen: Stephans Urteil, Empfängeradresse, Einbindung in

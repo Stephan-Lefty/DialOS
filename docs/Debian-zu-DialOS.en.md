@@ -2087,6 +2087,17 @@ saved, both ✓; a simultaneously heard "satz löschen" correctly discarded. Amo
 parts) → "31.05.2027". Open: a chunk without a sentence end runs into the next
 sentence ("… 2027 In ihrem Schreiben").
 
+**Seventh trial (15:53) - contact person.** Stephan: "I couldn't add a contact
+person to the address yet." After the name - new or from the contacts - the
+dialogue now asks: "Gibt es einen Ansprechpartner? Sage den Namen mit Frau oder Herr
+… Sonst sage: nein." Confirmation as for the name (ja, nein, buchstabieren); no
+answer means none. If the recipient itself starts with Frau/Herr/Dr./Prof., the
+question is skipped. Following DIN 5008 the line sits directly below the company,
+without "z. Hd.", and only in the letter - the Thunderbird card stays the company's.
+Also: "12345 in Musterhausen" → town "Musterhausen" (the "in" was not dropped).
+Simulated with Piper: company from contacts with and without contact person, new
+company with contact person, person without the question.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

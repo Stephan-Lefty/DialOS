@@ -122,6 +122,10 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Contact person in the recipient dialogue** (2026-09-17): for a company DialOS
+  asks for the person ("Frau Erika Muster"); following DIN 5008 the line sits below
+  the company, without "z. Hd.". "in Musterhausen" becomes "Musterhausen".
+
 - **Letter as a PDF following DIN 5008 wired in** (2026-09-17, Stephan's verdict on
   two previews): no letterhead, return address without floor fits the window
   completely, information block with address and date 17.09.2026 level with the

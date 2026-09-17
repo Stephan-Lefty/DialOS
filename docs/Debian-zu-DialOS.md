@@ -2164,6 +2164,17 @@ Beträge „3675,75 Euro" und „1746,78 Euro" ✓. Neu korrigiert: „31.05. 20
 zweigeteilt gesprochen) → „31.05.2027". Offen: ein Stück ohne Satzende läuft in den
 nächsten Satz („… 2027 In ihrem Schreiben").
 
+**Siebte Probe (15:53) - Ansprechpartner.** Stephan: „Ich konnte noch keinen
+Ansprechpartner in die Adresse einfügen." Nach dem Namen - neu oder aus den
+Kontakten - fragt der Dialog jetzt: „Gibt es einen Ansprechpartner? Sage den Namen
+mit Frau oder Herr … Sonst sage: nein." Bestätigung wie beim Namen (ja, nein,
+buchstabieren); keine Antwort heißt keiner. Beginnt der Empfänger selbst mit
+Frau/Herr/Dr./Prof., entfällt die Frage. Die Zeile steht nach DIN 5008 direkt unter
+der Firma, ohne „z. Hd.", und nur im Brief - die Thunderbird-Karte bleibt die der
+Firma. Außerdem: „12345 in Musterhausen" → Ort „Musterhausen" (das „in" fiel nicht
+weg). Mit Piper simuliert: Firma aus den Kontakten mit und ohne Ansprechpartner,
+neue Firma mit Ansprechpartner, Person ohne Frage.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/
