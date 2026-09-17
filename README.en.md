@@ -125,7 +125,9 @@ background) and `splash.png` (boot/login screen).
 - **In dictation: "von vorne" and "alles verwerfen", amounts with cents from Vosk**
   (2026-09-17, fourth trial). Both commands with a question and their own
   recogniser so "Diktat beenden" is not confused. If only Vosk hears "Cent", its
-  amount applies ("12 Euro und 40" → "322,40 Euro"). Test bench unchanged.
+  amount applies ("12 Euro und 40" → "322,40 Euro"). Test bench unchanged. After the fifth trial
+  (15:00): cross-check also with Parakeet's text, free recognition decides between
+  two commands heard at once, "322 Euro und 40 Cent" → "322,40 Euro".
 - **The grammar check can now check sentences that are not built in yet**
   (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` takes a
   candidate into the grammar on trial. **That did not work before, and the gap

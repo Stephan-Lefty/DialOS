@@ -2119,6 +2119,17 @@ ein Brief im Prüfstand endete nicht mehr. Nicht „Diktat abbrechen" - es kling
 „Diktat beenden", und der eine Befehl speichert, der andere verwirft. Simuliert:
 von vorne, alles verwerfen, Diktat beenden - je richtig; Prüfstand 9 Fälle wie vorher.
 
+**Fünfte Probe (15:00):** „von vorne" ✓. „Alles verwerfen" zweimal im Brief
+gelandet: (1) Das große Vosk-Modell hörte „alles verlaufen" - die Gegenprobe prüft
+jetzt auch Parakeets Text („Alles verwerfen."). (2) Der Schluss-Erkenner hörte im
+selben Moment „satz wiederholen" und überschrieb den wartenden Befehl. Jetzt bleibt
+der erste stehen, der zweite wird Alternative, und die freie Erkennung entscheidet
+(`befehl_vormerken`/`befehl_entscheiden`, auch zwischen Befehl und Schluss).
+(3) „322 Euro und 40 Cent" wird „322,40 Euro"; verschluckt Parakeet „Euro"
+(„dreihundersundzwanzig und vierzig Cent"), gilt Vosks Betrag. Die echte Aufnahme
+wiederholt: beide „alles verwerfen" mit Rückfrage, Betrag 322,40 Euro; mit „ja"
+endet das Diktat ohne Datei. Piper-Simulation und Prüfstand unverändert.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

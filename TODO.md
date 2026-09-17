@@ -35,7 +35,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Probe mit Stephans Stimme (13:00 und 13:36: Namen, Abbruch - nachgebaut);
   Thunderbird zeigt die angelegte Karte **(bestätigt 13:40)**;
   **„von vorne"/„alles verwerfen" im Diktat und Cent-Beträge von Vosk gebaut
-  (14:15-Probe, simuliert, nicht installiert)** - offen: Probe mit Stephans Stimme;
+  (14:15-Probe; 15:00-Probe: „von vorne" ✓, „alles verwerfen" und Cent nachgebaut,
+  mit der echten Aufnahme geprüft)** - offen: zweite Probe mit Stephans Stimme;
   Einbindung des DIN-PDF in Diktat/Drucken/PDF; Adresszusatz („z. Hd.").
   **Mail-Signatur installiert** (17.09.).
   **Entwurf 2026-09-17:** `dialos-brief-din.py` (Form B, Vorschau mit

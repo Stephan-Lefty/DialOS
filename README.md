@@ -133,7 +133,9 @@ das Erfolg meldet, während es versagt.
 - **Im Diktat: „von vorne" und „alles verwerfen", Beträge mit Cent von Vosk**
   (2026-09-17, vierte Probe). Beide Befehle mit Rückfrage und eigenem Erkenner, damit
   „Diktat beenden" nicht verwechselt wird. Hört nur Vosk „Cent", gilt sein Betrag
-  („12 Euro und 40" → „322,40 Euro"). Prüfstand unverändert.
+  („12 Euro und 40" → „322,40 Euro"). Prüfstand unverändert. Nach der fünften Probe
+  (15:00): Gegenprobe auch mit Parakeets Text, zwei gleichzeitig gehörte Befehle
+  entscheidet die freie Erkennung, „322 Euro und 40 Cent" → „322,40 Euro".
 - **Grammatik-Prüfung kann jetzt Sätze prüfen, die noch nicht eingebaut sind**
   (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` nimmt einen
   Kandidaten versuchsweise in die Grammatik auf. **Das ging vorher nicht, und

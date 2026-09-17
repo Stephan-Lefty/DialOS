@@ -2041,6 +2041,17 @@ letter on the test bench no longer ended. Not "Diktat abbrechen" - it sounds lik
 "Diktat beenden", and one command saves while the other discards. Simulated: von
 vorne, alles verwerfen, Diktat beenden - each right; test bench 9 cases as before.
 
+**Fifth trial (15:00):** "von vorne" ✓. "Alles verwerfen" landed in the letter
+twice: (1) the large Vosk model heard "alles verlaufen" - the cross-check now also
+looks at Parakeet's text ("Alles verwerfen."). (2) At the same moment the closing
+recogniser heard "satz wiederholen" and overwrote the pending command. Now the
+first one stays, the second becomes an alternative, and free recognition decides
+(`befehl_vormerken`/`befehl_entscheiden`, also between a command and the closing
+phrase). (3) "322 Euro und 40 Cent" becomes "322,40 Euro"; if Parakeet swallows
+"Euro" ("dreihundersundzwanzig und vierzig Cent"), Vosk's amount applies. The real
+recording replayed: both "alles verwerfen" with a question, amount 322,40 Euro; with
+"ja" dictation ends without a file. Piper simulation and test bench unchanged.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

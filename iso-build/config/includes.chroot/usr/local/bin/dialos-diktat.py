@@ -120,6 +120,9 @@ BEFEHL_ABBRECHEN = "alles verwerfen"
 BEFEHLE_IM_DIKTAT = (BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN)
 BEFEHL_STAMM = {BEFEHL_LOESCHEN: "lösch", BEFEHL_WIEDERHOLEN: "wiederhol",
                 BEFEHL_VON_VORNE: "vorn", BEFEHL_ABBRECHEN: "verwerf"}
+# Nur fuer die Entscheidung zwischen zwei gleichzeitig gehoerten Befehlen
+# (befehl_vormerken) - der Schluss selbst hat keine Gegenprobe.
+SCHLUSS_STAMM = "beend"
 # EIGENER ERKENNER FUER DIESE ZWEI (Pruefstand 2026-09-17): In derselben Grammatik
 # wie der Schluss hoerte das kleine Modell Stephans "Diktat beenden" als "diktat
 # vorne" - ein Brief endete nicht mehr. Ein dritter Erkenner mit nur diesen beiden
@@ -275,6 +278,39 @@ def pegel(block):
     if not werte:
         return 0.0
     return math.sqrt(sum(w * w for w in werte) / len(werte))
+
+
+def befehl_vormerken(offen, kandidat):
+    """Merkt einen Befehl vor, der auf seine Ruhe danach wartet.
+
+    ZWEI ERKENNER, ZWEI BEFEHLE IM SELBEN MOMENT (2026-09-17, 15:00): Stephan
+    sagte "alles verwerfen", der Steuer-Erkenner hoerte es richtig - und eine
+    Zehntelsekunde spaeter hoerte der Schluss-Erkenner "satz wiederholen" und
+    ueberschrieb den wartenden Befehl. Die Gegenprobe fand kein "wiederhol",
+    und "Alles verwerfen." stand im Brief. Jetzt bleibt der erste stehen, der
+    zweite kommt als Alternative dazu, und die freie Erkennung entscheidet
+    (befehl_entscheiden). Die Ruhe danach zaehlt ab dem spaeteren Ende.
+    """
+    if offen is None:
+        return kandidat
+    if offen["satz"] != kandidat["satz"] and "alternative" not in offen:
+        melde(f"  {kandidat['satz']!r} gleichzeitig mit {offen['satz']!r} gehoert "
+              f"- die freie Erkennung entscheidet")
+        offen["alternative"] = kandidat
+        offen["ende"] = max(offen["ende"], kandidat["ende"])
+    return offen
+
+
+def befehl_entscheiden(b, text):
+    """Waehlt zwischen b und b["alternative"] nach dem, was frei erkannt wurde."""
+    alt = b.pop("alternative", None)
+    if alt is None:
+        return b
+    stamm = lambda k: BEFEHL_STAMM.get(k["satz"], SCHLUSS_STAMM)
+    if stamm(alt) in text and stamm(b) not in text:
+        melde(f"  {alt['satz']!r} statt {b['satz']!r} - die freie Erkennung hoerte {text!r}")
+        return alt
+    return b
 
 
 def ist_schluss(gehoert):
@@ -1000,6 +1036,28 @@ class Aeusserungen:
                 break
             worte = spaeter + worte
         return worte
+
+    def texte_nach(self, epoche, ab_s):
+        """Geschriebener Text (Parakeet) der Aeusserungen, die nach ab_s enden.
+
+        GEGENPROBE AUCH MIT PARAKEET (2026-09-17, 15:00): Stephans "alles
+        verwerfen" hoerte das grosse Vosk-Modell als "alles verlaufen" - ohne
+        "verwerf" wurde der Befehl verworfen und stand als Satz im Brief.
+        Parakeet hatte "Alles verwerfen." geschrieben.
+        """
+        texte = []
+        for a in reversed(self.liste):
+            if a["epoche"] != epoche:
+                break
+            if not any(w.get("end", w.get("start", 0)) > ab_s for w in a["worte"]):
+                break
+            texte.insert(0, a.get("text") or "")
+        return " ".join(texte)
+
+    def gegenprobe(self, epoche, ab_s):
+        """Vosk-Woerter und Parakeet-Text ab ab_s, klein geschrieben."""
+        worte = " ".join(w.get("word", "") for w in self.worte_nach(epoche, ab_s))
+        return (worte + " | " + self.texte_nach(epoche, ab_s)).lower()
 
     def befehlsrest_entfernen(self):
         """Streicht den Rest eines gescheiterten Befehlsversuchs am Textende.
@@ -1852,6 +1910,10 @@ def parakeet_natuerlich(text):
     # (2026-09-16): Parakeet fasste den Betrag zusammen und behielt die falsche
     # Einheit. Ein Betrag mit zwei Nachkommastellen in Cent gibt es nicht.
     text = re.sub(r"\b(\d+,\d\d)\s+Cent\b", r"\1 Euro", text)
+    # "322 Euro und 40 Cent" (2026-09-17, 15:00): Parakeet schrieb die Euro schon
+    # als Ziffern, die Zahlenregel fasst nur Zahlwoerter zusammen. DIN 5008: 322,40 Euro.
+    text = re.sub(r"\b(\d+) Euro,? (?:und )?(\d{1,2}) Cent\b",
+                  lambda m: f"{m.group(1)},{int(m.group(2)):02d} Euro", text)
     text = re.sub(r"[ \t]+", " ", text)
     return text.strip(" ")
 
@@ -2055,6 +2117,30 @@ def zahlwoerter_aus_vosk(text, vosk_worte):
         if js < je and jc - je <= 4 and i_start < ie:
             text = (text[:stellen[i_start][0]] + " ".join(v[js:jc + 1])
                     + text[stellen[i_ende - 1][1]:])
+            stellen = [(m.start(), m.end(), m.group(0)) for m in WORT.finditer(text)]
+            p = [w.lower() for _, _, w in stellen]
+    # UND UMGEKEHRT: "EURO" VERSCHLUCKT (2026-09-17, Wiederholung der 15:00-Probe):
+    # Parakeet "dreihundersundzwanzig und vierzig Cent" fuer Vosks "dreihundert
+    # zweiundzwanzig euro und vierzig cent". Von "Cent" rueckwaerts gehoeren Zahlen,
+    # "und" und unbekannte Woerter (hunspell) zum Betrag - ein echtes Wort
+    # ("beträgt") beendet ihn.
+    elif "euro" in v and "cent" in v and "cent" in p and "euro" not in p:
+        je, jc = v.index("euro"), v.index("cent")
+        js = je
+        while js > 0 and _ist_zahlwort(v[js - 1]):
+            js -= 1
+        ic = p.index("cent")
+        vorne = [stellen[i][2] for i in range(max(0, ic - (jc - js + 2)), ic)]
+        unbekannt = unbekannte_woerter([w for w in vorne if not _ist_zahlwort(w.lower())
+                                        and not w.isdigit() and w.lower() not in betrag])
+        i_start = ic
+        while (i_start > 0 and ic - i_start < jc - js + 2
+               and (_ist_zahlwort(p[i_start - 1]) or p[i_start - 1].isdigit()
+                    or p[i_start - 1] in betrag or stellen[i_start - 1][2] in unbekannt)):
+            i_start -= 1
+        if js < je and jc - je <= 4 and i_start < ic:
+            text = (text[:stellen[i_start][0]] + " ".join(v[js:jc + 1])
+                    + text[stellen[ic][1]:])
             stellen = [(m.start(), m.end(), m.group(0)) for m in WORT.finditer(text)]
             p = [w.lower() for _, _, w in stellen]
     opcodes = difflib.SequenceMatcher(None, p, v, autojunk=False).get_opcodes()
@@ -2855,6 +2941,19 @@ def diktat_fuehren(zweck, name, quelle):
             if (befehl_offen and len(zeitverlauf) * BLOCK_S
                     >= befehl_offen["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S):
                 b, befehl_offen = befehl_offen, None
+                if "alternative" in b:
+                    # Die freie Erkennung liefert ihren Rest jetzt ab - sonst
+                    # laege das Gesprochene noch im Erkenner und es gaebe nichts
+                    # zu vergleichen.
+                    try:
+                        rest = json.loads(erkenner.FinalResult())
+                        if rest.get("result"):
+                            aeusserungen.hinzu(epoche, rest["result"],
+                                               frei_text(rest["result"], rest.get("text", "")))
+                    except Exception as fehler:
+                        melde(f"  Rest vor dem Befehl nicht lesbar: {fehler}")
+                    ab = min(b["start"], b["alternative"]["start"]) - BEFEHL_SPIELRAUM_S
+                    b = befehl_entscheiden(b, aeusserungen.gegenprobe(epoche, ab))
                 if not ruhig(zeitverlauf, b["ende"] + BEFEHL_RAND_S,
                              b["ende"] + BEFEHL_RAND_S + BEFEHL_RUHE_DANACH_S, ruhe_schwelle):
                     # Mit Pegeln (2026-09-15): Stephans echtes "Diktat beenden" wurde
@@ -2895,10 +2994,9 @@ def diktat_fuehren(zweck, name, quelle):
                     # wenn die freie Erkennung im selben Zeitraum "loesch..." bzw.
                     # "wiederhol..." gehoert hat.
                     stamm = BEFEHL_STAMM[b["satz"]]
-                    gegen = aeusserungen.worte_nach(epoche, b["start"] - BEFEHL_SPIELRAUM_S)
-                    if not any(stamm in w.get("word", "") for w in gegen):
-                        melde(f"  {b['satz']!r} verworfen - die freie Erkennung hoerte "
-                              f"{' '.join(w.get('word', '') for w in gegen)!r}")
+                    gegen = aeusserungen.gegenprobe(epoche, b["start"] - BEFEHL_SPIELRAUM_S)
+                    if stamm not in gegen:
+                        melde(f"  {b['satz']!r} verworfen - die freie Erkennung hoerte {gegen!r}")
                     else:
                         # NACH DEM WORTENDE SCHNEIDEN, NICHT NACH DEM ANFANG (2026-09-15,
                         # zweite Brief-Probe). Das grosse Modell hoerte "jax wiederholen"
@@ -2975,8 +3073,7 @@ def diktat_fuehren(zweck, name, quelle):
                 ergebnis_steuer = json.loads(steuer.Result())
                 gehoert_steuer = ergebnis_steuer.get("text", "").strip()
                 worte_steuer = ergebnis_steuer.get("result", [])
-                if (gehoert_steuer in (BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN) and len(worte_steuer) == 2
-                        and befehl_offen is None):
+                if gehoert_steuer in (BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN) and len(worte_steuer) == 2:
                     luecke = schluss_luecke(worte_steuer)
                     anfang, ende = worte_steuer[0].get("start", 0), worte_steuer[1].get("end", 0)
                     if luecke is not None and luecke > SCHLUSS_LUECKE_MAX_S:
@@ -2986,7 +3083,8 @@ def diktat_fuehren(zweck, name, quelle):
                         melde(f"  {gehoert_steuer!r} verworfen - davor nicht still ({anfang:.2f} s)")
                     else:
                         melde(f"  {gehoert_steuer!r} erkannt ({anfang:.2f}-{ende:.2f} s) - warte auf Ruhe danach")
-                        befehl_offen = {"satz": gehoert_steuer, "start": anfang, "ende": ende}
+                        befehl_offen = befehl_vormerken(
+                            befehl_offen, {"satz": gehoert_steuer, "start": anfang, "ende": ende})
             if schluss is not None and schluss.AcceptWaveform(block):
                 ergebnis_schluss = json.loads(schluss.Result())
                 gehoert = ergebnis_schluss.get("text", "").strip()
@@ -3010,7 +3108,8 @@ def diktat_fuehren(zweck, name, quelle):
                               f"{[round(x) for x in zeitverlauf[a_i:b_i]]})")
                     else:
                         melde(f"  {gehoert!r} erkannt ({anfang:.2f}-{ende:.2f} s) - warte auf Ruhe danach")
-                        befehl_offen = {"satz": gehoert, "start": anfang, "ende": ende}
+                        befehl_offen = befehl_vormerken(
+                            befehl_offen, {"satz": gehoert, "start": anfang, "ende": ende})
                     continue
                 if ist_schluss(gehoert):
                     # ZU LEISE IST KEIN SCHLUSS - ein Stoergeraeusch hat nicht den
@@ -3049,9 +3148,10 @@ def diktat_fuehren(zweck, name, quelle):
                     worte_s = ergebnis_schluss.get("result", [])
                     ende_s = worte_s[-1].get("end", 0) if worte_s else len(zeitverlauf) * BLOCK_S
                     melde(f"  {gehoert!r} gehoert - warte auf Ruhe danach")
-                    befehl_offen = {"satz": SCHLUSSSATZ, "gehoert": gehoert, "worte": worte_s,
-                                    "start": worte_s[0].get("start", 0) if worte_s else ende_s,
-                                    "ende": ende_s, "mittel": mittel, "seit_start": seit_start}
+                    befehl_offen = befehl_vormerken(befehl_offen, {
+                        "satz": SCHLUSSSATZ, "gehoert": gehoert, "worte": worte_s,
+                        "start": worte_s[0].get("start", 0) if worte_s else ende_s,
+                        "ende": ende_s, "mittel": mittel, "seit_start": seit_start})
                     continue
                 if ist_halber_schluss(gehoert):
                     # NUR DAS HALBE WORT - kein Schluss, aber der Nutzer muss es
