@@ -99,15 +99,52 @@ def parse_changelog(md_text, section_heading):
 
 
 def md_inline_to_html(text):
-    """Escape text for HTML, keeping `code` spans as <code>...</code>."""
-    parts = re.split(r'(`[^`]+`)', text)
-    out = []
-    for p in parts:
-        if p.startswith('`') and p.endswith('`'):
-            out.append(f'<code>{html.escape(p[1:-1])}</code>')
-        else:
-            out.append(html.escape(p))
-    return ''.join(out)
+    """Escape text for HTML, keeping `code` spans as <code>...</code>
+    and **bold** as <strong>...</strong>.
+
+    Fettschrift kam am 2026-09-17 dazu. Bis dahin wandelte diese Funktion nur
+    Code-Spannen um; die aelteren Changelog-Eintraege benutzten keine
+    Fettschrift, deshalb fiel es nie auf. Im Abschnitt 0.5.2 stehen 76 Zeilen
+    mit **...** - ohne diese Ergaenzung waeren die Sternchen woertlich auf der
+    Seite gelandet. Gefunden im --dry-run, also bevor etwas veroeffentlicht
+    wurde.
+
+    WARUM MIT PLATZHALTERN und nicht einfach nacheinander: Fettschrift darf
+    eine Code-Spanne UMSCHLIESSEN - im Quelltext steht zum Beispiel
+    "**`dialos-aufspielen` zaehlt ein Manifest jetzt wie eine Aenderung**".
+    Wer zuerst an den Backticks zerlegt, zerreisst dabei das Sternchen-Paar:
+    Das oeffnende landet im einen Stueck, das schliessende im naechsten, und
+    heraus kommt verschraenktes Markup. Deshalb werden die Code-Spannen durch
+    Platzhalter ersetzt, dann wird der ganze Text in einem Stueck maskiert und
+    fett gesetzt, und erst zum Schluss kommen die Code-Spannen zurueck.
+
+    Die Platzhalter nutzen \x00, weil html.escape() das Zeichen nicht
+    anfasst und es in einem Changelog nicht vorkommt.
+    """
+    spannen = []
+
+    def merken(treffer):
+        spannen.append(treffer.group(0)[1:-1])
+        return f"\x00{len(spannen) - 1}\x00"
+
+    if text.count('`') % 2:
+        print(f"  WARNUNG: ungerade Zahl Backticks - {text[:80]}...",
+              file=sys.stderr)
+    if text.count('**') % 2:
+        print(f"  WARNUNG: ungerade Zahl ** - {text[:80]}...", file=sys.stderr)
+
+    mit_platzhaltern = re.sub(r'`[^`]+`', merken, text)
+    ergebnis = html.escape(mit_platzhaltern)
+    # re.DOTALL, weil Fettschrift im README ueber Zeilenumbrueche laeuft -
+    # die Eintraege sind auf 79 Zeichen umbrochen, eine fette Ueberschrift
+    # passt oft nicht in eine Zeile. Ohne DOTALL blieben genau diese
+    # Sternchen stehen (2026-09-17 auf der englischen Idee-Seite gefunden).
+    ergebnis = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', ergebnis,
+                      flags=re.DOTALL)
+    for nummer, inhalt in enumerate(spannen):
+        ergebnis = ergebnis.replace(f"\x00{nummer}\x00",
+                                    f'<code>{html.escape(inhalt)}</code>')
+    return ergebnis
 
 
 def render_version_block(entry):
@@ -158,11 +195,24 @@ def fetch_readme(filename):
 
 
 def wp_api(method, path, wp_url, wp_user, wp_pass, body=None):
+    """Ein Aufruf an die WordPress-Schnittstelle.
+
+    Der Rumpf geht ueber die STANDARDEINGABE an curl (-d @-), nicht als
+    Kommandozeilen-Argument. Am 2026-09-17 ist genau das gescheitert:
+    "OSError: [Errno 7] Argument list too long". Das Aenderungsprotokoll war
+    ueber die Laengengrenze des Betriebssystems fuer Argumente gewachsen
+    (unter Linux rund 128 kB je Argument). Vorher lief es jahrelang, weil der
+    Text kleiner war - ein Fehler, der mit dem Projekt mitwaechst und
+    irgendwann zuschlaegt, ohne dass sich am Code etwas geaendert haette.
+    """
     cmd = ["curl", "-sS", "-u", f"{wp_user}:{wp_pass}", "-X", method]
+    eingabe = None
     if body is not None:
-        cmd += ["-H", "Content-Type: application/json", "-d", json.dumps(body)]
+        cmd += ["-H", "Content-Type: application/json", "-d", "@-"]
+        eingabe = json.dumps(body)
     cmd.append(f"{wp_url}/wp-json/wp/v2/pages/{path}")
-    r = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    r = subprocess.run(cmd, input=eingabe, capture_output=True, text=True,
+                       check=True)
     return json.loads(r.stdout)
 
 
