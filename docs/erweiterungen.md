@@ -51,7 +51,8 @@ geschah.
 
 **Die 382 sind nicht der heutige Stand, und das macht das Argument
 stärker, nicht schwächer.** Zweierlei hat sich seither geändert: Die
-Grammatik ist auf **47 Befehlssätze** gewachsen, und seit dem 2026-08-24
+Grammatik ist auf **47 Befehlssätze** gewachsen (49 Einträge mit Ein-
+und Ausschalten), und seit dem 2026-08-24
 schweigt DialOS nicht mehr, wenn nichts gepasst hat - es sagt es an und
 schlägt bei starker Übereinstimmung den richtigen Satz vor. Der Punkt ist
 damit **entschärft, aber nicht erledigt**: Die Zwei-Drittel-Schwelle wird
@@ -93,7 +94,7 @@ Eine Datei je Erweiterung unter
   "name": "DialOS-Suche",
   "version": "0.1.0",
   "braucht_dialos": "0.6.0",
-  "startsaetze": ["unterlagen durchsuchen", "briefe durchsuchen"],
+  "startsaetze": ["unterlagen durchsuchen"],
   "befehl": "/usr/local/bin/dialos-suche.py",
   "eigene_grammatik": ["vorlesen", "weiter", "zurueck", "stopp", "abbrechen"],
   "braucht_mikrofon": true,
@@ -149,7 +150,38 @@ hört mit der **vollständigen** Grammatik aller bereits eingebauten
 Erweiterungen zu. Erst dann zeigt sich, ob ein Satz mit einem
 bestehenden verwechselt wird.
 
-Das Werkzeug dafür gibt es schon: `scripts/dialos-grammatik-pruefen.py`.
+Das Werkzeug dafür gibt es: `scripts/dialos-grammatik-pruefen.py`. **Seit dem
+2026-09-17 kann es auch Sätze prüfen, die noch nicht eingebaut sind** - vorher
+ging genau das nicht, und die Lücke war nicht harmlos:
+
+```bash
+scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+```
+
+Ohne `--neu` hörte Vosk den Kandidaten gegen eine Grammatik, die ihn **nicht
+enthält**, und presste ihn auf den nächstliegenden bestehenden Satz. Das sah
+nach einer Verwechslung aus, war aber nur ein Werkzeugfehler - und umgekehrt
+konnte ein kaputter Kandidat unauffällig bleiben. Mit `--neu` kommt er
+versuchsweise in die Grammatik, und geprüft wird **in beide Richtungen**:
+
+| Frage | Warum sie zählt |
+|---|---|
+| Wird der Kandidat wörtlich erkannt? | Sonst ist er als Befehl unbrauchbar. |
+| **Gehen bestehende Sätze durch ihn kaputt?** | **Die wichtigere Frage.** Ein Kandidat, der selbst durchfällt, kostet nur sich selbst; einer, der einen bestehenden Befehl verwechselbar macht, nimmt etwas kaputt, das heute funktioniert - und das fällt erst auf, wenn der Nutzer allein mit dem Gerät ist. |
+
+Ebenfalls seit dem 2026-09-17 läuft die **erste** Pflichtprüfung dort mit,
+statt nur in der Doku zu stehen: Fehlt ein Wort im Wortschatz, meldet Vosk das
+zwar selbst - aber die Meldung ging in `SetLogLevel(-1)` unter. Geprüft wird
+jetzt vorher gegen `graph/words.txt`, ohne Sprechen, und **getrennt nach
+Kandidat und Bestand**: Ein fehlendes Wort im Kandidaten beendet die Prüfung,
+eines im Bestand wird als Altlast gemeldet, blockiert den Kandidaten aber
+nicht. Sonst hinge ein neuer Befehl an einem alten Problem, mit dem er nichts
+zu tun hat.
+
+**Mehrere Kandidaten in einem Lauf prüfen bedeutet, sie GEMEINSAM zu prüfen**
+(`--neu "…" --neu "…"`). Das ist richtig, wenn beide eingebaut werden sollen -
+dann müssen sie auch miteinander verträglich sein. Wer zwei Formulierungen
+gegeneinander abwägen will, prüft sie **einzeln**.
 
 ### 3. Das Mikrofon gehört immer genau einem
 

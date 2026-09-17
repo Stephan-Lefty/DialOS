@@ -77,7 +77,30 @@ listen?".
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
 | "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |
 | "Ruf {person} an" (call {person}) | Telephony via SIM or paired phone, see [telefonie.en.md](telefonie.en.md). |
-| "Unterlagen durchsuchen" / "Briefe durchsuchen" (search the documents / search the letters) | Start sentence of the **DialOS-Suche** extension - finding letters, documents, notes and mails and reading them out. **Wording not final yet**, it first has to be checked against the small model and against the existing 47 sentences. |
+| "Unterlagen durchsuchen" (search the documents) | Start sentence of the **DialOS-Suche** extension - finding letters, documents, notes and mails and reading them out. **Wording not final yet**, the check on the device is still pending: `scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`. |
+
+### Why "Unterlagen durchsuchen" and not "Briefe durchsuchen" (search the letters)
+
+On 2026-09-17 the word set of the grammar was counted: 49 sentences, **69
+different words**. The choice follows from that, and it did so before anyone
+had to speak:
+
+| Word | already in the grammar |
+|---|---|
+| "brief" (letter) | **six times** |
+| "briefe" (letters) | **once** (in "befehle für briefe" - commands for letters) |
+| "unterlagen" (documents) | no |
+| "durchsuchen" (search) | no |
+
+A start sentence made of words that are already there enlarges the word network
+exactly where it is densest anyway, and produces new command-less combinations
+- the problem from the item further below. **"unterlagen durchsuchen" brings
+two new, long, distinctive words with it** and touches no existing sentence.
+That is the same consideration that was measured for "starten" against
+"sprachsteuerung", only applied one level earlier.
+
+That does not replace the check on the device - it only sorts out beforehand,
+without anyone having to speak.
 
 ### Why only ONE sentence for DialOS-Suche stands here
 

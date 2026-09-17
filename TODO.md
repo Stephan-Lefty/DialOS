@@ -93,8 +93,43 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     „löschen" fehlt im Wortschatz und wurde am 2026-08-18 still aus der
     Grammatik geworfen. Eine Warnung beim Einbauen liest niemand wieder; der
     Fehler zeigt sich erst, wenn der Nutzer allein mit dem Gerät ist.
-  - [ ] **Kollisionsprüfung gegen die vollständige Grammatik** - Piper
-    spricht, Vosk hört. `scripts/dialos-grammatik-pruefen.py` gibt es schon.
+  - [x] **Kollisionsprüfung gegen die vollständige Grammatik - Werkzeug fertig
+    am 2026-09-17.** `scripts/dialos-grammatik-pruefen.py` kann jetzt Sätze
+    prüfen, die noch NICHT eingebaut sind: `--neu "satz"`. Das ging vorher
+    nicht, und die Lücke war nicht harmlos - ein Kandidat als bloßes Argument
+    wurde gegen eine Grammatik gehört, die ihn gar nicht enthält, und von Vosk
+    auf den nächstliegenden bestehenden Satz gepresst. Das sah nach einer
+    Verwechslung aus, war aber ein Werkzeugfehler; umgekehrt konnte ein
+    kaputter Kandidat unauffällig bleiben.
+
+    Geprüft wird jetzt **in beide Richtungen**: ob der Kandidat erkannt wird,
+    **und ob bestehende Sätze durch ihn kaputtgehen**. Die zweite Frage ist die
+    wichtigere - ein Kandidat, der selbst durchfällt, kostet nur sich; einer,
+    der einen bestehenden Befehl verwechselbar macht, nimmt etwas kaputt, das
+    heute funktioniert.
+
+    Dazu läuft die **erste** Pflichtprüfung jetzt mit, statt nur in der Doku zu
+    stehen: Wortschatz gegen `graph/words.txt`, ohne Sprechen, getrennt nach
+    Kandidat und Bestand. Ein fehlendes Wort im Kandidaten beendet die Prüfung,
+    eines im Bestand wird als Altlast gemeldet - sonst hinge ein neuer Befehl
+    an einem alten Problem.
+  - [ ] **Prüfung am Gerät ausführen** - der Wortlaut des Startsatzes hängt
+    daran:
+
+        scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+
+    „unterlagen" und „durchsuchen" kommen in keinem der 49 bestehenden Sätze
+    vor (ausgezählt am 2026-09-17: 69 verschiedene Wörter). „briefe" stünde
+    dagegen schon drin, „brief" sogar sechsmal - deshalb ist „Briefe
+    durchsuchen" als zweite Formulierung gestrichen. **Das ersetzt die Prüfung
+    nicht, es sortiert nur vorher aus.**
+  - [ ] **Nebenbefund beim Bauen des Werkzeugs, eigener Punkt:** Gegen das
+    große Tuda-Modell geprüft fehlt **„bildschirmfoto"** im Wortschatz -
+    obwohl „Bildschirmfoto erstellen" ein belegter Befehl ist. Das heißt
+    entweder, dass das kleine Modell einen anderen Wortschatz hat als das
+    große (dann ist jede Vorprüfung gegen das große wertlos), oder dass der
+    Befehl auf einem anderen Weg funktioniert. **Zu klären, bevor jemand aus
+    einer Vorprüfung Schlüsse zieht.**
   - [ ] **Mikrofon-Übergabe über eine Markierungsdatei, mit Wache.** Eine
     abgestürzte Erweiterung darf das Mikrofon nicht behalten - der Nutzer
     spräche sonst gegen ein taubes Gerät, und selbst das Ausschalten der

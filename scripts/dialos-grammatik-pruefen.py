@@ -23,8 +23,32 @@ Die Saetze kommen aus dialos-sprachbefehl-desktop.py selbst, nicht aus einer
 Liste hier: Eine zweite Liste liefe beim naechsten neuen Befehl auseinander,
 und zwar unbemerkt, weil sie fuer sich genommen richtig aussieht.
 
+EINEN NEUEN SATZ PRUEFEN, BEVOR ER EINGEBAUT IST: "--neu SATZ". Das war bis
+zum 2026-09-17 nicht moeglich, und die Luecke war nicht harmlos. Wer einen
+Kandidaten einfach als Argument uebergab, liess ihn gegen eine Grammatik
+hoeren, die ihn NICHT enthaelt - Vosk presst ihn dann auf den naechstliegenden
+bestehenden Satz. Das Ergebnis sah nach einer Verwechslung aus, war aber nur
+ein Werkzeugfehler; umgekehrt konnte ein kaputter Kandidat unauffaellig
+bleiben. Mit "--neu" kommt der Satz versuchsweise in die Grammatik, und
+geprueft wird in BEIDE Richtungen:
+
+  * Wird der Kandidat selbst woertlich erkannt?
+  * Gehen BESTEHENDE Saetze durch ihn kaputt?
+
+Die zweite Frage ist die wichtigere. Ein Kandidat, der selbst durchfaellt,
+kostet nur ihn; einer, der einen bestehenden Befehl verwechselbar macht, nimmt
+etwas kaputt, das heute funktioniert - und das faellt erst auf, wenn der
+Nutzer allein mit dem Geraet ist.
+
+AUSSERDEM SEIT DEM 2026-09-17: die erste Pflichtpruefung laeuft mit, statt nur
+in der Doku zu stehen. Fehlt ein Wort im Wortschatz des Modells, wirft Vosk es
+STILL aus der Grammatik - die Meldung dazu geht in SetLogLevel(-1) unter.
+Geprueft wird jetzt vorher gegen graph/words.txt, ohne Sprechen.
+
 Aufruf:  scripts/dialos-grammatik-pruefen.py [Satz ...]
-         ohne Argumente: alle Saetze der Grammatik
+         ohne Argumente:        alle Saetze der Grammatik
+         --neu "satz"           Kandidat versuchsweise dazu, beide Richtungen
+                                (mehrfach angebbar)
 """
 
 import importlib.util
@@ -76,6 +100,30 @@ def hoeren(rohton, grammatik, modell, vosk):
     return json.loads(erkenner.FinalResult()).get("text", "").strip()
 
 
+def wortschatz_pruefen(woerter, modell_pfad):
+    """Stehen alle Woerter im Wortschatz des Modells? DIE ERSTE PFLICHTPRUEFUNG.
+
+    Vosk meldet fehlende Woerter beim Bauen der Grammatik selbst
+    ("Ignoring word missing in vocabulary") - aber diese Meldung geht in
+    SetLogLevel(-1) unter, und genau deshalb stand sie bisher nicht hier. Ein
+    fehlendes Wort wird STILL aus der Grammatik geworfen: Der Befehl existiert
+    dann nicht, und im Protokoll steht nur, dass nichts erkannt wurde.
+
+    Am 2026-08-18 ist das bei "loeschen" aufgefallen, das im Wortschatz fehlt;
+    ebenfalls nicht enthalten sind "zuruecksetzen", "aufraeumen" und "spaet".
+    Jedes davon haette einen Befehl lautlos unwirksam gemacht.
+
+    Gelesen wird graph/words.txt des Modells - das geht sofort, ohne Sprechen
+    und ohne das Modell zu laden.
+    """
+    pfad = os.path.join(modell_pfad, "graph", "words.txt")
+    if not os.path.exists(pfad):
+        return None                      # Modell anders aufgebaut - nicht raten
+    with open(pfad, encoding="utf-8", errors="replace") as f:
+        bekannt = {z.split(" ", 1)[0].lower() for z in f if z.strip()}
+    return sorted({w for w in woerter if w.lower() not in bekannt})
+
+
 def main():
     try:
         import vosk
@@ -86,17 +134,83 @@ def main():
         print(f"Piper fehlt: {PIPER_DIR}", file=sys.stderr)
         return 1
 
+    neu = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--neu"
+           and i + 1 < len(sys.argv)]
+    rest = []
+    ueberspringen = False
+    for a in sys.argv[1:]:
+        if ueberspringen:
+            ueberspringen = False
+            continue
+        if a == "--neu":
+            ueberspringen = True
+        elif not a.startswith("--"):
+            rest.append(a)
+
     dienst = dienst_laden()
-    grammatik = dienst.GRAMMATIK_AN
-    alle = [s for s in json.loads(grammatik) if s != "[unk]"]
-    gewuenscht = [a for a in sys.argv[1:] if not a.startswith("--")] or alle
+    alle = [s for s in json.loads(dienst.GRAMMATIK_AN) if s != "[unk]"]
+
+    # EIN NEUER SATZ MUSS IN DIE GRAMMATIK, BEVOR ER PRUEFBAR IST. Ohne das
+    # hoert Vosk ihn gegen eine Grammatik, die ihn nicht kennt, presst ihn auf
+    # den naechstliegenden bestehenden Satz - und das Ergebnis saehe aus wie
+    # eine Verwechslung, waere aber nur ein Werkzeugfehler. Genau daran ist die
+    # Pruefung eines Kandidaten bisher gescheitert.
+    if neu:
+        schon = [s for s in neu if s in alle]
+        if schon:
+            print(f"Stehen bereits in der Grammatik: {schon} - ohne --neu pruefen.")
+            return 2
+        alle = alle + neu
+
+    grammatik = json.dumps(alle + ["[unk]"], ensure_ascii=False)
+    gewuenscht = rest or (neu + alle if neu else alle)
+
+    # Erste Pflichtpruefung, vor allem anderen - sie braucht kein Sprechen.
+    #
+    # GETRENNT NACH KANDIDAT UND BESTAND, und das ist kein Feinschliff: Fehlt
+    # ein Wort im KANDIDATEN, ist er unbrauchbar und die Pruefung endet hier.
+    # Fehlt eines im BESTAND, ist das eine Altlast - sie gehoert gemeldet, darf
+    # aber den Kandidaten nicht blockieren, sonst haengt ein neuer Befehl an
+    # einem alten Problem, mit dem er nichts zu tun hat.
+    kandidat_woerter = {w for s in neu for w in s.split()}
+    bestand_woerter = {w for s in alle if s not in neu for w in s.split()}
+
+    fehlend_k = wortschatz_pruefen(kandidat_woerter, MODELL) if neu else []
+    fehlend_b = wortschatz_pruefen(bestand_woerter, MODELL)
+
+    if fehlend_b is None:
+        print(f"Hinweis: {MODELL}/graph/words.txt nicht lesbar - "
+              "Wortschatz UNGEPRUEFT.")
+    elif fehlend_b:
+        print("ALTLAST - diese Woerter BESTEHENDER Saetze fehlen im Wortschatz:")
+        print("  " + ", ".join(repr(w) for w in fehlend_b))
+        print("Vosk wirft sie still aus der Grammatik; die betroffenen Befehle")
+        print("sind nicht ausloesbar. Eigener Punkt, nicht Sache des Kandidaten.")
+        print()
+
+    if fehlend_k:
+        print("KANDIDAT NICHT IM WORTSCHATZ DES MODELLS:",
+              ", ".join(repr(w) for w in fehlend_k))
+        print("Vosk wirft diese Woerter STILL aus der Grammatik - der Befehl")
+        print("waere nie ausloesbar, ohne dass irgendwo etwas stuende.")
+        print("Andere Formulierung waehlen, dann erneut pruefen.")
+        return 1
 
     vosk.SetLogLevel(-1)
     modell = vosk.Model(MODELL)
 
-    print(f"{len(alle)} Saetze in der Grammatik, {len(gewuenscht)} werden geprueft.")
+    if neu:
+        print(f"{len(alle) - len(neu)} Saetze in der Grammatik, "
+              f"{len(neu)} Kandidat(en) versuchsweise dazu.")
+        print("Geprueft wird in BEIDE Richtungen: ob der Kandidat erkannt wird,")
+        print("UND ob die bestehenden Saetze durch ihn kaputtgehen.")
+    else:
+        print(f"{len(alle)} Saetze in der Grammatik, "
+              f"{len(gewuenscht)} werden geprueft.")
     print()
+
     fehler = 0
+    kandidat_fehler = 0
     for satz in gewuenscht:
         rohton = sprechen(satz)
         if not rohton:
@@ -104,18 +218,30 @@ def main():
             fehler += 1
             continue
         gehoert = hoeren(rohton, grammatik, modell, vosk)
+        marke = "*" if satz in neu else " "
         if gehoert == satz:
-            print(f"  ok     {satz!r}")
+            print(f" {marke}ok     {satz!r}")
         else:
-            print(f"  FALSCH {satz!r}")
+            print(f" {marke}FALSCH {satz!r}")
             print(f"         erkannt: {gehoert!r}")
             fehler += 1
+            if satz in neu:
+                kandidat_fehler += 1
     print()
+    if neu:
+        print("(* = Kandidat)")
     if fehler:
         print(f"{fehler} von {len(gewuenscht)} Saetzen nicht woertlich erkannt.")
+        if neu and kandidat_fehler < fehler:
+            print("DARUNTER BESTEHENDE SAETZE: Der Kandidat macht sie")
+            print("verwechselbar. Das ist der schlimmere Fall - er nimmt etwas")
+            print("kaputt, das heute funktioniert.")
         print("Ein Satz, der hier durchfaellt, ist kaputt - vor dem Einbau aendern.")
         return 1
     print(f"Alle {len(gewuenscht)} Saetze woertlich erkannt.")
+    if neu:
+        print("Der Kandidat ist damit einbaubar - die bestehenden Saetze")
+        print("haben ihn ueberstanden.")
     print("Der Test am Geraet mit echter Stimme bleibt trotzdem der Abschluss.")
     return 0
 

@@ -134,6 +134,41 @@ das Erfolg meldet, während es versagt.
   (2026-09-17, vierte Probe). Beide Befehle mit Rückfrage und eigenem Erkenner, damit
   „Diktat beenden" nicht verwechselt wird. Hört nur Vosk „Cent", gilt sein Betrag
   („12 Euro und 40" → „322,40 Euro"). Prüfstand unverändert.
+- **Grammatik-Prüfung kann jetzt Sätze prüfen, die noch nicht eingebaut sind**
+  (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` nimmt einen
+  Kandidaten versuchsweise in die Grammatik auf. **Das ging vorher nicht, und
+  die Lücke war nicht harmlos:** Wer einen Kandidaten als bloßes Argument
+  übergab, liess ihn gegen eine Grammatik hören, die ihn gar nicht enthält -
+  Vosk presst ihn dann auf den nächstliegenden bestehenden Satz. Das sah nach
+  einer Verwechslung aus, war aber ein Werkzeugfehler; umgekehrt konnte ein
+  kaputter Kandidat unauffällig bleiben. Die Pflichtprüfung aus
+  `docs/sprachbefehle.md` war damit für genau den Fall nicht durchführbar, für
+  den sie gedacht ist.
+
+  **Geprüft wird jetzt in beide Richtungen:** ob der Kandidat wörtlich erkannt
+  wird, und **ob bestehende Sätze durch ihn kaputtgehen**. Die zweite Frage ist
+  die wichtigere - ein Kandidat, der selbst durchfällt, kostet nur sich selbst;
+  einer, der einen bestehenden Befehl verwechselbar macht, nimmt etwas kaputt,
+  das heute funktioniert, und das fällt erst auf, wenn der Nutzer allein mit
+  dem Gerät ist.
+
+  **Dazu läuft die erste Pflichtprüfung endlich mit, statt nur in der Doku zu
+  stehen.** Fehlt ein Wort im Wortschatz, wirft Vosk es still aus der Grammatik
+  und meldet das zwar - aber die Meldung ging in `SetLogLevel(-1)` unter.
+  Geprüft wird jetzt vorher gegen `graph/words.txt`, ohne Sprechen, und
+  getrennt nach Kandidat und Bestand: ein fehlendes Wort im Kandidaten beendet
+  die Prüfung, eines im Bestand wird als Altlast gemeldet, blockiert den
+  Kandidaten aber nicht.
+
+- **Startsatz für DialOS-Suche vorbereitet: „Unterlagen durchsuchen"**
+  (2026-09-17), zweite Formulierung „Briefe durchsuchen" gestrichen. Grundlage
+  ist eine Auszählung der Grammatik: 49 Sätze, **69 verschiedene Wörter**.
+  „brief" steht darin **sechsmal**, „briefe" einmal (in „befehle für briefe") -
+  ein Startsatz aus schon vorhandenen Wörtern vergrößert das Wortnetz genau
+  dort, wo es ohnehin am dichtesten ist. „unterlagen" und „durchsuchen" kommen
+  in **keinem** bestehenden Satz vor. Dieselbe Überlegung wie bei „starten"
+  gegen „sprachsteuerung", nur eine Ebene früher angewandt. **Die Prüfung am
+  Gerät steht aus** und wird dadurch nicht ersetzt - sie wird nur vorsortiert.
 
 - **DialOS bekommt eine Erweiterungsschnittstelle - Entwurf, noch kein Code**
   (2026-09-17, Stephans Entscheidung: DialOS-Suche „als eigenständige

@@ -94,7 +94,30 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |
-| „Unterlagen durchsuchen" / „Briefe durchsuchen" | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Wortlaut noch nicht endgültig**, er muss zuerst gegen das kleine Modell und gegen die bestehenden 47 Sätze geprüft werden. |
+| „Unterlagen durchsuchen" | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Wortlaut noch nicht endgültig**, die Prüfung am Gerät steht aus: `scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`. |
+
+### Warum „Unterlagen durchsuchen" und nicht „Briefe durchsuchen"
+
+Am 2026-09-17 wurde die Wortmenge der Grammatik ausgezählt: 49 Sätze, **69
+verschiedene Wörter**. Daraus folgt die Wahl, und zwar bevor jemand sprechen
+musste:
+
+| Wort | steht schon in der Grammatik |
+|---|---|
+| „brief" | **sechsmal** |
+| „briefe" | **einmal** (in „befehle für briefe") |
+| „unterlagen" | nein |
+| „durchsuchen" | nein |
+
+Ein Startsatz aus schon vorhandenen Wörtern vergrößert das Wortnetz genau
+dort, wo es ohnehin am dichtesten ist, und erzeugt neue befehlslose
+Kombinationen - das Problem aus dem Punkt weiter unten. **„unterlagen
+durchsuchen" bringt zwei neue, lange, markante Wörter mit** und berührt keinen
+bestehenden Satz. Das ist dieselbe Überlegung, die bei „starten" gegen
+„sprachsteuerung" gemessen wurde, nur eine Ebene früher angewandt.
+
+Das ersetzt die Prüfung am Gerät nicht - es sortiert nur vorher aus, ohne dass
+jemand sprechen muss.
 
 ### Warum bei DialOS-Suche nur EIN Satz hier steht
 

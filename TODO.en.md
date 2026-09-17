@@ -91,8 +91,44 @@ finished too, and then move down together. That way no reference breaks.
     "löschen" (delete) is missing from the vocabulary and was silently thrown
     out of the grammar on 2026-08-18. Nobody reads a warning at install time a
     second time; the fault only shows once the user is alone with the device.
-  - [ ] **Collision check against the complete grammar** - Piper speaks, Vosk
-    listens. `scripts/dialos-grammatik-pruefen.py` already exists.
+  - [x] **Collision check against the complete grammar - tool finished on
+    2026-09-17.** `scripts/dialos-grammatik-pruefen.py` can now check sentences
+    that are NOT built in yet: `--neu "satz"`. That did not work before, and the
+    gap was not harmless - a candidate passed as a plain argument was heard
+    against a grammar that does not contain it at all, and Vosk pressed it onto
+    the nearest existing sentence. That looked like a confusion but was a fault
+    of the tool; conversely a broken candidate could stay unnoticed.
+
+    The check now runs **in both directions**: whether the candidate is
+    recognized, **and whether existing sentences break because of it**. The
+    second question is the more important one - a candidate that fails by itself
+    costs only itself; one that makes an existing command confusable breaks
+    something that works today.
+
+    On top of that the **first** mandatory check now runs along instead of only
+    standing in the documentation: vocabulary against `graph/words.txt`, without
+    speaking, separately for candidate and existing stock. A missing word in the
+    candidate ends the check, one in the existing stock is reported as a legacy
+    problem - otherwise a new command would hang on an old problem.
+  - [ ] **Run the check on the device** - the wording of the start sentence
+    depends on it:
+
+        scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+
+    "unterlagen" (documents) and "durchsuchen" (search) appear in none of the 49
+    existing sentences (counted on 2026-09-17: 69 different words). "briefe"
+    (letters), by contrast, would already be in there, "brief" (letter) even six
+    times - which is why "Briefe durchsuchen" (search the letters) has been
+    dropped as a second phrasing. **That does not replace the check, it only
+    sorts out beforehand.**
+  - [ ] **Side finding while building the tool, an item of its own:** checked
+    against the large Tuda model, **"bildschirmfoto"** (screenshot) is missing
+    from the vocabulary - although "Bildschirmfoto erstellen" (take a
+    screenshot) is a documented command. That means either that the small model
+    has a different vocabulary than the large one (in which case every
+    pre-check against the large one is worthless), or that the command works by
+    some other route. **To be clarified before anyone draws conclusions from a
+    pre-check.**
   - [ ] **Microphone handover via a marker file, with a guard.** A crashed
     extension must not keep the microphone - the user would otherwise be
     speaking against a deaf device, and even switching the voice control off

@@ -53,7 +53,8 @@ happened.
 
 **The 382 are not today's state, and that makes the argument stronger,
 not weaker.** Two things have changed since: the grammar has grown to
-**47 command sentences**, and since 2026-08-24 DialOS no longer stays
+**47 command sentences** (49 entries counting switching on and off), and
+since 2026-08-24 DialOS no longer stays
 silent when nothing matched - it says so, and on a strong match it
 suggests the right sentence. The item is thus **defused, but not done**:
 the two-thirds threshold is never reached on short commands, and the
@@ -94,7 +95,7 @@ One file per extension under
   "name": "DialOS-Suche",
   "version": "0.1.0",
   "braucht_dialos": "0.6.0",
-  "startsaetze": ["unterlagen durchsuchen", "briefe durchsuchen"],
+  "startsaetze": ["unterlagen durchsuchen"],
   "befehl": "/usr/local/bin/dialos-suche.py",
   "eigene_grammatik": ["vorlesen", "weiter", "zurueck", "stopp", "abbrechen"],
   "braucht_mikrofon": true,
@@ -148,7 +149,39 @@ the full counter-test: Piper speaks every new start sentence, Vosk listens
 with the **complete** grammar of all extensions already installed. Only
 then does it show whether a sentence is confused with an existing one.
 
-The tool for that already exists: `scripts/dialos-grammatik-pruefen.py`.
+The tool for that exists: `scripts/dialos-grammatik-pruefen.py`. **Since
+2026-09-17 it can also check sentences that are not built in yet** - that was
+exactly what did not work before, and the gap was not harmless:
+
+```bash
+scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+```
+
+Without `--neu`, Vosk heard the candidate ("unterlagen durchsuchen" - search
+the documents) against a grammar that does **not contain** it, and pressed it
+onto the nearest existing sentence. That looked like a confusion but was only a
+fault of the tool - and conversely a broken candidate could stay unnoticed.
+With `--neu` it goes into the grammar on trial, and the check runs **in both
+directions**:
+
+| Question | Why it counts |
+|---|---|
+| Is the candidate recognized word for word? | Otherwise it is unusable as a command. |
+| **Do existing sentences break because of it?** | **The more important question.** A candidate that fails by itself costs only itself; one that makes an existing command confusable breaks something that works today - and that only shows once the user is alone with the device. |
+
+Also since 2026-09-17 the **first** mandatory check runs along there instead of
+only standing in the documentation: if a word is missing from the vocabulary,
+Vosk does report that itself - but the message was lost in `SetLogLevel(-1)`.
+The check now happens beforehand against `graph/words.txt`, without speaking,
+and **separately for candidate and existing stock**: a missing word in the
+candidate ends the check, one in the existing stock is reported as a legacy
+problem but does not block the candidate. Otherwise a new command would hang on
+an old problem it has nothing to do with.
+
+**Checking several candidates in one run means checking them TOGETHER**
+(`--neu "…" --neu "…"`). That is right when both are to be built in - then they
+also have to be compatible with each other. Anyone who wants to weigh two
+phrasings against each other checks them **separately**.
 
 ### 3. The microphone always belongs to exactly one party
 

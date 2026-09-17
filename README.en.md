@@ -126,6 +126,43 @@ background) and `splash.png` (boot/login screen).
   (2026-09-17, fourth trial). Both commands with a question and their own
   recogniser so "Diktat beenden" is not confused. If only Vosk hears "Cent", its
   amount applies ("12 Euro und 40" → "322,40 Euro"). Test bench unchanged.
+- **The grammar check can now check sentences that are not built in yet**
+  (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` takes a
+  candidate into the grammar on trial. **That did not work before, and the gap
+  was not harmless:** anyone passing a candidate as a plain argument had it
+  heard against a grammar that does not contain it at all - Vosk then presses it
+  onto the nearest existing sentence. That looked like a confusion but was a
+  fault of the tool; conversely a broken candidate could stay unnoticed. The
+  mandatory check from `docs/sprachbefehle.en.md` was thus not doable for
+  exactly the case it is meant for.
+
+  **The check now runs in both directions:** whether the candidate is recognized
+  word for word, and **whether existing sentences break because of it**. The
+  second question is the more important one - a candidate that fails by itself
+  costs only itself; one that makes an existing command confusable breaks
+  something that works today, and that only shows once the user is alone with
+  the device.
+
+  **On top of that the first mandatory check finally runs along instead of only
+  standing in the documentation.** If a word is missing from the vocabulary,
+  Vosk throws it silently out of the grammar and does report that - but the
+  message was lost in `SetLogLevel(-1)`. The check now happens beforehand
+  against `graph/words.txt`, without speaking, and separately for candidate and
+  existing stock: a missing word in the candidate ends the check, one in the
+  existing stock is reported as a legacy problem but does not block the
+  candidate.
+
+- **Start sentence for DialOS Search prepared: "Unterlagen durchsuchen"**
+  (search the documents) (2026-09-17), second phrasing "Briefe durchsuchen"
+  (search the letters) dropped. The basis is a count of the grammar: 49
+  sentences, **69 different words**. "brief" (letter) appears in it **six
+  times**, "briefe" (letters) once (in "befehle für briefe" - commands for
+  letters) - a start sentence made of words that are already there enlarges the
+  word network exactly where it is densest anyway. "unterlagen" (documents) and
+  "durchsuchen" (search) appear in **no** existing sentence. The same
+  consideration as for "starten" (start) against "sprachsteuerung" (voice
+  control), only applied one level earlier. **The check on the device is still
+  pending** and is not replaced by this - it is only pre-sorted.
 
 - **DialOS gets an extension interface - a draft, no code yet**
   (2026-09-17, Stephan's decision: build DialOS Search "als eigenständige
