@@ -15,6 +15,108 @@ Verschlüsselungs-Stick, ggf. WWAN-Telefonie) bewegt sich das Projekt von
 Referenz-Hardware" – eine konkrete Modellfestlegung (z. B. ThinkPad-X1-Klasse)
 steht noch aus.
 
+## Rechnerausstattung für DialOS (Stand 2026-09-17)
+
+Stephan am 2026-09-17: eine Einschätzung, „wie die Hardwareausstattung bei einem
+Laptop sein muss, damit die Sprachsteuerung, Audio- und Videowiedergabe und das
+ganze System flüssig laufen" - mit Intel und als Alternative mit AMD. Seine
+Vorgabe dazu: **32 GB Arbeitsspeicher als Minimum.**
+
+### Was DialOS wirklich braucht (gemessen am T490, 2026-09-17)
+
+Gemessen auf dem Test-T490 (Intel Core i7-8665U, 4 Kerne/8 Threads, AVX2; 46 GB
+nutzbar, NVMe-SSD). Schätzungen für andere Prozessoren sind als solche markiert.
+
+| Teil | Arbeitsspeicher | Platte | Zeit |
+|---|---|---|---|
+| Diktat: großes Vosk-Modell | **5,3 GB** Spitze beim Laden | 3,2 GB | 11 s Laden |
+| Diktat: Parakeet (int8) | rund 1 GB | 0,6 GB | 2,3 s Laden; 10 s Sprache in 0,73 s erkannt |
+| Schreibhilfe LanguageTool (Java, dauernd) | 0,8 GB | 0,4 GB | – |
+| Sprachsteuerung (dauernd) | 0,3 GB | 0,1 GB (kleines Modell) | – |
+| Stimmen Piper | kurzzeitig | 0,2 GB | neue Ansage 1,4–1,7 s |
+| GNOME, Firefox, Thunderbird | 2–4 GB | – | – |
+| Systempartition gesamt | – | **19 GB** belegt | – |
+
+**Während eines Diktats sind das zusammen 9–10 GB.** Der Engpass ist der
+Arbeitsspeicher, nicht der Prozessor: Mit 8 GB lagert das System beim Diktieren
+aus und hängt spürbar; 16 GB reichen knapp, solange nebenher wenig offen ist.
+**32 GB als Minimum** (Stephans Vorgabe) lassen Reserve für Browser mit vielen
+Tabs, Videotelefonie und künftige, größere Sprachmodelle.
+
+### Anforderungen
+
+| | Minimum | Empfohlen |
+|---|---|---|
+| **Arbeitsspeicher** | **32 GB** | 32 GB, aufrüstbar oder 64 GB |
+| **Prozessor** | 4 Kerne/8 Threads mit AVX2 (Leistung wie i7-8665U) | 6–8 Kerne, aktuelle Generation (siehe unten) |
+| **SSD** | 256 GB NVMe | **512 GB NVMe** (100 GB System + verschlüsselte Nutzerpartition) |
+| **Grafik** | integriert (Intel/AMD) | integriert mit Hardware-Dekodierung für H.264, HEVC, VP9, **AV1** |
+| **Mikrofon** | eingebautes Doppel-Mikrofon | Mikrofon-Array mit guter Rauschunterdrückung, **unter Debian 13 geprüft** |
+| **Anschlüsse** | 1× USB-A, 1× USB-C, Klinke | 2× USB-A (Sicherheits-Stick + USB-Mikrofon), USB-C mit Laden, Klinke |
+| **Funk** | WLAN 6, Bluetooth 5 | **Intel AX210/BE200** (WLAN 6E/7, Bluetooth 5.3) |
+| **Bildschirm** | 14" Full HD, matt | 14" Full HD oder höher, matt, hell (≥ 300 cd/m²) |
+| **Akku** | 6 Stunden | 8 Stunden und mehr |
+| **Tastatur** | tastbare Markierungen auf F und J | dazu Beleuchtung, deutliche Druckpunkte |
+
+**Warum der Prozessor weniger zählt als gedacht:** Parakeet erkennt auf dem
+i7-8665U von 2019 zehn Sekunden Sprache in 0,73 s - vierzehnmal schneller als
+gesprochen. Jeder aktuelle Mittelklasse-Prozessor mit AVX2 hat damit Reserve.
+Einsteigerchips wie der Intel N100 (4 Kerne ohne Hyperthreading) dürften nach
+Schätzung etwa halb so schnell sein - brauchbar, aber mit spürbar längerem
+Laden und Warten; nicht gemessen.
+
+### Linux-Fallstricke beim Kauf - unabhängig vom Hersteller
+
+- **Eingebautes Mikrofon unter Debian 13 prüfen**, bevor ein Modell Referenz
+  wird. Digitale Mikrofone hängen bei Intel am „Smart Sound"-DSP (SOF-Firmware),
+  bei AMD am „ACP" - beides braucht passende Kernel- und Firmware-Einträge je
+  Modell. Ohne funktionierendes Mikrofon ist DialOS nicht bedienbar.
+- **Kein Nvidia-Grafikchip.** Bringt für DialOS nichts und macht Treiber,
+  Standby und Akku schwieriger.
+- **Firmware über LVFS/fwupd** - DialOS spielt Firmware-Updates damit ein
+  (Schritt 13d). Lenovo ThinkPad, Dell Latitude und HP EliteBook sind dort gut
+  vertreten, viele Consumer-Geräte kaum.
+- **Aufgelöteter Speicher:** Viele aktuelle Geräte haben LPDDR5-Speicher fest
+  verlötet. Dann **ab Werk 32 GB** bestellen - nachrüsten geht nicht.
+- **Standby:** Neuere Geräte kennen nur „Modern Standby" (s2idle). DialOS
+  schaltet Standby am Netz ohnehin ab (Schritt 11j); im Akkubetrieb vorher
+  prüfen, dass das Gerät wieder aufwacht.
+
+### Variante Intel
+
+| | |
+|---|---|
+| Prozessor | Intel Core Ultra 5/7 (Serie 1 oder 2) oder Core i5/i7 ab 12. Generation (U/P) |
+| Grafik | Intel Iris Xe / Arc integriert - AV1-Dekodierung ab 11. Generation |
+| WLAN/Bluetooth | meist Intel ab Werk - unter Linux am zuverlässigsten |
+| Mikrofon | über SOF-Firmware (`firmware-sof-signed`) - je Modell prüfen |
+| Beispiele neu | Lenovo ThinkPad T14 (Intel), Dell Latitude 5450, HP EliteBook 840 |
+| Beispiele gebraucht | ThinkPad T14 Gen 2/3 (Intel) - Nachfolger des T490; Gen 3 hat einen Steckplatz, 32 GB möglich |
+
+### Variante AMD
+
+AMD-Prozessoren der aktuellen Generationen sind für DialOS eine gleichwertige,
+oft günstigere Alternative mit besserer Grafik und Akkulaufzeit.
+
+| | |
+|---|---|
+| Prozessor | **AMD Ryzen 5/7 7640U/7840U** (Zen 4, „Phoenix"), **8640U/8840U** („Hawk Point") oder **Ryzen AI 5/7 PRO** (Zen 5); gebraucht auch Ryzen 5/7 PRO 6650U/6850U (Zen 3+) |
+| Vorteil für die Spracherkennung | Zen 4/Zen 5 können zusätzlich **AVX-512** - die ONNX-Laufzeit hinter Parakeet nutzt das; schneller als AVX2 allein (nicht gemessen) |
+| Grafik | Radeon 760M/780M (Zen 4) bzw. 880M/890M - **AV1-Dekodierung ab Ryzen 6000**; Ryzen 5 7530U (Zen 3) hat **keine** AV1-Dekodierung |
+| Kernel | Debian 13 bringt Kernel 6.12 - Zen 3+/Zen 4 werden gut unterstützt; Ryzen AI 300 („Strix Point") ist jünger, vor dem Kauf prüfen |
+| WLAN/Bluetooth | **häufig MediaTek MT7922 oder Qualcomm ab Werk** - läuft unter Linux, aber Bluetooth-Audio ist mit Intel verlässlicher. Wo möglich mit **Intel AX210** bestellen oder tauschen (M.2 2230) |
+| Mikrofon | über AMD ACP (`snd_acp`/`snd_pci_ps`) - bei einzelnen Modellen fehlt der Eintrag im Kernel, dann bleibt das Mikrofon stumm: **vor der Festlegung unter Debian 13 prüfen** |
+| Speicher | Zen-4-Geräte fast immer **LPDDR5 verlötet** - ab Werk 32 GB bestellen |
+| NPU | wird von DialOS nicht genutzt (unter Linux für Parakeet/Vosk ohne Nutzen) - kein Kaufgrund |
+| Beispiele neu | Lenovo ThinkPad T14 Gen 5 AMD (Ryzen 7 PRO 8840U), ThinkPad E14 Gen 6 AMD, HP EliteBook 845 G11 |
+| Beispiele gebraucht | ThinkPad T14 Gen 3/4 AMD (Ryzen 5/7 PRO 6650U/7840U, 32 GB verlötet) |
+
+**Gemeinsam für beide Varianten gilt:** Vor der Festlegung ein Gerät mit
+Debian 13 durch die DialOS-Einrichtung laufen lassen und dabei gezielt
+prüfen: eingebautes Mikrofon (Pegel, Echo-Unterdrückung), Bluetooth-Lautsprecher
+(A2DP und Wiederaufwachen), Standby am Akku, Firmware über fwupd, und ein Diktat
+über den Prüfstand. Erst das macht ein Modell zur Referenz.
+
 ## Referenz-Audiogerät (festgelegt 2026-08-16)
 
 **AIRHUG 01** – Bluetooth-Headset, gleichzeitig Lautsprecher und
@@ -402,7 +504,10 @@ gewählt werden (z. B. Quectel EM7565, Sierra-Wireless-Module).
 
 - ~~Referenz-Audiogerät~~ – **entschieden am 2026-08-16: AIRHUG 01**
   (siehe oben).
-- Referenz-Laptop-Modell noch nicht final festgelegt.
+- Referenz-Laptop-Modell noch nicht final festgelegt. **Anforderungen seit
+  2026-09-17 festgehalten** (32 GB Minimum, Intel- und AMD-Variante, siehe
+  „Rechnerausstattung für DialOS") - offen ist die Probe eines Kandidaten unter
+  Debian 13.
 - Referenz-Sicherheits-Stick (Marke/Modell, USB-A vs. USB-C) noch nicht
   final festgelegt - empfohlene Größe (64 GB) und Dateisystem-Aufteilung
   (`DIALOS-KEY`/`DIALOS-DATA`) stehen bereits (siehe

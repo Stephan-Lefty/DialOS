@@ -130,6 +130,11 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Hardware-Anforderungen festgehalten** (2026-09-17, `docs/hardware.md`): am T490
+  gemessener Bedarf (Diktat 9–10 GB Arbeitsspeicher, Parakeet 10 s Sprache in
+  0,73 s), **32 GB als Minimum** (Stephans Vorgabe), Intel- und AMD-Variante mit
+  Linux-Fallstricken (Mikrofon, WLAN-Chip, verlöteter Speicher).
+
 - **„Brief vorlesen" ohne Fußzeile und Unterschrift-Hinweis** (2026-09-17,
   Stephan: „eher eine Info für den Empfänger und brauche ich nicht für die
   Kontrolle"). Beides bleibt im Brief, im PDF und auf dem Ausdruck; die Satzzahl

@@ -122,6 +122,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Hardware requirements recorded** (2026-09-17, `docs/hardware.en.md`):
+  needs measured on the T490 (dictation 9–10 GB RAM, Parakeet 10 s of speech in
+  0.73 s), **32 GB as the minimum** (Stephan's requirement), Intel and AMD variant
+  with Linux pitfalls (microphone, Wi-Fi chip, soldered memory).
+
 - **"Brief vorlesen" without footer and signature note** (2026-09-17, Stephan:
   rather information for the recipient, not needed for checking). Both stay in
   the letter, the PDF and the printout; the sentence count is now right (the
