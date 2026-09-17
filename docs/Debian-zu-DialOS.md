@@ -2101,6 +2101,12 @@ korrigiert per Buchstabieren und im Adressbuch gefunden, Abbruch bei der Straße
 Claude auf Stephans Wunsch in „GESOBAU AG" (Firma) korrigiert; Thunderbird zeigt
 extern angelegte und korrigierte Kontakte an (am Gerät bestätigt).
 
+**Dritte Probe (13:49):** „Gesobau" kam als „jesu bau" an und wurde über den Klang
+in den Kontakten gefunden, bestätigt, Brief mit Empfänger. Neu gefunden: „Tag,
+Absatz mit freundlichen Grüßen." - ein „Absatz" mitten im Satz vor Gruß oder
+Anrede ist jetzt immer der Befehl (sonst stand der Gruß im Satz und die
+Unterschrift aus den Daten griff nicht). Prüfstand unverändert.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

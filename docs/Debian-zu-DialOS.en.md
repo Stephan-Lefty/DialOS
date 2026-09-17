@@ -2023,6 +2023,12 @@ the street, "von vorne" followed by "ohne Empfänger". Claude corrected the cont
 "G so bau" to "GESOBAU AG" (company) at Stephan's request; Thunderbird shows
 externally created and corrected contacts (confirmed on the device).
 
+**Third trial (13:49):** "Gesobau" arrived as "jesu bau" and was found in the
+contacts by sound, confirmed, letter with recipient. Newly found: "Tag, Absatz mit
+freundlichen Grüßen." - an "Absatz" in mid-sentence before a closing or
+salutation is now always the command (otherwise the closing stayed in the
+sentence and the signature from the data did not apply). Test bench unchanged.
+
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-empfaenger.py iso-build/config/includes.chroot/usr/local/bin/dialos-diktat.py iso-build/config/includes.chroot/usr/local/bin/dialos-notiz.py /usr/local/bin/
 sudo install -m 644 iso-build/config/includes.chroot/etc/systemd/user/dialos-kontakte.service /etc/systemd/user/

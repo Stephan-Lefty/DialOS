@@ -1805,6 +1805,15 @@ def parakeet_natuerlich(text):
                   r"(?![,;:.!?]*\s*(?:\d|(?-i:des|der|dem|den|eins|zwei|drei|vier|fünf|sechs"
                   r"|sieben|acht|neun|zehn)\b))[,;:.!?]*\s*",
                   "\n\n", text, flags=re.IGNORECASE)
+    # "ABSATZ" MITTEN IM SATZ VOR GRUSS ODER ANREDE (2026-09-17, 13:49): "Ich wuensche
+    # Ihnen einen schoenen Tag, Absatz mit freundlichen Gruessen." - der Gruss stand
+    # im Satz, und deshalb setzte auch die Unterschrift aus den Daten nicht ein. Vor
+    # einer Grussformel oder Anrede ist "Absatz" immer der Befehl.
+    text = re.sub(r"\s*[,;]?\s*\babsatz\b[,;:.!?]*\s+(?=(?:mit freundlichen|mit freundlichem|"
+                  r"freundliche grü|viele grü|liebe grü|herzliche grü|beste grü|hochachtungsvoll|"
+                  r"sehr geehrte|liebe[rs]?\s|hallo\b|guten tag\b))",
+                  lambda m: ".\n\n" if not re.search(r"[.!?]\s*$", text[:m.start()]) else "\n\n",
+                  text, flags=re.IGNORECASE)
     # "zeil" auch: Am 2026-09-15 (TONOR) teilte Vosk genau in "neue Zeile" -
     # Parakeet schrieb "neue Zeil." und im naechsten Stueck "Zeile Stephan".
     text = re.sub(r"[,;]?\s*\bneue\s*[,.]?\s*zeile?\b[,;:.!?]*\s*", "\n", text,
