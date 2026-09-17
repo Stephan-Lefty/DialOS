@@ -611,3 +611,45 @@ function dialos_child_skip_link() {
 	<?php
 }
 
+
+/**
+ * Englische Anfuehrungszeichen auf den englischen Seiten (Stephan,
+ * 2026-09-17).
+ *
+ * WARUM: Die Installation laeuft auf Deutsch, und WordPress' wptexturize
+ * macht aus geraden Anfuehrungszeichen deshalb deutsche - auf JEDER Seite,
+ * auch auf den englischen. Im Quelltext der Beitraege stehen gerade Zeichen;
+ * die deutschen entstehen erst beim Ausliefern. Eine Korrektur im Inhalt
+ * bringt also nichts, sie muss hier passieren.
+ *
+ * Gefunden am 2026-09-17 bei einem Durchgang durch alle Seiten: 19 englische
+ * Seiten und Beitraege waren betroffen, teils mit ueber 30 Vorkommen. Fuer
+ * Muttersprachler liest sich das sofort nach Uebersetzung.
+ *
+ * Prioritaet 20, damit der Filter NACH wptexturize (10) laeuft. Frueher
+ * angesetzt haette er nichts zu tun.
+ *
+ * wptexturize liefert die Zeichen als numerische Entities, deshalb werden
+ * die zuerst vereinheitlicht. HTML-Attribute sind nicht betroffen: Die
+ * enthalten gerade Anfuehrungszeichen, keine typografischen.
+ */
+add_filter( 'the_content', 'dialos_child_englische_anfuehrungszeichen', 20 );
+add_filter( 'the_title', 'dialos_child_englische_anfuehrungszeichen', 20 );
+add_filter( 'the_excerpt', 'dialos_child_englische_anfuehrungszeichen', 20 );
+function dialos_child_englische_anfuehrungszeichen( $text ) {
+	if ( ! dialos_child_ist_englisch() ) {
+		return $text;
+	}
+	$text = str_replace(
+		array( '&#8222;', '&#8220;', '&#8221;', '&#8218;', '&#8216;', '&#8217;' ),
+		array( '„', '“', '”', '‚', '‘', '’' ),
+		$text
+	);
+	// Deutsches Paar „...“ wird zum englischen “...”, ebenso die einfachen.
+	$text = preg_replace( '/„([^„“]*)“/u', '“$1”', $text );
+	$text = preg_replace( '/‚([^‚‘]*)‘/u', '‘$1’', $text );
+	// Einzelgaenger ohne Partner - lieber ein oeffnendes englisches Zeichen
+	// als ein deutsches, das dort ganz sicher falsch ist.
+	$text = str_replace( array( '„', '‚' ), array( '“', '‘' ), $text );
+	return $text;
+}
