@@ -1,0 +1,13 @@
+Zwei Rückmeldungen, fünf Fehler.
+
+Der geschlossene Test von DialOS Mobil lief seit wenigen Tagen. Zwei Rückmeldungen genügten, um fünf Fehler zu finden. Einer davon traf jeden einzelnen Nutzer, und ich hatte ihn in Wochen eigenen Testens nicht bemerkt.
+
+Der schwerste Fund stand in keiner der beiden Meldungen. Er fiel beim Nachsehen auf. Die App verglich das Gesagte als ganzen Satz mit ihrer Liste bekannter Antworten. Ja stand darin. Bitte stand darin. Ja bitte stand nicht darin und wurde deshalb nicht verstanden. Ebenso nein danke.
+
+Das ist die häufigste Art, wie Menschen antworten. Es traf jeden Anruf. Aufgefallen ist es mir nie, weil ich beim Testen wie ein Entwickler spreche. Knapp, deutlich, in der Form, die ich selbst vorgesehen habe.
+
+Der zweite Fund betraf Namen. Damit die App auch dann findet, wen man meint, wenn sie sich verhört, vergleicht sie Namen nach ihrem Klang. Meier, Maier und Mayer gelten als derselbe Name. Für Nachnamen ist das genau richtig. Bei Vornamen ging es nach hinten los. Gleich klingende Vornamen bekamen dieselbe Bewertung, und weil die App nur die drei besten vorliest, verdrängten sie den gemeinten ganz aus der Liste.
+
+Der dritte war eine Ansage, die nicht stimmte. Die App sagte: Ich beende die Sprachsteuerung. Sie beendete aber nur das Gespräch und hörte weiter zu. Für sehende Menschen ist das eine Kleinigkeit. Wer nicht auf den Bildschirm sehen kann, hat nur diese Ansage. Er glaubt, die App sei aus, und schaltet sie unnötig wieder ein.
+
+Fünf Fehler aus zwei Rückmeldungen, nach wenigen Minuten Benutzung. Keiner war ein Absturz. Keiner wäre einem automatischen Test aufgefallen. Alle entstanden dort, wo ich angenommen hatte, wie jemand spricht.

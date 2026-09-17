@@ -1,0 +1,17 @@
+Ein Knopf, so breit wie der Bildschirm.
+
+DialOS Mobil hat jetzt eine Schaltfläche für den Startbildschirm. Sie ist unverschämt groß. Und sie hat mich eine Lehre gekostet.
+
+Warum überhaupt. Ein Programmsymbol ist etwa einen Zentimeter groß und liegt zwischen zwanzig anderen, die genauso aussehen. Für die meisten Menschen ist das kein Problem. Für jemanden, der die Hände nicht ruhig führt oder nur noch Umrisse erkennt, ist es kein brauchbares Ziel. Die neue Schaltfläche geht über die ganze Bildschirmbreite. Ein Tippen schaltet die Sprachsteuerung ein und fragt sofort: Wen möchten Sie anrufen?
+
+Dann kam die Frage, die alles umwarf. Ich hatte gebaut, geprüft und ein Bild davon verschickt. Im eingeschalteten Zustand stand darauf: Jetzt sprechen. Klingt gut, dachte ich. Die Rückfrage kam sofort. Macht es Sinn, das hinzuschreiben, wenn der Nutzer doch nicht sehen kann?
+
+Zwei Dinge stimmten daran nicht, und das zweite war schlimmer.
+
+Erstens lesen blinde Menschen diesen Text gar nicht. Sie hören eine eigene Beschreibung, die im Programm hinterlegt ist. Der sichtbare Text ist für die andere Hälfte der Zielgruppe. Für Menschen mit Sehrest, die große Schrift lesen können, aber kein winziges Symbol treffen. Barrierefreiheit ist keine Gruppe, sondern viele.
+
+Zweitens war der Text schlicht falsch. Man kann nicht einfach lossprechen. Man muss erst das Weckwort sagen oder tippen. Er hat etwas versprochen, das die App nicht hält.
+
+Jetzt steht dort, was zu tun ist, statt wie der Zustand heißt. Antippen und sprechen.
+
+Und die Lehre. Ich prüfe gegen das, was ich gemeint habe. Nicht gegen das, was jemand vorfindet.

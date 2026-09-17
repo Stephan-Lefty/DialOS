@@ -1,0 +1,13 @@
+DialOS Mobil sucht Testerinnen und Tester.
+
+DialOS Mobil ist fertig und lässt sich bedienen. Bevor die App in den Laden für Android-Programme darf, verlangt Google einen geschlossenen Test mit mindestens zwölf Menschen über zwei Wochen. Genau die suche ich.
+
+Worum es geht. DialOS Mobil ist ein Telefon für Menschen, die ein Telefon nicht bedienen können. Wer blind ist oder die Hände nicht ruhig führt, scheitert am Bildschirm, nicht am Telefonieren. Die App dreht das um. Man sagt, wen man anrufen möchte, und sie ruft an. Kein Tippen, kein Zielen, kein Hinsehen.
+
+Die Spracherkennung läuft vollständig auf dem Gerät. Die App hat nicht einmal die Berechtigung, ins Internet zu gehen. Sie kann technisch gar nichts versenden. Deshalb funktioniert sie auch im Funkloch, im Keller und im Flugmodus.
+
+Was du dafür brauchst. Ein Android-Handy mit SIM-Karte, ein Google-Konto, und die Bereitschaft, die App zwei Wochen installiert zu lassen und ab und zu zu benutzen. Ohne Telefonie kann die App nichts tun. Tablets ohne Karte fallen also aus.
+
+Und die eine Frage, auf die es ankommt. Wenn du nur eine einzige Sache zurückmeldest, dann bitte diese. Springt die Sprachsteuerung bei deiner Stimme zuverlässig an?
+
+Bisher ist das mit einer einzigen Stimme geprüft. Meiner. Eine Sprachsteuerung, die nicht anspringt, ist wertlos. Alles andere ist willkommen, aber das ist der Punkt, an dem die App steht oder fällt.

@@ -1,0 +1,15 @@
+Die App, die sich selbst taub machte.
+
+Eine Testperson meldete, beim Diktieren einer Telefonnummer seien zweimal einzelne Ziffern verschwunden. Die Spracherkennung war unschuldig. Die App hatte sich selbst das Mikrofon abgeschaltet. Und ich hatte das so gebaut.
+
+Der Hintergrund. Eine Sprachsteuerung kann nicht gleichzeitig reden und zuhören. Sonst würde sie ihre eigene Stimme erkennen und sich selbst antworten. Deshalb schaltet die App das Mikrofon ab, solange sie spricht. Das ist richtig so.
+
+Beim Diktieren las sie nach jedem Block die ganze bisherige Nummer zur Kontrolle vor. Gegen Ende einer Handynummer sind das mehrere Sekunden, in denen die App nichts hört. Wer eine Nummer herunterspricht, macht dabei aber keine Pause. Er redet weiter. Und alles, was in diese Sekunden fällt, ist weg. Nicht falsch erkannt, nicht verhört. Nie angekommen.
+
+Deshalb ging es vorne gut und bröckelte hinten. Das ist die unangenehmste Sorte Fehler. Sie sieht aus wie schlechte Erkennung, ist aber ein Konstruktionsfehler.
+
+Die Lösung war einfach, sobald die Ursache klar war. Die App bestätigt jetzt nur noch die neu hinzugekommenen Ziffern. Das Loch schrumpft von Sekunden auf einen Bruchteil.
+
+Dazu kam ein zweiter Fehler, der mich mehr ärgert. Lief die Wartezeit ab, warf die App die bereits gesprochenen Ziffern kommentarlos weg. Wer zehn Stellen diktiert hatte, stand wieder am Anfang und erfuhr nicht einmal, warum.
+
+Und die Lehre. Ich habe das Diktieren wochenlang selbst benutzt und den Fehler nie ausgelöst. Der Grund ist unangenehm. Ich habe nach jeder Ansage gewartet, weil ich weiß, dass die App dann nicht zuhört. Ich hatte mein Sprechen an die Technik angepasst, ohne es zu merken. Eine App für Menschen, die keine andere Wahl haben, darf das nicht verlangen.

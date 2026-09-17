@@ -1,0 +1,11 @@
+Der Brief, der nur durch Sprechen entsteht.
+
+Ein Brief entsteht bei DialOS nie durch Tippen. Vom ersten Wort bis zum gedruckten Blatt läuft alles über die Stimme. Und genau das hat lange nicht zuverlässig funktioniert.
+
+So ist der Weg gedacht. Wer Brief schreiben sagt, startet die Aufnahme. Gesprochene Satzzeichen werden umgesetzt. Wer Komma setzen sagt, bekommt ein Komma, wer neuer Absatz sagt, bekommt einen Absatz. Am Ende steht ein fertiger Briefbogen, mit Datum und Fußzeile. Brief vorlesen liest das Ergebnis vor, damit man hören kann, was wirklich dasteht, bevor gedruckt wird.
+
+Dann der Fehler, der das alles unbrauchbar machte. Ein Diktat braucht ein klares Ende, sonst schreibt das Gerät endlos mit. Der Schlusssatz wurde aber manchmal mitten im Sprechen ausgelöst, weil seine Wörter zufällig in einem längeren Satz vorkamen. Ein Brief, der irgendwo abbricht, weil das Gerät sich für fertig hält, ist kein kleiner Mangel. Er macht die ganze Funktion wertlos.
+
+Die Lösung ist eine Pause. Der Schlusssatz gilt nur noch, wenn davor wirklich geschwiegen wurde. Geprüft wurde das nicht am Menschen, sondern vorher gegen die eigene Sprachausgabe. Aus durchgehender Rede entstanden dabei zwei vollständige Schlusssätze, beide wurden abgewiesen. Der echte, nach einer Pause, wurde angenommen.
+
+Was noch fehlt. Der Weg steht, der Beweis am Gerät nicht. Ein Diktat mit echter Stimme, von Anfang bis Ende, ohne Stolpern. Und ein Briefbogen verlangt eigentlich auch Empfänger und Betreff. Der Dialog, der danach fragt, ist noch nicht gebaut. Der Brief ist fast fertig. Nicht ganz.

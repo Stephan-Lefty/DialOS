@@ -1,0 +1,13 @@
+Wie hört und spricht DialOS eigentlich.
+
+DialOS lässt sich vollständig durch Sprechen bedienen. Aber wie hört ein Computer zu, und wie spricht er zurück?
+
+Zuerst das Zuhören. Wenn du sprichst, nimmt ein Mikrofon deine Stimme als Schallwellen auf. Ein Programm verwandelt diese Wellen in Text. Das nennt man Spracherkennung. Bei DialOS läuft sie vollständig auf dem eigenen Gerät, ohne Internet, ohne dass etwas an einen fremden Rechner geschickt wird. Das ist kein Nebenaspekt. Es bedeutet, dass DialOS auch ohne Netz funktioniert, und dass niemand mithört.
+
+Man könnte meinen, eine gute Spracherkennung müsse jedes beliebige Wort verstehen. Bei Befehlen macht DialOS das bewusst anders. Es kennt eine feste Liste von Sätzen, gut zwei Dutzend, und hört gezielt danach. Das klingt einschränkend, macht die Erkennung aber deutlich verlässlicher. Frei erkannt wird aus einem ungewohnten Wort schnell ein ganz anderes. Mit fester Liste bleibt es richtig.
+
+Beim Diktat gilt das nicht. Wer eine Notiz oder einen Einkaufszettel spricht, wird frei erkannt, ohne Liste. Dort soll ja gerade unbekannter Text entstehen.
+
+Und das Sprechen zurück. Auch dafür läuft ein Programm auf dem Gerät selbst, ohne Netz. Es gibt zwei Stimmen, Anna und Michael, zwischen denen man wechseln kann, weil nicht jede Stimme für jeden Menschen gleich gut funktioniert.
+
+Warum das alles ohne Internet läuft. Wer auf Sprachsteuerung angewiesen ist, soll sich nicht zusätzlich auf eine stabile Verbindung verlassen müssen. Und niemand soll seine Stimme an ein fremdes Unternehmen senden, nur um seinen eigenen Computer zu bedienen.

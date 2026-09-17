@@ -1,0 +1,17 @@
+Das schweigende Missverständnis.
+
+Der Gegenspieler dieses Projekts ist bekannt. Ein System, das Erfolg meldet, während es scheitert. Diesmal zeigt er sich andersherum. Als eines, das schweigt, obwohl etwas schiefging.
+
+DialOS kennt für Befehle eine feste Liste von Sätzen. Man könnte meinen, jeder wird erkannt oder eben nicht. Tatsächlich arbeitet die Erkennung anders. Sie baut aus der Liste kein Verzeichnis einzelner Sätze, sondern ein Netz aus allen Wörtern und ihren Übergängen. Und ein solches Netz kennt keine Satzgrenzen. Es kann Wörter aus verschiedenen Befehlen mischen und daraus etwas bauen, das kein gültiger Satz ist.
+
+Zwei Beispiele aus dem Protokoll eines einzigen Tages. Notiz drucken. Wie viel Uhr schreiben. Keines davon ist ein Befehl. Beide wurden trotzdem erkannt.
+
+Und hier liegt das Problem. Passt das Erkannte zu keinem gültigen Satz, passiert nichts. Keine Aktion, keine Rückmeldung, kein Ton.
+
+Für einen sehenden Menschen wäre das ärgerlich, aber sichtbar. Für einen blinden Menschen gibt es diesen Blick nicht. Er hat gesprochen, das Gerät hat zugehört, und nichts sagt ihm, ob es ihn verstanden, missverstanden oder gar nicht gehört hat. Deshalb ist Stille die schlechteste aller Antworten.
+
+Wie oft das vorkommt, wurde nicht geschätzt, sondern gemessen. Über dreihundert solcher Wortfolgen an einem einzigen Tag.
+
+Die naheliegende Lösung wäre, jedes Mal zu sagen: das habe ich nicht verstanden. Das wäre aber schon der nächste Fehler. Ein großer Teil dieser Wortfolgen entsteht aus normalem Reden im Raum. Das Gerät würde ständig dazwischenreden, wenn niemand mit ihm gesprochen hat.
+
+Der Punkt steht offen. Mit gemessenen Zahlen statt mit einer vorschnellen Antwort.

@@ -1,0 +1,13 @@
+Die Woche, in der es um Geld ging.
+
+Sieben Tage, ein einziger Eintrag, und keine Zeile Programm. Diese Woche hatte gar keinen technischen Schauplatz. Es ging um Geld.
+
+Zwei Anbieter waren wegen eines gesponserten Servers angeschrieben worden. Von beiden kam keine inhaltliche Antwort. Keine Zusage, keine Absage. Nur Stille.
+
+Der Gegenspieler dieses Projekts reiste auch hier mit, in seiner leisesten Verkleidung. Sonst ist es ein Gerät, das Erfolg meldet, während es scheitert. Diesmal war es eine Erwartung. Die Annahme, es gebe bei deutschen Anbietern verbreitete Programme, die Open-Source-Projekten Server schenken. Das klang plausibel. Es war leer. Und wie immer half nur eines. Aufhören zu glauben und nachrechnen.
+
+Die Rechnung drehte die Frage um. Nicht: Wer schenkt uns einen großen Server. Sondern: Wie groß muss er überhaupt sein. Die Antwort fiel deutlich kleiner aus als die ursprüngliche Anfrage. Rund fünfunddreißig Euro im Monat decken Website, Nextcloud, Forum und Fernwartung ab. So viel kostet das Problem wirklich, das monatelang wie ein großes aussah.
+
+Und damit wurde sichtbar, was eigentlich fehlt. Das Nadelöhr sind nicht fünfunddreißig Euro im Monat. Es sind Hardware, Zeit und später die Zulassung als Hilfsmittel. Dagegen hilft kein gesponserter Server, sondern Fördermittel. Zwei Programme stehen seitdem auf der Warteliste.
+
+Aus beidem zeigt eine Richtung nach Süden. Beim Server sind österreichische Anbieter der nächste Schritt, weil dort der regionale Bezug zieht und die Unternehmen kleiner sind, also persönlicher entscheiden. Die Verengung, die zuerst wie eine Absage aussah, wurde zur Strategie.

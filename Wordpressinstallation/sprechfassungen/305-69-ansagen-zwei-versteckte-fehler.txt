@@ -1,0 +1,13 @@
+Neunundsechzig Ansagen, zwei versteckte Fehler.
+
+Manche Fehler findet man nicht, indem man eine Funktion prüft. Man findet sie erst, wenn man alles nebeneinanderlegt.
+
+DialOS spricht an vielen Stellen. Begrüßung, Bestätigungen, Rückfragen, Warnungen. Irgendwann entstand die Idee, wirklich jede dieser Ansagen an einem Ort zu sammeln, in beiden Stimmen, alle neunundsechzig hintereinander. Nicht als Vorführung, sondern als Werkzeug. Denn wer eine Ansage einzeln hört, während er sie einbaut, hält sie für richtig. Erst nebeneinander fällt auf, was sonst untergeht.
+
+Der erste Fund. Alle Hörproben liefen achtunddreißig Prozent zu schnell, und zwar von Anfang an. Der Ton war mit einer Geschwindigkeit aufgenommen und mit einer anderen abgespielt worden. Einzeln gehört klingt so etwas nur ein wenig eigenartig, nicht eindeutig falsch. Hintereinander gehört ist es unüberhörbar.
+
+Der zweite Fund war kleiner und genauso echt. Eine Ansage lautete: Die Notizen wird gedruckt. Mehrzahl und Einzahl passten nicht zusammen. Beim Bauen dieser einen Funktion war das nie aufgefallen.
+
+Warum das mehr ist als eine Kleinigkeit. Für einen blinden Menschen ist die Stimme nicht eine Informationsquelle unter mehreren. Sie ist die einzige. Eine Stimme, die dauerhaft zu schnell spricht, oder ein Satz, der falsch gebaut ist, wird niemals als Fehler gemeldet. Es fühlt sich nur ein bisschen falsch an, und niemand kann sagen, warum.
+
+Solche Fehler findet kein Test, der eine Funktion für sich allein prüft. Sie brauchen den Blick aufs Ganze. Deshalb ist diese Sammlung längst kein Zusatz mehr, sondern fester Teil der Arbeit.

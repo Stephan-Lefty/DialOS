@@ -1,0 +1,13 @@
+Wer ist eigentlich Claude.
+
+Wenn in den bisherigen Beiträgen ich stand, war damit nicht immer Stephan gemeint, sondern Claude. Zeit, das aufzuklären, ohne Fachsprache.
+
+Claude ist ein Assistent der Firma Anthropic, der mit künstlicher Intelligenz arbeitet. Kein Roboter, keine Person, kein Bewusstsein. Ein sehr großes Computerprogramm, das mit gewaltigen Mengen Text trainiert wurde und daraus gelernt hat vorherzusagen, welches Wort als nächstes sinnvoll ist. Das klingt schlicht, ergibt am Ende aber Sätze, Programme und Erklärungen.
+
+Wichtig ist eines. Claude weiß nichts im menschlichen Sinn und versteht auch nicht wie ein Mensch. Es erkennt Muster. Sehr gut, aber eben nur Muster. Deshalb kann es verblüffend hilfreich sein und im nächsten Moment mit großer Sicherheit etwas Falsches behaupten. Beides gehört zusammen.
+
+Stephan entwickelt DialOS allein. Kein Team, keine Firma. Da kommt Claude ins Spiel, als Werkzeug beim Programmieren, beim Suchen von Fehlern, beim Schreiben. Stephan entscheidet, testet und verantwortet. Claude schlägt vor, schreibt und sucht.
+
+Und jetzt der unbequeme Teil, der unbequem bleiben soll. Claude kann nicht hören, ob ein Mikrofon übersteuert ist. Nicht fühlen, ob ein Stecker wackelt. Nicht prüfen, ob eine Stimme echt klingt. Alles, was sich messen oder anfassen lässt, muss ein Mensch nachprüfen.
+
+DialOS entsteht für Menschen, die selbst nicht nachsehen können, ob etwas funktioniert. Sie müssen sich darauf verlassen, was das Gerät ihnen sagt. Genau diese Haltung, nichts zu glauben, was sich nicht überprüfen lässt, ist am Ende auch der richtige Umgang mit einer künstlichen Intelligenz.

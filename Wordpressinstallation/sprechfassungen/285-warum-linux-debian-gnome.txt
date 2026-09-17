@@ -1,0 +1,11 @@
+Warum Linux und nicht Windows.
+
+Wer von DialOS zum ersten Mal hört, fragt oft dasselbe. Warum nicht einfach auf Windows aufsetzen, das kennen doch die meisten Menschen. Die Antwort hat mit Barrierefreiheit wenig zu tun. Sie hat damit zu tun, wer am Ende bestimmt, was der Computer darf.
+
+Windows gehört einer Firma. Niemand außerhalb kann genau nachsehen, was darin geschieht, und niemand kann es tief verändern. DialOS will den Computer vollständig über die Stimme bedienbar machen, bis in Bereiche hinein, die ein Nutzer sonst nie anfasst. Dafür braucht es ein System, das sich öffnen lässt, ohne jemanden um Erlaubnis zu fragen. Linux lässt das zu.
+
+Warum dann ausgerechnet Debian. Weil Debian für Verlässlichkeit steht und nicht für das Neueste. Jedes Programm wird gründlich geprüft, bevor es aufgenommen wird. Für ein Gerät, das jeden Tag funktionieren muss, oft bei Menschen, die eine Störung nicht selbst beheben können, ist das wichtiger als aktuelle Software.
+
+Und warum GNOME als Bedienoberfläche. Weil dort ein ausgereifter Vorleser für den Bildschirm schon eingebaut ist, und weil die gesamte Oberfläche einem festen Standard für Zugänglichkeit folgt. Bei anderen Oberflächen ist Barrierefreiheit oft nachträglich aufgesetzt oder lückenhaft. Bei GNOME ist sie das Fundament.
+
+Eines noch, für alle, die von Windows kommen. Auf Wunsch sieht DialOS aus wie Windows, umschaltbar per Zuruf. Darunter bleibt alles, wie es ist. Es wird nichts ersetzt. Es kommt nur eine vertraute Fassade obendrauf.

@@ -1,0 +1,15 @@
+Die englische Hälfte.
+
+Zwölf Einträge an einem einzigen Tag, und keiner davon betraf die Sprachsteuerung. Alle gehörten der öffentlichen Seite des Projekts. Aus einem deutschen Auftritt wurde ein zweisprachiger.
+
+Der Gegenspieler reiste mit. Ein System, das Erfolg meldet, während es versagt. Diesmal trug er kein Mikrofon, sondern die Verkleidung einer Website. Und er hatte zwei saubere Auftritte.
+
+Der erste. Die englischen Beiträge sollten unter einer eigenen Adresse wohnen, getrennt von den deutschen. Für Seiten ging das. Für Beiträge lieferte dieselbe Adresse hartnäckig eine Fehlermeldung, obwohl der Beitrag über den technischen Umweg tadellos erschien. Der Fehler lag also früher.
+
+Ohne Zugriff auf den Server blieb nur ein Weg. Eine eingebaute Diagnose, die zeigt, was tatsächlich geschieht. Sie zeigte den Gegenspieler in Reinform. Das System hielt den Beitrag für einen Dateianhang. Kein Fehler, keine Warnung. Die Adresse zeigte lautlos auf das Falsche. Die Lösung umgeht die Frage, statt sie zu beantworten. Der Pfad wird jetzt gelesen, nicht erraten.
+
+Der zweite Auftritt kam am selben Tag. Ein Zwischenspeicher sollte sich bei jeder Änderung selbst leeren. Der Befehl dazu wurde angenommen und bestätigt. Beim Nachfragen stand der Wert unverändert auf aus. Eine Zusage ohne Deckung.
+
+Die Folge wäre nicht kosmetisch gewesen. Jede Korrektur wäre bis zu zehn Minuten unsichtbar geblieben. Ein Auftritt, der Änderungen annimmt und nicht zeigt. Gebaut wurde deshalb ein eigenes Sicherheitsnetz.
+
+Am Ende des Tages hatte die Seite eine vollständige englische Hälfte. Und die Gegenmaßnahme war dieselbe wie immer. Nicht der Zusage glauben, sondern das Ergebnis prüfen.
