@@ -2003,6 +2003,21 @@ aber ohne zu archivieren: `dialos-archiv.py pdf DATEI ZIEL`, aufgerufen von
 `dialos-notiz.py brief pdf`. Ziel ist das PDF mit demselben Namen neben dem
 neuesten Brief.
 
+**Fußzeile ganz unten, klein, mit Slogan (seit 2026-09-17).** Stephan: „Der
+folgende Satz muss immer als letzte Zeile auf der Seite stehen" und „kann auch
+eine kleinere Schriftgröße haben … Sie soll nicht ablenken", dazu Logo und
+Slogan. `als_pdf()` nimmt die Fußzeile aus dem Textfluss und setzt sie auf
+**jede** Seite ganz unten: 7 pt grau links, rechts `fuss-slogan.png` (Kopie von
+`assets/slogan.png`: „Dein Alltag. Deine Stimme. Dein System." mit Logo, 4,4 mm
+hoch). `dialos-drucken.py` druckt deshalb **alles** über dieses PDF, auch
+Einkaufszettel und Notizen - der Textdruck von CUPS hängte die Zeile direkt unter
+den letzten Eintrag.
+
+```bash
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/fuss-slogan.png /usr/local/share/dialos/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-archiv.py iso-build/config/includes.chroot/usr/local/bin/dialos-drucken.py /usr/local/bin/
+```
+
 **Dateinamen mit Datum und Uhrzeit (seit 2026-09-15, Stephans Vorgabe „wegen
 der Suche").** Briefe heißen `2026-09-15-1343-Brief.txt` (und `.pdf`),
 Bildschirmfotos `2026-09-14-1018-Bildschirmfoto.png`; zwei in einer Minute
@@ -3498,6 +3513,18 @@ fällt weg; vor dem Gruß steht immer eine Leerzeile; abgeschnittene Endungen
 `hunspell -d de_DE -l` das Wort nicht kennt - deshalb steht `hunspell` jetzt
 ausdrücklich in `package-lists/desktop.list.chroot`; hört nur Vosk am
 Stückanfang „absatz/abseits/absender", gibt es einen Absatz.
+
+**Nach dem dritten Brief (2026-09-17):** Zahlwörter werden Ziffern nach den
+Schreibregeln (`zahlen_in_ziffern`): „31. August 2026", „01.10.2026",
+„322,40 Euro", „10:30 Uhr", ab 13 als Ziffer, bis zwölf als Wort; Ziffern-Daten
+bekommen führende Nullen. Verstümmelte Zahlwörter bei Parakeet („Dreihund",
+„zweitaussechdzwanzig") ersetzt `zahlwoerter_aus_vosk` durch Vosks Zahlwörter
+(Ausrichtung mit difflib, nur wenn hunspell das Parakeet-Wort nicht kennt).
+Eine Anrede („Sehr geehrte …", „Liebe …", „Hallo …", „Guten Tag") steht immer
+allein mit Komma und Leerzeile und beendet den Betreff (`anrede_absetzen`). Hört
+Vosk nur „absatz"/„neue zeile", gilt nur der Umbruch (vorher blieb Parakeets
+„Upsets." stehen). Prüfstand: 8 Fälle, keiner schlechter, alle Satzzeichen
+richtig.
 
 ## 16. Sicherungs-Abbild (Clonezilla)
 

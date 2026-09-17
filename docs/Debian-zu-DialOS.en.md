@@ -1928,6 +1928,20 @@ but without archiving: `dialos-archiv.py pdf FILE TARGET`, called by
 `dialos-notiz.py brief pdf`. The target is the PDF with the same name next to
 the newest letter.
 
+**Footer at the very bottom, small, with slogan (since 2026-09-17).** Stephan:
+the sentence must always be the last line on the page, may be smaller so it does
+not distract, plus logo and slogan. `als_pdf()` takes the footer out of the text
+flow and puts it at the bottom of **every** page: 7 pt grey on the left,
+`fuss-slogan.png` on the right (copy of `assets/slogan.png`: "Dein Alltag. Deine
+Stimme. Dein System." with logo, 4.4 mm high). `dialos-drucken.py` therefore
+prints **everything** via this PDF, shopping lists and notes too - CUPS text
+printing put the line right below the last entry.
+
+```bash
+sudo install -m 644 iso-build/config/includes.chroot/usr/local/share/dialos/fuss-slogan.png /usr/local/share/dialos/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-archiv.py iso-build/config/includes.chroot/usr/local/bin/dialos-drucken.py /usr/local/bin/
+```
+
 **File names with date and time (since 2026-09-15, Stephan's requirement "for
 searching").** Letters are named `2026-09-15-1343-Brief.txt` (and `.pdf`),
 screenshots `2026-09-14-1018-Bildschirmfoto.png`; two in one minute get `-2`.
@@ -3256,6 +3270,18 @@ dropped; there is always a blank line before the closing; cut-off endings
 if `hunspell -d de_DE -l` does not know the word - hence `hunspell` is now listed
 explicitly in `package-lists/desktop.list.chroot`; if only Vosk hears
 "absatz/abseits/absender" at a chunk start, a paragraph is made.
+
+**After the third letter (2026-09-17):** number words become digits following
+the writing rules (`zahlen_in_ziffern`): "31. August 2026", "01.10.2026",
+"322,40 Euro", "10:30 Uhr", from 13 as digits, up to twelve as words; digit
+dates get leading zeros. Mangled number words from Parakeet ("Dreihund",
+"zweitaussechdzwanzig") are replaced by Vosk's number words by
+`zahlwoerter_aus_vosk` (alignment with difflib, only if hunspell does not know
+the Parakeet word). A salutation ("Sehr geehrte …", "Liebe …", "Hallo …", "Guten
+Tag") always stands alone with comma and blank line and ends the subject
+(`anrede_absetzen`). If Vosk only hears "absatz"/"neue zeile", only the break
+counts (before, Parakeet's "Upsets." remained). Test bench: 8 cases, none worse,
+all punctuation right.
 
 ## 16. Backup image (Clonezilla)
 

@@ -1379,6 +1379,56 @@ BETREFF = re.compile(r"(?i)^\s*betr[ie]ff?t?\b\s*[:,.]?\s*")
 ANREDE = re.compile(r"(?im)^((?:sehr geehrte|liebe|lieber|hallo)\b[^\n.!?]*?)[ \t]*[.!,]?[ \t]*\n\n")
 
 
+ANREDE_ANFANG = re.compile(r"(?i)\b(sehr geehrte[rs]?|liebe[rs]?(?!\s+grü)|hallo|guten tag)\b")
+
+
+def anrede_absetzen(text):
+    """Die Anrede steht allein, mit Komma und Leerzeile danach - auch nach dem Betreff.
+
+    GEFUNDEN AM 2026-09-17: Stephan sagte "Betreff", Pause, "Mieter Stephan
+    Roesner", Pause, "Sehr geehrte Damen und Herren". Parakeet setzte erst hinter
+    "Herren" ein Ausrufezeichen - und die Betreffzeile lautete "Mieter Stephan
+    Roesner Sehr geehrte Damen und Herren". Eine Anrede beendet den Betreff immer.
+
+    Gesucht wird nur am Briefanfang (erste 300 Zeichen): "Liebe Gruesse" am Ende
+    und ein "Hallo" mitten im Text sind keine Anrede. Das Ende der Anrede ist das
+    erste Komma, Ausrufezeichen, Punkt oder Zeilenende; fehlt eins, "Damen und
+    Herren" oder hoechstens fuenf Woerter.
+    """
+    for treffer in ANREDE_ANFANG.finditer(text[:300]):
+        davor = text[:treffer.start(1)]
+        # Nur am Anfang, nach einem Satzende oder Umbruch, oder direkt nach dem
+        # Betreff - "Ich wollte nur hallo sagen" ist keine Anrede.
+        if (not davor.strip() or re.search(r"[.!?:\n]\s*$", davor)
+                or re.match(r"(?i)\s*betr[ie]ff?t?\b[^.!?\n]*$", davor)):
+            break
+    else:
+        return text
+    start = treffer.start(1)
+    rest = text[start:]
+    # Das erste Satzzeichen hinter mehr als der blossen Formel beendet die Anrede:
+    # "Sehr geehrte, sehr geehrte Damen und Herren" (Stephan, 16.09., verhaspelt)
+    # endet nicht nach "Sehr geehrte".
+    formel = len(treffer.group(1).split())
+    satzende = set(satzenden(rest[:120]))
+    ende = next((m for m in re.finditer(r"[,.!]|\n", rest[:120])
+                 if (len(rest[:m.start()].split()) > formel
+                     or not ANREDE_ANFANG.match(rest[m.end():].lstrip()))
+                 and (m.group() != "." or m.start() in satzende)), None)
+    if ende and len(rest[:ende.start()].split()) <= 9:
+        anrede, danach = rest[:ende.start()], rest[ende.end():]
+    else:
+        herren = re.search(r"(?i)damen und herren", rest[:80])
+        if herren:
+            anrede, danach = rest[:herren.end()], rest[herren.end():]
+        else:
+            return text
+    davor = text[:start].rstrip(" ,")
+    anrede = " ".join(anrede.split())
+    danach = danach.lstrip(" \n")
+    return (davor + "\n\n" if davor.strip() else "") + anrede + ",\n\n" + danach
+
+
 def anrede_richten(text):
     """Die Anrede endet mit Komma - auch ueber Stueckgrenzen.
 
@@ -1419,7 +1469,7 @@ def brief_text(zeilen):
     wird. Der Pruefstand ruft genau diese Funktion.
     """
     text = re.sub(r"[ \t]*\n[ \t]*", "\n", " ".join(zeilen))
-    return betreff_richten(anrede_richten(grussformel_richten(text)))
+    return betreff_richten(anrede_richten(anrede_absetzen(grussformel_richten(text))))
 
 
 def brief_schreiben(zeilen):
@@ -1772,6 +1822,8 @@ PARAKEET_FUELLWOERTER = {"yeah", "yes", "yep", "okay", "ok", "oh", "uh", "um", "
 
 
 ABSATZ_BEI_VOSK = {"absatz", "absätze", "abseits", "absender", "absenders"}
+UMBRUCH_ALLEIN = {"absatz": "\n\n", "neuer absatz": "\n\n", "abseits": "\n\n",
+                  "neue zeile": "\n", "neue zeil": "\n"}
 
 
 def parakeet_fuellwort(text):
@@ -1816,6 +1868,233 @@ def endungen_ergaenzen(text, vosk_worte):
     if not ersatz:
         return text
     return re.sub(r"[A-Za-zÄÖÜäöüß]+", lambda m: ersatz.get(m.group(0), m.group(0)), text)
+
+
+# ZAHLEN IM BRIEF (Stephan, 2026-09-17). Parakeet schrieb am 16.09. Ziffern
+# ("31.8.2026", "322,40 Euro"), am 17.09. im selben Brief Woerter - und teils
+# verstuemmelt: "Dreihund zweiundzwanzig Euro und vierzig Cent",
+# "zweitaussechdzwanzig". Vosk hoerte dieselben Stellen sauber
+# ("dreihundert zweiundzwanzig", "zweitausend sechsundzwanzig").
+#
+# ZWEI SCHRITTE:
+#   1. VERSTUEMMELTE ZAHLWOERTER AUS VOSK: Parakeet- und Vosk-Woerter werden
+#      ausgerichtet (difflib). Wo Parakeet ein Wort hat, das weder Zahl noch
+#      bekanntes Wort ist, und Vosk an derselben Stelle nur Zahlwoerter, gelten
+#      Vosks Zahlwoerter.
+#   2. ZAHLWOERTER -> ZIFFERN nach den Schreibregeln fuer Briefe (DIN 5008):
+#        Datum    "einunddreissigsten August zweitausendsechsundzwanzig" -> "31. August 2026"
+#                 "ersten zehnten [zweitausendsechsundzwanzig]"            -> "01.10.[2026]"
+#        Betrag   "dreihundertzweiundzwanzig Euro und vierzig Cent"       -> "322,40 Euro"
+#        Uhrzeit  "zehn Uhr dreissig"                                     -> "10:30 Uhr"
+#        sonst    ab 13 als Ziffern ("zweitausendsechsundzwanzig" -> "2026"),
+#                 bis zwoelf bleiben Woerter ("drei Punkte") - so die Norm.
+#   Ziffern-Daten von Parakeet ("31.8.2026") bekommen die fuehrenden Nullen.
+#
+# "ein", "eine", "einen" sind nie Zahlen - das Wort ist fast immer der Artikel.
+
+EINER = {"null": 0, "eins": 1, "ein": 1, "eine": 1, "zwei": 2, "zwo": 2, "drei": 3, "vier": 4,
+         "fünf": 5, "sechs": 6, "sieben": 7, "acht": 8, "neun": 9}
+ZEHNER_FEST = {"zehn": 10, "elf": 11, "zwölf": 12, "dreizehn": 13, "vierzehn": 14,
+               "fünfzehn": 15, "sechzehn": 16, "siebzehn": 17, "achtzehn": 18, "neunzehn": 19}
+ZEHNER = {"zwanzig": 20, "dreißig": 30, "vierzig": 40, "fünfzig": 50, "sechzig": 60,
+          "siebzig": 70, "achtzig": 80, "neunzig": 90}
+MONATE = ("januar", "februar", "märz", "april", "mai", "juni", "juli", "august",
+          "september", "oktober", "november", "dezember")
+ORDINAL_UNREGELMAESSIG = {"erst": 1, "zweit": 2, "dritt": 3, "viert": 4, "fünft": 5, "sechst": 6,
+                          "siebt": 7, "siebent": 7, "acht": 8, "neunt": 9, "zehnt": 10,
+                          "elft": 11, "zwölft": 12}
+
+
+def _unter_hundert(s):
+    if s in ZEHNER_FEST:
+        return ZEHNER_FEST[s]
+    if s in ZEHNER:
+        return ZEHNER[s]
+    if s in EINER and s not in ("ein", "eine"):
+        return EINER[s]
+    m = re.fullmatch(r"(ein|zwei|drei|vier|fünf|sechs|sieben|acht|neun)und(\w+)", s)
+    if m and m.group(2) in ZEHNER:
+        return EINER[m.group(1)] + ZEHNER[m.group(2)]
+    return None
+
+
+def _unter_tausend(s):
+    if "hundert" in s:
+        vor, _, nach = s.partition("hundert")
+        h = 1 if vor in ("", "ein", "eins") else EINER.get(vor)
+        if h is None or vor == "null":
+            return None
+        if not nach:
+            return h * 100
+        rest = _unter_hundert(nach[3:] if nach.startswith("und") else nach)
+        return None if rest is None else h * 100 + rest
+    return _unter_hundert(s)
+
+
+def grundzahl(s):
+    """"dreihundertzweiundzwanzig" -> 322, "zweitausendsechsundzwanzig" -> 2026, sonst None."""
+    s = s.lower()
+    if "tausend" in s:
+        vor, _, nach = s.partition("tausend")
+        t = 1 if vor in ("", "ein", "eins") else _unter_tausend(vor)
+        if t is None:
+            return None
+        if not nach:
+            return t * 1000
+        rest = _unter_tausend(nach[3:] if nach.startswith("und") else nach)
+        return None if rest is None else t * 1000 + rest
+    return _unter_tausend(s)
+
+
+def ordnungszahl(s):
+    """"einunddreissigsten" -> 31, "ersten" -> 1, "siebten" -> 7, sonst None.
+
+    Alle Endungen werden probiert: "ersten" ist "ers"+"ten" (erst-), nicht
+    "er"+"sten" - die kuerzeste Aufteilung waere falsch.
+    """
+    s = s.lower()
+    for endung in ("sten", "ster", "stem", "stes", "ste", "ten", "ter", "tem", "tes", "te"):
+        if not s.endswith(endung) or len(s) <= len(endung):
+            continue
+        stamm = s[:-len(endung)]
+        if endung.startswith("s"):
+            wert = grundzahl(stamm)
+            if wert is not None and wert >= 20:
+                return wert
+        else:
+            wert = ORDINAL_UNREGELMAESSIG.get(stamm + "t") or ORDINAL_UNREGELMAESSIG.get(stamm)
+            if wert:
+                return wert
+    return None
+
+
+WORT = re.compile(r"[A-Za-zÄÖÜäöüß]+|\d+(?:[.,]\d+)*")
+
+
+def _ist_zahlwort(w):
+    return w.lower() not in ("ein", "eine", "einen", "einer", "eines", "einem") and \
+        (grundzahl(w) is not None or ordnungszahl(w) is not None)
+
+
+def zahlwoerter_aus_vosk(text, vosk_worte):
+    """Schritt 1: verstuemmelte Zahlwoerter bei Parakeet durch Vosks ersetzen."""
+    import difflib
+    stellen = [(m.start(), m.end(), m.group(0)) for m in WORT.finditer(text)]
+    p = [w.lower() for _, _, w in stellen]
+    v = [w.lower() for w in vosk_worte]
+    kandidaten = [(i1, i2, j1, j2) for tag, i1, i2, j1, j2
+                  in difflib.SequenceMatcher(None, p, v, autojunk=False).get_opcodes()
+                  if tag == "replace"
+                  and all(_ist_zahlwort(w) for w in v[j1:j2])
+                  and any(not _ist_zahlwort(w) and not w.isdigit() for w in p[i1:i2])]
+    if not kandidaten:
+        return text
+    unbekannt = unbekannte_woerter([stellen[i][2] for i1, i2, _, _ in kandidaten
+                                    for i in range(i1, i2)])
+    for i1, i2, j1, j2 in reversed(kandidaten):
+        woerter = [stellen[i][2] for i in range(i1, i2)]
+        # Nur wenn das Parakeet-Wort kein echtes Wort ist ("Dreihund") - ein
+        # richtiges Wort an der Stelle ("Forderung") bleibt stehen.
+        if not all(w in unbekannt or _ist_zahlwort(w) for w in woerter):
+            continue
+        text = text[:stellen[i1][0]] + " ".join(v[j1:j2]) + text[stellen[i2 - 1][1]:]
+    return text
+
+
+def _zweistellig(n):
+    return f"{n:02d}"
+
+
+def zahlen_in_ziffern(text):
+    """Schritt 2: Zahlwoerter nach Schreibregeln in Ziffern."""
+    # Ziffern-Daten mit fuehrenden Nullen: "31.8.2026" -> "31.08.2026", "1.10." -> "01.10."
+    text = re.sub(r"\b(\d{1,2})\.(\d{1,2})\.(\d{4})?(?!\d)",
+                  lambda m: f"{int(m.group(1)):02d}.{int(m.group(2)):02d}.{m.group(3) or ''}",
+                  text)
+    stellen = [(m.start(), m.end(), m.group(0)) for m in WORT.finditer(text)]
+    ergebnis = []   # (start, ende, ersatz)
+    i = 0
+
+    def zahl_ab(k):
+        """Laengste Grundzahl ab Wort k (auch ueber mehrere Woerter), (wert, naechstes k)."""
+        beste = None
+        for ende in range(k + 1, min(k + 4, len(stellen)) + 1):
+            teile = [stellen[x][2] for x in range(k, ende)]
+            if any(t.lower() in ("ein", "eine", "einen") for t in teile):
+                break
+            wert = grundzahl("".join(teile).lower())
+            if wert is None:
+                break
+            beste = (wert, ende)
+        return beste
+
+    while i < len(stellen):
+        start, _, wort = stellen[i]
+        klein = wort.lower()
+        tag = ordnungszahl(wort)
+        grund = zahl_ab(i) if klein not in ("ein", "eine", "einen") else None
+        naechstes = stellen[i + 1][2].lower() if i + 1 < len(stellen) else ""
+        # Datum mit Monatsnamen: Tag (Ordnungs- oder Grundzahl) + Monat [+ Jahr]
+        if (tag or (grund and grund[1] == i + 1 and 1 <= grund[0] <= 31)) and naechstes in MONATE:
+            tagzahl = tag or grund[0]
+            ersatz = f"{tagzahl}. {stellen[i + 1][2].capitalize()}"
+            ende = i + 2
+            jahr = zahl_ab(ende) if ende < len(stellen) else None
+            if jahr and 1000 <= jahr[0] <= 2999:
+                ersatz += f" {jahr[0]}"
+                ende = jahr[1]
+            ergebnis.append((start, stellen[ende - 1][1], ersatz))
+            i = ende
+            continue
+        # Datum aus zwei Ordnungszahlen: "ersten zehnten [zweitausendsechsundzwanzig]"
+        monat = ordnungszahl(naechstes) if tag else None
+        if tag and monat and 1 <= tag <= 31 and 1 <= monat <= 12:
+            ersatz = f"{tag:02d}.{monat:02d}."
+            ende = i + 2
+            jahr = zahl_ab(ende) if ende < len(stellen) else None
+            if jahr and 1000 <= jahr[0] <= 2999:
+                ersatz += str(jahr[0])
+                ende = jahr[1]
+            ergebnis.append((start, stellen[ende - 1][1], ersatz))
+            i = ende
+            continue
+        if grund:
+            wert, ende = grund
+            folge = [stellen[x][2].lower() for x in range(ende, min(ende + 4, len(stellen)))]
+            # Betrag: "... Euro [und] vierzig [Cent]"
+            if folge[:1] == ["euro"]:
+                cent_ab = ende + 1 + (1 if folge[1:2] == ["und"] else 0)
+                cent = zahl_ab(cent_ab) if cent_ab < len(stellen) else None
+                if cent and cent[0] < 100 and (cent[1] >= len(stellen)
+                                               or stellen[cent[1]][2].lower() in ("cent", "ct")
+                                               or folge[1:2] != ["und"]):
+                    stop = cent[1] + (1 if cent[1] < len(stellen)
+                                      and stellen[cent[1]][2].lower() in ("cent", "ct") else 0)
+                    ergebnis.append((start, stellen[stop - 1][1], f"{wert},{cent[0]:02d} Euro"))
+                    i = stop
+                    continue
+                ergebnis.append((start, stellen[ende][1], f"{wert} Euro"))
+                i = ende + 1
+                continue
+            # Uhrzeit: "zehn Uhr [dreissig]"
+            if folge[:1] == ["uhr"] and wert <= 24:
+                minuten = zahl_ab(ende + 1) if ende + 1 < len(stellen) else None
+                if minuten and minuten[0] < 60:
+                    ergebnis.append((start, stellen[minuten[1] - 1][1], f"{wert}:{minuten[0]:02d} Uhr"))
+                    i = minuten[1]
+                else:
+                    ergebnis.append((start, stellen[ende][1], f"{wert} Uhr"))
+                    i = ende + 1
+                continue
+            if wert > 12 or ende - i > 1:
+                ergebnis.append((start, stellen[ende - 1][1], str(wert)))
+                i = ende
+                continue
+        i += 1
+    for start, ende, ersatz in reversed(ergebnis):
+        text = text[:start] + ersatz + text[ende:]
+    # "am 20.12." am Satzende: der Satzpunkt kam dazu - "20.12.." wird "20.12."
+    return re.sub(r"(\d{2}\.\d{2}\.)\.", r"\1", text)
 
 
 def parakeet_erkennen(erkenner, audio, worte):
@@ -1957,10 +2236,20 @@ def diktat_fuehren(zweck, name, quelle):
         if parakeet_fuellwort(roh):
             melde(f"  PARAKEET: nur Fuellwort {roh!r} - Stueck faellt weg")
             return ""
+        # NUR EIN UMBRUCH GESPROCHEN (2026-09-17): Vosk hoerte "absatz", Parakeet
+        # machte daraus "Upsets." - der Absatz kam, das Wort blieb im Brief.
+        # Besteht Vosks ganzes Stueck aus einem Umbruch-Befehl, gilt nur dieser.
+        nur_umbruch = UMBRUCH_ALLEIN.get(" ".join(vosk_text.lower().split()))
+        if nur_umbruch:
+            melde(f"  nur Umbruch laut Vosk ({vosk_text!r}), Parakeet {roh!r} verworfen")
+            return nur_umbruch
         ergaenzt = endungen_ergaenzen(roh, vosk_text.split())
         if ergaenzt != roh:
             melde(f"  Endungen nach Vosk ergaenzt: {ergaenzt!r}")
-        text = parakeet_natuerlich(ergaenzt)
+        mit_zahlen = zahlen_in_ziffern(zahlwoerter_aus_vosk(ergaenzt, vosk_text.split()))
+        if mit_zahlen != ergaenzt:
+            melde(f"  Zahlen: {mit_zahlen!r}")
+        text = parakeet_natuerlich(mit_zahlen)
         # ABSATZ, DEN NUR VOSK HOERTE (2026-09-16, 14:36): Stephan sagte "Absatz
         # Diesen Betrag ...", Vosk hoerte "absender diesen betrag", Parakeet liess
         # das Wort ganz weg - und der Absatz fehlte. Vosk schreibt dieses "Absatz"

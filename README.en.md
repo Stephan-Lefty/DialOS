@@ -122,6 +122,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+- **Third letter: numbers as digits, salutation on its own, footer at the bottom
+  with slogan** (2026-09-17). Number words become digits following the writing
+  rules ("31. August 2026", "01.10.2026", "322,40 Euro"), mangled Parakeet
+  numbers come from Vosk; the salutation ends the subject and stands alone with a
+  comma; a spoken "Absatz" alone leaves no word behind. Footer in PDF and print
+  always at the bottom of every page, 7 pt grey, slogan with logo on the right;
+  everything is printed via the PDF. "pdf speichern" now suggests "Brief als PDF
+  speichern". Test bench 8 cases, all punctuation right.
+
 - **Hardware requirements recorded** (2026-09-17, `docs/hardware.en.md`):
   needs measured on the T490 (dictation 9–10 GB RAM, Parakeet 10 s of speech in
   0.73 s), **32 GB as the minimum** (Stephan's requirement), Intel and AMD variant

@@ -214,7 +214,10 @@ def main():
     # Betreffzeile fett (Stephan: "fett geschrieben und Betreff: ..."), und Papier
     # soll aussehen wie das PDF im Archiv. Klappt das PDF nicht, wird wie bisher
     # der Text gedruckt - lieber ohne Fett als gar nicht.
-    pdf = brief_als_pdf(text) if name == "brief" else None
+    # SEIT 2026-09-17 GEHT ALLES ALS PDF IN DEN DRUCK: Nur so steht die Fusszeile
+    # ganz unten auf der Seite (Stephan) - der Textdruck von CUPS haengt sie direkt
+    # unter den letzten Eintrag des Zettels.
+    pdf = brief_als_pdf(text)
     try:
         if pdf:
             p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + [pdf],

@@ -256,15 +256,35 @@ def erste_seite(satz, daten, pd, empfaenger, datum):
         s.stroke()
 
 
+SLOGAN_BILD = "/usr/local/share/dialos/fuss-slogan.png"
+
+
 def fusszeile(satz, seite, seiten):
+    """Fusszeile klein und grau links, Slogan mit Logo rechts, Seitenzahl dazwischen."""
     fuss = holen(FUSSZEILE_SKRIPT, "fusszeile")
     text = fuss.text("dokument") if fuss else \
         "Dieses Dokument wurde per Spracheingabe powered by DialOS.org erstellt!"
     grau = (0.45, 0.45, 0.45)
-    satz.text(text, RAND_LINKS, 287 * MM, groesse=7, farbe=grau)
+    y = 286 * MM
+    satz.text(text, RAND_LINKS, y, groesse=7, farbe=grau)
+    rechts = SEITE_B - RAND_RECHTS
+    if os.path.exists(SLOGAN_BILD):
+        try:
+            bild = cairo.ImageSurface.create_from_png(SLOGAN_BILD)
+            hoehe = 4.4 * MM
+            skala = hoehe / bild.get_height()
+            s = satz.stift
+            s.save()
+            s.translate(rechts - bild.get_width() * skala, y - 1.1 * MM)
+            s.scale(skala, skala)
+            s.set_source_surface(bild, 0, 0)
+            s.paint()
+            s.restore()
+        except Exception:
+            pass
     if seiten > 1:
         lay = satz.layout(f"Seite {seite} von {seiten}", groesse=7)
-        satz.zeigen(lay, SEITE_B - RAND_RECHTS - lay.get_pixel_size()[0], 287 * MM, grau)
+        satz.zeigen(lay, (SEITE_B - lay.get_pixel_size()[0]) / 2, y - 4.5 * MM, grau)
 
 
 def bausteine(satz, betreff, absaetze, gruss, name, unterschrift_bild):

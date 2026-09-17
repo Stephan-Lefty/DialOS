@@ -985,6 +985,15 @@ def naechster_befehl(worte):
     return beste, wert
 
 
+def teil_von_genau_einem_befehl(worte):
+    """Der Befehl, in dem die Woerter (mind. zwei) zusammenhaengend stehen - wenn es genau einer ist."""
+    if len(worte) < 2:
+        return None
+    gehoert = " " + " ".join(worte) + " "
+    treffer = [b for b in BEFEHLSSAETZE if gehoert in " " + b + " "]
+    return treffer[0] if len(treffer) == 1 else None
+
+
 def hinweis_text(worte):
     """Was gesagt wird - immer das Gehoerte, den Befehl nur bei starker Naehe.
 
@@ -997,6 +1006,13 @@ def hinweis_text(worte):
     """
     gehoert = " ".join(worte)
     befehl, anteil = naechster_befehl(worte)
+    # EIN EINDEUTIGES STUECK EINES BEFEHLS (2026-09-17): Stephan sagte "pdf
+    # speichern" und bekam "Das kann ich noch nicht" - zwei von vier Woertern
+    # liegen unter der Zwei-Drittel-Schwelle. Stehen aber alle gehoerten Woerter
+    # zusammenhaengend in GENAU einem Befehl, ist klar, welcher gemeint war.
+    teil = teil_von_genau_einem_befehl(worte)
+    if teil:
+        befehl, anteil = teil, 1.0
     if befehl and anteil >= HINWEIS_ANTEIL and befehl not in NICHT_VORSCHLAGEN:
         return (f"Ich habe verstanden: {gehoert}. "
                 f"Der Befehl heisst: {befehl}.")

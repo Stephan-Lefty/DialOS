@@ -130,6 +130,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+- **Dritter Brief: Zahlen als Ziffern, Anrede für sich, Fußzeile unten mit Slogan**
+  (2026-09-17). Zahlwörter werden Ziffern nach Schreibregeln („31. August 2026",
+  „01.10.2026", „322,40 Euro"), verstümmelte Parakeet-Zahlen kommen von Vosk; die
+  Anrede beendet den Betreff und steht mit Komma allein; ein nur gesprochenes
+  „Absatz" hinterlässt kein Wort mehr. Fußzeile in PDF und Druck immer ganz unten
+  auf jeder Seite, 7 pt grau, rechts Slogan mit Logo; gedruckt wird alles über
+  das PDF. „pdf speichern" schlägt jetzt „Brief als PDF speichern" vor.
+  Prüfstand 8 Fälle, alle Satzzeichen richtig.
+
 - **Hardware-Anforderungen festgehalten** (2026-09-17, `docs/hardware.md`): am T490
   gemessener Bedarf (Diktat 9–10 GB Arbeitsspeicher, Parakeet 10 s Sprache in
   0,73 s), **32 GB als Minimum** (Stephans Vorgabe), Intel- und AMD-Variante mit

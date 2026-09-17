@@ -108,19 +108,70 @@ def melde(text):
         pass
 
 
-def als_pdf(text, ziel):
-    """Schreibt reinen Text als PDF - festbreit, damit die Ausrichtung bleibt."""
+FUSSZEILE_KENNUNG = "powered by DialOS"
+# Slogan mit Logo neben der Fusszeile (Stephan, 2026-09-17: "Logo und/oder den
+# Slogan"). Aus assets/slogan.png - als Bild, damit Schrift und Farbverlauf der
+# Marke erhalten bleiben. Fehlt die Datei, steht nur der Text da.
+SLOGAN_BILD = "/usr/local/share/dialos/fuss-slogan.png"
+FUSS_SCHRIFTGROESSE = 7.0     # lesbar, aber leiser als der Inhalt (Stephan)
+SLOGAN_HOEHE = 12.5           # Punkt, etwa 4,4 mm - Buchstaben so hoch wie die 7-pt-Schrift
+
+
+def fusszeile_zeichnen(stift, text, fuss_y, links=RAND, rechts=SEITE_B - RAND):
+    """Fusszeile klein und grau links, Slogan mit Logo rechts - auf einer Grundlinie."""
     import cairo
-    zeilen = text.split("\n")
-    je_seite = int((SEITE_H - 2 * RAND) / ZEILENHOEHE)
+    stift.save()
+    stift.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+    stift.set_font_size(FUSS_SCHRIFTGROESSE)
+    stift.set_source_rgb(0.45, 0.45, 0.45)
+    stift.move_to(links, fuss_y)
+    stift.show_text(text.strip())
+    if os.path.exists(SLOGAN_BILD):
+        try:
+            bild = cairo.ImageSurface.create_from_png(SLOGAN_BILD)
+            skala = SLOGAN_HOEHE / bild.get_height()
+            breite = bild.get_width() * skala
+            stift.translate(rechts - breite, fuss_y - SLOGAN_HOEHE * 0.72)
+            stift.scale(skala, skala)
+            stift.set_source_surface(bild, 0, 0)
+            stift.paint()
+        except Exception:
+            pass
+    stift.restore()
+
+
+def als_pdf(text, ziel):
+    """Schreibt reinen Text als PDF - festbreit, damit die Ausrichtung bleibt.
+
+    DIE FUSSZEILE STEHT IMMER GANZ UNTEN AUF DER SEITE (Stephan, 2026-09-17:
+    "Der folgende Satz muss immer als letzte Zeile auf der Seite stehen. Also im
+    Fussbereich."). Vorher folgte sie dem Text und stand bei einem kurzen Brief
+    mitten auf dem Blatt. Jetzt wird sie aus dem Textfluss genommen und auf JEDE
+    Seite unten gesetzt - an derselben Stelle, auf der ersten wie auf der letzten.
+    """
+    import cairo
+    zeilen = text.rstrip("\n").split("\n")
+    fuss = [z for z in zeilen if FUSSZEILE_KENNUNG in z]
+    zeilen = [z for z in zeilen if FUSSZEILE_KENNUNG not in z]
+    while zeilen and not zeilen[-1].strip():
+        zeilen.pop()
+    fuss_y = SEITE_H - RAND
+    # Platz ueber der Fusszeile: zwei Zeilen Abstand, damit Text sie nie beruehrt.
+    je_seite = int((fuss_y - RAND) / ZEILENHOEHE) - (2 if fuss else 0)
     flaeche = cairo.PDFSurface(ziel, SEITE_B, SEITE_H)
     stift = cairo.Context(flaeche)
-    stift.select_font_face(SCHRIFT, cairo.FONT_SLANT_NORMAL,
-                           cairo.FONT_WEIGHT_NORMAL)
     stift.set_font_size(SCHRIFTGROESSE)
     stift.set_source_rgb(0, 0, 0)
-    for nummer, zeile in enumerate(zeilen):
+
+    def fusszeile_setzen():
+        for nummer, zeile in enumerate(reversed(fuss)):
+            fusszeile_zeichnen(stift, zeile, fuss_y - nummer * ZEILENHOEHE)
+        stift.set_font_size(SCHRIFTGROESSE)
+        stift.set_source_rgb(0, 0, 0)
+
+    for nummer, zeile in enumerate(zeilen or [""]):
         if nummer and nummer % je_seite == 0:
+            fusszeile_setzen()
             flaeche.show_page()
         y = RAND + (nummer % je_seite + 1) * ZEILENHOEHE
         stift.move_to(RAND, y)
@@ -130,6 +181,7 @@ def als_pdf(text, ziel):
         stift.select_font_face(SCHRIFT, cairo.FONT_SLANT_NORMAL,
                                cairo.FONT_WEIGHT_BOLD if fett else cairo.FONT_WEIGHT_NORMAL)
         stift.show_text(zeile)
+    fusszeile_setzen()
     flaeche.finish()
     return os.path.exists(ziel) and os.path.getsize(ziel) > 0
 
