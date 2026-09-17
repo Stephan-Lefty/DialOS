@@ -115,8 +115,17 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Kandidat und Bestand. Ein fehlendes Wort im Kandidaten beendet die Prüfung,
     eines im Bestand wird als Altlast gemeldet - sonst hinge ein neuer Befehl
     an einem alten Problem.
-  - [ ] **Prüfung am Gerät ausführen** - der Wortlaut des Startsatzes hängt
-    daran:
+  - [x] **Prüfung am Gerät ausführen** - der Wortlaut des Startsatzes hängt
+    daran. **Ausgeführt am 2026-09-17 auf dem T490: alle 51 Sätze wörtlich
+    erkannt** (Kandidat selbst und alle 49 bestehenden), der Startsatz ist
+    einbaubar. **Aber:** Das Werkzeug meldete „graph/words.txt nicht lesbar -
+    Wortschatz UNGEPRUEFT" - das kleine Modell unter
+    `/usr/local/share/vosk-model-de-small/graph/` hat keine `words.txt` (nur
+    `Gr.fst`, `HCLr.fst`, `phones/`). Die Wortschatz-Prüfung läuft dort also
+    nie. Von Hand nachgeholt: Grammatik mit „unterlagen durchsuchen" gebaut,
+    Vosk meldete kein „missing in vocabulary" - beide Wörter bekannt. Das
+    Werkzeug sollte deshalb über diese Vosk-Meldung prüfen statt über die Datei
+    (passt auch zum Nebenbefund „bildschirmfoto" unten).
 
         scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
 

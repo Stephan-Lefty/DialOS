@@ -112,8 +112,17 @@ finished too, and then move down together. That way no reference breaks.
     speaking, separately for candidate and existing stock. A missing word in the
     candidate ends the check, one in the existing stock is reported as a legacy
     problem - otherwise a new command would hang on an old problem.
-  - [ ] **Run the check on the device** - the wording of the start sentence
-    depends on it:
+  - [x] **Run the check on the device** - the wording of the start sentence
+    depends on it. **Run on 2026-09-17 on the T490: all 51 sentences recognised
+    verbatim** (the candidate and all 49 existing ones), the start sentence can
+    be built in. **But:** the tool reported "graph/words.txt nicht lesbar -
+    Wortschatz UNGEPRUEFT" - the small model under
+    `/usr/local/share/vosk-model-de-small/graph/` has no `words.txt` (only
+    `Gr.fst`, `HCLr.fst`, `phones/`). The vocabulary check therefore never runs
+    there. Done by hand: grammar built with "unterlagen durchsuchen", Vosk
+    reported no "missing in vocabulary" - both words known. The tool should
+    check via that Vosk message instead of the file (fits the "bildschirmfoto"
+    side finding below).
 
         scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
 
