@@ -146,7 +146,7 @@ context, and that is exactly where it failed; so the comparison was
 worthless. **Whoever tests TLS must pass the verification context
 explicitly.**
 
-## Archive and search: MailBurg is the engine
+## Archive and search: MailBurg's extraction, but an index of our own
 
 Settled with Stephan on 2026-09-17, when he asked for an archive solution
 with reading out and a voice dialogue - searching letters, documents,
@@ -161,43 +161,84 @@ has two halves: `dialos-archiv.py` (PDF archive in
 route alongside them would, by the one-player rule below, be exactly the
 mistake this file is meant to prevent.
 
-**MailBurg is the only program in the DialOS family that fully meets this
-file's selection criterion.** Controllability from outside is not
-retrofitted there but the normal case:
+**The draft first had MailBurg as the whole engine. Stephan's question of
+2026-09-17 corrected that:** „Brauchen wir denn MailBurg als komplettes
+Programm oder nur Teile? Denn MailBurg wird ja mit einem anderen Anliegen
+erstellt." (Do we need MailBurg as a complete program or only parts? After
+all, MailBurg is being built with a different concern.) That is exactly
+it, and the difference is not size.
 
-| What DialOS-Suche needs | What MailBurg brings |
-|---|---|
-| Searchable from outside | `mailburg suchen ARCHIV "…"` as a command line |
-| Full text over everything | SQLite FTS5 with prefix **and** trigram index |
-| Making letters and scans readable | `pdftotext`/`pypdf`, Office extraction, OCR via `tesseract` |
-| Installable on Debian 13 | already builds as a `.deb` |
-| Licence position clear | MIT - may go into a GPL-3.0 project |
+### MailBurg archives. DialOS-Suche only has to find.
 
-**It is called over the command line, not imported as a library.** That
-keeps versions and licences apart, and DialOS does not hang off MailBurg's
-internal structure. What is still missing in MailBurg for that is a **JSON
-output** for `suchen`: a hit list laid out for humans is useless for a
-voice dialogue. That belongs in the MailBurg repository, not here.
+MailBurg copies mail into a content-addressed store of its own (`.eml.zst`,
+SHA-256 as the file name, hash chain in the journal) - because it must be
+able to **prove** that nothing was altered. For a GoBD archive of business
+post that is right.
 
-**What MailBurg does not do today:** it archives mail only. Letters from
-`~/Dokumente/`, scanned post and Denkzettel's notes have to be added as
-further sources - the extraction chain can already do all of that, it is
-simply only invoked over attachments so far.
+**But DialOS's documents are already lying there:** letters in
+`~/Dokumente/`, PDFs under `~/Dokumente/Archiv/DialOS-DATA/`, notes in
+`~/Notizen/`, mail in Thunderbird's mbox. Writing them out a second time
+would be duplication - twice the space, and from then on two truths that
+can drift apart.
 
-**The recognizer for the search term is already there.** A spoken search
-term is text, not a command - so the same division of labour applies as in
-dictation: Vosk takes the start sentence, **Parakeet** the term. The only
-new thing to clarify is whether Parakeet can be given a dictionary built
-from the most frequent sender names in one's own archive - the way
-dictation has its personal dictionary.
+On top of that comes everything that has no business on a private device:
+audit-proof storage, tombstones instead of real deletion, RFC 3161
+timestamps, retention periods. For private individuals the GDPR's
+household exemption applies. MailBurg does have a mode of its own for
+that, but the apparatus would stay installed.
 
-**Open and deliberately not decided here:** whether the archive runs
-encrypted. MailBurg can do it (AES-256-GCM per file), but **the search
-index stays plain text** - and a blind user who would have to speak his
-archive password is a problem of its own. See
-[sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md) and
-`TODO.en.md`. Equally open: whether `dialos-archiv.py` and
-`dialos-mailarchiv.py` are absorbed into MailBurg or stay alongside it.
+### What is shared and what is not
+
+Counted on 2026-09-17:
+
+| Part of MailBurg | Lines | DialOS-Suche |
+|---|---|---|
+| `extract/` - making PDF, OCR, Office readable | 1.360 | **is shared** |
+| `core/` - archive, index, encryption, journal | 12.091 | no |
+| `ui/` - graphical interface | 12.542 | no |
+| `server/` - web interface | 1.600 | no |
+
+**What is shared is the extraction chain**, because dearly earned
+knowledge sits in there that nobody gets right a second time: `pdftotext`
+with `pypdf` as a fallback, OCR via `pdftoppm` and `tesseract` with the
+measured pixel limit `MAX_KANTE=5000` against the 523-megapixel crash on
+iPhone scans, Office files without binary rubbish.
+
+**The index is built anew, lean.** SQLite FTS5 is part of the standard
+library; an index over files that already lie in the file system is a few
+hundred lines - without archive storage, without a journal, without
+retention periods. In exchange it has what DialOS needs and MailBurg does
+not have: a column with the **Cologne phonetics** of sender names, so that
+„Meier", „Mayer" and „Maier" fall together. That catches recognition
+fuzziness structurally instead of loading it onto the user as a follow-up
+question.
+
+**Imported rather than called over the command line** - and that is a
+correction of the first draft, which settled it the other way round.
+Calling over the command line was right as long as MailBurg was to be the
+whole engine; for a shared module, importing is the right way. It also
+costs nothing: MailBurg's core has `dependencies = []`. Without the extras
+neither PySide6 nor the server comes along.
+
+**Licence checked:** MailBurg is MIT, DialOS GPL-3.0 - MIT code may go
+into a GPL project.
+
+### The recognizer for the search term is already there
+
+A spoken search term is **text, not a command** - the same division of
+labour applies as in dictation: Vosk takes the start sentence,
+**Parakeet** the term. The only new thing to clarify is whether Parakeet
+can be given a dictionary built from the most frequent sender names in
+one's own index - the way dictation has its personal dictionary.
+
+### Open
+
+Whether the index has to lie encrypted. It sits on the LUKS partition of
+`nutzer`, so it is protected while the device is switched off - an
+encryption of its own would only help against an attacker inside the
+running session, and he would have the documents themselves as well.
+Equally open: whether `dialos-archiv.py` and `dialos-mailarchiv.py`
+remain or are absorbed into the index.
 
 ## Two rules that follow from this list
 

@@ -227,20 +227,37 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     beweist nicht, dass etwas auf dem Gerät wirkt.
 
   **Schritt 3 - DialOS-Suche**, erst wenn Schritt 1 und 2 stehen:
-  - [ ] **MailBurg als Motor**, kein neuer Suchindex. Es erfüllt das
-    Auswahlkriterium aus `docs/anwendungen.md` als einziges Programm der
-    Familie vollständig (`mailburg suchen ARCHIV "…"`), hat FTS5 mit Präfix-
-    und Trigramm-Index, PDF-Textextraktion, OCR über tesseract und baut sich
-    schon als `.deb` für Debian 13. Lizenz geprüft: MailBurg ist MIT, DialOS
-    GPL-3.0 - MIT-Code darf in ein GPL-Projekt.
-  - [ ] **Über die Kommandozeile aufrufen, nicht als Bibliothek importieren.**
-    Dann bleiben Versionen und Lizenzen getrennt.
-  - [ ] MailBurg braucht dafür eine **JSON-Ausgabe** bei `suchen` - eine für
-    Menschen gesetzte Trefferliste ist für einen Sprachdialog unbrauchbar.
-    Gehört ins MailBurg-Repo, nicht hierher.
-  - [ ] **Nicht-Mail-Quellen in MailBurg:** Briefe aus `~/Dokumente/`, Scans,
-    Denkzettels `notizen.db`. Die Extraktionskette kann das alles schon, sie
-    wird heute nur über Anhänge aufgerufen.
+  - [ ] **Von MailBurg wird `extract/` geteilt, nicht das Programm**
+    (korrigiert am 2026-09-17 nach Stephans Frage, ob es MailBurg ganz braucht
+    „oder nur Teile"). Der Unterschied ist nicht die Größe, sondern die
+    Aufgabe: **MailBurg archiviert, DialOS-Suche muss nur finden.** Vollständig
+    begründet in `docs/anwendungen.md`; kurz: Die Dokumente liegen schon in
+    `~/Dokumente/`, `~/Notizen/` und im mbox - sie ein zweites Mal in einen
+    inhaltsadressierten Speicher zu schreiben wäre Verdopplung, und
+    Revisionssicherheit, Grabsteine und Aufbewahrungsfristen haben auf einem
+    privaten Gerät nichts zu suchen.
+    - [ ] **`extract/` einbinden** (1.360 Zeilen): `pdftotext` mit `pypdf` als
+      Rückfall, OCR über `pdftoppm`/`tesseract` mit der gemessenen Pixelgrenze
+      `MAX_KANTE=5000`, Office ohne Binärmüll. Dort steckt teuer erarbeitetes
+      Wissen - das baut niemand ein zweites Mal richtig nach.
+    - [ ] **Import statt Kommandozeile** - Korrektur des ersten Entwurfs, der
+      es umgekehrt festlegte. Der Aufruf über die Kommandozeile war richtig,
+      solange MailBurg der ganze Motor sein sollte; für ein geteiltes Modul ist
+      der Import richtig. Kostet nichts: MailBurgs Kern hat
+      `dependencies = []`, ohne Extras kommen weder PySide6 noch der Server
+      mit. Lizenz geprüft: MIT darf in ein GPL-3.0-Projekt.
+    - [ ] **Offen, gehört ins MailBurg-Repo:** ob `extract/` in ein eigenes
+      kleines Paket wandert, das beide benutzen. Sauberer als der Import aus
+      dem Kern, aber ein Umbau an MailBurg - und dort zu entscheiden.
+  - [ ] **Eigener Index, schlank.** SQLite-FTS5 gehört zur Standardbibliothek;
+    ein Index über Dateien, die schon da sind, sind einige hundert Zeilen -
+    ohne Archivablage, ohne Journal, ohne Fristen. Quellen: Briefe aus
+    `~/Dokumente/`, PDFs aus `~/Dokumente/Archiv/DialOS-DATA/`, Notizen aus
+    `~/Notizen/`, Mails aus Thunderbirds mbox.
+    - [ ] **Kölner-Phonetik-Spalte** für Absendernamen, damit „Meier", „Mayer"
+      und „Maier" zusammenfallen. Fängt Erkennungsunschärfe strukturell ab,
+      statt sie dem Nutzer als Nachfrage aufzubürden. Hat MailBurg nicht, weil
+      es dort niemand braucht - dort tippt man.
   - [ ] **Freier Suchbegriff über Parakeet**, nicht über Vosk. Ein Suchbegriff
     ist Text, kein Befehl - dieselbe Arbeitsteilung wie beim Diktat. Nichts neu
     zu beschaffen. **Zu prüfen ist nur eines:** ob sich Parakeet ein Wörterbuch

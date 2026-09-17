@@ -150,58 +150,92 @@ dann steht nicht fest, ob überhaupt geprüft wird. Bei SMTP hatte ich den
 Kontext gesetzt, und genau dort schlug es fehl; der Vergleich war also
 wertlos. **Wer TLS prüft, muss den Prüfkontext ausdrücklich übergeben.**
 
-## Archiv und Suche: MailBurg ist der Motor
+## Archiv und Suche: MailBurgs Extraktion, aber ein eigener Index
 
 Festgelegt mit Stephan am 2026-09-17, als er nach einer Archivlösung mit
 Vorlesefunktion und Sprach-Dialog fragte - Briefe, Dokumente, Notizen und
-E-Mails per Sprache suchen. Gebaut wird das als erste **Erweiterung**
-namens DialOS-Suche, siehe [erweiterungen.md](erweiterungen.md).
+E-Mails per Sprache suchen. Gebaut wird das als erste **Erweiterung** namens
+DialOS-Suche, siehe [erweiterungen.md](erweiterungen.md).
 
-**Die Wahl fiel gegen ein viertes eigenes Archiv.** DialOS hat bereits
-zwei halbe: `dialos-archiv.py` (PDF-Archiv in
-`~/Dokumente/Archiv/DialOS-DATA/` und auf dem Stick) und
-`dialos-mailarchiv.py` (Mails aus Thunderbirds lokalen mbox-Dateien). Ein
-dritter Weg daneben wäre nach der Ein-Player-Regel weiter unten genau der
-Fehler, den diese Datei verhindern soll.
+**Die Wahl fiel gegen ein viertes eigenes Archiv.** DialOS hat bereits zwei
+halbe: `dialos-archiv.py` (PDF-Archiv in `~/Dokumente/Archiv/DialOS-DATA/` und
+auf dem Stick) und `dialos-mailarchiv.py` (Mails aus Thunderbirds lokalen
+mbox-Dateien). Ein dritter Weg daneben wäre nach der Ein-Player-Regel weiter
+unten genau der Fehler, den diese Datei verhindern soll.
 
-**MailBurg erfüllt das Auswahlkriterium dieser Datei als einziges
-Programm der DialOS-Familie vollständig.** Steuerbarkeit von außen ist
-dort nicht nachgerüstet, sondern der Normalfall:
+**Zuerst stand MailBurg als ganzer Motor im Entwurf. Stephans Frage vom
+2026-09-17 hat das korrigiert:** „Brauchen wir denn MailBurg als komplettes
+Programm oder nur Teile? Denn MailBurg wird ja mit einem anderen Anliegen
+erstellt." Genau so ist es, und der Unterschied ist nicht die Größe.
 
-| Was DialOS-Suche braucht | Was MailBurg mitbringt |
-|---|---|
-| Von außen durchsuchbar | `mailburg suchen ARCHIV "…"` als Kommandozeile |
-| Volltext über alles | SQLite-FTS5 mit Präfix- **und** Trigramm-Index |
-| Briefe und Scans lesbar machen | `pdftotext`/`pypdf`, Office-Extraktion, OCR über `tesseract` |
-| Auf Debian 13 installierbar | baut sich schon als `.deb` |
-| Lizenzlage geklärt | MIT - darf in ein GPL-3.0-Projekt |
+### MailBurg archiviert. DialOS-Suche muss nur finden.
 
-**Aufgerufen wird es über die Kommandozeile, nicht als Bibliothek
-importiert.** Damit bleiben Versionen und Lizenzen getrennt, und DialOS
-hängt nicht an MailBurgs innerem Aufbau. Was dafür in MailBurg noch fehlt,
-ist eine **JSON-Ausgabe** bei `suchen`: Eine für Menschen gesetzte
-Trefferliste ist für einen Sprachdialog unbrauchbar. Das gehört ins
-MailBurg-Repo, nicht hierher.
+MailBurg kopiert Mails in einen eigenen, inhaltsadressierten Speicher
+(`.eml.zst`, SHA-256 als Dateiname, Hash-Kette im Journal) - weil es **beweisen**
+können muss, dass nichts verändert wurde. Für ein GoBD-Archiv der Geschäftspost
+ist das richtig.
 
-**Was MailBurg heute nicht tut:** Es archiviert nur Mails. Briefe aus
-`~/Dokumente/`, eingescannte Post und Denkzettels Notizen müssen als
-weitere Quellen dazukommen - die Extraktionskette kann das alles schon,
-sie wird bisher nur über Anhänge aufgerufen.
+**Die Dokumente von DialOS liegen aber schon:** Briefe in `~/Dokumente/`, PDFs
+unter `~/Dokumente/Archiv/DialOS-DATA/`, Notizen in `~/Notizen/`, Mails in
+Thunderbirds mbox. Sie ein zweites Mal wegzuschreiben wäre Verdopplung -
+doppelter Platz, und ab da zwei Wahrheiten, die auseinanderlaufen können.
 
-**Der Erkenner für den Suchbegriff ist schon da.** Ein gesprochener
-Suchbegriff ist Text, kein Befehl - es gilt also dieselbe Arbeitsteilung
-wie beim Diktat: Vosk nimmt den Startsatz, **Parakeet** den Begriff. Neu
-zu klären ist nur, ob sich Parakeet ein Wörterbuch aus den häufigsten
-Absendernamen des eigenen Archivs mitgeben lässt - so wie das Diktat sein
-persönliches Wörterbuch hat.
+Dazu kommt, was auf einem privaten Gerät nichts zu suchen hat:
+Revisionssicherheit, Grabsteine statt echter Löschung, RFC-3161-Zeitstempel,
+Aufbewahrungsfristen. Für Privatpersonen greift die Haushaltsausnahme der
+DSGVO. MailBurg hat dafür zwar einen eigenen Modus, aber der Apparat bliebe
+installiert.
 
-**Offen und bewusst nicht hier entschieden:** ob das Archiv verschlüsselt
-läuft. MailBurg kann es (AES-256-GCM je Datei), aber **der Suchindex
-bleibt dabei Klartext** - und ein blinder Nutzer, der sein Archivpasswort
-sprechen müsste, ist ein eigenes Problem. Siehe
-[sicherheit-datenschutz.md](sicherheit-datenschutz.md) und `TODO.md`.
-Ebenso offen: ob `dialos-archiv.py` und `dialos-mailarchiv.py` in
-MailBurg aufgehen oder daneben stehen bleiben.
+### Was geteilt wird und was nicht
+
+Ausgezählt am 2026-09-17:
+
+| Teil von MailBurg | Zeilen | DialOS-Suche |
+|---|---|---|
+| `extract/` - PDF, OCR, Office lesbar machen | 1.360 | **wird geteilt** |
+| `core/` - Archiv, Index, Verschlüsselung, Journal | 12.091 | nein |
+| `ui/` - grafische Oberfläche | 12.542 | nein |
+| `server/` - Weboberfläche | 1.600 | nein |
+
+**Geteilt wird die Extraktionskette**, weil dort teuer erarbeitetes Wissen
+steckt, das niemand ein zweites Mal richtig hinbekommt: `pdftotext` mit `pypdf`
+als Rückfall, OCR über `pdftoppm` und `tesseract` mit der gemessenen
+Pixelgrenze `MAX_KANTE=5000` gegen den 523-Megapixel-Absturz bei
+iPhone-Scans, Office-Dateien ohne Binärmüll.
+
+**Der Index wird neu gebaut, schlank.** SQLite-FTS5 gehört zur
+Standardbibliothek; ein Index über Dateien, die schon im Dateisystem liegen,
+sind einige hundert Zeilen - ohne Archivablage, ohne Journal, ohne Fristen.
+Dafür mit dem, was DialOS braucht und MailBurg nicht hat: einer Spalte mit der
+**Kölner Phonetik** von Absendernamen, damit „Meier", „Mayer" und „Maier"
+zusammenfallen. Das fängt Erkennungsunschärfe strukturell ab, statt sie dem
+Nutzer als Nachfrage aufzubürden.
+
+**Importiert statt über die Kommandozeile aufgerufen** - und das ist eine
+Korrektur des ersten Entwurfs, der es umgekehrt festlegte. Der Aufruf über die
+Kommandozeile war richtig, solange MailBurg der ganze Motor sein sollte; für
+ein geteiltes Modul ist der Import der richtige Weg. Er kostet auch nichts:
+MailBurgs Kern hat `dependencies = []`. Ohne die Extras kommen weder PySide6
+noch der Server mit.
+
+**Lizenz geprüft:** MailBurg ist MIT, DialOS GPL-3.0 - MIT-Code darf in ein
+GPL-Projekt.
+
+### Der Erkenner für den Suchbegriff ist schon da
+
+Ein gesprochener Suchbegriff ist **Text, kein Befehl** - es gilt dieselbe
+Arbeitsteilung wie beim Diktat: Vosk nimmt den Startsatz, **Parakeet** den
+Begriff. Neu zu klären ist nur, ob sich Parakeet ein Wörterbuch aus den
+häufigsten Absendernamen des eigenen Index mitgeben lässt - so wie das Diktat
+sein persönliches Wörterbuch hat.
+
+### Offen
+
+Ob der Index verschlüsselt liegen muss. Er steht auf der LUKS-Partition von
+`nutzer`, ist also bei ausgeschaltetem Gerät geschützt - eine eigene
+Verschlüsselung käme nur gegen einen Angreifer in der laufenden Sitzung, und
+der hätte auch die Dokumente selbst. Ebenso offen: ob `dialos-archiv.py` und
+`dialos-mailarchiv.py` bestehen bleiben oder in den Index aufgehen.
 
 ## Zwei Regeln, die aus dieser Liste folgen
 

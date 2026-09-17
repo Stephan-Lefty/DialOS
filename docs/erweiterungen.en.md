@@ -473,9 +473,11 @@ bypassed: if the check in the installation script fails, the installation
 fails. With a script that copies files, "refuse instead of warn" remains a
 courtesy.
 
-On top of that comes `Depends: mailburg` - DialOS-Suche's dependency on
-MailBurg is then enforced by the package manager instead of by a line in
-the documentation. MailBurg already builds itself as a `.deb` anyway.
+On top of that comes `Depends:` - DialOS-Suche's dependencies are then
+enforced by the package manager instead of by a line in the documentation.
+Those are `poppler-utils` and `tesseract-ocr` for the extraction and, as
+long as `extract/` is shared from MailBurg, its core. MailBurg already
+builds itself as a `.deb` anyway.
 
 **To be honest about it:** DialOS builds not a single package today. Setup
 runs over shell scripts (`dialos-parakeet-einrichten.sh`,
@@ -496,10 +498,16 @@ answer has to be measured:
    2026-08-13 and is unused to this day (not a single template in the
    system). Mapping sentence → action per extension would be the first
    place where it could contribute something - that is not decided.
-3. **Whether the archive runs encrypted.** MailBurg can do it (AES-256-GCM
-   per file), but the search index stays plain text in the process - and a
-   blind user who would have to speak their archive password is a problem
-   of its own.
+3. **Whether the index has to lie encrypted.** It sits on the LUKS
+   partition of `nutzer`, so it is protected while the device is switched
+   off. An encryption of its own would only help against an attacker inside
+   the running session - and he would have the documents themselves as
+   well, lying unencrypted alongside. A password that a blind user would
+   have to speak would be a high price for that.
+4. **How `extract/` is shared without copying it.** Importing from
+   MailBurg's core is the simple way and costs nothing (`dependencies = []`).
+   Cleaner would be a small package of its own that both use - but that is
+   a rebuild of MailBurg and belongs to be decided there, not here.
 
 ## The first extension: DialOS-Suche
 
@@ -509,11 +517,15 @@ by voice. The choice of program is in
 [sprachbefehle.en.md](sprachbefehle.en.md), the tasks in
 [TODO.en.md](../TODO.en.md).
 
-**MailBurg is intended as the engine, not a new search index.** The
-reasoning follows the selection criterion from
-[anwendungen.en.md](anwendungen.en.md) - controllability from outside -
-and MailBurg is the only program in the family that fully meets it:
-`mailburg suchen ARCHIV "…"` is a ready-made command line.
+**From MailBurg the extraction chain is shared, not the program**
+(corrected on 2026-09-17 after Stephan's question whether MailBurg is
+needed whole „oder nur Teile" - or only parts). The difference is not size
+but the task: **MailBurg archives, DialOS-Suche only has to find.** The
+documents already lie in the file system; writing them a second time into
+a content-addressed store would be duplication. What is shared is
+`extract/` (1.360 lines, PDF, OCR, Office), what is built anew is a lean
+FTS5 index over the existing files. In full, with figures, in
+[anwendungen.en.md](anwendungen.en.md).
 
 **DialOS-Suche makes two demands that go beyond an ordinary extension**
 and are therefore listed here, because they shaped the design:

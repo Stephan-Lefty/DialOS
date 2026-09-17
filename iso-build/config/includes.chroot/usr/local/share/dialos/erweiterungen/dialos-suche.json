@@ -1,0 +1,10 @@
+{
+  "name": "DialOS-Suche",
+  "version": "0.1.0",
+  "braucht_dialos": "0.5.1",
+  "startsaetze": ["unterlagen durchsuchen"],
+  "befehl": "/usr/local/bin/dialos-suche.py",
+  "eigene_grammatik": ["stopp", "weiter", "abbrechen"],
+  "braucht_mikrofon": true,
+  "beschreibung": "Briefe, Dokumente, Notizen und Mails im Archiv finden"
+}

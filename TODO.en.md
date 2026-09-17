@@ -232,20 +232,39 @@ finished too, and then move down together. That way no reference breaks.
     prove that anything takes effect on the device.
 
   **Step 3 - DialOS Search**, only once steps 1 and 2 stand:
-  - [ ] **MailBurg as the engine**, no new search index. It is the only program
-    in the family that fully meets the selection criterion from
-    `docs/anwendungen.en.md` (`mailburg suchen ARCHIV "…"`), has FTS5 with
-    prefix and trigram index, PDF text extraction, OCR via tesseract and already
-    builds itself as a `.deb` for Debian 13. Licence checked: MailBurg is MIT,
-    DialOS GPL-3.0 - MIT code may go into a GPL project.
-  - [ ] **Call it over the command line, do not import it as a library.** That
-    keeps versions and licences apart.
-  - [ ] For that MailBurg needs a **JSON output** for `suchen` - a hit list
-    typeset for humans is unusable for a voice dialogue. Belongs in the MailBurg
-    repo, not here.
-  - [ ] **Non-mail sources in MailBurg:** letters from `~/Dokumente/`, scans,
-    Denkzettel's `notizen.db`. The extraction chain can already do all of that,
-    it is only called via attachments today.
+  - [ ] **From MailBurg, `extract/` is shared, not the program**
+    (corrected on 2026-09-17 after Stephan's question whether MailBurg is needed
+    whole „oder nur Teile" - or only parts). The difference is not size but the
+    task: **MailBurg archives, DialOS Search only has to find.** Reasoned out in
+    full in `docs/anwendungen.en.md`; in short: the documents already lie in
+    `~/Dokumente/`, `~/Notizen/` and in the mbox - writing them a second time
+    into a content-addressed store would be duplication, and audit-proof
+    storage, tombstones and retention periods have no business on a private
+    device.
+    - [ ] **Bring in `extract/`** (1.360 lines): `pdftotext` with `pypdf` as a
+      fallback, OCR via `pdftoppm`/`tesseract` with the measured pixel limit
+      `MAX_KANTE=5000`, Office without binary rubbish. Dearly earned knowledge
+      sits in there - nobody rebuilds that correctly a second time.
+    - [ ] **Import instead of command line** - a correction of the first draft,
+      which settled it the other way round. Calling over the command line was
+      right as long as MailBurg was to be the whole engine; for a shared module
+      importing is right. Costs nothing: MailBurg's core has
+      `dependencies = []`, without the extras neither PySide6 nor the server
+      comes along. Licence checked: MIT may go into a GPL-3.0 project.
+    - [ ] **Open, belongs in the MailBurg repo:** whether `extract/` moves into
+      a small package of its own that both use. Cleaner than importing from the
+      core, but a rebuild of MailBurg - and to be decided there.
+  - [ ] **An index of our own, lean.** SQLite FTS5 is part of the standard
+    library; an index over files that are already there is a few hundred lines -
+    without archive storage, without a journal, without retention periods.
+    Sources: letters from `~/Dokumente/`, PDFs from
+    `~/Dokumente/Archiv/DialOS-DATA/`, notes from `~/Notizen/`, mail from
+    Thunderbird's mbox.
+    - [ ] **Cologne phonetics column** for sender names, so that „Meier",
+      „Mayer" and „Maier" fall together. Catches recognition fuzziness
+      structurally instead of loading it onto the user as a follow-up question.
+      MailBurg does not have it because nobody needs it there - there one
+      types.
   - [ ] **Free search term via Parakeet**, not via Vosk. A search term is text,
     not a command - the same division of labour as in dictation. Nothing new to
     procure. **Only one thing needs checking:** whether Parakeet can be given a

@@ -476,9 +476,11 @@ umgangen werden können: Schlägt die Prüfung im Installationsskript fehl,
 schlägt die Installation fehl. Bei einem Skript, das Dateien kopiert,
 bleibt „verweigern statt warnen" eine Höflichkeit.
 
-Dazu kommt `Depends: mailburg` - die Abhängigkeit von DialOS-Suche auf
-MailBurg wird damit vom Paketmanager erzwungen statt von einer Zeile in
-der Doku. MailBurg baut sich ohnehin schon als `.deb`.
+Dazu kommt `Depends:` - die Abhängigkeiten von DialOS-Suche werden vom
+Paketmanager erzwungen statt von einer Zeile in der Doku. Das sind
+`poppler-utils` und `tesseract-ocr` für die Extraktion und, solange
+`extract/` aus MailBurg geteilt wird, dessen Kern. MailBurg baut sich
+ohnehin schon als `.deb`.
 
 **Ehrlich dazu:** DialOS baut heute kein einziges Paket. Einrichtung läuft
 über Shell-Skripte (`dialos-parakeet-einrichten.sh`,
@@ -499,10 +501,16 @@ die Antwort gemessen werden muss:
    installiert und bis heute ungenutzt (keine einzige Vorlage im System).
    Die Zuordnung Satz → Aktion je Erweiterung wäre der erste Ort, an dem
    es etwas beitragen könnte - entschieden ist das nicht.
-3. **Ob das Archiv verschlüsselt läuft.** MailBurg kann es
-   (AES-256-GCM je Datei), aber der Suchindex bleibt dabei Klartext - und
-   ein blinder Nutzer, der sein Archivpasswort sprechen müsste, ist ein
-   eigenes Problem.
+3. **Ob der Index verschlüsselt liegen muss.** Er steht auf der
+   LUKS-Partition von `nutzer`, ist bei ausgeschaltetem Gerät also
+   geschützt. Eine eigene Verschlüsselung käme nur gegen einen Angreifer in
+   der laufenden Sitzung - und der hätte auch die Dokumente selbst, die
+   unverschlüsselt danebenliegen. Ein Passwort, das ein blinder Nutzer
+   sprechen müsste, wäre dafür ein hoher Preis.
+4. **Wie `extract/` geteilt wird, ohne zu kopieren.** Import aus MailBurgs
+   Kern ist der einfache Weg und kostet nichts (`dependencies = []`). Sauberer
+   wäre ein eigenes kleines Paket, das beide benutzen - das ist aber ein
+   Umbau an MailBurg und gehört dorthin entschieden, nicht hierher.
 
 ## Die erste Erweiterung: DialOS-Suche
 
@@ -511,11 +519,14 @@ vorlesen. Die Programmwahl steht in [anwendungen.md](anwendungen.md), die
 vorgesehenen Sätze in [sprachbefehle.md](sprachbefehle.md), die Aufgaben
 in [TODO.md](../TODO.md).
 
-**Als Motor ist MailBurg vorgesehen, nicht ein neuer Suchindex.** Die
-Begründung folgt dem Auswahlkriterium aus
-[anwendungen.md](anwendungen.md) - Steuerbarkeit von außen -, und
-MailBurg erfüllt es als einziges Programm der Familie vollständig:
-`mailburg suchen ARCHIV "…"` ist eine fertige Kommandozeile.
+**Von MailBurg wird die Extraktionskette geteilt, nicht das Programm**
+(korrigiert am 2026-09-17 nach Stephans Frage, ob es MailBurg ganz braucht
+„oder nur Teile"). Der Unterschied ist nicht die Größe, sondern die Aufgabe:
+**MailBurg archiviert, DialOS-Suche muss nur finden.** Die Dokumente liegen
+schon im Dateisystem; sie ein zweites Mal in einen inhaltsadressierten Speicher
+zu schreiben wäre Verdopplung. Geteilt wird `extract/` (1.360 Zeilen, PDF, OCR,
+Office), neu gebaut wird ein schlanker FTS5-Index über die vorhandenen Dateien.
+Vollständig mit Zahlen in [anwendungen.md](anwendungen.md).
 
 **Zwei Anforderungen stellt DialOS-Suche, die über eine gewöhnliche
 Erweiterung hinausgehen** und deshalb hier stehen, weil sie den Entwurf

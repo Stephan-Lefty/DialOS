@@ -130,31 +130,6 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
-- **Version 0.5.2 begonnen** (2026-09-17, Stephans Ansage: „aus dem, was wir bis
-  heute geschafft haben, mit der Version 0.5.2 starten"). 0.5.1 ist damit
-  abgeschlossen - vom 2026-08-17 bis 2026-09-17: Anwendungen (Diktat, Notizen,
-  Einkaufszettel, Drucken, Archiv, Auskunft, Wetter, Bildschirmfoto,
-  Update-Automatik), Prüfstand und Parakeet für freien Text, persönliche Daten mit
-  Eingabemaske, Befehlsübersicht, Hintergrund nach Jahreszeit und der Brief nach
-  DIN 5008 mit Empfänger-Dialog, Thunderbird-Kontakten, Ansprechpartner und
-  Mailadressen. Neue Einträge stehen ab hier.
-
-### 0.5.1
-
-- **Mailadressen im Diktat** (2026-09-17): „meine Mailadresse" setzt die eigene
-  E-Mail aus den persönlichen Daten ein, „Mailadresse von GESOBAU" die aus den
-  Thunderbird-Kontakten, und „Mailadresse buchstabieren" nimmt jede fremde Adresse
-  Zeichen für Zeichen auf. Vorlesen als „max at beispiel Punkt de".
-
-- **Ansprechpartner im Empfänger-Dialog** (2026-09-17): Bei einer Firma fragt DialOS
-  nach der Person („Frau Erika Muster"), die Zeile steht nach DIN 5008 unter der
-  Firma, ohne „z. Hd.". „in Musterhausen" wird „Musterhausen".
-
-- **Brief als PDF nach DIN 5008 eingebunden** (2026-09-17, Stephans Urteil über zwei
-  Vorschauen): kein Briefkopf, Rücksendeangabe ohne Etage passt ganz ins Fenster,
-  Informationsblock mit Anschrift und Datum 17.09.2026 auf Höhe der
-  Rücksendeangabe. Gilt für „Brief als PDF speichern", „Brief drucken" und das
-  Archiv; Zettel und Notizen bleiben festbreit.
 - **Wortschatz-Prüfung lief nie - auf Vosks eigene Meldung umgestellt**
   (2026-09-17, Stephans Befund am Gerät). Sie las `graph/words.txt`, **die es
   im kleinen Modell gar nicht gibt**:
@@ -204,12 +179,6 @@ das Erfolg meldet, während es versagt.
   übersieht sie. Gezählt wird jetzt über den Syntaxbaum. Die Satzzahl 49 und
   alle Schlussfolgerungen bleiben unberührt.
 
-- **Im Diktat: „von vorne" und „alles verwerfen", Beträge mit Cent von Vosk**
-  (2026-09-17, vierte Probe). Beide Befehle mit Rückfrage und eigenem Erkenner, damit
-  „Diktat beenden" nicht verwechselt wird. Hört nur Vosk „Cent", gilt sein Betrag
-  („12 Euro und 40" → „322,40 Euro"). Prüfstand unverändert. Nach der fünften Probe
-  (15:00): Gegenprobe auch mit Parakeets Text, zwei gleichzeitig gehörte Befehle
-  entscheidet die freie Erkennung, „322 Euro und 40 Cent" → „322,40 Euro".
 - **Grammatik-Prüfung kann jetzt Sätze prüfen, die noch nicht eingebaut sind**
   (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` nimmt einen
   Kandidaten versuchsweise in die Grammatik auf. **Das ging vorher nicht, und
@@ -354,6 +323,98 @@ das Erfolg meldet, während es versagt.
   kurzen Lauschfenster dazwischen - gebaut gehört das in `dialos-say.py` und
   nicht in eine Erweiterung, dann löst es die 144 Sekunden gleich mit.
 
+- **Erweiterungsschnittstelle gebaut - Werkzeug, Manifest und DialOS-Suche**
+  (2026-09-17). Aus dem Entwurf desselben Tages wird Code:
+  `dialos-erweiterung.py` (`pruefen`/`einbauen`/`entfernen`/`liste`), das
+  Manifest `dialos-suche.json` und `dialos-suche.py` als erste Erweiterung.
+  **Die Manifest-Prüfung verweigert statt zu warnen**, auch bei Kleinigkeiten,
+  die sonst still durchgehen: unbekannte Feldnamen (ein „startsaetzte" wäre ein
+  Feld, das niemand liest), Startsätze mit Großbuchstaben oder doppelten
+  Leerzeichen (in der Grammatik gültig, aber nie zugeordnet, weil Vosk klein
+  zurückgibt), relative Programmpfade. Sieben Fälle gegengeprüft. Ein kaputtes
+  Manifest wird übersprungen und gemeldet, nicht verschluckt und nicht tödlich -
+  es darf die Sprachsteuerung nicht mitreißen.
+
+  **DialOS-Suche sucht noch nicht, und das ist Absicht:** den Index gibt es
+  nicht. Käme beides zugleich, wäre bei einem Fehlschlag nicht zu sagen, ob die
+  Schnittstelle oder die Suche schuld ist. Was läuft, ist das Fundament -
+  Startsatz, Mikrofon-Übergabe, freie Erkennung des Begriffs über Parakeet,
+  saubere Rückgabe, dazu `--pruefen` als Selbsttest ohne Mikrofon.
+
+  **Zwei Funde beim Bauen machen den Eingriff in den Befehlsdienst klein:** Er
+  prüft bereits in jeder Schleifenrunde auf eine Markierungsdatei und verwirft
+  dann alles Gehörte - genau die Mikrofon-Übergabe. Und `dialos-notiz.py`
+  benutzt für Rückfragen **exakt dieselbe Datei** unter dem Namen
+  `FREMDE_AUFNAHME_MARKE`. Es gibt also längst eine allgemeine Mikrofon-Marke,
+  nur unter historischem Namen. Neu ist die **PID in der Marke**: Die
+  bestehenden Prüfungen sehen nur, ob die Datei da ist, aber eine Wache kann
+  damit eine verwaiste Marke erkennen - heute bliebe das Mikrofon nach einem
+  Absturz für immer belegt. Dazu ein Signal-Handler, den das Diktat nicht hat.
+
+  **Noch nicht auslösbar:** Es fehlen der Grammatik-Einbau in
+  `dialos-sprachbefehl-desktop.py`, die Prüfungen in `dialos-aufspielen` und der
+  Abgleich in `dialos-installstand.sh`.
+
+- **Von MailBurg wird nur die Extraktion geteilt, nicht das Programm**
+  (2026-09-17, nach Stephans Frage: „Brauchen wir denn MailBurg als komplettes
+  Programm oder nur Teile? Denn MailBurg wird ja mit einem anderen Anliegen
+  erstellt."). Sie trifft zu, und **der Unterschied ist nicht die Größe,
+  sondern die Aufgabe: MailBurg archiviert, DialOS-Suche muss nur finden.**
+
+  MailBurg kopiert Mails in einen inhaltsadressierten Speicher mit Hash-Kette,
+  weil es beweisen können muss, dass nichts verändert wurde - richtig für ein
+  GoBD-Archiv der Geschäftspost. Die Dokumente von DialOS **liegen aber schon**
+  in `~/Dokumente/`, `~/Notizen/` und im mbox. Sie ein zweites Mal wegzuschreiben
+  wäre Verdopplung, und ab da gäbe es zwei Wahrheiten. Revisionssicherheit,
+  Grabsteine, RFC-3161-Zeitstempel und Aufbewahrungsfristen haben auf einem
+  privaten Gerät ohnehin nichts zu suchen - dort greift die Haushaltsausnahme
+  der DSGVO.
+
+  **Geteilt wird `extract/`** (1.360 Zeilen von 27.593): `pdftotext` mit
+  `pypdf` als Rückfall, OCR über `pdftoppm`/`tesseract` mit der gemessenen
+  Pixelgrenze `MAX_KANTE=5000` gegen den 523-Megapixel-Absturz bei
+  iPhone-Scans, Office ohne Binärmüll. Dort steckt Wissen, das niemand ein
+  zweites Mal richtig nachbaut. **Neu gebaut wird der Index**, schlank über
+  SQLite-FTS5 aus der Standardbibliothek - dafür mit einer
+  Kölner-Phonetik-Spalte, damit „Meier", „Mayer" und „Maier" zusammenfallen.
+  Die hat MailBurg nicht, weil man dort tippt statt spricht.
+
+  **Damit korrigiert sich der Entwurf in einem Punkt:** „über die Kommandozeile
+  aufrufen, nicht als Bibliothek importieren" galt für MailBurg als ganzen
+  Motor. Für ein geteiltes Modul ist der Import richtig - und er kostet nichts,
+  weil MailBurgs Kern `dependencies = []` hat.
+
+
+- **Version 0.5.2 begonnen** (2026-09-17, Stephans Ansage: „aus dem, was wir bis
+  heute geschafft haben, mit der Version 0.5.2 starten"). 0.5.1 ist damit
+  abgeschlossen - vom 2026-08-17 bis 2026-09-17: Anwendungen (Diktat, Notizen,
+  Einkaufszettel, Drucken, Archiv, Auskunft, Wetter, Bildschirmfoto,
+  Update-Automatik), Prüfstand und Parakeet für freien Text, persönliche Daten mit
+  Eingabemaske, Befehlsübersicht, Hintergrund nach Jahreszeit und der Brief nach
+  DIN 5008 mit Empfänger-Dialog, Thunderbird-Kontakten, Ansprechpartner und
+  Mailadressen. Neue Einträge stehen ab hier.
+
+### 0.5.1
+
+- **Mailadressen im Diktat** (2026-09-17): „meine Mailadresse" setzt die eigene
+  E-Mail aus den persönlichen Daten ein, „Mailadresse von GESOBAU" die aus den
+  Thunderbird-Kontakten, und „Mailadresse buchstabieren" nimmt jede fremde Adresse
+  Zeichen für Zeichen auf. Vorlesen als „max at beispiel Punkt de".
+
+- **Ansprechpartner im Empfänger-Dialog** (2026-09-17): Bei einer Firma fragt DialOS
+  nach der Person („Frau Erika Muster"), die Zeile steht nach DIN 5008 unter der
+  Firma, ohne „z. Hd.". „in Musterhausen" wird „Musterhausen".
+- **Brief als PDF nach DIN 5008 eingebunden** (2026-09-17, Stephans Urteil über zwei
+  Vorschauen): kein Briefkopf, Rücksendeangabe ohne Etage passt ganz ins Fenster,
+  Informationsblock mit Anschrift und Datum 17.09.2026 auf Höhe der
+  Rücksendeangabe. Gilt für „Brief als PDF speichern", „Brief drucken" und das
+  Archiv; Zettel und Notizen bleiben festbreit.
+- **Im Diktat: „von vorne" und „alles verwerfen", Beträge mit Cent von Vosk**
+  (2026-09-17, vierte Probe). Beide Befehle mit Rückfrage und eigenem Erkenner, damit
+  „Diktat beenden" nicht verwechselt wird. Hört nur Vosk „Cent", gilt sein Betrag
+  („12 Euro und 40" → „322,40 Euro"). Prüfstand unverändert. Nach der fünften Probe
+  (15:00): Gegenprobe auch mit Parakeets Text, zwei gleichzeitig gehörte Befehle
+  entscheidet die freie Erkennung, „322 Euro und 40 Cent" → „322,40 Euro".
 - **Empfänger-Dialog: Namen korrigieren, jederzeit abbrechen oder von vorne**
   (2026-09-17, Stephan: „keinen Einfluss, das noch mal zu ändern" und „kann den
   Brief nicht neu starten oder das Diktat einfach beenden"). „Stimmt das? Sage ja,

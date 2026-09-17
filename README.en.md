@@ -122,30 +122,6 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
-- **Version 0.5.2 started** (2026-09-17, Stephan's call: "start version 0.5.2 from
-  what we have achieved up to today"). 0.5.1 is thereby closed - from 2026-08-17 to
-  2026-09-17: applications (dictation, notes, shopping list, printing, archive,
-  information, weather, screenshot, update automation), test bench and Parakeet for
-  free text, personal data with an input form, command overview, seasonal wallpaper
-  and the letter following DIN 5008 with recipient dialogue, Thunderbird contacts,
-  contact person and email addresses. New entries go here from now on.
-
-### 0.5.1
-
-- **Email addresses in dictation** (2026-09-17): "meine Mailadresse" inserts your
-  own email from the personal data, "Mailadresse von GESOBAU" the one from the
-  Thunderbird contacts, and "Mailadresse buchstabieren" takes any other address
-  character by character. Read out as "max at beispiel Punkt de".
-
-- **Contact person in the recipient dialogue** (2026-09-17): for a company DialOS
-  asks for the person ("Frau Erika Muster"); following DIN 5008 the line sits below
-  the company, without "z. Hd.". "in Musterhausen" becomes "Musterhausen".
-
-- **Letter as a PDF following DIN 5008 wired in** (2026-09-17, Stephan's verdict on
-  two previews): no letterhead, return address without floor fits the window
-  completely, information block with address and date 17.09.2026 level with the
-  return address. Applies to "Brief als PDF speichern", "Brief drucken" and the
-  archive; lists and notes stay fixed width.
 - **The vocabulary check never ran - switched to Vosk's own message**
   (2026-09-17, Stephan's finding on the device). It read `graph/words.txt`,
   **which does not exist in the small model at all**:
@@ -169,16 +145,6 @@ background) and `splash.png` (boot/login screen).
   follows:** a vocabulary pre-check against the large model is worthless -
   checking is done on the device, against the model that runs there as well.
 
-- **Start sentence "Unterlagen durchsuchen" (search the documents) checked on
-  the device and passed** (2026-09-17).
-  `dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"` on the T490:
-  **every sentence recognized word for word, the candidate can be built in** -
-  it is recognized itself, and none of the 49 existing commands breaks because
-  of it. The pre-selection has been confirmed: "unterlagen" (documents) and
-  "durchsuchen" (search) appear in no existing sentence, "brief" (letter) by
-  contrast six times. The test with a real voice remains the conclusion - Piper
-  speaks more clearly than a human being.
-
 - **A counting fault in the checking tool, found by the first real run**
   (2026-09-17). The run reported 51 instead of 50 sentences, and Stephan saw the
   cause in the log: "Unterlagen durchsuchen wurde 2x aufgeführt" ("Unterlagen
@@ -189,58 +155,6 @@ background) and `splash.png` (boot/login screen).
   Recorded because the lesson is bigger than the fault - a number that cannot be
   explained has more than once been the beginning of a wrong diagnosis here, and
   this time the beginning of the right one.
-
-- **Two numbers in the documentation corrected** (2026-09-17). The count of the
-  grammar from the same day named 69 different words; **71** is correct. The
-  cause was the counting method: `STARTSATZ` and `STOPPSATZ` stand in
-  `GRAMMATIK_AN` as constants and not as strings, and a text search overlooks
-  them. Counting now goes via the syntax tree. The sentence count of 49 and all
-  conclusions remain untouched.
-
-- **In dictation: "von vorne" and "alles verwerfen", amounts with cents from Vosk**
-  (2026-09-17, fourth trial). Both commands with a question and their own
-  recogniser so "Diktat beenden" is not confused. If only Vosk hears "Cent", its
-  amount applies ("12 Euro und 40" → "322,40 Euro"). Test bench unchanged. After the fifth trial
-  (15:00): cross-check also with Parakeet's text, free recognition decides between
-  two commands heard at once, "322 Euro und 40 Cent" → "322,40 Euro".
-- **The grammar check can now check sentences that are not built in yet**
-  (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` takes a
-  candidate into the grammar on trial. **That did not work before, and the gap
-  was not harmless:** anyone passing a candidate as a plain argument had it
-  heard against a grammar that does not contain it at all - Vosk then presses it
-  onto the nearest existing sentence. That looked like a confusion but was a
-  fault of the tool; conversely a broken candidate could stay unnoticed. The
-  mandatory check from `docs/sprachbefehle.en.md` was thus not doable for
-  exactly the case it is meant for.
-
-  **The check now runs in both directions:** whether the candidate is recognized
-  word for word, and **whether existing sentences break because of it**. The
-  second question is the more important one - a candidate that fails by itself
-  costs only itself; one that makes an existing command confusable breaks
-  something that works today, and that only shows once the user is alone with
-  the device.
-
-  **On top of that the first mandatory check finally runs along instead of only
-  standing in the documentation.** If a word is missing from the vocabulary,
-  Vosk throws it silently out of the grammar and does report that - but the
-  message was lost in `SetLogLevel(-1)`. The check now happens beforehand
-  against `graph/words.txt`, without speaking, and separately for candidate and
-  existing stock: a missing word in the candidate ends the check, one in the
-  existing stock is reported as a legacy problem but does not block the
-  candidate.
-
-- **Start sentence for DialOS Search prepared: "Unterlagen durchsuchen"**
-  (search the documents) (2026-09-17), second phrasing "Briefe durchsuchen"
-  (search the letters) dropped. The basis is a count of the grammar: 49
-  sentences, **71 different words** (the entry first said 69 - corrected, see
-  above). "brief" (letter) appears in it **six
-  times**, "briefe" (letters) once (in "befehle für briefe" - commands for
-  letters) - a start sentence made of words that are already there enlarges the
-  word network exactly where it is densest anyway. "unterlagen" (documents) and
-  "durchsuchen" (search) appear in **no** existing sentence. The same
-  consideration as for "starten" (start) against "sprachsteuerung" (voice
-  control), only applied one level earlier. **The check on the device is still
-  pending** and is not replaced by this - it is only pre-sorted.
 
 - **DialOS gets an extension interface - a draft, no code yet**
   (2026-09-17, Stephan's decision: build DialOS Search "als eigenständige
@@ -352,6 +266,156 @@ background) and `splash.png` (boot/login screen).
   listening window in between - that belongs in `dialos-say.py` and not in an
   extension, then it solves the 144 seconds along with it.
 
+- **Extension interface built - tool, manifest and DialOS-Suche**
+  (2026-09-17). The draft of the same day becomes code:
+  `dialos-erweiterung.py` (`pruefen`/`einbauen`/`entfernen`/`liste`), the
+  manifest `dialos-suche.json`, and `dialos-suche.py` as the first extension.
+  **The manifest check refuses instead of warning**, including on small things
+  that would otherwise pass silently: unknown field names (a „startsaetzte"
+  would be a field nobody reads), start sentences with capitals or double
+  spaces (valid in the grammar, but never matched, because Vosk returns
+  lowercase), relative program paths. Seven cases cross-checked. A broken
+  manifest is skipped and reported, neither swallowed nor fatal - it must not
+  take the voice control down with it.
+
+  **DialOS-Suche does not search yet, and that is deliberate:** there is no
+  index. If both came at once, a failure could not be attributed to either the
+  interface or the search. What runs is the foundation - start sentence,
+  microphone handover, free recognition of the term via Parakeet, clean return,
+  plus `--pruefen` as a self-test without a microphone.
+
+  **Two findings while building keep the change to the command service small:**
+  it already checks for a marker file on every loop pass and then discards
+  everything heard - exactly the microphone handover. And `dialos-notiz.py`
+  uses **the very same file** for its confirmations, under the name
+  `FREMDE_AUFNAHME_MARKE`. So a general microphone marker has existed all
+  along, only under a historical name. New is the **PID inside the marker**:
+  the existing checks only look at whether the file is there, but a watchdog
+  can use it to spot an orphaned marker - today the microphone would stay
+  occupied forever after a crash. Plus a signal handler, which the dictation
+  does not have.
+
+  **Not yet triggerable:** the grammar hook-up in
+  `dialos-sprachbefehl-desktop.py`, the checks in `dialos-aufspielen` and the
+  comparison in `dialos-installstand.sh` are still missing.
+
+- **From MailBurg only the extraction is shared, not the program**
+  (2026-09-17, after Stephan's question: „Brauchen wir denn MailBurg als
+  komplettes Programm oder nur Teile? Denn MailBurg wird ja mit einem anderen
+  Anliegen erstellt." - do we need MailBurg as a complete program or only
+  parts? After all, MailBurg is being built with a different concern.) It
+  applies, and **the difference is not size but the task: MailBurg archives,
+  DialOS-Suche only has to find.**
+
+  MailBurg copies mail into a content-addressed store with a hash chain,
+  because it must be able to prove that nothing was altered - right for a GoBD
+  archive of business post. But DialOS's documents **are already lying** in
+  `~/Dokumente/`, `~/Notizen/` and in the mbox. Writing them out a second time
+  would be duplication, and from then on there would be two truths.
+  Audit-proof storage, tombstones, RFC 3161 timestamps and retention periods
+  have no business on a private device anyway - there the GDPR's household
+  exemption applies.
+
+  **What is shared is `extract/`** (1.360 lines out of 27.593): `pdftotext`
+  with `pypdf` as a fallback, OCR via `pdftoppm`/`tesseract` with the measured
+  pixel limit `MAX_KANTE=5000` against the 523-megapixel crash on iPhone scans,
+  Office without binary rubbish. Knowledge sits in there that nobody rebuilds
+  correctly a second time. **What is built anew is the index**, lean over
+  SQLite FTS5 from the standard library - in exchange with a Cologne phonetics
+  column, so that „Meier", „Mayer" and „Maier" fall together. MailBurg does not
+  have that, because there one types instead of speaking.
+
+  **This corrects the draft on one point:** "call it over the command line, do
+  not import it as a library" held for MailBurg as the whole engine. For a
+  shared module, importing is right - and it costs nothing, because MailBurg's
+  core has `dependencies = []`.
+
+
+- **Version 0.5.2 started** (2026-09-17, Stephan's call: "start version 0.5.2 from
+  what we have achieved up to today"). 0.5.1 is thereby closed - from 2026-08-17 to
+  2026-09-17: applications (dictation, notes, shopping list, printing, archive,
+  information, weather, screenshot, update automation), test bench and Parakeet for
+  free text, personal data with an input form, command overview, seasonal wallpaper
+  and the letter following DIN 5008 with recipient dialogue, Thunderbird contacts,
+  contact person and email addresses. New entries go here from now on.
+
+- **Start sentence "Unterlagen durchsuchen" (search the documents) checked on
+  the device and passed** (2026-09-17).
+  `dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"` on the T490:
+  **every sentence recognized word for word, the candidate can be built in** -
+  it is recognized itself, and none of the 49 existing commands breaks because
+  of it. The pre-selection has been confirmed: "unterlagen" (documents) and
+  "durchsuchen" (search) appear in no existing sentence, "brief" (letter) by
+  contrast six times. The test with a real voice remains the conclusion - Piper
+  speaks more clearly than a human being.
+
+- **The grammar check can now check sentences that are not built in yet**
+  (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` takes a
+  candidate into the grammar on trial. **That did not work before, and the gap
+  was not harmless:** anyone passing a candidate as a plain argument had it
+  heard against a grammar that does not contain it at all - Vosk then presses it
+  onto the nearest existing sentence. That looked like a confusion but was a
+  fault of the tool; conversely a broken candidate could stay unnoticed. The
+  mandatory check from `docs/sprachbefehle.en.md` was thus not doable for
+  exactly the case it is meant for.
+
+  **The check now runs in both directions:** whether the candidate is recognized
+  word for word, and **whether existing sentences break because of it**. The
+  second question is the more important one - a candidate that fails by itself
+  costs only itself; one that makes an existing command confusable breaks
+  something that works today, and that only shows once the user is alone with
+  the device.
+
+  **On top of that the first mandatory check finally runs along instead of only
+  standing in the documentation.** If a word is missing from the vocabulary,
+  Vosk throws it silently out of the grammar and does report that - but the
+  message was lost in `SetLogLevel(-1)`. The check now happens beforehand
+  against `graph/words.txt`, without speaking, and separately for candidate and
+  existing stock: a missing word in the candidate ends the check, one in the
+  existing stock is reported as a legacy problem but does not block the
+  candidate.
+
+- **Start sentence for DialOS Search prepared: "Unterlagen durchsuchen"**
+  (search the documents) (2026-09-17), second phrasing "Briefe durchsuchen"
+  (search the letters) dropped. The basis is a count of the grammar: 49
+  sentences, **71 different words** (the entry first said 69 - corrected, see
+  above). "brief" (letter) appears in it **six
+  times**, "briefe" (letters) once (in "befehle für briefe" - commands for
+  letters) - a start sentence made of words that are already there enlarges the
+  word network exactly where it is densest anyway. "unterlagen" (documents) and
+  "durchsuchen" (search) appear in **no** existing sentence. The same
+  consideration as for "starten" (start) against "sprachsteuerung" (voice
+  control), only applied one level earlier. **The check on the device is still
+  pending** and is not replaced by this - it is only pre-sorted.
+
+### 0.5.1
+
+- **Email addresses in dictation** (2026-09-17): "meine Mailadresse" inserts your
+  own email from the personal data, "Mailadresse von GESOBAU" the one from the
+  Thunderbird contacts, and "Mailadresse buchstabieren" takes any other address
+  character by character. Read out as "max at beispiel Punkt de".
+
+- **Contact person in the recipient dialogue** (2026-09-17): for a company DialOS
+  asks for the person ("Frau Erika Muster"); following DIN 5008 the line sits below
+  the company, without "z. Hd.". "in Musterhausen" becomes "Musterhausen".
+- **Letter as a PDF following DIN 5008 wired in** (2026-09-17, Stephan's verdict on
+  two previews): no letterhead, return address without floor fits the window
+  completely, information block with address and date 17.09.2026 level with the
+  return address. Applies to "Brief als PDF speichern", "Brief drucken" and the
+  archive; lists and notes stay fixed width.
+- **Two numbers in the documentation corrected** (2026-09-17). The count of the
+  grammar from the same day named 69 different words; **71** is correct. The
+  cause was the counting method: `STARTSATZ` and `STOPPSATZ` stand in
+  `GRAMMATIK_AN` as constants and not as strings, and a text search overlooks
+  them. Counting now goes via the syntax tree. The sentence count of 49 and all
+  conclusions remain untouched.
+
+- **In dictation: "von vorne" and "alles verwerfen", amounts with cents from Vosk**
+  (2026-09-17, fourth trial). Both commands with a question and their own
+  recogniser so "Diktat beenden" is not confused. If only Vosk hears "Cent", its
+  amount applies ("12 Euro und 40" → "322,40 Euro"). Test bench unchanged. After the fifth trial
+  (15:00): cross-check also with Parakeet's text, free recognition decides between
+  two commands heard at once, "322 Euro und 40 Cent" → "322,40 Euro".
 - **Recipient dialogue: correct names, abort or restart at any time** (2026-09-17,
   Stephan: no way to change it again, cannot restart the letter or simply end the
   dictation). "Stimmt das? Sage ja, nein oder buchstabieren.", "abbrechen"/"Diktat
