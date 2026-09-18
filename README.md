@@ -130,6 +130,26 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Die Abnahme fiel beim ersten Lauf am Gerät selbst durch - an der Sprache**
+  (2026-09-18). Der Altersvergleich holte die Startzeit über
+  `ps -o lstart=`, und das gibt den Wochentag in der Systemsprache aus:
+  `Fr Sep 18 08:12:31 2026`. `time.strptime` erwartet das englische `Fri` und
+  scheitert. Auf dem T490 stand deshalb „Startzeit nicht lesbar" - **es fiel
+  ausgerechnet die Prüfung aus, für die das Werkzeug gebaut wurde.** Immerhin
+  hat es sich damit an sich selbst bewährt: Es meldete seinen eigenen Ausfall
+  als `OFFEN`, nicht als Erfolg.
+
+  Jetzt über den Zeitstempel von `/proc/PID` - eine Zahl, keine Sprache -, mit
+  `ps -o etimes=` als Rückfall, das ebenfalls nur eine Zahl liefert. Geprüft
+  gegen einen lebenden Prozess und eine tote PID.
+
+  **Dazu unterscheidet die Indexprüfung jetzt zwei Ursachen:** „Index leer,
+  aber Dateien liegen da" ist ein Fehler und braucht einen Aufbau - „Index
+  leer und Quellordner leer" ist keiner. Am T490 war es der zweite Fall, und
+  die Meldung „Der Index ist leer" ließ genau die Frage offen, die als
+  Nächstes kam. Die Ordnerliste kommt aus dem Index selbst, nicht aus einer
+  zweiten Liste, die auseinanderlaufen könnte.
+
 - **Das Grammatik-Prüfwerkzeug lag am falschen Ort - jedes Einbauen einer
   Erweiterung wäre gescheitert** (2026-09-18). `dialos-erweiterung.py` sucht den
   Prüfer unter `/usr/local/bin/dialos-grammatik-pruefen.py`, die Datei lag aber

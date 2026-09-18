@@ -122,6 +122,26 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The acceptance check failed its own first run on the device - over
+  language** (2026-09-18). The age comparison fetched the start time via
+  `ps -o lstart=`, and that prints the weekday in the system language:
+  `Fr Sep 18 08:12:31 2026`. `time.strptime` expects the English `Fri` and
+  fails. On the T490 it therefore said "Startzeit nicht lesbar" (start time not
+  readable) - **the very check the tool was built for was the one that fell
+  out.** It did prove itself on itself, at least: it reported its own failure
+  as `OFFEN` (open), not as a success.
+
+  Now via the timestamp of `/proc/PID` - a number, not a language - with
+  `ps -o etimes=` as a fallback, which likewise yields only a number. Checked
+  against a living process and a dead PID.
+
+  **The index check now tells two causes apart as well:** "index empty but
+  files are there" is a fault and needs a build - "index empty and source
+  folders empty" is not. On the T490 it was the second case, and the message
+  "Der Index ist leer" left open precisely the question that came next. The
+  folder list comes from the index itself, not from a second list that could
+  drift apart.
+
 - **The grammar checking tool sat in the wrong place - installing any extension
   would have failed** (2026-09-18). `dialos-erweiterung.py` looks for the
   checker at `/usr/local/bin/dialos-grammatik-pruefen.py`, but the file only

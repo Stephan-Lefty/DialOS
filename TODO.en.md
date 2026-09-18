@@ -107,9 +107,16 @@ finished too, and then move down together. That way no reference breaks.
     third for everything that needs a microphone. **The unchecked must not
     count as passed**; that is exactly what the two faults of 2026-09-17 looked
     like.
-    - [ ] **Run the acceptance check on the device itself** - so far it has
-      only been tried on a machine without DialOS, where everything is missing
-      as expected.
+    - [x] **Run on the device** (Stephan, 2026-09-18): 9 in order, 1 fault,
+      4 open. In doing so it **found its own fault**: the age comparison read
+      the start time via `ps -o lstart=`, which prints the weekday in the
+      system language ("Fr" instead of "Fri"), which `time.strptime` chokes on.
+      Fixed via `/proc/PID`. That it reported the failure as `OFFEN` and not as
+      a success is exactly what the third level is for.
+    - [ ] **Run again after the fix** - that also shows whether the command
+      service really got its restart. On 2026-09-18 the semicolon was lost
+      while pasting, `pkill` received two patterns and aborted with exit 2; the
+      service kept running unchanged.
   - [ ] **A vocabulary check that REFUSES instead of warning.** Every word from
     `startsaetze` and `eigene_grammatik` against the small model. Reason:
     "löschen" (delete) is missing from the vocabulary and was silently thrown

@@ -109,8 +109,16 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Index. Drei Urteile: `OK`, `FEHLER`, `OFFEN` - die dritte Stufe für alles,
     was Mikrofon braucht. **Ungeprüftes darf nicht als bestanden zählen**;
     genau so sahen die beiden Fehler vom 2026-09-17 aus.
-    - [ ] **Die Abnahme selbst am Gerät laufen lassen** - sie ist bisher nur
-      auf einem Rechner ohne DialOS geprüft, wo erwartungsgemäß alles fehlt.
+    - [x] **Am Gerät gelaufen** (Stephan, 2026-09-18): 9 in Ordnung, 1 Fehler,
+      4 offen. Sie hat dabei **ihren eigenen Fehler gefunden**: Der
+      Altersvergleich las die Startzeit über `ps -o lstart=`, das den Wochentag
+      in der Systemsprache ausgibt („Fr" statt „Fri"), woran `time.strptime`
+      scheitert. Behoben über `/proc/PID`. Dass sie den Ausfall als `OFFEN`
+      meldete und nicht als Erfolg, ist genau der Zweck der dritten Stufe.
+    - [ ] **Nach dem Fix erneut laufen lassen** - dabei zeigt sich zugleich,
+      ob der Befehlsdienst den Neustart wirklich bekommen hat. Am 2026-09-18
+      ging beim Einfügen das Semikolon verloren, `pkill` bekam zwei Muster und
+      brach mit Exit 2 ab; der Dienst lief unverändert weiter.
   - [ ] **Wortschatzprüfung, die VERWEIGERT statt warnt.** Jedes Wort aus
     `startsaetze` und `eigene_grammatik` gegen das kleine Modell. Grund:
     „löschen" fehlt im Wortschatz und wurde am 2026-08-18 still aus der

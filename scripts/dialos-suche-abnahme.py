@@ -32,6 +32,7 @@ Aufruf:
                                                (Piper spricht, Vosk hoert - Minuten)
 """
 
+import importlib.util
 import json
 import os
 import subprocess
@@ -87,6 +88,34 @@ def lauf(befehl, zeitgrenze=60):
 def abschnitt(titel):
     print(f"\n{titel}")
     print("-" * len(titel))
+
+
+def startzeit(pid):
+    """Wann wurde dieser Prozess gestartet? Sekunden seit der Epoche, sonst None.
+
+    UEBER /proc UND NICHT UEBER "ps -o lstart=". Der erste Entwurf tat das und
+    fiel am 2026-09-18 auf dem T490 aus: ps gibt den Wochentag in der Sprache
+    des Systems aus - "Fr Sep 18 08:12:31 2026" -, time.strptime erwartet aber
+    das englische "Fri". Ergebnis war "Startzeit nicht lesbar", und damit fiel
+    ausgerechnet die Pruefung aus, fuer die dieses Werkzeug gebaut wurde.
+
+    Der Zeitstempel des Verzeichnisses /proc/PID ist die Startzeit des
+    Prozesses, als Zahl und ohne Sprache. "ps -o etimes=" bleibt als Rueckfall,
+    weil es ebenfalls nur eine Zahl liefert (Sekunden seit dem Start) - auch
+    das ist locale-fest. Beide zusammen decken jedes Linux ab, auf dem DialOS
+    laufen soll.
+    """
+    try:
+        return os.path.getmtime(f"/proc/{pid}")
+    except OSError:
+        pass
+    code, ausgabe = lauf(["ps", "-o", "etimes=", "-p", str(pid)])
+    if code == 0:
+        try:
+            return time.time() - int(ausgabe.strip())
+        except ValueError:
+            pass
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -184,15 +213,7 @@ def pruefe_dienst():
                f"setsid {DIENST} >/dev/null 2>&1 &")
         return
 
-    # Startzeit des Prozesses gegen die Aenderungszeit der Dateien, die er
-    # beim Start liest. /proc/PID/stat waere genauer, ps ist lesbarer - und
-    # die Frage ist grob: Minuten, nicht Millisekunden.
-    code, ausgabe = lauf(["ps", "-o", "lstart=", "-p", pids[0]])
-    gestartet = None
-    try:
-        gestartet = time.mktime(time.strptime(ausgabe.strip()))
-    except (ValueError, OverflowError):
-        pass
+    gestartet = startzeit(pids[0])
 
     neuer = []
     for pfad in (MANIFEST, DIENST, WERKZEUG):
@@ -295,6 +316,28 @@ def pruefe_wache():
                "geben und hier erneut nachsehen.")
 
 
+def dateien_in_quellen():
+    """Wie viele indizierbare Dateien liegen ueberhaupt in den Quellordnern?
+
+    Die Ordner und Endungen kommen aus dem Index selbst, nicht aus einer
+    zweiten Liste hier - eine Kopie wuerde auseinanderlaufen, und dann zaehlte
+    die Abnahme etwas anderes, als der Index einliest.
+    """
+    try:
+        spec = importlib.util.spec_from_file_location("dialos_suche_index", INDEX)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        quellen = modul.QUELLEN
+    except Exception:                       # noqa: BLE001 - jede Ursache zaehlt
+        return None
+    anzahl = 0
+    for _art, ordner, endungen in quellen:
+        for wurzel, _o, dateien in os.walk(ordner):
+            anzahl += sum(1 for d in dateien if d.lower().endswith(endungen))
+            del wurzel
+    return anzahl
+
+
 def pruefe_index():
     abschnitt("7. Steht der Suchindex?")
     if not os.access(INDEX, os.X_OK):
@@ -315,9 +358,30 @@ def pruefe_index():
                 pass
     print("            " + "\n            ".join(ausgabe.strip().splitlines()))
     if anzahl == 0:
-        urteil("FEHLER", "Der Index ist leer",
-               "Jede Suche findet nichts - das sagt ueber die Suche nichts aus.",
-               f"{INDEX} aufbauen --debug")
+        # ZWEI SEHR VERSCHIEDENE URSACHEN, und der Unterschied entscheidet, was
+        # zu tun ist: Entweder liegen Dateien da und wurden nie eingelesen -
+        # dann fehlt ein Aufbau. Oder die Ordner sind leer - dann ist der
+        # Index in Ordnung und es fehlen Dokumente. Am 2026-09-18 stand auf dem
+        # T490 nur "Index leer", und die naechste Frage war sofort "woran
+        # liegt das".
+        vorhanden = dateien_in_quellen()
+        if vorhanden is None:
+            # Kein Urteil raten: Ohne die Quellenliste ist nicht zu sagen, ob
+            # der Aufbau fehlt oder nichts da ist.
+            urteil("OFFEN", "Der Index ist leer - Ursache nicht feststellbar",
+                   "Die Quellordner liessen sich nicht auslesen.",
+                   f"{INDEX} stand")
+        elif vorhanden:
+            urteil("FEHLER", f"Der Index ist leer, aber {vorhanden} Datei(en) "
+                             "liegen in den Quellordnern",
+                   "Sie wurden nie eingelesen.",
+                   f"{INDEX} aufbauen --debug")
+        else:
+            urteil("OFFEN", "Der Index ist leer - und die Quellordner sind es auch",
+                   "Kein Fehler am Index: Es gibt schlicht nichts zu finden.\n"
+                   "Zum Pruefen der Suche braucht es ein paar Dokumente in\n"
+                   "~/Dokumente oder ~/Notizen - sonst sagt jede Suche nur,\n"
+                   "dass nichts da ist, und das beweist nichts.")
     else:
         urteil("OK", f"{anzahl} Dateien im Index")
 
