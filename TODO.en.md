@@ -313,6 +313,27 @@ finished too, and then move down together. That way no reference breaks.
     Sources: letters from `~/Dokumente/`, PDFs from
     `~/Dokumente/Archiv/DialOS-DATA/`, notes from `~/Notizen/`, mail from
     Thunderbird's mbox.
+    - [x] **`content=''` was a mistake** (2026-09-18). Nothing can be deleted
+      from a contentless FTS5 table; the index would have crashed from the
+      second run on. Fixed, an old index is discarded on opening and rebuilt.
+      Whole life cycle checked.
+    - [x] **A missing source no longer throws anything out of the index**
+      (2026-09-18, after Stephan's note about the stick). Only individual files
+      within a source that is present get removed.
+    - [ ] **The source folders have to become configurable.** `~/Dokumente` and
+      `~/Notizen` are the same everywhere, but the archive sits under
+      `~/Dokumente/Archiv` on the test user and **on a USB stick** for the later
+      user - so under `/media/USER/STICKNAME/...`, and that name differs for
+      everyone. Hard-coded paths go nowhere there.
+
+      More than the location needs settling: **how does DialOS recognise "its"
+      stick?** Not by mount path - that changes. A marker file in the root that
+      the index looks for would serve better; then the archive is the same
+      wherever it is mounted, and a stranger's stick is not read by accident.
+    - [ ] **Announcement for unreachable hits.** Since 2026-09-18 the index
+      carries `erreichbar` (reachable) per hit. The announcement has to say the
+      difference, otherwise DialOS sends the user to a location that cannot be
+      opened - belongs to the hit dialogue.
     - [ ] **Cologne phonetics column** for sender names, so that „Meier",
       „Mayer" and „Maier" fall together. Catches recognition fuzziness
       structurally instead of loading it onto the user as a follow-up question.

@@ -122,6 +122,39 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The index could be filled once and never maintained again** (2026-09-18).
+  The FTS5 table was created with `content=''` - space-saving, but nothing can
+  be deleted from it: `cannot DELETE from contentless fts5 table`. It stayed
+  hidden because a `DELETE` that hits nothing goes through: precisely the first
+  build. **From the second run on, every call would have crashed** - on
+  re-reading a changed file just as much as on removing a deleted one.
+
+  Found while simulating an unplugged stick, not in operation. The index on the
+  T490 is empty, so nothing is lost; an old index with `content=''` is detected
+  on opening and discarded. **An index is derived data** - throwing it away and
+  rebuilding is the right answer here, not a migration that could not work
+  without deleting in the first place.
+
+  The whole life cycle is now checked: first build, second build, refresh with
+  no change, changed file, deleted file, stick gone, stick back. Plus the sound
+  search after the schema change - "Meier" still finds "Mayer", "Schmidt" finds
+  "Schmitt", "Fahrrad" finds nothing.
+
+- **An unplugged stick must not throw the archive out of the index**
+  (2026-09-18, after Stephan's note: on the test user `Archiv` is a subfolder,
+  **on the later user a folder on a USB stick**). Until now the build removed
+  every file it could no longer find. Without the stick that would have meant:
+  the entire archive gone, everything re-read on the next plug-in - on scanned
+  PDFs the entire OCR. Worse is the time in between: the user searches for a
+  letter that exists, and DialOS says it does not.
+
+  **A missing source is not an empty source.** If the folder is gone entirely,
+  its entries stay and are reported; only individual files vanishing from a
+  source that is present count as a real disappearance. Every hit now carries
+  `erreichbar` (reachable) - the announcement can say "in the archive, which is
+  not connected right now" instead of pointing at a location that cannot be
+  opened.
+
 - **The archive was being read twice** (2026-09-18, found just before the first
   real build ran on the T490). "Ablage" is `~/Dokumente/Archiv` and therefore
   sits *inside* "Brief" (`~/Dokumente`), which is searched recursively - so

@@ -312,14 +312,48 @@ CREATE INDEX IF NOT EXISTS dateien_jahr ON dateien(jahr);
 CREATE INDEX IF NOT EXISTS dateien_art  ON dateien(art);
 CREATE VIRTUAL TABLE IF NOT EXISTS suche USING fts5(
     name, inhalt, klang,
-    content='', tokenize="unicode61 remove_diacritics 2"
+    tokenize="unicode61 remove_diacritics 2"
 );
 """
+
+# KEIN content='' MEHR (2026-09-18). Der erste Entwurf sparte damit den Platz
+# fuer den Text, den FTS5 sonst ein zweites Mal ablegt - und handelte sich
+# dafuer ein, dass sich aus der Tabelle NICHTS LOESCHEN laesst:
+#
+#     sqlite3.OperationalError: cannot DELETE from contentless fts5 table
+#
+# Der Fehler blieb verborgen, weil ein DELETE, das nichts trifft, durchgeht.
+# Genau das ist der erste Aufbau. Ab dem zweiten Lauf trifft jedes DELETE -
+# beim erneuten Einlesen einer Datei, beim Austragen einer verschwundenen -,
+# und der Index waere abgestuerzt. Er war also einmal befuellbar und danach
+# nicht mehr pflegbar; aufgefallen ist es beim Nachstellen eines abgezogenen
+# Sticks, nicht im Betrieb.
+#
+# Der Preis ist Plattenplatz: FTS5 legt den Text nun selbst ab. Bei einem
+# Archiv aus Briefen sind das einige zehn Megabyte - gegen einen Index, der
+# sich nicht pflegen laesst, ist das kein Handel, sondern eine Korrektur.
 
 
 def oeffnen():
     os.makedirs(BASIS, exist_ok=True)
     db = sqlite3.connect(DATENBANK)
+
+    # ALTEN INDEX VERWERFEN, NICHT UMBAUEN. Wer schon eine Datenbank mit
+    # content='' hat, kann daraus nichts loeschen - also auch nicht umziehen.
+    # Ein Index ist abgeleitet: Er laesst sich jederzeit neu bauen, und genau
+    # deshalb ist Wegwerfen hier die richtige Antwort und kein Verlust. Der
+    # Neuaufbau kostet Lesezeit, mehr nicht.
+    zeile = db.execute("SELECT sql FROM sqlite_master WHERE type = 'table' "
+                       "AND name = 'suche'").fetchone()
+    if zeile and "content=''" in (zeile[0] or "").replace(" ", ""):
+        melde("alter Index mit content='' gefunden - wird neu aufgebaut")
+        db.execute("DROP TABLE IF EXISTS suche")
+        try:
+            db.execute("DELETE FROM dateien")
+        except sqlite3.OperationalError:
+            pass                    # gibt es noch nicht - dann ist nichts zu leeren
+        db.commit()
+
     db.executescript(SCHEMA)
     return db
 
@@ -390,15 +424,36 @@ def aufbauen(db, nur_neue=False):
         gelesen += 1
     # Verschwundene Dateien austragen - ein Treffer, den es nicht mehr gibt,
     # ist schlimmer als kein Treffer: Der Nutzer sucht ihn dann am Geraet.
-    entfernt = 0
+    #
+    # ABER NICHT, WENN DIE GANZE QUELLE FEHLT (2026-09-18, nach Stephans
+    # Hinweis, dass das Archiv beim Testnutzer ein Unterordner ist, beim
+    # spaeteren Nutzer aber ein Ordner AUF EINEM STICK). Ein Stick steckt mal
+    # und mal nicht. Liefe der Aufbau ohne ihn, wuerde jede Archivdatei als
+    # "verschwunden" ausgetragen - und beim naechsten Einstecken muesste alles
+    # neu gelesen werden, bei gescannten PDFs die gesamte OCR. Schlimmer noch
+    # ist die Zwischenzeit: Der Nutzer sucht einen Brief, den es gibt, und
+    # DialOS sagt, es gebe ihn nicht.
+    #
+    # EINE FEHLENDE QUELLE IST KEINE LEERE QUELLE. Nur das Verschwinden
+    # EINZELNER Dateien innerhalb einer vorhandenen Quelle ist ein echtes
+    # Verschwinden.
+    fehlende = tuple(os.path.normpath(o) + os.sep
+                     for _art, o, _e in QUELLEN if not os.path.isdir(o))
+    entfernt = gehalten = 0
     for pfad in list(bekannt):
-        if pfad not in gesehen:
-            db.execute("DELETE FROM suche WHERE rowid IN "
-                       "(SELECT id FROM dateien WHERE pfad = ?)", (pfad,))
-            db.execute("DELETE FROM dateien WHERE pfad = ?", (pfad,))
-            entfernt += 1
+        if pfad in gesehen:
+            continue
+        if fehlende and os.path.normpath(pfad).startswith(fehlende):
+            gehalten += 1
+            continue
+        db.execute("DELETE FROM suche WHERE rowid IN "
+                   "(SELECT id FROM dateien WHERE pfad = ?)", (pfad,))
+        db.execute("DELETE FROM dateien WHERE pfad = ?", (pfad,))
+        entfernt += 1
+    if gehalten:
+        melde(f"{gehalten} Eintraege gehalten - ihre Quelle ist gerade nicht da")
     db.commit()
-    return gelesen, uebersprungen, entfernt
+    return gelesen, uebersprungen, entfernt, gehalten
 
 
 def suchen(db, begriff, hoechstens=40):
@@ -427,7 +482,14 @@ def suchen(db, begriff, hoechstens=40):
             treffer.append({"pfad": zeile[0], "art": zeile[1],
                             "geaendert": zeile[2], "jahr": zeile[3],
                             "personen": (zeile[4] or "").split("\n") if zeile[4] else [],
-                            "wie": wie})
+                            "wie": wie,
+                            # IST DIE DATEI GERADE ERREICHBAR? Bei einem Archiv
+                            # auf einem Stick kann der Index sie kennen, ohne
+                            # dass sie da ist. Die Ansage muss den Unterschied
+                            # sagen koennen - "im Archiv, das gerade nicht
+                            # angeschlossen ist" statt einer Fundstelle, die
+                            # sich nicht oeffnen laesst.
+                            "erreichbar": os.path.exists(zeile[0])})
 
     hole("suche MATCH ?", (" OR ".join(f'"{w}"' for w in worte),), "wort")
     if len(treffer) < hoechstens:
@@ -444,11 +506,15 @@ def main():
 
     if was in ("aufbauen", "auffrischen"):
         t0 = time.time()
-        gelesen, uebersprungen, entfernt = aufbauen(db, nur_neue=(was == "auffrischen"))
+        gelesen, uebersprungen, entfernt, gehalten = aufbauen(
+            db, nur_neue=(was == "auffrischen"))
         melde(f"{was}: {gelesen} gelesen, {uebersprungen} unveraendert, "
-              f"{entfernt} entfernt, {time.time() - t0:.1f} s")
+              f"{entfernt} entfernt, {gehalten} gehalten, {time.time() - t0:.1f} s")
         print(f"{gelesen} gelesen, {uebersprungen} unveraendert, {entfernt} entfernt "
               f"({time.time() - t0:.1f} s)")
+        if gehalten:
+            print(f"{gehalten} Eintraege behalten, weil ihre Quelle gerade nicht "
+                  "angeschlossen ist - nicht ausgetragen.")
         if _mailburg() is None:
             print("Hinweis: MailBurgs extract/ fehlt - kein OCR, keine "
                   "Office-Dateien. PDFs nur ueber pdftotext.")
@@ -467,7 +533,8 @@ def main():
         for art, ordner, _ in QUELLEN:
             n = db.execute("SELECT COUNT(*) FROM dateien WHERE art = ?",
                            (art,)).fetchone()[0]
-            da = "" if os.path.isdir(ordner) else "  (Ordner fehlt)"
+            da = ("" if os.path.isdir(ordner)
+                  else "  (Ordner fehlt - Eintraege bleiben erhalten)")
             print(f"  {art:8s} {n:5d}  {ordner}{da}")
         print(f"MailBurg:  {'vorhanden' if _mailburg() else 'FEHLT - kein OCR'}")
         return 0

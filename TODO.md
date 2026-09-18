@@ -303,6 +303,28 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     ohne Archivablage, ohne Journal, ohne Fristen. Quellen: Briefe aus
     `~/Dokumente/`, PDFs aus `~/Dokumente/Archiv/DialOS-DATA/`, Notizen aus
     `~/Notizen/`, Mails aus Thunderbirds mbox.
+    - [x] **`content=''` war ein Fehler** (2026-09-18). Aus einer contentless
+      FTS5-Tabelle lässt sich nichts löschen; der Index wäre ab dem zweiten
+      Lauf abgestürzt. Behoben, alter Index wird beim Öffnen verworfen und neu
+      gebaut. Ganzer Lebenslauf gegengeprüft.
+    - [x] **Fehlende Quelle wirft nichts mehr aus dem Index** (2026-09-18,
+      nach Stephans Hinweis auf den Stick). Nur einzelne Dateien innerhalb
+      einer vorhandenen Quelle werden ausgetragen.
+    - [ ] **Die Quellordner müssen konfigurierbar werden.** `~/Dokumente` und
+      `~/Notizen` sind überall gleich, aber das Archiv liegt beim Testnutzer
+      unter `~/Dokumente/Archiv` und beim späteren Nutzer **auf einem Stick** -
+      also unter `/media/NUTZER/STICKNAME/...`, und der Name ist bei jedem
+      anders. Fest eingetragene Pfade gehen dort ins Leere.
+
+      Zu klären ist dabei mehr als der Ort: **Woran erkennt DialOS „seinen"
+      Stick wieder?** Am Einhängepfad nicht - der wechselt. Sinnvoller wäre
+      eine Kennzeichnungsdatei im Wurzelverzeichnis, die der Index sucht; dann
+      ist das Archiv dasselbe, egal wo es hängt, und ein fremder Stick wird
+      nicht versehentlich eingelesen.
+    - [ ] **Ansage für nicht angeschlossene Treffer.** Der Index liefert seit
+      dem 2026-09-18 `erreichbar` pro Treffer. Die Ansage muss den Unterschied
+      sagen, sonst schickt DialOS den Nutzer an eine Fundstelle, die sich nicht
+      öffnen lässt - gehört zum Trefferdialog.
     - [x] **Kölner-Phonetik-Spalte gebaut.** Geprüft: „Meier"/„Mayer"/„Maier"/
       „Mayr" fallen auf `67` zusammen, „Müller"/„Mueller"/„Miller" auf `657`.
       Im Test findet der gesprochene Begriff „Meier" den Brief mit „Mayer", und

@@ -130,6 +130,40 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Der Index war einmal befüllbar und danach nicht mehr pflegbar**
+  (2026-09-18). Die FTS5-Tabelle war mit `content=''` angelegt - platzsparend,
+  aber daraus lässt sich **nichts löschen**:
+  `cannot DELETE from contentless fts5 table`. Verborgen blieb das, weil ein
+  `DELETE`, das nichts trifft, durchgeht: genau der erste Aufbau. **Ab dem
+  zweiten Lauf wäre jeder Aufruf abgestürzt** - beim erneuten Einlesen einer
+  geänderten Datei ebenso wie beim Austragen einer gelöschten.
+
+  Gefunden beim Nachstellen eines abgezogenen Sticks, nicht im Betrieb. Der
+  Index am T490 ist leer, es geht also nichts verloren; ein alter Index mit
+  `content=''` wird beim Öffnen erkannt und verworfen. **Ein Index ist
+  abgeleitet** - wegwerfen und neu bauen ist hier die richtige Antwort, nicht
+  ein Umbau, der ohne Löschen ohnehin nicht ginge.
+
+  Geprüft ist jetzt der ganze Lebenslauf: Erstaufbau, zweiter Aufbau,
+  auffrischen ohne Änderung, geänderte Datei, gelöschte Datei, Stick weg, Stick
+  wieder da. Dazu die Klangsuche nach dem Schemawechsel - „Meier" findet
+  weiterhin „Mayer", „Schmidt" findet „Schmitt", „Fahrrad" findet nichts.
+
+- **Ein abgezogener Stick darf das Archiv nicht aus dem Index werfen**
+  (2026-09-18, nach Stephans Hinweis: beim Testnutzer ist `Archiv` ein
+  Unterordner, **beim späteren Nutzer ein Ordner auf einem Stick**). Der Aufbau
+  trug bisher jede Datei aus, die er nicht mehr fand. Ohne Stick hätte das
+  bedeutet: das ganze Archiv weg, beim nächsten Einstecken alles neu lesen -
+  bei gescannten PDFs die gesamte OCR. Schlimmer ist die Zwischenzeit: Der
+  Nutzer sucht einen Brief, den es gibt, und DialOS sagt, es gebe ihn nicht.
+
+  **Eine fehlende Quelle ist keine leere Quelle.** Fehlt der Ordner ganz,
+  bleiben seine Einträge stehen und werden gemeldet; nur das Verschwinden
+  einzelner Dateien innerhalb einer vorhandenen Quelle ist ein echtes
+  Verschwinden. Jeder Treffer trägt dazu `erreichbar` - die Ansage kann damit
+  „im Archiv, das gerade nicht angeschlossen ist" sagen, statt an eine
+  Fundstelle zu schicken, die sich nicht öffnen lässt.
+
 - **Das Archiv wurde doppelt eingelesen** (2026-09-18, gefunden kurz bevor der
   erste echte Aufbau am T490 lief). „Ablage" ist `~/Dokumente/Archiv` und liegt
   damit *innerhalb* von „Brief" (`~/Dokumente`), das rekursiv durchsucht wird -
