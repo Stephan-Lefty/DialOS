@@ -771,7 +771,14 @@ function dialos_child_neueste_beitraege() {
 		$roh = preg_replace( '#<p class="[^"]*\bmeta\b[^"]*".*?</p>#s', ' ', $roh );
 		$roh = preg_replace( '#<figure.*?</figure>#s', ' ', $roh );
 		$text = has_excerpt( $beitrag ) ? $beitrag->post_excerpt : $roh;
-		$text = wp_trim_words( wp_strip_all_tags( $text ), 80, '' );
+		// html_entity_decode, sonst steht woertlich "&ndash;" in der Kachel.
+		// Am 2026-09-18 auf der Startseite gesehen: "gebuendelt auf zwei
+		// Tage &ndash; dazwischen drei Wochen". wp_strip_all_tags() entfernt
+		// nur Tags, keine Entitaeten - und weil der Text spaeter ueber
+		// textContent gesetzt wird (richtig so, das schuetzt vor
+		// eingeschleustem Code), erscheint die Entitaet dann als Text.
+		$text = html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES, 'UTF-8' );
+		$text = wp_trim_words( $text, 80, '' );
 
 		$eintraege[] = array(
 			'titel' => get_the_title( $beitrag ),
