@@ -51,7 +51,13 @@ ABTASTRATE = 16000
 BLOCK = 4000
 PEGEL_SCHWELLE = 150.0
 RUHE_ENDE_S = 1.0
-ZEITGRENZE_S = 8.0
+ZEITGRENZE_S = 12.0      # bis die Antwort BEGINNT - Zeit zum Luftholen
+# DREI SEKUNDEN PAUSE NACH JEDEM WORT (Stephan, 2026-09-18: "immer 3 Sekunden
+# Pause bitte"). Gemessen wird, wie gut ein Wort ankommt - nicht, wie schnell
+# jemand reagieren kann. Wer gehetzt spricht, spricht undeutlicher, und dann
+# misst die Messung die Hetze mit.
+PAUSE_NACH_WORT_S = 3.0
+BLOCK_LAENGE = 10        # nach so vielen Woertern eine echte Pause
 
 MESSORDNER = ("/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich/"
               "buchstaben")
@@ -76,9 +82,11 @@ def marke_pfad(name):
 MARKE = marke_pfad("dialos-diktat-aktiv")
 
 
-def sprich(text):
+def sprich(text, frage=False):
+    """Ansage - mit frage=True klingt danach der Frageton, der zum Sprechen auffordert."""
+    befehl = [SAY] + (["--frage"] if frage else []) + [text]
     try:
-        subprocess.run([SAY, text], capture_output=True, timeout=60)
+        subprocess.run(befehl, capture_output=True, timeout=60)
     except (OSError, subprocess.TimeoutExpired):
         print(f"[Ansage] {text}")
 
@@ -119,6 +127,28 @@ def aufnehmen(prozess):
             if ruhe >= RUHE_ENDE_S:
                 break
     return bytes(roh) if gesprochen else b""
+
+
+def auf_weiter_warten(prozess, modell, bis_s=180.0):
+    """Wartet in der Pause auf "weiter" - oder auf "abbrechen". True: weiter."""
+    import vosk
+    erkenner = vosk.KaldiRecognizer(
+        modell, ABTASTRATE, json.dumps(["weiter", "abbrechen", "[unk]"],
+                                       ensure_ascii=False))
+    ende = time.time() + bis_s
+    while time.time() < ende:
+        block = prozess.stdout.read(BLOCK)
+        if not block:
+            break
+        if not erkenner.AcceptWaveform(block):
+            continue
+        worte = json.loads(erkenner.Result()).get("text", "").split()
+        if "weiter" in worte:
+            return True
+        if "abbrechen" in worte:
+            return False
+    # Auch ohne Antwort geht es weiter - wer die Pause braucht, hat sie gehabt.
+    return True
 
 
 def messen(art, wiederholungen, mit_aufnahme):
@@ -162,10 +192,27 @@ def messen(art, wiederholungen, mit_aufnahme):
          "--channels=1", "--latency-msec=30"], stdout=subprocess.PIPE)
     try:
         sprich(f"Ich messe jetzt {len(fragen)} Wörter, je {wiederholungen} mal. "
-               "Ich sage ein Wort, Du sprichst es nach. Los geht es.")
+               "Ich sage ein Wort, danach kommt ein Ton, dann sprichst Du es nach. "
+               f"Nach je {BLOCK_LAENGE} Wörtern machen wir eine Pause. "
+               "Du kannst jederzeit sagen: abbrechen.")
+        abgebrochen = False
         for runde in range(1, wiederholungen + 1):
-            for wort in fragen:
-                sprich(wort)
+            if abgebrochen:
+                break
+            for nummer, wort in enumerate(fragen, start=1):
+                # PAUSE NACH JE ZEHN WOERTERN (Stephan, 2026-09-18: "Du musst
+                # mir auch Pausen lassen"). Dreiundvierzig Wörter am Stück sind
+                # anstrengend, und wer aus der Puste kommt, spricht anders -
+                # dann misst die Messung die Erschoepfung mit.
+                if nummer > 1 and (nummer - 1) % BLOCK_LAENGE == 0:
+                    sprich(f"Pause. {nummer - 1} von {len(fragen)} Wörtern sind "
+                           "geschafft. Sage: weiter, wenn es weitergehen soll.",
+                           frage=True)
+                    if not auf_weiter_warten(prozess, modell):
+                        abgebrochen = True
+                        break
+                sprich(wort, frage=True)
+                time.sleep(0.3)             # kurz, bis der Ton verklungen ist
                 roh = aufnehmen(prozess)
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, grammatik)
                 erkenner.AcceptWaveform(roh)
@@ -182,11 +229,19 @@ def messen(art, wiederholungen, mit_aufnahme):
                                    "zeichen_richtig": bool(zeichen_soll)
                                    and zeichen_soll == zeichen_ist,
                                    "sekunden": round(len(roh) / 2 / ABTASTRATE, 2)})
+                if gehoert == "abbrechen":
+                    ergebnisse.pop()
+                    sprich("Ich breche die Messung ab.")
+                    abgebrochen = True
+                    break
                 zeichen = "ok " if richtig else ("(" + (zeichen_ist or "-") + ")"
                                                  if ergebnisse[-1]["zeichen_richtig"]
                                                  else "FALSCH")
                 print(f"  {runde}. {wort:12s} -> {gehoert or '(nichts)':14s} {zeichen}",
                       flush=True)
+                # Die Pause kommt NACH der Aufnahme: Vorher wuerde sie nur
+                # die Stille vor dem Wort verlaengern.
+                time.sleep(PAUSE_NACH_WORT_S)
                 if mit_aufnahme and roh:
                     pfad = os.path.join(MESSORDNER, f"{stempel}-{art}-{runde}-{wort}.wav")
                     with wave.open(pfad, "wb") as w:
