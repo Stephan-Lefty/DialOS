@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.7
+Version: 1.6.8
 Text Domain: dialos
 */
 
@@ -539,30 +539,37 @@ body.dialos-a11y-mode *:focus {
 
 /* ------------------------------------------------------------------
    Die drei neuesten Beitraege in der rechten Spalte der Startseiten
-   (Stephan, 2026-09-17; quadratisch und groesser gesetzt seit
-   2026-09-18). Weiss und 16 px Radius wie main#main - die Breite hat
-   Stephan abgenommen und bleibt unangetastet.
+   (Stephan, 2026-09-17; quadratisch 2026-09-18; Schriftgroesse und
+   Fuellung am selben Tag nachgezogen). Weiss und 16 px Radius wie
+   main#main - die Breite hat Stephan abgenommen, sie bleibt.
 
-   QUADRATISCH ueber aspect-ratio, nicht ueber eine feste Pixelhoehe:
-   Die Spalte ist unterschiedlich breit, je nach Fenster und Zoomstufe.
-   Eine feste Hoehe waere nur bei genau einer Fensterbreite ein Quadrat.
+   SCHRIFTGROESSE IN PIXELN, NICHT IN rem. Das Eltern-Theme setzt
+   body auf 18 px, waehrend rem gegen die Wurzelgroesse von 16 px
+   rechnet. Die vorherigen 1,05 rem waren deshalb 16,8 px und wirkten
+   neben dem Fliesstext und der Fusszeile zu klein - Stephans Vorgabe
+   war "so gross wie im Footer", und die Fusszeile erbt genau diese
+   18 px. Wer das auf rem umstellt, macht die Schrift wieder kleiner,
+   ohne es zu merken.
 
-   UND TROTZDEM KEIN SCROLLEN (Stephans aeltere Vorgabe, die weiter
-   gilt): Es steht bewusst KEIN overflow und KEIN max-height hier. Passt
-   ein besonders langer Titel einmal nicht ins Quadrat, waechst der
-   Kasten nach unten - das ist sichtbar und harmlos. Ein Scrollbalken
-   waere es nicht: Wer den Bildschirm nicht sieht, findet einen
-   versteckten Rest nie.
+   QUADRATISCH ueber aspect-ratio statt fester Pixelhoehe: Die Spalte
+   ist je nach Fenster und Zoomstufe verschieden breit.
 
-   Die Schrift ist mitgewachsen: Titel 1,25 rem, Text 1,05 rem, Datum
-   0,95 rem - vorher 1 / 0,92 / 0,85.
+   GEFUELLT WIRD IM BROWSER, nicht hier: Das Skript kuerzt den Text,
+   bis die Kachel quadratisch ist - dadurch steht in jeder so viel,
+   wie hineinpasst, auch bei ungleich langen Titeln.
+
+   KEIN overflow, KEIN max-height. Stephans aeltere Vorgabe gilt
+   weiter: Es darf nicht gescrollt werden. Und abgeschnitten werden
+   soll auch nichts - waere das Skript einmal nicht da, waechst die
+   Kachel sichtbar, statt etwas zu verstecken, das niemand findet,
+   der den Bildschirm nicht sieht.
    ------------------------------------------------------------------ */
 .dialos-neueste {
   max-width: 100%;
 }
 .dialos-neueste-titel {
   margin: 0 0 1rem;
-  font-size: 1.3rem;
+  font-size: 22px;
   font-weight: 700;
 }
 .dialos-neueste-block {
@@ -573,32 +580,30 @@ body.dialos-a11y-mode *:focus {
   max-width: 100%;
   box-sizing: border-box;
   aspect-ratio: 1 / 1;
-  display: flex;
-  flex-direction: column;
   overflow-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
 }
 .dialos-neueste-block h3 {
   margin: 0 0 0.4rem;
-  font-size: 1.25rem;
+  font-size: 19px;
   line-height: 1.3;
   font-weight: 700;
 }
 .dialos-neueste-datum {
   display: block;
-  font-size: 0.95rem;
+  font-size: 16px;
   color: #666;
   margin-bottom: 0.7rem;
 }
 .dialos-neueste-text {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 18px;
   line-height: 1.5;
 }
 .dialos-neueste-alle {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 18px;
 }
 
 /* Im Barrierefreiheits-Modus reicht die globale Linkfarbe nicht: Das
@@ -609,9 +614,9 @@ body.dialos-a11y-mode .dialos-neueste-datum {
 
 /* Handy und Tablet: Bootstrap schiebt die Spalte unter den Hauptblock,
    sobald der Bildschirm schmaler als 992 px ist. Das Quadrat wird dort
-   aufgehoben - ueber die volle Breite waere ein quadratischer Kasten
-   ein halber Bildschirm hoch, mit viel Leerraum darin. Den gemessenen
-   oberen Abstand nimmt das Skript selbst zurueck. */
+   aufgehoben - ueber die volle Breite waere eine quadratische Kachel
+   ein halber Bildschirm hoch, groesstenteils leer. Das Skript fuellt
+   dort ebenfalls nicht, der Text bleibt vollstaendig. */
 @media (max-width: 991px) {
   .dialos-neueste {
     margin-top: 1.5rem;

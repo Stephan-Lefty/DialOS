@@ -744,9 +744,13 @@ function dialos_child_neueste_beitraege() {
 			? str_replace( $monate_de, $monate_en, date_i18n( 'j F Y', strtotime( $beitrag->post_date ) ) )
 			: date_i18n( 'j. F Y', strtotime( $beitrag->post_date ) );
 
-		// Zwanzig Woerter, seit die Kaesten quadratisch sind und groesser
-		// gesetzt werden (2026-09-18). Mehr passt bei dieser Schriftgroesse
-		// nicht ins Quadrat, ohne es nach unten aufzudruecken.
+		// Achtzig Woerter, also reichlich. Wie viele davon stehenbleiben,
+		// entscheidet erst der Browser: Dort laesst sich messen, wie hoch
+		// die Kachel bei dieser Fensterbreite, Schriftgroesse und Titellaenge
+		// tatsaechlich wird. Eine feste Wortzahl waere immer fuer genau einen
+		// Fall richtig - bei einem langen Chronik-Titel zu viel, bei einem
+		// kurzen zu wenig (Stephan am 2026-09-18: "den Block auch auffuellen,
+		// wenn noch Platz ist").
 		// Aus dem Beitrag muss alles heraus, was kein Fliesstext ist. Am
 		// 2026-09-17 stand in JEDER deutschen Kachel "Diesen Beitrag
 		// anhoeren - gesprochen von Anna" (die Beschriftung des
@@ -767,7 +771,7 @@ function dialos_child_neueste_beitraege() {
 		$roh = preg_replace( '#<p class="[^"]*\bmeta\b[^"]*".*?</p>#s', ' ', $roh );
 		$roh = preg_replace( '#<figure.*?</figure>#s', ' ', $roh );
 		$text = has_excerpt( $beitrag ) ? $beitrag->post_excerpt : $roh;
-		$text = wp_trim_words( wp_strip_all_tags( $text ), 20, ' …' );
+		$text = wp_trim_words( wp_strip_all_tags( $text ), 80, '' );
 
 		$eintraege[] = array(
 			'titel' => get_the_title( $beitrag ),
@@ -825,6 +829,7 @@ function dialos_child_neueste_beitraege() {
 				text.className = 'dialos-neueste-text';
 				text.textContent = e.text;
 				eintrag.appendChild(text);
+				eintrag.dataset.text = e.text;
 			}
 
 			block.appendChild(eintrag);
@@ -843,6 +848,39 @@ function dialos_child_neueste_beitraege() {
 		// Oberkante auf Hoehe der Grafik im Hauptblock - gemessen, nicht
 		// geraten. Unter 992 px stehen die Spalten untereinander, dort waere
 		// ein Abstand eine Luecke.
+		// Jede Kachel so weit fuellen, wie sie Platz hat, und keinen Deut
+		// weiter. Gemessen wird die Hoehe gegen die Breite: Solange die
+		// Kachel hoeher als breit ist, passt der Text nicht ins Quadrat und
+		// es fliegen Woerter raus. Bewusst OHNE overflow:hidden - waere das
+		// Skript einmal nicht da, wuerde der Text sonst lautlos abgeschnitten.
+		// So waechst die Kachel im schlimmsten Fall sichtbar, statt etwas zu
+		// verstecken, das niemand findet, der den Bildschirm nicht sieht.
+		function fuellen() {
+			if (window.innerWidth < 992) return;
+			block.querySelectorAll('.dialos-neueste-block').forEach(function (kasten) {
+				var absatz = kasten.querySelector('.dialos-neueste-text');
+				if (!absatz || !kasten.dataset.text) return;
+				var woerter = kasten.dataset.text.split(' ');
+				var n = woerter.length;
+				absatz.textContent = woerter.join(' ');
+				// Schrittweise kuerzen. Erst grob, dann Wort fuer Wort, damit
+				// es auch bei achtzig Woertern in wenigen Durchlaeufen sitzt.
+				var schritt = 8;
+				while (n > 6 && kasten.offsetHeight > kasten.offsetWidth + 1) {
+					n -= schritt;
+					if (n < 6) { n = 6; }
+					absatz.textContent = woerter.slice(0, n).join(' ') + ' …';
+					if (schritt > 1 && kasten.offsetHeight <= kasten.offsetWidth + 1) {
+						n += schritt; schritt = 1;
+						absatz.textContent = woerter.slice(0, n).join(' ') + ' …';
+					}
+				}
+				if (n < woerter.length && absatz.textContent.slice(-1) !== '…') {
+					absatz.textContent = absatz.textContent + ' …';
+				}
+			});
+		}
+
 		function ausrichten() {
 			block.style.marginTop = '';
 			if (window.innerWidth < 992) return;
@@ -852,15 +890,16 @@ function dialos_child_neueste_beitraege() {
 			if (abstand > 0) block.style.marginTop = Math.round(abstand) + 'px';
 		}
 
+		fuellen();
 		ausrichten();
-		window.addEventListener('load', ausrichten);
+		window.addEventListener('load', function () { fuellen(); ausrichten(); });
 		var bild = haupt.querySelector('figure img, img');
 		if (bild && !bild.complete) bild.addEventListener('load', ausrichten);
 
 		var warten;
 		window.addEventListener('resize', function () {
 			clearTimeout(warten);
-			warten = setTimeout(ausrichten, 150);
+			warten = setTimeout(function () { fuellen(); ausrichten(); }, 150);
 		});
 	});
 	</script>
