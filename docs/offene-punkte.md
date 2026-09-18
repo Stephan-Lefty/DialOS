@@ -23,6 +23,40 @@ damit nichts aus den Diskussionen verloren geht.
   z. B. 900 setzen, damit SIM nur greift, wenn weder Kabel noch WLAN eine
   Route liefern.
 
+## Debian-Version: 13 bleibt, kein Sprung auf 14 (entschieden 2026-09-18)
+
+Stephans Frage: „Würde es heute schon Sinn machen, mit Debian 14 und der
+aktuellen GNOME-Version zu testen?" Antwort nach dem Abwägen: **nein, wir
+bleiben bei Debian 13 und GNOME 48** (Stand am Gerät: 13.7, GNOME Shell 48.7,
+Python 3.13.5).
+
+Die Gründe, in der Reihenfolge ihres Gewichts:
+
+1. **Debian 14 („Forky") ist heute *testing*, also eine bewegliche Basis.**
+   Sicherheitsupdates kommen dort verzögert - für ein Gerät, das bei einem
+   blinden Nutzer im Alltag steht, ist das der falsche Handel.
+2. **Ein Fehler von heute ist morgen weg und ein neuer da.** Genau dieses Muster
+   hat in diesem Projekt schon Tage gekostet: eine Ursache, die sich nicht mehr
+   nachstellen lässt, ist keine Ursache.
+3. **Kein Zeitdruck:** Debian 13 bekommt Sicherheitsupdates bis etwa 2028, mit
+   LTS bis etwa 2030.
+4. **Die Windows-Optik bricht als Erstes.** `dash-to-panel`, `arc-menu` und
+   `tiling-assistant` sind GNOME-Erweiterungen und brechen typischerweise bei
+   jedem GNOME-Sprung. Diese Arbeit macht man einmal - wenn die Zielversion
+   feststeht.
+
+**Was beim späteren Sprung wirklich zu prüfen ist, ist nicht GNOME, sondern die
+kompilierten Fremdbibliotheken:** Vosk, sherpa-onnx (Parakeet), cairo/Pango,
+GTK4. Sie hängen an Python-Version und glibc; fällt eine aus, ist die
+Sprachsteuerung selbst betroffen und nicht nur die Optik.
+
+**Der vorgeschlagene Weg, wenn es soweit ist** (nicht gebaut, bewusst
+zurückgestellt): ein Container mit Debian testing, in dem der **Prüfstand**
+läuft. Er braucht kein Mikrofon und keinen Desktop - er spielt die vorhandenen
+Aufnahmen ab und prüft damit Vosk, Parakeet, Zahlen- und Satzzeichenregeln und
+die PDF-Erzeugung in einem Durchlauf, ohne das T490 anzufassen. Sinnvoller
+Zeitpunkt: **wenn Forky eingefroren ist.**
+
 ## Sicherheit
 - Wiederherstellungsweg für den USB-Sicherheits-Stick bei Verlust/Defekt:
   vorläufig als Master-Passphrase umgesetzt (zweiter LUKS-Schlüsselslot,
