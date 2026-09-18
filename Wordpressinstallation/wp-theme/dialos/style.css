@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.9
+Version: 1.6.10
 Text Domain: dialos
 */
 
@@ -549,12 +549,12 @@ body.dialos-a11y-mode *:focus {
    das auf rem zurueckstellt, macht die Schrift wieder kleiner, ohne
    es zu merken.
 
-   Von 18 auf 20 px am 2026-09-18: Die Umstellung auf die Fusszeilen-
-   groesse (18 px) hat Stephan nicht gesehen - zu Recht, es waren
-   1,2 px Unterschied. In einer schmalen Spalte neben einem breiten
-   Textblock braucht es mehr, damit die Kachel nicht nach Kleingedrucktem
-   aussieht. Der Text steht jetzt ueber dem Fliesstext der Seite, und
-   das ist beabsichtigt.
+   Der Weg zu den heutigen Werten, damit ihn niemand rueckwaerts geht:
+   1,05 rem (= 16,8 px) waren zu klein. 18 px hat Stephan nicht als
+   Aenderung wahrgenommen - zu Recht, das waren 1,2 px. 20 px waren
+   dann "zu wuchtig". Geblieben sind 19 px fuer den Text, 20 fuer den
+   Titel, 23 fuer die Ueberschrift, 16 fuer das Datum (2026-09-18,
+   nach drei Runden am Bildschirm entschieden, nicht gerechnet).
 
    #sidebar VOR DEN KLASSEN (2026-09-18): Stephan sah die Schrift
    unveraendert, obwohl die Regel griff. Welche fremde Regel dagegen
@@ -581,7 +581,7 @@ body.dialos-a11y-mode *:focus {
 }
 #sidebar .dialos-neueste-titel, .dialos-neueste-titel {
   margin: 0 0 1rem;
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 700;
 }
 .dialos-neueste-block {
@@ -598,24 +598,24 @@ body.dialos-a11y-mode *:focus {
 }
 #sidebar .dialos-neueste-block h3, .dialos-neueste-block h3 {
   margin: 0 0 0.4rem;
-  font-size: 21px;
+  font-size: 20px;
   line-height: 1.3;
   font-weight: 700;
 }
 #sidebar .dialos-neueste-datum, .dialos-neueste-datum {
   display: block;
-  font-size: 17px;
+  font-size: 16px;
   color: #666;
   margin-bottom: 0.7rem;
 }
 #sidebar .dialos-neueste-text, .dialos-neueste-text {
   margin: 0;
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1.5;
 }
 #sidebar .dialos-neueste-alle, .dialos-neueste-alle {
   margin: 0;
-  font-size: 20px;
+  font-size: 19px;
 }
 
 /* Im Barrierefreiheits-Modus reicht die globale Linkfarbe nicht: Das
