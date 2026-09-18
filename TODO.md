@@ -67,6 +67,71 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
   Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
 
+- [ ] **Thunderbird eine MailExtension geben, statt an seinen Dateien vorbei
+  zu schreiben - und ihn NICHT forken** (Stephans Frage vom 2026-09-18: „Wäre
+  es sinnvoll, Thunderbird zu clonen … und auf die Bedürfnisse von DialOS und
+  die Spracheingabe zu optimieren?").
+
+  **Nicht verwechseln:** Gemeint ist eine Erweiterung **in Thunderbird**
+  (MailExtension, das ist Thunderbirds WebExtension-Schnittstelle) - nicht
+  eine DialOS-Erweiterung nach [docs/erweiterungen.md](docs/erweiterungen.md).
+  Dasselbe Wort, zwei verschiedene Dinge.
+
+  **Der Fork ist verneint, und zwar aus zwei Gründen.** Die Wartungslast ist
+  der offensichtliche: Thunderbird ist die Gecko-Plattform samt Mail-Schicht,
+  und genau die Teile, die niemand anfassen will (MIME-Parser, TLS, S/MIME,
+  OpenPGP), bekommen monatlich Sicherheitsupdates. Der schwerere Grund ist
+  **OAuth2**: Thunderbirds Wert liegt nicht im Quelltext, sondern darin, dass
+  er bei Google und Microsoft als geprüfter Client registriert ist. Eine
+  umbenannte Abspaltung erbt das nicht, und die Client-IDs mitzubenutzen ist
+  kein Ausweg - eine ältere Thunderbird-Client-ID wurde von Google bereits
+  deaktiviert und hat Drittprojekte mit abgeräumt. Wir stünden vor derselben
+  Wand wie bei MailBurg.
+
+  **Der Fund steckt in der Gegenrichtung.** In `docs/anwendungen.md` steht
+  seit dem 2026-08-18, Mails ließen sich „von außen gar nicht" lesen, weil
+  Thunderbirds Kommandozeile nur `-compose` kennt. Für die **Kommandozeile**
+  stimmt das - inzwischen tut DialOS es trotzdem, nur eben **an Thunderbird
+  vorbei, direkt auf seinen Dateien**. Und jeder dieser drei Wege hat bereits
+  einen Fehler erzeugt:
+
+  - **Entwurf in die mbox** (2026-09-18): erst LF statt CR LF, worauf
+    Thunderbird den ganzen Ordner leer zeigte; dann `X-Mozilla-Status: 0008`,
+    was nicht „Entwurf" heißt, sondern **gelöscht**.
+  - **Kontakt in `abook.sqlite`** (2026-09-17): braucht eine Warteschlange,
+    weil in die Datenbank eines laufenden Thunderbird nicht geschrieben werden
+    darf.
+  - **Index liest die mbox** (2026-09-18): sieht nur INBOX und Sent, keine
+    weiteren IMAP-Ordner und keine Anhänge - beides steht dort als offen.
+
+  Das sind nicht drei Einzelfehler, sondern dreimal dasselbe Muster: in fremde
+  Dateiformate schreiben, statt das Programm zu fragen, dem sie gehören. Die
+  MailExtension-API kennt Konten, Ordner, Nachrichten und Adressbücher, und wo
+  sie nicht reicht, geben
+  [Experiments](https://developer.thunderbird.net/add-ons/mailextensions/experiments)
+  vollen Zugriff auf Thunderbirds Interna. Das ist zugleich der Weg, der den
+  Fork überflüssig macht.
+
+  **Zu klären, in dieser Reihenfolge:**
+  1. **Erst messen, dann glauben.** Eine kleine Erweiterung am Gerät, die
+     einen Entwurf ablegt und einen Kontakt anlegt - reicht die API dafür ohne
+     Experiment? Das entscheidet der Versuch, nicht die Dokumentation.
+  2. **Der Weg vom Befehlsdienst zur Erweiterung.** Sie läuft IN Thunderbird,
+     der Dienst außerhalb; dazwischen braucht es Native Messaging oder einen
+     lokalen Socket.
+  3. **Was, wenn Thunderbird zu ist?** Der mbox-Weg funktioniert auch dann,
+     eine Erweiterung nicht. Für einen blinden Nutzer ist „das Programm war
+     geschlossen" kein erklärbarer Zustand - hier hängt die Entscheidung.
+  4. **Trägt sie, gehört `docs/anwendungen.md` berichtigt** (beide Sprachen):
+     Der Satz über die Steuerbarkeit hat die ganze Arbeitsteilung begründet.
+  5. **Vorgelesen wird weiter von DialOS**, nicht von der Erweiterung - sonst
+     hat das System zwei Stimmen.
+
+  **Kein Vorrang, kein Umbauauftrag:** Der mbox-Weg läuft und ist am Gerät
+  belegt (Suche → Fund → Antwort → Entwurf). Der Punkt lohnt sich, **bevor**
+  Anhänge und weitere IMAP-Ordner dazukommen - also bevor der Fremdzugriff
+  größer wird als das, was eine Erweiterung sauber könnte.
+
 - [ ] **Erweiterungsschnittstelle bauen, danach DialOS-Suche als erste
   Erweiterung** (entschieden mit Stephan am 2026-09-17). Der Entwurf steht
   vollständig in [docs/erweiterungen.md](docs/erweiterungen.md) - **hier nur

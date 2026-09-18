@@ -64,6 +64,70 @@ finished too, and then move down together. That way no reference breaks.
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
   that DialOS can show or read out on the device.
 
+- [ ] **Give Thunderbird a MailExtension instead of writing past its files -
+  and do NOT fork it** (Stephan's question of 2026-09-18: „Wäre es sinnvoll,
+  Thunderbird zu clonen … und auf die Bedürfnisse von DialOS und die
+  Spracheingabe zu optimieren?").
+
+  **Not to be confused:** this means an extension **inside Thunderbird** (a
+  MailExtension, Thunderbird's WebExtension interface) - not a DialOS
+  extension per [docs/erweiterungen.en.md](docs/erweiterungen.en.md). Same
+  word, two different things.
+
+  **The fork is ruled out, for two reasons.** The maintenance burden is the
+  obvious one: Thunderbird is the Gecko platform plus a mail layer, and
+  precisely the parts nobody wants to touch (MIME parser, TLS, S/MIME,
+  OpenPGP) get security updates every month. The heavier reason is **OAuth2**:
+  Thunderbird's value is not its source but the fact that it is registered as
+  a vetted client with Google and Microsoft. A renamed fork does not inherit
+  that, and reusing the client IDs is no way out - an older Thunderbird client
+  ID has already been disabled by Google, taking third-party projects down
+  with it. We would face the same wall as with MailBurg.
+
+  **The finding lies in the opposite direction.** Since 2026-08-18
+  `docs/anwendungen.en.md` says mail cannot be read "from the outside at all"
+  because Thunderbird's command line only knows `-compose`. For the **command
+  line** that holds - meanwhile DialOS does it anyway, only **past
+  Thunderbird, straight on its files**. And each of those three paths has
+  already produced a bug:
+
+  - **Draft into the mbox** (2026-09-18): first LF instead of CR LF, on which
+    Thunderbird showed the whole folder as empty; then `X-Mozilla-Status:
+    0008`, which does not mean "draft" but **deleted**.
+  - **Contact into `abook.sqlite`** (2026-09-17): needs a queue, because one
+    must not write into the database of a running Thunderbird.
+  - **Index reads the mbox** (2026-09-18): sees only INBOX and Sent, no other
+    IMAP folders and no attachments - both are noted there as open.
+
+  These are not three separate bugs but the same pattern three times: writing
+  into someone else's file formats instead of asking the program they belong
+  to. The MailExtension API knows accounts, folders, messages and address
+  books, and where it falls short,
+  [Experiments](https://developer.thunderbird.net/add-ons/mailextensions/experiments)
+  grant full access to Thunderbird's internals. That is also the path that
+  makes the fork unnecessary.
+
+  **To settle, in this order:**
+  1. **Measure first, believe second.** A small extension on the device that
+     files a draft and creates a contact - does the API suffice without an
+     Experiment? The attempt decides that, not the documentation.
+  2. **The path from the command service to the extension.** It runs INSIDE
+     Thunderbird, the service outside; in between it needs native messaging or
+     a local socket.
+  3. **What if Thunderbird is closed?** The mbox path works even then, an
+     extension does not. For a blind user "the program was closed" is not an
+     explainable state - this is where the decision hangs.
+  4. **If it holds, `docs/anwendungen.md` must be corrected** (both
+     languages): that sentence about controllability is what justified the
+     entire division of labour.
+  5. **DialOS keeps doing the reading aloud**, not the extension - otherwise
+     the system has two voices.
+
+  **No priority, no rebuild order:** the mbox path works and is proven on the
+  device (search → hit → reply → draft). This is worth doing **before**
+  attachments and further IMAP folders arrive - that is, before the outside
+  access grows beyond what an extension could do cleanly.
+
 - [ ] **Build the extension interface, then DialOS Search as the first
   extension** (decided with Stephan on 2026-09-17). The draft is complete in
   [docs/erweiterungen.en.md](docs/erweiterungen.en.md) - **only the checkable
