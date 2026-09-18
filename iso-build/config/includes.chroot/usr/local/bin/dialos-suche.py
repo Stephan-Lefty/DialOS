@@ -73,6 +73,24 @@ PEGEL_SCHWELLE = 150.0
 VORLAUF_S = 0.3
 
 ANSAGE_LADEN = "Einen Moment, ich hole das Verzeichnis."
+# ERST DER BEREICH, DANN DER BEGRIFF (Stephan, 2026-09-18: "der erste Befehl ist
+# Unterlagen durchsuchen, dann Dokumente oder Postfach/Mails oder Bilder oder
+# Videos"). Der Bereich schneidet vorher weg, was ohnehin nicht gemeint ist -
+# und er macht die Frage danach kuerzer: Wer "Postfach" gesagt hat, wird nicht
+# mehr gefragt, ob er den Brief oder die Mail meint.
+ANSAGE_BEREICH = ("Wo soll ich suchen? Sage: Dokumente, Postfach, Bilder oder Videos. "
+                  "Im Postfach suche ich die E-Mails.")
+BEREICHE = {
+    "dokumente": ("Brief", "Notiz", "Ablage"), "dokument": ("Brief", "Notiz", "Ablage"),
+    "unterlagen": ("Brief", "Notiz", "Ablage"), "briefe": ("Brief", "Notiz", "Ablage"),
+    "brief": ("Brief", "Notiz", "Ablage"), "notizen": ("Brief", "Notiz", "Ablage"),
+    "ablage": ("Brief", "Notiz", "Ablage"), "archiv": ("Brief", "Notiz", "Ablage"),
+    "postfach": ("Mail",), "post": ("Mail",), "mail": ("Mail",), "mails": ("Mail",),
+    "nachrichten": ("Mail",), "nachricht": ("Mail",), "email": ("Mail",),
+}
+NOCH_NICHT = ("bilder", "bild", "fotos", "foto", "videos", "video", "filme", "film")
+ANSAGE_NOCH_NICHT_BEREICH = ("Bilder und Videos kann ich noch nicht durchsuchen. "
+                             "Das kommt später.")
 ANSAGE_START = "Wonach soll ich suchen?"
 ANSAGE_NICHTS = "Ich habe nichts verstanden. Die Suche ist beendet."
 ANSAGE_NOCH_NICHT = ("Der Suchindex ist noch nicht eingerichtet. "
@@ -325,7 +343,64 @@ ABBRUCH_WORTE = ("abbrechen", "abbruch", "beenden", "stopp", "stop", "aufhören"
 ARTEN_WORTE = {"brief": "Brief", "briefe": "Brief", "schreiben": "Brief",
                "notiz": "Notiz", "notizen": "Notiz",
                "ablage": "Ablage", "archiv": "Ablage", "akte": "Ablage",
-               "mail": "Mail", "mails": "Mail", "email": "Mail", "e-mail": "Mail"}
+               "mail": "Mail", "mails": "Mail", "email": "Mail", "e-mail": "Mail",
+               # "MAIL" IST EIN HARTES WORT (Stephan, 2026-09-18: "mit dem Wort
+               # Mail hat sich die Sprachsteuerung schwer getan"). Im Protokoll
+               # kam es als "melle", "Man" und "Okay" an. Deshalb zusaetzlich
+               # deutsche Woerter, die niemand verwechselt.
+               "nachricht": "Mail", "nachrichten": "Mail", "post": "Mail",
+               "elektronische": "Mail"}
+
+
+# GESPROCHEN HEISST ES E-MAIL (Stephan, 2026-09-18: "Mache doch aus Mail EMail").
+# In der Datenbank bleibt "Mail" - dort ist es ein Schluessel, kein Satz.
+ART_GESPROCHEN = {"Mail": "E-Mail", "Brief": "Brief", "Notiz": "Notiz",
+                  "Ablage": "Ablage"}
+
+
+def gesprochene_art(art):
+    return ART_GESPROCHEN.get(art, art)
+
+
+def art_aus_antwort(texte, gruppen):
+    """Welche Art ist gemeint? Wort, Klang, dann Aehnlichkeit.
+
+    Der Klangvergleich kommt aus dem Index (Koelner Phonetik) - "melle" und
+    "mail" haben denselben Schluessel, "man" nicht. Was der Erkenner daraus
+    gemacht hat, ist nicht zu aendern; erkennen laesst es sich trotzdem.
+    """
+    koelner = None
+    try:
+        spec = importlib.util.spec_from_file_location("dialos_suche_index", INDEX)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        koelner = modul.koelner
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"  Klangvergleich nicht nutzbar: {fehler}")
+    for text in texte:
+        for wort in text.lower().split():
+            art = ARTEN_WORTE.get(wort.strip(".,!?"))
+            if art in gruppen:
+                return art
+    if koelner:
+        for text in texte:
+            for wort in text.lower().split():
+                schluessel = koelner(wort.strip(".,!?"))
+                for wort_art, art in ARTEN_WORTE.items():
+                    if art in gruppen and schluessel and koelner(wort_art) == schluessel:
+                        melde(f"  Art {art!r} ueber den Klang von {wort!r}")
+                        return art
+    beste, bester_wert = None, 0.6
+    for text in texte:
+        for wort_art, art in ARTEN_WORTE.items():
+            if art not in gruppen:
+                continue
+            wert = _aehnlich(text, wort_art)
+            if wert > bester_wert:
+                beste, bester_wert = art, wert
+    if beste:
+        melde(f"  Art {beste!r} ueber Aehnlichkeit ({bester_wert:.2f})")
+    return beste
 MONATE = ("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
           "August", "September", "Oktober", "November", "Dezember")
 ORDNUNGSZAHLEN = {"erste": 0, "ersten": 0, "erster": 0, "zweite": 1, "zweiten": 1,
@@ -421,13 +496,13 @@ def eingrenzen(treffer, erkenner, modell):
                      + " Oder ".join(str(j) for j in sorted(gruppen)) + ".")
         elif name == "art":
             frage = (f"{len(treffer)} Treffer. Was davon: "
-                     + ", ".join(sorted(gruppen)) + "?")
+                     + ", ".join(gesprochene_art(a) for a in sorted(gruppen)) + "?")
         elif name == "monat":
             frage = (f"{len(treffer)} Treffer. Aus welchem Monat? "
                      + " Oder ".join(MONATE[m - 1] for m in sorted(gruppen)) + ".")
         else:
             namen = sorted(gruppen, key=lambda x: -len(gruppen[x]))[:4]
-            frage = f"{len(treffer)} Treffer. Von wem? " + ", ".join(namen) + "."
+            frage = sprechbar(f"{len(treffer)} Treffer. Von wem? " + ", ".join(namen) + ".")
         texte, gesprochen = antwort_hoeren(frage, erkenner, modell, mit_pegel=True)
         melde(f"  {name}: Antwort {texte!r}")
         if _abbruch(texte):
@@ -451,14 +526,9 @@ def eingrenzen(treffer, erkenner, modell):
             if jahr in gruppen:
                 gewaehlt = gruppen[jahr]
         elif name == "art":
-            for text in texte:
-                for wort in text.lower().split():
-                    art = ARTEN_WORTE.get(wort.strip(".,"))
-                    if art in gruppen:
-                        gewaehlt = gruppen[art]
-                        break
-                if gewaehlt:
-                    break
+            art = art_aus_antwort(texte, gruppen)
+            if art:
+                gewaehlt = gruppen[art]
         elif name == "monat":
             for text in texte:
                 for nummer, monat in enumerate(MONATE, start=1):
@@ -518,6 +588,21 @@ def mit_wort_eingrenzen(treffer, erkenner, modell):
     return enger
 
 
+MAILADRESSE = re.compile(r"\b([\w.+-]+)@([\w-]+(?:\.[\w-]+)+)")
+
+
+def sprechbar(text):
+    """Mailadressen hoerbar machen - wie beim Vorlesen eines Briefs.
+
+    Ohne das sagt Piper "web57p6@s111.goserver.host" als Buchstabensalat; der
+    Punkt darin klaenge ausserdem wie ein Satzende (2026-09-18, aus Stephans
+    Probe: die Mail hatte keinen Anzeigenamen fuer den Empfaenger).
+    """
+    lesbar = lambda teil: (teil.replace(".", " Punkt ").replace("-", " Minus ")
+                           .replace("_", " Unterstrich ").replace("  ", " ").strip())
+    return MAILADRESSE.sub(lambda m: f"{lesbar(m.group(1))} at {lesbar(m.group(2))}", text)
+
+
 def treffer_nennen(t):
     """Wie ein Treffer angesagt wird - Art, Datum, Titel.
 
@@ -525,32 +610,133 @@ def treffer_nennen(t):
     15. September, 2026-09-15-1634-Brief.pdf" sagt einem Hoerer nichts. Der
     Titel ist der Betreff, sonst der erste Satz nach der Anrede.
     """
-    art = t.get("art", "Schreiben")
+    art = gesprochene_art(t.get("art", "Schreiben"))
     wann = time.strftime("%d. %B", time.localtime(t.get("geaendert", 0)))
     wer = (t.get("personen") or [""])[0]
     titel = (t.get("titel") or os.path.basename(t.get("pfad", ""))).strip()
     if len(titel) > 90:
         titel = titel[:90].rsplit(" ", 1)[0] + " und so weiter"
-    return f"{art} vom {wann}" + (f", {wer}" if wer else "") + f": {titel.rstrip('.')}"
+    return sprechbar(f"{art} vom {wann}" + (f", {wer}" if wer else "")
+                     + f": {titel.rstrip('.')}")
+
+
+DRUCKEN_SKRIPT = "/usr/local/bin/dialos-drucken.py"
+ARCHIV_SKRIPT = "/usr/local/bin/dialos-archiv.py"
+DRUCK_OPTIONEN = ["-o", "media=A4", "-o", "orientation-requested=3"]
+WAHL_WORTE = {"vorlesen": "vorlesen", "lesen": "vorlesen", "lies": "vorlesen",
+              "vorlese": "vorlesen", "drucken": "drucken", "druck": "drucken",
+              "ausdrucken": "drucken", "papier": "drucken",
+              "nichts": "nichts", "keine": "nichts", "nein": "nichts",
+              "danke": "nichts", "fertig": "nichts"}
+
+
+def _modul(pfad, name):
+    try:
+        spec = importlib.util.spec_from_file_location(name, pfad)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"  {name} nicht nutzbar: {fehler}")
+        return None
+
+
+def text_holen(t):
+    """Der Text des Treffers aus dem Index - schon extrahiert."""
+    try:
+        r = subprocess.run([INDEX, "text", t["pfad"]], capture_output=True, timeout=60)
+        return r.stdout.decode("utf-8", errors="replace").strip()
+    except (OSError, subprocess.TimeoutExpired) as fehler:
+        melde(f"  Text nicht lesbar: {fehler}")
+        return ""
+
+
+def drucken_treffer(t, erkenner, modell):
+    """Den Treffer auf Papier - PDF direkt, alles andere ueber den PDF-Erzeuger.
+
+    MIT RUECKFRAGE, wie jeder Druckbefehl seit dem 2026-09-14: Ein missverstandenes
+    Wort kostet sonst eine Seite Papier, und der Nutzer sieht nicht, was da liegt.
+    """
+    antwort = antwort_hoeren("Soll ich das drucken? Sage ja oder nein.", erkenner, modell)
+    if not any(w in ("ja", "jawohl", "gerne", "bitte")
+               for text in antwort or [] for w in text.lower().split()):
+        sprich("Gut, ich drucke nicht.")
+        return 0
+    drucken = _modul(DRUCKEN_SKRIPT, "dialos_drucken")
+    ziel = drucken.drucker() if drucken else None
+    if not ziel:
+        sprich("Ich finde keinen Drucker.")
+        return 1
+    datei = t["pfad"]
+    aufraeumen = None
+    if "#" in datei or not datei.lower().endswith(".pdf"):
+        # Mail oder Textdatei: dasselbe PDF wie im Archiv, damit Papier und
+        # Archiv gleich aussehen.
+        archiv = _modul(ARCHIV_SKRIPT, "dialos_archiv")
+        text = text_holen(t)
+        if archiv is None or not text:
+            sprich("Ich kann das nicht drucken.")
+            return 1
+        import tempfile
+        datei = os.path.join(tempfile.mkdtemp(prefix="dialos-suche-"), "druck.pdf")
+        aufraeumen = datei
+        try:
+            archiv.als_pdf(text, datei)
+        except Exception as fehler:        # noqa: BLE001 - jede Ursache zaehlt
+            melde(f"  PDF fehlgeschlagen: {fehler}")
+            sprich("Das PDF ließ sich nicht erstellen.")
+            return 1
+    try:
+        p = subprocess.run(["lp", "-d", ziel] + DRUCK_OPTIONEN + [datei],
+                           capture_output=True, timeout=60)
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"  lp nicht aufrufbar: {fehler}")
+        sprich("Der Druck hat nicht geklappt.")
+        return 1
+    finally:
+        if aufraeumen:
+            try:
+                os.unlink(aufraeumen)
+            except OSError:
+                pass
+    if p.returncode != 0:
+        melde(f"  lp meldet {p.returncode}: {p.stderr.decode('utf-8', 'replace')[:200]}")
+        sprich("Der Druck hat nicht geklappt.")
+        return 1
+    melde(f"  gedruckt auf {ziel}: {t['pfad']}")
+    sprich("Ich drucke das aus.")
+    return 0
 
 
 def vorlesen_anbieten(t, erkenner, modell):
-    """Einen Treffer vorlesen - wenn er erreichbar ist und der Nutzer will."""
+    """Was mit dem Fund geschehen soll - vorlesen, drucken oder nichts.
+
+    (Stephan, 2026-09-18: "Wenn ich eine Mail oder Datei gefunden habe, dann muss
+    der Nutzer ja damit was anfangen koennen. Vorlesen, drucken, bei einer Mail
+    antworten oder weiterleiten.") Antworten und Weiterleiten kommen als
+    Naechstes - sie brauchen das Diktat und einen Entwurf in Thunderbird.
+    """
     if not t.get("erreichbar"):
         sprich("Diese Datei liegt im Archiv, das gerade nicht angeschlossen ist.")
         return 0
-    texte = antwort_hoeren(f"Es bleibt: {treffer_nennen(t)}. Soll ich vorlesen? "
-                           "Sage ja oder nein.", erkenner, modell)
-    if not texte or not any(w in ("ja", "jawohl", "gerne", "bitte")
-                            for text in texte for w in text.lower().split()):
-        sprich("Gut, ich lese nicht vor.")
+    texte = antwort_hoeren(f"Es bleibt: {treffer_nennen(t)}. Was soll ich damit tun? "
+                           "Sage: vorlesen, drucken oder nichts.", erkenner, modell)
+    wahl = None
+    for text in texte or []:
+        for wort in text.lower().split():
+            wahl = wahl or WAHL_WORTE.get(wort.strip(".,!?"))
+    if wahl is None and texte:
+        for wort, ziel in WAHL_WORTE.items():
+            if any(_aehnlich(text, wort) >= 0.7 for text in texte):
+                wahl = ziel
+                break
+    melde(f"  Wahl: {wahl!r} aus {texte!r}")
+    if wahl == "drucken":
+        return drucken_treffer(t, erkenner, modell)
+    if wahl != "vorlesen":
+        sprich("Gut, ich lasse es.")
         return 0
-    try:
-        r = subprocess.run([INDEX, "text", t["pfad"]], capture_output=True, timeout=60)
-        text = r.stdout.decode("utf-8", errors="replace").strip()
-    except (OSError, subprocess.TimeoutExpired) as fehler:
-        melde(f"  Text nicht lesbar: {fehler}")
-        text = ""
+    text = text_holen(t)
     if not text:
         sprich("Ich kann den Text nicht vorlesen.")
         return 1
@@ -576,7 +762,33 @@ def vorlesen_anbieten(t, erkenner, modell):
     return 0
 
 
-def suchen(begriffe, erkenner=None, modell=None):
+def bereich_erfragen(erkenner, modell):
+    """Welcher Bereich - Dokumente oder Postfach. Arten-Tupel oder None."""
+    for _versuch in range(2):
+        texte, gesprochen = antwort_hoeren(ANSAGE_BEREICH, erkenner, modell, mit_pegel=True)
+        if _abbruch(texte):
+            return None
+        worte = [w.strip(".,!?").lower() for text in texte for w in text.split()]
+        for wort in worte:
+            if wort in NOCH_NICHT:
+                sprich(ANSAGE_NOCH_NICHT_BEREICH)
+                return None
+            if wort in BEREICHE:
+                melde(f"  Bereich: {BEREICHE[wort]}")
+                return BEREICHE[wort]
+        # Klang und Aehnlichkeit wie bei der Art - "Postfach" kam als "Hostwa" an.
+        arten = {a for arten in BEREICHE.values() for a in arten}
+        art = art_aus_antwort(texte, arten)
+        if art:
+            return ("Mail",) if art == "Mail" else ("Brief", "Notiz", "Ablage")
+        if not gesprochen:
+            sprich("Ich höre nichts mehr. Die Suche ist beendet.")
+            return None
+        sprich("Das habe ich nicht verstanden.")
+    return None
+
+
+def suchen(begriffe, erkenner=None, modell=None, arten=None):
     """Den Index fragen und das Ergebnis ansagen.
 
     MEHRERE BEGRIFFE, EINE ANTWORT (2026-09-18): Vosk und Parakeet hoeren
@@ -609,6 +821,8 @@ def suchen(begriffe, erkenner=None, modell=None):
             melde(f"  Suche fehlgeschlagen: {fehler}")
             sprich("Bei der Suche ist etwas schiefgegangen.")
             return 1
+        if arten:
+            gefunden = [x for x in gefunden if x.get("art") in arten]
         melde(f"  {len(gefunden)} Treffer fuer {versuch!r}")
         if gefunden:
             begriff, treffer = versuch, gefunden
@@ -707,6 +921,9 @@ def main():
         melde("=== DialOS-Suche gestartet ===")
         sprich(ANSAGE_LADEN)
         erkenner, modell = modelle_laden()
+        arten = bereich_erfragen(erkenner, modell)
+        if arten is None:
+            return 0
         begriffe = antwort_hoeren(ANSAGE_START, erkenner, modell)
         melde(f"  verstanden: {begriffe!r}")
         if not begriffe:
@@ -715,7 +932,7 @@ def main():
         if _abbruch(begriffe):
             sprich("Gut, ich suche nicht.")
             return 0
-        return suchen(begriffe, erkenner, modell)
+        return suchen(begriffe, erkenner, modell, arten)
     finally:
         try:
             os.unlink(MARKE)

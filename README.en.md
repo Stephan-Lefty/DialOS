@@ -122,6 +122,28 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The area first, then the search term** (2026-09-18, Stephan's requirement:
+  "the first command is Unterlagen durchsuchen, then documents or
+  mailbox/mails or images or videos"). "Where shall I search?" cuts away what is
+  not meant anyway - whoever says "Postfach" is no longer asked whether they mean
+  the letter or the email. Images and videos honestly say "that comes later"
+  instead of pretending they already exist.
+
+- **"Mail" is a hard word for speech recognition** (Stephan, 2026-09-18: "the
+  voice control struggled with the word Mail"). The log shows it arriving as
+  "melle", "Man" and "Okay". Three answers: it is now spoken as **E-Mail**,
+  "Postfach", "Post" and "Nachricht" count as answers too, and it is additionally
+  recognised by **sound** (Kölner Phonetik, the same function as in the index -
+  "melle" and "mail" share a key) and by similarity.
+
+- **What should happen to a hit** (2026-09-18, Stephan: "the user has to be able
+  to do something with it"). Instead of "shall I read it out?" DialOS now asks
+  "what shall I do with it? Say: read out, print or nothing." Printing asks for
+  confirmation like every print command since 2026-09-14: PDFs go straight to the
+  printer, mails and text files through the same PDF generator as the archive -
+  so paper looks like the filing. **Reply and forward come next**; Stephan's
+  decision is made: dictate, save as a draft, and only send on a second command.
+
 - **Thunderbird's mails are now in the index** (2026-09-18, Stephan's question:
   "and do we search the mails in Thunderbird too?"). The local mbox files of
   inbox and sent are read - **one mail is one entry, not the whole mailbox**:

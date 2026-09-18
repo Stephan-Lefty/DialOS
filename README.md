@@ -130,6 +130,30 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Erst der Bereich, dann der Suchbegriff** (2026-09-18, Stephans Vorgabe: „der
+  erste Befehl ist Unterlagen durchsuchen, dann Dokumente oder Postfach/Mails
+  oder Bilder oder Videos"). „Wo soll ich suchen?" schneidet vorher weg, was
+  ohnehin nicht gemeint ist - wer „Postfach" sagt, wird nicht mehr gefragt, ob er
+  den Brief oder die E-Mail meint. Bilder und Videos sagen ehrlich „das kommt
+  später", statt so zu tun, als gäbe es sie schon.
+
+- **„Mail" ist ein hartes Wort für die Spracherkennung** (Stephan, 2026-09-18:
+  „mit dem Wort Mail hat sich die Sprachsteuerung schwer getan"). Im Protokoll
+  kam es als „melle", „Man" und „Okay" an. Drei Antworten darauf: gesprochen
+  heißt es jetzt **E-Mail**, als Antwort gelten auch „Postfach", „Post" und
+  „Nachricht", und erkannt wird zusätzlich über den **Klang** (Kölner Phonetik,
+  dieselbe Funktion wie im Index - „melle" und „mail" haben denselben Schlüssel)
+  sowie über Ähnlichkeit.
+
+- **Was mit einem Fund geschehen soll** (2026-09-18, Stephan: „dann muss der
+  Nutzer ja damit was anfangen können"). Statt „Soll ich vorlesen?" fragt DialOS
+  jetzt „Was soll ich damit tun? Sage: vorlesen, drucken oder nichts."
+  Gedruckt wird mit Rückfrage, wie jeder Druckbefehl seit dem 2026-09-14: PDFs
+  gehen direkt an den Drucker, Mails und Textdateien über denselben PDF-Erzeuger
+  wie das Archiv - Papier sieht damit aus wie die Ablage. **Antworten und
+  Weiterleiten kommen als Nächstes**; Stephans Entscheidung dazu steht:
+  diktieren, als Entwurf ablegen, und erst auf einen zweiten Befehl senden.
+
 - **Die Mails aus Thunderbird sind jetzt mit im Index** (2026-09-18, Stephans
   Frage: „Und suchen wir auch über die Mails in Thunderbird?"). Gelesen werden
   die lokalen mbox-Dateien von Eingang und Gesendet - **eine Mail ist ein

@@ -616,8 +616,17 @@ def mails_finden():
         for nachricht in postfach:
             kennung = str(nachricht.get("Message-ID", "")).strip()
             betreff = ma.lesbar(nachricht.get("Subject")) or "(ohne Betreff)"
-            wer = [x for x in (ma.lesbar(nachricht.get("From")),
-                               ma.lesbar(nachricht.get("To"))) if x]
+            # NUR DER NAME, NICHT DIE ADRESSE (2026-09-18, aus Stephans Probe):
+            # Angesagt wurde "webgo Kundenbetreuung <support@webgo.de>" - die
+            # spitzen Klammern und das @ sind zum Hoeren unbrauchbar. Fehlt der
+            # Anzeigename, bleibt die Adresse; sie ist dann das Einzige, was den
+            # Absender benennt.
+            wer = []
+            for kopf in ("From", "To"):
+                name, adresse = email.utils.parseaddr(ma.lesbar(nachricht.get(kopf)))
+                eintrag = (name or adresse).strip()
+                if eintrag and eintrag not in wer:
+                    wer.append(eintrag)
             try:
                 datum = email.utils.parsedate_to_datetime(nachricht.get("Date"))
                 stempel = datum.timestamp()
