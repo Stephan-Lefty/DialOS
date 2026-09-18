@@ -130,6 +130,24 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Die erste buchstabierte Adresse kam falsch an - drei Verbesserungen**
+  (2026-09-18, Stephans Probe am Gerät). Aus „kontakt@dialos.org" wurde
+  `komteakte@teialos.or`: Nordpol als Martha gehört, Dora als Theodor, das
+  Gustav am Ende verschluckt. Der Ablauf selbst lief durch, der Entwurf lag mit
+  „Fwd:" in den Entwürfen - nur wäre er unzustellbar gewesen. Das
+  Buchstabieralphabet ist gut, aber nicht fehlerfrei, und in einer Kette aus
+  achtzehn Buchstabierwörtern fällt so ein Fehler beim Vorlesen kaum auf.
+
+  1. **Gegengelesen mit dem, was das Gerät schon kennt:** eigene Daten,
+     Thunderbird-Kontakte und die Absender der indizierten Mails (dafür gibt der
+     Index jetzt `adressen` aus). Passt eine bekannte Adresse fast, wird sie
+     vorgeschlagen; ist nur die **Domain** ähnlich, kommt sie korrigiert zurück
+     (`…@teialos.or` → `…@dialos.org`). Was hinter dem At steht, entscheidet
+     über die Zustellbarkeit; was davor steht, fällt höchstens dem Empfänger auf.
+  2. **Vorgelesen wird getrennt:** erst vor dem At-Zeichen, dann danach.
+  3. **Bis zu drei Anläufe:** Ein „nein" führt zurück ins Buchstabieren, statt
+     das Weiterleiten abzubrechen.
+
 - **Weiterleiten an eine buchstabierte Adresse** (2026-09-18, Stephans
   Entscheidung nach dem Befund, dass **keiner** seiner Thunderbird-Kontakte eine
   Mailadresse hat - im Adressbuch stehen Brief-Empfänger mit Anschrift). DialOS

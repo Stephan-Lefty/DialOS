@@ -122,6 +122,24 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The first spelled-out address came out wrong - three improvements**
+  (2026-09-18, Stephan's trial on the device). "kontakt@dialos.org" became
+  `komteakte@teialos.or`: Nordpol heard as Martha, Dora as Theodor, the Gustav
+  at the end swallowed. The flow itself worked and the draft was filed with
+  "Fwd:" - it would simply have been undeliverable. The spelling alphabet is
+  good but not error-free, and in a chain of eighteen spelling words such a slip
+  is easy to miss when it is read back.
+
+  1. **Cross-checked against what the device already knows:** own data,
+     Thunderbird contacts and the senders of the indexed mails (the index now
+     prints `adressen` for this). If a known address almost matches it is
+     offered; if only the **domain** is similar it comes back corrected
+     (`…@teialos.or` → `…@dialos.org`). What is behind the at sign decides
+     deliverability; what is in front is at most noticed by the recipient.
+  2. **Read back in two parts:** first before the at sign, then after it.
+  3. **Up to three attempts:** a "no" leads back into spelling instead of
+     aborting the forward.
+
 - **Forwarding to a spelled-out address** (2026-09-18, Stephan's decision after
   the finding that **none** of his Thunderbird contacts has an email address -
   the address book holds letter recipients with postal addresses). DialOS asks
