@@ -21,13 +21,15 @@ Dieses Projekt ist in Zusammenarbeit mit [Claude](https://claude.com) entstanden
 ## Status
 
 **Seit dem 2026-08-16 läuft DialOS auf echter Hardware.** Aus einer
-nackten Debian-13/GNOME-Installation entsteht das fertige System in drei
+nackten Debian-13/GNOME-Installation entsteht das fertige System in fünf
 Befehlen – am Referenzgerät (ThinkPad T490) end-to-end durchgeprüft:
 
 ```bash
 ./scripts/dialos-full-office-setup.sh                    # Pakete, Branding, Sprachausgabe, Vosk
 /usr/local/sbin/dialos-setup-home-partition.sh           # verschlüsselter Swap + nutzer-Partition
 sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # Konto + Autologin
+./scripts/dialos-aufraeumen.sh                           # nicht benötigte Programme entfernen
+./scripts/dialos-menue-pro-konto.sh                      # Startmenü je Konto einrichten
 ```
 
 **Was funktioniert:** Sprachausgabe über Piper, Spracherkennung über
@@ -50,11 +52,16 @@ Erweiterungen obendrauf, und es lässt sich jederzeit in beide Richtungen
 zurückschalten. Die gewählte Optik bleibt über Neustarts hinweg
 bestehen.
 
-**Was noch fehlt – der eigentliche Kern:** die Sprachsteuerung in der
-Breite. Was es gibt, ist eine auf drei feste Sätze beschränkte
-Erkennung; was fehlt, ist ein Aufweckwort und eine Befehlsgrammatik für
-alles andere (Radio, Briefe, Termine). Ebenso offen: Telefonie und die
-WWAN-Variante.
+**Was noch fehlt:** das Aufweckwort – die fertigen Modelle dafür stehen
+unter einer Lizenz, die eine kommerzielle Nutzung ausschließt. Ebenso
+offen sind Telefonie und die WWAN-Variante, Radio und Mediatheken,
+Termine und Kontakte. Und der Brief nach DIN 5008 ist gebaut, aber noch
+nicht am Gerät von Anfang bis Ende durchgesprochen.
+
+**Was inzwischen läuft:** über zwei Dutzend Befehlssätze, freies Diktat
+für Notizen und Einkaufszettel, der diktierte Brief bis zum Ausdruck und
+ins PDF-Archiv, und seit dem 2026-09-17 eine Erweiterungsschnittstelle
+mit der Volltextsuche als erstem Baustein.
 
 Details zum jeweiligen Stand stehen im
 [Änderungsprotokoll](#änderungsprotokoll), konkrete nächste Schritte in

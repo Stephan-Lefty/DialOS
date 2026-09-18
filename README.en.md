@@ -21,7 +21,7 @@ This project was created in collaboration with [Claude](https://claude.com).
 
 ## Status
 
-**Since 2026-08-16, DialOS runs on real hardware.** Three commands turn a
+**Since 2026-08-16, DialOS runs on real hardware.** Five commands turn a
 bare Debian 13/GNOME install into the finished system – verified
 end-to-end on the reference device (ThinkPad T490):
 
@@ -29,6 +29,8 @@ end-to-end on the reference device (ThinkPad T490):
 ./scripts/dialos-full-office-setup.sh                    # packages, branding, speech output, Vosk
 /usr/local/sbin/dialos-setup-home-partition.sh           # encrypted swap + nutzer partition
 sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # account + autologin
+./scripts/dialos-aufraeumen.sh                           # remove programs that are not needed
+./scripts/dialos-menue-pro-konto.sh                      # set up the start menu per account
 ```
 
 **What works:** speech output via Piper, speech recognition via Vosk, the
@@ -51,11 +53,16 @@ in full (Orca, AT-SPI); only three extensions are added on top, and it
 can be switched back at any time in either direction. The chosen look
 persists across restarts.
 
-**What is still missing – the actual core:** voice control across the
-board. What exists is recognition limited to three fixed sentences; what
-is missing is a wake word and a command grammar for everything else
-(radio, letters, appointments). Also open: telephony and the WWAN
-variant.
+**What is still missing:** the wake word – the ready-made models for it
+come under a licence that rules out commercial use. Also open are
+telephony and the WWAN variant, radio and streaming libraries,
+appointments and contacts. And the DIN 5008 letter is built, but has not
+yet been spoken through from start to finish on the device.
+
+**What works by now:** more than two dozen command sentences, free
+dictation for notes and shopping lists, the dictated letter all the way
+to the printout and into the PDF archive, and since 2026-09-17 an
+extension interface with full-text search as its first building block.
 
 Details on the respective state are in the [changelog](#changelog),
 concrete next steps in [TODO.en.md](TODO.en.md).
