@@ -1,0 +1,22 @@
+[Unit]
+# Traegt beim Anmelden Mail-Entwuerfe in Thunderbird ein, die beim Antworten
+# vorgemerkt wurden, weil Thunderbird gerade lief (2026-09-18).
+#
+# WARUM NICHT SOFORT: Thunderbird haelt seine mbox-Dateien offen und
+# ueberschreibt eine Aenderung von aussen beim Beenden. Beim Anmelden laeuft es
+# noch nicht. Ist die Warteschlange leer, tut der Dienst nichts.
+#
+# DASSELBE VERFAHREN WIE BEI DEN KONTAKTEN (dialos-kontakte.service): Es hat
+# sich dort bewaehrt, und zwei verschiedene Wege fuer dieselbe Lage waeren zwei
+# Stellen zum Nachsehen, wenn etwas fehlt.
+Description=DialOS: vorgemerkte Mail-Entwuerfe in Thunderbird
+Documentation=file:///usr/local/bin/dialos-mail-entwurf.py
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dialos-mail-entwurf.py nachholen
+Nice=15
+
+[Install]
+WantedBy=default.target

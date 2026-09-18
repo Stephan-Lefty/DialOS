@@ -626,8 +626,14 @@ DRUCK_OPTIONEN = ["-o", "media=A4", "-o", "orientation-requested=3"]
 WAHL_WORTE = {"vorlesen": "vorlesen", "lesen": "vorlesen", "lies": "vorlesen",
               "vorlese": "vorlesen", "drucken": "drucken", "druck": "drucken",
               "ausdrucken": "drucken", "papier": "drucken",
+              "antworten": "antworten", "antwort": "antworten",
+              "weiterleiten": "weiterleiten", "weiterleitung": "weiterleiten",
+              "weiter": "weiterleiten",
               "nichts": "nichts", "keine": "nichts", "nein": "nichts",
               "danke": "nichts", "fertig": "nichts"}
+DIKTAT_SKRIPT_MODUL = "/usr/local/bin/dialos-diktat.py"
+ENTWURF_SKRIPT = "/usr/local/bin/dialos-mail-entwurf.py"
+EMPFAENGER_SKRIPT = "/usr/local/bin/dialos-empfaenger.py"
 
 
 def _modul(pfad, name):
@@ -708,6 +714,213 @@ def drucken_treffer(t, erkenner, modell):
     return 0
 
 
+def mail_daten(t):
+    """Absender, Betreff und Text der gefundenen Mail - aus ihrer mbox."""
+    try:
+        r = subprocess.run([INDEX, "mail", t["pfad"]], capture_output=True, timeout=60)
+        return json.loads(r.stdout.decode("utf-8", errors="replace") or "{}")
+    except (OSError, subprocess.TimeoutExpired, ValueError) as fehler:
+        melde(f"  Mail nicht lesbar: {fehler}")
+        return {}
+
+
+def ja_oder_nein(frage):
+    """Kurze Rueckfrage mit dem KLEINEN Modell - es laedt in einer halben Sekunde.
+
+    Die grossen Erkenner sind zu diesem Zeitpunkt absichtlich weggeraeumt (siehe
+    text_diktieren): Zwei geladene Saetze zugleich waeren rund 20 GB, das Geraet
+    hat sie nicht.
+    """
+    import vosk
+    vosk.SetLogLevel(-1)
+    if not os.path.isdir(MODELL_KLEIN):
+        return False
+    modell = vosk.Model(MODELL_KLEIN)
+    grammatik = json.dumps(["ja", "nein", "[unk]"], ensure_ascii=False)
+    prozess = mikrofon_oeffnen()
+    try:
+        vorrat = sprechen_bei_offener_aufnahme(frage, prozess, frage=True)
+        erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, grammatik)
+        bis = time.time() + 12.0
+        while time.time() < bis:
+            if vorrat:
+                block, vorrat = vorrat[:BLOCK], vorrat[BLOCK:]
+            else:
+                block = prozess.stdout.read(BLOCK)
+            if not block:
+                break
+            if not erkenner.AcceptWaveform(block):
+                continue
+            worte = json.loads(erkenner.Result()).get("text", "").split()
+            if "ja" in worte:
+                return True
+            if "nein" in worte:
+                return False
+        return False
+    finally:
+        try:
+            prozess.terminate()
+        except OSError:
+            pass
+
+
+DIKTAT_HELFER = """
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("d", sys.argv[1])
+d = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(d)
+d.EMPFAENGER_FRAGEN = False
+gesammelt = {}
+d.notiz_schreiben = lambda name, zeilen: (
+    gesammelt.update(text="\\n".join(zeilen)), "/dev/null")[1]
+d.diktat_fuehren("notiz", "notizen", sys.argv[2])
+sys.stdout.write(gesammelt.get("text", ""))
+"""
+
+
+def text_diktieren(ansage):
+    """Laesst den Text diktieren - mit dem Diktat, nicht mit einer zweiten Fassung.
+
+    IN EINEM EIGENEN PROZESS, und das hat zwei Gruende: Das Diktat laedt sein
+    eigenes Erkennerpaar (rund 10 GB) - endet der Prozess, ist der Speicher
+    sicher wieder frei, ohne dass die Suche ihre eigenen Modelle wegwerfen und
+    spaeter neu laden muesste. Und der Text kommt ueber die Standardausgabe
+    zurueck, statt dass hier eine zweite Diktat-Fassung entstuende: Was das
+    Diktat an Regeln kann - Absaetze, Zahlen, Satzzeichen, "Satz loeschen" -
+    gilt damit auch fuer eine Mail.
+
+    DIE MIKROFON-MARKE GEHOERT DANACH WIEDER UNS: Das Diktat raeumt seine eigene
+    am Ende weg, und das ist dieselbe Datei. Ohne das Neusetzen hoerte der
+    Befehlsdienst mit, waehrend die Suche noch fragt.
+    """
+    import tempfile
+    ordner = tempfile.mkdtemp(prefix="dialos-diktat-")
+    helfer = os.path.join(ordner, "diktieren.py")
+    with open(helfer, "w", encoding="utf-8") as f:
+        f.write(DIKTAT_HELFER)
+    sprich(ansage)
+    text = ""
+    try:
+        r = subprocess.run([sys.executable, helfer, DIKTAT_SKRIPT_MODUL, ECHO_QUELLE],
+                           capture_output=True, timeout=1200)
+        text = r.stdout.decode("utf-8", errors="replace").strip()
+        if r.returncode != 0:
+            melde(f"  Diktat meldet {r.returncode}: "
+                  f"{r.stderr.decode('utf-8', 'replace')[-300:]}")
+    except (OSError, subprocess.TimeoutExpired) as fehler:
+        melde(f"  Diktat fehlgeschlagen: {fehler}")
+    finally:
+        try:
+            with open(MARKE, "w", encoding="utf-8") as f:
+                f.write(f"{os.getpid()} dialos-suche\n")
+        except OSError as fehler:
+            melde(f"  Marke nicht neu gesetzt: {fehler}")
+        try:
+            os.unlink(helfer)
+            os.rmdir(ordner)
+        except OSError:
+            pass
+    melde(f"  diktiert: {len(text)} Zeichen")
+    return text
+
+
+def entwurf_ablegen(an, betreff, text, bezug=None, zitat=""):
+    """Ruft dialos-mail-entwurf.py - gesendet wird nichts."""
+    import tempfile
+    ordner = tempfile.mkdtemp(prefix="dialos-entwurf-")
+    t_datei = os.path.join(ordner, "text.txt")
+    z_datei = os.path.join(ordner, "zitat.txt")
+    with open(t_datei, "w", encoding="utf-8") as f:
+        f.write(text)
+    with open(z_datei, "w", encoding="utf-8") as f:
+        f.write(zitat)
+    befehl = [ENTWURF_SKRIPT, "anlegen", "--an", an, "--betreff", betreff,
+              "--text", t_datei, "--zitat", z_datei]
+    if bezug:
+        befehl += ["--bezug", bezug]
+    try:
+        r = subprocess.run(befehl, capture_output=True, timeout=60)
+        ergebnis = r.stdout.decode("utf-8", errors="replace").strip()
+        melde(f"  Entwurf: {ergebnis!r} (Rueckgabe {r.returncode})")
+        return r.returncode == 0, ergebnis
+    except (OSError, subprocess.TimeoutExpired) as fehler:
+        melde(f"  Entwurf fehlgeschlagen: {fehler}")
+        return False, ""
+    finally:
+        for datei in (t_datei, z_datei):
+            try:
+                os.unlink(datei)
+            except OSError:
+                pass
+
+
+def antworten_auf(t, erkenner, modell, weiterleiten=False):
+    """Antwort oder Weiterleitung diktieren und als Entwurf ablegen."""
+    daten = mail_daten(t)
+    if not daten.get("betreff") and not daten.get("von"):
+        sprich("Ich finde die Mail nicht mehr.")
+        return 1
+    betreff = daten.get("betreff") or "(ohne Betreff)"
+    if weiterleiten:
+        an = empfaenger_erfragen_fuer_mail(erkenner, modell)
+        if not an:
+            return 0
+        betreff = betreff if betreff.lower().startswith("fwd:") else f"Fwd: {betreff}"
+    else:
+        an = daten.get("von", "")
+        if not an:
+            sprich("Diese Mail hat keine Absenderadresse.")
+            return 1
+        betreff = betreff if betreff.lower().startswith("re:") else f"Re: {betreff}"
+    text = text_diktieren("Diktiere jetzt den Text. Sage am Ende: Diktat beenden.")
+    if not text:
+        sprich("Ich habe nichts mitgeschrieben. Es wird kein Entwurf abgelegt.")
+        return 0
+    wer = sprechbar(an)
+    if not ja_oder_nein(f"Ich habe {len(text.split())} Wörter an {wer}. "
+                        "Soll ich den Entwurf ablegen? Sage ja oder nein."):
+        sprich("Gut, ich lege nichts ab.")
+        return 0
+    geklappt, ergebnis = entwurf_ablegen(an, betreff, text,
+                                         bezug=daten.get("message_id"),
+                                         zitat=daten.get("text", "")[:4000])
+    if not geklappt:
+        sprich("Der Entwurf ließ sich nicht ablegen.")
+        return 1
+    if ergebnis == "vorgemerkt":
+        sprich("Der Entwurf kommt in die Warteschlange, weil Thunderbird gerade "
+               "läuft. Beim nächsten Anmelden liegt er in den Entwürfen. "
+               "Gesendet wird nichts.")
+    else:
+        sprich("Der Entwurf liegt in Thunderbird unter Entwürfe. Gesendet wird "
+               "nichts, das machst Du selbst.")
+    return 0
+
+
+def empfaenger_erfragen_fuer_mail(erkenner, modell):
+    """An wen weitergeleitet wird - aus den Thunderbird-Kontakten."""
+    em = _modul(EMPFAENGER_SKRIPT, "dialos_empfaenger")
+    if em is None:
+        sprich("Ich komme nicht an die Kontakte.")
+        return ""
+    for _versuch in range(2):
+        texte = antwort_hoeren("An wen soll ich weiterleiten? Sage den Namen aus "
+                               "Deinen Kontakten.", erkenner, modell)
+        if not texte or _abbruch(texte):
+            return ""
+        for gesagt in texte:
+            for kontakt in em.suchen(gesagt):
+                adresse = (kontakt.get("mail") or "").strip()
+                name = kontakt.get("name") or kontakt.get("firma") or adresse
+                if not adresse:
+                    continue
+                if ja_oder_nein(f"An {name}, {sprechbar(adresse)}. "
+                                "Stimmt das? Sage ja oder nein."):
+                    return adresse
+        sprich("Dazu finde ich keine Adresse in den Kontakten.")
+    return ""
+
+
 def vorlesen_anbieten(t, erkenner, modell):
     """Was mit dem Fund geschehen soll - vorlesen, drucken oder nichts.
 
@@ -719,8 +932,11 @@ def vorlesen_anbieten(t, erkenner, modell):
     if not t.get("erreichbar"):
         sprich("Diese Datei liegt im Archiv, das gerade nicht angeschlossen ist.")
         return 0
+    ist_mail = t.get("art") == "Mail"
+    moeglich = ("vorlesen, drucken, antworten, weiterleiten oder nichts"
+                if ist_mail else "vorlesen, drucken oder nichts")
     texte = antwort_hoeren(f"Es bleibt: {treffer_nennen(t)}. Was soll ich damit tun? "
-                           "Sage: vorlesen, drucken oder nichts.", erkenner, modell)
+                           f"Sage: {moeglich}.", erkenner, modell)
     wahl = None
     for text in texte or []:
         for wort in text.lower().split():
@@ -733,6 +949,12 @@ def vorlesen_anbieten(t, erkenner, modell):
     melde(f"  Wahl: {wahl!r} aus {texte!r}")
     if wahl == "drucken":
         return drucken_treffer(t, erkenner, modell)
+    if wahl in ("antworten", "weiterleiten") and ist_mail:
+        return antworten_auf(t, erkenner, modell,
+                             weiterleiten=(wahl == "weiterleiten"))
+    if wahl in ("antworten", "weiterleiten"):
+        sprich("Antworten kann ich nur bei einer E-Mail.")
+        return 0
     if wahl != "vorlesen":
         sprich("Gut, ich lasse es.")
         return 0

@@ -934,6 +934,35 @@ def main():
         print(zeile[0])
         return 0
 
+    if was == "mail" and len(sys.argv) > 2:
+        # DIE MAIL SELBST, fuer Antworten und Weiterleiten (2026-09-18): Der
+        # Index kennt nur Betreff, Namen und Text - zum Antworten braucht es die
+        # Adresse und die Message-ID. Beides steht in der mbox, also wird dort
+        # nachgesehen, statt es ein zweites Mal zu speichern.
+        kennung = sys.argv[2]
+        pfad, _, mid = kennung.partition("#")
+        import mailbox
+        ma = _mailarchiv()
+        if ma is None or not os.path.isfile(pfad):
+            print("{}")
+            return 1
+        for nachricht in mailbox.mbox(pfad):
+            if str(nachricht.get("Message-ID", "")).strip() != mid:
+                continue
+            absender_name, absender = email.utils.parseaddr(
+                ma.lesbar(nachricht.get("From")))
+            print(json.dumps({
+                "von": absender, "von_name": absender_name,
+                "an": ma.lesbar(nachricht.get("To")),
+                "betreff": ma.lesbar(nachricht.get("Subject")),
+                "datum": ma.lesbar(nachricht.get("Date")),
+                "message_id": mid,
+                "text": (ma.text_von(nachricht) or "")[:20000],
+            }, ensure_ascii=False))
+            return 0
+        print("{}")
+        return 1
+
     if was == "stand":
         anzahl = db.execute("SELECT COUNT(*) FROM dateien").fetchone()[0]
         print(f"Index:     {DATENBANK}")

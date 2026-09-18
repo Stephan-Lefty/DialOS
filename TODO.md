@@ -337,6 +337,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       (`<mbox>#<Message-ID>`), Betreff als Titel, Absender und Empfänger als
       Namen; Pfade und Lesen kommen aus `dialos-mailarchiv.py`. Am T490 fünf
       Mails. Offen: IMAP-Ordner jenseits von INBOX/Sent, Anhänge.
+    - [x] **Mails bleiben auch auf dem Stick** (Stephan, 2026-09-18, auf die
+      Frage nach MailBurg auf dem Stick: „Dann hätte man alle Mails immer auch
+      auf den Stick"). Das läuft schon: `dialos-mailarchiv.py` legt ein- und
+      ausgehende Mails als PDF im Archiv ab, `dialos-archiv.py` kopiert sie auf
+      den Stick (fünf Mail-PDFs am T490). **Programme gehören nicht auf den
+      Stick** - exFAT kennt kein Ausführbar-Bit, und eine Datenbank auf einem
+      Wechselmedium ist beim Abziehen mitten im Schreiben hin. Bewusst in Kauf
+      genommen: Der Stick ist unverschlüsselt, ein Finder liest die Mails mit;
+      Stephans Entscheidung, weil sie an jedem Rechner lesbar sein sollen.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den

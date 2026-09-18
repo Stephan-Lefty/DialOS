@@ -122,6 +122,24 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Reply to a found mail or forward it** (2026-09-18, Stephan's choice among
+  three drafts: "dictate, then a draft"). After a hit the options are now "read
+  out, print, reply, forward or nothing". For a reply, recipient and subject
+  ("Re: …") come from the mail itself; for forwarding the recipient is looked up
+  in the **Thunderbird contacts** - the same path as for a letter. The text is
+  written **with dictation**, not with a second implementation: paragraphs,
+  numbers, punctuation and "Satz löschen" therefore apply to a mail as well.
+  Dictation runs in its **own process** - its pair of recognisers (about 10 GB)
+  is then certainly free again, and the search need not discard its own models.
+
+  **It is stored as a draft, never sent** (`dialos-mail-entwurf.py`): in "Local
+  Folders/Drafts", not in the IMAP drafts folder - on the device that is only a
+  copy of the server and would be overwritten at the next sync. If Thunderbird is
+  running, the draft goes into a queue and is entered at the next login
+  (`dialos-mail-entwurf.service`), exactly as for contacts. Before storing,
+  DialOS asks "I have 9 words to … shall I store the draft?" - **a sent mail is
+  out of the world, a draft is not.**
+
 - **The area first, then the search term** (2026-09-18, Stephan's requirement:
   "the first command is Unterlagen durchsuchen, then documents or
   mailbox/mails or images or videos"). "Where shall I search?" cuts away what is

@@ -130,6 +130,26 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Auf eine gefundene Mail antworten oder sie weiterleiten** (2026-09-18,
+  Stephans Wahl aus drei Entwürfen: „Diktieren, dann Entwurf"). Nach dem Fund
+  heißt es jetzt „vorlesen, drucken, antworten, weiterleiten oder nichts". Beim
+  Antworten kommen Empfänger und Betreff („Re: …") aus der Mail selbst, beim
+  Weiterleiten wird der Empfänger in den **Thunderbird-Kontakten** gesucht -
+  derselbe Weg wie beim Brief. Der Text wird **mit dem Diktat** geschrieben,
+  nicht mit einer zweiten Fassung: Absätze, Zahlen, Satzzeichen und „Satz
+  löschen" gelten damit auch für eine Mail. Das Diktat läuft in einem **eigenen
+  Prozess** - so ist sein Erkennerpaar (rund 10 GB) danach sicher wieder frei,
+  und die Suche muss ihre eigenen Modelle nicht wegwerfen.
+
+  **Abgelegt wird als Entwurf, gesendet wird nie** (`dialos-mail-entwurf.py`):
+  in „Local Folders/Drafts", nicht im IMAP-Entwurfsordner - der ist auf dem Gerät
+  nur eine Kopie des Servers und würde beim nächsten Abgleich überschrieben.
+  Läuft Thunderbird gerade, kommt der Entwurf in eine Warteschlange und wird beim
+  nächsten Anmelden eingetragen (`dialos-mail-entwurf.service`), genau wie bei den
+  Kontakten. Vor dem Ablegen fragt DialOS „Ich habe 9 Wörter an … Soll ich den
+  Entwurf ablegen?" - **eine abgeschickte Mail ist aus der Welt, ein Entwurf
+  nicht.**
+
 - **Erst der Bereich, dann der Suchbegriff** (2026-09-18, Stephans Vorgabe: „der
   erste Befehl ist Unterlagen durchsuchen, dann Dokumente oder Postfach/Mails
   oder Bilder oder Videos"). „Wo soll ich suchen?" schneidet vorher weg, was
