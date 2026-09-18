@@ -39,11 +39,13 @@ Aufruf:  dialos-suche.py            (startet der Befehlsdienst)
          dialos-suche.py --pruefen  (nur Selbsttest, ohne Mikrofon)
 """
 
+import collections
 import json
 import os
 import signal
 import subprocess
 import sys
+import threading
 import time
 
 SAY = "/usr/local/bin/dialos-say.py"
@@ -53,6 +55,7 @@ BLOCK = 4000
 ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
 
 MODELL_KLEIN = "/usr/local/share/vosk-model-de-small"
+MODELL_GROSS = "/usr/local/share/vosk-model-de-big"
 PARAKEET_MODELL = ("/usr/local/share/dialos-parakeet/"
                    "sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8")
 PARAKEET_AUS = os.path.join(os.path.expanduser("~"), ".config", "dialos",
@@ -63,7 +66,10 @@ PARAKEET_AUS = os.path.join(os.path.expanduser("~"), ".config", "dialos",
 ZEITGRENZE_S = 20.0
 RUHE_ENDE_S = 1.2
 PEGEL_SCHWELLE = 150.0
+# Wie viel vom Ton VOR dem Ende der Ansage noch zaehlt - wie im Diktat.
+VORLAUF_S = 0.3
 
+ANSAGE_LADEN = "Einen Moment, ich hole das Verzeichnis."
 ANSAGE_START = "Wonach soll ich suchen?"
 ANSAGE_NICHTS = "Ich habe nichts verstanden. Die Suche ist beendet."
 ANSAGE_NOCH_NICHT = ("Der Suchindex ist noch nicht eingerichtet. "
@@ -102,6 +108,43 @@ def sprich(text, frage=False):
         subprocess.run(befehl, capture_output=True, timeout=60)
     except (OSError, subprocess.TimeoutExpired):
         print(text)
+
+
+def sprechen_bei_offener_aufnahme(text, prozess, frage=False):
+    """Spricht die Ansage und liest dabei mit; liefert die letzten VORLAUF_S.
+
+    OHNE DAS STAUT SICH DIE EIGENE ANSAGE IN DER LEITUNG (2026-09-18, Stephans
+    erste Probe am Mikrofon): Das Mikrofon ist waehrend der Frage schon offen,
+    `parec` fuellt die Pipe weiter, und `sprich()` wartet. Danach las die
+    Schleife diesen Stau in Sekundenbruchteilen ein, hielt ihn fuer die Antwort
+    - Pegel hoch, dann "Stille" - und brach nach 3,5 s ab, bevor Stephan
+    ueberhaupt gesprochen hatte. Im Protokoll stand "verstanden: ''".
+
+    Das Diktat loest das seit dem 2026-08-19 genau so; hier fehlte es. Was
+    waehrend der Ansage hereinkommt, wird verworfen - bis auf die letzten
+    0,3 s, damit ein sofort begonnenes Wort nicht abgeschnitten wird.
+    """
+    fertig = threading.Event()
+
+    def ansage():
+        try:
+            sprich(text, frage=frage)
+        finally:
+            fertig.set()
+
+    threading.Thread(target=ansage, daemon=True).start()
+    zuletzt = collections.deque()
+    while not fertig.is_set():
+        block = prozess.stdout.read(800)
+        if not block:
+            break
+        jetzt = time.time()
+        zuletzt.append((jetzt, block))
+        while zuletzt and zuletzt[0][0] < jetzt - 2.0:
+            zuletzt.popleft()
+    fertig.wait()
+    grenze = time.time() - VORLAUF_S
+    return b"".join(b for t, b in zuletzt if t >= grenze)
 
 
 def mikrofon_oeffnen():
@@ -146,6 +189,45 @@ def parakeet_laden():
         return None
 
 
+def vosk_laden():
+    """Das grosse Vosk-Modell - oder None.
+
+    ZWEI ERKENNER FUER DEN SUCHBEGRIFF (2026-09-18, Stephans erste Probe am
+    Mikrofon). Der Entwurf setzte allein auf Parakeet, weil ein Suchbegriff
+    Text ist. Das stimmt fuer SAETZE - gemessen am 2026-09-15: 2,8 % gegen
+    12,7 % Wortfehler. Ein Suchbegriff ist aber meist EIN Wort, und genau dort
+    kippt Parakeet: Beim Einkaufszettel traf Vosk 16 von 20 Waren, Parakeet 11,
+    und aus einem einzeln gesprochenen "Gesobau" machte es hier "It's a".
+    Deshalb hoeren beide zu, und gesucht wird mit beiden Ergebnissen - der
+    Index entscheidet, welches Wort etwas findet. Das kostet nichts ausser
+    Ladezeit, und die laeuft parallel.
+    """
+    try:
+        import vosk
+        vosk.SetLogLevel(-1)
+        if not os.path.isdir(MODELL_GROSS):
+            melde(f"  grosses Modell fehlt ({MODELL_GROSS})")
+            return None
+        t0 = time.time()
+        modell = vosk.Model(MODELL_GROSS)
+        melde(f"  grosses Modell geladen in {time.time() - t0:.1f} s")
+        return modell
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"  Vosk liess sich nicht laden: {fehler}")
+        return None
+
+
+def modelle_laden():
+    """Beide Erkenner gleichzeitig - nacheinander waeren es 9 s plus 2 s."""
+    geladen = {}
+    faden = threading.Thread(
+        target=lambda: geladen.update(parakeet=parakeet_laden()), daemon=True)
+    faden.start()
+    geladen["vosk"] = vosk_laden()
+    faden.join()
+    return geladen.get("parakeet"), geladen.get("vosk")
+
+
 def erkennen(erkenner, roh):
     import array
     if len(roh) < ABTASTRATE // 5:
@@ -157,7 +239,7 @@ def erkennen(erkenner, roh):
     return strom.result.text.strip()
 
 
-def begriff_hoeren(erkenner):
+def begriff_hoeren(erkenner, modell=None):
     """Ansage stellen und den Suchbegriff aufnehmen.
 
     DAS MIKROFON IST WAEHREND DER ANSAGE SCHON OFFEN - dieselbe Reihenfolge
@@ -166,18 +248,27 @@ def begriff_hoeren(erkenner):
     Aufnahmebeginn. Erst bereit sein, dann fragen.
     """
     prozess = mikrofon_oeffnen()
+    vosk_erkenner = None
+    if modell is not None:
+        import vosk
+        vosk_erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
     try:
-        sprich(ANSAGE_START, frage=True)
+        vorrat = sprechen_bei_offener_aufnahme(ANSAGE_START, prozess, frage=True)
         roh = bytearray()
         ruhe = 0.0
         gesprochen = False
         ende = time.time() + ZEITGRENZE_S
         block_s = BLOCK / 2 / ABTASTRATE
         while time.time() < ende:
-            block = prozess.stdout.read(BLOCK)
+            if vorrat:
+                block, vorrat = vorrat[:BLOCK], vorrat[BLOCK:]
+            else:
+                block = prozess.stdout.read(BLOCK)
             if not block:
                 break
             roh += block
+            if vosk_erkenner is not None:
+                vosk_erkenner.AcceptWaveform(bytes(block))
             if pegel(block) >= PEGEL_SCHWELLE:
                 gesprochen, ruhe = True, 0.0
             elif gesprochen:
@@ -187,8 +278,22 @@ def begriff_hoeren(erkenner):
         melde(f"  {len(roh) / 2 / ABTASTRATE:.1f} s aufgenommen, "
               f"gesprochen={gesprochen}")
         if not gesprochen:
-            return ""
-        return erkennen(erkenner, roh) if erkenner else ""
+            return []
+        begriffe = []
+        if vosk_erkenner is not None:
+            try:
+                text = json.loads(vosk_erkenner.FinalResult()).get("text", "").strip()
+                melde(f"  VOSK:     {text!r}")
+                if text:
+                    begriffe.append(text)
+            except ValueError as fehler:
+                melde(f"  Vosk-Ergebnis nicht lesbar: {fehler}")
+        if erkenner is not None:
+            text = erkennen(erkenner, roh).strip(" .!?,")
+            melde(f"  PARAKEET: {text!r}")
+            if text and text.lower() not in (x.lower() for x in begriffe):
+                begriffe.append(text)
+        return begriffe
     finally:
         try:
             prozess.terminate()
@@ -196,8 +301,13 @@ def begriff_hoeren(erkenner):
             pass
 
 
-def suchen(begriff):
+def suchen(begriffe):
     """Den Index fragen und das Ergebnis ansagen.
+
+    MEHRERE BEGRIFFE, EINE ANTWORT (2026-09-18): Vosk und Parakeet hoeren
+    dasselbe Wort verschieden. Gesucht wird mit beiden, angesagt wird der
+    Begriff, der etwas gefunden hat - der Index entscheidet damit, welche
+    Erkennung recht hatte, und der Nutzer hoert, wonach gesucht wurde.
 
     DIE ANZAHL KOMMT ZUERST, dann der neueste Treffer - nicht die Liste. Wer
     vierzig Briefe findet, will sie nicht hoeren; er will wissen, dass es
@@ -214,16 +324,20 @@ def suchen(begriff):
         melde(f"  Index-Werkzeug fehlt: {INDEX}")
         sprich(ANSAGE_NOCH_NICHT)
         return 1
-    try:
-        r = subprocess.run([INDEX, "suchen", begriff],
-                           capture_output=True, timeout=120)
-        treffer = json.loads(r.stdout.decode("utf-8", errors="replace") or "[]")
-    except (OSError, subprocess.TimeoutExpired, ValueError) as fehler:
-        melde(f"  Suche fehlgeschlagen: {fehler}")
-        sprich("Bei der Suche ist etwas schiefgegangen.")
-        return 1
-
-    melde(f"  {len(treffer)} Treffer fuer {begriff!r}")
+    begriff, treffer = begriffe[0], []
+    for versuch in begriffe:
+        try:
+            r = subprocess.run([INDEX, "suchen", versuch],
+                               capture_output=True, timeout=120)
+            gefunden = json.loads(r.stdout.decode("utf-8", errors="replace") or "[]")
+        except (OSError, subprocess.TimeoutExpired, ValueError) as fehler:
+            melde(f"  Suche fehlgeschlagen: {fehler}")
+            sprich("Bei der Suche ist etwas schiefgegangen.")
+            return 1
+        melde(f"  {len(gefunden)} Treffer fuer {versuch!r}")
+        if gefunden:
+            begriff, treffer = versuch, gefunden
+            break
     if not treffer:
         sprich(f"Zu {begriff} habe ich nichts gefunden.")
         return 0
@@ -286,13 +400,14 @@ def main():
 
     try:
         melde("=== DialOS-Suche gestartet ===")
-        erkenner = parakeet_laden()
-        begriff = begriff_hoeren(erkenner)
-        melde(f"  verstanden: {begriff!r}")
-        if not begriff:
+        sprich(ANSAGE_LADEN)
+        erkenner, modell = modelle_laden()
+        begriffe = begriff_hoeren(erkenner, modell)
+        melde(f"  verstanden: {begriffe!r}")
+        if not begriffe:
             sprich(ANSAGE_NICHTS)
             return 0
-        return suchen(begriff)
+        return suchen(begriffe)
     finally:
         try:
             os.unlink(MARKE)

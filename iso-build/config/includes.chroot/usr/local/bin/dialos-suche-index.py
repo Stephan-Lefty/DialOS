@@ -598,15 +598,48 @@ def aufbauen(db, nur_neue=False):
     return gelesen, uebersprungen, entfernt, gehalten
 
 
+# FUELLWOERTER. Die Spracherkennung setzt sie gern dazu ("der schupo" fuer
+# "Gesobau"), und ein "der" steht in jedem Brief: Mit ODER verknuepft lieferte
+# genau dieser Fehlversuch 14 Treffer - alle falsch (2026-09-18).
+FUELLWOERTER = {"der", "die", "das", "den", "dem", "des", "ein", "eine", "einen",
+                "einem", "eines", "und", "oder", "von", "vom", "mit", "im", "in",
+                "am", "an", "auf", "für", "fuer", "zu", "zum", "zur", "bei",
+                "nach", "aus", "ist", "war", "ich", "du", "sie", "er", "es"}
+
+
+def wortstamm(wort):
+    """Grobe Endung weg, damit "Krankenkassen" auch "Krankenkasse" findet.
+
+    Kein Stemmer, sondern das Noetigste: Wer sucht, spricht das Wort selten in
+    genau der Form aus, in der es im Brief steht ("Krankenkassen" gesagt,
+    "Krankenkasse" geschrieben - gemessen am 2026-09-18, null Treffer). Der
+    Stamm wird als Praefix gesucht, deshalb schadet ein zu kurzer Stamm nicht:
+    Er findet mehr, nicht Falsches.
+    """
+    klein = wort.lower()
+    for endung in ("ungen", "enen", "innen", "chen", "lein", "nen", "en", "er",
+                   "es", "em", "n", "s", "e"):
+        if len(klein) - len(endung) >= 4 and klein.endswith(endung):
+            return klein[:len(klein) - len(endung)]
+    return klein
+
+
 def suchen(db, begriff, hoechstens=40):
     """Treffer zu einem gesprochenen Begriff.
 
-    ZWEI DURCHGAENGE, und der zweite ist der Grund fuer diese Datei: Zuerst
-    woertlich, dann phonetisch. Wer "Meier" sagt und "Maier" im Brief stehen
-    hat, bekommt ihn im zweiten Durchgang - markiert als "klang", damit die
-    Ansage es sagen kann ("klingt wie").
+    DREI DURCHGAENGE, jeder aus einem gemessenen Fehlversuch (2026-09-18):
+    woertlich, dann ueber den Wortstamm als Praefix ("Krankenkassen" findet
+    "Krankenkasse"), dann phonetisch ("Meier" findet "Mayer") - markiert als
+    "klang", damit die Ansage es sagen kann.
+
+    VERKNUEPFT WIRD MIT UND, NICHT MIT ODER. Mit ODER genuegte ein Wort, und
+    "der schupo" (Vosks Fassung von "Gesobau") fand 14 Briefe - jeden, in dem
+    "der" steht. Wer zwei Woerter sagt, meint beide.
     """
     worte = [w for w in re.findall(r"[\wÄÖÜäöüß]+", begriff) if len(w) > 1]
+    inhalt = [w for w in worte if w.lower() not in FUELLWOERTER]
+    if inhalt:
+        worte = inhalt
     if not worte:
         return []
     treffer, gesehen = [], set()
@@ -633,13 +666,74 @@ def suchen(db, begriff, hoechstens=40):
                             # sich nicht oeffnen laesst.
                             "erreichbar": os.path.exists(zeile[0])})
 
-    hole("suche MATCH ?", (" OR ".join(f'"{w}"' for w in worte),), "wort")
+    hole("suche MATCH ?", (" AND ".join(f'"{w}"' for w in worte),), "wort")
+    if len(treffer) < hoechstens:
+        staemme = [wortstamm(w) for w in worte]
+        if any(st != w.lower() for st, w in zip(staemme, worte)):
+            hole("suche MATCH ?", (" AND ".join(f'"{st}"*' for st in staemme),), "wort")
+    # ZUSAMMENGESETZTE WOERTER (2026-09-18): Die Erkennung trennt sie gern
+    # ("nebenkosten abrechnung"), im Brief stehen sie zusammen. Erst hier, nach
+    # den beiden genauen Durchgaengen - wer wirklich zwei Woerter meint, hat
+    # seine Treffer dann schon.
+    if len(worte) > 1 and len(treffer) < hoechstens:
+        zusammen = "".join(w.lower() for w in worte)
+        hole("suche MATCH ?", (f'"{wortstamm(zusammen)}"*',), "wort")
     if len(treffer) < hoechstens:
         codes = [koelner(w) for w in worte if len(w) >= 4]
         codes = [c for c in codes if c]
         if codes:
-            hole("klang MATCH ?", (" OR ".join(codes),), "klang")
+            hole("klang MATCH ?", (" AND ".join(codes),), "klang")
+    if not treffer:
+        treffer = aehnliche_namen(db, worte, hoechstens)
     return treffer[:hoechstens]
+
+
+def _ohne_leerzeichen(text):
+    return re.sub(r"[^a-z0-9äöüß]", "", text.lower())
+
+
+def aehnliche_namen(db, worte, hoechstens=40):
+    """Letzter Versuch: Wer im Brief steht, aehnlich geschrieben.
+
+    (2026-09-18) Aus "Gesobau" macht die Erkennung "wieso bau" - weder woertlich
+    noch ueber die Koelner Phonetik zu finden: Der Klangschluessel beginnt mit
+    dem ersten Laut, und der ist falsch gehoert. Der Empfaenger-Dialog im Diktat
+    loest genau dasselbe Problem seit dem 2026-09-17 mit einem Zeichenvergleich
+    (difflib) - hier derselbe Weg, aber nur ueber die wenigen Namen aus den
+    Briefkoepfen, nicht ueber den ganzen Text.
+
+    Nur wenn sonst NICHTS gefunden wurde: Ein aehnlicher Name ist ein Raten,
+    und Geratenes darf echte Treffer nicht verdraengen.
+    """
+    import difflib
+    gesucht = _ohne_leerzeichen(" ".join(worte))
+    if len(gesucht) < 4:
+        return []
+    kandidaten = {}
+    for zeile in db.execute("SELECT pfad, personen FROM dateien "
+                            "WHERE personen IS NOT NULL AND personen != ''"):
+        for name in (zeile[1] or "").split("\n"):
+            if name.strip():
+                kandidaten.setdefault(name.strip(), []).append(zeile[0])
+    passend = set()
+    for name, pfade in kandidaten.items():
+        verglichen = _ohne_leerzeichen(name)
+        if not verglichen:
+            continue
+        wert = difflib.SequenceMatcher(None, gesucht, verglichen).ratio()
+        if wert >= 0.7:
+            melde(f"aehnlicher Name: {name!r} zu {' '.join(worte)!r} ({wert:.2f})")
+            passend.update(pfade)
+    if not passend:
+        return []
+    frage = ",".join("?" * len(passend))
+    return [{"pfad": z[0], "art": z[1], "geaendert": z[2], "jahr": z[3],
+             "personen": (z[4] or "").split("\n") if z[4] else [],
+             "wie": "klang", "erreichbar": os.path.exists(z[0])}
+            for z in db.execute(
+                "SELECT pfad, art, geaendert, jahr, personen FROM dateien "
+                f"WHERE pfad IN ({frage}) ORDER BY geaendert DESC LIMIT ?",
+                tuple(passend) + (hoechstens,))]
 
 
 def main():

@@ -130,6 +130,34 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Die erste Probe am Mikrofon: der Suchbegriff kam nie an** (2026-09-18,
+  Stephans Test). „Unterlagen durchsuchen" startete die Erweiterung, die
+  Mikrofon-Übergabe lief sauber - aber im Protokoll stand „3,5 s aufgenommen,
+  gesprochen=True, verstanden: ''", bevor Stephan überhaupt gesprochen hatte.
+  **Die eigene Ansage staute sich in der Leitung:** Das Mikrofon ist während der
+  Frage schon offen, `parec` füllt die Pipe weiter, und `sprich()` wartet. Danach
+  las die Schleife diesen Stau in Sekundenbruchteilen ein, hielt ihn für die
+  Antwort und brach ab. Das Diktat löst das seit dem 2026-08-19; in der Suche
+  fehlte es. Jetzt wird während der Ansage mitgehört und verworfen, bis auf die
+  letzten 0,3 Sekunden.
+
+- **Zwei Erkenner für den Suchbegriff statt nur Parakeet** (2026-09-18). Der
+  Entwurf setzte auf Parakeet, weil ein Suchbegriff Text ist - das gilt für
+  Sätze (2,8 % gegen 12,7 % Wortfehler), aber ein Suchbegriff ist meist **ein
+  Wort**, und genau dort kippt Parakeet: Aus „Gesobau" wurde „It's a", aus
+  „Krankenkasse" „Handy". Vosk hörte in denselben Proben „nebenkostenabrechnung"
+  und „krankenkassen". Jetzt hören beide zu, gesucht wird mit beiden Ergebnissen,
+  und der Index entscheidet, welche Erkennung recht hatte.
+
+- **Vier Durchgänge in der Suche, jeder aus einem Fehlversuch** (2026-09-18):
+  wörtlich mit **UND** statt ODER (mit ODER fand „der schupo" 14 Briefe - jeden,
+  in dem „der" steht), dann über den Wortstamm als Präfix („Krankenkassen" findet
+  „Krankenkasse"), dann zusammengesetzt („nebenkosten abrechnung" →
+  „Nebenkostenabrechnung"), dann phonetisch. Findet nichts davon etwas, werden
+  zuletzt die **Namen aus den Briefköpfen** mit difflib verglichen - so findet
+  „wieso bau" die fünf Briefe an die GESOBAU AG. Geraten wird nur, wenn es sonst
+  keinen Treffer gibt.
+
 - **Erweiterungen stehen jetzt in der gesprochenen Befehlsübersicht**
   (2026-09-18). Beim Start meldete der Dienst „Befehle ohne Platz in der
   Übersicht: ['unterlagen durchsuchen']" - der Startsatz stand in der Grammatik,

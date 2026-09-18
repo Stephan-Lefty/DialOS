@@ -122,6 +122,33 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **First trial at the microphone: the search term never arrived** (2026-09-18,
+  Stephan's test). "Unterlagen durchsuchen" started the extension and the
+  microphone handover was clean - but the log said "3.5 s recorded, spoken=True,
+  understood: ''" before Stephan had said anything. **The announcement itself was
+  queued in the pipe:** the microphone is already open during the question,
+  `parec` keeps filling the pipe, and `sprich()` waits. The loop then read that
+  backlog in a fraction of a second, took it for the answer and stopped.
+  Dictation has solved this since 2026-08-19; the search lacked it. Now the audio
+  during the announcement is read and discarded, except the last 0.3 seconds.
+
+- **Two recognisers for the search term instead of only Parakeet** (2026-09-18).
+  The draft relied on Parakeet because a search term is text - true for
+  sentences (2.8 % vs 12.7 % word errors), but a search term is usually **one
+  word**, and that is where Parakeet fails: "Gesobau" became "It's a",
+  "Krankenkasse" became "Handy". In the same trials Vosk heard
+  "nebenkostenabrechnung" and "krankenkassen". Now both listen, the search runs
+  with both results, and the index decides which recognition was right.
+
+- **Four passes in the search, each from a failed attempt** (2026-09-18):
+  literal with **AND** instead of OR (with OR "der schupo" found 14 letters -
+  every one containing "der"), then the word stem as a prefix ("Krankenkassen"
+  finds "Krankenkasse"), then joined ("nebenkosten abrechnung" →
+  "Nebenkostenabrechnung"), then phonetic. If none of that finds anything, the
+  **names from the letter headings** are compared with difflib - that is how
+  "wieso bau" finds the five letters to GESOBAU AG. Guessing happens only when
+  there is no hit otherwise.
+
 - **Extensions now appear in the spoken command overview** (2026-09-18). At
   startup the service reported "Befehle ohne Platz in der Uebersicht:
   ['unterlagen durchsuchen']" - the start sentence was in the grammar but in no
