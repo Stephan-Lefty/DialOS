@@ -905,27 +905,83 @@ def antworten_auf(t, erkenner, modell, weiterleiten=False):
     return 0
 
 
-def empfaenger_erfragen_fuer_mail(erkenner, modell):
-    """An wen weitergeleitet wird - aus den Thunderbird-Kontakten."""
-    em = _modul(EMPFAENGER_SKRIPT, "dialos_empfaenger")
-    if em is None:
-        sprich("Ich komme nicht an die Kontakte.")
+ADRESSE_GUELTIG = re.compile(r"^[\w.+-]+@[\w-]+(\.[\w-]+)+$")
+
+
+def adresse_buchstabieren_lassen():
+    """Eine Mailadresse Zeichen fuer Zeichen - dieselbe Tabelle wie im Diktat.
+
+    (Stephan, 2026-09-18: "Weiterleiten fertig bauen mit buchstabierter
+    Adresse".) Die Kontakte im Adressbuch haben oft keine Mailadresse - beim
+    T490 keiner von beiden -, und eine fremde Adresse frei zu sprechen trifft
+    kein Erkenner. Buchstabiert wird sie mit dem Buchstabieralphabet plus at,
+    Punkt, Minus, Unterstrich und Ziffern; die Tabelle dafuer steht im Diktat
+    und wird von dort geholt, nicht abgeschrieben.
+    """
+    d = _modul(DIKTAT_SKRIPT_MODUL, "dialos_diktat")
+    if d is None:
         return ""
+    import vosk
+    vosk.SetLogLevel(-1)
+    if not os.path.isdir(MODELL_KLEIN):
+        return ""
+    modell_klein = vosk.Model(MODELL_KLEIN)
+    prozess = mikrofon_oeffnen()
+    try:
+        adresse = d.buchstaben_hoeren(prozess, modell_klein,
+                                      ansage=d.ANSAGE_MAIL_BUCHSTABIEREN,
+                                      zusatz=d.MAIL_ZEICHEN).replace(" ", "").lower()
+    except Exception as fehler:            # noqa: BLE001 - auch ein Abbruch
+        melde(f"  Buchstabieren abgebrochen: {fehler}")
+        return ""
+    finally:
+        try:
+            prozess.terminate()
+        except OSError:
+            pass
+    melde(f"  Adresse buchstabiert: {adresse!r}")
+    if not adresse:
+        return ""
+    if not ADRESSE_GUELTIG.match(adresse):
+        # LIEBER NICHTS ALS EINE HALBE ADRESSE: Eine Mail an "stephanguideos.de"
+        # kaeme nie an, und der Nutzer erfuehre es erst Tage spaeter.
+        sprich("Das ergibt keine Mailadresse. Es fehlt das At-Zeichen oder der Punkt.")
+        return ""
+    if ja_oder_nein(f"Die Adresse ist: {d.mail_vorlesbar(adresse)} "
+                    "Stimmt das? Sage ja oder nein."):
+        return adresse
+    return ""
+
+
+def empfaenger_erfragen_fuer_mail(erkenner, modell):
+    """An wen weitergeleitet wird - aus den Kontakten oder buchstabiert."""
+    em = _modul(EMPFAENGER_SKRIPT, "dialos_empfaenger")
     for _versuch in range(2):
         texte = antwort_hoeren("An wen soll ich weiterleiten? Sage den Namen aus "
-                               "Deinen Kontakten.", erkenner, modell)
+                               "Deinen Kontakten, oder sage: buchstabieren.",
+                               erkenner, modell)
         if not texte or _abbruch(texte):
             return ""
+        if any(re.search(r"(?i)buchstab", t) or _aehnlich(t, "buchstabieren") >= 0.7
+               for t in texte):
+            return adresse_buchstabieren_lassen()
         for gesagt in texte:
-            for kontakt in em.suchen(gesagt):
+            for kontakt in (em.suchen(gesagt) if em else []):
                 adresse = (kontakt.get("mail") or "").strip()
                 name = kontakt.get("name") or kontakt.get("firma") or adresse
                 if not adresse:
+                    melde(f"  Kontakt {name!r} ohne Mailadresse")
                     continue
                 if ja_oder_nein(f"An {name}, {sprechbar(adresse)}. "
                                 "Stimmt das? Sage ja oder nein."):
                     return adresse
-        sprich("Dazu finde ich keine Adresse in den Kontakten.")
+        # KEIN KONTAKT MIT ADRESSE: Das ist der Normalfall, solange das
+        # Adressbuch aus Brief-Empfaengern besteht - dort steht eine Anschrift,
+        # keine Mailadresse. Deshalb hier gleich das Buchstabieren anbieten,
+        # statt ein zweites Mal nach einem Namen zu fragen.
+        if ja_oder_nein("Dazu finde ich keine Mailadresse. Soll ich sie "
+                        "buchstabieren lassen? Sage ja oder nein."):
+            return adresse_buchstabieren_lassen()
     return ""
 
 

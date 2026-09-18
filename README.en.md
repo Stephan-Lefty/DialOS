@@ -122,6 +122,17 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Forwarding to a spelled-out address** (2026-09-18, Stephan's decision after
+  the finding that **none** of his Thunderbird contacts has an email address -
+  the address book holds letter recipients with postal addresses). DialOS asks
+  "who shall I forward to? Say the name from your contacts, or say: spell it".
+  If no contact **with an address** is found, it offers spelling by itself
+  instead of asking for a name a second time. Spelling uses the same table as
+  dictation (alphabet plus at, Punkt, Minus, Unterstrich, digits), read back
+  character by character for checking. **Without an at sign and a dot it is
+  rejected** - a mail to "stephanguideos.de" would never arrive, and the user
+  would only find out days later.
+
 - **Two errors before the first draft showed up in Thunderbird** (2026-09-18,
   Stephan's test). The file was correct on disk every time, and Thunderbird kept
   reporting "Local Folders - Drafts, 0 messages":

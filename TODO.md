@@ -362,6 +362,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       `X-Mozilla-Status: 0008` heißt gelöscht, nicht Entwurf. Offen: Senden per
       Sprache (bewusst nicht gebaut - eine abgeschickte Mail ist aus der Welt),
       Weiterleiten am Gerät noch nicht geprobt.
+    - [x] **Weiterleiten mit buchstabierter Adresse** (2026-09-18, Stephans
+      Wahl). Kontakte zuerst, sonst buchstabieren; Prüfung auf At-Zeichen und
+      Punkt. Mit Piper simuliert („ste@guideos.de"), Probe am Gerät offen.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den

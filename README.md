@@ -130,6 +130,17 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Weiterleiten an eine buchstabierte Adresse** (2026-09-18, Stephans
+  Entscheidung nach dem Befund, dass **keiner** seiner Thunderbird-Kontakte eine
+  Mailadresse hat - im Adressbuch stehen Brief-Empfänger mit Anschrift). DialOS
+  fragt „An wen soll ich weiterleiten? Sage den Namen aus Deinen Kontakten, oder
+  sage: buchstabieren." Findet sich kein Kontakt **mit Adresse**, bietet es das
+  Buchstabieren von selbst an, statt ein zweites Mal nach einem Namen zu fragen.
+  Buchstabiert wird mit derselben Tabelle wie im Diktat (Alphabet plus at,
+  Punkt, Minus, Unterstrich, Ziffern), vorgelesen zur Kontrolle Zeichen für
+  Zeichen. **Ohne At-Zeichen und Punkt wird abgelehnt** - eine Mail an
+  „stephanguideos.de" käme nie an, und der Nutzer erführe es erst Tage später.
+
 - **Zwei Fehler, bis der erste Entwurf in Thunderbird sichtbar war** (2026-09-18,
   Stephans Test). Die Datei stand jedes Mal richtig auf der Platte, und
   Thunderbird meldete „Lokale Ordner - Entwürfe, 0 Nachrichten":
