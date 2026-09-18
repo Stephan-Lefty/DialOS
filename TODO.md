@@ -369,6 +369,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       komteakte@teialos.or an statt kontakt@dialos.org. Daraus gebaut:
       Gegenlesen mit bekannten Adressen und Domains, getrenntes Vorlesen vor
       und nach dem At, bis zu drei Anläufe. Erneute Probe offen.
+    - [ ] **Buchstaben-Messung mit Stephans Stimme auswerten** (Werkzeug
+      `scripts/dialos-buchstaben-messen.py`, gebaut 2026-09-18 nach seiner Frage
+      „Buchstabieren nur mit den Buchstaben, ist das nicht sinnvoller?"). Drei
+      Läufe zeigten bisher nur Werkzeugfehler: eigene Ansage im Puffer (0/43),
+      Aufnahme startete im Frageton (24/43), Raum lauter als die feste Schwelle
+      (abgebrochen). Jetzt wartet es auf Stille und hängt die Schwelle an den
+      gemessenen Rauschboden. **Am Montag: einmal `--alphabet`, einmal
+      `--namen`** - dann liegt die Antwort in Zahlen vor, für seine Stimme statt
+      für Pipers.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den

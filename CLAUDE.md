@@ -125,7 +125,55 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-17, nachmittags - ab jetzt Version 0.5.2)
+## Aktueller Stand (Stand: 2026-09-18, Feierabend - Version 0.5.2)
+
+**Der 2026-09-18 war der Tag von DialOS-Suche.** Stephan hat die Erweiterung, die
+er am zweiten Rechner begonnen hatte, mit einer Uebergabedatei hierher gegeben
+(`~/Downloads/dialos-suche-uebergabe-t490.txt`); seitdem wird sie hier gebaut.
+Alles ist gepusht; installiert ist alles ausser den drei Dateien unten.
+
+**Am Geraet belegt, in dieser Reihenfolge entstanden:**
+- **Index** ueber Briefe, Notizen, Ablage und **Thunderbird-Mails** (80 Eintraege).
+  Drei Fehler davor: Schema ohne Spalte `quelle` (Aufbau brach ab), ein abgezogener
+  Stick warf das ganze Archiv aus dem Index, und die Abnahme zaehlte doppelt.
+- **Sprachdialog:** "Unterlagen durchsuchen" → Bereich (Dokumente oder Postfach,
+  Bilder/Videos sagen "spaeter") → Begriff → Trefferdialog (Jahr, Art, Person,
+  Monat, dann weitere Suchwoerter) → "vorlesen, drucken, antworten, weiterleiten
+  oder nichts".
+- **Drucken auf Papier belegt** (Stephan: "Druck lief einwandfrei durch").
+- **Antworten belegt:** Diktat in eigenem Prozess, Rueckfrage, **Entwurf in
+  Thunderbird** (Stephan: "Entwurf ist da"). Gesendet wird nie von selbst.
+- **Zwei Fehler kosteten den Nachmittag:** mbox braucht CR LF, und
+  `X-Mozilla-Status: 0008` heisst GELOESCHT, nicht Entwurf. Gefunden ueber einen
+  Gegenversuch mit einer von Thunderbird selbst geschriebenen Nachricht.
+- **Weiterleiten** mit buchstabierter Adresse gebaut; die erste Probe ergab
+  "komteakte@teialos.or" statt "kontakt@dialos.org" - daraufhin Gegenlesen mit
+  bekannten Adressen/Domains, getrenntes Vorlesen vor und nach dem At, drei Anlaeufe.
+
+**Offen und als Erstes am Montag: die Buchstaben-Messung.** Stephans Frage
+("Buchstabieren nur mit den Buchstaben, ist das nicht sinnvoller?") ist NICHT
+beantwortet. `scripts/dialos-buchstaben-messen.py` ist gebaut, aber die drei
+Laeufe haben bisher mehr ueber das Werkzeug verraten als ueber die Stimme:
+1. Lauf 0/43 - die eigene Ansage stand im Mikrofonpuffer (wie bei der Suche
+vormittags), 2. Lauf 24/43 - die Aufnahme begann im Rest des Fragetons, 3. Lauf
+abgebrochen - der Raum war lauter als die feste Pegelschwelle. Jetzt: warten,
+bis es still ist, Schwelle am gemessenen Rauschboden, zwei laute Bloecke fuer
+Sprache. **Erst messen, dann entscheiden** - die alte Zahl (Alphabet 26/26,
+Buchstabennamen 15/26) stammt von Piper, nicht von Stephans Stimme.
+
+**Montag, in dieser Reihenfolge:**
+1. Aufspielen (drei Dateien weichen ab):
+   `sudo /usr/local/sbin/dialos-aufspielen --wirklich`
+2. Buchstaben-Messung mit Stephans Stimme, danach dieselbe mit `--namen`;
+   Ergebnis entscheidet ueber das Buchstabieralphabet.
+3. Weiterleiten am Geraet erneut proben (Adresse buchstabieren, Gegenvorschlag).
+4. Suche in DOKUMENTEN proben - bisher nur Postfach geprobt.
+5. Offen aus dem Brief-Block: Satzende bei abgebrochenem Satz, Befehlsuebersicht
+   unterbrechbar, Du/Sie aus den Daten, polkit-Regel durchsehen,
+   Parakeet-Lizenzhinweis. Fuer die Suche: echter Stick, MailBurgs `extract/`
+   (kein OCR ohne das), Bilder und Videos (eigener TODO-Punkt).
+
+## Stand vom 2026-09-17, nachmittags
 
 **Der 2026-09-17 in Stichpunkten - Einzelheiten im Aenderungsprotokoll unter 0.5.1.**
 Brief fertig ausgebaut, jeweils nach Stephans Proben am Geraet:
