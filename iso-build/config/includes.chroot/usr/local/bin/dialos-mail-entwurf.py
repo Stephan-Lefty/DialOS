@@ -134,10 +134,18 @@ def nachricht_bauen(an, betreff, text, bezug=None, zitat=""):
 
 
 def als_mbox_eintrag(nachricht):
-    """Ein mbox-Eintrag mit den Kopfzeilen, die Thunderbird fuer Entwuerfe braucht.
+    """Ein mbox-Eintrag, so wie Thunderbird ihn selbst schreibt.
+
+    ZEILENENDEN CR LF, UND DAS IST DER GANZE PUNKT (2026-09-18, an Stephans
+    erstem Entwurf gefunden): Die Datei stand richtig auf der Platte, und
+    Thunderbird zeigte den Ordner trotzdem als "0 Nachrichten". Zum Vergleich
+    das eigene Postfach angesehen - dort endet JEDE Zeile auf CR LF. Mit
+    blossem LF hat Thunderbirds Parser den Eintrag nicht erkannt, ohne Fehler
+    und ohne Meldung: genau die Art Fehlschlag, die ein blinder Nutzer nie
+    bemerken wuerde.
 
     X-Mozilla-Status=0008 heisst "Entwurf"; ohne diese Zeilen zeigt Thunderbird
-    die Nachricht als normale Mail im Ordner an und bietet kein Bearbeiten an.
+    die Nachricht als gewoehnliche Mail und bietet kein Bearbeiten an.
     """
     roh = nachricht.as_string()
     kopf = (f"From - {time.strftime('%a %b %d %H:%M:%S %Y')}\n"
@@ -147,7 +155,8 @@ def als_mbox_eintrag(nachricht):
     # scheinbar eine neue Nachricht an.
     roh = "\n".join((">" + z) if z.startswith("From ") else z
                     for z in roh.splitlines())
-    return kopf + roh + "\n\n"
+    text = kopf + roh + "\n\n"
+    return text.replace("\r\n", "\n").replace("\n", "\r\n")
 
 
 def _vormerken(daten):
@@ -174,8 +183,10 @@ def ablegen(an, betreff, text, bezug=None, zitat=""):
         melde(f"vorgemerkt (Thunderbird laeuft oder kein Profil): {betreff!r}")
         return False
     nachricht = nachricht_bauen(an, betreff, text, bezug, zitat)
-    with open(ziel, "a", encoding="utf-8") as f:
-        f.write(als_mbox_eintrag(nachricht))
+    # Binaer anhaengen: Sonst uebersetzt Python die Zeilenenden je nach System
+    # wieder zurueck, und genau darauf kam es hier an.
+    with open(ziel, "ab") as f:
+        f.write(als_mbox_eintrag(nachricht).encode("utf-8"))
     # Die .msf-Datei ist Thunderbirds Verzeichnis der mbox. Ist sie aelter als
     # die mbox, baut Thunderbird sie neu auf - sonst zeigte es den Entwurf nicht.
     msf = ziel + ".msf"
