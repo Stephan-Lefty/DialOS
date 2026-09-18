@@ -40,8 +40,10 @@ Aufruf:  dialos-suche.py            (startet der Befehlsdienst)
 """
 
 import collections
+import importlib.util
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -50,6 +52,7 @@ import time
 
 SAY = "/usr/local/bin/dialos-say.py"
 INDEX = "/usr/local/bin/dialos-suche-index.py"
+DIKTAT_SKRIPT = "/usr/local/bin/dialos-diktat.py"
 ABTASTRATE = 16000
 BLOCK = 4000
 ECHO_QUELLE = "dialos_mikrofon_ohne_echo"
@@ -239,8 +242,8 @@ def erkennen(erkenner, roh):
     return strom.result.text.strip()
 
 
-def begriff_hoeren(erkenner, modell=None):
-    """Ansage stellen und den Suchbegriff aufnehmen.
+def antwort_hoeren(frage, erkenner, modell=None):
+    """Eine Frage stellen und die Antwort aufnehmen - Liste der Lesarten.
 
     DAS MIKROFON IST WAEHREND DER ANSAGE SCHON OFFEN - dieselbe Reihenfolge
     wie bei den Rueckfragen in dialos-notiz.py, und aus demselben Grund: Am
@@ -253,7 +256,7 @@ def begriff_hoeren(erkenner, modell=None):
         import vosk
         vosk_erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
     try:
-        vorrat = sprechen_bei_offener_aufnahme(ANSAGE_START, prozess, frage=True)
+        vorrat = sprechen_bei_offener_aufnahme(frage, prozess, frage=True)
         roh = bytearray()
         ruhe = 0.0
         gesprochen = False
@@ -301,7 +304,253 @@ def begriff_hoeren(erkenner, modell=None):
             pass
 
 
-def suchen(begriffe):
+ABBRUCH_WORTE = ("abbrechen", "abbruch", "beenden", "stopp", "stop", "aufhören", "aufhoeren")
+ARTEN_WORTE = {"brief": "Brief", "briefe": "Brief", "schreiben": "Brief",
+               "notiz": "Notiz", "notizen": "Notiz",
+               "ablage": "Ablage", "archiv": "Ablage", "akte": "Ablage",
+               "mail": "Mail", "mails": "Mail", "email": "Mail", "e-mail": "Mail"}
+MONATE = ("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
+          "August", "September", "Oktober", "November", "Dezember")
+ORDNUNGSZAHLEN = {"erste": 0, "ersten": 0, "erster": 0, "zweite": 1, "zweiten": 1,
+                  "dritte": 2, "dritten": 2, "vierte": 3, "vierten": 3,
+                  "fünfte": 4, "fünften": 4}
+
+
+def _abbruch(texte):
+    return any(w in ABBRUCH_WORTE for t in texte for w in t.lower().split())
+
+
+def _aehnlich(gesagt, kandidat):
+    import difflib
+    sauber = lambda x: re.sub(r"[^a-z0-9äöüß]", "", x.lower())
+    return difflib.SequenceMatcher(None, sauber(gesagt), sauber(kandidat)).ratio()
+
+
+def jahr_aus_antwort(texte):
+    """Die Jahreszahl aus dem Gesagten - Ziffern oder Zahlwoerter.
+
+    Die Zahlwoerter kommen aus dem Diktat (zahlen_in_ziffern), damit "zwanzig
+    sechsundzwanzig" und "zweitausendsechsundzwanzig" hier genauso zu 2026
+    werden wie in einem Brief. Zwei Zahlenleser waeren zwei Staende.
+    """
+    for text in texte:
+        m = re.search(r"\b(19|20)\d{2}\b", text)
+        if m:
+            return int(m.group(0))
+    try:
+        spec = importlib.util.spec_from_file_location("dialos_diktat", DIKTAT_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"  Zahlwoerter nicht lesbar: {fehler}")
+        return None
+    for text in texte:
+        m = re.search(r"\b(19|20)\d{2}\b", modul.zahlen_in_ziffern(text))
+        if m:
+            return int(m.group(0))
+    return None
+
+
+def merkmal_waehlen(treffer):
+    """Wonach als Naechstes gefragt wird - oder None, wenn nichts mehr trennt.
+
+    NUR MERKMALE, DIE WIRKLICH TRENNEN (Stephan, 2026-09-18: "Schritt fuer
+    Schritt die Treffer verkleinern, bis nur noch eine Datei uebrig bleibt").
+    Eine Frage, deren Antwort alle Treffer behaelt, kostet den Nutzer Zeit und
+    bringt ihn keinen Schritt weiter - und er sieht nicht, dass sie sinnlos war.
+    Deshalb gilt ein Merkmal nur, wenn es mindestens zwei Gruppen bildet, und
+    genommen wird das mit der kleinsten groessten Gruppe: Es schneidet am meisten weg.
+    """
+    kandidaten = []
+    jahre = {}
+    monate = {}
+    arten = {}
+    personen = {}
+    for nummer, t in enumerate(treffer):
+        if t.get("jahr"):
+            jahre.setdefault(t["jahr"], set()).add(nummer)
+        monat = time.localtime(t.get("geaendert", 0)).tm_mon
+        monate.setdefault(monat, set()).add(nummer)
+        if t.get("art"):
+            arten.setdefault(t["art"], set()).add(nummer)
+        for person in t.get("personen") or []:
+            if person.strip():
+                personen.setdefault(person.strip(), set()).add(nummer)
+    for name, gruppen in (("jahr", jahre), ("art", arten), ("person", personen),
+                          ("monat", monate)):
+        if len(gruppen) > 1:
+            kandidaten.append((max(len(x) for x in gruppen.values()), name, gruppen))
+    if not kandidaten:
+        return None, {}
+    kandidaten.sort(key=lambda x: (x[0], ("jahr", "art", "person", "monat").index(x[1])))
+    _groesse, name, gruppen = kandidaten[0]
+    return name, gruppen
+
+
+def eingrenzen(treffer, erkenner, modell):
+    """Fragt so lange nach Merkmalen, bis ein Treffer uebrig ist - oder Schluss.
+
+    Hoechstens vier Fragen: Wer danach noch nicht bei einem Dokument ist, hat
+    einen zu allgemeinen Begriff gesucht; weiterzufragen waere Quaelerei.
+    """
+    for _runde in range(4):
+        if len(treffer) <= 1:
+            return treffer
+        name, gruppen = merkmal_waehlen(treffer)
+        if name is None:
+            return treffer
+        if name == "jahr":
+            frage = (f"{len(treffer)} Treffer. Aus welchem Jahr? "
+                     + " Oder ".join(str(j) for j in sorted(gruppen)) + ".")
+        elif name == "art":
+            frage = (f"{len(treffer)} Treffer. Was davon: "
+                     + ", ".join(sorted(gruppen)) + "?")
+        elif name == "monat":
+            frage = (f"{len(treffer)} Treffer. Aus welchem Monat? "
+                     + " Oder ".join(MONATE[m - 1] for m in sorted(gruppen)) + ".")
+        else:
+            namen = sorted(gruppen, key=lambda x: -len(gruppen[x]))[:4]
+            frage = f"{len(treffer)} Treffer. Von wem? " + ", ".join(namen) + "."
+        texte = antwort_hoeren(frage, erkenner, modell)
+        melde(f"  {name}: Antwort {texte!r}")
+        if _abbruch(texte):
+            return []
+        if not texte:
+            # KEINE ANTWORT HEISST AUFHOEREN (2026-09-18, in der Simulation
+            # gesehen): Sonst folgt Frage auf Frage, jede mit 20 s Wartezeit -
+            # wer weggegangen ist, hoert danach noch minutenlang Fragen.
+            melde("  keine Antwort - Dialog beendet")
+            sprich("Ich höre nichts mehr. Die Suche ist beendet.")
+            return []
+        gewaehlt = None
+        if name == "jahr":
+            jahr = jahr_aus_antwort(texte)
+            if jahr in gruppen:
+                gewaehlt = gruppen[jahr]
+        elif name == "art":
+            for text in texte:
+                for wort in text.lower().split():
+                    art = ARTEN_WORTE.get(wort.strip(".,"))
+                    if art in gruppen:
+                        gewaehlt = gruppen[art]
+                        break
+                if gewaehlt:
+                    break
+        elif name == "monat":
+            for text in texte:
+                for nummer, monat in enumerate(MONATE, start=1):
+                    if monat.lower()[:4] in text.lower() and nummer in gruppen:
+                        gewaehlt = gruppen[nummer]
+                        break
+                if gewaehlt:
+                    break
+        else:
+            beste, bester_wert = None, 0.6
+            for text in texte:
+                for person in gruppen:
+                    wert = _aehnlich(text, person)
+                    if wert > bester_wert:
+                        beste, bester_wert = person, wert
+            if beste:
+                melde(f"  Person {beste!r} ({bester_wert:.2f})")
+                gewaehlt = gruppen[beste]
+        if gewaehlt is None:
+            sprich("Das habe ich nicht zuordnen können.")
+            continue
+        treffer = [t for i, t in enumerate(treffer) if i in gewaehlt]
+        melde(f"  eingegrenzt auf {len(treffer)}")
+    return treffer
+
+
+def mit_wort_eingrenzen(treffer, erkenner, modell):
+    """Letzter Schritt, wenn kein Merkmal mehr trennt: noch ein Suchwort.
+
+    (2026-09-18) Im ersten Durchlauf blieben nach Art und Jahr vierzehn Briefe
+    stehen, die sich in nichts mehr unterschieden - alle aus demselben Monat,
+    ohne erkannten Absender. Ohne diesen Schritt endet der Dialog dort, und der
+    Nutzer hat vierzehn Treffer und keinen Weg weiter.
+    """
+    texte = antwort_hoeren(f"Es bleiben {len(treffer)} Treffer. Sage ein weiteres Wort "
+                           "zum Eingrenzen, oder sage: aufzählen.", erkenner, modell)
+    if not texte or _abbruch(texte):
+        return treffer
+    if any("zähl" in t.lower() or "zaehl" in t.lower() for t in texte):
+        return treffer
+    pfade = set()
+    for versuch in texte:
+        try:
+            r = subprocess.run([INDEX, "suchen", versuch], capture_output=True, timeout=120)
+            for x in json.loads(r.stdout.decode("utf-8", errors="replace") or "[]"):
+                pfade.add(x["pfad"])
+        except (OSError, subprocess.TimeoutExpired, ValueError) as fehler:
+            melde(f"  zweite Suche fehlgeschlagen: {fehler}")
+    enger = [t for t in treffer if t["pfad"] in pfade]
+    melde(f"  mit {texte!r} eingegrenzt: {len(treffer)} -> {len(enger)}")
+    if not enger:
+        sprich("Damit finde ich nichts mehr. Ich bleibe bei den bisherigen Treffern.")
+        return treffer
+    return enger
+
+
+def treffer_nennen(t):
+    """Wie ein Treffer angesagt wird - Art, Datum, Titel.
+
+    NICHT DER DATEINAME (2026-09-18, aus der ersten Aufzaehlung): "Brief vom
+    15. September, 2026-09-15-1634-Brief.pdf" sagt einem Hoerer nichts. Der
+    Titel ist der Betreff, sonst der erste Satz nach der Anrede.
+    """
+    art = t.get("art", "Schreiben")
+    wann = time.strftime("%d. %B", time.localtime(t.get("geaendert", 0)))
+    wer = (t.get("personen") or [""])[0]
+    titel = (t.get("titel") or os.path.basename(t.get("pfad", ""))).strip()
+    if len(titel) > 90:
+        titel = titel[:90].rsplit(" ", 1)[0] + " und so weiter"
+    return f"{art} vom {wann}" + (f", {wer}" if wer else "") + f": {titel.rstrip('.')}"
+
+
+def vorlesen_anbieten(t, erkenner, modell):
+    """Einen Treffer vorlesen - wenn er erreichbar ist und der Nutzer will."""
+    if not t.get("erreichbar"):
+        sprich("Diese Datei liegt im Archiv, das gerade nicht angeschlossen ist.")
+        return 0
+    texte = antwort_hoeren(f"Es bleibt: {treffer_nennen(t)}. Soll ich vorlesen? "
+                           "Sage ja oder nein.", erkenner, modell)
+    if not texte or not any(w in ("ja", "jawohl", "gerne", "bitte")
+                            for text in texte for w in text.lower().split()):
+        sprich("Gut, ich lese nicht vor.")
+        return 0
+    try:
+        r = subprocess.run([INDEX, "text", t["pfad"]], capture_output=True, timeout=60)
+        text = r.stdout.decode("utf-8", errors="replace").strip()
+    except (OSError, subprocess.TimeoutExpired) as fehler:
+        melde(f"  Text nicht lesbar: {fehler}")
+        text = ""
+    if not text:
+        sprich("Ich kann den Text nicht vorlesen.")
+        return 1
+    # AB DER ANREDE VORLESEN (2026-09-18, aus der Simulation): Davor stehen
+    # Absender, Anschriftfeld und Informationsblock - bei einem PDF kommen die
+    # Spalten beim Extrahieren durcheinander ("Name Stephan Rösner Guide O S").
+    # Wer einen Brief sucht, will wissen, was drinsteht, nicht seinen eigenen
+    # Briefkopf hoeren. Dieselbe Entscheidung wie bei "Brief vorlesen", wo
+    # Stephan am 2026-09-17 den Absender abbestellt hat.
+    zeilen = text.splitlines()
+    anfang = next((i for i, z in enumerate(zeilen)
+                   if re.match(r"(?i)^\s*(sehr geehrt|liebe[rn]?\b|hallo|guten (tag|morgen))",
+                               z)), None)
+    if anfang is None:
+        anfang = next((i for i, z in enumerate(zeilen)
+                       if re.match(r"(?i)^\s*betreff", z)), 0)
+    zeilen = [z for z in zeilen[anfang:]
+              if "powered by DialOS" not in z
+              and not z.strip().startswith("Dieser Brief wurde per Spracheingabe")
+              and z.strip() != "unterschrieben."]
+    melde(f"  vorlesen: {len(' '.join(zeilen))} Zeichen")
+    sprich(" ".join(z.strip() for z in zeilen if z.strip()))
+    return 0
+
+
+def suchen(begriffe, erkenner=None, modell=None):
     """Den Index fragen und das Ergebnis ansagen.
 
     MEHRERE BEGRIFFE, EINE ANTWORT (2026-09-18): Vosk und Parakeet hoeren
@@ -343,18 +592,48 @@ def suchen(begriffe):
         return 0
 
     nur_klang = all(x.get("wie") == "klang" for x in treffer)
-    klang = " Die Schreibweise klingt nur aehnlich." if nur_klang else ""
-    erster = treffer[0]
-    art = erster.get("art", "Schreiben")
-    name = os.path.basename(erster.get("pfad", ""))
-    wann = time.strftime("%d. %B", time.localtime(erster.get("geaendert", 0)))
-
+    klang = " Die Schreibweise klingt nur ähnlich." if nur_klang else ""
     if len(treffer) == 1:
-        sprich(f"Ich habe einen Treffer zu {begriff}.{klang} "
-               f"Es ist {art} {name} vom {wann}.")
-    else:
-        sprich(f"Ich habe {len(treffer)} Treffer zu {begriff}.{klang} "
-               f"Der neueste ist {art} {name} vom {wann}.")
+        sprich(f"Ich habe einen Treffer zu {begriff}.{klang}")
+        return vorlesen_anbieten(treffer[0], erkenner, modell)
+
+    # SCHRITT FUER SCHRITT EINGRENZEN (Stephan, 2026-09-18: "so aufbauen, dass
+    # man Schritt fuer Schritt die Treffer verkleinert, bis nur noch eine Datei
+    # uebrig bleibt"). Erst die Zahl, dann Fragen nach Jahr, Art und Person -
+    # und nur nach dem, was die Treffer wirklich auseinanderhaelt.
+    sprich(f"Ich habe {len(treffer)} Treffer zu {begriff}.{klang}")
+    if erkenner is None and modell is None:
+        return 0
+    treffer = eingrenzen(treffer, erkenner, modell)
+    if not treffer:
+        sprich("Gut, ich höre auf zu suchen.")
+        return 0
+    # Bis zu drei weitere Woerter: Jedes schneidet, und wer aufhoeren will, sagt
+    # "aufzaehlen" - dann kommt die Liste.
+    for _runde in range(3):
+        if len(treffer) <= 1:
+            break
+        enger = mit_wort_eingrenzen(treffer, erkenner, modell)
+        if enger is treffer or len(enger) == len(treffer):
+            treffer = enger
+            break
+        treffer = enger
+    if len(treffer) == 1:
+        return vorlesen_anbieten(treffer[0], erkenner, modell)
+
+    # MEHR ALS EINER BLEIBT UEBRIG: Dann wird nicht weitergefragt, sondern
+    # aufgezaehlt - hoechstens drei, nach Datum. Wer bis hierher gekommen ist,
+    # hat vier Fragen beantwortet; eine fuenfte waere Quaelerei.
+    sprich(f"Es bleiben {len(treffer)} Treffer. Die neuesten sind: "
+           + ". ".join(treffer_nennen(t) for t in treffer[:3]) + ".")
+    texte = antwort_hoeren("Welchen soll ich vorlesen? Sage: den ersten, den zweiten "
+                           "oder den dritten. Oder sage: keinen.", erkenner, modell)
+    for text in texte or []:
+        for wort in text.lower().split():
+            nummer = ORDNUNGSZAHLEN.get(wort.strip(".,"))
+            if nummer is not None and nummer < min(3, len(treffer)):
+                return vorlesen_anbieten(treffer[nummer], erkenner, modell)
+    sprich("Gut, ich lese nichts vor.")
     return 0
 
 
@@ -402,12 +681,15 @@ def main():
         melde("=== DialOS-Suche gestartet ===")
         sprich(ANSAGE_LADEN)
         erkenner, modell = modelle_laden()
-        begriffe = begriff_hoeren(erkenner, modell)
+        begriffe = antwort_hoeren(ANSAGE_START, erkenner, modell)
         melde(f"  verstanden: {begriffe!r}")
         if not begriffe:
             sprich(ANSAGE_NICHTS)
             return 0
-        return suchen(begriffe)
+        if _abbruch(begriffe):
+            sprich("Gut, ich suche nicht.")
+            return 0
+        return suchen(begriffe, erkenner, modell)
     finally:
         try:
             os.unlink(MARKE)

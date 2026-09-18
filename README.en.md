@@ -122,6 +122,24 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The hit dialogue: step by step down to one file** (2026-09-18, Stephan's
+  requirement: "build it so the hits are narrowed step by step until only one
+  file is left", and his choice among three drafts: "DialOS asks one after
+  another"). After the number of hits, DialOS asks for **year, kind, person or
+  month** - but only for what really separates the hits, and always for the
+  feature that cuts away the most. If none separates any more, "say another word
+  to narrow it down" follows (up to three times), otherwise the three newest are
+  listed with "the first, the second or the third". At the end: read out, from
+  the salutation - the letterhead belongs to the recipient, not to checking. No
+  answer ends the dialogue instead of asking on.
+
+- **The index remembers what it is about** (2026-09-18). The first listing read
+  out "Brief vom 15. September, 2026-09-15-1634-Brief.pdf" - a file name tells a
+  listener nothing. Every entry now carries a **title**: the subject, else the
+  first sentence after the salutation. Two failed attempts are in there: without
+  skipping the letterhead every letter was called "Stephan", and without the
+  abbreviation list from dictation the title ended at "Am 12.".
+
 - **First trial at the microphone: the search term never arrived** (2026-09-18,
   Stephan's test). "Unterlagen durchsuchen" started the extension and the
   microphone handover was clean - but the log said "3.5 s recorded, spoken=True,

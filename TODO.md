@@ -337,10 +337,22 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       das: Stick einstecken, `dialos-suche-index.py stand` muss den
       Einhängepunkt zeigen; dann abziehen und erneut - die Einträge müssen
       bleiben.
-    - [ ] **Ansage für nicht angeschlossene Treffer.** Der Index liefert seit
-      dem 2026-09-18 `erreichbar` pro Treffer. Die Ansage muss den Unterschied
-      sagen, sonst schickt DialOS den Nutzer an eine Fundstelle, die sich nicht
-      öffnen lässt - gehört zum Trefferdialog.
+    - [x] **Ansage für nicht angeschlossene Treffer** (2026-09-18): Vor dem
+      Vorlesen wird `erreichbar` geprüft - „Diese Datei liegt im Archiv, das
+      gerade nicht angeschlossen ist."
+    - [x] **Trefferdialog gebaut** (2026-09-18, Stephans Wahl „DialOS fragt der
+      Reihe nach"): Jahr, Art, Person oder Monat - nur Merkmale, die wirklich
+      trennen, das schärfste zuerst; dann bis zu drei weitere Suchwörter; sonst
+      die drei neuesten aufzählen und „den ersten/zweiten/dritten" wählen; zum
+      Schluss vorlesen ab der Anrede. Mit Piper simuliert, Probe am Mikrofon
+      steht aus.
+    - [ ] **Bilder und Videos durchsuchbar machen** (Stephan, 2026-09-18: „Bilder
+      Videos Suche in die Todo für später packen"; die Suche danach ist anders
+      als bei Dokumenten). Erst wenn Dokumente, Notizen und Mails fertig sind.
+      Zu entscheiden ist dann: nur Dateiname, Aufnahmedatum und Ordner (dann
+      geht „Fotos vom Juli", nicht „Foto vom Auto"), oder zusätzlich
+      Texterkennung auf Bildern - das braucht MailBurgs `extract/` und deutlich
+      mehr Rechenzeit beim Aufbau. Die Endungen fallen heute bewusst heraus.
     - [x] **Kölner-Phonetik-Spalte gebaut.** Geprüft: „Meier"/„Mayer"/„Maier"/
       „Mayr" fallen auf `67` zusammen, „Müller"/„Mueller"/„Miller" auf `657`.
       Im Test findet der gesprochene Begriff „Meier" den Brief mit „Mayer", und

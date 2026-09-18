@@ -371,6 +371,57 @@ def personen_aus_text(text, hoechstens=12):
     return gefunden[:hoechstens]
 
 
+# Abkuerzungen, nach denen KEIN Satz endet - dieselbe Liste wie im Diktat
+# (dialos-diktat.py, ABKUERZUNGEN): Ohne sie hiess ein Brief "Am 12." und ein
+# anderer "... bei Frau Dr."
+ABKUERZUNGEN = ("dr", "prof", "nr", "str", "st", "bzw", "usw", "ca", "z", "b",
+                "evtl", "ggf", "inkl", "tel", "hr", "fr", "vgl", "etc", "u", "a",
+                "d", "h", "i")
+
+
+def erster_satz(zeile):
+    for m in re.finditer(r"[.!?](?=\s+[A-ZÄÖÜ])", zeile):
+        davor = re.search(r"([\wÄÖÜäöüß]+)\.$", zeile[:m.end()])
+        if davor and (davor.group(1).isdigit()
+                      or davor.group(1).lower() in ABKUERZUNGEN):
+            continue
+        return zeile[:m.end()]
+    return zeile
+
+
+def titel_aus(text, pfad):
+    """Woran der Nutzer den Treffer erkennt: Betreff, sonst die erste Zeile.
+
+    (2026-09-18, aus der ersten Aufzaehlung im Trefferdialog.) Vorgelesen wurde
+    "Brief vom 15. September, 2026-09-15-1634-Brief.pdf" - der Dateiname sagt
+    einem Hoerer nichts. Der Betreff sagt alles; fehlt er, taugt die erste
+    Zeile, die keine Anschrift und keine Anrede ist.
+    """
+    kopf = text[:3000]
+    m = re.search(r"(?im)^\s*Betreff:?\s*(.+)$", kopf)
+    if m and m.group(1).strip():
+        return m.group(1).strip()[:120]
+    # NACH DER ANREDE BEGINNT DER BRIEF (2026-09-18): Die ersten Zeilen sind
+    # Absender, Empfaenger und Datum - der erste Versuch nannte deshalb jeden
+    # Brief "Stephan". Was der Brief WILL, steht im ersten Satz nach der Anrede.
+    zeilen = [z.strip() for z in kopf.splitlines()]
+    anrede = next((i for i, z in enumerate(zeilen)
+                   if re.match(r"(?i)^(sehr geehrt|liebe[rn]?\b|hallo|guten (tag|morgen))", z)), None)
+    bereich = zeilen[anrede + 1:] if anrede is not None else zeilen
+    for zeile in bereich:
+        if len(zeile) < 8:
+            continue
+        if re.match(r"(?i)^(mit freundlichen|viele grüße|dieser brief)", zeile):
+            continue
+        if re.match(r"^[\d.\s/-]+$", zeile):          # Datum oder Nummern
+            continue
+        if anrede is None and re.search(r"@|^\+?\d[\d ()/-]{6,}$", zeile):
+            continue                                   # Absenderzeilen
+        satz = erster_satz(zeile)
+        return (satz if len(satz) <= 90 else satz[:90].rsplit(" ", 1)[0] + " …").strip()
+    return os.path.splitext(os.path.basename(pfad))[0]
+
+
 def jahr_aus(pfad, text, zeitstempel):
     """Das Jahr des Dokuments - aus dem Dateinamen, sonst aus dem Text.
 
@@ -406,7 +457,11 @@ CREATE TABLE IF NOT EXISTS dateien (
     groesse  INTEGER NOT NULL,
     gelesen  REAL NOT NULL,
     jahr     INTEGER,
-    personen TEXT
+    personen TEXT,
+    -- WORUEBER GEHT ES? Ein Dateiname ist zum Vorlesen unbrauchbar
+    -- ("2026-09-15-1634-Brief.pdf"), der Betreff dagegen sagt alles. Ohne ihn
+    -- kann die Ansage einen Treffer nicht benennen (2026-09-18).
+    titel    TEXT
 );
 CREATE INDEX IF NOT EXISTS dateien_jahr ON dateien(jahr);
 CREATE INDEX IF NOT EXISTS dateien_art  ON dateien(art);
@@ -439,7 +494,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS suche USING fts5(
 # Aufbau brach mit "no such column: quelle" ab, weil `CREATE TABLE IF NOT EXISTS`
 # eine bestehende Tabelle UNVERAENDERT laesst - die Spalte kam am selben Tag dazu.
 # Die Pruefung auf content='' fing nur die FTS-Tabelle ab, nicht `dateien`.
-SCHEMA_STAND = 2
+SCHEMA_STAND = 3
 
 
 def veraltet(db):
@@ -452,7 +507,7 @@ def veraltet(db):
     if not spalten:
         return None                 # noch gar keine Tabelle - nichts zu verwerfen
     fehlend = {"pfad", "art", "quelle", "geaendert", "groesse", "gelesen",
-               "jahr", "personen"} - spalten
+               "jahr", "personen", "titel"} - spalten
     if fehlend:
         return "fehlende Spalte(n) in dateien: " + ", ".join(sorted(fehlend))
     if db.execute("PRAGMA user_version").fetchone()[0] != SCHEMA_STAND:
@@ -537,11 +592,12 @@ def aufbauen(db, nur_neue=False):
         db.execute("DELETE FROM suche WHERE rowid IN "
                    "(SELECT id FROM dateien WHERE pfad = ?)", (pfad,))
         db.execute("INSERT OR REPLACE INTO dateien "
-                   "(pfad, art, quelle, geaendert, groesse, gelesen, jahr, personen) "
-                   "VALUES (?,?,?,?,?,?,?,?)",
+                   "(pfad, art, quelle, geaendert, groesse, gelesen, jahr, personen, titel) "
+                   "VALUES (?,?,?,?,?,?,?,?,?)",
                    (pfad, art, quelle, st.st_mtime, st.st_size, time.time(),
                     jahr_aus(pfad, inhalt, st.st_mtime),
-                    "\n".join(personen_aus_text(inhalt))))
+                    "\n".join(personen_aus_text(inhalt)),
+                    titel_aus(inhalt, pfad)))
         neue_id = db.execute("SELECT id FROM dateien WHERE pfad = ?",
                              (pfad,)).fetchone()[0]
         db.execute("INSERT INTO suche (rowid, name, inhalt, klang) VALUES (?,?,?,?)",
@@ -646,7 +702,7 @@ def suchen(db, begriff, hoechstens=40):
 
     def hole(bedingung, parameter, wie):
         for zeile in db.execute(
-                "SELECT d.pfad, d.art, d.geaendert, d.jahr, d.personen "
+                "SELECT d.pfad, d.art, d.geaendert, d.jahr, d.personen, d.titel "
                 "FROM suche s "
                 "JOIN dateien d ON d.id = s.rowid "
                 f"WHERE {bedingung} ORDER BY d.geaendert DESC LIMIT ?",
@@ -657,6 +713,7 @@ def suchen(db, begriff, hoechstens=40):
             treffer.append({"pfad": zeile[0], "art": zeile[1],
                             "geaendert": zeile[2], "jahr": zeile[3],
                             "personen": (zeile[4] or "").split("\n") if zeile[4] else [],
+                            "titel": zeile[5] or "",
                             "wie": wie,
                             # IST DIE DATEI GERADE ERREICHBAR? Bei einem Archiv
                             # auf einem Stick kann der Index sie kennen, ohne
@@ -729,9 +786,9 @@ def aehnliche_namen(db, worte, hoechstens=40):
     frage = ",".join("?" * len(passend))
     return [{"pfad": z[0], "art": z[1], "geaendert": z[2], "jahr": z[3],
              "personen": (z[4] or "").split("\n") if z[4] else [],
-             "wie": "klang", "erreichbar": os.path.exists(z[0])}
+             "titel": z[5] or "", "wie": "klang", "erreichbar": os.path.exists(z[0])}
             for z in db.execute(
-                "SELECT pfad, art, geaendert, jahr, personen FROM dateien "
+                "SELECT pfad, art, geaendert, jahr, personen, titel FROM dateien "
                 f"WHERE pfad IN ({frage}) ORDER BY geaendert DESC LIMIT ?",
                 tuple(passend) + (hoechstens,))]
 
@@ -760,6 +817,20 @@ def main():
         # JSON, weil eine fuer Menschen gesetzte Liste fuer einen Sprachdialog
         # unbrauchbar waere - die Erweiterung muss zaehlen und eingrenzen.
         print(json.dumps(suchen(db, " ".join(sys.argv[2:])), ensure_ascii=False))
+        return 0
+
+    if was == "text" and len(sys.argv) > 2:
+        # DER TEXT AUS DEM INDEX, nicht aus der Datei (2026-09-18, fuer das
+        # Vorlesen eines Treffers): Er ist schon extrahiert - bei einem PDF
+        # spart das den zweiten Lauf durch pdftotext, und bei einem Scan die
+        # gesamte OCR. Faellt der Eintrag weg, gibt es auch nichts vorzulesen.
+        zeile = db.execute(
+            "SELECT s.inhalt FROM suche s JOIN dateien d ON d.id = s.rowid "
+            "WHERE d.pfad = ?", (sys.argv[2],)).fetchone()
+        if not zeile:
+            print("", end="")
+            return 1
+        print(zeile[0])
         return 0
 
     if was == "stand":

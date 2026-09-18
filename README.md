@@ -130,6 +130,25 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Der Trefferdialog: Schritt für Schritt bis zu einer Datei** (2026-09-18,
+  Stephans Vorgabe: „so aufbauen, dass man Schritt für Schritt die Treffer
+  verkleinert, bis nur noch eine Datei übrig bleibt", und seine Wahl aus drei
+  Entwürfen: „DialOS fragt der Reihe nach"). Nach der Zahl der Treffer fragt
+  DialOS nach **Jahr, Art, Person oder Monat** - aber nur nach dem, was die
+  Treffer wirklich auseinanderhält, und immer nach dem Merkmal, das am meisten
+  wegschneidet. Trennt keines mehr, kommt „Sage ein weiteres Wort zum
+  Eingrenzen" (bis zu dreimal), sonst die Aufzählung der drei neuesten mit „den
+  ersten, den zweiten oder den dritten". Am Ende: vorlesen, ab der Anrede - der
+  Briefkopf gehört dem Empfänger, nicht der Kontrolle. Keine Antwort beendet den
+  Dialog, statt weiter zu fragen.
+
+- **Der Index merkt sich, worum es geht** (2026-09-18). Die erste Aufzählung las
+  „Brief vom 15. September, 2026-09-15-1634-Brief.pdf" vor - ein Dateiname sagt
+  einem Hörer nichts. Jeder Eintrag führt jetzt einen **Titel**: der Betreff,
+  sonst der erste Satz nach der Anrede. Zwei Fehlversuche stecken darin: Ohne
+  das Überspringen des Briefkopfs hieß jeder Brief „Stephan", und ohne die
+  Abkürzungsliste aus dem Diktat endete der Titel bei „Am 12.".
+
 - **Die erste Probe am Mikrofon: der Suchbegriff kam nie an** (2026-09-18,
   Stephans Test). „Unterlagen durchsuchen" startete die Erweiterung, die
   Mikrofon-Übergabe lief sauber - aber im Protokoll stand „3,5 s aufgenommen,
