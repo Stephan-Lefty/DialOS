@@ -40,6 +40,7 @@ import json
 import os
 import subprocess
 import sys
+import threading
 import time
 import wave
 
@@ -100,6 +101,65 @@ def diktat_modul():
     return modul
 
 
+def sprechen_und_mithoeren(text, prozess, frage=False):
+    """Spricht und LIEST DABEI DEN MIKROFONSTROM LEER.
+
+    OHNE DAS MISST MAN DIE EIGENE ANSAGE (2026-09-18, beim ersten Lauf mit
+    Stephans Stimme): Das Mikrofon laeuft waehrend der Ansage weiter, `parec`
+    fuellt die Pipe, und niemand liest sie. Die naechste Aufnahme bekam dann
+    zuerst diesen Stau - im Protokoll stand bei "Emil" die Ansage "anton berta"
+    und sonst "(nichts)". Ergebnis: 0 von 43, gemessen wurde nichts als der
+    eigene Lautsprecher. Dieselbe Falle wie in der Suche am selben Vormittag.
+    """
+    fertig = threading.Event()
+
+    def ansage():
+        try:
+            sprich(text, frage=frage)
+        finally:
+            fertig.set()
+
+    threading.Thread(target=ansage, daemon=True).start()
+    while not fertig.is_set():
+        if not prozess.stdout.read(800):
+            break
+    fertig.wait()
+
+
+def bis_ruhe(prozess, hoechstens_s=2.5, ruhe_s=0.4):
+    """Liest den Strom leer, BIS ES WIRKLICH STILL IST - dann beginnt die Aufnahme.
+
+    (2026-09-18, an Stephans zweitem Lauf gemessen: 24 von 43.) Eine feste
+    Wartezeit von 0,3 s genuegte nicht: Bei den Fehlschlaegen begann die
+    Aufnahme mit dem Rest der eigenen Ansage (Pegel 6146 im ersten Block),
+    galt damit sofort als "gesprochen" und endete nach einer Sekunde Stille -
+    bevor Stephan ueberhaupt angefangen hatte. Bei den Treffern lagen 2,5 s
+    Stille zwischen Ton und Stimme. Also nicht auf die Uhr warten, sondern auf
+    die Stille.
+    """
+    still_seit = 0.0
+    block_s = BLOCK / 2 / ABTASTRATE
+    ende = time.time() + hoechstens_s
+    while time.time() < ende:
+        block = prozess.stdout.read(BLOCK)
+        if not block:
+            return
+        if pegel(block) < PEGEL_SCHWELLE:
+            still_seit += block_s
+            if still_seit >= ruhe_s:
+                return
+        else:
+            still_seit = 0.0
+
+
+def leerlesen(prozess, sekunden):
+    """Haelt den Strom waehrend einer Pause leer - sonst staut sie sich an."""
+    ende = time.time() + sekunden
+    while time.time() < ende:
+        if not prozess.stdout.read(BLOCK):
+            break
+
+
 def pegel(block):
     import array
     if len(block) < 2:
@@ -112,6 +172,7 @@ def aufnehmen(prozess):
     """Ein gesprochenes Wort - roh, bis es eine Sekunde still ist."""
     roh = bytearray()
     gesprochen = False
+    laut = 0
     ruhe = 0.0
     block_s = BLOCK / 2 / ABTASTRATE
     ende = time.time() + ZEITGRENZE_S
@@ -121,11 +182,19 @@ def aufnehmen(prozess):
             break
         roh += block
         if pegel(block) >= PEGEL_SCHWELLE:
-            gesprochen, ruhe = True, 0.0
-        elif gesprochen:
-            ruhe += block_s
-            if ruhe >= RUHE_ENDE_S:
-                break
+            # ZWEI BLOECKE, NICHT EINER: Ein einzelnes Knacken oder der letzte
+            # Rest des Fragetons ist keine Sprache. Ein gesprochenes Wort
+            # dauert laenger als eine Achtelsekunde.
+            laut += 1
+            if laut >= 2:
+                gesprochen = True
+            ruhe = 0.0
+        else:
+            laut = 0
+            if gesprochen:
+                ruhe += block_s
+                if ruhe >= RUHE_ENDE_S:
+                    break
     return bytes(roh) if gesprochen else b""
 
 
@@ -191,10 +260,11 @@ def messen(art, wiederholungen, mit_aufnahme):
         ["parec", "-d", QUELLE, "--format=s16le", f"--rate={ABTASTRATE}",
          "--channels=1", "--latency-msec=30"], stdout=subprocess.PIPE)
     try:
-        sprich(f"Ich messe jetzt {len(fragen)} Wörter, je {wiederholungen} mal. "
-               "Ich sage ein Wort, danach kommt ein Ton, dann sprichst Du es nach. "
-               f"Nach je {BLOCK_LAENGE} Wörtern machen wir eine Pause. "
-               "Du kannst jederzeit sagen: abbrechen.")
+        sprechen_und_mithoeren(
+            f"Ich messe jetzt {len(fragen)} Wörter, je {wiederholungen} mal. "
+            "Ich sage ein Wort, danach kommt ein Ton, dann sprichst Du es nach. "
+            f"Nach je {BLOCK_LAENGE} Wörtern machen wir eine Pause. "
+            "Du kannst jederzeit sagen: abbrechen.", prozess)
         abgebrochen = False
         for runde in range(1, wiederholungen + 1):
             if abgebrochen:
@@ -205,14 +275,15 @@ def messen(art, wiederholungen, mit_aufnahme):
                 # anstrengend, und wer aus der Puste kommt, spricht anders -
                 # dann misst die Messung die Erschoepfung mit.
                 if nummer > 1 and (nummer - 1) % BLOCK_LAENGE == 0:
-                    sprich(f"Pause. {nummer - 1} von {len(fragen)} Wörtern sind "
-                           "geschafft. Sage: weiter, wenn es weitergehen soll.",
-                           frage=True)
+                    sprechen_und_mithoeren(
+                        f"Pause. {nummer - 1} von {len(fragen)} Wörtern sind "
+                        "geschafft. Sage: weiter, wenn es weitergehen soll.",
+                        prozess, frage=True)
                     if not auf_weiter_warten(prozess, modell):
                         abgebrochen = True
                         break
-                sprich(wort, frage=True)
-                time.sleep(0.3)             # kurz, bis der Ton verklungen ist
+                sprechen_und_mithoeren(wort, prozess, frage=True)
+                bis_ruhe(prozess)           # bis der Frageton wirklich weg ist
                 roh = aufnehmen(prozess)
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, grammatik)
                 erkenner.AcceptWaveform(roh)
@@ -240,8 +311,9 @@ def messen(art, wiederholungen, mit_aufnahme):
                 print(f"  {runde}. {wort:12s} -> {gehoert or '(nichts)':14s} {zeichen}",
                       flush=True)
                 # Die Pause kommt NACH der Aufnahme: Vorher wuerde sie nur
-                # die Stille vor dem Wort verlaengern.
-                time.sleep(PAUSE_NACH_WORT_S)
+                # die Stille vor dem Wort verlaengern. Mitgelesen wird dabei,
+                # sonst staut sich der Strom genau hier.
+                leerlesen(prozess, PAUSE_NACH_WORT_S)
                 if mit_aufnahme and roh:
                     pfad = os.path.join(MESSORDNER, f"{stempel}-{art}-{runde}-{wort}.wav")
                     with wave.open(pfad, "wb") as w:
