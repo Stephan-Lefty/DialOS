@@ -5,8 +5,20 @@
 Wie ein Programm zu DialOS dazukommt, ohne dass am Kern etwas geändert
 werden muss.
 
-> **Stand am 2026-09-17: Die Schnittstelle ist ENTWURF, keine Zeile Code
-> davon ist gebaut.** Diese Datei beschreibt, wie es werden soll, und steht
+> **Stand am 2026-09-18: gebaut und am Gerät belegt.** Die Schnittstelle steht
+> (Manifest, `dialos-erweiterung.py`, Startsatz in der Kern-Grammatik,
+> Mikrofon-Übergabe mit Wache), und **DialOS-Suche läuft**: Index über Briefe,
+> Notizen, Ablage und Thunderbird-Mails, Sprachdialog mit Eingrenzen bis zu einer
+> Datei, dann vorlesen, drucken, auf eine Mail antworten oder sie weiterleiten -
+> die Antwort wird diktiert und landet als Entwurf in Thunderbird, gesendet wird
+> nie von selbst. Auf Papier und im Entwurfsordner von Stephan bestätigt.
+> Einzelheiten im Änderungsprotokoll unter 0.5.2, Aufgaben in [TODO.md](../TODO.md).
+>
+> Der Text unten ist der Entwurf vom 2026-09-17 - er beschreibt das Warum und
+> gilt unverändert; was daraus geworden ist, steht im Änderungsprotokoll.
+>
+> **Ursprünglicher Vermerk vom 2026-09-17: Die Schnittstelle ist ENTWURF, keine
+> Zeile Code davon ist gebaut.** Diese Datei beschreibt, wie es werden soll, und steht
 > bewusst getrennt von [sprachbefehle.md](sprachbefehle.md) und
 > [anwendungen.md](anwendungen.md), die beschreiben, was ist. Die Trennung
 > ist dieselbe wie dort: Vermischt sähe Geplantes wie Vorhandenes aus.

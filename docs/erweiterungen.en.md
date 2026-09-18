@@ -4,7 +4,19 @@
 
 How a program joins DialOS without anything in the core having to change.
 
-> **Status on 2026-09-17: the interface is a DRAFT, not a line of its code
+> **Status on 2026-09-18: built and confirmed on the device.** The interface is
+> in place (manifest, `dialos-erweiterung.py`, start sentence in the core
+> grammar, microphone handover with a watchdog), and **DialOS-Suche runs**: an
+> index over letters, notes, filing and Thunderbird mails, a voice dialogue that
+> narrows down to a single file, then read out, print, reply to a mail or forward
+> it - the reply is dictated and ends up as a draft in Thunderbird, nothing is
+> ever sent by itself. Confirmed by Stephan on paper and in the drafts folder.
+> Details in the changelog under 0.5.2, tasks in [TODO.md](../TODO.md).
+>
+> The text below is the draft of 2026-09-17 - it describes the why and still
+> holds; what became of it is in the changelog.
+>
+> **Original note of 2026-09-17: the interface is a DRAFT, not a line of its code
 > is built.** This file describes how it is meant to become, and is
 > deliberately kept separate from [sprachbefehle.en.md](sprachbefehle.en.md)
 > and [anwendungen.en.md](anwendungen.en.md), which describe what exists.
