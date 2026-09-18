@@ -140,6 +140,21 @@ background) and `splash.png` (boot/login screen).
   search after the schema change - "Meier" still finds "Mayer", "Schmidt" finds
   "Schmitt", "Fahrrad" finds nothing.
 
+- **The security stick is found by its label, not by its path** (2026-09-18).
+  `dialos-setup-home-partition.sh` and `dialos-rekey` always partition the
+  stick into `DIALOS-KEY` (2 GiB, ext4, key file) and `DIALOS-DATA` (the rest,
+  exFAT, mobile data area) - see
+  [sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md). That provides a
+  fixed anchor: the index resolves `/dev/disk/by-label/DIALOS-DATA` and looks
+  up the mount point in `/proc/mounts`, both without root. **The mount path may
+  change, the label may not** - and a stranger's stick is not read along by
+  accident.
+
+  The data area is added as a source and does not replace `~/Dokumente/Archiv`:
+  on the development machine there is no stick, on the shipped one the archive
+  lives there. Two entries, one of which points nowhere depending on the
+  machine, are simpler and more honest than a special case.
+
 - **An unplugged stick must not throw the archive out of the index**
   (2026-09-18, after Stephan's note: on the test user `Archiv` is a subfolder,
   **on the later user a folder on a USB stick**). Until now the build removed
@@ -150,7 +165,11 @@ background) and `splash.png` (boot/login screen).
 
   **A missing source is not an empty source.** If the folder is gone entirely,
   its entries stay and are reported; only individual files vanishing from a
-  source that is present count as a real disappearance. Every hit now carries
+  source that is present count as a real disappearance. **What gets checked is
+  the entry's own source, not today's source list** - an unplugged stick is no
+  longer in that list at all, and asking only the list would remove exactly the
+  files it is meant to protect. Each entry therefore carries its source folder
+  with it. Every hit now carries
   `erreichbar` (reachable) - the announcement can say "in the archive, which is
   not connected right now" instead of pointing at a location that cannot be
   opened.

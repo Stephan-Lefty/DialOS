@@ -46,14 +46,75 @@ BASIS = os.path.join(os.environ.get(
 DATENBANK = os.path.join(BASIS, "index.db")
 PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-suche-index.log")
 
-# Was durchsucht wird. Reihenfolge ist die Reihenfolge der Ansage.
-QUELLEN = [
-    ("Brief",   os.path.join(os.path.expanduser("~"), "Dokumente"),
-     (".txt", ".pdf", ".odt", ".docx", ".rtf")),
-    ("Notiz",   os.path.join(os.path.expanduser("~"), "Notizen"), (".txt",)),
-    ("Ablage",  os.path.join(os.path.expanduser("~"), "Dokumente", "Archiv"),
-     (".pdf", ".txt")),
-]
+# DER SICHERHEITS-STICK TRAEGT DEN DATENBEREICH DIALOS-DATA. Aufbau und Gruende
+# stehen in docs/sicherheit-datenschutz.md: Der Stick wird immer in DIALOS-KEY
+# (2 GiB, ext4, die LUKS-Schluesseldatei, nur fuer root) und DIALOS-DATA (Rest,
+# exFAT, der mobile Datenbereich des Nutzers) partitioniert. Bei 64 GB bleiben
+# rund 62 GB fuer Dokumente - dort liegt beim ausgelieferten Geraet das Archiv,
+# waehrend es beim Entwicklungsnutzer dialosadmin ein Unterordner ist.
+#
+# GEFUNDEN WIRD ER UEBER DAS LABEL, NICHT UEBER DEN PFAD. Der Einhaengepunkt
+# haengt vom Anmeldenamen ab und kann wechseln (/media/nutzer/DIALOS-DATA);
+# das Label ist von dialos-setup-home-partition.sh und dialos-rekey fest
+# vergeben. Damit erkennt der Index "seinen" Datenbereich wieder, egal wo er
+# haengt - und liest einen fremden Stick nicht versehentlich mit.
+STICK_LABEL = "DIALOS-DATA"
+
+
+def stick_datenbereich():
+    """Einhaengepunkt von DIALOS-DATA, oder None.
+
+    None heisst NICHT "leer", sondern "gerade nicht da" - der Stick gehoert
+    laut Praxishinweis an den Schluesselbund und wird abgezogen. Was daraus
+    folgt, steht bei `aufbauen`: Eintraege einer fehlenden Quelle bleiben
+    stehen, statt ausgetragen zu werden.
+    """
+    verweis = f"/dev/disk/by-label/{STICK_LABEL}"
+    if not os.path.exists(verweis):
+        return None
+    geraet = os.path.realpath(verweis)
+    try:
+        with open("/proc/mounts", encoding="utf-8") as f:
+            for zeile in f:
+                teile = zeile.split()
+                if len(teile) < 2:
+                    continue
+                if os.path.realpath(teile[0]) != geraet:
+                    continue
+                # /proc/mounts maskiert Leerzeichen als \040, Tabs als \011.
+                ort = (teile[1].replace("\\040", " ").replace("\\011", "\t")
+                       .replace("\\012", "\n").replace("\\134", "\\"))
+                return ort if os.path.isdir(ort) else None
+    except OSError:
+        return None
+    return None                 # steckt, ist aber nicht eingehaengt
+
+
+def quellen_bauen():
+    """Was durchsucht wird. Reihenfolge ist die Reihenfolge der Ansage.
+
+    Der Stick kommt HINZU und ersetzt nichts: Auf dem Entwicklungsgeraet gibt
+    es ihn nicht und das Archiv liegt unter ~/Dokumente/Archiv, auf dem
+    ausgelieferten Geraet ist es umgekehrt. Zwei Eintraege, von denen je nach
+    Geraet einer ins Leere zeigt, sind einfacher und ehrlicher als eine
+    Fallunterscheidung - ein Ordner, den es nicht gibt, wird ohnehin
+    uebersprungen.
+    """
+    heim = os.path.expanduser("~")
+    quellen = [
+        ("Brief",   os.path.join(heim, "Dokumente"),
+         (".txt", ".pdf", ".odt", ".docx", ".rtf")),
+        ("Notiz",   os.path.join(heim, "Notizen"), (".txt",)),
+        ("Ablage",  os.path.join(heim, "Dokumente", "Archiv"),
+         (".pdf", ".txt")),
+    ]
+    stick = stick_datenbereich()
+    if stick:
+        quellen.append(("Ablage", stick, (".pdf", ".txt", ".odt", ".docx")))
+    return quellen
+
+
+QUELLEN = quellen_bauen()
 
 MAX_ZEICHEN = 400_000          # wie bei MailBurg - ein Buch braucht niemand
 GRENZE_BYTES = 80 * 1024 * 1024
@@ -302,6 +363,11 @@ CREATE TABLE IF NOT EXISTS dateien (
     id       INTEGER PRIMARY KEY,
     pfad     TEXT UNIQUE NOT NULL,
     art      TEXT NOT NULL,
+    -- AUS WELCHEM QUELLORDNER STAMMT DIE DATEI? Nur so laesst sich spaeter
+    -- entscheiden, ob ein fehlender Eintrag geloescht wurde oder ob bloss
+    -- seine Quelle gerade nicht angeschlossen ist. Ueber die Quellenliste
+    -- allein geht das nicht: Ein abgezogener Stick steht dort gar nicht mehr.
+    quelle   TEXT,
     geaendert REAL NOT NULL,
     groesse  INTEGER NOT NULL,
     gelesen  REAL NOT NULL,
@@ -389,22 +455,23 @@ def dateien_finden():
                     continue
                 if os.path.splitext(name)[1].lower() not in endungen:
                     continue
-                yield art, os.path.join(wurzel, name)
+                yield art, ordner, os.path.join(wurzel, name)
 
 
 def aufbauen(db, nur_neue=False):
     """Index fuellen. nur_neue laesst unveraenderte Dateien in Ruhe."""
-    bekannt = {p: (m, g) for p, m, g in
-               db.execute("SELECT pfad, geaendert, groesse FROM dateien")}
+    bekannt = {p: (m, g, q) for p, m, g, q in
+               db.execute("SELECT pfad, geaendert, groesse, quelle FROM dateien")}
     gelesen = uebersprungen = 0
     gesehen = set()
-    for art, pfad in dateien_finden():
+    for art, quelle, pfad in dateien_finden():
         gesehen.add(pfad)
         try:
             st = os.stat(pfad)
         except OSError:
             continue
-        if nur_neue and pfad in bekannt and bekannt[pfad] == (st.st_mtime, st.st_size):
+        if (nur_neue and pfad in bekannt
+                and bekannt[pfad] == (st.st_mtime, st.st_size, quelle)):
             uebersprungen += 1
             continue
         inhalt = text_aus_datei(pfad)
@@ -412,9 +479,9 @@ def aufbauen(db, nur_neue=False):
         db.execute("DELETE FROM suche WHERE rowid IN "
                    "(SELECT id FROM dateien WHERE pfad = ?)", (pfad,))
         db.execute("INSERT OR REPLACE INTO dateien "
-                   "(pfad, art, geaendert, groesse, gelesen, jahr, personen) "
-                   "VALUES (?,?,?,?,?,?,?)",
-                   (pfad, art, st.st_mtime, st.st_size, time.time(),
+                   "(pfad, art, quelle, geaendert, groesse, gelesen, jahr, personen) "
+                   "VALUES (?,?,?,?,?,?,?,?)",
+                   (pfad, art, quelle, st.st_mtime, st.st_size, time.time(),
                     jahr_aus(pfad, inhalt, st.st_mtime),
                     "\n".join(personen_aus_text(inhalt))))
         neue_id = db.execute("SELECT id FROM dateien WHERE pfad = ?",
@@ -437,15 +504,23 @@ def aufbauen(db, nur_neue=False):
     # EINE FEHLENDE QUELLE IST KEINE LEERE QUELLE. Nur das Verschwinden
     # EINZELNER Dateien innerhalb einer vorhandenen Quelle ist ein echtes
     # Verschwinden.
-    fehlende = tuple(os.path.normpath(o) + os.sep
-                     for _art, o, _e in QUELLEN if not os.path.isdir(o))
+    #
+    # GEPRUEFT WIRD DIE QUELLE DES EINTRAGS, NICHT DIE HEUTIGE QUELLENLISTE.
+    # Das ist der Unterschied, der zaehlt: Ein abgezogener Stick steht in der
+    # heutigen Liste gar nicht mehr drin - wer nur sie befragt, findet keine
+    # fehlende Quelle und traegt genau die Dateien aus, die er schuetzen soll.
+    # Jeder Eintrag bringt seinen Quellordner deshalb selbst mit.
     entfernt = gehalten = 0
-    for pfad in list(bekannt):
+    verfuegbar = {}
+    for pfad, (_m, _g, quelle) in list(bekannt.items()):
         if pfad in gesehen:
             continue
-        if fehlende and os.path.normpath(pfad).startswith(fehlende):
-            gehalten += 1
-            continue
+        if quelle:
+            if quelle not in verfuegbar:
+                verfuegbar[quelle] = os.path.isdir(quelle)
+            if not verfuegbar[quelle]:
+                gehalten += 1
+                continue
         db.execute("DELETE FROM suche WHERE rowid IN "
                    "(SELECT id FROM dateien WHERE pfad = ?)", (pfad,))
         db.execute("DELETE FROM dateien WHERE pfad = ?", (pfad,))
@@ -536,6 +611,18 @@ def main():
             da = ("" if os.path.isdir(ordner)
                   else "  (Ordner fehlt - Eintraege bleiben erhalten)")
             print(f"  {art:8s} {n:5d}  {ordner}{da}")
+        # QUELLEN, DIE DER INDEX KENNT, DIE ES HEUTE ABER NICHT GIBT. Ohne
+        # diese Zeile sieht ein abgezogener Stick aus wie gar nichts: Die
+        # Eintraege zaehlen oben mit, aber kein Ordner dazu ist zu sehen.
+        bekannte = {q for (q,) in db.execute(
+            "SELECT DISTINCT quelle FROM dateien WHERE quelle IS NOT NULL")}
+        fehlend = sorted(q for q in bekannte if not os.path.isdir(q))
+        for ordner in fehlend:
+            n = db.execute("SELECT COUNT(*) FROM dateien WHERE quelle = ?",
+                           (ordner,)).fetchone()[0]
+            print(f"  {'nicht da':8s} {n:5d}  {ordner}  (Eintraege bleiben)")
+        stick = stick_datenbereich()
+        print(f"Stick:     {stick or f'{STICK_LABEL} nicht eingehaengt'}")
         print(f"MailBurg:  {'vorhanden' if _mailburg() else 'FEHLT - kein OCR'}")
         return 0
 

@@ -149,6 +149,22 @@ das Erfolg meldet, während es versagt.
   wieder da. Dazu die Klangsuche nach dem Schemawechsel - „Meier" findet
   weiterhin „Mayer", „Schmidt" findet „Schmitt", „Fahrrad" findet nichts.
 
+- **Der Sicherheits-Stick wird über sein Label gefunden, nicht über den Pfad**
+  (2026-09-18). Der Stick wird von `dialos-setup-home-partition.sh` und
+  `dialos-rekey` immer in `DIALOS-KEY` (2 GiB, ext4, Schlüsseldatei) und
+  `DIALOS-DATA` (Rest, exFAT, mobiler Datenbereich) partitioniert - siehe
+  [sicherheit-datenschutz.md](docs/sicherheit-datenschutz.md). Damit steht ein
+  fester Anker bereit: Der Index löst `/dev/disk/by-label/DIALOS-DATA` auf und
+  sucht den Einhängepunkt in `/proc/mounts`, beides ohne root. **Der
+  Einhängepfad darf wechseln, das Label nicht** - und ein fremder Stick wird
+  nicht versehentlich mitgelesen.
+
+  Der Datenbereich kommt als Quelle hinzu und ersetzt `~/Dokumente/Archiv`
+  nicht: Auf dem Entwicklungsgerät gibt es den Stick nicht, auf dem
+  ausgelieferten liegt das Archiv dort. Zwei Einträge, von denen je nach Gerät
+  einer ins Leere zeigt, sind einfacher und ehrlicher als eine
+  Fallunterscheidung.
+
 - **Ein abgezogener Stick darf das Archiv nicht aus dem Index werfen**
   (2026-09-18, nach Stephans Hinweis: beim Testnutzer ist `Archiv` ein
   Unterordner, **beim späteren Nutzer ein Ordner auf einem Stick**). Der Aufbau
@@ -160,7 +176,10 @@ das Erfolg meldet, während es versagt.
   **Eine fehlende Quelle ist keine leere Quelle.** Fehlt der Ordner ganz,
   bleiben seine Einträge stehen und werden gemeldet; nur das Verschwinden
   einzelner Dateien innerhalb einer vorhandenen Quelle ist ein echtes
-  Verschwinden. Jeder Treffer trägt dazu `erreichbar` - die Ansage kann damit
+  Verschwinden. **Geprüft wird dabei die Quelle des Eintrags, nicht die
+  heutige Quellenliste** - ein abgezogener Stick steht dort gar nicht mehr,
+  und wer nur sie befragt, trägt genau die Dateien aus, die er schützen
+  soll. Jeder Eintrag führt seinen Quellordner deshalb selbst mit. Jeder Treffer trägt dazu `erreichbar` - die Ansage kann damit
   „im Archiv, das gerade nicht angeschlossen ist" sagen, statt an eine
   Fundstelle zu schicken, die sich nicht öffnen lässt.
 

@@ -310,17 +310,27 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     - [x] **Fehlende Quelle wirft nichts mehr aus dem Index** (2026-09-18,
       nach Stephans Hinweis auf den Stick). Nur einzelne Dateien innerhalb
       einer vorhandenen Quelle werden ausgetragen.
-    - [ ] **Die Quellordner müssen konfigurierbar werden.** `~/Dokumente` und
-      `~/Notizen` sind überall gleich, aber das Archiv liegt beim Testnutzer
-      unter `~/Dokumente/Archiv` und beim späteren Nutzer **auf einem Stick** -
-      also unter `/media/NUTZER/STICKNAME/...`, und der Name ist bei jedem
-      anders. Fest eingetragene Pfade gehen dort ins Leere.
+    - [x] **Der Stick wird über sein Label gefunden** (2026-09-18, nach
+      Stephans Verweis auf `docs/sicherheit-datenschutz.md`). Eine
+      Kennzeichnungsdatei, wie hier zuerst vorgeschlagen, wäre überflüssig
+      gewesen: `dialos-setup-home-partition.sh` und `dialos-rekey`
+      partitionieren den Sicherheits-Stick **immer** in `DIALOS-KEY` (2 GiB,
+      ext4, Schlüsseldatei) und `DIALOS-DATA` (Rest, exFAT, der mobile
+      Datenbereich). Das Label steht damit schon fest.
 
-      Zu klären ist dabei mehr als der Ort: **Woran erkennt DialOS „seinen"
-      Stick wieder?** Am Einhängepfad nicht - der wechselt. Sinnvoller wäre
-      eine Kennzeichnungsdatei im Wurzelverzeichnis, die der Index sucht; dann
-      ist das Archiv dasselbe, egal wo es hängt, und ein fremder Stick wird
-      nicht versehentlich eingelesen.
+      Der Index löst `/dev/disk/by-label/DIALOS-DATA` auf und sucht den
+      Einhängepunkt in `/proc/mounts` - beides ohne root. Der Pfad darf
+      wechseln, das Label nicht, und ein fremder Stick wird nicht mitgelesen.
+      Der Datenbereich **kommt hinzu** und ersetzt `~/Dokumente/Archiv` nicht:
+      Auf dem Entwicklungsgerät gibt es den Stick nicht, auf dem
+      ausgelieferten ist es umgekehrt - ein Ordner, den es nicht gibt, wird
+      ohnehin übersprungen.
+    - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
+      Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Offen ist
+      auch, ob der ganze Datenbereich indiziert werden soll - er ist als
+      allgemeiner mobiler Speicher gedacht, auf dem auch Fotos liegen. Die
+      Endungen filtern das zwar, aber ein Unterordner als Archivbereich wäre
+      die klarere Ansage.
     - [ ] **Ansage für nicht angeschlossene Treffer.** Der Index liefert seit
       dem 2026-09-18 `erreichbar` pro Treffer. Die Ansage muss den Unterschied
       sagen, sonst schickt DialOS den Nutzer an eine Fundstelle, die sich nicht

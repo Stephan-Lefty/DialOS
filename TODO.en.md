@@ -320,16 +320,25 @@ finished too, and then move down together. That way no reference breaks.
     - [x] **A missing source no longer throws anything out of the index**
       (2026-09-18, after Stephan's note about the stick). Only individual files
       within a source that is present get removed.
-    - [ ] **The source folders have to become configurable.** `~/Dokumente` and
-      `~/Notizen` are the same everywhere, but the archive sits under
-      `~/Dokumente/Archiv` on the test user and **on a USB stick** for the later
-      user - so under `/media/USER/STICKNAME/...`, and that name differs for
-      everyone. Hard-coded paths go nowhere there.
+    - [x] **The stick is found by its label** (2026-09-18, after Stephan
+      pointed at `docs/sicherheit-datenschutz.md`). A marker file, as first
+      proposed here, would have been redundant:
+      `dialos-setup-home-partition.sh` and `dialos-rekey` **always** partition
+      the security stick into `DIALOS-KEY` (2 GiB, ext4, key file) and
+      `DIALOS-DATA` (the rest, exFAT, the mobile data area). The label is
+      already fixed.
 
-      More than the location needs settling: **how does DialOS recognise "its"
-      stick?** Not by mount path - that changes. A marker file in the root that
-      the index looks for would serve better; then the archive is the same
-      wherever it is mounted, and a stranger's stick is not read by accident.
+      The index resolves `/dev/disk/by-label/DIALOS-DATA` and looks up the
+      mount point in `/proc/mounts` - both without root. The path may change,
+      the label may not, and a stranger's stick is not read along. The data
+      area **is added** and does not replace `~/Dokumente/Archiv`: on the
+      development machine there is no stick, on the shipped one it is the other
+      way round - a folder that does not exist is skipped anyway.
+    - [ ] **Check against a real stick.** So far only tested with a simulated
+      mount point, not against `/dev/disk/by-label`. Also open: whether the
+      whole data area should be indexed - it is meant as general mobile storage
+      and will hold photos too. The extensions filter those out, but a
+      dedicated archive subfolder would be the clearer arrangement.
     - [ ] **Announcement for unreachable hits.** Since 2026-09-18 the index
       carries `erreichbar` (reachable) per hit. The announcement has to say the
       difference, otherwise DialOS sends the user to a location that cannot be
