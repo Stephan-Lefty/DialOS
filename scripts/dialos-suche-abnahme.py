@@ -327,15 +327,14 @@ def dateien_in_quellen():
         spec = importlib.util.spec_from_file_location("dialos_suche_index", INDEX)
         modul = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(modul)
-        quellen = modul.QUELLEN
+        # GEZAEHLT WIRD MIT DER FUNKTION DES INDEX, nicht mit einem eigenen
+        # os.walk (2026-09-18): Der eigene zaehlte das Archiv doppelt, weil es
+        # in ~/Dokumente liegt, und versteckte Dateien mit - 105 gegen 75
+        # wirklich eingelesene. Eine Abnahme, die anders zaehlt als das
+        # gepruefte Programm, meldet Fehler, die keine sind.
+        return sum(1 for _ in modul.dateien_finden())
     except Exception:                       # noqa: BLE001 - jede Ursache zaehlt
         return None
-    anzahl = 0
-    for _art, ordner, endungen in quellen:
-        for wurzel, _o, dateien in os.walk(ordner):
-            anzahl += sum(1 for d in dateien if d.lower().endswith(endungen))
-            del wurzel
-    return anzahl
 
 
 def pruefe_index():

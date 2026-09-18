@@ -303,6 +303,25 @@ KEIN_NAME = {"Sehr", "Mit", "Ich", "Wir", "Sie", "Der", "Die", "Das", "Ein",
              "Für", "Von", "Nach", "Über", "Und", "Aber", "Auch", "Dann"}
 
 
+def _wie_eine_anschriftzeile(zeile):
+    """Sieht die Zeile aus wie eine Zeile der Anschrift - oder wie Fliesstext?
+
+    (2026-09-18, am Geraet gefunden.) Aus Stephans Brief kam als "Person" der
+    Satzrest "nicht gesehen? E.V. In Oesterreich." - "e.V" stand in FIRMA_WORTE
+    und traf mitten im Fliesstext. Ein falscher Name zum Eingrenzen ist
+    schlimmer als ein fehlender: Der Nutzer waehlt ihn und landet bei null
+    Treffern, ohne nachsehen zu koennen, warum.
+
+    Drei Merkmale, alle aus dem Fall: Eine Anschriftzeile enthaelt kein
+    Satzende mitten drin, ist kurz, und beginnt gross.
+    """
+    if re.search(r"[.!?]\s+\S", zeile):
+        return False
+    if len(zeile.split()) > 6:
+        return False
+    return not zeile[:1].islower()
+
+
 def personen_aus_text(text, hoechstens=12):
     """Namen und Firmen, nach denen sich eingrenzen laesst.
 
@@ -324,6 +343,8 @@ def personen_aus_text(text, hoechstens=12):
             continue
         if re.match(r"(?i)^(sehr geehrt|liebe|hallo|guten)", zeile):
             continue                       # Anrede, nicht der Empfaenger
+        if not _wie_eine_anschriftzeile(zeile):
+            continue                       # Fliesstext, keine Anschrift
         # Firma: Zeile enthaelt eine Rechtsform oder ein Sachwort
         # MIT WORTGRENZEN, und das ist kein Feinschliff: Ohne sie steckte "AG"
         # in "Frage" und "Abschlagszahlung", und jede Zeile mit einem dieser
@@ -331,7 +352,7 @@ def personen_aus_text(text, hoechstens=12):
         # zweite Vorschlag so entstanden.
         if any(re.search(r"\b" + re.escape(w) + r"\b", zeile, re.I)
                for w in FIRMA_WORTE):
-            name = re.sub(r"[,;].*$", "", zeile).strip()
+            name = re.sub(r"[,;].*$", "", zeile).strip().rstrip(".")
             if 3 <= len(name) <= 60 and name not in gefunden:
                 gefunden.append(name)
                 continue
@@ -413,6 +434,32 @@ CREATE VIRTUAL TABLE IF NOT EXISTS suche USING fts5(
 # sich nicht pflegen laesst, ist das kein Handel, sondern eine Korrektur.
 
 
+# SCHEMA-STAND: bei JEDER Aenderung an SCHEMA hochzaehlen. Ein alter Index wird
+# dann verworfen und neu gebaut (2026-09-18, am Geraet aufgelaufen): Der erste
+# Aufbau brach mit "no such column: quelle" ab, weil `CREATE TABLE IF NOT EXISTS`
+# eine bestehende Tabelle UNVERAENDERT laesst - die Spalte kam am selben Tag dazu.
+# Die Pruefung auf content='' fing nur die FTS-Tabelle ab, nicht `dateien`.
+SCHEMA_STAND = 2
+
+
+def veraltet(db):
+    """Grund, warum der vorhandene Index nicht mehr passt - oder None."""
+    zeile = db.execute("SELECT sql FROM sqlite_master WHERE type = 'table' "
+                       "AND name = 'suche'").fetchone()
+    if zeile and "content=''" in (zeile[0] or "").replace(" ", ""):
+        return "alter Index mit content=''"
+    spalten = {z[1] for z in db.execute("PRAGMA table_info(dateien)")}
+    if not spalten:
+        return None                 # noch gar keine Tabelle - nichts zu verwerfen
+    fehlend = {"pfad", "art", "quelle", "geaendert", "groesse", "gelesen",
+               "jahr", "personen"} - spalten
+    if fehlend:
+        return "fehlende Spalte(n) in dateien: " + ", ".join(sorted(fehlend))
+    if db.execute("PRAGMA user_version").fetchone()[0] != SCHEMA_STAND:
+        return "aelterer Schema-Stand"
+    return None
+
+
 def oeffnen():
     os.makedirs(BASIS, exist_ok=True)
     db = sqlite3.connect(DATENBANK)
@@ -422,18 +469,16 @@ def oeffnen():
     # Ein Index ist abgeleitet: Er laesst sich jederzeit neu bauen, und genau
     # deshalb ist Wegwerfen hier die richtige Antwort und kein Verlust. Der
     # Neuaufbau kostet Lesezeit, mehr nicht.
-    zeile = db.execute("SELECT sql FROM sqlite_master WHERE type = 'table' "
-                       "AND name = 'suche'").fetchone()
-    if zeile and "content=''" in (zeile[0] or "").replace(" ", ""):
-        melde("alter Index mit content='' gefunden - wird neu aufgebaut")
+    grund = veraltet(db)
+    if grund:
+        melde(f"Index passt nicht mehr ({grund}) - wird neu aufgebaut")
         db.execute("DROP TABLE IF EXISTS suche")
-        try:
-            db.execute("DELETE FROM dateien")
-        except sqlite3.OperationalError:
-            pass                    # gibt es noch nicht - dann ist nichts zu leeren
+        db.execute("DROP TABLE IF EXISTS dateien")
         db.commit()
 
     db.executescript(SCHEMA)
+    db.execute(f"PRAGMA user_version = {SCHEMA_STAND}")
+    db.commit()
     return db
 
 
@@ -523,6 +568,14 @@ def aufbauen(db, nur_neue=False):
     # heutigen Liste gar nicht mehr drin - wer nur sie befragt, findet keine
     # fehlende Quelle und traegt genau die Dateien aus, die er schuetzen soll.
     # Jeder Eintrag bringt seinen Quellordner deshalb selbst mit.
+    # DA SEIN HEISST: IN DER HEUTIGEN LISTE **UND** VORHANDEN (2026-09-18, in
+    # der Nachstellung aufgelaufen). Die Pruefung auf os.path.isdir() allein
+    # genuegt nicht: Der Einhaengepunkt eines abgezogenen Sticks bleibt je nach
+    # System als LEERER Ordner stehen. Dann ist er "vorhanden", der Stick aber
+    # weg - und genau die Archivdateien, die geschuetzt werden sollen, wurden
+    # ausgetragen. Steht die Quelle heute nicht in QUELLEN (kein Stick
+    # gefunden), bleiben ihre Eintraege ohne weitere Frage stehen.
+    heutige = {os.path.normpath(o) for _a, o, _e in QUELLEN}
     entfernt = gehalten = 0
     verfuegbar = {}
     for pfad, (_m, _g, quelle) in list(bekannt.items()):
@@ -530,7 +583,8 @@ def aufbauen(db, nur_neue=False):
             continue
         if quelle:
             if quelle not in verfuegbar:
-                verfuegbar[quelle] = os.path.isdir(quelle)
+                verfuegbar[quelle] = (os.path.normpath(quelle) in heutige
+                                      and os.path.isdir(quelle))
             if not verfuegbar[quelle]:
                 gehalten += 1
                 continue
