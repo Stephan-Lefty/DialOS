@@ -412,7 +412,7 @@ UEBERSICHT_THEMEN_SAETZE = {
 ALLE_BEFEHLE_SATZ = "alle befehle vorlesen"
 THEMEN_NAMEN = {"fragen": "Fragen", "briefe": "Briefe", "notizen": "Notizen",
                 "einkauf": "den Einkauf", "bildschirm": "den Bildschirm",
-                "diktat": "das Diktat"}
+                "diktat": "das Diktat", "erweiterungen": "Erweiterungen"}
 # (Thema, Beschriftung) je Aktion. Schluessel: (Tabelle, Wert der Tabelle).
 AKTIONEN = {
     ("auskunft", "uhrzeit"): ("fragen", "Die Uhrzeit"),
@@ -433,7 +433,8 @@ AKTIONEN = {
     ("umschalten", "gnome"): ("bildschirm", "Linux-Ansicht"),
     ("umschalten", "windows"): ("bildschirm", "Windows-Ansicht"),
 }
-THEMEN_REIHENFOLGE = ("fragen", "briefe", "notizen", "einkauf", "bildschirm", "diktat")
+THEMEN_REIHENFOLGE = ("fragen", "briefe", "notizen", "einkauf", "bildschirm", "diktat",
+                      "erweiterungen")
 GROSS_SCHREIBEN = {"pdf": "PDF", "linux": "Linux", "gnome": "Gnome", "windows": "Windows",
                    "brief": "Brief", "notiz": "Notiz", "notizen": "Notizen",
                    "einkaufszettel": "Einkaufszettel", "einkauf": "Einkauf",
@@ -503,6 +504,17 @@ def befehls_themen():
             ziel = next((ZIELE[w] for w in worte if w in ZIELE), None)
             dazu(("umschalten", ziel), satz)
     zuordnung["diktat"] = collections.OrderedDict(diktat_befehle())
+    # ERWEITERUNGEN GEHOEREN IN DIE UEBERSICHT (2026-09-18). Beim Start meldete
+    # der Dienst "Befehle ohne Platz in der Uebersicht: ['unterlagen
+    # durchsuchen']" - der Startsatz stand in der Grammatik, aber in keiner
+    # Ansage. Fuer jemanden, der den Bildschirm nicht sieht, ist ein Befehl, den
+    # niemand nennt, so gut wie nicht vorhanden. Die Beschriftung kommt aus dem
+    # Manifest ("beschreibung"), damit jede Erweiterung sich selbst erklaert.
+    for satz, manifest in sorted(ERWEITERUNG_SAETZE.items()):
+        beschriftung = (manifest.get("beschreibung") or manifest.get("name")
+                        or gesprochen(satz))
+        eintraege = zuordnung.setdefault("erweiterungen", collections.OrderedDict())
+        eintraege.setdefault(beschriftung, []).append(satz)
     return {thema: list(eintraege.items()) for thema, eintraege in zuordnung.items()}
 
 

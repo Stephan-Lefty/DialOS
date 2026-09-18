@@ -130,6 +130,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Erweiterungen stehen jetzt in der gesprochenen Befehlsübersicht**
+  (2026-09-18). Beim Start meldete der Dienst „Befehle ohne Platz in der
+  Übersicht: ['unterlagen durchsuchen']" - der Startsatz stand in der Grammatik,
+  aber in keiner Ansage. Für jemanden, der den Bildschirm nicht sieht, ist ein
+  Befehl, den niemand nennt, so gut wie nicht vorhanden. „Alle Befehle vorlesen"
+  endet jetzt mit „Befehle für Erweiterungen", die Beschriftung kommt aus dem
+  Manifest.
+
 - **Der Index war einmal befüllbar und danach nicht mehr pflegbar**
   (2026-09-18). Die FTS5-Tabelle war mit `content=''` angelegt - platzsparend,
   aber daraus lässt sich **nichts löschen**:

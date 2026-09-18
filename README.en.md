@@ -122,6 +122,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Extensions now appear in the spoken command overview** (2026-09-18). At
+  startup the service reported "Befehle ohne Platz in der Uebersicht:
+  ['unterlagen durchsuchen']" - the start sentence was in the grammar but in no
+  announcement. For someone who cannot see the screen, a command nobody mentions
+  might as well not exist. "Alle Befehle vorlesen" now ends with "Befehle für
+  Erweiterungen"; the label comes from the manifest.
+
 - **The index could be filled once and never maintained again** (2026-09-18).
   The FTS5 table was created with `content=''` - space-saving, but nothing can
   be deleted from it: `cannot DELETE from contentless fts5 table`. It stayed
