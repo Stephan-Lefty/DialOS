@@ -122,6 +122,23 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Two errors before the first draft showed up in Thunderbird** (2026-09-18,
+  Stephan's test). The file was correct on disk every time, and Thunderbird kept
+  reporting "Local Folders - Drafts, 0 messages":
+
+  1. **Line endings.** Thunderbird writes its mailboxes with CR LF, DialOS wrote
+     LF. The parser did not recognise the entry - no error, no message.
+  2. **`X-Mozilla-Status: 0008` does not mean "draft", it means "deleted".** The
+     field is a bit field (0001 read, 0002 replied, 0004 marked, 0008 deleted);
+     what makes a message a draft is the folder, and the edit button comes from
+     `X-Mozilla-Draft-Info`. Thunderbird had read the draft and immediately
+     hidden it.
+
+  **The second error was found by a counter-test:** a message Thunderbird itself
+  had written was placed next to the draft in the same file. Only one was
+  visible - which ruled out the folder and pointed at that single number.
+  Stephan afterwards: "the draft is there."
+
 - **After dictating a reply, DialOS says "E-Mail", not "Notizen"** (Stephan,
   2026-09-18, after the first real reply: "at the end it mentioned notes -
   wouldn't e-mail be better?"). Dictation only knew its own targets and closed

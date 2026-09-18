@@ -357,6 +357,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       „17 Wörter an support at webgo Punkt de" → Entwurf abgelegt, Mikrofon
       danach zurück. Dabei gefunden: Die Schlussansage des Diktats sprach von
       Notizen - behoben, sie nennt jetzt die E-Mail.
+    - [x] **Antwort als Entwurf in Thunderbird sichtbar** (Stephan, 2026-09-18:
+      „Entwurf ist da"). Zwei Fehler davor: LF statt CR LF, und
+      `X-Mozilla-Status: 0008` heißt gelöscht, nicht Entwurf. Offen: Senden per
+      Sprache (bewusst nicht gebaut - eine abgeschickte Mail ist aus der Welt),
+      Weiterleiten am Gerät noch nicht geprobt.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den

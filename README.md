@@ -130,6 +130,25 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Zwei Fehler, bis der erste Entwurf in Thunderbird sichtbar war** (2026-09-18,
+  Stephans Test). Die Datei stand jedes Mal richtig auf der Platte, und
+  Thunderbird meldete „Lokale Ordner - Entwürfe, 0 Nachrichten":
+
+  1. **Zeilenenden.** Thunderbird schreibt seine Postfächer mit CR LF, DialOS
+     schrieb LF. Der Parser erkannte den Eintrag nicht - ohne Fehler, ohne
+     Meldung.
+  2. **`X-Mozilla-Status: 0008` heißt nicht „Entwurf", sondern „gelöscht".** Das
+     Feld ist ein Bitfeld (0001 gelesen, 0002 beantwortet, 0004 markiert, 0008
+     gelöscht); dass eine Nachricht ein Entwurf ist, sagt der Ordner, und den
+     Bearbeiten-Knopf bringt `X-Mozilla-Draft-Info`. Thunderbird hatte den
+     Entwurf also gelesen und sofort ausgeblendet.
+
+  **Gefunden hat den zweiten Fehler ein Gegenversuch:** eine Nachricht, die
+  Thunderbird selbst geschrieben hatte, wurde neben den Entwurf in dieselbe
+  Datei gelegt. Nur eine war sichtbar - damit war ausgeschlossen, dass es am
+  Ordner liegt, und der Vergleich zeigte auf die eine Zahl. Stephan danach:
+  „Entwurf ist da."
+
 - **Nach dem Diktat einer Antwort sagt DialOS „E-Mail", nicht „Notizen"**
   (Stephan, 2026-09-18, nach der ersten echten Antwort: „Es wurde zum Schluss
   Notizen erwähnt - wäre E-Mail nicht besser?"). Das Diktat kannte nur seine

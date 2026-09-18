@@ -144,13 +144,20 @@ def als_mbox_eintrag(nachricht):
     und ohne Meldung: genau die Art Fehlschlag, die ein blinder Nutzer nie
     bemerken wuerde.
 
-    X-Mozilla-Status=0008 heisst "Entwurf"; ohne diese Zeilen zeigt Thunderbird
-    die Nachricht als gewoehnliche Mail und bietet kein Bearbeiten an.
+    X-MOZILLA-STATUS IST EIN BITFELD, UND 0008 HEISST GELOESCHT (2026-09-18, im
+    Gegenversuch gefunden): Neben Stephans Entwurf lag eine Nachricht, die
+    Thunderbird selbst geschrieben hatte - die wurde angezeigt, unsere nicht.
+    Thunderbird hatte sie also gelesen und sofort ausgeblendet. Die Bits sind
+    0001 gelesen, 0002 beantwortet, 0004 markiert, 0008 geloescht; dass eine
+    Nachricht ein Entwurf ist, sagt nicht dieses Feld, sondern der Ordner - und
+    fuer den Bearbeiten-Knopf die Zeile X-Mozilla-Draft-Info.
     """
     roh = nachricht.as_string()
     kopf = (f"From - {time.strftime('%a %b %d %H:%M:%S %Y')}\n"
-            "X-Mozilla-Status: 0008\n"
-            "X-Mozilla-Status2: 00000000\n")
+            "X-Mozilla-Status: 0000\n"
+            "X-Mozilla-Status2: 00000000\n"
+            "X-Mozilla-Draft-Info: internal/draft; vcard=0; receipt=0; DSN=0; "
+            "uuencode=0; attachmentreminder=0; deliveryformat=4\n")
     # In einer mbox beginnt keine Zeile im Text mit "From " - sonst faengt dort
     # scheinbar eine neue Nachricht an.
     roh = "\n".join((">" + z) if z.startswith("From ") else z
