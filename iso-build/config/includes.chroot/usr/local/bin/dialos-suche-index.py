@@ -963,6 +963,21 @@ def main():
         print("{}")
         return 1
 
+    if was == "adressen":
+        # Alle Mailadressen, die in den indizierten Mails vorkommen - zum
+        # Gegenlesen einer buchstabierten Adresse (2026-09-18).
+        import re as _re
+        gefunden = set()
+        for (personen,) in db.execute("SELECT personen FROM dateien "
+                                      "WHERE art = 'Mail' AND personen IS NOT NULL"):
+            for treffer in _re.findall(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", personen or ""):
+                gefunden.add(treffer.lower())
+        for (kennung,) in db.execute("SELECT pfad FROM dateien WHERE art = 'Mail'"):
+            del kennung
+        for adresse in sorted(gefunden):
+            print(adresse)
+        return 0
+
     if was == "stand":
         anzahl = db.execute("SELECT COUNT(*) FROM dateien").fetchone()[0]
         print(f"Index:     {DATENBANK}")

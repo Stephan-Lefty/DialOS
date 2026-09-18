@@ -906,6 +906,79 @@ def antworten_auf(t, erkenner, modell, weiterleiten=False):
 
 
 ADRESSE_GUELTIG = re.compile(r"^[\w.+-]+@[\w-]+(\.[\w-]+)+$")
+PERSOENLICHE_DATEN_SKRIPT = "/usr/local/bin/dialos-persoenliche-daten.py"
+
+
+def bekannte_adressen():
+    """Mailadressen, die auf diesem Geraet schon vorkommen - zum Gegenlesen.
+
+    (2026-09-18, aus Stephans erster buchstabierter Adresse: Aus
+    "kontakte@dialos.org" wurde "komteakte@teialos.or" - Nordpol als Martha,
+    Dora als Theodor, das Gustav am Ende verschluckt.) Das Buchstabieralphabet
+    ist gut, aber nicht fehlerfrei; die richtige Schreibweise steht oft schon
+    irgendwo: in den eigenen Daten, in den Kontakten, in den Absendern der
+    indizierten Mails. Ein Vorschlag daraus ist billiger als ein zweites
+    Buchstabieren - und eine Mail an eine erfundene Adresse kommt nie an.
+    """
+    gefunden = set()
+    _, daten = (None, {})
+    pd = _modul(PERSOENLICHE_DATEN_SKRIPT, "persoenliche_daten")
+    if pd is not None:
+        try:
+            daten = pd.lesen() or {}
+        except Exception:                  # noqa: BLE001 - keine Daten, kein Problem
+            daten = {}
+    for schluessel in ("mail", "mail_dienstlich"):
+        if daten.get(schluessel):
+            gefunden.add(daten[schluessel].strip().lower())
+    em = _modul(EMPFAENGER_SKRIPT, "dialos_empfaenger")
+    if em is not None:
+        try:
+            for kontakt in em.kontakte():
+                if kontakt.get("mail"):
+                    gefunden.add(kontakt["mail"].strip().lower())
+        except Exception as fehler:        # noqa: BLE001
+            melde(f"  Kontakte nicht lesbar: {fehler}")
+    try:
+        r = subprocess.run([INDEX, "adressen"], capture_output=True, timeout=60)
+        for zeile in r.stdout.decode("utf-8", errors="replace").splitlines():
+            if "@" in zeile:
+                gefunden.add(zeile.strip().lower())
+    except (OSError, subprocess.TimeoutExpired) as fehler:
+        melde(f"  Adressen aus dem Index nicht lesbar: {fehler}")
+    return {a for a in gefunden if ADRESSE_GUELTIG.match(a)}
+
+
+def adresse_pruefen(adresse):
+    """Eine bekannte Adresse, die fast so aussieht - oder None."""
+    import difflib
+    beste, bester_wert = None, 0.72
+    for bekannt in bekannte_adressen():
+        if bekannt == adresse:
+            return None                    # sie ist schon genau richtig
+        wert = difflib.SequenceMatcher(None, adresse, bekannt).ratio()
+        if wert > bester_wert:
+            beste, bester_wert = bekannt, wert
+    if beste:
+        melde(f"  aehnliche bekannte Adresse: {beste!r} ({bester_wert:.2f})")
+        return beste
+    # NUR DIE DOMAIN VERGLEICHEN, wenn die ganze Adresse neu ist (2026-09-18):
+    # "kontakte@dialos.org" steht nirgends, "dialos.org" dagegen schon. Der
+    # Teil hinter dem At ist der, bei dem ein Buchstabierfehler die Mail
+    # unzustellbar macht - der Teil davor faellt beim Empfaenger hoechstens auf.
+    lokal, _, domain = adresse.partition("@")
+    bekannte_domains = {a.partition("@")[2] for a in bekannte_adressen()}
+    beste_domain, wert_domain = None, 0.7
+    for bekannt in bekannte_domains:
+        if bekannt == domain:
+            return None
+        wert = difflib.SequenceMatcher(None, domain, bekannt).ratio()
+        if wert > wert_domain:
+            beste_domain, wert_domain = bekannt, wert
+    if beste_domain:
+        melde(f"  aehnliche Domain: {beste_domain!r} statt {domain!r} ({wert_domain:.2f})")
+        return f"{lokal}@{beste_domain}"
+    return None
 
 
 def adresse_buchstabieren_lassen():
@@ -947,7 +1020,19 @@ def adresse_buchstabieren_lassen():
         # kaeme nie an, und der Nutzer erfuehre es erst Tage spaeter.
         sprich("Das ergibt keine Mailadresse. Es fehlt das At-Zeichen oder der Punkt.")
         return ""
-    if ja_oder_nein(f"Die Adresse ist: {d.mail_vorlesbar(adresse)} "
+    # GEGENLESEN MIT DEM, WAS DAS GERAET SCHON KENNT (2026-09-18): Ein
+    # Buchstabierfehler faellt beim Vorlesen kaum auf - "teialos" klingt wie
+    # "dialos", wenn man weiss, was gemeint ist. Eine bekannte Adresse, die fast
+    # passt, wird deshalb ausdruecklich angeboten.
+    vorschlag = adresse_pruefen(adresse)
+    if vorschlag and ja_oder_nein(f"Meinst Du {d.mail_vorlesbar(vorschlag)} "
+                                  "Sage ja oder nein."):
+        return vorschlag
+    # VOR DEM AT UND DANACH GETRENNT VORLESEN: Eine Kette aus achtzehn
+    # Buchstabierwoertern behaelt niemand im Kopf.
+    vorne, _, hinten = adresse.partition("@")
+    if ja_oder_nein(f"Vor dem At-Zeichen: {d.buchstabiert(vorne)} "
+                    f"Danach: {d.buchstabiert(hinten)} "
                     "Stimmt das? Sage ja oder nein."):
         return adresse
     return ""
@@ -964,7 +1049,16 @@ def empfaenger_erfragen_fuer_mail(erkenner, modell):
             return ""
         if any(re.search(r"(?i)buchstab", t) or _aehnlich(t, "buchstabieren") >= 0.7
                for t in texte):
-            return adresse_buchstabieren_lassen()
+            # BIS ZU DREI ANLAEUFE: Beim ersten Versuch am Geraet kam
+            # "komteakte@teialos.or" heraus - wer dann "nein" sagt, will es noch
+            # einmal versuchen und nicht den ganzen Vorgang verlieren.
+            for _mal in range(3):
+                adresse = adresse_buchstabieren_lassen()
+                if adresse:
+                    return adresse
+                if not ja_oder_nein("Noch einmal buchstabieren? Sage ja oder nein."):
+                    return ""
+            return ""
         for gesagt in texte:
             for kontakt in (em.suchen(gesagt) if em else []):
                 adresse = (kontakt.get("mail") or "").strip()
