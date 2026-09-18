@@ -334,11 +334,17 @@ finished too, and then move down together. That way no reference breaks.
       area **is added** and does not replace `~/Dokumente/Archiv`: on the
       development machine there is no stick, on the shipped one it is the other
       way round - a folder that does not exist is skipped anyway.
+    - [x] **The whole data area is searched, not a subfolder** (Stephan,
+      2026-09-18: "yes, the complete data area should always be searched").
+      Photos and music drop out via the extensions, not via a folder rule the
+      user would have to keep - whoever puts their letters somewhere should
+      find them again. The list of readable extensions now lives in one place
+      instead of per source; before, the same file was readable or not
+      depending on the folder.
     - [ ] **Check against a real stick.** So far only tested with a simulated
-      mount point, not against `/dev/disk/by-label`. Also open: whether the
-      whole data area should be indexed - it is meant as general mobile storage
-      and will hold photos too. The extensions filter those out, but a
-      dedicated archive subfolder would be the clearer arrangement.
+      mount point, not against `/dev/disk/by-label`. On the T490 that means:
+      plug the stick in, `dialos-suche-index.py stand` has to show the mount
+      point; then unplug and run again - the entries have to stay.
     - [ ] **Announcement for unreachable hits.** Since 2026-09-18 the index
       carries `erreichbar` (reachable) per hit. The announcement has to say the
       difference, otherwise DialOS sends the user to a location that cannot be

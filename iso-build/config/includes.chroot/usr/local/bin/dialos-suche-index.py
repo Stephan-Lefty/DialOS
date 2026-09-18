@@ -60,6 +60,16 @@ PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-suche-index.lo
 # haengt - und liest einen fremden Stick nicht versehentlich mit.
 STICK_LABEL = "DIALOS-DATA"
 
+# WAS SICH LESEN LAESST - an EINER Stelle, nicht je Quelle. Vorher hatte die
+# Ablage eine engere Liste als die Briefe, ohne dass ein Grund dafuer bestand:
+# Dieselbe Datei war je nach Ordner lesbar oder nicht. Die Suche waechst
+# Schritt fuer Schritt (Stephan, 2026-09-18), und sie soll ueberall zugleich
+# wachsen - eine Liste, die man an drei Stellen pflegen muss, laeuft
+# auseinander. Naechster Schritt sind die Mails aus Thunderbirds mbox; die
+# haengen an einer eigenen Quelle, weil eine mbox-Datei viele Nachrichten
+# enthaelt und nicht als eine Datei zaehlen darf.
+LESBAR = (".txt", ".pdf", ".odt", ".docx", ".rtf")
+
 
 def stick_datenbereich():
     """Einhaengepunkt von DIALOS-DATA, oder None.
@@ -102,15 +112,18 @@ def quellen_bauen():
     """
     heim = os.path.expanduser("~")
     quellen = [
-        ("Brief",   os.path.join(heim, "Dokumente"),
-         (".txt", ".pdf", ".odt", ".docx", ".rtf")),
+        ("Brief",   os.path.join(heim, "Dokumente"), LESBAR),
         ("Notiz",   os.path.join(heim, "Notizen"), (".txt",)),
-        ("Ablage",  os.path.join(heim, "Dokumente", "Archiv"),
-         (".pdf", ".txt")),
+        ("Ablage",  os.path.join(heim, "Dokumente", "Archiv"), LESBAR),
     ]
     stick = stick_datenbereich()
     if stick:
-        quellen.append(("Ablage", stick, (".pdf", ".txt", ".odt", ".docx")))
+        # DER GANZE DATENBEREICH, nicht ein Unterordner (Stephan, 2026-09-18:
+        # "ja es soll immer der komplette Datenbereich durchsucht werden").
+        # Fotos und Musik liegen dort auch - die fallen ueber die Endungen
+        # heraus, nicht ueber eine Ordnerregel, die der Nutzer einhalten
+        # muesste. Wer seine Briefe irgendwohin legt, soll sie wiederfinden.
+        quellen.append(("Ablage", stick, LESBAR))
     return quellen
 
 

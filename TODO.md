@@ -325,12 +325,18 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       Auf dem Entwicklungsgerät gibt es den Stick nicht, auf dem
       ausgelieferten ist es umgekehrt - ein Ordner, den es nicht gibt, wird
       ohnehin übersprungen.
+    - [x] **Der ganze Datenbereich wird durchsucht, kein Unterordner**
+      (Stephan, 2026-09-18: „ja es soll immer der komplette Datenbereich
+      durchsucht werden"). Fotos und Musik fallen über die Endungen heraus,
+      nicht über eine Ordnerregel, die der Nutzer einhalten müsste - wer seine
+      Briefe irgendwohin legt, soll sie wiederfinden. Die Liste der lesbaren
+      Endungen steht dafür jetzt an einer Stelle statt je Quelle; vorher war
+      dieselbe Datei je nach Ordner lesbar oder nicht.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
-      Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Offen ist
-      auch, ob der ganze Datenbereich indiziert werden soll - er ist als
-      allgemeiner mobiler Speicher gedacht, auf dem auch Fotos liegen. Die
-      Endungen filtern das zwar, aber ein Unterordner als Archivbereich wäre
-      die klarere Ansage.
+      Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
+      das: Stick einstecken, `dialos-suche-index.py stand` muss den
+      Einhängepunkt zeigen; dann abziehen und erneut - die Einträge müssen
+      bleiben.
     - [ ] **Ansage für nicht angeschlossene Treffer.** Der Index liefert seit
       dem 2026-09-18 `erreichbar` pro Treffer. Die Ansage muss den Unterschied
       sagen, sonst schickt DialOS den Nutzer an eine Fundstelle, die sich nicht
