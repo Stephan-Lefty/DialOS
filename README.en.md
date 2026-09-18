@@ -122,6 +122,20 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The archive was being read twice** (2026-09-18, found just before the first
+  real build ran on the T490). "Ablage" is `~/Dokumente/Archiv` and therefore
+  sits *inside* "Brief" (`~/Dokumente`), which is searched recursively - so
+  every archive file passed through `dateien_finden()` twice. No duplicate hits
+  arose from that, because `pfad` is `UNIQUE` in the table; but it cost **twice
+  the reading time, and on scanned PDFs twice the OCR time**, and `aufbauen`
+  reported more files read than there are files.
+
+  Folders that are a source in their own right are now excluded from the parent
+  - `os.walk` runs top-down, and whatever is struck from the list there is not
+  entered. **The more specific folder wins**, so an archive file is "Ablage" and
+  not "Brief". Checked against the old state: twice there, once now; subfolders
+  inside the archive are still reached, hidden files still skipped.
+
 - **The acceptance check failed its own first run on the device - over
   language** (2026-09-18). The age comparison fetched the start time via
   `ps -o lstart=`, and that prints the weekday in the system language:

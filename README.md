@@ -130,6 +130,21 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Das Archiv wurde doppelt eingelesen** (2026-09-18, gefunden kurz bevor der
+  erste echte Aufbau am T490 lief). „Ablage" ist `~/Dokumente/Archiv` und liegt
+  damit *innerhalb* von „Brief" (`~/Dokumente`), das rekursiv durchsucht wird -
+  jede Archivdatei kam also zweimal durch `dateien_finden()`. Doppelte Treffer
+  entstanden dadurch nicht, weil `pfad` in der Tabelle `UNIQUE` ist; es kostete
+  aber **die doppelte Lesezeit, bei gescannten PDFs die doppelte OCR-Zeit**, und
+  `aufbauen` meldete mehr gelesene Dateien, als es Dateien gibt.
+
+  Ordner, die selbst eine Quelle sind, werden jetzt aus der übergeordneten
+  ausgenommen - `os.walk` läuft von oben nach unten, wer dort aus der Liste
+  streicht, betritt sie nicht. **Der spezifischere Ordner gewinnt**, eine
+  Archivdatei ist also „Ablage" und nicht „Brief". Gegengeprüft gegen den alten
+  Stand: dort zweimal, jetzt einmal; Unterordner im Archiv werden weiterhin
+  erreicht, versteckte Dateien weiterhin übergangen.
+
 - **Die Abnahme fiel beim ersten Lauf am Gerät selbst durch - an der Sprache**
   (2026-09-18). Der Altersvergleich holte die Startzeit über
   `ps -o lstart=`, und das gibt den Wochentag in der Systemsprache aus:

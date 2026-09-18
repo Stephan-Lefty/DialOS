@@ -325,10 +325,31 @@ def oeffnen():
 
 
 def dateien_finden():
+    """Jede Datei GENAU EINMAL, mit der Art des spezifischsten Ordners.
+
+    WARUM DAS NOETIG IST: "Ablage" ist ~/Dokumente/Archiv und liegt damit
+    INNERHALB von "Brief" (~/Dokumente), das rekursiv durchsucht wird. Ohne
+    diese Ausnahme wird jede Archivdatei zweimal gelesen - einmal als Brief,
+    einmal als Ablage. Weil `pfad` in der Tabelle UNIQUE ist, entstehen dabei
+    keine Doppeltreffer; es kostet aber die doppelte Lesezeit, und bei
+    gescannten PDFs heisst das die doppelte OCR-Zeit. Dazu meldet `aufbauen`
+    mehr gelesene Dateien, als es Dateien gibt.
+
+    Gefunden am 2026-09-18, bevor der erste echte Aufbau am T490 lief.
+    """
+    eigene = {os.path.normpath(o) for _art, o, _e in QUELLEN}
     for art, ordner, endungen in QUELLEN:
         if not os.path.isdir(ordner):
             continue
-        for wurzel, _, namen in os.walk(ordner):
+        # Alles ausser diesem Ordner selbst - sonst schnitte sich die Quelle
+        # gleich an der Wurzel ab.
+        fremde = eigene - {os.path.normpath(ordner)}
+        for wurzel, unterordner, namen in os.walk(ordner):
+            # os.walk laeuft von oben nach unten; wer hier aus der Liste
+            # streicht, wird nicht betreten.
+            unterordner[:] = [
+                u for u in unterordner
+                if os.path.normpath(os.path.join(wurzel, u)) not in fremde]
             for name in sorted(namen):
                 if name.startswith("."):
                     continue
