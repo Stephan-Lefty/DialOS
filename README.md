@@ -130,6 +130,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Nach dem Diktat einer Antwort sagt DialOS „E-Mail", nicht „Notizen"**
+  (Stephan, 2026-09-18, nach der ersten echten Antwort: „Es wurde zum Schluss
+  Notizen erwähnt - wäre E-Mail nicht besser?"). Das Diktat kannte nur seine
+  eigenen Ziele und schloss mit „Diktat beendet, 2 Einträge geschrieben. Möchtest
+  Du Deine Notizen vorgelesen haben" - beides falsch: Es sind Sätze einer Mail,
+  und „Notizen vorlesen" läse etwas ganz anderes vor. Jetzt: „Die E-Mail ist
+  geschrieben, 2 Sätze."
+
 - **Auf eine gefundene Mail antworten oder sie weiterleiten** (2026-09-18,
   Stephans Wahl aus drei Entwürfen: „Diktieren, dann Entwurf"). Nach dem Fund
   heißt es jetzt „vorlesen, drucken, antworten, weiterleiten oder nichts". Beim

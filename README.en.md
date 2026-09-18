@@ -122,6 +122,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **After dictating a reply, DialOS says "E-Mail", not "Notizen"** (Stephan,
+  2026-09-18, after the first real reply: "at the end it mentioned notes -
+  wouldn't e-mail be better?"). Dictation only knew its own targets and closed
+  with "Diktat beendet, 2 Einträge geschrieben. Möchtest Du Deine Notizen
+  vorgelesen haben" - both wrong: these are sentences of a mail, and "Notizen
+  vorlesen" would read out something entirely different. Now: "Die E-Mail ist
+  geschrieben, 2 Sätze."
+
 - **Reply to a found mail or forward it** (2026-09-18, Stephan's choice among
   three drafts: "dictate, then a draft"). After a hit the options are now "read
   out, print, reply, forward or nothing". For a reply, recipient and subject

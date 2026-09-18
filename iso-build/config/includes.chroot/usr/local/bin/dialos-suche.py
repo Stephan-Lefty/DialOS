@@ -773,6 +773,14 @@ d.EMPFAENGER_FRAGEN = False
 gesammelt = {}
 d.notiz_schreiben = lambda name, zeilen: (
     gesammelt.update(text="\\n".join(zeilen)), "/dev/null")[1]
+# DIE SCHLUSSANSAGE GEHOERT HIER ZUR MAIL, NICHT ZU DEN NOTIZEN (Stephan,
+# 2026-09-18: "Es wurde zum Schluss Notizen erwaehnt - waere E-Mail nicht
+# besser?"). Das Diktat sagt sonst "Diktat beendet, 2 Eintraege geschrieben.
+# Moechtest Du Deine Notizen vorgelesen haben" - beides falsch: Es sind Saetze
+# einer Mail, und "Notizen vorlesen" laese etwas ganz anderes vor.
+d.ansage_ende = lambda name, anzahl: (
+    "Die E-Mail ist geschrieben, ein Satz." if anzahl == 1
+    else "Die E-Mail ist geschrieben, %d Sätze." % anzahl)
 d.diktat_fuehren("notiz", "notizen", sys.argv[2])
 sys.stdout.write(gesammelt.get("text", ""))
 """

@@ -352,6 +352,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       „Druck lief einwandfrei durch." Damit ist die ganze Kette belegt: Startsatz,
       Mikrofon-Übergabe, Bereich, Begriff über zwei Erkenner, Index, Trefferdialog,
       PDF aus dem Mailtext, Drucker - und das Mikrofon war danach zurück.
+    - [x] **Antworten am Gerät belegt** (Stephan, 2026-09-18, 12:45): Fund →
+      „antworten" → Diktat („Ich schreibe mit") → „Diktat beenden" → Rückfrage
+      „17 Wörter an support at webgo Punkt de" → Entwurf abgelegt, Mikrofon
+      danach zurück. Dabei gefunden: Die Schlussansage des Diktats sprach von
+      Notizen - behoben, sie nennt jetzt die E-Mail.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den
