@@ -332,6 +332,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       Briefe irgendwohin legt, soll sie wiederfinden. Die Liste der lesbaren
       Endungen steht dafür jetzt an einer Stelle statt je Quelle; vorher war
       dieselbe Datei je nach Ordner lesbar oder nicht.
+    - [x] **Mails aus Thunderbird im Index** (2026-09-18, Stephans Frage).
+      Lokale mbox-Dateien aus Eingang und Gesendet, eine Mail je Eintrag
+      (`<mbox>#<Message-ID>`), Betreff als Titel, Absender und Empfänger als
+      Namen; Pfade und Lesen kommen aus `dialos-mailarchiv.py`. Am T490 fünf
+      Mails. Offen: IMAP-Ordner jenseits von INBOX/Sent, Anhänge.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den

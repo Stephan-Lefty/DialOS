@@ -130,6 +130,25 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Die Mails aus Thunderbird sind jetzt mit im Index** (2026-09-18, Stephans
+  Frage: „Und suchen wir auch über die Mails in Thunderbird?"). Gelesen werden
+  die lokalen mbox-Dateien von Eingang und Gesendet - **eine Mail ist ein
+  Eintrag, nicht das ganze Postfach**: Als eine Datei gezählt wäre die INBOX ein
+  einziger Treffer, und jede Suche fände sie. Betreff wird der Titel, Absender
+  und Empfänger werden die Namen zum Eingrenzen, das Datum der Mail zählt, nicht
+  das der Datei. Wo Thunderbird seine mbox-Dateien hat und wie eine Mail lesbar
+  wird, holt der Index aus `dialos-mailarchiv.py` statt es abzuschreiben. Am
+  T490: 44 Briefe, 28 im Archiv, 3 Notizen, 5 Mails.
+
+- **Vosk lädt im Hintergrund** (2026-09-18, nach Stephans Probe): Zwischen
+  „Unterlagen durchsuchen" und „Wonach soll ich suchen?" lagen zwölf Sekunden,
+  weil beide Erkenner vorher fertig sein mussten. Gebraucht wird das große
+  Modell aber erst, wenn der Begriff fertig gesprochen ist - die Aufnahme wird
+  jetzt roh gesammelt und am Ende durch den Erkenner geschickt. Dazu: **Wer
+  antwortet und nicht verstanden wird, bekommt die Frage noch einmal** - vorher
+  endete der Dialog wie bei Schweigen, und genau das ist Stephan in der ersten
+  Probe passiert.
+
 - **Der Trefferdialog: Schritt für Schritt bis zu einer Datei** (2026-09-18,
   Stephans Vorgabe: „so aufbauen, dass man Schritt für Schritt die Treffer
   verkleinert, bis nur noch eine Datei übrig bleibt", und seine Wahl aus drei

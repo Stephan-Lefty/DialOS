@@ -220,15 +220,34 @@ def vosk_laden():
         return None
 
 
+class Spaeter:
+    """Ein Modell, das noch laedt - `hole()` wartet, bis es da ist.
+
+    WARUM NICHT EINFACH WARTEN (2026-09-18, aus Stephans Probe): Das grosse
+    Vosk-Modell braucht 9 s, Parakeet 2 s. Beide vor der Frage zu laden hiess:
+    zwoelf Sekunden Stille zwischen "Unterlagen durchsuchen" und "Wonach soll
+    ich suchen?". Gebraucht wird Vosk aber erst, wenn der Suchbegriff fertig
+    gesprochen ist - bis dahin laedt es im Hintergrund weiter. Die Aufnahme
+    wird deshalb roh gesammelt und erst am Ende durch den Erkenner geschickt.
+    """
+
+    def __init__(self, lade):
+        self.wert = None
+        self.faden = threading.Thread(target=self._laden, args=(lade,), daemon=True)
+        self.faden.start()
+
+    def _laden(self, lade):
+        self.wert = lade()
+
+    def hole(self):
+        self.faden.join()
+        return self.wert
+
+
 def modelle_laden():
-    """Beide Erkenner gleichzeitig - nacheinander waeren es 9 s plus 2 s."""
-    geladen = {}
-    faden = threading.Thread(
-        target=lambda: geladen.update(parakeet=parakeet_laden()), daemon=True)
-    faden.start()
-    geladen["vosk"] = vosk_laden()
-    faden.join()
-    return geladen.get("parakeet"), geladen.get("vosk")
+    """Parakeet sofort, Vosk im Hintergrund - die Frage soll nicht warten."""
+    vosk_spaeter = Spaeter(vosk_laden)
+    return parakeet_laden(), vosk_spaeter
 
 
 def erkennen(erkenner, roh):
@@ -242,7 +261,7 @@ def erkennen(erkenner, roh):
     return strom.result.text.strip()
 
 
-def antwort_hoeren(frage, erkenner, modell=None):
+def antwort_hoeren(frage, erkenner, modell=None, mit_pegel=False):
     """Eine Frage stellen und die Antwort aufnehmen - Liste der Lesarten.
 
     DAS MIKROFON IST WAEHREND DER ANSAGE SCHON OFFEN - dieselbe Reihenfolge
@@ -251,10 +270,6 @@ def antwort_hoeren(frage, erkenner, modell=None):
     Aufnahmebeginn. Erst bereit sein, dann fragen.
     """
     prozess = mikrofon_oeffnen()
-    vosk_erkenner = None
-    if modell is not None:
-        import vosk
-        vosk_erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE)
     try:
         vorrat = sprechen_bei_offener_aufnahme(frage, prozess, frage=True)
         roh = bytearray()
@@ -270,8 +285,6 @@ def antwort_hoeren(frage, erkenner, modell=None):
             if not block:
                 break
             roh += block
-            if vosk_erkenner is not None:
-                vosk_erkenner.AcceptWaveform(bytes(block))
             if pegel(block) >= PEGEL_SCHWELLE:
                 gesprochen, ruhe = True, 0.0
             elif gesprochen:
@@ -281,22 +294,26 @@ def antwort_hoeren(frage, erkenner, modell=None):
         melde(f"  {len(roh) / 2 / ABTASTRATE:.1f} s aufgenommen, "
               f"gesprochen={gesprochen}")
         if not gesprochen:
-            return []
+            return ([], False) if mit_pegel else []
         begriffe = []
-        if vosk_erkenner is not None:
+        geladen = modell.hole() if isinstance(modell, Spaeter) else modell
+        if geladen is not None:
             try:
-                text = json.loads(vosk_erkenner.FinalResult()).get("text", "").strip()
+                import vosk
+                erk = vosk.KaldiRecognizer(geladen, ABTASTRATE)
+                erk.AcceptWaveform(bytes(roh))
+                text = json.loads(erk.FinalResult()).get("text", "").strip()
                 melde(f"  VOSK:     {text!r}")
                 if text:
                     begriffe.append(text)
-            except ValueError as fehler:
+            except (ValueError, ImportError) as fehler:
                 melde(f"  Vosk-Ergebnis nicht lesbar: {fehler}")
         if erkenner is not None:
             text = erkennen(erkenner, roh).strip(" .!?,")
             melde(f"  PARAKEET: {text!r}")
             if text and text.lower() not in (x.lower() for x in begriffe):
                 begriffe.append(text)
-        return begriffe
+        return (begriffe, gesprochen) if mit_pegel else begriffe
     finally:
         try:
             prozess.terminate()
@@ -411,14 +428,20 @@ def eingrenzen(treffer, erkenner, modell):
         else:
             namen = sorted(gruppen, key=lambda x: -len(gruppen[x]))[:4]
             frage = f"{len(treffer)} Treffer. Von wem? " + ", ".join(namen) + "."
-        texte = antwort_hoeren(frage, erkenner, modell)
+        texte, gesprochen = antwort_hoeren(frage, erkenner, modell, mit_pegel=True)
         melde(f"  {name}: Antwort {texte!r}")
         if _abbruch(texte):
             return []
+        if not texte and gesprochen:
+            # GESPROCHEN, ABER NICHTS VERSTANDEN ist etwas anderes als Stille
+            # (2026-09-18, Stephans erste Probe am Mikrofon: 6,7 s aufgenommen,
+            # beide Erkenner leer - und der Dialog war zu Ende). Wer geantwortet
+            # hat, bekommt die Frage noch einmal; wer schweigt, wird in Ruhe
+            # gelassen.
+            melde("  gesprochen, aber nichts verstanden - Frage wiederholen")
+            sprich("Das habe ich nicht verstanden.")
+            continue
         if not texte:
-            # KEINE ANTWORT HEISST AUFHOEREN (2026-09-18, in der Simulation
-            # gesehen): Sonst folgt Frage auf Frage, jede mit 20 s Wartezeit -
-            # wer weggegangen ist, hoert danach noch minutenlang Fragen.
             melde("  keine Antwort - Dialog beendet")
             sprich("Ich höre nichts mehr. Die Suche ist beendet.")
             return []
@@ -474,7 +497,10 @@ def mit_wort_eingrenzen(treffer, erkenner, modell):
                            "zum Eingrenzen, oder sage: aufzählen.", erkenner, modell)
     if not texte or _abbruch(texte):
         return treffer
-    if any("zähl" in t.lower() or "zaehl" in t.lower() for t in texte):
+    # "aufzaehlen" kam am Geraet als "auf zehn" und "Aufziehen" an (2026-09-18) -
+    # deshalb nicht auf das Wort prüfen, sondern auf die Aehnlichkeit.
+    if any("zähl" in t.lower() or "zaehl" in t.lower()
+           or _aehnlich(t, "aufzählen") >= 0.6 for t in texte):
         return treffer
     pfade = set()
     for versuch in texte:

@@ -32,6 +32,8 @@ Aufruf:
     dialos-suche-index.py stand               was drinsteht
 """
 
+import email.utils
+import importlib.util
 import json
 import os
 import re
@@ -571,6 +573,72 @@ def dateien_finden():
                 yield art, ordner, os.path.join(wurzel, name)
 
 
+MAILARCHIV_SKRIPT = "/usr/local/bin/dialos-mailarchiv.py"
+
+
+def _mailarchiv():
+    """dialos-mailarchiv.py als Modul - geholt, nicht abgeschrieben.
+
+    Dort steht seit dem 2026-08-22, wo Thunderbird seine lokalen mbox-Dateien
+    hat und wie eine Mail lesbar wird (RFC-2047-Kopfzeilen, text/plain vor
+    entkerntem HTML). Zwei Kopien davon liefen beim naechsten Thunderbird-Update
+    auseinander.
+    """
+    try:
+        spec = importlib.util.spec_from_file_location("dialos_mailarchiv",
+                                                      MAILARCHIV_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"Mailarchiv nicht nutzbar: {fehler}")
+        return None
+
+
+def mails_finden():
+    """(kennung, quelle, betreff, text, personen, zeitstempel) je Mail.
+
+    EINE MBOX IST VIELE NACHRICHTEN, deshalb eine eigene Quelle: Als eine Datei
+    gezaehlt waere das Postfach ein einziger Treffer, und "Brief vom Zahnarzt"
+    faende die ganze INBOX. Die Kennung ist "<mbox-Pfad>#<Message-ID>" - die
+    Datei bleibt auffindbar (fuer "erreichbar"), die Nachricht eindeutig.
+    """
+    import mailbox
+    ma = _mailarchiv()
+    if ma is None:
+        return
+    for pfad, richtung, _server in ma.postfaecher():
+        try:
+            postfach = mailbox.mbox(pfad)
+        except Exception as fehler:        # noqa: BLE001 - ein kaputtes Postfach
+            melde(f"Postfach nicht lesbar ({pfad}): {fehler}")
+            continue
+        for nachricht in postfach:
+            kennung = str(nachricht.get("Message-ID", "")).strip()
+            betreff = ma.lesbar(nachricht.get("Subject")) or "(ohne Betreff)"
+            wer = [x for x in (ma.lesbar(nachricht.get("From")),
+                               ma.lesbar(nachricht.get("To"))) if x]
+            try:
+                datum = email.utils.parsedate_to_datetime(nachricht.get("Date"))
+                stempel = datum.timestamp()
+            except Exception:              # noqa: BLE001 - kaputtes Datum
+                stempel = os.path.getmtime(pfad)
+            if not kennung:
+                kennung = f"ohne-id-{betreff[:40]}-{stempel:.0f}"
+            text = ""
+            try:
+                text = ma.text_von(nachricht) or ""
+            except Exception as fehler:    # noqa: BLE001 - eine kaputte Mail
+                melde(f"Mail nicht lesbar ({betreff[:40]}): {fehler}")
+            yield (f"{pfad}#{kennung}", pfad, betreff, text, wer, stempel,
+                   richtung)
+
+
+def erreichbar(pfad):
+    """Liegt die Fundstelle gerade vor? Bei einer Mail zaehlt ihre mbox-Datei."""
+    return os.path.exists(pfad.split("#", 1)[0] if "#" in pfad else pfad)
+
+
 def aufbauen(db, nur_neue=False):
     """Index fuellen. nur_neue laesst unveraenderte Dateien in Ruhe."""
     bekannt = {p: (m, g, q) for p, m, g, q in
@@ -602,6 +670,26 @@ def aufbauen(db, nur_neue=False):
                              (pfad,)).fetchone()[0]
         db.execute("INSERT INTO suche (rowid, name, inhalt, klang) VALUES (?,?,?,?)",
                    (neue_id, name, inhalt, phonetisch(name + " " + inhalt)))
+        gelesen += 1
+    for kennung, quelle, betreff, text, wer, stempel, richtung in mails_finden():
+        gesehen.add(kennung)
+        if nur_neue and kennung in bekannt:
+            uebersprungen += 1
+            continue
+        inhalt = f"{betreff}\n{' '.join(wer)}\n{text}"
+        db.execute("DELETE FROM suche WHERE rowid IN "
+                   "(SELECT id FROM dateien WHERE pfad = ?)", (kennung,))
+        db.execute("INSERT OR REPLACE INTO dateien "
+                   "(pfad, art, quelle, geaendert, groesse, gelesen, jahr, personen, titel) "
+                   "VALUES (?,?,?,?,?,?,?,?,?)",
+                   (kennung, "Mail", quelle, stempel, len(inhalt), time.time(),
+                    int(time.strftime("%Y", time.localtime(stempel))),
+                    "\n".join(wer), betreff))
+        neue_id = db.execute("SELECT id FROM dateien WHERE pfad = ?",
+                             (kennung,)).fetchone()[0]
+        db.execute("INSERT INTO suche (rowid, name, inhalt, klang) VALUES (?,?,?,?)",
+                   (neue_id, f"Mail {richtung} {betreff}", inhalt,
+                    phonetisch(betreff + " " + " ".join(wer) + " " + inhalt)))
         gelesen += 1
     # Verschwundene Dateien austragen - ein Treffer, den es nicht mehr gibt,
     # ist schlimmer als kein Treffer: Der Nutzer sucht ihn dann am Geraet.
@@ -639,8 +727,12 @@ def aufbauen(db, nur_neue=False):
             continue
         if quelle:
             if quelle not in verfuegbar:
-                verfuegbar[quelle] = (os.path.normpath(quelle) in heutige
-                                      and os.path.isdir(quelle))
+                # Eine Mail-Quelle ist eine DATEI (die mbox), kein Ordner in
+                # QUELLEN - sie gilt als da, wenn es die Datei gibt. Sonst
+                # bliebe eine geloeschte Mail fuer immer im Index stehen.
+                verfuegbar[quelle] = (os.path.isfile(quelle)
+                                      or (os.path.normpath(quelle) in heutige
+                                          and os.path.isdir(quelle)))
             if not verfuegbar[quelle]:
                 gehalten += 1
                 continue
@@ -721,7 +813,7 @@ def suchen(db, begriff, hoechstens=40):
                             # sagen koennen - "im Archiv, das gerade nicht
                             # angeschlossen ist" statt einer Fundstelle, die
                             # sich nicht oeffnen laesst.
-                            "erreichbar": os.path.exists(zeile[0])})
+                            "erreichbar": erreichbar(zeile[0])})
 
     hole("suche MATCH ?", (" AND ".join(f'"{w}"' for w in worte),), "wort")
     if len(treffer) < hoechstens:
@@ -786,7 +878,7 @@ def aehnliche_namen(db, worte, hoechstens=40):
     frage = ",".join("?" * len(passend))
     return [{"pfad": z[0], "art": z[1], "geaendert": z[2], "jahr": z[3],
              "personen": (z[4] or "").split("\n") if z[4] else [],
-             "titel": z[5] or "", "wie": "klang", "erreichbar": os.path.exists(z[0])}
+             "titel": z[5] or "", "wie": "klang", "erreichbar": erreichbar(z[0])}
             for z in db.execute(
                 "SELECT pfad, art, geaendert, jahr, personen, titel FROM dateien "
                 f"WHERE pfad IN ({frage}) ORDER BY geaendert DESC LIMIT ?",
@@ -843,11 +935,20 @@ def main():
             da = ("" if os.path.isdir(ordner)
                   else "  (Ordner fehlt - Eintraege bleiben erhalten)")
             print(f"  {art:8s} {n:5d}  {ordner}{da}")
+        # Mails haengen an mbox-DATEIEN, nicht an einem Ordner - sie stehen
+        # nicht in QUELLEN und wuerden sonst als "nicht da" erscheinen.
+        for (quelle,) in db.execute("SELECT DISTINCT quelle FROM dateien "
+                                    "WHERE art = 'Mail' AND quelle IS NOT NULL"):
+            n = db.execute("SELECT COUNT(*) FROM dateien WHERE quelle = ?",
+                           (quelle,)).fetchone()[0]
+            da = "" if os.path.isfile(quelle) else "  (Postfach fehlt - Eintraege bleiben)"
+            print(f"  {'Mail':8s} {n:5d}  {quelle}{da}")
         # QUELLEN, DIE DER INDEX KENNT, DIE ES HEUTE ABER NICHT GIBT. Ohne
         # diese Zeile sieht ein abgezogener Stick aus wie gar nichts: Die
         # Eintraege zaehlen oben mit, aber kein Ordner dazu ist zu sehen.
         bekannte = {q for (q,) in db.execute(
-            "SELECT DISTINCT quelle FROM dateien WHERE quelle IS NOT NULL")}
+            "SELECT DISTINCT quelle FROM dateien WHERE quelle IS NOT NULL "
+            "AND art != 'Mail'")}
         fehlend = sorted(q for q in bekannte if not os.path.isdir(q))
         for ordner in fehlend:
             n = db.execute("SELECT COUNT(*) FROM dateien WHERE quelle = ?",

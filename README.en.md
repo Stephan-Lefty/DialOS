@@ -122,6 +122,24 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Thunderbird's mails are now in the index** (2026-09-18, Stephan's question:
+  "and do we search the mails in Thunderbird too?"). The local mbox files of
+  inbox and sent are read - **one mail is one entry, not the whole mailbox**:
+  counted as a single file the INBOX would be one hit that every search finds.
+  The subject becomes the title, sender and recipient become the names for
+  narrowing, the mail's date counts rather than the file's. Where Thunderbird
+  keeps its mbox files and how a mail becomes readable is taken from
+  `dialos-mailarchiv.py` instead of being copied. On the T490: 44 letters, 28 in
+  the archive, 3 notes, 5 mails.
+
+- **Vosk loads in the background** (2026-09-18, after Stephan's trial): twelve
+  seconds passed between "Unterlagen durchsuchen" and "Wonach soll ich suchen?"
+  because both recognisers had to be ready first. The large model is only needed
+  once the term has been spoken - the recording is now collected raw and put
+  through the recogniser at the end. Also: **whoever answers and is not
+  understood gets the question again** - before, the dialogue ended as if for
+  silence, which is exactly what happened to Stephan in the first trial.
+
 - **The hit dialogue: step by step down to one file** (2026-09-18, Stephan's
   requirement: "build it so the hits are narrowed step by step until only one
   file is left", and his choice among three drafts: "DialOS asks one after
