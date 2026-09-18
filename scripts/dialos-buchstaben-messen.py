@@ -127,6 +127,7 @@ def sprechen_und_mithoeren(text, prozess, frage=False):
 
 
 def bis_ruhe(prozess, hoechstens_s=2.5, ruhe_s=0.4):
+    """Liefert zusaetzlich den Rauschboden des Raumes - siehe unten."""
     """Liest den Strom leer, BIS ES WIRKLICH STILL IST - dann beginnt die Aufnahme.
 
     (2026-09-18, an Stephans zweitem Lauf gemessen: 24 von 43.) Eine feste
@@ -140,16 +141,27 @@ def bis_ruhe(prozess, hoechstens_s=2.5, ruhe_s=0.4):
     still_seit = 0.0
     block_s = BLOCK / 2 / ABTASTRATE
     ende = time.time() + hoechstens_s
+    gemessen = []
     while time.time() < ende:
         block = prozess.stdout.read(BLOCK)
         if not block:
-            return
-        if pegel(block) < PEGEL_SCHWELLE:
+            break
+        wert = pegel(block)
+        gemessen.append(wert)
+        if wert < PEGEL_SCHWELLE:
             still_seit += block_s
             if still_seit >= ruhe_s:
-                return
+                break
         else:
             still_seit = 0.0
+    # DER RAUM IST NICHT IMMER GLEICH LAUT (2026-09-18, an Stephans Lauf
+    # gemessen): Bei "Berta" lag der Raum bei 20 und seine Stimme bei 5300 -
+    # bei "Anton" lag der RAUM schon zwischen 150 und 780. Die feste Schwelle
+    # von 150 galt dort als Sprache, die Aufnahme lief los und war vorbei,
+    # bevor er den Mund aufmachte. Deshalb wird der Rauschboden kurz vor jedem
+    # Wort gemessen und die Schwelle daran gehaengt.
+    gemessen.sort()
+    return gemessen[len(gemessen) // 2] if gemessen else 0.0
 
 
 def leerlesen(prozess, sekunden):
@@ -168,8 +180,14 @@ def pegel(block):
     return (sum(x * x for x in werte) / len(werte)) ** 0.5 if werte else 0.0
 
 
-def aufnehmen(prozess):
-    """Ein gesprochenes Wort - roh, bis es eine Sekunde still ist."""
+def aufnehmen(prozess, boden=0.0):
+    """Ein gesprochenes Wort - roh, bis es eine Sekunde still ist.
+
+    boden: der eben gemessene Rauschboden. Sprache muss deutlich darueber
+    liegen (vierfach), sonst zaehlt sie nicht - ein Raum, der selbst bei 500
+    liegt, wuerde sonst jede Aufnahme selbst starten und beenden.
+    """
+    schwelle = max(PEGEL_SCHWELLE, boden * 4)
     roh = bytearray()
     gesprochen = False
     laut = 0
@@ -181,7 +199,7 @@ def aufnehmen(prozess):
         if not block:
             break
         roh += block
-        if pegel(block) >= PEGEL_SCHWELLE:
+        if pegel(block) >= schwelle:
             # ZWEI BLOECKE, NICHT EINER: Ein einzelnes Knacken oder der letzte
             # Rest des Fragetons ist keine Sprache. Ein gesprochenes Wort
             # dauert laenger als eine Achtelsekunde.
@@ -283,8 +301,8 @@ def messen(art, wiederholungen, mit_aufnahme):
                         abgebrochen = True
                         break
                 sprechen_und_mithoeren(wort, prozess, frage=True)
-                bis_ruhe(prozess)           # bis der Frageton wirklich weg ist
-                roh = aufnehmen(prozess)
+                boden = bis_ruhe(prozess)   # bis der Frageton weg ist; misst den Raum
+                roh = aufnehmen(prozess, boden)
                 erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, grammatik)
                 erkenner.AcceptWaveform(roh)
                 gehoert = json.loads(erkenner.FinalResult()).get("text", "").strip()
@@ -299,7 +317,8 @@ def messen(art, wiederholungen, mit_aufnahme):
                                    "richtig": richtig,
                                    "zeichen_richtig": bool(zeichen_soll)
                                    and zeichen_soll == zeichen_ist,
-                                   "sekunden": round(len(roh) / 2 / ABTASTRATE, 2)})
+                                   "sekunden": round(len(roh) / 2 / ABTASTRATE, 2),
+                                   "rauschboden": round(boden)})
                 if gehoert == "abbrechen":
                     ergebnisse.pop()
                     sprich("Ich breche die Messung ab.")
