@@ -47,7 +47,7 @@ Gefragt wird deshalb VOSK SELBST, indem seine Meldung abgefangen wird; der Weg
 ueber graph/words.txt war die erste Fassung und lief ins Leere, weil das kleine
 Modell diese Datei gar nicht hat. Einzelheiten bei wortschatz_pruefen().
 
-Aufruf:  scripts/dialos-grammatik-pruefen.py [Satz ...]
+Aufruf:  /usr/local/bin/dialos-grammatik-pruefen.py [Satz ...]
          ohne Argumente:        alle Saetze der Grammatik
          --neu "satz"           Kandidat versuchsweise dazu, beide Richtungen
                                 (mehrfach angebbar)

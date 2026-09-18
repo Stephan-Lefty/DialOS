@@ -150,12 +150,12 @@ hört mit der **vollständigen** Grammatik aller bereits eingebauten
 Erweiterungen zu. Erst dann zeigt sich, ob ein Satz mit einem
 bestehenden verwechselt wird.
 
-Das Werkzeug dafür gibt es: `scripts/dialos-grammatik-pruefen.py`. **Seit dem
+Das Werkzeug dafür gibt es: `/usr/local/bin/dialos-grammatik-pruefen.py`. **Seit dem
 2026-09-17 kann es auch Sätze prüfen, die noch nicht eingebaut sind** - vorher
 ging genau das nicht, und die Lücke war nicht harmlos:
 
 ```bash
-scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+/usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
 ```
 
 Ohne `--neu` hörte Vosk den Kandidaten gegen eine Grammatik, die ihn **nicht
@@ -330,6 +330,29 @@ nur die Skriptnamen.
 eine Erweiterung auf ein Kundengerät kommt, auf dem es weder
 `dialos-aufspielen` noch die sudoers-Regel geben darf
 (`scripts/dialos-aufraeumen.sh` entfernt beides), ist offen - siehe unten.
+
+### Nach dem Aufspielen: die Abnahme
+
+```
+scripts/dialos-suche-abnahme.py
+```
+
+Prüft in einem Durchgang, was sich ohne Mikrofon prüfen lässt: liegen alle
+Dateien am Platz, ist das Manifest angemeldet, **ist der laufende
+Befehlsdienst jünger als das aufgespielte Manifest**, hängt eine verwaiste
+Mikrofon-Marke, steht der Index. Der Altersvergleich ist die Antwort auf
+den lautlosen Fehlschlag von oben - er sieht den vergessenen Neustart,
+statt ihn den Nutzer beim Zurufen entdecken zu lassen.
+
+**Drei Urteile, nicht zwei:** `OK`, `FEHLER` und `OFFEN`. Die dritte Stufe
+steht für alles, was nur mit Mikrofon zu prüfen ist, und für Prüfungen, die
+nicht liefen. Ungeprüftes als bestanden zu zählen wäre genau der Fehler,
+den die Abnahme finden soll - am 2026-09-17 sahen eine nie anlaufende
+Wortschatzprüfung und eine nie greifende Wache beide aus wie ein Erfolg.
+
+Mit `--lang` läuft die Wortschatz-Gegenprobe mit: Der Kandidat
+`xylofonquark durchsuchen` **muss** abgewiesen werden. Hier gilt ein
+Durchlauf als Fehler.
 
 ## Die dritte Namenskategorie
 

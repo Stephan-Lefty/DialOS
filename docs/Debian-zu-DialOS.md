@@ -1106,7 +1106,7 @@ sagen"/„was kannst du" (Übersicht), „wie ist/wird das wetter" (über
 Formulierung in `wetter_satz()` in `dialos-start-ansage.py`) und acht Sätze mit
 ehrlicher Antwort (`WUNSCH_SAETZE`, protokolliert als `WUNSCH`). Ohne passenden
 Befehl: „Das kann ich noch nicht. Sage: Was kann ich sagen." Geprüft mit
-`scripts/dialos-grammatik-pruefen.py`: alle 42 Sätze wörtlich.
+`/usr/local/bin/dialos-grammatik-pruefen.py`: alle 42 Sätze wörtlich.
 
 **Befehlsübersicht seit 2026-09-16:** 49 Befehlssätze - dazu „alle befehle
 vorlesen" und „befehle für fragen/briefe/notizen/den einkauf/den bildschirm/das

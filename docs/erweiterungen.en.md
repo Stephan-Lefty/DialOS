@@ -149,12 +149,12 @@ the full counter-test: Piper speaks every new start sentence, Vosk listens
 with the **complete** grammar of all extensions already installed. Only
 then does it show whether a sentence is confused with an existing one.
 
-The tool for that exists: `scripts/dialos-grammatik-pruefen.py`. **Since
+The tool for that exists: `/usr/local/bin/dialos-grammatik-pruefen.py`. **Since
 2026-09-17 it can also check sentences that are not built in yet** - that was
 exactly what did not work before, and the gap was not harmless:
 
 ```bash
-scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+/usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
 ```
 
 Without `--neu`, Vosk heard the candidate ("unterlagen durchsuchen" - search
@@ -327,6 +327,29 @@ script names.
 extension gets onto a customer device, where neither `dialos-aufspielen`
 nor the sudoers rule may exist (`scripts/dialos-aufraeumen.sh` removes
 both), is open - see below.
+
+### After deploying: the acceptance check
+
+```
+scripts/dialos-suche-abnahme.py
+```
+
+Checks in one pass what can be checked without a microphone: are all files in
+place, is the manifest registered, **is the running command service younger
+than the deployed manifest**, is an orphaned microphone marker lying around,
+does the index stand. The age comparison is the answer to the silent failure
+above - it catches the forgotten restart instead of leaving the user to
+discover it by calling out.
+
+**Three verdicts, not two:** `OK`, `FEHLER` (fault) and `OFFEN` (open). The
+third stands for everything that needs a microphone, and for checks that did
+not run. Counting the unchecked as passed would be exactly the fault the
+acceptance check is meant to find - on 2026-09-17 a vocabulary check that
+never ran and a guard that never fired both looked like a success.
+
+With `--lang` the vocabulary counter-check runs along: the candidate
+`xylofonquark durchsuchen` **has to** be refused. Here a pass counts as a
+fault.
 
 ## The third naming category
 

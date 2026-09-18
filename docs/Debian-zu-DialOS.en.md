@@ -1063,7 +1063,7 @@ ich sagen"/"was kannst du" (overview), "wie ist/wird das wetter" (via
 wording in `wetter_satz()` in `dialos-start-ansage.py`) and eight sentences with
 an honest answer (`WUNSCH_SAETZE`, logged as `WUNSCH`). Without a matching
 command: "Das kann ich noch nicht. Sage: Was kann ich sagen." Checked with
-`scripts/dialos-grammatik-pruefen.py`: all 42 sentences verbatim.
+`/usr/local/bin/dialos-grammatik-pruefen.py`: all 42 sentences verbatim.
 
 **Command overview since 2026-09-16:** 49 command sentences - plus "alle befehle
 vorlesen" and "befehle für fragen/briefe/notizen/den einkauf/den bildschirm/das

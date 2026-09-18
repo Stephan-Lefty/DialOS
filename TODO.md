@@ -97,13 +97,27 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Einzige, womit der Nutzer das Gerät noch erreicht.
   - [x] **`dialos-erweiterung.py`** mit `pruefen` / `einbauen` / `entfernen` /
     `liste` (2026-09-17). Sieben Validierungsfälle gegengeprüft.
+  - [x] **Das Prüfwerkzeug lag am falschen Ort** (2026-09-18, beim Bauen der
+    Abnahme gefunden). `dialos-erweiterung.py` sucht es unter
+    `/usr/local/bin/dialos-grammatik-pruefen.py`, es lag aber nur in `scripts/`
+    und wurde nie aufgespielt. Da `einbauen` ohne den Prüfer verweigert, ließ
+    sich am Gerät **keine** Erweiterung einbauen. Datei in den Aufspielbaum
+    verschoben, Doku durchgehend nachgezogen. Aufgefallen wäre es sonst erst
+    beim ersten Einbau durch einen Nutzer.
+  - [x] **Abnahme-Werkzeug** `scripts/dialos-suche-abnahme.py` (2026-09-18).
+    Ein Befehl prüft Dateien, Manifest, Dienstalter, Mikrofon-Marke, Wache und
+    Index. Drei Urteile: `OK`, `FEHLER`, `OFFEN` - die dritte Stufe für alles,
+    was Mikrofon braucht. **Ungeprüftes darf nicht als bestanden zählen**;
+    genau so sahen die beiden Fehler vom 2026-09-17 aus.
+    - [ ] **Die Abnahme selbst am Gerät laufen lassen** - sie ist bisher nur
+      auf einem Rechner ohne DialOS geprüft, wo erwartungsgemäß alles fehlt.
   - [ ] **Wortschatzprüfung, die VERWEIGERT statt warnt.** Jedes Wort aus
     `startsaetze` und `eigene_grammatik` gegen das kleine Modell. Grund:
     „löschen" fehlt im Wortschatz und wurde am 2026-08-18 still aus der
     Grammatik geworfen. Eine Warnung beim Einbauen liest niemand wieder; der
     Fehler zeigt sich erst, wenn der Nutzer allein mit dem Gerät ist.
   - [x] **Kollisionsprüfung gegen die vollständige Grammatik - Werkzeug fertig
-    am 2026-09-17.** `scripts/dialos-grammatik-pruefen.py` kann jetzt Sätze
+    am 2026-09-17.** `/usr/local/bin/dialos-grammatik-pruefen.py` kann jetzt Sätze
     prüfen, die noch NICHT eingebaut sind: `--neu "satz"`. Das ging vorher
     nicht, und die Lücke war nicht harmlos - ein Kandidat als bloßes Argument
     wurde gegen eine Grammatik gehört, die ihn gar nicht enthält, und von Vosk
@@ -188,14 +202,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     C++-Ebene, nicht aus Python, und `contextlib.redirect_stderr` greift dort
     nicht. Das ist der einzige Weg, der unabhängig vom Aufbau des Modells
     funktioniert.
-    - [ ] **Am Gerät gegenprüfen, dass die neue Prüfung wirklich anschlägt:**
-      ein erfundenes Wort als Kandidat muss abgewiesen werden.
+    - [x] **Am Gerät gegengeprüft - sie schlägt an** (Stephan, 2026-09-18).
+      Der Kandidat „xylofonquark durchsuchen" wurde mit
+      „KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'" abgewiesen.
 
-          scripts/dialos-grammatik-pruefen.py --neu "xylofonquark durchsuchen"
+          /usr/local/bin/dialos-grammatik-pruefen.py --neu "xylofonquark durchsuchen"
 
-      Erwartet: „KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'",
-      Rückgabewert 1. Kommt stattdessen ein Durchlauf, prüft sie weiterhin
-      nichts.
+      **Damit ist die Lücke vom 2026-09-17 nachweislich geschlossen** - die
+      Pflichtprüfung prüft wieder. Ein Durchlauf wäre hier das schlechte
+      Ergebnis gewesen, kein gutes.
   - [x] **Mikrofon-Übergabe** (2026-09-17) - kleiner als gedacht: Der Dienst
     prüft schon heute in jeder Schleifenrunde auf eine Markierungsdatei und
     verwirft dann alles Gehörte, und `dialos-notiz.py` benutzt für Rückfragen
@@ -256,6 +271,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     inhaltsadressierten Speicher zu schreiben wäre Verdopplung, und
     Revisionssicherheit, Grabsteine und Aufbewahrungsfristen haben auf einem
     privaten Gerät nichts zu suchen.
+    - [ ] **Am T490 bestätigt: `extract/` fehlt** (Stephan, 2026-09-18).
+      `dialos-suche-index.py stand` meldet „MailBurg: FEHLT - kein OCR". Der
+      Index läuft damit nur über `pdftotext` und Klartext - **gescannte Briefe
+      bleiben stumm**, und gerade die sind der Grund, warum jemand ein Archiv
+      durchsuchen will. Kein Fehler, aber die Grenze des heutigen Standes.
     - [ ] **`extract/` einbinden** (1.360 Zeilen): `pdftotext` mit `pypdf` als
       Rückfall, OCR über `pdftoppm`/`tesseract` mit der gemessenen Pixelgrenze
       `MAX_KANTE=5000`, Office ohne Binärmüll. Dort steckt teuer erarbeitetes

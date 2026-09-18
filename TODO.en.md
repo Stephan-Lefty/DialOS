@@ -94,13 +94,29 @@ finished too, and then move down together. That way no reference breaks.
     the user still has to reach the device with.
   - [x] **`dialos-erweiterung.py`** with `pruefen` / `einbauen` / `entfernen` /
     `liste` (2026-09-17). Seven validation cases checked against.
+  - [x] **The checking tool sat in the wrong place** (2026-09-18, found while
+    building the acceptance check). `dialos-erweiterung.py` looks for it at
+    `/usr/local/bin/dialos-grammatik-pruefen.py`, but it only existed in
+    `scripts/` and was never deployed. Since `einbauen` refuses without the
+    checker, **no** extension could be installed on the device. File moved into
+    the deployment tree, documentation updated throughout. Otherwise it would
+    only have surfaced at a user's first install.
+  - [x] **Acceptance tool** `scripts/dialos-suche-abnahme.py` (2026-09-18).
+    One command checks files, manifest, service age, microphone marker, guard
+    and index. Three verdicts: `OK`, `FEHLER` (fault), `OFFEN` (open) - the
+    third for everything that needs a microphone. **The unchecked must not
+    count as passed**; that is exactly what the two faults of 2026-09-17 looked
+    like.
+    - [ ] **Run the acceptance check on the device itself** - so far it has
+      only been tried on a machine without DialOS, where everything is missing
+      as expected.
   - [ ] **A vocabulary check that REFUSES instead of warning.** Every word from
     `startsaetze` and `eigene_grammatik` against the small model. Reason:
     "löschen" (delete) is missing from the vocabulary and was silently thrown
     out of the grammar on 2026-08-18. Nobody reads a warning at install time a
     second time; the fault only shows once the user is alone with the device.
   - [x] **Collision check against the complete grammar - tool finished on
-    2026-09-17.** `scripts/dialos-grammatik-pruefen.py` can now check sentences
+    2026-09-17.** `/usr/local/bin/dialos-grammatik-pruefen.py` can now check sentences
     that are NOT built in yet: `--neu "satz"`. That did not work before, and the
     gap was not harmless - a candidate passed as a plain argument was heard
     against a grammar that does not contain it at all, and Vosk pressed it onto
@@ -134,7 +150,7 @@ finished too, and then move down together. That way no reference breaks.
     point): 49 existing sentences plus the candidate makes 50 - the candidate
     was checked twice. That changes nothing about the result.
 
-        scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
+        /usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"
 
     With that, "Unterlagen durchsuchen" (search the documents) is the start
     sentence of DialOS-Suche - it is recognized itself, and **none of the
@@ -193,14 +209,15 @@ finished too, and then move down together. That way no reference breaks.
     file-descriptor level - the message comes from the C++ layer, not from
     Python, and `contextlib.redirect_stderr` does not reach it there. That is
     the only way that works independently of how the model is built.
-    - [ ] **Cross-check on the device that the new check really fires:** an
-      invented word as a candidate has to be refused.
+    - [x] **Cross-checked on the device - it fires** (Stephan, 2026-09-18).
+      The candidate "xylofonquark durchsuchen" was refused with
+      "KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'" (candidate not
+      in the model's vocabulary).
 
-          scripts/dialos-grammatik-pruefen.py --neu "xylofonquark durchsuchen"
+          /usr/local/bin/dialos-grammatik-pruefen.py --neu "xylofonquark durchsuchen"
 
-      Expected: "KANDIDAT NICHT IM WORTSCHATZ DES MODELLS: 'xylofonquark'"
-      (candidate not in the model's vocabulary), return value 1. If a pass
-      comes instead, it still checks nothing.
+      **That closes the gap of 2026-09-17 demonstrably** - the mandatory check
+      checks again. A pass would have been the bad outcome here, not a good one.
   - [x] **Microphone handover** (2026-09-17) - smaller than expected: already
     today the service checks for a marker file on every round of the loop and
     then discards everything it has heard, and `dialos-notiz.py` uses **exactly
@@ -265,6 +282,11 @@ finished too, and then move down together. That way no reference breaks.
     into a content-addressed store would be duplication, and audit-proof
     storage, tombstones and retention periods have no business on a private
     device.
+    - [ ] **Confirmed on the T490: `extract/` is missing** (Stephan,
+      2026-09-18). `dialos-suche-index.py stand` reports "MailBurg: FEHLT -
+      kein OCR". The index therefore runs on `pdftotext` and plain text only -
+      **scanned letters stay mute**, and those are precisely why anyone wants
+      to search an archive. Not a fault, but the limit of today's state.
     - [ ] **Bring in `extract/`** (1.360 lines): `pdftotext` with `pypdf` as a
       fallback, OCR via `pdftoppm`/`tesseract` with the measured pixel limit
       `MAX_KANTE=5000`, Office without binary rubbish. Dearly earned knowledge

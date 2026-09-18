@@ -122,6 +122,37 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The grammar checking tool sat in the wrong place - installing any extension
+  would have failed** (2026-09-18). `dialos-erweiterung.py` looks for the
+  checker at `/usr/local/bin/dialos-grammatik-pruefen.py`, but the file only
+  existed in `scripts/` and was therefore never deployed. Since `einbauen`
+  (install) refuses without it - rightly so, because vocabulary and collisions
+  would go unchecked - no extension could be installed on the device at all.
+  The file now sits in the deployment tree; the documentation names the new path
+  throughout. Found while building the acceptance check, not on the device: the
+  fault would only have surfaced at a user's first install.
+
+- **Acceptance tool for the extension interface**
+  (2026-09-18, `scripts/dialos-suche-abnahme.py`). One command instead of
+  twelve, with a verdict per check. **Three levels, and the third is the point:**
+  `OK`, `FEHLER` (fault) and `OFFEN` (open) for everything that cannot be checked
+  without a microphone. Counting the unchecked as "passed" would be exactly the
+  fault the acceptance check is meant to find - on 2026-09-17 a vocabulary check
+  that never ran and a guard that never fired both looked like passes.
+
+  **New among the checks is the age comparison:** the command service reads the
+  manifests only at startup. If its process is older than the deployed manifest,
+  it runs with the old grammar - the start sentence then does nothing, with no
+  error message and no announcement. The acceptance check compares start time
+  against modification time and names the restart command.
+
+  **The vocabulary counter-check counts the other way round:** `--lang` runs it,
+  and passing counts as a `FEHLER`. "xylofonquark" is in no vocabulary; whoever
+  waves that through is not checking.
+
+  **It touches nothing** - no file, no service, no index. Where something needs
+  doing, it names the command and leaves it to the human.
+
 - **Guard against orphaned microphone markers** (2026-09-17). `diktat_laeuft()`
   now reads the PID out of the marker and checks with signal 0 whether the
   process is still alive; an orphaned marker is cleared away and reported.
@@ -392,7 +423,7 @@ background) and `splash.png` (boot/login screen).
   speaks more clearly than a human being.
 
 - **The grammar check can now check sentences that are not built in yet**
-  (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` takes a
+  (2026-09-17). `/usr/local/bin/dialos-grammatik-pruefen.py --neu "satz"` takes a
   candidate into the grammar on trial. **That did not work before, and the gap
   was not harmless:** anyone passing a candidate as a plain argument had it
   heard against a grammar that does not contain it at all - Vosk then presses it

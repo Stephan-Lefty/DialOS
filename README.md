@@ -130,6 +130,37 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Das Grammatik-Prüfwerkzeug lag am falschen Ort - jedes Einbauen einer
+  Erweiterung wäre gescheitert** (2026-09-18). `dialos-erweiterung.py` sucht den
+  Prüfer unter `/usr/local/bin/dialos-grammatik-pruefen.py`, die Datei lag aber
+  nur in `scripts/` und wurde damit nie aufgespielt. Da `einbauen` ohne ihn
+  verweigert - zu Recht, denn Wortschatz und Kollisionen blieben ungeprüft -,
+  ließ sich am Gerät überhaupt keine Erweiterung einbauen. Die Datei liegt
+  jetzt im Aufspielbaum; die Doku nennt durchgehend den neuen Pfad. Gefunden
+  beim Bauen der Abnahme, nicht am Gerät: Der Fehler wäre erst beim ersten
+  Einbau durch einen Nutzer aufgefallen.
+
+- **Abnahme-Werkzeug für die Erweiterungsschnittstelle**
+  (2026-09-18, `scripts/dialos-suche-abnahme.py`). Ein Befehl statt zwölf, mit
+  einem Urteil je Prüfung. **Drei Stufen, und die dritte ist der Punkt:** `OK`,
+  `FEHLER` und `OFFEN` für alles, was sich nicht ohne Mikrofon prüfen lässt.
+  Ungeprüftes als „bestanden" zu zählen wäre genau der Fehler, den die Abnahme
+  finden soll - am 2026-09-17 sahen eine nie anlaufende Wortschatzprüfung und
+  eine nie greifende Wache beide aus wie bestanden.
+
+  **Neu unter den Prüfungen ist der Altersvergleich:** Der Befehlsdienst liest
+  die Manifeste nur beim Start. Ist sein Prozess älter als das aufgespielte
+  Manifest, läuft er mit der alten Grammatik - der Startsatz tut dann nichts,
+  ohne Fehlermeldung und ohne Ansage. Die Abnahme vergleicht die Startzeit
+  gegen die Änderungszeit und nennt den Neustartbefehl.
+
+  **Die Wortschatz-Gegenprobe zählt umgekehrt:** `--lang` lässt sie mitlaufen,
+  und ein Durchlauf gilt als `FEHLER`. „xylofonquark" steht in keinem
+  Wortschatz; wer das durchwinkt, prüft nicht.
+
+  **Es fasst nichts an** - keine Datei, kein Dienst, kein Index. Wo etwas zu
+  tun ist, nennt es den Befehl und überlässt ihn dem Menschen.
+
 - **Der Suchindex ist gebaut - DialOS-Suche findet jetzt wirklich**
   (2026-09-17, `dialos-suche-index.py`). Ein eigener SQLite-FTS5-Index über die
   Dateien, die ohnehin schon da liegen: Briefe aus `~/Dokumente/`, Notizen aus
@@ -248,7 +279,7 @@ das Erfolg meldet, während es versagt.
   alle Schlussfolgerungen bleiben unberührt.
 
 - **Grammatik-Prüfung kann jetzt Sätze prüfen, die noch nicht eingebaut sind**
-  (2026-09-17). `scripts/dialos-grammatik-pruefen.py --neu "satz"` nimmt einen
+  (2026-09-17). `/usr/local/bin/dialos-grammatik-pruefen.py --neu "satz"` nimmt einen
   Kandidaten versuchsweise in die Grammatik auf. **Das ging vorher nicht, und
   die Lücke war nicht harmlos:** Wer einen Kandidaten als bloßes Argument
   übergab, liess ihn gegen eine Grammatik hören, die ihn gar nicht enthält -

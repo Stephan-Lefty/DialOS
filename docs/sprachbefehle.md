@@ -95,7 +95,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
 | „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |
-| **„Unterlagen durchsuchen"** | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Am 2026-09-17 am Gerät geprüft und bestanden:** alle Sätze wörtlich erkannt, kein bestehender Befehl geht durch ihn kaputt (`scripts/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). Der Test mit echter Stimme bleibt der Abschluss. |
+| **„Unterlagen durchsuchen"** | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Am 2026-09-17 am Gerät geprüft und bestanden:** alle Sätze wörtlich erkannt, kein bestehender Befehl geht durch ihn kaputt (`/usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). Der Test mit echter Stimme bleibt der Abschluss. |
 
 ### Warum „Unterlagen durchsuchen" und nicht „Briefe durchsuchen"
 
