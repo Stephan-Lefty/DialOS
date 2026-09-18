@@ -744,20 +744,30 @@ function dialos_child_neueste_beitraege() {
 			? str_replace( $monate_de, $monate_en, date_i18n( 'j F Y', strtotime( $beitrag->post_date ) ) )
 			: date_i18n( 'j. F Y', strtotime( $beitrag->post_date ) );
 
-		// Derselbe Textschnipsel wie auf der Neuigkeiten-Seite. Dreissig
-		// Woerter sind der Kompromiss: genug, damit der Kasten die von
-		// Stephan gewuenschte Groesse bekommt, wenig genug, dass in einer
-		// schmalen Spalte keine Textwand steht.
-		// Der Sprachmarker ist per CSS versteckt, steht aber im Inhalt.
-		// Ohne diese Zeile begaenne ein Schnipsel ohne eigenen Auszug mit
-		// dem Wort "English" - derselbe Stolperstein wie bei den
-		// Hoerfassungen am 2026-09-17, wo Anna ihn mitten im Beitrag
-		// vorgelesen hat. Wer Beitragstext maschinell weiterverarbeitet,
-		// muss ihn herausnehmen.
-		$roh  = preg_replace( '#<p class="[^"]*dialos-lang-marker[^"]*".*?</p>#s', '',
-			$beitrag->post_content );
+		// Zwanzig Woerter, seit die Kaesten quadratisch sind und groesser
+		// gesetzt werden (2026-09-18). Mehr passt bei dieser Schriftgroesse
+		// nicht ins Quadrat, ohne es nach unten aufzudruecken.
+		// Aus dem Beitrag muss alles heraus, was kein Fliesstext ist. Am
+		// 2026-09-17 stand in JEDER deutschen Kachel "Diesen Beitrag
+		// anhoeren - gesprochen von Anna" (die Beschriftung des
+		// Audio-Blocks) und in jeder englischen "16 September 2026 General"
+		// (die Datumszeile, die die Chronik-Routine fuer die englische
+		// Anzeige einfuegt). Beides wurde erst am fertigen Auftritt
+		// sichtbar, nicht im Code.
+		//
+		// Die Reihenfolge ist egal, die Vollstaendigkeit nicht:
+		//   style/script - die eingebettete Datums-Korrektur
+		//   .meta        - die Datums- und Kategoriezeile selbst
+		//   lang-marker  - der per CSS versteckte Sprachumschalter
+		//   figure       - Bildunterschriften UND der Audio-Block
+		$roh = $beitrag->post_content;
+		$roh = preg_replace( '#<style.*?</style>#s', ' ', $roh );
+		$roh = preg_replace( '#<script.*?</script>#s', ' ', $roh );
+		$roh = preg_replace( '#<p class="[^"]*dialos-lang-marker[^"]*".*?</p>#s', ' ', $roh );
+		$roh = preg_replace( '#<p class="[^"]*\bmeta\b[^"]*".*?</p>#s', ' ', $roh );
+		$roh = preg_replace( '#<figure.*?</figure>#s', ' ', $roh );
 		$text = has_excerpt( $beitrag ) ? $beitrag->post_excerpt : $roh;
-		$text = wp_trim_words( wp_strip_all_tags( $text ), 30, ' …' );
+		$text = wp_trim_words( wp_strip_all_tags( $text ), 20, ' …' );
 
 		$eintraege[] = array(
 			'titel' => get_the_title( $beitrag ),
