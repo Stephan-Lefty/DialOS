@@ -346,6 +346,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       Wechselmedium ist beim Abziehen mitten im Schreiben hin. Bewusst in Kauf
       genommen: Der Stick ist unverschlüsselt, ein Finder liest die Mails mit;
       Stephans Entscheidung, weil sie an jedem Rechner lesbar sein sollen.
+    - [x] **Am Gerät belegt: Suche → Fund → Papier** (Stephan, 2026-09-18,
+      12:22): „Unterlagen durchsuchen" → „Postfach" → Begriff „Postfach" → ein
+      Treffer → „drucken" → Rückfrage → Ausdruck auf dem Brother. Stephan:
+      „Druck lief einwandfrei durch." Damit ist die ganze Kette belegt: Startsatz,
+      Mikrofon-Übergabe, Bereich, Begriff über zwei Erkenner, Index, Trefferdialog,
+      PDF aus dem Mailtext, Drucker - und das Mikrofon war danach zurück.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den
