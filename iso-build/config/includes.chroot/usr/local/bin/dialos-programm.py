@@ -326,9 +326,16 @@ def schliessen(satz):
         except OSError as fehler:
             melde(f"  SIGTERM an {pid} fehlgeschlagen: {fehler}")
     melde(f"{satz!r}: SIGTERM an {pids}")
-    ende = time.time() + BEENDEN_GEDULD_S
+    # AUCH DER GUTE AUSGANG GEHOERT INS PROTOKOLL (2026-09-21). Beim ersten
+    # echten Lauf stand dort nur das SIGTERM - ob das Programm danach wirklich
+    # weg war und was der Nutzer gehoert hat, liess sich hinterher nur noch
+    # erraten. Ein Protokoll, das nur Fehler kennt, beantwortet die haeufigste
+    # Frage nicht: "Hat es funktioniert?"
+    begonnen = time.time()
+    ende = begonnen + BEENDEN_GEDULD_S
     while time.time() < ende:
         if not prozesse(eintrag["programm"]):
+            melde(f"{satz!r}: beendet nach {time.time() - begonnen:.1f} s")
             sprich(eintrag["zu"])
             return True
         time.sleep(0.5)
