@@ -47,6 +47,7 @@ import shutil
 import sys
 
 SIGNATUR_HTML = "/usr/local/share/dialos/mail-signatur.html"
+WOERTERBUCH = "de-DE"
 SIGNATUR_TEXT = "/usr/local/share/dialos/mail-signatur.txt"
 EIGENE_HTML = os.path.join(os.path.expanduser("~"), ".config", "dialos", "mail-signatur.html")
 EIGENE_TEXT = os.path.join(os.path.expanduser("~"), ".config", "dialos", "mail-signatur.txt")
@@ -177,7 +178,16 @@ def block(ids, datei=SIGNATUR_HTML):
     """
     zeilen = [ANFANG,
               "// Quelle des Satzes: /usr/local/share/dialos/fusszeile.txt",
-              "// Nicht von Hand aendern - wird beim Einrichten neu geschrieben."]
+              "// Nicht von Hand aendern - wird beim Einrichten neu geschrieben.",
+              # DEUTSCHE RECHTSCHREIBPRUEFUNG (Stephan, 2026-09-21, im
+              # Verfassen-Fenster gesehen: "unten rechts steht was von
+              # englisch"). Ohne Einstellung prueft Thunderbird gegen en-US -
+              # dann steht unter jedem deutschen Wort eine Wellenlinie, und wer
+              # den Bildschirm nicht sieht, merkt nicht einmal, dass die
+              # Pruefung nichts taugt. Die Woerterbuecher sind da
+              # (hunspell-de-de, thunderbird-l10n-de), nur nicht gewaehlt.
+              # Stephans Wahl: Deutschland, weil die Post dorthin geht.
+              f'user_pref("spellchecker.dictionary", "{WOERTERBUCH}");']
     for kennung in sorted(ids):
         zeilen += [
             f'user_pref("mail.identity.{kennung}.attach_signature", true);',
