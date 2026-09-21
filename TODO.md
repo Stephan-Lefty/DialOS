@@ -67,6 +67,30 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
   Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
 
+- [ ] **Eigene GNOME-Shell-Erweiterung, um zwischen Fenstern zu wechseln**
+  (Stephans Frage vom 2026-09-21: „Man kann nicht per Sprachbefehl durch die
+  Fenster wandern?"). Heute nicht, und das liegt nicht an DialOS: Unter
+  Wayland darf ein fremder Prozess kein Fenster heben. Zweimal am Geräte
+  gemessen - auch mit Aktivierungs-Token über die `.desktop`-Datei bleibt ein
+  offenes Thunderbird-Fenster hinten, GNOME meldet nur „Thunderbird ist
+  bereit".
+
+  **Der einzige saubere Weg ist derselbe wie bei Thunderbird: das Programm
+  fragen, dem die Sache gehört.** Eine Erweiterung läuft IM Fenstermanager und
+  darf dort alles - Fenster auflisten, benennen, aktivieren, schließen. Damit
+  ginge: „Welche Fenster sind offen?", „Wechsle zu Thunderbird", „Nächstes
+  Fenster", „Fenster schließen".
+
+  **Was es kostet, ehrlich:** ein neues Bauteil in GJS (zweite Sprache im
+  Projekt), gebunden an die GNOME-Version - bei einem GNOME-Sprung muss es
+  nachgezogen werden, sonst schaltet GNOME es ab. Dazu die Anbindung an den
+  Sprachdienst (D-Bus), also dasselbe Muster wie die Thunderbird-Brücke.
+
+  **`ydotool` ist die Abkürzung und wird nicht genommen:** Es speist
+  Tastendrücke wie Alt+Tab direkt in den Kernel ein und braucht dafür einen
+  Dienst mit Root-Rechten, der beliebige Eingaben erzeugen kann. Auf einem
+  Gerät, das bei fremden Leuten steht, ist das die falsche Ecke zum Sparen.
+
 - [ ] **Die Programmliste weiterziehen - und einen Widerspruch auflösen**
   (2026-09-21, aus Stephans Anstoß „Wir müssen doch sowieso eine Liste von
   Befehlen machen, die dann die Programme startet"). Neun Sätze stehen in

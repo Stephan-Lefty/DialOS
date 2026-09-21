@@ -136,12 +136,16 @@ background) and `splash.png` (boot/login screen).
   lives there and nowhere else** - the voice service reads it at startup, like
   the extensions' sentences; a second list in the grammar would drift apart at
   the next program, unnoticed. The microphone stays with DialOS (opening a
-  program is not a dictation). **Launching goes through the `.desktop` file**
-  (`gio launch`) - which was wrong at first: I claimed a second start would
-  raise the existing window by itself, and Stephan saw the opposite the same
-  day. Under Wayland a foreign process may not raise a window; only the
-  application itself may, and only with an activation token that exists solely
-  when started through the `.desktop` file. **No "close"**: that could throw away a sighted helper's unsaved work, and the
+  program is not a dictation). **An already open window does not come to the
+  front** - the opposite stood here at first, and Stephan checked twice: on
+  the first run Thunderbird was closed (the call started it, so the run did
+  not count), on the second it was running - "the window stays in the back".
+  Under Wayland a foreign process may not raise a window, not even through the
+  `.desktop` file; GNOME reports "Thunderbird is ready" instead. **So DialOS
+  announces the state** ("Das Postfach ist schon offen.") - for someone who
+  cannot see the screen, the state is the answer. Launching still goes through
+  the `.desktop` file (`gio launch`), because the program then runs in its own
+  systemd unit rather than the voice service's. **No "close"**: that could throw away a sighted helper's unsaved work, and the
   user cannot hear what would be lost. Mandatory check passed: all 59
   sentences recognised verbatim, none broken by the nine new ones.
 

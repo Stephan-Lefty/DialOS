@@ -39,16 +39,39 @@ darf sich nur die Anwendung selbst, und nur mit einem Aktivierungs-Token
 aber nur, wenn ueber die .desktop-Datei gestartet wird - "/usr/bin/thunderbird"
 von Hand aufgerufen bekommt keins. Genau das stand hier.
 
-Deshalb: "gio launch <desktop-Datei>", wo es eine gibt. Fensterverwaltung
-braucht es weiterhin keine (wmctrl und xdotool sind nicht installiert und
-waeren unter Wayland ohnehin wirkungslos, die GNOME-Schnittstelle ist
-gesperrt).
+AUCH MIT DER .desktop-DATEI GEHT ES NICHT - ZWEIMAL GEMESSEN AM 2026-09-21.
 
-WO ES NICHT GEHT, UND WARUM DAS HINNEHMBAR IST: "gio launch" uebergibt
-Argumente als DATEINAMEN, nicht als Schalter - fuer "-compose", "-calendar"
-und "-addressbook" bleibt also der direkte Aufruf. Dort entsteht aber ein
-NEUES Fenster, und ein neues Fenster kommt nach vorn; das Problem betrifft nur
-das Heben eines vorhandenen.
+Erster Lauf: "Fenster kommt nicht nach vorne, es erscheint nur oben mittig ein
+Hinweis von Gnome." Dieser Lauf zaehlte nicht, und das Eingestaendnis gehoert
+hierher: Thunderbird war dabei ZU - die Prozessliste zeigte hinterher, dass
+der Aufruf es erst gestartet hatte. Gemessen war damit nur der Fokus-Schutz
+beim Neustart, nicht das Heben eines vorhandenen Fensters. Ich hatte die
+Begruendung schon geschrieben, bevor das auffiel.
+
+Zweiter Lauf, mit LAUFENDEM Thunderbird und derselbe Aufruf: "Fenster bleibt
+hinten." Damit steht es: Auch mit Aktivierungs-Token hebt sich das vorhandene
+Fenster nicht. GNOME meldet stattdessen "Thunderbird ist bereit" und
+ueberlaesst dem Nutzer den Klick - das ist der Schutz davor, dass Programme
+sich in den Vordergrund draengen, und er greift auch hier.
+
+DAMIT IST DER PUNKT ERLEDIGT, NICHT OFFEN. Es gibt keinen dritten Weg: wmctrl
+und xdotool sind nicht installiert und waeren unter Wayland wirkungslos, die
+GNOME-Schnittstelle ist gesperrt, und ein Fenster von aussen zu heben ist dort
+ausdruecklich nicht vorgesehen.
+
+"gio launch" BLEIBT TROTZDEM, aus einem anderen Grund: Ueber die
+.desktop-Datei gestartet laeuft das Programm in seiner EIGENEN systemd-Einheit
+und nicht in der des Sprachdienstes - genau der Fehler, der beim
+Bildschirmfoto drei Wochen unbemerkt blieb (CLAUDE.md, Regel vom 2026-09-14).
+
+WAS DER NUTZER STATTDESSEN BEKOMMT: eine Auskunft. Laeuft das Programm schon,
+sagt DialOS das ("Das Postfach ist schon offen.") - fuer jemanden, der den
+Bildschirm nicht sieht, ist der Zustand die Antwort, nicht das Fenster. Der
+sehende Helfer daneben sieht GNOMEs Hinweis.
+
+"gio launch" uebergibt Argumente als DATEINAMEN, nicht als Schalter - fuer
+"-compose", "-calendar" und "-addressbook" bleibt der direkte Aufruf. Dort
+entsteht ohnehin ein NEUES Fenster, und ein neues kommt nach vorn.
 
 Aufruf:
   dialos-programm.py "postfach öffnen"      # startet und sagt es an
@@ -72,6 +95,7 @@ PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-programm.log")
 # Programm ist und kein anderes. Hier steht nur, wie man es ruft.
 PROGRAMME = {
     "postfach öffnen": {
+        "offen": "Das Postfach ist schon offen.",
         "befehl": ["/usr/bin/thunderbird"],
         "fenster": "/usr/share/applications/thunderbird.desktop",
         "ansage": "Ich öffne das Postfach.",
@@ -97,21 +121,25 @@ PROGRAMME = {
         "ansage": "Ich öffne die Kontakte.",
     },
     "internet öffnen": {
+        "offen": "Das Internet ist schon offen.",
         "fenster": "/usr/share/applications/firefox-esr.desktop",
         "befehl": ["/usr/bin/firefox-esr"],
         "ansage": "Ich öffne das Internet.",
     },
     "browser öffnen": {
+        "offen": "Der Browser ist schon offen.",
         "fenster": "/usr/share/applications/firefox-esr.desktop",
         "befehl": ["/usr/bin/firefox-esr"],
         "ansage": "Ich öffne den Browser.",
     },
     "musik öffnen": {
+        "offen": "Die Musik läuft schon.",
         "fenster": "/usr/share/applications/org.gnome.Rhythmbox3.desktop",
         "befehl": ["/usr/bin/rhythmbox"],
         "ansage": "Ich öffne die Musik.",
     },
     "radio öffnen": {
+        "offen": "Das Radio läuft schon.",
         "fenster": "/usr/share/applications/de.haeckerfelix.Shortwave.desktop",
         "befehl": ["/usr/bin/shortwave"],
         "ansage": "Ich öffne das Radio.",
@@ -151,6 +179,38 @@ def vorgemerkte_entwuerfe():
         return 0
 
 
+def laeuft_schon(programm):
+    """Laeuft das Programm bereits? Nur fuer die Ansage, nicht fuer den Start.
+
+    ABSICHTLICH UEBER pgrep UND NICHT UEBER EIN FENSTER: Fenster sind unter
+    Wayland von aussen nicht abfragbar - dieselbe Grenze, die das Heben
+    verhindert. Der Prozess ist es sehr wohl, und fuer die Auskunft "ist es
+    offen?" reicht er.
+    """
+    name = os.path.basename(programm)
+    # ZWEI PRUEFUNGEN, WEIL DER PROZESSNAME NICHT DER PROGRAMMNAME SEIN MUSS:
+    # "/usr/bin/thunderbird" ist bei Debian ein Startskript, der laufende
+    # Prozess ist "/usr/lib/thunderbird/thunderbird". "-x" trifft den
+    # einfachen Fall (rhythmbox, shortwave), das verankerte Muster den mit
+    # Wrapper (thunderbird, firefox-esr).
+    #
+    # DAS "^" IST NICHT KOSMETIK - beim Probieren am 2026-09-21 meldete ein
+    # unverankertes "/thunderbird" einen laufenden Thunderbird, obwohl keiner
+    # lief: Getroffen hatte es die Befehlszeile der Pruefung selbst. Eine
+    # Auskunft, die sich selbst sieht, ist schlimmer als gar keine.
+    for befehl in (["/usr/bin/pgrep", "-x", name],
+                   ["/usr/bin/pgrep", "-f", f"^/usr/lib/{name}/{name}"]):
+        try:
+            fertig = subprocess.run(befehl, capture_output=True, timeout=5)
+        except (OSError, subprocess.SubprocessError) as fehler:
+            melde(f"pgrep fehlgeschlagen: {fehler}")
+            return False
+        if fertig.returncode == 0:
+            melde(f"{name} laeuft schon (gefunden mit {' '.join(befehl[1:])})")
+            return True
+    return False
+
+
 def starten(satz):
     """Das Programm zum Satz starten. True, wenn es losgelaufen ist."""
     eintrag = PROGRAMME.get(satz)
@@ -164,6 +224,10 @@ def starten(satz):
                                      "eingerichtet."))
         return False
     ansage = eintrag["ansage"]
+    # NUR BEI DEN SAETZEN OHNE SCHALTER: "neue E-Mail schreiben" oeffnet immer
+    # ein neues Fenster, da waere "ist schon offen" schlicht falsch.
+    if eintrag.get("fenster") and laeuft_schon(programm):
+        ansage = eintrag.get("offen", "Das Programm läuft schon.")
     wartende = vorgemerkte_entwuerfe() if "thunderbird" in programm else 0
     if wartende:
         ansage += (" Ich trage dabei den vorgemerkten Entwurf ein."

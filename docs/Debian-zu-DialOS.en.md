@@ -3535,12 +3535,17 @@ nowhere else; `dialos-sprachbefehl-desktop.py` reads the list at startup, like
 the extensions' sentences. **After installing, the voice service must be
 restarted** (log out and in), otherwise the grammar does not know them.
 
-**Launching goes through the `.desktop` file** (`gio launch`) wherever one
-exists - not through `/usr/bin/…`. Under Wayland a foreign process may not
-bring a window to the front; only the application itself may, and only with
-the activation token that a start through the `.desktop` file provides. With
-the bare program path an already open Thunderbird window stayed in the
-background (seen by Stephan on 2026-09-21, wrongly claimed by me before).
+**An already open window does not come to the front** - measured on
+2026-09-21 with Thunderbird running: "the window stays in the back", GNOME
+only reports "Thunderbird is ready". Under Wayland a foreign process may not
+raise a window, not even with an activation token through the `.desktop`
+file. DialOS therefore announces the state ("Das Postfach ist schon offen.").
+Real switching would need our own GNOME Shell extension (TODO.md).
+
+**Launching still goes through the `.desktop` file** (`gio launch`) wherever
+one exists: the program then runs in its OWN systemd unit rather than the
+voice service's - exactly the error that went unnoticed for three weeks with
+the screenshot (see the rule of 2026-09-14).
 
 "Postfach öffnen" is also the resolution for queued drafts: it starts
 Thunderbird, and the bridge files whatever is waiting - announcing it first.

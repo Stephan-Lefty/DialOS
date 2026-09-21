@@ -64,6 +64,29 @@ finished too, and then move down together. That way no reference breaks.
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
   that DialOS can show or read out on the device.
 
+- [ ] **Our own GNOME Shell extension for switching between windows**
+  (Stephan's question on 2026-09-21: "can one not walk through the windows by
+  voice?"). Not today, and that is not DialOS's fault: under Wayland a foreign
+  process may not raise a window. Measured twice on the device - even with an
+  activation token through the `.desktop` file, an open Thunderbird window
+  stays in the back and GNOME only reports "Thunderbird is ready".
+
+  **The only clean route is the same one as with Thunderbird: ask the program
+  that owns the thing.** An extension runs INSIDE the window manager and may
+  do everything there - list windows, name them, activate them, close them.
+  That would give: "which windows are open?", "switch to Thunderbird", "next
+  window", "close the window".
+
+  **What it costs, honestly:** a new component in GJS (a second language in
+  the project), tied to the GNOME version - at a GNOME jump it must be brought
+  along, or GNOME disables it. Plus the link to the voice service (D-Bus), so
+  the same pattern as the Thunderbird bridge.
+
+  **`ydotool` is the shortcut and is not taken:** it injects key presses such
+  as Alt+Tab straight into the kernel and needs a root service for it that can
+  produce arbitrary input. On a device standing in other people's homes, that
+  is the wrong corner to cut.
+
 - [ ] **Carry the program list further - and resolve one contradiction**
   (2026-09-21, from Stephan's prompt "we need a list of commands that start
   the programs anyway"). Nine sentences live in `dialos-programm.py` and are

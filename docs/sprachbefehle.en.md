@@ -88,18 +88,29 @@ listen?".
 > 2. **The microphone stays with DialOS.** Opening a program is neither a
 >    dictation nor an extension - the voice control keeps listening, and the
 >    next command goes through immediately.
-> 3. **Launching goes through the `.desktop` file, not the program path**
->    (corrected on 2026-09-21 after Stephan checked: "if Thunderbird is already
->    open, 'Postfach öffnen' does not bring the existing window to the front").
->    Under Wayland a foreign process **may not** raise a window - that is
->    deliberately prevented so no background program can jump into view. Only
->    the application may raise itself, and only with an activation token
->    (`XDG_ACTIVATION_TOKEN`), which exists only when it is started through the
->    `.desktop` file. Hence `gio launch`. Window management does not help:
->    `wmctrl` and `xdotool` are not installed and would be ineffective under
->    Wayland, and the GNOME interface is locked down. **Where flags are needed**
->    (`-compose`, `-calendar`, `-addressbook`) the direct call stays - a new
->    window appears there anyway, and a new window does come to the front.
+> 3. **An already open window does not come to the front - that is impossible
+>    under Wayland, so DialOS announces the state instead.** Stephan checked it
+>    twice on 2026-09-21: "the window does not come to the front, only a hint
+>    from Gnome appears at the top" (Thunderbird was closed then and the call
+>    started it, so that run did not count), and then with Thunderbird running:
+>    **"the window stays in the back."** A foreign process may not raise a
+>    window there; only the application itself may, and Thunderbird does not
+>    ask for it. GNOME reports "Thunderbird is ready" and leaves the click to
+>    the user. `wmctrl` and `xdotool` are not installed and would be
+>    ineffective under Wayland, and the GNOME interface is locked down.
+>
+>    **So the user gets an answer instead of a window:** "Das Postfach ist
+>    schon offen." For someone who cannot see the screen, the state is the
+>    answer - the window never was. The only clean route to real switching
+>    would be our own GNOME Shell extension (see `TODO.md`), i.e. the same
+>    pattern as with Thunderbird: ask the program that owns the thing.
+>
+>    **Launching still goes through the `.desktop` file** (`gio launch`), for a
+>    different reason: the program then runs in its own systemd unit rather
+>    than the voice service's - exactly the error that went unnoticed for three
+>    weeks with the screenshot. Where flags are needed (`-compose`,
+>    `-calendar`, `-addressbook`) the direct call stays: `gio launch` passes
+>    arguments as file names, not as flags.
 > 4. **There is no "close".** A "close the mailbox" could throw away a sighted
 >    helper's unsaved work, and the user cannot hear what would be lost.
 >    Quitting stays manual until there is a reason that outweighs this.

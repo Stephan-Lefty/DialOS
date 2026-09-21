@@ -3781,13 +3781,17 @@ dort; `dialos-sprachbefehl-desktop.py` liest die Liste beim Start ein, wie die
 Sätze der Erweiterungen. **Nach dem Aufspielen muss der Sprachdienst neu
 starten** (ab- und anmelden), sonst kennt die Grammatik die Sätze nicht.
 
-**Gestartet wird über die `.desktop`-Datei** (`gio launch`), wo es eine gibt -
-nicht über `/usr/bin/…`. Unter Wayland darf ein fremder Prozess kein Fenster
-nach vorn holen; nur die Anwendung selbst darf das, und nur mit dem
-Aktivierungs-Token, das der Start über die `.desktop`-Datei mitgibt. Mit dem
-nackten Programmpfad blieb ein bereits offenes Thunderbird-Fenster im
-Hintergrund (am 2026-09-21 von Stephan gesehen, vorher von mir falsch
-behauptet).
+**Ein schon offenes Fenster kommt nicht nach vorn** - am 2026-09-21 mit
+laufendem Thunderbird gemessen: „Fenster bleibt hinten", GNOME meldet nur
+„Thunderbird ist bereit". Unter Wayland darf ein fremder Prozess kein Fenster
+heben, auch nicht mit Aktivierungs-Token über die `.desktop`-Datei. DialOS
+sagt deshalb den Zustand an („Das Postfach ist schon offen."). Echtes Wechseln
+bräuchte eine eigene GNOME-Shell-Erweiterung (TODO.md).
+
+**Gestartet wird trotzdem über die `.desktop`-Datei** (`gio launch`), wo es
+eine gibt: So läuft das Programm in seiner EIGENEN systemd-Einheit und nicht
+in der des Sprachdienstes - genau der Fehler, der beim Bildschirmfoto drei
+Wochen unbemerkt blieb (siehe Regel vom 2026-09-14).
 
 „Postfach öffnen" ist zugleich die Auflösung für vorgemerkte Entwürfe: Es
 startet Thunderbird, die Brücke trägt ein, was wartet - und sagt es vorher an.

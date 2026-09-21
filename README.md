@@ -145,13 +145,17 @@ das Erfolg meldet, während es versagt.
   dort** - die Sprachsteuerung liest sie beim Start ein, wie die Sätze der
   Erweiterungen; eine zweite Liste in der Grammatik liefe beim nächsten
   Programm unbemerkt auseinander. Das Mikrofon bleibt dabei bei DialOS (ein
-  Programm zu öffnen ist kein Diktat). **Gestartet wird über die
-  `.desktop`-Datei** (`gio launch`) - das war zuerst falsch: Ich hatte
-  behauptet, ein zweiter Start hebe das vorhandene Fenster von selbst, und
-  Stephan hat am selben Tag das Gegenteil gesehen. Unter Wayland darf ein
-  fremder Prozess kein Fenster heben; nur die Anwendung selbst darf es, und
-  nur mit einem Aktivierungs-Token, das es allein beim Start über die
-  `.desktop`-Datei gibt. **Kein „schließen"**: Das könnte die ungespeicherte Arbeit
+  Programm zu öffnen ist kein Diktat). **Ein schon offenes Fenster kommt
+  nicht nach vorn** - hier stand zuerst das Gegenteil, und Stephan hat es
+  zweimal geprüft: beim ersten Lauf war Thunderbird zu (der Aufruf startete
+  es erst, der Lauf zählte nicht), beim zweiten lief es - „Fenster bleibt
+  hinten". Unter Wayland darf ein fremder Prozess kein Fenster heben, auch
+  nicht über die `.desktop`-Datei; GNOME meldet stattdessen „Thunderbird ist
+  bereit". **Deshalb sagt DialOS den Zustand an** („Das Postfach ist schon
+  offen.") - wer den Bildschirm nicht sieht, für den ist der Zustand die
+  Antwort. Gestartet wird trotzdem über die `.desktop`-Datei (`gio launch`),
+  weil das Programm so in seiner eigenen systemd-Einheit läuft und nicht in
+  der des Sprachdienstes. **Kein „schließen"**: Das könnte die ungespeicherte Arbeit
   eines sehenden Helfers wegwerfen, und der Nutzer hört nicht, was dabei
   verlorenginge. Pflichtprüfung bestanden: alle 59 Sätze wörtlich erkannt,
   kein bestehender geht durch die neun kaputt.
