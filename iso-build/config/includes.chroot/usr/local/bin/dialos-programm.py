@@ -304,6 +304,82 @@ def offenes_sichern():
     return f"{gesichert} angefangene E-Mails lege ich noch als Entwürfe ab."
 
 
+# So lange wird nach dem Start auf die Bruecke gewartet, bevor nach Entwuerfen
+# gefragt wird. Die Bruecke holt in den ersten acht Sekunden Vorgemerktes nach -
+# wer frueher fragt, zaehlt genau das nicht mit, was DialOS selbst abgelegt hat.
+ENTWUERFE_VORLAUF_S = 14
+BRUECKE_GEDULD_S = 40
+
+
+def entwuerfe_ansagen(beim_oeffnen):
+    """Auf liegende Entwuerfe hinweisen und fragen, was damit geschehen soll.
+
+    WARUM (Stephan, 2026-09-21): "Wir muessen den Nutzer hinweisen, wenn er
+    Thunderbird schliesst und/oder oeffnet, dass noch Entwuerfe vorhanden sind
+    und natuerlich fragen, wie man weiter damit umgehen soll."
+
+    Der Punkt ist neu entstanden, weil DialOS seit heute selbst Entwuerfe
+    ablegt - beim Antworten, beim Weiterleiten, beim Vormerken und beim
+    Schliessen mit offenem Schreibfenster. Wer den Bildschirm nicht sieht,
+    merkt davon sonst nie etwas: Ein Entwurf ist das einzige Ergebnis in
+    DialOS, das NICHT von selbst irgendwo ankommt.
+
+    GEFRAGT WIRD EINZELN UND NUR AUF WUNSCH. Ein "soll ich alle verschicken?"
+    waere der gefaehrlichste Satz im System - ein einziges missverstandenes
+    "ja" schickte halbfertige Texte an echte Leute.
+    """
+    stand = bruecke_fragen({"befehl": "entwuerfe"})
+    if not stand.get("ok"):
+        melde(f"Entwürfe nicht abfragbar: {stand.get('fehler')}")
+        return
+    entwuerfe = stand.get("entwuerfe") or []
+    if not entwuerfe:
+        melde("keine Entwürfe")
+        return
+    anzahl = len(entwuerfe)
+    wieviel = ("Ein Entwurf liegt" if anzahl == 1
+               else f"{anzahl} Entwürfe liegen")
+    wo = "im Postfach" if beim_oeffnen else "noch im Postfach"
+    # HOECHSTENS DREI BETREFFZEILEN. Bei zwanzig Entwuerfen waere die Aufzaehlung
+    # laenger als alles, was der Nutzer danach noch tun will.
+    namen = []
+    for eintrag in entwuerfe[:3]:
+        betreff = (eintrag.get("betreff") or "ohne Betreff").strip()
+        an = (eintrag.get("an") or "").strip()
+        namen.append(f"{betreff} an {an}" if an else betreff)
+    aufzaehlung = "; ".join(namen)
+    if anzahl > 3:
+        aufzaehlung += f"; und {anzahl - 3} weitere"
+    sprich(f"{wieviel} {wo}: {aufzaehlung}.")
+    if ja_oder_nein("Soll ich einen davon verschicken? Sage ja oder nein.") is not True:
+        sprich("Gut, sie bleiben liegen.")
+        melde(f"{anzahl} Entwürfe, nichts gesendet")
+        return
+    for eintrag in entwuerfe:
+        betreff = (eintrag.get("betreff") or "ohne Betreff").strip()
+        an = (eintrag.get("an") or "").strip()
+        wer = f" an {an}" if an else ""
+        if ja_oder_nein(f"{betreff}{wer} verschicken? Sage ja oder nein.") is not True:
+            continue
+        antwort = bruecke_fragen({"befehl": "entwurf senden", "id": eintrag.get("id")})
+        if antwort.get("ok"):
+            sprich("Ist unterwegs.")
+            melde(f"Entwurf {eintrag.get('id')} gesendet: {betreff!r}")
+        else:
+            sprich("Das hat nicht geklappt. Der Entwurf bleibt liegen.")
+            melde(f"Entwurf {eintrag.get('id')} nicht gesendet: {antwort.get('fehler')}")
+
+
+def auf_bruecke_warten(geduld=BRUECKE_GEDULD_S):
+    """Wartet, bis Thunderbird die Bruecke gestartet hat. True, wenn sie da ist."""
+    ende = time.time() + geduld
+    while time.time() < ende:
+        if bruecke_fragen({"befehl": "hallo"}).get("ok"):
+            return True
+        time.sleep(1.0)
+    return False
+
+
 def prozesse(programm):
     """Die Prozesse des Programms - eigene, ohne Hilfsprozesse.
 
@@ -365,6 +441,9 @@ def schliessen(satz):
     # Rhythmbox offen haben, kann DialOS nicht sichern - dort ist SIGTERM alles,
     # was geht, und beide fragen selbst nach, wenn etwas offen ist.
     if "thunderbird" in eintrag["programm"]:
+        # VOR DEM SCHLIESSEN HINWEISEN, NICHT DANACH: Ist Thunderbird erst zu,
+        # laesst sich kein Entwurf mehr verschicken - die Bruecke ist dann weg.
+        entwuerfe_ansagen(beim_oeffnen=False)
         # EIGENER NAME, NICHT "satz" (Fehler vom 2026-09-21): Die erste Fassung
         # ueberschrieb damit den Befehlssatz - im Protokoll stand danach
         # "'Eine angefangene E-Mail lege ich noch als Entwurf ab.': SIGTERM an
@@ -437,9 +516,10 @@ def starten(satz):
                                      "eingerichtet."))
         return False
     ansage = eintrag["ansage"]
-    # NUR BEI DEN SAETZEN OHNE SCHALTER: "neue E-Mail schreiben" oeffnet immer
-    # ein neues Fenster, da waere "ist schon offen" schlicht falsch.
-    if eintrag.get("fenster") and laeuft_schon(programm):
+    lief_schon = bool(eintrag.get("fenster")) and laeuft_schon(programm)
+    # NUR BEI DEN SAETZEN OHNE SCHALTER: "Kalender öffnen" oeffnet ein Fenster
+    # in einem schon laufenden Thunderbird, da waere "ist schon offen" falsch.
+    if lief_schon:
         ansage = eintrag.get("offen", "Das Programm läuft schon.")
     wartende = vorgemerkte_entwuerfe() if "thunderbird" in programm else 0
     if wartende:
@@ -464,6 +544,20 @@ def starten(satz):
         sprich("Das Programm ließ sich nicht öffnen.")
         return False
     melde(f"{satz!r} -> {' '.join(zeile)}")
+    # NUR BEIM POSTFACH, NICHT BEI KALENDER ODER KONTAKTEN: Wer den Kalender
+    # aufmacht, will von Entwuerfen nichts hoeren - der Hinweis gehoert dorthin,
+    # wo der Nutzer ohnehin an E-Mails denkt.
+    if satz == "postfach öffnen":
+        if auf_bruecke_warten():
+            # ERST NACH DEM NACHHOLEN FRAGEN: Die Bruecke traegt in den ersten
+            # Sekunden ein, was vorgemerkt war. Wer frueher zaehlt, uebersieht
+            # genau den Entwurf, den DialOS gerade selbst abgelegt hat. Lief
+            # Thunderbird schon, gibt es nichts nachzuholen - dann sofort.
+            if not lief_schon:
+                time.sleep(ENTWUERFE_VORLAUF_S)
+            entwuerfe_ansagen(beim_oeffnen=True)
+        else:
+            melde("Brücke kam nicht - keine Entwurfsansage")
     return True
 
 

@@ -113,6 +113,66 @@ async function mailSenden({ an, betreff, text }) {
   return { ok: true, was: "senden", an, betreff };
 }
 
+async function entwurfsordner() {
+  // Alle Entwurfsordner - es kann mehrere geben (ein Konto, lokale Ordner).
+  try {
+    return await browser.folders.query({ type: "drafts" });
+  } catch (fehler) {
+    // Aeltere Thunderbird-Fassungen kennen folders.query nicht; dann ueber
+    // die Konten gehen. Lieber zwei Wege als eine Erweiterung, die bei der
+    // naechsten Debian-Fassung stumm ausfaellt.
+    const konten = await browser.accounts.list();
+    const ordner = [];
+    for (const konto of konten) {
+      for (const f of konto.folders || []) {
+        if (f.type === "drafts") ordner.push(f);
+      }
+    }
+    return ordner;
+  }
+}
+
+async function entwuerfeZeigen() {
+  // WOZU (Stephan, 2026-09-21): "Wir muessen den Nutzer hinweisen, wenn er
+  // Thunderbird schliesst und/oder oeffnet, dass noch Entwuerfe vorhanden
+  // sind." Wer den Bildschirm nicht sieht, hat sonst keine Moeglichkeit zu
+  // merken, dass dort etwas Halbfertiges liegt - und seit DialOS Entwuerfe
+  // selbst ablegt, liegt dort regelmaessig etwas.
+  const liste = [];
+  for (const ordner of await entwurfsordner()) {
+    let seite = await browser.messages.list(ordner);
+    while (seite) {
+      for (const m of seite.messages || []) {
+        liste.push({
+          id: m.id,
+          betreff: m.subject || "",
+          an: (m.recipients || []).join(", "),
+          datum: m.date ? String(m.date) : "",
+        });
+      }
+      seite = seite.id ? await browser.messages.continueList(seite.id) : null;
+    }
+  }
+  return { ok: true, was: "entwuerfe", anzahl: liste.length, entwuerfe: liste };
+}
+
+async function entwurfSenden({ id }) {
+  // Einen LIEGENDEN Entwurf verschicken. Gefragt hat vorher DialOS, nicht
+  // diese Datei - siehe mailSenden().
+  const tab = await browser.compose.beginExisting(id);
+  try {
+    await browser.compose.sendMessage(tab.id, { mode: "sendNow" });
+  } catch (fehler) {
+    try {
+      await browser.compose.saveMessage(tab.id, { mode: "draft" });
+    } catch (zweiter) {
+      /* Fenster bleibt offen - der Entwurf ist nicht verloren */
+    }
+    return { ok: false, was: "entwurf senden", fehler: String(fehler) };
+  }
+  return { ok: true, was: "entwurf senden", id };
+}
+
 async function schreibfenster() {
   // Welche Schreibfenster stehen offen - und was steht darin?
   //
@@ -177,6 +237,8 @@ async function ausfuehren(bitte) {
   try {
     if (bitte.befehl === "entwurf") return await entwurfAblegen(bitte);
     if (bitte.befehl === "senden") return await mailSenden(bitte);
+    if (bitte.befehl === "entwuerfe") return await entwuerfeZeigen();
+    if (bitte.befehl === "entwurf senden") return await entwurfSenden(bitte);
     if (bitte.befehl === "schreibfenster") return await schreibfenster();
     if (bitte.befehl === "schreibfenster sichern") return await schreibfensterSichern();
     if (bitte.befehl === "kontakt") return await kontaktAnlegen(bitte);

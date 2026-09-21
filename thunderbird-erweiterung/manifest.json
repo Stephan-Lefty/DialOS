@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "DialOS-Brücke",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Legt Entwürfe ab und trägt Kontakte ein - für die Sprachsteuerung DialOS.",
   "applications": {
     "gecko": {
