@@ -437,9 +437,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       **Zweite Probe (2026-09-21):** Buchstabieren fehlerfrei
       (`kontakt@dialos.org`), aber der Vorschlag ersetzte den Teil vor dem At und
       schickte den Entwurf an `proband@dialos.org`. Behoben: Der lokale Teil wird
-      nie ersetzt, bei bekannter Domain kommt kein Vorschlag. **Dritte Probe am
-      Gerät offen.** Der Fehl-Entwurf liegt noch in den Entwürfen und kann dort
-      gelöscht werden.
+      nie ersetzt, bei bekannter Domain kommt kein Vorschlag.
+      **Dritte Probe (2026-09-21, 13:29) bestanden:** buchstabiert
+      `kontakt@dialos.org`, kein Vorschlag mehr, Kontrolle getrennt vor und nach
+      dem At, Entwurf an die richtige Adresse. Damit ist das Weiterleiten vom
+      Zuruf bis zum Entwurf belegt. Der Fehl-Entwurf an `proband@dialos.org`
+      liegt noch in den Entwürfen und kann dort gelöscht werden.
     - [x] **Buchstaben-Messung mit Stephans Stimme ausgewertet** (2026-09-21):
       Buchstabieralphabet 43 von 43, Buchstabennamen 16 von 26 - und „ef", „vau",
       „ix" fehlen im Wortschatz des kleinen Modells, F, V und X wären damit
