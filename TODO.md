@@ -91,7 +91,50 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Dienst mit Root-Rechten, der beliebige Eingaben erzeugen kann. Auf einem
   Gerät, das bei fremden Leuten steht, ist das die falsche Ecke zum Sparen.
 
-- [ ] **Werkzeug: prüfen, ob im Konto `nutzer` wirklich alles ankommt**
+- [ ] **Was von Hand aufs Gerät kam, bekommt keine Updates** (Stephans Frage
+  vom 2026-09-21: „Werden über Software alle Programme und Erweiterungen
+  regelmäßig auf Updates kontrolliert?" - Antwort nach Nachsehen: **nein,
+  nicht alles**). Alles aus Debian-Paketen ist abgedeckt (Sicherheitsupdates
+  über `unattended-upgrades`, der Rest alle 14 Tage über die
+  Update-Automatik, Firmware über `fwupd`; kein Flatpak, kein Snap). **Nicht
+  abgedeckt**, am 2026-09-21 auf dem Gerät erhoben:
+
+  | Was | Wo | Seit |
+  |---|---|---|
+  | 10 Python-Pakete über pip: `websockets`, `yaml`, `cffi`, `tqdm`, `pycparser`, `srt`, `hassil`, `unicode_rbnf`, `vosk`, `sherpa_onnx` | `/usr/local/lib/python3*/dist-packages` | Aufbau |
+  | LanguageTool | `/opt/languagetool` (lauscht nur auf `127.0.0.1:8081`) | 2026-08-18 |
+  | Piper | `/usr/local/share/dialos-piper` (Programmdatei 1.2.0 vom 2023-11-14) | Aufbau |
+  | Sprachmodelle Vosk klein/groß, Parakeet | `/usr/local/share/` | Aufbau |
+  | GNOME-Erweiterung *bluetooth-battery-monitor* | von Hand in `/etc/skel` und im Heimatverzeichnis | Aufbau |
+
+  **Dieselbe Lehre wie beim Nutzerkonto am selben Abend:** Was von Hand
+  kommt, fällt aus jeder Automatik heraus, und niemand merkt es.
+
+  **Drei Klassen, drei Wege:**
+  - [ ] **1. Auf Debian-Pakete umstellen**, was es dort gibt - **8 der 10**
+    pip-Pakete (alle außer `vosk` und `sherpa_onnx`). Danach laufen sie mit der
+    Update-Automatik. Am wichtigsten sind `websockets` und `yaml`: genau die
+    Sorte Bibliothek, in der Sicherheitslücken auftauchen. **Vorher prüfen:**
+    Debians Fassung kann eine andere sein als die per pip installierte -
+    `hassil` baut unsere Grammatik, also nach dem Umstellen
+    `dialos-grammatik-pruefen.py` laufen lassen und den Prüfstand. Die
+    pip-Fassungen erst entfernen, wenn das besteht (sonst überdeckt pip die
+    Debian-Fassung still, weil `/usr/local` vorn im Suchpfad steht).
+  - [ ] **2. Festhalten, aber beobachten:** `vosk`, `sherpa_onnx`, Piper,
+    LanguageTool und die Modelle werden **mit Absicht nicht** automatisch
+    erneuert - ein neues Modell oder ein neuer Erkenner verändert die
+    Erkennung und muss über den Prüfstand. Gebraucht wird ein Werkzeug, das
+    **meldet**, wenn es eine neuere Fassung gibt (und bei den Programmen:
+    eine bekannte Sicherheitslücke), und dann entscheidet Stephan.
+  - [ ] **3. Entscheiden:** *bluetooth-battery-monitor* behalten (mit
+    Handpflege und dem Wissen, dass GNOME sie beim nächsten Versionssprung
+    abschaltet) oder ersetzen.
+
+  **Nicht betroffen:** unsere eigene Thunderbird-Erweiterung (kommt über
+  `scripts/dialos-erweiterung-bauen.sh`) und Claude Code über npm (nur auf
+  dem Entwicklungsgerät, eigener Updater, gehört nicht auf ein Kundengerät).
+
+- [x] **Werkzeug: prüfen, ob im Konto `nutzer` wirklich alles ankommt**
   (Stephans Regel vom 2026-09-21, ausführlich in [CLAUDE.md](CLAUDE.md)). Die
   Regel selbst hält nur so lange, wie jemand daran denkt - bei
   `dialos-installstand.sh` war das die Lehre, und dort hat ein Werkzeug sie
@@ -107,9 +150,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   dasselbe Muster wie `dialos-installstand.sh --befehl`: melden, was fehlt, und
   den Befehl ausgeben, der es einrichtet.
 
-  **Zwei Dinge sind heute schon bekannt und wären der erste Testfall:** die
-  MailExtension (hängt nur bei `dialosadmin`) und der Frageton im Nutzerkonto
-  (`sudo -u nutzer …` wurde am 2026-09-21 genannt, aber nie bestätigt).
+  **Erledigt am 2026-09-21, am selben Abend** (Stephan: „Das bitte unbedingt
+  jetzt noch überprüfen und gerade ziehen"): `scripts/dialos-nutzerkonto-pruefen.sh`
+  gebaut und gelaufen. **Der erste Lauf meldete neun falsche Lücken** - das
+  Werkzeug sah nur im Heimatverzeichnis nach und kannte die systemweit
+  eingeschalteten Dienste nicht. Berichtigt, dann drei echte: der
+  Mail-Archiv-Timer (nur bei `dialosadmin`, jetzt `--global`), der Frageton
+  (jetzt gesetzt) und die MailExtension (jetzt über `policies.json` mit
+  `force_installed`, am Gerät belegt: Thunderbird setzte die 0.1.6 selbst ein
+  und startete die Brücke). Stand danach: **im Konto `nutzer` fehlt nichts.**
 
 - [ ] **Die Programmliste weiterziehen - und einen Widerspruch auflösen**
   (2026-09-21, aus Stephans Anstoß „Wir müssen doch sowieso eine Liste von

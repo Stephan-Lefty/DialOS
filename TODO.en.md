@@ -87,6 +87,59 @@ finished too, and then move down together. That way no reference breaks.
   produce arbitrary input. On a device standing in other people's homes, that
   is the wrong corner to cut.
 
+- [ ] **What came onto the device by hand gets no updates** (Stephan's
+  question on 2026-09-21: "are all programs and extensions checked for updates
+  regularly?" - answer after checking: **no, not all of them**). Everything
+  from Debian packages is covered (security updates via
+  `unattended-upgrades`, the rest every 14 days via the update automation,
+  firmware via `fwupd`; no Flatpak, no Snap). **Not covered**, surveyed on the
+  device on 2026-09-21:
+
+  | What | Where | Since |
+  |---|---|---|
+  | 10 Python packages via pip: `websockets`, `yaml`, `cffi`, `tqdm`, `pycparser`, `srt`, `hassil`, `unicode_rbnf`, `vosk`, `sherpa_onnx` | `/usr/local/lib/python3*/dist-packages` | setup |
+  | LanguageTool | `/opt/languagetool` (listens on `127.0.0.1:8081` only) | 2026-08-18 |
+  | Piper | `/usr/local/share/dialos-piper` (binary 1.2.0 from 2023-11-14) | setup |
+  | Speech models Vosk small/big, Parakeet | `/usr/local/share/` | setup |
+  | GNOME extension *bluetooth-battery-monitor* | by hand in `/etc/skel` and the home directory | setup |
+
+  **The same lesson as with the user account that same evening:** whatever
+  arrives by hand drops out of every automation, and nobody notices.
+
+  **Three classes, three routes:**
+  - [ ] **1. Switch to Debian packages** where they exist - **8 of the 10**
+    pip packages (all but `vosk` and `sherpa_onnx`). They then run with the
+    update automation. Most important are `websockets` and `yaml`: exactly the
+    kind of library where security holes turn up. **Check first:** Debian's
+    version may differ from the pip one - `hassil` builds our grammar, so run
+    `dialos-grammatik-pruefen.py` and the test bench after switching. Remove
+    the pip versions only once that passes (otherwise pip silently shadows the
+    Debian version, because `/usr/local` comes first in the search path).
+  - [ ] **2. Keep pinned, but watch:** `vosk`, `sherpa_onnx`, Piper,
+    LanguageTool and the models are **deliberately not** renewed
+    automatically - a new model or recogniser changes recognition and has to
+    go through the test bench. What is needed is a tool that **reports** when
+    a newer version exists (and for the programs: a known security hole), and
+    then Stephan decides.
+  - [ ] **3. Decide:** keep *bluetooth-battery-monitor* (with manual care, and
+    knowing GNOME will disable it at the next version jump) or replace it.
+
+  **Not affected:** our own Thunderbird extension (comes via
+  `scripts/dialos-erweiterung-bauen.sh`) and Claude Code via npm (only on the
+  development device, own updater, does not belong on a customer device).
+
+- [x] **Tool: check that everything really reaches the `nutzer` account**
+  (Stephan's rule of 2026-09-21, in full in [CLAUDE.md](CLAUDE.md)). **Done
+  the same evening** (Stephan: "please check this right now and straighten it
+  out"): `scripts/dialos-nutzerkonto-pruefen.sh` built and run. **The first run
+  reported nine false gaps** - the tool only looked in the home directory and
+  did not know the system-wide enabled services. Corrected, then three real
+  ones: the mail archive timer (only for `dialosadmin`, now `--global`), the
+  question tone (now set) and the MailExtension (now via `policies.json` with
+  `force_installed`, proven on the device: Thunderbird installed 0.1.6 by
+  itself and started the bridge). State afterwards: **nothing is missing in
+  the `nutzer` account.**
+
 - [ ] **Carry the program list further - and resolve one contradiction**
   (2026-09-21, from Stephan's prompt "we need a list of commands that start
   the programs anyway"). Nine sentences live in `dialos-programm.py` and are

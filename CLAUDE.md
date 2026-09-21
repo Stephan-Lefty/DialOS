@@ -224,7 +224,12 @@ dann auch die Mail verschicken!"):
    Dasselbe Muster wie am 2026-08-24. Stephan nach der Umgebung fragen - die
    Frage steht noch offen - und danach entscheiden, ob es am Geraeusch liegt
    oder am Erkenner. Das ist der Befehl, ohne den alle anderen 64 nichts nuetzen.
-8. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
+8. **Updates für alles, was von Hand kam** (Stephans Frage zum Feierabend,
+   Antwort: nein, nicht alles). 10 pip-Pakete, LanguageTool, Piper, die Modelle
+   und eine GNOME-Erweiterung fallen aus jeder Automatik heraus. Erster Schritt:
+   8 der 10 pip-Pakete auf Debian-Pakete umstellen (vorher Grammatik und
+   Prüfstand, `hassil` baut die Grammatik). Einzelheiten in TODO.md.
+9. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
    Befehlsuebersicht unterbrechbar, Du/Sie aus den Daten, polkit-Regel,
    Parakeet-Lizenzhinweis, echter Stick, MailBurgs `extract/`, Bilder/Videos.
 
