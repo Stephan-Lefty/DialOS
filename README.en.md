@@ -129,6 +129,34 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The spelling alphabet stays - now measured with Stephan's voice, not
+  Piper's** (2026-09-21). His question of 2026-09-18 after the first
+  mis-spelled address: "spelling with just the letters, wouldn't that make more
+  sense?" Measured with `scripts/dialos-buchstaben-messen.py`:
+
+  | | spelling alphabet | letter names |
+  |---|---|---|
+  | correct | **43 of 43** | 2 of 5, then aborted |
+  | missing from the vocabulary | nothing | "ef", "vau", "ix" - i.e. **F, V and X** |
+
+  **What decides it is not the hit rate but the vocabulary:** the small model
+  does not know the names for F, V and X, and Vosk drops them **silently** when
+  building the grammar - three letters would be unspellable without anyone being
+  told. The same pattern as "löschen" on 2026-08-18.
+
+  This also explains the wrong address of 2026-09-18: not the alphabet, the
+  recording. The tool first measured itself - its own announcement in the
+  buffer, recording starting inside the question tone, a level threshold above
+  the voice - and it took three runs before it measured the room correctly
+  (noise floor 14 to 66).
+
+- **The question tone belongs to short questions** (Stephan, 2026-09-21: "the
+  tone never comes"). In DialOS it is an option via `~/.config/dialos/frageton`;
+  otherwise only Piper's rising intonation carries it - and that is inaudible on
+  a single "a" or "be". The measuring tool therefore plays it itself, without
+  changing the device setting. **Open, as Stephan's decision:** whether DialOS
+  should play it for questions in general.
+
 - **The first spelled-out address came out wrong - three improvements**
   (2026-09-18, Stephan's trial on the device). "kontakt@dialos.org" became
   `komteakte@teialos.or`: Nordpol heard as Martha, Dora as Theodor, the Gustav

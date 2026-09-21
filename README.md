@@ -137,6 +137,33 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Das Buchstabieralphabet bleibt - jetzt mit Stephans Stimme gemessen, nicht
+  mit Pipers** (2026-09-21). Seine Frage vom 2026-09-18 nach der ersten falsch
+  buchstabierten Adresse: „Buchstabieren nur mit den Buchstaben, ist das nicht
+  sinnvoller?" Gemessen mit `scripts/dialos-buchstaben-messen.py`:
+
+  | | Buchstabieralphabet | Buchstabennamen |
+  |---|---|---|
+  | Treffer | **43 von 43** | 2 von 5, dann abgebrochen |
+  | Fehlt im Wortschatz | nichts | „ef", „vau", „ix" - also **F, V und X** |
+
+  **Der Ausschlag ist nicht die Trefferquote, sondern der Wortschatz:** Die
+  Namen für F, V und X kennt das kleine Modell nicht, Vosk wirft sie beim Bauen
+  der Grammatik **still** aus - drei Buchstaben wären damit unbuchstabierbar,
+  ohne dass es jemand erführe. Dasselbe Muster wie bei „löschen" am 2026-08-18.
+
+  Damit ist auch die falsche Adresse vom 2026-09-18 erklärt: nicht das Alphabet,
+  sondern die Aufnahme. Das Werkzeug maß erst sich selbst - eigene Ansage im
+  Puffer, Aufnahmestart im Frageton, Pegelschwelle über der Stimme -, und drei
+  Läufe brauchte es, bis es den Raum richtig vermaß (Rauschboden 14 bis 66).
+
+- **Der Frageton gehört bei kurzen Fragen dazu** (Stephan, 2026-09-21: „der Ton
+  kommt nie"). Er ist in DialOS eine Option über `~/.config/dialos/frageton`,
+  sonst trägt allein Pipers steigende Satzmelodie - und die hört man bei einem
+  einzelnen „a" oder „be" nicht. Das Messwerkzeug spielt ihn deshalb selbst,
+  ohne die Einstellung des Geräts zu ändern. **Offen, als Entscheidung für
+  Stephan:** ob DialOS ihn generell bei Rückfragen spielen soll.
+
 - **Die erste buchstabierte Adresse kam falsch an - drei Verbesserungen**
   (2026-09-18, Stephans Probe am Gerät). Aus „kontakt@dialos.org" wurde
   `komteakte@teialos.or`: Nordpol als Martha gehört, Dora als Theodor, das
