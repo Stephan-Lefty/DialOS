@@ -1,0 +1,16 @@
+Ein Server in Innsbruck. Und warum nicht das günstigste Angebot gewonnen hat.
+
+Ein Computer macht Ärger, und am Telefon fragt jemand vom Support: Sehen Sie das kleine Zahnrad rechts oben? Wer den Bildschirm nicht sieht, kommt mit dieser Frage nicht wirklich weiter.
+
+Deshalb braucht DialOS einen eigenen Server im Netz. Nur darüber kann sich später jemand aus dem Support aus der Ferne auf ein Kundengerät schalten und nachsehen, was nicht stimmt. Und so zur Lösung beim Kunden beitragen.
+
+Vier Anbieter wurden gefragt. Zwei haben geantwortet. Einer war zwar deutlich günstiger. Er sagte aber auch ehrlich: Bei der Einrichtung können wir keine Unterstützung anbieten. Damit war klar, bei diesem Angebot muss ich alles selbst in die Hand nehmen.
+Genau daran entschied es sich. Jede Stunde, die in die Einrichtung und Wartung eines Servers fließt, fehlt beim Testen am echten Gerät. Und das Testen kann niemand abnehmen.
+
+Die Wahl fiel deshalb auf ein Unternehmen in Innsbruck, eine halbe Autostunde von Seefeld in Tirol entfernt. Dort werden Einrichtung und Betreuung übernommen.
+
+Zwei Dinge kamen dazu, die im Angebot gar nicht standen. Erstens: Jede Nacht wird eine Sicherungskopie angelegt. Zweitens: Auch die Pflege des Systems übernimmt der Anbieter.
+
+Und der Ort zählt. Die Rechner stehen in Österreich. Die Daten verlassen Europa nicht.
+
+Angefangen wird erst im kommenden Januar. Das ist Absicht. Bis dahin soll DialOS in Ruhe getestet werden und auf einem festen Fundament stehen. Nicht immer entscheidet der Preis, man muss auch die Leistung genauer betrachten und schauen, was man an Zeit spart, die man für das eigentliche Projekt investieren kann.

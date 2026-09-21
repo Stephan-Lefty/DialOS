@@ -48,11 +48,42 @@ nichts automatisch: Was an die Stelle gehört, entscheidet der Sinn des Satzes.
 
 ```bash
 # 1. Sprechfassung schreiben: sprechfassungen/<beitrags-id>-<slug>.txt
-# 2. Sprechen lassen (Piper + Annas Modell nötig, siehe Skriptkopf)
+# 2. Sprechen lassen (Piper + Annas Modell nötig, siehe unten)
 ./dialos-hoerfassung-sprechen.py sprechfassungen/315-von-drei-auf-26-saetze.txt
 # 3. ANHÖREN. Erst danach:
 ./dialos-hoerfassung-hochladen.py 315 sprechfassungen/315-von-drei-auf-26-saetze.mp3
 ```
+
+### Wo Piper und Annas Stimme liegen (Stand 2026-09-21)
+
+Der Vorgabepfad im Skriptkopf – `/usr/local/share/dialos-piper/voices/` – ist
+der Pfad **auf dem Zielgerät**, nicht auf dem Arbeitsrechner. Dort liegt die
+Stimme, weil DialOS selbst sie zum Sprechen braucht.
+
+Auf dem Arbeitsrechner ist beides am 2026-09-21 neu eingerichtet worden,
+nutzerlokal und damit unabhängig von einer Systeminstallation:
+
+```
+~/.local/share/dialos-piper/venv/      piper-tts in eigener Umgebung
+~/.local/share/dialos-piper/voices/    de_DE-kerstin-low.onnx (61 MB) + .onnx.json
+```
+
+Der Aufruf braucht deshalb zwei Umgebungsvariablen:
+
+```bash
+ANNA_MODELL="$HOME/.local/share/dialos-piper/voices/de_DE-kerstin-low.onnx" \
+ANNA_PYTHON="$HOME/.local/share/dialos-piper/venv/bin/python" \
+./dialos-hoerfassung-sprechen.py sprechfassungen/<datei>.txt
+```
+
+**Warum das hier steht:** Am 2026-09-21 war von der Einrichtung des
+Vertonungstags nichts mehr übrig – weder das `piper`-Modul noch die Stimme,
+und zwar nirgendwo auf der Platte. Vermutlich hat eine Neuinstallation sie
+mitgenommen; genau davor warnt CLAUDE.md für die interne Platte. Gekostet hat
+das eine halbe Stunde Suche, weil die Anleitung nur auf den Skriptkopf verwies
+und der auf den Gerätepfad zeigt. Wer die Einrichtung erneuern muss:
+`pip install piper-tts` in ein venv, Modell und `.onnx.json` von
+`huggingface.co/rhasspy/piper-voices` (`de/de_DE/kerstin/low/`).
 
 Der dritte Schritt lädt die Datei in die Mediathek und setzt den Audio-Block
 direkt hinter den Sprachmarker im Beitrag. **Die Vertonung läuft bewusst nicht
@@ -64,8 +95,14 @@ geschrieben, und ihr Zuhause ist die Mediathek von dialos.org.
 
 ## Bisher vertont
 
-Alle siebzehn deutschen Beiträge, Stand 2026-09-17. Die englischen bewusst nicht:
+Achtzehn deutsche Beiträge, Stand 2026-09-21. Die englischen bewusst nicht:
 Anna ist eine deutsche Stimme, und eine englische Hörfassung bräuchte eine eigene.
+
+**Noch ohne Hörfassung:** „Der Prüfstand: Messen statt glauben" (2026-09-19) und
+„Tag 41 bis 47: Schreiben und wiederfinden" (2026-09-21). Beide sind nach dem
+Vertonungstag entstanden. Das ist die Kehrseite davon, dass die Vertonung
+bewusst nicht mit der Blog-Routine mitläuft: Sie holt auch niemand von selbst
+nach. Wer hier ergänzt, sieht am besten gleich die ganze Liste durch.
 
 | Beitrag | Datum | Länge |
 |---|---|---|
@@ -86,6 +123,7 @@ Anna ist eine deutsche Stimme, und eine englische Hörfassung bräuchte eine eig
 | [Der Brief, der nur durch Sprechen entsteht](https://dialos.org/der-brief-der-nur-durch-sprechen-entsteht/) | 2026-09-11 | 1:53 |
 | [Tag 34 bis 40: Als die Landkarte wieder zum Gebiet passte](https://dialos.org/dialos-tag-34-bis-40-als-die-landkarte-wieder-zum-gebiet-passte/) | 2026-09-14 | 1:57 |
 | [Von drei auf 26 Sätze](https://dialos.org/von-drei-auf-26-saetze/) | 2026-09-16 | 1:43 |
+| [Ein Server in Innsbruck](https://dialos.org/ein-server-in-innsbruck/) | 2026-09-24 | 1:49 |
 
 ### Was beim Kürzen der Chronik-Folgen zu beachten war
 
