@@ -27,6 +27,12 @@ auch die Beschriftung „gesprochen von Anna, der Stimme von DialOS" und nicht
 
 - **Höchstens zwei Minuten** (Stephans Vorgabe, 2026-09-17). Bei rund
   140 Wörtern pro Minute sind das etwa 270 Wörter.
+- **Bei Aufzählungen früher aufhören.** Anna spricht sie hörbar langsamer:
+  Am 2026-09-21 lag eine Fassung mit „Erstens, Zweitens, Drittens" bei 126
+  Wörtern pro Minute, eine gleich lange ohne bei 133 – sechs Sekunden
+  Unterschied bei nahezu gleicher Wortzahl. Wer gliedert, rechnet mit rund
+  250 Wörtern statt 270. Die Meldung des Skripts, wie viele Wörter zu
+  streichen sind, rechnet mit dem Durchschnitt und greift dann zu kurz.
 - **Keine Ziffern.** Anna schreibt Zahlen zwar aus, hetzt sie aber – gemessen
   am 2026-09-17 ist „26" 22 % kürzer als „sechsundzwanzig". Also „über zwei
   Dutzend" schreiben statt „26".
@@ -95,14 +101,15 @@ geschrieben, und ihr Zuhause ist die Mediathek von dialos.org.
 
 ## Bisher vertont
 
-Achtzehn deutsche Beiträge, Stand 2026-09-21. Die englischen bewusst nicht:
+Alle zwanzig deutschen Beiträge, Stand 2026-09-21. Die englischen bewusst nicht:
 Anna ist eine deutsche Stimme, und eine englische Hörfassung bräuchte eine eigene.
 
-**Noch ohne Hörfassung:** „Der Prüfstand: Messen statt glauben" (2026-09-19) und
-„Tag 41 bis 47: Schreiben und wiederfinden" (2026-09-21). Beide sind nach dem
-Vertonungstag entstanden. Das ist die Kehrseite davon, dass die Vertonung
-bewusst nicht mit der Blog-Routine mitläuft: Sie holt auch niemand von selbst
-nach. Wer hier ergänzt, sieht am besten gleich die ganze Liste durch.
+**Die Lücke schließt sich nicht von selbst.** Am 2026-09-21 fehlten zwei
+Hörfassungen, weil die Beiträge nach dem Vertonungstag entstanden waren – und
+aufgefallen ist das nur zufällig beim Durchsehen. Das ist die Kehrseite davon,
+dass die Vertonung bewusst nicht mit der Blog-Routine mitläuft. Wer hier
+ergänzt, vergleicht die Tabelle am besten gleich mit allen veröffentlichten
+deutschen Beiträgen.
 
 | Beitrag | Datum | Länge |
 |---|---|---|
@@ -123,11 +130,13 @@ nach. Wer hier ergänzt, sieht am besten gleich die ganze Liste durch.
 | [Der Brief, der nur durch Sprechen entsteht](https://dialos.org/der-brief-der-nur-durch-sprechen-entsteht/) | 2026-09-11 | 1:53 |
 | [Tag 34 bis 40: Als die Landkarte wieder zum Gebiet passte](https://dialos.org/dialos-tag-34-bis-40-als-die-landkarte-wieder-zum-gebiet-passte/) | 2026-09-14 | 1:57 |
 | [Von drei auf 26 Sätze](https://dialos.org/von-drei-auf-26-saetze/) | 2026-09-16 | 1:43 |
+| [Der Prüfstand: Messen statt glauben](https://dialos.org/der-pruefstand-messen-statt-glauben/) | 2026-09-19 | 1:58 |
+| [Tag 41 bis 47: Schreiben und wiederfinden](https://dialos.org/dialos-tag-41-bis-47-schreiben-und-wiederfinden/) | 2026-09-21 | 1:58 |
 | [Ein Server in Innsbruck](https://dialos.org/ein-server-in-innsbruck/) | 2026-09-24 | 1:49 |
 
 ### Was beim Kürzen der Chronik-Folgen zu beachten war
 
-Die fünf Chronik-Beiträge sind zwischen 900 und 2000 Wörter lang. Auf 250
+Die sechs Chronik-Beiträge sind zwischen 900 und 2000 Wörter lang. Auf 250
 einzudampfen ist keine Kürzung, sondern eine Auswahl: Der Beitrag belegt seine
 Aussagen mit Zahlen, Daten und Versionsnummern, die Hörfassung braucht den
 Gedanken. Bewährt hat sich, zwei oder drei Episoden herauszugreifen und den

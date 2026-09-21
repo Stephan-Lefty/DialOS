@@ -1,0 +1,13 @@
+Tag einundvierzig bis siebenundvierzig. Schreiben und wiederfinden.
+
+Die dichteste Woche seit dem Anfang. DialOS lernt zwei Dinge, und beide sind größer als ein Befehl. Einen ganzen Brief zu schreiben, den ein Mensch diktiert. Und ihn hinterher wiederzufinden.
+
+Am Montagvormittag diktierte Stephan seinen ersten vollständigen Brief. Sein Urteil danach war knapp: Den letzten Absatz konnte ich nicht mehr einsprechen. Drei Fehler steckten in diesem einen Brief. Das Programm hörte mitten im Satz ein Kommando, wo keines war. Eine Hilfsfunktion riss einen Absatz weg. Und der Briefbogen zog die Zeilenumbrüche zusammen.
+
+Aus diesem einen Brief wuchs in wenigen Stunden ein ganzes Diktat. Satz löschen und Satz wiederholen für den Versprecher. Und ein Dateiname aus Datum und Uhrzeit, damit kein Brief einen alten überschreibt.
+
+Am Nachmittag meldete die Sprachsteuerung immer wieder, es sei zu laut. Dabei hatte niemand etwas gesagt. Das Verblüffende: Das System tat genau das Richtige. Geräusche hatten zufällig den Einschaltsatz ergeben, die Abwehr hatte gegriffen. Nur meldete sie ihren Erfolg so laut, dass er selbst zur Störung wurde. Die Antwort war leise. Beim ersten Mal wird still verworfen. Erst wer es kurz darauf noch einmal versucht, bekommt eine Ansage.
+
+Am deutlichsten wurde es gegen Ende der Woche. DialOS legte einen Mailentwurf ab, und das Mailprogramm zeigte an: keine Nachrichten. Kein Fehler, keine Meldung. Der Entwurf lag richtig auf der Platte, nur eine unsichtbare Kleinigkeit in jeder Zeile stimmte nicht. Genau die Art Fehlschlag, die ein blinder Nutzer nie bemerkt.
+
+Am Ende dieser Woche schreibt DialOS einen Brief, legt ihn ab, und findet ihn Tage später über den Klang eines halb verstandenen Namens wieder.
