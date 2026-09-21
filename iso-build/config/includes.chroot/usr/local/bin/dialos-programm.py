@@ -33,9 +33,17 @@ vorsichtig zu bauen:
   * SIGTERM, NIEMALS SIGKILL. SIGTERM ist die Bitte "raeum auf und geh" -
     Thunderbird speichert dabei, was zu speichern ist. SIGKILL waere genau
     der Datenverlust, wegen dem der Befehl erst nicht existieren sollte.
-  * WER NICHT GEHT, DARF BLEIBEN. Fragt das Programm noch etwas ("Entwurf
-    speichern?"), beendet es sich nicht - dann sagt DialOS genau das, statt
-    nachzutreten. Der Nutzer sieht den Dialog ja nicht.
+  * WER NICHT GEHT, DARF BLEIBEN. Fragt das Programm noch etwas, beendet es
+    sich nicht - dann sagt DialOS genau das, statt nachzutreten.
+  * VORHER SICHERN, WAS OFFEN IST - und das war kein Vorsatz, sondern eine
+    Messung (2026-09-21): Thunderbird fragt bei SIGTERM NICHT nach. Es geht
+    nach EINER Sekunde zu, und ein angefangenes Schreibfenster ist lautlos
+    weg; der Entwurfsordner wuchs im Versuch um kein einziges Byte. Die
+    urspruengliche Sorge ("Schliessen koennte die Arbeit eines sehenden
+    Helfers wegwerfen") war also berechtigt, und die Rueckfrage allein haette
+    sie nicht aufgefangen. Deshalb fragt DialOS vor dem Schliessen die
+    Bruecke, was an Schreibfenstern offen steht, legt es als Entwurf ab und
+    SAGT, wie viele es waren.
 
 DAS FENSTER NACH VORN ZU HOLEN, BRAUCHT DIE .desktop-DATEI - GEMESSEN AM
 2026-09-21. Hier stand vorher, ein zweiter Start hebe das vorhandene Fenster
@@ -236,6 +244,7 @@ SCHLIESSEN = {
 }
 
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
+BRUECKE_SKRIPT = "/usr/local/bin/dialos-thunderbird-bruecke.py"
 # So lange wird nach dem SIGTERM gewartet, bevor DialOS sagt, dass das
 # Programm noch da ist. Thunderbird braucht beim Beenden ein paar Sekunden,
 # weil es seine Ordner schreibt.
@@ -261,6 +270,44 @@ def ja_oder_nein(frage):
     except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
         melde(f"Rückfrage nicht möglich: {fehler}")
         return None
+
+
+def bruecke_fragen(bitte):
+    """Eine Bitte an Thunderbird - {} , wenn die Bruecke nicht da ist."""
+    try:
+        spec = importlib.util.spec_from_file_location("dialos_bruecke", BRUECKE_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.fragen(bitte, zeitgrenze=20.0)
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"Brücke nicht erreichbar: {fehler}")
+        return {}
+
+
+def offenes_sichern():
+    """Vor dem Schliessen: angefangene E-Mails als Entwurf ablegen.
+
+    Gibt den Satz zurueck, den der Nutzer dazu hoeren soll - oder "".
+
+    DAS IST DIE ANTWORT AUF EINE MESSUNG, NICHT AUF EINE VERMUTUNG: Thunderbird
+    beendet sich auf SIGTERM binnen einer Sekunde und fragt nicht nach. Alles,
+    was in einem Schreibfenster steht und nicht gespeichert ist, waere weg -
+    und zwar ohne ein Geraeusch.
+    """
+    stand = bruecke_fragen({"befehl": "schreibfenster"})
+    anzahl = stand.get("anzahl", 0) if stand.get("ok") else 0
+    if not anzahl:
+        return ""
+    ergebnis = bruecke_fragen({"befehl": "schreibfenster sichern"})
+    gesichert = ergebnis.get("gesichert", 0)
+    melde(f"vor dem Schliessen gesichert: {gesichert} von {anzahl} Schreibfenster(n)")
+    if gesichert == 0:
+        # Lieber gar nicht schliessen als etwas wegwerfen: Der Aufrufer bricht
+        # daraufhin ab (siehe schliessen()).
+        return "FEHLER"
+    if gesichert == 1:
+        return "Eine angefangene E-Mail lege ich noch als Entwurf ab."
+    return f"{gesichert} angefangene E-Mails lege ich noch als Entwürfe ab."
 
 
 def prozesse(programm):
@@ -320,6 +367,18 @@ def schliessen(satz):
         sprich("Gut, ich lasse es offen.")
         melde(f"{satz!r}: abgelehnt oder nichts verstanden")
         return False
+    # NUR BEI THUNDERBIRD, UND NUR WEIL ES DIE BRUECKE GIBT: Was Firefox oder
+    # Rhythmbox offen haben, kann DialOS nicht sichern - dort ist SIGTERM alles,
+    # was geht, und beide fragen selbst nach, wenn etwas offen ist.
+    if "thunderbird" in eintrag["programm"]:
+        satz = offenes_sichern()
+        if satz == "FEHLER":
+            sprich("Es ist noch eine E-Mail offen, die ich nicht speichern "
+                   "konnte. Ich lasse das Postfach offen.")
+            melde(f"{satz!r}: abgebrochen, Sichern fehlgeschlagen")
+            return False
+        if satz:
+            sprich(satz)
     for pid in pids:
         try:
             os.kill(pid, signal.SIGTERM)

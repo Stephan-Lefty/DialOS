@@ -73,7 +73,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Internet öffnen"** / **„Browser öffnen"** | Öffnet Firefox ESR. |
 | **„Musik öffnen"** | Öffnet Rhythmbox. |
 | **„Radio öffnen"** | Öffnet Shortwave. |
-| **„Postfach schließen"** | **Mit Rückfrage:** „Soll ich das Postfach schließen? Sage ja oder nein." Danach `SIGTERM` - die Bitte „räum auf und geh", bei der Thunderbird speichert, was zu speichern ist. Ist es nach zwölf Sekunden noch da, sagt DialOS das („Vielleicht fragt Thunderbird nach etwas, das noch nicht gespeichert ist.") und tritt **nicht** nach. Läuft es gar nicht: „Das Postfach ist gar nicht offen." |
+| **„Postfach schließen"** | **Mit Rückfrage:** „Soll ich das Postfach schließen? Sage ja oder nein." **Vorher werden angefangene E-Mails gesichert** - DialOS fragt die Brücke, was an Schreibfenstern offen steht, lässt Thunderbird sie als Entwurf ablegen und sagt es an („Eine angefangene E-Mail lege ich noch als Entwurf ab."). Das ist die Antwort auf eine Messung vom 2026-09-21: **Thunderbird fragt bei `SIGTERM` nicht nach** - es geht nach einer Sekunde zu, und ungespeicherter Text ist lautlos weg (der Entwurfsordner wuchs um kein Byte). Lässt sich etwas nicht sichern, bleibt das Postfach offen. Danach erst `SIGTERM`, nie `SIGKILL`. Läuft es gar nicht: „Das Postfach ist gar nicht offen." |
 | **„Internet schließen"** / **„Browser schließen"** | Dasselbe für Firefox. |
 | **„Musik ausschalten"** | Dasselbe für Rhythmbox - „ausschalten" statt „schließen", weil Musik läuft und nicht offen steht. |
 | **„Radio ausschalten"** | Dasselbe für Shortwave. |

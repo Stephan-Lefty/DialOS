@@ -80,6 +80,52 @@ async function entwurfAblegen({ an, betreff, text, bezug }) {
            antwort_auf: bezugs_mail ? bezugs_mail.id : null };
 }
 
+async function schreibfenster() {
+  // Welche Schreibfenster stehen offen - und was steht darin?
+  //
+  // WOZU: DialOS schliesst Thunderbird auf Zuruf. Am 2026-09-21 gemessen:
+  // Auf SIGTERM geht Thunderbird nach EINER Sekunde zu und fragt nicht nach -
+  // ein angefangenes Schreibfenster ist danach lautlos weg. Wer den Bildschirm
+  // nicht sieht, merkt davon nichts. Also fragt DialOS vorher.
+  const tabs = await browser.tabs.query({ type: "messageCompose" });
+  const offen = [];
+  for (const tab of tabs) {
+    try {
+      const d = await browser.compose.getComposeDetails(tab.id);
+      offen.push({
+        id: tab.id,
+        an: (d.to || []).join(", "),
+        betreff: d.subject || "",
+      });
+    } catch (fehler) {
+      offen.push({ id: tab.id, an: "", betreff: "" });
+    }
+  }
+  return { ok: true, was: "schreibfenster", anzahl: offen.length, offen };
+}
+
+async function schreibfensterSichern() {
+  // Jedes offene Schreibfenster als Entwurf ablegen - und NICHT schliessen.
+  //
+  // NICHT SCHLIESSEN IST ABSICHT: Sitzt ein sehender Helfer davor und tippt,
+  // waere ein Fenster, das unter den Haenden verschwindet, schlimmer als das
+  // Problem. Gespeichert ist gespeichert; ob das Fenster zugeht, entscheidet
+  // gleich Thunderbird selbst beim Beenden.
+  const tabs = await browser.tabs.query({ type: "messageCompose" });
+  let gesichert = 0;
+  const fehler = [];
+  for (const tab of tabs) {
+    try {
+      await browser.compose.saveMessage(tab.id, { mode: "draft" });
+      gesichert += 1;
+    } catch (f) {
+      fehler.push(String(f));
+    }
+  }
+  return { ok: fehler.length === 0, was: "schreibfenster sichern",
+           gesichert, fehler };
+}
+
 async function kontaktAnlegen({ name, mail, firma }) {
   const buecher = await browser.addressBooks.list();
   const ziel = buecher.find((b) => !b.readOnly);
@@ -97,6 +143,8 @@ async function kontaktAnlegen({ name, mail, firma }) {
 async function ausfuehren(bitte) {
   try {
     if (bitte.befehl === "entwurf") return await entwurfAblegen(bitte);
+    if (bitte.befehl === "schreibfenster") return await schreibfenster();
+    if (bitte.befehl === "schreibfenster sichern") return await schreibfensterSichern();
     if (bitte.befehl === "kontakt") return await kontaktAnlegen(bitte);
     if (bitte.befehl === "hallo") {
       const konten = await browser.accounts.list();

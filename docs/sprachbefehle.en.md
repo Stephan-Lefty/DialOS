@@ -75,7 +75,7 @@ listen?".
 | **"Internet öffnen"** / **"Browser öffnen"** | Opens Firefox ESR. |
 | **"Musik öffnen"** (open music) | Opens Rhythmbox. |
 | **"Radio öffnen"** (open radio) | Opens Shortwave. |
-| **"Postfach schließen"** (close the mailbox) | **With a confirmation:** "Soll ich das Postfach schließen? Sage ja oder nein." Then `SIGTERM` - the request "tidy up and go", on which Thunderbird saves what needs saving. If it is still there after twelve seconds, DialOS says so ("perhaps Thunderbird is asking about something unsaved") and does **not** kick again. If it is not running: "Das Postfach ist gar nicht offen." |
+| **"Postfach schließen"** (close the mailbox) | **With a confirmation:** "Soll ich das Postfach schließen? Sage ja oder nein." **Unfinished e-mails are saved first** - DialOS asks the bridge which compose windows are open, has Thunderbird file them as drafts, and says so. This answers a measurement from 2026-09-21: **Thunderbird does not ask on `SIGTERM`** - it quits after one second and unsaved text is silently gone (the drafts folder did not grow by a single byte). If something cannot be saved, the mailbox stays open. Only then `SIGTERM`, never `SIGKILL`. If it is not running: "Das Postfach ist gar nicht offen." |
 | **"Internet schließen"** / **"Browser schließen"** | The same for Firefox. |
 | **"Musik ausschalten"** (turn the music off) | The same for Rhythmbox - "turn off" rather than "close", because music plays rather than standing open. |
 | **"Radio ausschalten"** (turn the radio off) | The same for Shortwave. |
