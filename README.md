@@ -137,6 +137,16 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Die Frage nach dem Suchbegriff sagt jetzt, was sie will** (Stephan,
+  2026-09-21: „können wir bei Dokument, wenn ich einen Begriff sagen soll, in der
+  Frage auch Begriff einfließen lassen"). Aus „Wonach soll ich suchen?" wird
+  **„Wonach soll ich in den Dokumenten suchen? Sage einen Begriff."** bzw. „…im
+  Postfach…". Das löst zwei Dinge auf einmal: Der Nutzer hört, **was** erwartet
+  wird - vorher blieb offen, ob ein Dateiname, ein Datum oder ein ganzer Satz
+  gemeint ist, und wer den Bildschirm nicht sieht, hat keine Liste, an der er
+  das abliest. Und er hört, **dass seine Bereichswahl angekommen ist**, ohne
+  eine eigene Bestätigung dafür.
+
 - **Ein Absturz der Suche war still - jetzt sagt er sich an** (2026-09-21,
   Stephan: „Nach Punkt 1 kommt keine Sprachausgabe mehr"). Beim Umbau der
   Trefferfrage hatte ich einen ganzen Block Funktionen mitüberschrieben;

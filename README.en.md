@@ -129,6 +129,15 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The question for the search term now says what it wants** (Stephan,
+  2026-09-21: "when I am supposed to say a term, can the question mention the
+  term as well"). "What shall I search for?" becomes **"What shall I search for
+  in the documents? Say a term."** or "…in the mailbox…". That solves two things
+  at once: the user hears **what** is expected - it was previously open whether a
+  file name, a date or a whole sentence was meant, and someone who cannot see the
+  screen has no list to read that from. And he hears **that his choice of area
+  arrived**, without a separate confirmation for it.
+
 - **A crash in the search was silent - now it announces itself** (2026-09-21,
   Stephan: "after point 1 no speech comes any more"). While rebuilding the hit
   question I overwrote a whole block of functions; `bereich_erfragen` was gone.
