@@ -171,19 +171,54 @@ fragt es die MailExtension, und Thunderbird legt selbst ab.
   saubere Weg waere eine eigene GNOME-Shell-Erweiterung - steht im TODO,
   entschieden ist nichts.
 
+**Am Nachmittag kam der ganze Mail-Weg dazu** (Stephan: "Dann muessen wir ja bei
+einer neuen Mail die Mailadresse, den Betreff und den Text noch hin bekommen und
+dann auch die Mail verschicken!"):
+- **Neue Erweiterung DialOS-Mail** (`dialos-mail-schreiben.py`): Empfaenger aus
+  den Kontakten oder buchstabiert, Betreff, Text diktieren, dann Stephans Form
+  der Bestaetigung - **nur die Eckdaten**, der ganze Text auf Zuruf ("Sage ja,
+  nein, oder vorlesen"). Bei allem ausser einem klaren "ja" wird abgelegt statt
+  gesendet. Nichts davon ist neu geschrieben: Empfaengerdialog, Diktat und
+  Rueckfragen kommen aus dialos-suche.py.
+- **Hinweis auf liegende Entwuerfe** beim Oeffnen und VOR dem Schliessen
+  (Stephans Punkt). Hoechstens drei werden einzeln durchgefragt, Entwuerfe ohne
+  Empfaenger uebersprungen. Ein "soll ich alle verschicken?" gibt es mit
+  Absicht nicht.
+- **Schliessen sichert vorher, was offen ist** - gemessen: Thunderbird fragt bei
+  SIGTERM NICHT nach, es geht nach einer Sekunde zu, und ein angefangenes
+  Schreibfenster waere lautlos weg gewesen. Am Geraet belegt (Drafts 2722 ->
+  3759 Bytes, Stephan: "der Entwurf ist drin").
+- **Zwei eigene Fehler derselben Art an einem Tag:** erst `saveMessage` ohne die
+  Berechtigung `compose.save`, dann ein erfundenes `beginExisting`. Beide sahen
+  nach einem Programmfehler aus. Das Schema liegt auf dem Geraet
+  (`/usr/lib/thunderbird/omni.ja`, `chrome/.../schemas/compose.json`) - bei
+  dieser API wird nachgesehen, nicht geraten.
+
 **Dienstag, in dieser Reihenfolge:**
-1. **Ab- und anmelden** - alles ist aufgespielt, aber der Sprachdienst laeuft
-   noch in der alten Fassung; die vierzehn Programmsaetze kennt die Grammatik
-   erst nach einem Neustart ueber den Autostart. Danach dieselben Proben mit
-   der Stimme statt mit der Kommandozeile.
-2. Die eine Probe, die noch fehlt: **schliessen mit ungespeichertem Entwurf**.
-   Dann fragt Thunderbird nach und beendet sich nicht - DialOS muss sagen "ist
-   noch offen", statt nachzutreten. Nur der gute Fall ist bisher belegt.
-3. Widerspruch aufloesen: "Radio einschalten" sagt "kann ich noch nicht",
+1. **Erweiterung 0.1.6 in Thunderbird installieren** (`/tmp/dialos-bruecke.xpi`
+   ist weg nach einem Neustart - dann neu packen, Befehl steht in
+   docs/Debian-zu-DialOS.md Schritt 15c). Ohne sie fehlen `senden`,
+   `entwuerfe` und der reparierte Entwurfsversand.
+2. **Probe A:** "Postfach oeffnen" - der Hinweis muss GLEICH kommen (vorher
+   18 s Stille, behoben), hoechstens drei Entwuerfe einzeln, der ohne
+   Empfaenger uebersprungen. Sagt man bei einem "ja", muss er wirklich
+   hinausgehen - das ist der Test fuer `beginNew`.
+3. **Probe B, noch nie gelaufen:** "Neue E-Mail schreiben" - Empfaenger,
+   Betreff, Text, dann bei der Frage einmal "vorlesen" sagen. Protokoll:
+   `~/.log/dialos-mail-schreiben.log`, bisher leer.
+4. **Probe C:** schliessen mit ungespeichertem Schreibfenster nochmal, jetzt
+   mit dem Sichern davor (einmal belegt, aber nur einmal).
+5. Widerspruch aufloesen: "Radio einschalten" sagt "kann ich noch nicht",
    "Radio oeffnen" oeffnet Shortwave (TODO-Punkt, Stephan entscheidet).
-4. Kontakte auf die Bruecke umhaengen (letzter Schreibweg an Thunderbird
+6. Kontakte auf die Bruecke umhaengen (letzter Schreibweg an Thunderbird
    vorbei), dann: wie kommt die Erweiterung auf ein Kundengeraet?
-5. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
+7. **Das Einschalten hat am Montag zehn Anlaeufe gebraucht** (15:40-15:48, im
+   Protokoll nur 'starten' oder '[unk]'; beim gescheiterten Versuch zeigte der
+   Pegelverlauf durchgehend Geraeusch, beim gelungenen begann er bei Null).
+   Dasselbe Muster wie am 2026-08-24. Stephan nach der Umgebung fragen - die
+   Frage steht noch offen - und danach entscheiden, ob es am Geraeusch liegt
+   oder am Erkenner. Das ist der Befehl, ohne den alle anderen 64 nichts nuetzen.
+8. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
    Befehlsuebersicht unterbrechbar, Du/Sie aus den Daten, polkit-Regel,
    Parakeet-Lizenzhinweis, echter Stick, MailBurgs `extract/`, Bilder/Videos.
 
