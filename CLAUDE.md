@@ -210,8 +210,14 @@ dann auch die Mail verschicken!"):
    mit dem Sichern davor (einmal belegt, aber nur einmal).
 5. Widerspruch aufloesen: "Radio einschalten" sagt "kann ich noch nicht",
    "Radio oeffnen" oeffnet Shortwave (TODO-Punkt, Stephan entscheidet).
-6. Kontakte auf die Bruecke umhaengen (letzter Schreibweg an Thunderbird
-   vorbei), dann: wie kommt die Erweiterung auf ein Kundengeraet?
+6. **Die Erweiterung ins Konto `nutzer` bringen** (Stephans Punkt zum
+   Feierabend). Heute haengt sie nur im Profil von `dialosadmin` - im
+   Nutzerkonto waere der ganze 2026-09-21 wirkungslos. Nachgesehen: Es gibt
+   weder `/usr/lib/thunderbird/distribution/` noch eine `policies.json`, der
+   Platz ist frei; die Bruecke selbst liegt schon systemweit richtig. Weg:
+   `policies.json` mit `ExtensionSettings`/`force_installed` (greift auch in
+   vorhandenen Profilen), Einzelheiten in TODO.md. Danach Kontakte auf die
+   Bruecke umhaengen - der letzte Schreibweg an Thunderbird vorbei.
 7. **Das Einschalten hat am Montag zehn Anlaeufe gebraucht** (15:40-15:48, im
    Protokoll nur 'starten' oder '[unk]'; beim gescheiterten Versuch zeigte der
    Pegelverlauf durchgehend Geraeusch, beim gelungenen begann er bei Null).

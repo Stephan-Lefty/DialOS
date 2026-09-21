@@ -192,11 +192,37 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     die Brücke, der Kontakt noch nicht - und damit steht das alte Muster noch
     an einer Stelle. `{"befehl": "kontakt"}` ist in der Erweiterung gebaut und
     gemessen; es fehlt nur das Umhängen.
-  - [ ] **Wie kommt die Erweiterung auf ein Kundengerät?** Heute ist sie von
-    Hand installiert. Für Weg A (jedes Gerät entsteht im Büro) reicht ein
-    Schritt im Aufbau-Rezept; sauberer wäre eine systemweite Installation über
-    `/usr/lib/thunderbird/distribution/extensions/`. Zu entscheiden, bevor das
-    zweite Gerät entsteht.
+  - [ ] **Die Erweiterung muss im Konto `nutzer` ankommen - nicht nur bei
+    `dialosadmin`** (Stephan, 2026-09-21: „Wichtig ist auch, dass die
+    Erweiterungen dann auch beim Account des Nutzers ankommen"). **Das ist
+    heute NICHT der Fall**: Sie hängt im Thunderbird-Profil von `dialosadmin`,
+    weil sie dort von Hand installiert wurde. Im Nutzerkonto wäre alles, was am
+    2026-09-21 gebaut wurde, wirkungslos - Entwurf, Senden, Entwurfs-Hinweis,
+    Sichern vor dem Schließen. Und genau dieses Konto ist das, das der Kunde
+    benutzt.
+
+    **Vorarbeit ist getan** (am 2026-09-21 nachgesehen): Es gibt **weder**
+    `/usr/lib/thunderbird/distribution/` **noch** eine `policies.json` - Debian
+    belegt den Platz nicht, der Weg ist frei. Die Brücke selbst liegt schon
+    systemweit richtig (`/usr/lib/thunderbird/native-messaging-hosts/`), gilt
+    also für jedes Konto.
+
+    **Zwei Wege, und sie unterscheiden sich an einer Stelle:**
+    - `distribution/extensions/bruecke@dialos.org.xpi` wird nur in **neue**
+      Profile übernommen. Für ein Gerät aus dem Büro (Weg A) reicht das, für
+      ein bestehendes Profil nicht.
+    - `distribution/policies.json` mit `ExtensionSettings` und
+      `installation_mode: force_installed` greift **auch in vorhandenen
+      Profilen** und lässt sich vom Nutzer nicht versehentlich entfernen. Das
+      ist der Weg für ein Kundengerät. Unsigniert ist dabei in Ordnung, weil
+      Debians Thunderbird `xpinstall.signatures.required=false` hat.
+
+    **Zu tun:** `.xpi` an einen festen Ort (z. B.
+    `/usr/local/share/dialos/dialos-bruecke.xpi`), `policies.json` ins Repo,
+    im Nutzerkonto proben (anmelden als `nutzer`, „Postfach öffnen"), dann in
+    `docs/Debian-zu-DialOS.md` Schritt 15c aufnehmen. **Nicht blind
+    aufspielen**: `force_installed` wirkt sofort in allen Profilen, das gehört
+    einmal beobachtet.
 
 - [ ] **Erweiterungsschnittstelle bauen, danach DialOS-Suche als erste
   Erweiterung** (entschieden mit Stephan am 2026-09-17). Der Entwurf steht

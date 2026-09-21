@@ -185,11 +185,36 @@ finished too, and then move down together. That way no reference breaks.
     bridge, the contact does not - so the old pattern still stands in one
     place. `{"befehl": "kontakt"}` is built and measured in the extension;
     only the rewiring is missing.
-  - [ ] **How does the extension reach a customer device?** Today it is
-    installed by hand. For route A (every device is built in the office) a
-    step in the build recipe suffices; a system-wide install through
-    `/usr/lib/thunderbird/distribution/extensions/` would be cleaner. To be
-    decided before the second device is built.
+  - [ ] **The extension must reach the `nutzer` account - not only
+    `dialosadmin`** (Stephan, 2026-09-21: "it is also important that the
+    extensions actually reach the user's account"). **Today they do not**: it
+    lives in `dialosadmin`'s Thunderbird profile because it was installed by
+    hand there. In the user account everything built on 2026-09-21 would be
+    ineffective - drafts, sending, the drafts notice, saving before closing.
+    And that account is the one the customer uses.
+
+    **Groundwork done** (checked 2026-09-21): there is **neither**
+    `/usr/lib/thunderbird/distribution/` **nor** a `policies.json` - Debian
+    does not occupy that spot, the way is clear. The bridge itself already
+    sits system-wide (`/usr/lib/thunderbird/native-messaging-hosts/`) and thus
+    applies to every account.
+
+    **Two routes, differing in one point:**
+    - `distribution/extensions/bruecke@dialos.org.xpi` is only picked up by
+      **new** profiles. Enough for a device built in the office (route A), not
+      for an existing profile.
+    - `distribution/policies.json` with `ExtensionSettings` and
+      `installation_mode: force_installed` also applies to **existing
+      profiles** and cannot be removed by accident. That is the route for a
+      customer device. Unsigned is fine, because Debian's Thunderbird has
+      `xpinstall.signatures.required=false`.
+
+    **To do:** put the `.xpi` in a fixed place (e.g.
+    `/usr/local/share/dialos/dialos-bruecke.xpi`), add `policies.json` to the
+    repo, test in the user account (log in as `nutzer`, "Postfach öffnen"),
+    then add it to `docs/Debian-zu-DialOS.md` step 15c. **Do not install it
+    blindly**: `force_installed` takes effect immediately in all profiles, and
+    that deserves to be watched once.
 
 - [ ] **Build the extension interface, then DialOS Search as the first
   extension** (decided with Stephan on 2026-09-17). The draft is complete in
