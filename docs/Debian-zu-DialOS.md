@@ -3724,7 +3724,7 @@ Vier Teile, in dieser Reihenfolge:
 
 ```bash
 # 1. Die MailExtension bauen (aus thunderbird-erweiterung/ im Repo)
-cd /pfad/zum/repo/thunderbird-erweiterung && zip -r /tmp/dialos-bruecke.xpi manifest.json hintergrund.js
+cd /pfad/zum/repo/thunderbird-erweiterung && python3 -c "import zipfile; z=zipfile.ZipFile('/tmp/dialos-bruecke.xpi','w'); [z.write(d) for d in ('manifest.json','hintergrund.js')]; z.close()"
 ```
 
 ```bash
