@@ -87,6 +87,52 @@ finished too, and then move down together. That way no reference breaks.
   produce arbitrary input. On a device standing in other people's homes, that
   is the wrong corner to cut.
 
+- [ ] **Friday 2026-09-25: complete rebuild, both accounts** (Stephan,
+  2026-09-21: "I'd like to set up the complete installation fresh on Friday,
+  for both dialosadmin and nutzer!"). This is the real proof of the standing
+  rule that DialOS can be rebuilt without gaps from
+  `docs/Debian-zu-DialOS.md`.
+
+  **NOT WITHOUT GROUNDWORK - measured on 2026-09-21:** the setup script copies
+  a **fixed list** of files, no bulk copy. Of 118 device files in the repo it
+  does **not mention 75**; after removing false alarms (10 wallpapers come via
+  `*.png`, 11 Bluetooth files are deliberately device-specific, 2 remote
+  support files are deferred) **52 are genuinely missing** - among them
+  `dialos-diktat.py`, `dialos-notiz.py`, the search, `dialos-brief-din.py`, the
+  mail archive, all `systemd --user` services, the sudoers rules and the
+  security-update configuration. On this device all of that arrived through
+  `dialos-aufspielen`; the setup script has not been kept up since mid-August.
+  **A rebuild by script would yield roughly the state of 2026-08-16** - and
+  some of it would only be noticed days later.
+
+  **Groundwork Tuesday to Thursday:**
+  - [ ] **Files:** the setup script calls `dialos-aufspielen` from the repo at
+    the end (`sudo repo/.../usr/local/sbin/dialos-aufspielen --wirklich`). That
+    closes all 52 file gaps at once and cannot drift apart again, because it
+    is the very route used every day - exclusion list included (voice choice,
+    Bluetooth, remote support).
+  - [ ] **Actions that are not files** - `dialos-aufspielen` does NOT cover
+    them: `systemctl --global enable` for the services,
+    `dialos-erweiterung-bauen.sh`, pip or Debian packages (see the update item
+    below), speech models, LanguageTool into `/opt`, Piper, Parakeet
+    (`dialos-parakeet-einrichten.sh`), question tone and personal data per
+    account. Cross-check against `Debian-zu-DialOS.md` step by step and move
+    them into the scripts.
+  - [ ] **Back up before wiping:** a **Rescuezilla image** of today's state
+    (that is the way back if the rebuild gets stuck - according to
+    `docs/iso-builds.md` none exists yet), plus what is NOT in the repo and
+    must not be: `~/.config/dialos/persoenliche-daten.txt` of both accounts,
+    the Thunderbird profile (test account `proband@dialos.org`),
+    `~/Dokumente`, `~/Notizen`, the personal dictionary. Recordings are on the
+    external disk and unaffected.
+  - [ ] **Claude's own memory is lost in the process** (see the top of
+    CLAUDE.md) - check beforehand that everything needed is in the repo.
+
+  **On Friday itself:** strictly by the recipe, and **write down every manual
+  step that is not in it, immediately** - it is a gap. Acceptance with
+  `scripts/dialos-installstand.sh` (device = repo?) and
+  `scripts/dialos-nutzerkonto-pruefen.sh` (`nutzer` account complete?).
+
 - [ ] **What came onto the device by hand gets no updates** (Stephan's
   question on 2026-09-21: "are all programs and extensions checked for updates
   regularly?" - answer after checking: **no, not all of them**). Everything

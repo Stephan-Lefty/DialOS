@@ -91,6 +91,51 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Dienst mit Root-Rechten, der beliebige Eingaben erzeugen kann. Auf einem
   Gerät, das bei fremden Leuten steht, ist das die falsche Ecke zum Sparen.
 
+- [ ] **Freitag 2026-09-25: kompletter Neuaufbau, beide Konten** (Stephan,
+  2026-09-21: „Ich würde gerne am Freitag einmal die komplette Installation
+  sowohl für dialosadmin und dem nutzer neu aufzusetzen!"). Das ist der
+  eigentliche Beweis für die Dauerregel, dass sich DialOS lückenlos aus
+  `docs/Debian-zu-DialOS.md` nachbauen lässt.
+
+  **NICHT OHNE VORARBEIT - am 2026-09-21 gemessen:** Das Aufbau-Skript kopiert
+  eine **feste Liste** von Dateien, keine Sammelkopie. Von 118 Gerätedateien im
+  Repo nennt es **75 nicht**; nach Abzug von falschem Alarm (10
+  Hintergrundbilder kommen per `*.png`, 11 Bluetooth-Dateien sind mit Absicht
+  gerätespezifisch, 2 Fernwartungsdateien zurückgestellt) **fehlen 52 echt** -
+  darunter `dialos-diktat.py`, `dialos-notiz.py`, die Suche, `dialos-brief-din.py`,
+  das Mail-Archiv, alle `systemd --user`-Dienste, die sudoers-Regeln und die
+  Konfiguration der Sicherheitsupdates. Auf diesem Gerät kam das alles über
+  `dialos-aufspielen`; das Aufbau-Skript ist seit Mitte August nicht
+  nachgezogen worden. **Ein Neuaufbau nach Skript ergäbe ungefähr den Stand
+  vom 2026-08-16** - und einiges davon fiele erst Tage später auf.
+
+  **Vorarbeit Dienstag bis Donnerstag:**
+  - [ ] **Dateien:** Das Aufbau-Skript ruft am Ende `dialos-aufspielen` aus dem
+    Repo auf (`sudo repo/.../usr/local/sbin/dialos-aufspielen --wirklich`).
+    Das schließt alle 52 Datei-Lücken auf einmal und kann nicht wieder
+    auseinanderlaufen, weil es genau der Weg ist, der täglich benutzt wird -
+    samt seiner Ausschlussliste (Stimmwahl, Bluetooth, Fernwartung).
+  - [ ] **Handlungen, die keine Dateien sind** - das deckt `dialos-aufspielen`
+    NICHT ab: Dienste `systemctl --global enable`, `dialos-erweiterung-bauen.sh`,
+    pip- bzw. Debian-Pakete (siehe den Update-Punkt oben), Sprachmodelle,
+    LanguageTool nach `/opt`, Piper, Parakeet (`dialos-parakeet-einrichten.sh`),
+    Frageton und persönliche Daten je Konto. Gegen `Debian-zu-DialOS.md` Schritt
+    für Schritt abgleichen und in die Skripte bringen.
+  - [ ] **Sichern, bevor gelöscht wird:** ein **Rescuezilla-Abbild** des
+    heutigen Stands (das ist der Rückweg, falls der Neuaufbau hängt - laut
+    `docs/iso-builds.md` gibt es noch keins), dazu was NICHT im Repo liegt und
+    liegen darf: `~/.config/dialos/persoenliche-daten.txt` beider Konten,
+    Thunderbird-Profil (Testkonto `proband@dialos.org`), `~/Dokumente`,
+    `~/Notizen`, das persönliche Wörterbuch. Aufnahmen liegen auf der externen
+    Platte und sind nicht betroffen.
+  - [ ] **Claudes eigenes Gedächtnis geht dabei verloren** (steht oben in
+    CLAUDE.md) - vorher prüfen, dass alles Nötige im Repo steht.
+
+  **Am Freitag selbst:** streng nach Rezept, und **jeden Handgriff, der nicht
+  darin steht, sofort aufschreiben** - er ist eine Lücke. Abnahme mit
+  `scripts/dialos-installstand.sh` (Gerät = Repo?) und
+  `scripts/dialos-nutzerkonto-pruefen.sh` (Konto `nutzer` vollständig?).
+
 - [ ] **Was von Hand aufs Gerät kam, bekommt keine Updates** (Stephans Frage
   vom 2026-09-21: „Werden über Software alle Programme und Erweiterungen
   regelmäßig auf Updates kontrolliert?" - Antwort nach Nachsehen: **nein,

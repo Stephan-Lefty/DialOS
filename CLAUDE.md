@@ -195,10 +195,11 @@ dann auch die Mail verschicken!"):
   dieser API wird nachgesehen, nicht geraten.
 
 **Dienstag, in dieser Reihenfolge:**
-1. **Erweiterung 0.1.6 in Thunderbird installieren** (`/tmp/dialos-bruecke.xpi`
-   ist weg nach einem Neustart - dann neu packen, Befehl steht in
-   docs/Debian-zu-DialOS.md Schritt 15c). Ohne sie fehlen `senden`,
-   `entwuerfe` und der reparierte Entwurfsversand.
+1. ~~Erweiterung 0.1.6 von Hand installieren~~ **Erledigt, und zwar nicht von
+   Hand:** Thunderbird setzt sie seit dem Abend des 2026-09-21 über
+   `policies.json` selbst ein (siehe Punkt 6). Nach einer Änderung an der
+   Erweiterung: Fassung in `manifest.json` hochzählen, dann
+   `sudo scripts/dialos-erweiterung-bauen.sh`.
 2. **Probe A:** "Postfach oeffnen" - der Hinweis muss GLEICH kommen (vorher
    18 s Stille, behoben), hoechstens drei Entwuerfe einzeln, der ohne
    Empfaenger uebersprungen. Sagt man bei einem "ja", muss er wirklich
@@ -210,26 +211,32 @@ dann auch die Mail verschicken!"):
    mit dem Sichern davor (einmal belegt, aber nur einmal).
 5. Widerspruch aufloesen: "Radio einschalten" sagt "kann ich noch nicht",
    "Radio oeffnen" oeffnet Shortwave (TODO-Punkt, Stephan entscheidet).
-6. **Die Erweiterung ins Konto `nutzer` bringen** (Stephans Punkt zum
-   Feierabend). Heute haengt sie nur im Profil von `dialosadmin` - im
-   Nutzerkonto waere der ganze 2026-09-21 wirkungslos. Nachgesehen: Es gibt
-   weder `/usr/lib/thunderbird/distribution/` noch eine `policies.json`, der
-   Platz ist frei; die Bruecke selbst liegt schon systemweit richtig. Weg:
-   `policies.json` mit `ExtensionSettings`/`force_installed` (greift auch in
-   vorhandenen Profilen), Einzelheiten in TODO.md. Danach Kontakte auf die
-   Bruecke umhaengen - der letzte Schreibweg an Thunderbird vorbei.
+6. ~~Die Erweiterung ins Konto `nutzer` bringen~~ **Erledigt am selben Abend:**
+   `policies.json` mit `force_installed`, die .xpi unter
+   `/usr/local/share/dialos/`. Thunderbird setzte die 0.1.6 selbst ein und
+   startete die Brücke (16:41:56). `dialos-nutzerkonto-pruefen.sh`: im Konto
+   `nutzer` fehlt nichts. Offen bleibt nur: Kontakte auf die Brücke umhängen -
+   der letzte Schreibweg an Thunderbird vorbei.
 7. **Das Einschalten hat am Montag zehn Anlaeufe gebraucht** (15:40-15:48, im
    Protokoll nur 'starten' oder '[unk]'; beim gescheiterten Versuch zeigte der
    Pegelverlauf durchgehend Geraeusch, beim gelungenen begann er bei Null).
    Dasselbe Muster wie am 2026-08-24. Stephan nach der Umgebung fragen - die
    Frage steht noch offen - und danach entscheiden, ob es am Geraeusch liegt
    oder am Erkenner. Das ist der Befehl, ohne den alle anderen 64 nichts nuetzen.
-8. **Updates für alles, was von Hand kam** (Stephans Frage zum Feierabend,
+8. **VORARBEIT FÜR FREITAG, DEN KOMPLETTEN NEUAUFBAU** (Stephans Wunsch:
+   beide Konten neu). Gemessen am 2026-09-21: Dem Aufbau-Skript fehlen **52
+   Gerätedateien**, darunter `dialos-diktat.py` - es kopiert eine feste Liste und
+   ist seit Mitte August nicht nachgezogen; alles Spätere kam über
+   `dialos-aufspielen`. Ein Neuaufbau nach Skript ergäbe den Stand vom
+   2026-08-16. Weg: Skript ruft `dialos-aufspielen` auf (Dateien), die
+   Handlungen (Dienste, Modelle, Pakete, Erweiterung) kommen dazu, vorher ein
+   Rescuezilla-Abbild. Einzelheiten und Häkchen in TODO.md.
+9. **Updates für alles, was von Hand kam** (Stephans Frage zum Feierabend,
    Antwort: nein, nicht alles). 10 pip-Pakete, LanguageTool, Piper, die Modelle
    und eine GNOME-Erweiterung fallen aus jeder Automatik heraus. Erster Schritt:
    8 der 10 pip-Pakete auf Debian-Pakete umstellen (vorher Grammatik und
    Prüfstand, `hassil` baut die Grammatik). Einzelheiten in TODO.md.
-9. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
+10. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
    Befehlsuebersicht unterbrechbar, Du/Sie aus den Daten, polkit-Regel,
    Parakeet-Lizenzhinweis, echter Stick, MailBurgs `extract/`, Bilder/Videos.
 
