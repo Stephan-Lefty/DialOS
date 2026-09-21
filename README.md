@@ -137,6 +137,19 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Ein Absturz der Suche war still - jetzt sagt er sich an** (2026-09-21,
+  Stephan: „Nach Punkt 1 kommt keine Sprachausgabe mehr"). Beim Umbau der
+  Trefferfrage hatte ich einen ganzen Block Funktionen mitüberschrieben;
+  `bereich_erfragen` fehlte. Die Erweiterung startete, lud Parakeet und endete
+  sofort - **im Protokoll stand nur „beendet", gesagt wurde nichts.** Wer den
+  Bildschirm nicht sieht, steht dann vor einem Gerät, das schweigt.
+
+  Zwei Dinge daraus: Der Fehler ist behoben, und **jeder Absturz landet jetzt
+  mit vollem Traceback im Protokoll und wird angesagt** („Bei der Suche ist
+  etwas schiefgegangen. Ich höre wieder zu."). Dass `python3 -m py_compile` und
+  der Selbsttest sauber durchliefen, hat den fehlenden Namen nicht gefunden -
+  er fällt erst zur Laufzeit auf, und genau dafür braucht es diese Meldung.
+
 - **Nach dem Vorlesen ist nicht Schluss** (Stephan, 2026-09-21, aus der Probe mit
   Dokumenten: „nach dem Vorlesen kommt nix mehr!"). Die Suche endete nach der
   ersten Handlung - wer einen Brief gehört hatte und ihn drucken wollte, musste

@@ -129,6 +129,19 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **A crash in the search was silent - now it announces itself** (2026-09-21,
+  Stephan: "after point 1 no speech comes any more"). While rebuilding the hit
+  question I overwrote a whole block of functions; `bereich_erfragen` was gone.
+  The extension started, loaded Parakeet and ended immediately - **the log said
+  only "finished", nothing was spoken.** Someone who cannot see the screen is
+  then left with a device that stays silent.
+
+  Two things from this: the error is fixed, and **every crash now lands in the
+  log with its full traceback and is announced** ("something went wrong with the
+  search; I am listening again"). That `python3 -m py_compile` and the self-test
+  both passed did not catch the missing name - it only shows at runtime, and
+  that is exactly what the message is for.
+
 - **After reading out, it is not over** (Stephan, 2026-09-21, from the document
   trial: "after the reading nothing comes any more!"). The search ended after the
   first action - whoever had heard a letter and wanted to print it had to speak

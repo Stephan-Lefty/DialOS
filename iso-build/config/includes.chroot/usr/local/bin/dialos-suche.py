@@ -1197,6 +1197,32 @@ def vorlesen_anbieten(t, erkenner, modell):
     return ergebnis
 
 
+def bereich_erfragen(erkenner, modell):
+    """Welcher Bereich - Dokumente oder Postfach. Arten-Tupel oder None."""
+    for _versuch in range(2):
+        texte, gesprochen = antwort_hoeren(ANSAGE_BEREICH, erkenner, modell, mit_pegel=True)
+        if _abbruch(texte):
+            return None
+        worte = [w.strip(".,!?").lower() for text in texte for w in text.split()]
+        for wort in worte:
+            if wort in NOCH_NICHT:
+                sprich(ANSAGE_NOCH_NICHT_BEREICH)
+                return None
+            if wort in BEREICHE:
+                melde(f"  Bereich: {BEREICHE[wort]}")
+                return BEREICHE[wort]
+        # Klang und Aehnlichkeit wie bei der Art - "Postfach" kam als "Hostwa" an.
+        arten = {a for arten in BEREICHE.values() for a in arten}
+        art = art_aus_antwort(texte, arten)
+        if art:
+            return ("Mail",) if art == "Mail" else ("Brief", "Notiz", "Ablage")
+        if not gesprochen:
+            sprich("Ich höre nichts mehr. Die Suche ist beendet.")
+            return None
+        sprich("Das habe ich nicht verstanden.")
+    return None
+
+
 def suchen(begriffe, erkenner=None, modell=None, arten=None):
     """Den Index fragen und das Ergebnis ansagen.
 
@@ -1342,6 +1368,17 @@ def main():
             sprich("Gut, ich suche nicht.")
             return 0
         return suchen(begriffe, erkenner, modell, arten)
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        # EIN ABSTURZ DARF NICHT STILL SEIN (2026-09-21, Stephan: "Nach Punkt 1
+        # kommt keine Sprachausgabe mehr"). Eine fehlende Funktion liess die
+        # Erweiterung sofort enden; im Protokoll stand nur "beendet", gesagt
+        # wurde gar nichts - und wer den Bildschirm nicht sieht, steht vor einem
+        # Geraet, das schweigt. Jetzt steht der ganze Fehler im Protokoll, und
+        # der Nutzer hoert, dass etwas schiefging.
+        import traceback
+        melde("ABSTURZ: " + traceback.format_exc().strip().replace("\n", " | "))
+        sprich("Bei der Suche ist etwas schiefgegangen. Ich höre wieder zu.")
+        return 1
     finally:
         try:
             os.unlink(MARKE)
