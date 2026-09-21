@@ -950,10 +950,31 @@ def bekannte_adressen():
 
 
 def adresse_pruefen(adresse):
-    """Eine bekannte Adresse, die fast so aussieht - oder None."""
+    """Eine bekannte Adresse, die fast so aussieht - oder None.
+
+    DER TEIL VOR DEM AT WIRD NIE ERSETZT (2026-09-21, am Geraet aufgelaufen).
+    Stephan buchstabierte "kontakt@dialos.org" - fehlerfrei, das Protokoll
+    belegt es. Dann schlug diese Funktion "proband@dialos.org" vor (0,72
+    Aehnlichkeit), er sagte ja, und der Entwurf ging an den falschen
+    Empfaenger. Der Fehler lag im Entwurf, nicht in der Erkennung: "kontakt@"
+    und "proband@" sind ZWEI POSTFAECHER, kein Tippfehler. Eine Hilfe, die aus
+    einer richtigen Adresse eine falsche macht, ist schlimmer als keine.
+
+    Deshalb jetzt:
+      1. Ist die Domain bekannt, gilt die Adresse als plausibel - kein Vorschlag.
+      2. Sonst wird die GANZE Adresse nur bei sehr hoher Aehnlichkeit (0,9)
+         vorgeschlagen - das faengt einen verhoerten Buchstaben, nicht ein
+         anderes Postfach.
+      3. Sonst wird nur die DOMAIN ersetzt, der Teil davor bleibt unangetastet.
+    """
     import difflib
-    beste, bester_wert = None, 0.72
-    for bekannt in bekannte_adressen():
+    lokal, _, domain = adresse.partition("@")
+    bekannte = bekannte_adressen()
+    bekannte_domains = {a.partition("@")[2] for a in bekannte}
+    if domain in bekannte_domains:
+        return None
+    beste, bester_wert = None, 0.9
+    for bekannt in bekannte:
         if bekannt == adresse:
             return None                    # sie ist schon genau richtig
         wert = difflib.SequenceMatcher(None, adresse, bekannt).ratio()
@@ -962,16 +983,12 @@ def adresse_pruefen(adresse):
     if beste:
         melde(f"  aehnliche bekannte Adresse: {beste!r} ({bester_wert:.2f})")
         return beste
-    # NUR DIE DOMAIN VERGLEICHEN, wenn die ganze Adresse neu ist (2026-09-18):
-    # "kontakte@dialos.org" steht nirgends, "dialos.org" dagegen schon. Der
-    # Teil hinter dem At ist der, bei dem ein Buchstabierfehler die Mail
-    # unzustellbar macht - der Teil davor faellt beim Empfaenger hoechstens auf.
-    lokal, _, domain = adresse.partition("@")
-    bekannte_domains = {a.partition("@")[2] for a in bekannte_adressen()}
+    # NUR DIE DOMAIN VERGLEICHEN (2026-09-18): "kontakt@dialos.org" steht
+    # nirgends, "dialos.org" dagegen schon. Der Teil hinter dem At ist der, bei
+    # dem ein Buchstabierfehler die Mail unzustellbar macht - der Teil davor
+    # gehoert dem Nutzer und bleibt, wie er ihn buchstabiert hat.
     beste_domain, wert_domain = None, 0.7
     for bekannt in bekannte_domains:
-        if bekannt == domain:
-            return None
         wert = difflib.SequenceMatcher(None, domain, bekannt).ratio()
         if wert > wert_domain:
             beste_domain, wert_domain = bekannt, wert

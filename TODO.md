@@ -433,7 +433,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       vollständig, Entwurf mit Fwd: abgelegt - aber die Adresse kam als
       komteakte@teialos.or an statt kontakt@dialos.org. Daraus gebaut:
       Gegenlesen mit bekannten Adressen und Domains, getrenntes Vorlesen vor
-      und nach dem At, bis zu drei Anläufe. Erneute Probe offen.
+      und nach dem At, bis zu drei Anläufe.
+      **Zweite Probe (2026-09-21):** Buchstabieren fehlerfrei
+      (`kontakt@dialos.org`), aber der Vorschlag ersetzte den Teil vor dem At und
+      schickte den Entwurf an `proband@dialos.org`. Behoben: Der lokale Teil wird
+      nie ersetzt, bei bekannter Domain kommt kein Vorschlag. **Dritte Probe am
+      Gerät offen.** Der Fehl-Entwurf liegt noch in den Entwürfen und kann dort
+      gelöscht werden.
     - [x] **Buchstaben-Messung mit Stephans Stimme ausgewertet** (2026-09-21):
       Buchstabieralphabet 43 von 43, Buchstabennamen 16 von 26 - und „ef", „vau",
       „ix" fehlen im Wortschatz des kleinen Modells, F, V und X wären damit

@@ -137,6 +137,23 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Der Hilfsvorschlag machte aus einer richtigen Adresse eine falsche**
+  (2026-09-21, Stephans Probe am Gerät). Er buchstabierte `kontakt@dialos.org`
+  **fehlerfrei** - das Protokoll belegt es. Dann schlug DialOS
+  `proband@dialos.org` vor (0,72 Ähnlichkeit), er bestätigte, und der Entwurf
+  ging an den falschen Empfänger.
+
+  **Der Fehler lag im Entwurf, nicht in der Erkennung:** „kontakt@" und
+  „proband@" sind **zwei Postfächer, kein Tippfehler**. Der Teil vor dem
+  At-Zeichen gehört dem Nutzer und wird jetzt **nie** ersetzt. Ist die Domain
+  bekannt, gilt die Adresse als plausibel und es kommt gar kein Vorschlag; sonst
+  wird die ganze Adresse erst ab 0,9 Ähnlichkeit angeboten, und sonst nur die
+  **Domain** korrigiert (`…@teialos.or` → `…@dialos.org`).
+
+  Die Lehre ist größer als der Fall: **Eine Hilfe, die aus einer richtigen
+  Eingabe eine falsche macht, ist schlimmer als keine Hilfe** - erst recht,
+  wenn der Nutzer das Ergebnis nicht nachlesen kann.
+
 - **Das Buchstabieralphabet bleibt - jetzt mit Stephans Stimme gemessen, nicht
   mit Pipers** (2026-09-21). Seine Frage vom 2026-09-18 nach der ersten falsch
   buchstabierten Adresse: „Buchstabieren nur mit den Buchstaben, ist das nicht

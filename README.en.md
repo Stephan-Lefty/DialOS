@@ -129,6 +129,23 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **The helpful suggestion turned a correct address into a wrong one**
+  (2026-09-21, Stephan's trial on the device). He spelled `kontakt@dialos.org`
+  **without a single error** - the log proves it. DialOS then offered
+  `proband@dialos.org` (0.72 similarity), he confirmed, and the draft went to the
+  wrong recipient.
+
+  **The mistake was in the design, not in the recognition:** "kontakt@" and
+  "proband@" are **two mailboxes, not a typo**. What stands before the at sign
+  belongs to the user and is now **never** replaced. If the domain is known the
+  address counts as plausible and no suggestion is made at all; otherwise the
+  whole address is only offered from 0.9 similarity upwards, and failing that
+  only the **domain** is corrected (`…@teialos.or` → `…@dialos.org`).
+
+  The lesson is bigger than the case: **a help that turns correct input into
+  wrong input is worse than no help** - all the more when the user cannot read
+  the result.
+
 - **The spelling alphabet stays - now measured with Stephan's voice, not
   Piper's** (2026-09-21). His question of 2026-09-18 after the first
   mis-spelled address: "spelling with just the letters, wouldn't that make more
