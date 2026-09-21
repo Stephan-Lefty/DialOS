@@ -20,10 +20,22 @@ dialos-sprachbefehl-desktop.py liest sie beim Start aus dieser Datei. Eine
 zweite Liste in der Grammatik liefe beim naechsten Programm auseinander, und
 zwar unbemerkt - dieselbe Ueberlegung wie bei den Erweiterungen.
 
-WAS NICHT DRIN STEHT: Programme schliessen. Ein "Postfach schliessen" waere
-verlockend, kann aber ungespeicherte Arbeit eines sehenden Helfers wegwerfen -
-und der Nutzer hoert nicht, was dabei verlorenginge. Beenden bleibt Handarbeit,
-bis es einen Grund gibt, der das aufwiegt.
+SCHLIESSEN GIBT ES SEIT DEM 2026-09-21 AUCH (Stephan: "wir muessen noch den
+Befehl fuer das Schliessen einbauen"). Hier stand vorher das Gegenteil, mit der
+Sorge um ungespeicherte Arbeit eines sehenden Helfers. Die Sorge bleibt richtig
+- die Antwort darauf ist aber nicht, den Befehl wegzulassen, sondern ihn
+vorsichtig zu bauen:
+
+  * RUECKFRAGE wie bei jedem zerstoerenden Befehl ("Soll ich das Postfach
+    schliessen? Sage ja oder nein."), mit ja_oder_nein aus dialos-notiz.py -
+    in dieser Funktion stecken drei teuer bezahlte Lehren, sie wird nicht
+    nachgebaut.
+  * SIGTERM, NIEMALS SIGKILL. SIGTERM ist die Bitte "raeum auf und geh" -
+    Thunderbird speichert dabei, was zu speichern ist. SIGKILL waere genau
+    der Datenverlust, wegen dem der Befehl erst nicht existieren sollte.
+  * WER NICHT GEHT, DARF BLEIBEN. Fragt das Programm noch etwas ("Entwurf
+    speichern?"), beendet es sich nicht - dann sagt DialOS genau das, statt
+    nachzutreten. Der Nutzer sieht den Dialog ja nicht.
 
 DAS FENSTER NACH VORN ZU HOLEN, BRAUCHT DIE .desktop-DATEI - GEMESSEN AM
 2026-09-21. Hier stand vorher, ein zweiter Start hebe das vorhandene Fenster
@@ -78,7 +90,9 @@ Aufruf:
   dialos-programm.py --liste                # alle Saetze, fuer die Doku
 """
 
+import importlib.util
 import os
+import signal
 import subprocess
 import sys
 import time
@@ -179,40 +193,172 @@ def vorgemerkte_entwuerfe():
         return 0
 
 
-def laeuft_schon(programm):
-    """Laeuft das Programm bereits? Nur fuer die Ansage, nicht fuer den Start.
+# Was wieder zugeht. Getrennt von PROGRAMME, weil nicht jedes Programm, das
+# sich oeffnen laesst, auch per Sprache zugehen muss - und weil hier jeder
+# Eintrag drei Ansagen braucht statt einer.
+SCHLIESSEN = {
+    "postfach schließen": {
+        "programm": "/usr/bin/thunderbird",
+        "frage": "Soll ich das Postfach schließen? Sage ja oder nein.",
+        "zu": "Das Postfach ist zu.",
+        "nicht_offen": "Das Postfach ist gar nicht offen.",
+        "bleibt": "Das Postfach ist noch offen. Vielleicht fragt Thunderbird "
+                  "nach etwas, das noch nicht gespeichert ist.",
+    },
+    "internet schließen": {
+        "programm": "/usr/bin/firefox-esr",
+        "frage": "Soll ich das Internet schließen? Sage ja oder nein.",
+        "zu": "Das Internet ist zu.",
+        "nicht_offen": "Das Internet ist gar nicht offen.",
+        "bleibt": "Der Browser ist noch offen. Vielleicht fragt er nach etwas.",
+    },
+    "browser schließen": {
+        "programm": "/usr/bin/firefox-esr",
+        "frage": "Soll ich den Browser schließen? Sage ja oder nein.",
+        "zu": "Der Browser ist zu.",
+        "nicht_offen": "Der Browser ist gar nicht offen.",
+        "bleibt": "Der Browser ist noch offen. Vielleicht fragt er nach etwas.",
+    },
+    "musik ausschalten": {
+        "programm": "/usr/bin/rhythmbox",
+        "frage": "Soll ich die Musik ausschalten? Sage ja oder nein.",
+        "zu": "Die Musik ist aus.",
+        "nicht_offen": "Es läuft gerade keine Musik.",
+        "bleibt": "Die Musik läuft noch.",
+    },
+    "radio ausschalten": {
+        "programm": "/usr/bin/shortwave",
+        "frage": "Soll ich das Radio ausschalten? Sage ja oder nein.",
+        "zu": "Das Radio ist aus.",
+        "nicht_offen": "Das Radio läuft gar nicht.",
+        "bleibt": "Das Radio läuft noch.",
+    },
+}
 
-    ABSICHTLICH UEBER pgrep UND NICHT UEBER EIN FENSTER: Fenster sind unter
-    Wayland von aussen nicht abfragbar - dieselbe Grenze, die das Heben
-    verhindert. Der Prozess ist es sehr wohl, und fuer die Auskunft "ist es
-    offen?" reicht er.
+NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
+# So lange wird nach dem SIGTERM gewartet, bevor DialOS sagt, dass das
+# Programm noch da ist. Thunderbird braucht beim Beenden ein paar Sekunden,
+# weil es seine Ordner schreibt.
+BEENDEN_GEDULD_S = 12.0
+
+
+def ja_oder_nein(frage):
+    """Die Rueckfrage aus dialos-notiz.py - nicht nachgebaut, sondern geholt.
+
+    WARUM GEHOLT: In dieser Funktion stecken drei Fehler, die schon einmal Geld
+    gekostet haben - das Sprachmodell muss VOR der Frage geladen sein (sonst
+    faellt das "ja" in die Ladeluecke), das Mikrofon muss waehrend der Frage
+    schon offen sein (sonst fehlen die ersten Sekunden), und die eigene Ansage
+    darf nicht mitgehoert werden (sonst beantwortet sich das System selbst).
+    Eine zweite Fassung davon waere eine zweite Stelle, an der diese drei
+    Fehler wieder entstehen koennen.
+    """
+    try:
+        spec = importlib.util.spec_from_file_location("dialos_notiz", NOTIZ_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.ja_oder_nein(frage)
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"Rückfrage nicht möglich: {fehler}")
+        return None
+
+
+def prozesse(programm):
+    """Die Prozesse des Programms - eigene, ohne Hilfsprozesse.
+
+    UEBER /proc UND NICHT UEBER pgrep, seit dem zweiten Anlauf am 2026-09-21:
+    Ein pgrep-Muster sucht in Befehlszeilen, und dabei findet es auch die
+    Befehlszeile der Suche selbst - beim Probieren meldete "/thunderbird"
+    einen laufenden Thunderbird, obwohl keiner lief. Hier wird stattdessen
+    genau hingesehen: erstes Argument, eigener Benutzer, keine Hilfsprozesse.
+
+    "-contentproc" schliesst die Unterprozesse von Thunderbird und Firefox aus.
+    Sie gehoeren zum selben Programm, aber ihnen ein SIGTERM zu schicken waere,
+    als zoege man einem Haus einzelne Waende weg - das Hauptprogramm raeumt sie
+    selbst ab, sobald es geht.
     """
     name = os.path.basename(programm)
-    # ZWEI PRUEFUNGEN, WEIL DER PROZESSNAME NICHT DER PROGRAMMNAME SEIN MUSS:
-    # "/usr/bin/thunderbird" ist bei Debian ein Startskript, der laufende
-    # Prozess ist "/usr/lib/thunderbird/thunderbird". "-x" trifft den
-    # einfachen Fall (rhythmbox, shortwave), das verankerte Muster den mit
-    # Wrapper (thunderbird, firefox-esr).
-    #
-    # DAS "^" IST NICHT KOSMETIK - beim Probieren am 2026-09-21 meldete ein
-    # unverankertes "/thunderbird" einen laufenden Thunderbird, obwohl keiner
-    # lief: Getroffen hatte es die Befehlszeile der Pruefung selbst. Eine
-    # Auskunft, die sich selbst sieht, ist schlimmer als gar keine.
-    for befehl in (["/usr/bin/pgrep", "-x", name],
-                   ["/usr/bin/pgrep", "-f", f"^/usr/lib/{name}/{name}"]):
+    meine = os.getuid()
+    gefunden = []
+    for eintrag in os.listdir("/proc"):
+        if not eintrag.isdigit():
+            continue
+        ordner = os.path.join("/proc", eintrag)
         try:
-            fertig = subprocess.run(befehl, capture_output=True, timeout=5)
-        except (OSError, subprocess.SubprocessError) as fehler:
-            melde(f"pgrep fehlgeschlagen: {fehler}")
-            return False
-        if fertig.returncode == 0:
-            melde(f"{name} laeuft schon (gefunden mit {' '.join(befehl[1:])})")
+            if os.stat(ordner).st_uid != meine:
+                continue
+            with open(os.path.join(ordner, "cmdline"), "rb") as f:
+                argv = f.read().split(b"\0")
+        except OSError:
+            continue
+        if not argv or not argv[0]:
+            continue
+        if b"-contentproc" in argv:
+            continue
+        erstes = argv[0].decode("utf-8", errors="replace")
+        if not erstes.startswith(("/usr/bin/", "/usr/lib/")):
+            continue
+        if os.path.basename(erstes) in (name, name + "-bin"):
+            gefunden.append(int(eintrag))
+    return gefunden
+
+
+def schliessen(satz):
+    """Ein Programm bitten, sich zu beenden. True, wenn es weg ist."""
+    eintrag = SCHLIESSEN.get(satz)
+    if eintrag is None:
+        return False
+    pids = prozesse(eintrag["programm"])
+    if not pids:
+        sprich(eintrag["nicht_offen"])
+        melde(f"{satz!r}: laeuft nicht")
+        return False
+    if ja_oder_nein(eintrag["frage"]) is not True:
+        # None (nichts verstanden) wird wie nein behandelt - bei etwas, das
+        # sich nicht rueckgaengig machen laesst, ist Nichtstun die richtige
+        # Auslegung eines unklaren Wortes.
+        sprich("Gut, ich lasse es offen.")
+        melde(f"{satz!r}: abgelehnt oder nichts verstanden")
+        return False
+    for pid in pids:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError as fehler:
+            melde(f"  SIGTERM an {pid} fehlgeschlagen: {fehler}")
+    melde(f"{satz!r}: SIGTERM an {pids}")
+    ende = time.time() + BEENDEN_GEDULD_S
+    while time.time() < ende:
+        if not prozesse(eintrag["programm"]):
+            sprich(eintrag["zu"])
             return True
+        time.sleep(0.5)
+    sprich(eintrag["bleibt"])
+    melde(f"{satz!r}: laeuft nach {BEENDEN_GEDULD_S:.0f} s immer noch")
     return False
+
+
+def laeuft_schon(programm):
+    """Laeuft das Programm schon? Nur fuer die Ansage, nicht fuer den Start.
+
+    DIESELBE PRUEFUNG WIE BEIM SCHLIESSEN (prozesse()), mit Absicht: Zwei
+    verschiedene Arten zu fragen "laeuft es?" wuerden irgendwann verschieden
+    antworten, und dann sagt DialOS "ist schon offen" und schliesst im
+    naechsten Satz nichts - oder umgekehrt.
+
+    NACH DEM FENSTER ZU FRAGEN GEHT NICHT: Fenster sind unter Wayland von
+    aussen nicht abfragbar - dieselbe Grenze, die das Heben verhindert. Der
+    Prozess ist es sehr wohl, und fuer "ist es offen?" reicht er.
+    """
+    gefunden = prozesse(programm)
+    if gefunden:
+        melde(f"{os.path.basename(programm)} laeuft schon (PID {gefunden[0]})")
+    return bool(gefunden)
 
 
 def starten(satz):
     """Das Programm zum Satz starten. True, wenn es losgelaufen ist."""
+    if satz in SCHLIESSEN:
+        return schliessen(satz)
     eintrag = PROGRAMME.get(satz)
     if eintrag is None:
         melde(f"Kein Programm zu {satz!r}")
@@ -256,13 +402,15 @@ def starten(satz):
 
 def saetze():
     """Alle Saetze - fuer die Grammatik und fuer die Doku."""
-    return tuple(PROGRAMME)
+    return tuple(PROGRAMME) + tuple(SCHLIESSEN)
 
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] in ("--liste", "-l"):
-        for satz in saetze():
+        for satz in PROGRAMME:
             print(f"{satz}\t{' '.join(PROGRAMME[satz]['befehl'])}")
+        for satz in SCHLIESSEN:
+            print(f"{satz}\tSIGTERM an {SCHLIESSEN[satz]['programm']}")
         return 0
     return 0 if starten(" ".join(sys.argv[1:]).strip().lower()) else 1
 

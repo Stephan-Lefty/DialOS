@@ -3774,9 +3774,11 @@ englisch"): `user_pref("spellchecker.dictionary", "de-DE");` schreibt
 sudo install -m 755 /pfad/zum/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-programm.py /usr/local/bin/
 ```
 
-Neun Sätze - „Postfach öffnen", „neue E-Mail schreiben", „E-Mail schreiben",
-„Kalender öffnen", „Kontakte öffnen", „Internet öffnen", „Browser öffnen",
-„Musik öffnen", „Radio öffnen". Sie stehen in `dialos-programm.py` und nur
+Vierzehn Sätze - zum Öffnen „Postfach öffnen", „neue E-Mail schreiben",
+„E-Mail schreiben", „Kalender öffnen", „Kontakte öffnen", „Internet öffnen",
+„Browser öffnen", „Musik öffnen", „Radio öffnen"; zum Schließen „Postfach
+schließen", „Internet schließen", „Browser schließen", „Musik ausschalten",
+„Radio ausschalten" (jeweils mit Rückfrage und `SIGTERM`, nie `SIGKILL`). Sie stehen in `dialos-programm.py` und nur
 dort; `dialos-sprachbefehl-desktop.py` liest die Liste beim Start ein, wie die
 Sätze der Erweiterungen. **Nach dem Aufspielen muss der Sprachdienst neu
 starten** (ab- und anmelden), sonst kennt die Grammatik die Sätze nicht.

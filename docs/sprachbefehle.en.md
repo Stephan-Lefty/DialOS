@@ -75,6 +75,10 @@ listen?".
 | **"Internet öffnen"** / **"Browser öffnen"** | Opens Firefox ESR. |
 | **"Musik öffnen"** (open music) | Opens Rhythmbox. |
 | **"Radio öffnen"** (open radio) | Opens Shortwave. |
+| **"Postfach schließen"** (close the mailbox) | **With a confirmation:** "Soll ich das Postfach schließen? Sage ja oder nein." Then `SIGTERM` - the request "tidy up and go", on which Thunderbird saves what needs saving. If it is still there after twelve seconds, DialOS says so ("perhaps Thunderbird is asking about something unsaved") and does **not** kick again. If it is not running: "Das Postfach ist gar nicht offen." |
+| **"Internet schließen"** / **"Browser schließen"** | The same for Firefox. |
+| **"Musik ausschalten"** (turn the music off) | The same for Rhythmbox - "turn off" rather than "close", because music plays rather than standing open. |
+| **"Radio ausschalten"** (turn the radio off) | The same for Shortwave. |
 
 > **Opening programs (since 2026-09-21).** Stephan's prompt: "we need a list
 > of commands that start the programs anyway." Until then DialOS could do a
@@ -111,9 +115,16 @@ listen?".
 >    weeks with the screenshot. Where flags are needed (`-compose`,
 >    `-calendar`, `-addressbook`) the direct call stays: `gio launch` passes
 >    arguments as file names, not as flags.
-> 4. **There is no "close".** A "close the mailbox" could throw away a sighted
->    helper's unsaved work, and the user cannot hear what would be lost.
->    Quitting stays manual until there is a reason that outweighs this.
+> 4. **Closing exists since 2026-09-21** (Stephan: "we still need the command
+>    for closing"). The opposite stood here at first, out of concern for a
+>    sighted helper's unsaved work. The concern remains right - but the answer
+>    to it is not to leave the command out, it is to build it carefully:
+>    **a confirmation** as with every destructive command, **`SIGTERM` and
+>    never `SIGKILL`** (the request "tidy up and go", on which the program
+>    saves - `SIGKILL` would be exactly the data loss the command was meant to
+>    avoid), and **whoever does not go may stay**: if the program is still
+>    asking something, DialOS says so instead of kicking again. The user
+>    cannot see that dialog.
 >
 > **"Postfach öffnen" is also the resolution for queued drafts.** Since
 > 2026-09-21 DialOS no longer writes into Thunderbird's files but has

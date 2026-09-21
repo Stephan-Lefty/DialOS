@@ -107,9 +107,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     nahe; „Einstellungen öffnen" wäre für den Nutzer eher eine Falle als eine
     Hilfe. Jeder neue Satz muss durch beide Pflichtprüfungen.
 
-  **Nicht gebaut und mit Absicht:** ein „schließen". Es könnte die
-  ungespeicherte Arbeit eines sehenden Helfers wegwerfen, und der Nutzer hört
-  nicht, was dabei verlorenginge.
+  **Nachgetragen am selben Tag** (Stephan: „wir müssen noch den Befehl für das
+  Schließen einbauen"): fünf Sätze zum Schließen, mit Rückfrage und `SIGTERM`.
+  Offen bleibt dabei **die Probe mit einem ungespeicherten Entwurf** - dann
+  fragt Thunderbird nach und beendet sich nicht; DialOS soll in dem Fall
+  sagen, dass es noch offen ist, statt nachzutreten. Am Gerät noch nicht
+  nachgestellt.
 
 - [ ] **Thunderbird eine MailExtension geben, statt an seinen Dateien vorbei
   zu schreiben - und ihn NICHT forken** (Stephans Frage vom 2026-09-18: „Wäre

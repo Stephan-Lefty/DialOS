@@ -131,8 +131,16 @@ background) and `splash.png` (boot/login screen).
 
 - **Programs open on command - "Postfach öffnen", "neue E-Mail schreiben"**
   (Stephan, 2026-09-21: "we need a list of commands that start the programs
-  anyway"). Nine sentences in `dialos-programm.py`: mailbox, new e-mail (two
-  wordings), calendar, contacts, internet/browser, music, radio. **The list
+  anyway" - and shortly after: "we still need the command for closing").
+  Fourteen sentences in `dialos-programm.py`: mailbox, new e-mail (two
+  wordings), calendar, contacts, internet/browser, music, radio - plus five
+  for closing. **Closing was explicitly left out at first**, out of concern
+  for a sighted helper's unsaved work. The concern remains right, but the
+  answer is not to leave the command out - it is to build it carefully: a
+  confirmation as with every destructive command, **`SIGTERM` and never
+  `SIGKILL`** (the program saves by itself), and whoever is still there after
+  twelve seconds may stay - DialOS then says "perhaps Thunderbird is asking
+  about something unsaved" instead of kicking again. **The list
   lives there and nowhere else** - the voice service reads it at startup, like
   the extensions' sentences; a second list in the grammar would drift apart at
   the next program, unnoticed. The microphone stays with DialOS (opening a
@@ -146,8 +154,10 @@ background) and `splash.png` (boot/login screen).
   cannot see the screen, the state is the answer. Launching still goes through
   the `.desktop` file (`gio launch`), because the program then runs in its own
   systemd unit rather than the voice service's. **No "close"**: that could throw away a sighted helper's unsaved work, and the
-  user cannot hear what would be lost. Mandatory check passed: all 59
-  sentences recognised verbatim, none broken by the nine new ones.
+  Mandatory check passed, in two runs: first the nine for opening (59
+  sentences, all recognised verbatim), then the five for closing (64
+  sentences, all recognised verbatim) - no existing command is broken by
+  them.
 
 - **Thunderbird now writes drafts itself - DialOS only asks** (2026-09-21).
   `dialos-mail-entwurf.py` no longer appends to the mbox; it asks the

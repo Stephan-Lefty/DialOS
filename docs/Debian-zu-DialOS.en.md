@@ -3528,9 +3528,12 @@ profile's `user.js` by `dialos-mail-signatur.py`.
 sudo install -m 755 /path/to/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-programm.py /usr/local/bin/
 ```
 
-Nine sentences - "Postfach öffnen", "neue E-Mail schreiben", "E-Mail
-schreiben", "Kalender öffnen", "Kontakte öffnen", "Internet öffnen", "Browser
-öffnen", "Musik öffnen", "Radio öffnen". They live in `dialos-programm.py` and
+Fourteen sentences - to open: "Postfach öffnen", "neue E-Mail schreiben",
+"E-Mail schreiben", "Kalender öffnen", "Kontakte öffnen", "Internet öffnen",
+"Browser öffnen", "Musik öffnen", "Radio öffnen"; to close: "Postfach
+schließen", "Internet schließen", "Browser schließen", "Musik ausschalten",
+"Radio ausschalten" (each with a confirmation and `SIGTERM`, never
+`SIGKILL`). They live in `dialos-programm.py` and
 nowhere else; `dialos-sprachbefehl-desktop.py` reads the list at startup, like
 the extensions' sentences. **After installing, the voice service must be
 restarted** (log out and in), otherwise the grammar does not know them.

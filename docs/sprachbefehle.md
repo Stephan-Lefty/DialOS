@@ -73,6 +73,10 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Internet öffnen"** / **„Browser öffnen"** | Öffnet Firefox ESR. |
 | **„Musik öffnen"** | Öffnet Rhythmbox. |
 | **„Radio öffnen"** | Öffnet Shortwave. |
+| **„Postfach schließen"** | **Mit Rückfrage:** „Soll ich das Postfach schließen? Sage ja oder nein." Danach `SIGTERM` - die Bitte „räum auf und geh", bei der Thunderbird speichert, was zu speichern ist. Ist es nach zwölf Sekunden noch da, sagt DialOS das („Vielleicht fragt Thunderbird nach etwas, das noch nicht gespeichert ist.") und tritt **nicht** nach. Läuft es gar nicht: „Das Postfach ist gar nicht offen." |
+| **„Internet schließen"** / **„Browser schließen"** | Dasselbe für Firefox. |
+| **„Musik ausschalten"** | Dasselbe für Rhythmbox - „ausschalten" statt „schließen", weil Musik läuft und nicht offen steht. |
+| **„Radio ausschalten"** | Dasselbe für Shortwave. |
 
 > **Programme öffnen (seit 2026-09-21).** Stephans Anstoß: „Wir müssen doch
 > sowieso eine Liste von Befehlen machen, die dann die Programme startet."
@@ -112,10 +116,16 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 >    sind (`-compose`, `-calendar`, `-addressbook`), bleibt der direkte
 >    Aufruf: `gio launch` übergibt Argumente als Dateinamen, nicht als
 >    Schalter.
-> 4. **Es gibt kein „schließen".** Ein „Postfach schließen" könnte die
->    ungespeicherte Arbeit eines sehenden Helfers wegwerfen, und der Nutzer
->    hört nicht, was dabei verlorenginge. Beenden bleibt Handarbeit, bis es
->    einen Grund gibt, der das aufwiegt.
+> 4. **Schließen gibt es seit dem 2026-09-21** (Stephan: „wir müssen noch den
+>    Befehl für das Schließen einbauen"). Hier stand zuerst das Gegenteil, mit
+>    der Sorge um ungespeicherte Arbeit eines sehenden Helfers. Die Sorge
+>    bleibt richtig - die Antwort darauf ist aber nicht, den Befehl
+>    wegzulassen, sondern ihn vorsichtig zu bauen: **Rückfrage** wie bei jedem
+>    zerstörenden Befehl, **`SIGTERM` und niemals `SIGKILL`** (die Bitte „räum
+>    auf und geh", bei der das Programm speichert - `SIGKILL` wäre genau der
+>    Datenverlust, wegen dem der Befehl erst nicht existieren sollte), und
+>    **wer nicht geht, darf bleiben**: Fragt das Programm noch etwas, sagt
+>    DialOS das, statt nachzutreten. Der Nutzer sieht den Dialog ja nicht.
 >
 > **„Postfach öffnen" ist außerdem die Auflösung für vorgemerkte Entwürfe.**
 > Seit dem 2026-09-21 schreibt DialOS nicht mehr in Thunderbirds Dateien,

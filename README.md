@@ -138,10 +138,19 @@ das Erfolg meldet, während es versagt.
 ### 0.5.2
 
 - **Programme öffnen sich auf Zuruf - „Postfach öffnen", „neue E-Mail
-  schreiben"** (Stephan, 2026-09-21: „Wir müssen doch sowieso eine Liste von
-  Befehlen machen, die dann die Programme startet"). Neun Sätze in
-  `dialos-programm.py`: Postfach, neue E-Mail (zwei Formulierungen), Kalender,
-  Kontakte, Internet/Browser, Musik, Radio. **Die Liste steht dort und nur
+  schreiben", „Postfach schließen"** (Stephan, 2026-09-21: „Wir müssen doch
+  sowieso eine Liste von Befehlen machen, die dann die Programme startet" -
+  und kurz darauf: „wir müssen noch den Befehl für das Schließen einbauen").
+  Vierzehn Sätze in `dialos-programm.py`: Postfach, neue E-Mail (zwei
+  Formulierungen), Kalender, Kontakte, Internet/Browser, Musik, Radio - dazu
+  fünf zum Schließen. **Schließen stand zuerst ausdrücklich nicht drin**, aus
+  Sorge um die ungespeicherte Arbeit eines sehenden Helfers. Die Sorge bleibt
+  richtig, die Antwort darauf ist aber nicht, den Befehl wegzulassen, sondern
+  ihn vorsichtig zu bauen: Rückfrage wie bei jedem zerstörenden Befehl,
+  **`SIGTERM` und niemals `SIGKILL`** (das Programm speichert dabei selbst),
+  und wer nach zwölf Sekunden noch da ist, darf bleiben - dann sagt DialOS
+  „Vielleicht fragt Thunderbird nach etwas, das noch nicht gespeichert ist."
+  statt nachzutreten. **Die Liste steht dort und nur
   dort** - die Sprachsteuerung liest sie beim Start ein, wie die Sätze der
   Erweiterungen; eine zweite Liste in der Grammatik liefe beim nächsten
   Programm unbemerkt auseinander. Das Mikrofon bleibt dabei bei DialOS (ein
@@ -157,8 +166,9 @@ das Erfolg meldet, während es versagt.
   weil das Programm so in seiner eigenen systemd-Einheit läuft und nicht in
   der des Sprachdienstes. **Kein „schließen"**: Das könnte die ungespeicherte Arbeit
   eines sehenden Helfers wegwerfen, und der Nutzer hört nicht, was dabei
-  verlorenginge. Pflichtprüfung bestanden: alle 59 Sätze wörtlich erkannt,
-  kein bestehender geht durch die neun kaputt.
+  Pflichtprüfung bestanden, in zwei Läufen: erst die neun zum Öffnen (59
+  Sätze, alle wörtlich erkannt), dann die fünf zum Schließen (64 Sätze, alle
+  wörtlich erkannt) - kein bestehender Befehl geht durch sie kaputt.
 
 - **Entwürfe schreibt jetzt Thunderbird selbst - DialOS fragt nur noch**
   (2026-09-21). `dialos-mail-entwurf.py` legt nichts mehr in die mbox, sondern

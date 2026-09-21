@@ -102,8 +102,11 @@ finished too, and then move down together. That way no reference breaks.
     are obvious candidates; "open settings" would be a trap rather than a help
     for the user. Every new sentence must pass both mandatory checks.
 
-  **Deliberately not built:** a "close". It could throw away a sighted
-  helper's unsaved work, and the user cannot hear what would be lost.
+  **Added the same day** (Stephan: "we still need the command for closing"):
+  five sentences for closing, with a confirmation and `SIGTERM`. Still open is
+  **the test with an unsaved draft** - Thunderbird then asks and does not
+  quit; DialOS should say it is still open instead of kicking again. Not yet
+  reproduced on the device.
 
 - [ ] **Give Thunderbird a MailExtension instead of writing past its files -
   and do NOT fork it** (Stephan's question of 2026-09-18: „Wäre es sinnvoll,
