@@ -159,7 +159,22 @@ async function entwuerfeZeigen() {
 async function entwurfSenden({ id }) {
   // Einen LIEGENDEN Entwurf verschicken. Gefragt hat vorher DialOS, nicht
   // diese Datei - siehe mailSenden().
-  const tab = await browser.compose.beginExisting(id);
+  //
+  // beginNew(messageId) UND NICHT beginExisting (Fehler vom 2026-09-21, am
+  // Geraet gemeldet als "browser.compose.beginExisting is not a function"):
+  // Den Namen hatte ich geraten. Im Schema von Thunderbird 140 - nachgesehen
+  // in /usr/lib/thunderbird/omni.ja, chrome/.../schemas/compose.json - gibt es
+  // genau drei Wege, ein Fenster zu oeffnen: beginNew, beginReply,
+  // beginForward. beginNew nimmt eine messageId und beschreibt sie als "the
+  // message or template to edit as a new message"; damit ist der Entwurf
+  // geoeffnet, und sendMessage schickt ihn.
+  //
+  // Zweimal an einem Tag derselbe Fehler (erst saveMessage ohne Berechtigung,
+  // jetzt ein erfundener Name), und beide Male sah es nach einem
+  // Programmfehler aus. Die Lehre steht im Quelltext, damit sie nicht ein
+  // drittes Mal Zeit kostet: Bei dieser API wird nachgesehen, nicht geraten -
+  // das Schema liegt auf dem Geraet.
+  const tab = await browser.compose.beginNew(id);
   try {
     await browser.compose.sendMessage(tab.id, { mode: "sendNow" });
   } catch (fehler) {

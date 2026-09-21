@@ -304,10 +304,13 @@ def offenes_sichern():
     return f"{gesichert} angefangene E-Mails lege ich noch als Entwürfe ab."
 
 
-# So lange wird nach dem Start auf die Bruecke gewartet, bevor nach Entwuerfen
-# gefragt wird. Die Bruecke holt in den ersten acht Sekunden Vorgemerktes nach -
-# wer frueher fragt, zaehlt genau das nicht mit, was DialOS selbst abgelegt hat.
-ENTWUERFE_VORLAUF_S = 14
+# Hoechstens so lange wird auf das Nachtragen gewartet - siehe
+# nachholen_abwarten(). Als FESTE Wartezeit stand hier zuerst 14 Sekunden, und
+# Stephan hat es am 2026-09-21 sofort gemerkt: "Punkt 1 die Rückmeldung kam
+# sehr spät." Im Protokoll waren es 18 Sekunden Stille zwischen "Ich öffne das
+# Postfach" und dem Hinweis - 4 davon brauchte Thunderbird, 14 war mein
+# Warten auf etwas, das gar nicht anstand.
+NACHHOLEN_GRENZE_S = 25
 BRUECKE_GEDULD_S = 40
 
 
@@ -368,6 +371,23 @@ def entwuerfe_ansagen(beim_oeffnen):
         else:
             sprich("Das hat nicht geklappt. Der Entwurf bleibt liegen.")
             melde(f"Entwurf {eintrag.get('id')} nicht gesendet: {antwort.get('fehler')}")
+
+
+def nachholen_abwarten():
+    """Warten, bis die Warteschlange leer ist - aber nur, wenn eine da ist.
+
+    WARUM NICHT EINFACH EINE FESTE PAUSE: Weil sie in dem Fall falsch ist, der
+    fast immer vorliegt. Vorgemerkt wird nur, wenn DialOS bei geschlossenem
+    Thunderbird einen Entwurf ablegen wollte - sonst ist die Datei gar nicht
+    da, und es gibt nichts abzuwarten. Die Datei verschwindet, sobald die
+    Bruecke sie abgearbeitet hat; das ist ein genaueres Signal als jede Zahl.
+    """
+    if not os.path.isfile(WARTESCHLANGE):
+        return
+    melde("Warteschlange ist noch da - warte aufs Nachtragen")
+    ende = time.time() + NACHHOLEN_GRENZE_S
+    while time.time() < ende and os.path.isfile(WARTESCHLANGE):
+        time.sleep(0.5)
 
 
 def auf_bruecke_warten(geduld=BRUECKE_GEDULD_S):
@@ -554,7 +574,7 @@ def starten(satz):
             # genau den Entwurf, den DialOS gerade selbst abgelegt hat. Lief
             # Thunderbird schon, gibt es nichts nachzuholen - dann sofort.
             if not lief_schon:
-                time.sleep(ENTWUERFE_VORLAUF_S)
+                nachholen_abwarten()
             entwuerfe_ansagen(beim_oeffnen=True)
         else:
             melde("Brücke kam nicht - keine Entwurfsansage")
