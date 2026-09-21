@@ -559,12 +559,16 @@ MAILADRESSE = re.compile(r"\b([\w.+-]+)@([\w-]+(?:\.[\w-]+)+)")
 
 
 def mail_vorlesbar(text):
-    """"stephan@beispiel.de" -> "stephan at beispiel Punkt de" (2026-09-17).
+    """"stephan@beispiel.de" -> "stephan. at. beispiel. Punkt. de."
 
-    Piper liest das @ sonst nicht oder als Fremdwort, und der Punkt in der Adresse
-    klaenge wie ein Satzende. Zur Kontrolle der Schreibweise gibt es beim
-    Buchstabieren im Diktat die Rueckfrage Zeichen fuer Zeichen.
+    Die Fassung mit den Pausen steht seit dem 2026-09-21 im Diktat und wird von
+    dort geholt - zwei Kopien liefen beim naechsten Feinschliff auseinander.
     """
+    gemeinsam = holen(DIKTAT_SKRIPT, "dialos_diktat")
+    if gemeinsam is not None and hasattr(gemeinsam, "mailadresse_lesbar"):
+        return gemeinsam.mailadresse_lesbar(text)
+
+    # Rueckfall, falls das Diktat fehlt - dieselbe Form, ohne die Pausen.
     def lesbar(teil):
         return (teil.replace(".", " Punkt ").replace("-", " Minus ")
                 .replace("_", " Unterstrich ").replace("  ", " ").strip())

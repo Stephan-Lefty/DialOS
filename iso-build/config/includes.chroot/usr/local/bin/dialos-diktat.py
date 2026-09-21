@@ -1816,6 +1816,36 @@ ANSAGE_MAIL_BUCHSTABIEREN = ("Buchstabiere die Mailadresse mit dem Buchstabieral
                              "Ziffern. Für einen Fehler sage zurück. Am Ende sage: fertig.")
 
 
+MAILADRESSE_IM_TEXT = re.compile(r"\b([\w.+-]+)@([\w-]+(?:\.[\w-]+)+)")
+
+
+def mailadresse_lesbar(text):
+    """Mailadressen in einem Text hoerbar machen - mit Pausen (Stephan, 2026-09-21).
+
+    "stephan@beispiel.de" -> "stephan. at. beispiel. Punkt. de." Piper liest das
+    @ sonst gar nicht, und ohne Pausen verschwimmt die Adresse zu einem Wort.
+    Stephan hat zwei Fassungen gehoert und die mit Pause um AT UND um den Punkt
+    gewaehlt: "at ist ok aber mit einer kleinen Pause und auch bei dem Punkt in
+    der Mailadresse".
+
+    DIE PAUSE KOSTET EINEN SATZPUNKT, und das ist kein Schoenheitsfehler,
+    sondern die einzige Moeglichkeit: Gemessen am 2026-08-24 erzeugt Piper nur
+    an Satzende-Zeichen Stille (Punkt 220 ms); Semikolon, Doppelpunkt,
+    Gedankenstrich und mehrere Leerzeichen ergeben exakt 0 ms. Die Melodie faellt
+    dadurch ab - bei einer Adresse zaehlt Verstaendlichkeit mehr als Melodie.
+
+    HIER UND NUR HIER: dialos-notiz.py (Brief vorlesen) und dialos-suche.py
+    (Treffer nennen) holen diese Funktion, statt sie abzuschreiben.
+    """
+    def teile(text):
+        for zeichen, wort in ((".", "Punkt"), ("-", "Minus"), ("_", "Unterstrich")):
+            text = text.replace(zeichen, f". {wort}. ")
+        return " ".join(text.split())
+
+    return MAILADRESSE_IM_TEXT.sub(
+        lambda m: f"{teile(m.group(1))}. at. {teile(m.group(2))}.", text)
+
+
 def mail_vorlesbar(adresse):
     teile = []
     for z in adresse.lower():

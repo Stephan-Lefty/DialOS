@@ -129,6 +129,25 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Email addresses are read out with pauses** (Stephan, 2026-09-21, after
+  listening to two versions: "at is fine but with a small pause, and at the dot
+  in the address too"). `kontakt@dialos.org` is read as "kontakt. at. dialos.
+  Punkt. org." **The pause costs a full stop, and that is the only way:**
+  measured on 2026-08-24, Piper only produces silence at sentence-ending marks
+  (full stop 220 ms), while semicolon, colon, dash and multiple spaces give
+  exactly 0 ms. The intonation falls as a result - for an address,
+  intelligibility counts more than melody.
+
+  **It stays "at", not "ät"** (also Stephan's choice by ear): in the measurement
+  "at" was recognised 43 out of 43, and "ät" is not in the small model's
+  vocabulary at all - as an answer it would be unusable. What the user says and
+  what DialOS reads out are two different things.
+
+  The function lives in **one place** (`mailadresse_lesbar` in
+  `dialos-diktat.py`); "Brief vorlesen" and the search fetch it from there
+  instead of copying it - three copies would have drifted apart at the next
+  refinement.
+
 - **The helpful suggestion turned a correct address into a wrong one**
   (2026-09-21, Stephan's trial on the device). He spelled `kontakt@dialos.org`
   **without a single error** - the log proves it. DialOS then offered

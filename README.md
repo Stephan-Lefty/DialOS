@@ -137,6 +137,24 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Mailadressen werden mit Pausen vorgelesen** (Stephan, 2026-09-21, nach dem
+  Anhören zweier Fassungen: „at ist ok aber mit einer kleinen Pause und auch bei
+  dem Punkt in der Mailadresse"). Aus `kontakt@dialos.org` wird beim Vorlesen
+  „kontakt. at. dialos. Punkt. org." **Die Pause kostet einen Satzpunkt, und das
+  ist die einzige Möglichkeit:** Gemessen am 2026-08-24 erzeugt Piper nur an
+  Satzende-Zeichen Stille (Punkt 220 ms), während Semikolon, Doppelpunkt,
+  Gedankenstrich und mehrere Leerzeichen exakt 0 ms ergeben. Die Sprechmelodie
+  fällt dadurch ab - bei einer Adresse zählt Verständlichkeit mehr als Melodie.
+
+  **Gesprochen wird weiter „at", nicht „ät"** (auch das Stephans Wahl nach dem
+  Hörvergleich): Beim Erkennen traf „at" in der Messung 43 von 43, und „ät"
+  steht gar nicht im Wortschatz des kleinen Modells - als Antwort wäre es
+  unbrauchbar. Was der Nutzer sagt und was DialOS vorliest, sind zwei Dinge.
+
+  Die Funktion steht **an einer Stelle** (`mailadresse_lesbar` in
+  `dialos-diktat.py`); „Brief vorlesen" und die Suche holen sie von dort, statt
+  sie abzuschreiben - drei Kopien wären beim nächsten Feinschliff auseinandergelaufen.
+
 - **Der Hilfsvorschlag machte aus einer richtigen Adresse eine falsche**
   (2026-09-21, Stephans Probe am Gerät). Er buchstabierte `kontakt@dialos.org`
   **fehlerfrei** - das Protokoll belegt es. Dann schlug DialOS

@@ -598,6 +598,9 @@ def sprechbar(text):
     Punkt darin klaenge ausserdem wie ein Satzende (2026-09-18, aus Stephans
     Probe: die Mail hatte keinen Anzeigenamen fuer den Empfaenger).
     """
+    d = _modul(DIKTAT_SKRIPT_MODUL, "dialos_diktat")
+    if d is not None and hasattr(d, "mailadresse_lesbar"):
+        return d.mailadresse_lesbar(text)
     lesbar = lambda teil: (teil.replace(".", " Punkt ").replace("-", " Minus ")
                            .replace("_", " Unterstrich ").replace("  ", " ").strip())
     return MAILADRESSE.sub(lambda m: f"{lesbar(m.group(1))} at {lesbar(m.group(2))}", text)
