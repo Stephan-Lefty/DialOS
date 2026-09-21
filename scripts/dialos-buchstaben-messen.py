@@ -127,8 +127,10 @@ def sprechen_und_mithoeren(text, prozess, frage=False):
 
 
 def bis_ruhe(prozess, hoechstens_s=2.5, ruhe_s=0.4):
-    """Liefert zusaetzlich den Rauschboden des Raumes - siehe unten."""
-    """Liest den Strom leer, BIS ES WIRKLICH STILL IST - dann beginnt die Aufnahme.
+    """Liest den Strom leer, BIS ES WIRKLICH STILL IST, und misst dabei den Raum.
+
+    Rueckgabe: der Rauschboden (Median der gemessenen Pegel) - die Aufnahme
+    haengt ihre Schwelle daran.
 
     (2026-09-18, an Stephans zweitem Lauf gemessen: 24 von 43.) Eine feste
     Wartezeit von 0,3 s genuegte nicht: Bei den Fehlschlaegen begann die
