@@ -32,7 +32,7 @@ statt es neu sprechen zu muessen.
 
 Aufruf:
   scripts/dialos-buchstaben-messen.py [--alphabet|--namen|--beides]
-                                      [--mal N] [--ohne-aufnahme]
+                                      [--mal N] [--ohne-aufnahme] [--ab WORT]
   scripts/dialos-buchstaben-messen.py --auswerten DATEI.json
 """
 
@@ -51,6 +51,9 @@ QUELLE = "dialos_mikrofon_ohne_echo"
 ABTASTRATE = 16000
 BLOCK = 4000
 PEGEL_SCHWELLE = 150.0
+# Hoeher als das wird die Schwelle nie: Stephans Stimme lag in den Messungen
+# zwischen 1500 und 5900, ein Raum darf sie nicht ueberbieten.
+SCHWELLE_HOECHSTENS = 800.0
 RUHE_ENDE_S = 1.0
 ZEITGRENZE_S = 12.0      # bis die Antwort BEGINNT - Zeit zum Luftholen
 # DREI SEKUNDEN PAUSE NACH JEDEM WORT (Stephan, 2026-09-18: "immer 3 Sekunden
@@ -162,8 +165,16 @@ def bis_ruhe(prozess, hoechstens_s=2.5, ruhe_s=0.4):
     # von 150 galt dort als Sprache, die Aufnahme lief los und war vorbei,
     # bevor er den Mund aufmachte. Deshalb wird der Rauschboden kurz vor jedem
     # Wort gemessen und die Schwelle daran gehaengt.
+    # DAS LEISESTE VIERTEL ZAEHLT, NICHT DIE MITTE (2026-09-21, am zweiten
+    # Messtag): Der Median nahm den Rest der Ansage mit, die Schwelle stieg auf
+    # ein Vielfaches der Stimme - ab dem 31. Wort kam nur noch "(nichts)",
+    # obwohl Stephan sprach. Gesucht ist der RUHIGE Pegel des Raumes, also das
+    # untere Viertel; nach oben ist die Schwelle gedeckelt, damit sie nie ueber
+    # einer normalen Sprechstimme liegt.
+    if not gemessen:
+        return 0.0
     gemessen.sort()
-    return gemessen[len(gemessen) // 2] if gemessen else 0.0
+    return gemessen[len(gemessen) // 4]
 
 
 def leerlesen(prozess, sekunden):
@@ -189,7 +200,7 @@ def aufnehmen(prozess, boden=0.0):
     liegen (vierfach), sonst zaehlt sie nicht - ein Raum, der selbst bei 500
     liegt, wuerde sonst jede Aufnahme selbst starten und beenden.
     """
-    schwelle = max(PEGEL_SCHWELLE, boden * 4)
+    schwelle = min(SCHWELLE_HOECHSTENS, max(PEGEL_SCHWELLE, boden * 3))
     roh = bytearray()
     gesprochen = False
     laut = 0
@@ -240,7 +251,7 @@ def auf_weiter_warten(prozess, modell, bis_s=180.0):
     return True
 
 
-def messen(art, wiederholungen, mit_aufnahme):
+def messen(art, wiederholungen, mit_aufnahme, ab=None):
     import vosk
     vosk.SetLogLevel(-1)
     d = diktat_modul()
@@ -262,6 +273,15 @@ def messen(art, wiederholungen, mit_aufnahme):
         # Die Zeichen fuer Mailadressen gehoeren dazu: Genau an ihnen haengt der
         # Fall, aus dem die Messung kommt (at, Punkt, Minus, Ziffern).
         fragen = alphabet + [w for w in d.MAIL_ZEICHEN if w != "bindestrich"]
+    # WIEDEREINSTIEG (Stephan, 2026-09-21: "ab dem Ä neu starten"): Wer 30
+    # Woerter gesprochen hat und dann an einem Fehler haengenbleibt, soll nicht
+    # von vorn anfangen muessen.
+    if ab:
+        klein = [w.lower() for w in fragen]
+        if ab.lower() in klein:
+            fragen = fragen[klein.index(ab.lower()):]
+        else:
+            print(f"'{ab}' steht nicht in der Liste - es geht von vorn los.")
     grammatik = json.dumps(list(tabelle) + ["fertig", "zurück", "abbrechen", "[unk]"],
                            ensure_ascii=False)
     modell = vosk.Model(MODELL_KLEIN)
@@ -394,7 +414,10 @@ def main():
     mal = 1
     if "--mal" in argumente:
         mal = int(argumente[argumente.index("--mal") + 1])
-    return messen(art, mal, "--ohne-aufnahme" not in argumente)
+    ab = None
+    if "--ab" in argumente:
+        ab = argumente[argumente.index("--ab") + 1]
+    return messen(art, mal, "--ohne-aufnahme" not in argumente, ab)
 
 
 if __name__ == "__main__":
