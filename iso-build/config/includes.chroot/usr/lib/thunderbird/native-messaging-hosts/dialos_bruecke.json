@@ -1,0 +1,7 @@
+{
+  "name": "dialos_bruecke",
+  "description": "Brücke zwischen DialOS und Thunderbird",
+  "path": "/usr/local/bin/dialos-thunderbird-bruecke.py",
+  "type": "stdio",
+  "allowed_extensions": ["bruecke@dialos.org"]
+}

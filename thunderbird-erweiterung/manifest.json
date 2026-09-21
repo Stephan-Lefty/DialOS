@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "DialOS-Brücke",
+  "version": "0.1.0",
+  "description": "Legt Entwürfe ab und trägt Kontakte ein - für die Sprachsteuerung DialOS.",
+  "applications": {
+    "gecko": {
+      "id": "bruecke@dialos.org",
+      "strict_min_version": "128.0"
+    }
+  },
+  "permissions": [
+    "accountsRead",
+    "addressBooks",
+    "compose",
+    "messagesRead",
+    "nativeMessaging"
+  ],
+  "background": {
+    "scripts": ["hintergrund.js"]
+  }
+}
