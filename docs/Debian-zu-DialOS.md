@@ -867,6 +867,27 @@ hat - wer den Anfang verpasst hat oder nebenbei Radio hört, braucht ein
 Signal, das davon unabhängig ist. Deshalb eine Einstellung und keine
 Festlegung.
 
+**Seit 2026-09-21 ist der Ton eingeschaltet - Stephans Entscheidung nach der
+Buchstaben-Messung** („der Ton kommt nie"). Der Anlass war eine Messung, bei der
+einzelne Wörter angesagt wurden: **Bei einem einzelnen „a" oder „be" trägt die
+Satzmelodie nicht**, es gibt keinen Satz, an dem sie hörbar würde. Dasselbe gilt
+im Betrieb überall dort, wo DialOS kurz zurückfragt. Die Wahl von 2026-08-17
+bleibt richtig für ganze Sätze - der Ton kommt jetzt zusätzlich, nicht statt der
+Melodie.
+
+Eingerichtet wird er über `/etc/skel/.config/dialos/frageton` (gilt für jedes
+künftig angelegte Konto) und für bestehende Konten mit einer Datei:
+
+```bash
+printf 'an\n' > ~/.config/dialos/frageton
+```
+
+Für das Konto `nutzer` als root, weil dessen Heimatverzeichnis dem Konto gehört:
+
+```bash
+sudo -u nutzer mkdir -p /home/nutzer/.config/dialos && sudo -u nutzer sh -c "printf 'an\n' > /home/nutzer/.config/dialos/frageton"
+```
+
 **Warum ein Schalter im Code und nicht „erkenne das Fragezeichen
 selbst":** Ein Fragezeichen kann auch mitten in einem Hinweis stehen, und
 eine rhetorische Frage will kein Signal. Der Code, der die Ansage baut,

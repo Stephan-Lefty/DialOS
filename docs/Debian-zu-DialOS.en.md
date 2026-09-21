@@ -826,6 +826,26 @@ rising melody at the end is only noticed by someone who was listening -
 anyone who missed the beginning, or has the radio on, needs a signal
 independent of that. Hence a setting rather than a decision.
 
+**Since 2026-09-21 the tone is switched on - Stephan's decision after the
+spelling measurement** ("the tone never comes"). The trigger was a measurement
+that announced single words: **on a single "a" or "be" the intonation carries
+nothing** - there is no sentence for it to be heard in. The same holds wherever
+DialOS asks a short question. The choice of 2026-08-17 remains right for whole
+sentences - the tone now comes in addition, not instead of the melody.
+
+It is set up via `/etc/skel/.config/dialos/frageton` (for every account created
+from now on) and for existing accounts with a file:
+
+```bash
+printf 'an\n' > ~/.config/dialos/frageton
+```
+
+For the account `nutzer` as root, because that home belongs to the account:
+
+```bash
+sudo -u nutzer mkdir -p /home/nutzer/.config/dialos && sudo -u nutzer sh -c "printf 'an\n' > /home/nutzer/.config/dialos/frageton"
+```
+
 **Why a switch in the code rather than "detect the question mark":** a
 question mark can appear in the middle of a hint, and a rhetorical
 question wants no signal. The code building the announcement *knows*

@@ -440,10 +440,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       unbuchstabierbar. **Das Alphabet bleibt.** Werkzeug:
       `scripts/dialos-buchstaben-messen.py`, Aufnahmen unter
       `erkenner-vergleich/buchstaben/`.
-    - [ ] **Frageton bei Rückfragen generell einschalten?** Stephan hörte ihn
-      beim Messen nicht, weil er eine Option ist (`~/.config/dialos/frageton`).
-      Bei kurzen Fragen trägt Pipers Satzmelodie allein nicht - bei einem
-      einzelnen „a" ist sie nicht hörbar. Seine Entscheidung.
+    - [x] **Frageton bei Rückfragen eingeschaltet** (Stephans Entscheidung,
+      2026-09-21: „Ja, bei jeder Rückfrage"). Bei kurzen Fragen trägt Pipers
+      Satzmelodie allein nicht - bei einem einzelnen „a" ist sie nicht hörbar.
+      Gesetzt für `dialosadmin` und in `/etc/skel`, damit jedes künftige Konto
+      ihn hat. **Offen: für das bestehende Konto `nutzer` setzen** (Befehl in
+      `docs/Debian-zu-DialOS.md`).
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den
