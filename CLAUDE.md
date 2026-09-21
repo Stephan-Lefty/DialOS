@@ -125,7 +125,51 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-18, Feierabend - Version 0.5.2)
+## Aktueller Stand (Stand: 2026-09-21, Montag - Version 0.5.2)
+
+**Der 2026-09-21 war der Tag, an dem Thunderbird aufgehoert hat, ein fremdes
+Dateiformat zu sein.** Bis heute hat DialOS in `abook.sqlite`, in die mbox und
+am laufenden Programm vorbei geschrieben - drei Wege, drei Fehler. Seit heute
+fragt es die MailExtension, und Thunderbird legt selbst ab.
+
+**Am Geraet belegt:**
+- **Buchstaben-Messung mit Stephans Stimme** (sein erster Punkt vom Freitag):
+  **Alphabet 43/43**, Buchstabennamen **16/26** - "ef", "vau" und "ix" fehlen im
+  Wortschatz des kleinen Modells. Damit ist die Frage "nur mit den Buchstaben?"
+  beantwortet, und zwar gemessen, nicht geraten. Das Werkzeug hat sich davor
+  dreimal selbst gemessen (eigene Ansage im Puffer, Aufnahme im Frageton, Raum
+  lauter als die feste Schwelle) - jetzt: warten bis Ruhe, Schwelle am
+  Rauschboden, drei Sekunden Pause, Neustart ab einem Buchstaben.
+- **Frageton bei jeder Rueckfrage** (Stephans Wahl), **Mailadresse mit Pausen**
+  bei "at" und beim Punkt (seine Variante B: gleichmaessige Pausen).
+- **Suche in Dokumenten** geprobt; die Frage nennt jetzt Bereich UND das Wort
+  "Begriff". Ein stiller Absturz der Suche (mein Umbau hatte
+  `bereich_erfragen` mitgeloescht, `py_compile` und Selbsttest liefen trotzdem
+  durch) sagt sich jetzt an und steht im Protokoll.
+- **MailExtension gemessen:** Kontakt ✓, Entwurf ✓ im **Konto**-Entwurfsordner
+  (wird zum Server hochgeladen), kein Experiment noetig, unsigniert erlaubt.
+  Stephan: "Der Entwurf ist da." Rechtschreibpruefung auf de-DE.
+- **Entwuerfe gehen jetzt durch die Bruecke**, der mbox-Weg ist weg. Ist
+  Thunderbird zu, wird vorgemerkt (Stephans Wahl: "Vormerken und nachholen"),
+  und die Bruecke holt es nach, sobald Thunderbird sie startet.
+- **Programme auf Zuruf** (Stephans Anstoss am Nachmittag): neun Saetze in
+  `dialos-programm.py`, alle 59 Saetze der Pflichtpruefung woertlich erkannt.
+  "Postfach oeffnen" loest vorgemerkte Entwuerfe selbst auf.
+
+**Dienstag, in dieser Reihenfolge:**
+1. Aufspielen (`sudo /usr/local/sbin/dialos-aufspielen --wirklich`), danach
+   **ab- und anmelden** - die neuen Saetze kennt die Grammatik erst dann.
+2. Am Geraet proben: "Postfach oeffnen" mit geschlossenem Thunderbird, davor
+   eine Antwort diktieren - der Entwurf muss beim Start von selbst eintreffen.
+3. Widerspruch aufloesen: "Radio einschalten" sagt "kann ich noch nicht",
+   "Radio oeffnen" oeffnet Shortwave (TODO-Punkt, Stephan entscheidet).
+4. Kontakte auf die Bruecke umhaengen (letzter Schreibweg an Thunderbird
+   vorbei), dann: wie kommt die Erweiterung auf ein Kundengeraet?
+5. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
+   Befehlsuebersicht unterbrechbar, Du/Sie aus den Daten, polkit-Regel,
+   Parakeet-Lizenzhinweis, echter Stick, MailBurgs `extract/`, Bilder/Videos.
+
+## Stand vom 2026-09-18, Feierabend
 
 **Der 2026-09-18 war der Tag von DialOS-Suche.** Stephan hat die Erweiterung, die
 er am zweiten Rechner begonnen hatte, mit einer Uebergabedatei hierher gegeben

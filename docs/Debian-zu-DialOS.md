@@ -3704,6 +3704,86 @@ Vosk nur „absatz"/„neue zeile", gilt nur der Umbruch (vorher blieb Parakeets
 „Upsets." stehen). Prüfstand: 8 Fälle, keiner schlechter, alle Satzzeichen
 richtig.
 
+### 15c. Thunderbird bekommt eine Erweiterung, statt dass DialOS in seine Dateien schreibt (neu 2026-09-21)
+
+**Warum das der wichtigste Umbau des Tages ist.** DialOS hat Kontakte in
+`abook.sqlite` geschrieben, Entwürfe in die mbox und den Suchindex über die
+Postfachdateien gebaut. Jeder der drei Wege hat einen eigenen Fehler erzeugt:
+eine Warteschlange, weil in die Datenbank eines laufenden Thunderbird nicht
+geschrieben werden darf; LF statt CR LF, was den Entwurfsordner leer aussehen
+ließ; und `X-Mozilla-Status: 0008`, das nicht „Entwurf" heißt, sondern
+**gelöscht**. Dreimal dasselbe Muster - ein fremdes Dateiformat nachbauen,
+statt das Programm zu fragen, dem es gehört.
+
+**Die Linie seit dem 2026-09-21: Lesen darf man von außen, Schreiben nicht.**
+Der Suchindex liest die mbox-Dateien weiter (das stört niemanden und braucht
+kein laufendes Thunderbird). Alles, was in Thunderbirds Daten hinein soll,
+geht durch Thunderbird selbst.
+
+Vier Teile, in dieser Reihenfolge:
+
+```bash
+# 1. Die MailExtension bauen (aus thunderbird-erweiterung/ im Repo)
+cd /pfad/zum/repo/thunderbird-erweiterung && zip -r /tmp/dialos-bruecke.xpi manifest.json hintergrund.js
+```
+
+```bash
+# 2. Brücke und Host-Manifest aufspielen
+sudo install -m 755 /pfad/zum/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-thunderbird-bruecke.py /usr/local/bin/ && sudo install -m 644 -D /pfad/zum/repo/iso-build/config/includes.chroot/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json /usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json
+```
+
+3. In Thunderbird: Hamburger-Menü → Add-ons → Zahnrad → *Add-on aus Datei
+   installieren* → `/tmp/dialos-bruecke.xpi`. **Unsigniert ist in Ordnung:**
+   Debians Thunderbird hat `xpinstall.signatures.required=false`; bei einem
+   Thunderbird von Mozilla wäre das anders.
+
+4. Thunderbird neu starten. Danach muss es die Brücke gestartet haben:
+
+```bash
+ls -l "$XDG_RUNTIME_DIR/dialos-thunderbird.sock" && /usr/local/bin/dialos-thunderbird-bruecke.py --bitte '{"befehl": "hallo"}'
+```
+
+Die Antwort nennt die Thunderbird-Version und die Konten. Kommt
+`{"ok": false, "fehler": "Thunderbird läuft nicht"}`, fehlt der Socket - dann
+ist die Erweiterung nicht aktiv oder das Host-Manifest liegt falsch
+(`~/.log/dialos-thunderbird.log` sagt, was passiert ist).
+
+**Die Rechte am Socket sind Absicht:** `0600`, nur für den angemeldeten
+Nutzer. Im Socket stehen Mailadressen und Betreffzeilen.
+
+**Zwei Berechtigungen, nicht eine.** `compose` erlaubt, ein Schreibfenster zu
+öffnen - `compose.save` erlaubt erst, es als Entwurf abzulegen. Ohne die
+zweite meldet Thunderbird `browser.compose.saveMessage is not a function`, und
+die Ursache sieht wie ein Programmfehler aus.
+
+**Ist Thunderbird zu, wird vorgemerkt und nachgeholt** (Stephans Wahl):
+`dialos-mail-entwurf.py` legt den Entwurf in
+`~/.config/dialos/mail-entwuerfe.json`, DialOS sagt „Thunderbird ist zu. Ich
+lege den Entwurf beim nächsten Start von Thunderbird ab.", und die Brücke
+arbeitet die Warteschlange ab, sobald Thunderbird sie startet. **Die Bedingung
+hat sich damit umgedreht:** Früher war ein laufender Thunderbird das
+Hindernis, jetzt ist er die Voraussetzung.
+
+**Deutsche Rechtschreibprüfung** (Stephan sah „unten rechts steht was von
+englisch"): `user_pref("spellchecker.dictionary", "de-DE");` schreibt
+`dialos-mail-signatur.py` mit in die `user.js` des Profils.
+
+### 11k. Programme auf Zuruf öffnen (neu 2026-09-21)
+
+```bash
+sudo install -m 755 /pfad/zum/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-programm.py /usr/local/bin/
+```
+
+Neun Sätze - „Postfach öffnen", „neue E-Mail schreiben", „E-Mail schreiben",
+„Kalender öffnen", „Kontakte öffnen", „Internet öffnen", „Browser öffnen",
+„Musik öffnen", „Radio öffnen". Sie stehen in `dialos-programm.py` und nur
+dort; `dialos-sprachbefehl-desktop.py` liest die Liste beim Start ein, wie die
+Sätze der Erweiterungen. **Nach dem Aufspielen muss der Sprachdienst neu
+starten** (ab- und anmelden), sonst kennt die Grammatik die Sätze nicht.
+
+„Postfach öffnen" ist zugleich die Auflösung für vorgemerkte Entwürfe: Es
+startet Thunderbird, die Brücke trägt ein, was wartet - und sagt es vorher an.
+
 ## 16. Sicherungs-Abbild (Clonezilla)
 
 **Entscheidung vom 2026-08-16: Penguins' Eggs entfällt, Clonezilla

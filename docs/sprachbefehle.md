@@ -66,6 +66,41 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Einkaufszettel wegwerfen"** | Gleichbedeutend mit „Einkauf erledigt". Zwei Formulierungen für dasselbe, damit der Nutzer sich keine merken muss - wie bei „auf Linux" und „auf Gnome". |
 | **„Einkaufszettel löschen"** | Gleichbedeutend, mit derselben Rückfrage (seit 2026-09-14). Wird wie die beiden anderen nie vorgeschlagen. |
 | **„ja" / „nein"** | Antwort auf eine Rückfrage - vor dem Leeren einer Notiz und seit 2026-09-14 auch vor jedem Drucken und Diktat. Gilt **nur während der Rückfrage**: dafür läuft ein eigener Erkenner mit einer Grammatik aus genau diesen zwei Wörtern, der Befehlsdienst hält sich heraus. Kommt nichts Verwertbares, wird einmal nachgefragt, danach bleibt der Zettel stehen. |
+| **„Postfach öffnen"** | Öffnet Thunderbird. Wartet ein vorgemerkter Entwurf, sagt DialOS es dazu („Ich öffne das Postfach. Ich trage dabei den vorgemerkten Entwurf ein.") - die Brücke arbeitet die Warteschlange beim Start ab. |
+| **„Neue E-Mail schreiben"** / **„E-Mail schreiben"** | Öffnet ein leeres Schreibfenster (`thunderbird -compose`). Zwei Formulierungen für dasselbe, wie bei „Brief schreiben"/„Brief aufnehmen". |
+| **„Kalender öffnen"** | Öffnet Thunderbirds Kalender (`-calendar`). |
+| **„Kontakte öffnen"** | Öffnet Thunderbirds Adressbuch (`-addressbook`). |
+| **„Internet öffnen"** / **„Browser öffnen"** | Öffnet Firefox ESR. |
+| **„Musik öffnen"** | Öffnet Rhythmbox. |
+| **„Radio öffnen"** | Öffnet Shortwave. |
+
+> **Programme öffnen (seit 2026-09-21).** Stephans Anstoß: „Wir müssen doch
+> sowieso eine Liste von Befehlen machen, die dann die Programme startet."
+> Bis dahin konnte DialOS vieles selbst - vorlesen, diktieren, drucken,
+> suchen -, aber kein Fenster aufmachen. Vier Dinge gelten für diese Gruppe:
+>
+> 1. **Die Liste steht in `dialos-programm.py` und nur dort.** Die
+>    Sprachsteuerung liest sie beim Start ein, genau wie die Sätze der
+>    Erweiterungen. Eine zweite Liste in der Grammatik liefe beim nächsten
+>    Programm auseinander, und zwar unbemerkt.
+> 2. **Das Mikrofon bleibt bei DialOS.** Ein Programm zu öffnen ist kein
+>    Diktat und keine Erweiterung - die Sprachsteuerung hört weiter zu, der
+>    nächste Befehl kommt sofort durch.
+> 3. **Nochmal sagen holt das Fenster nach vorn.** Thunderbird, Firefox und
+>    Rhythmbox erkennen eine laufende Sitzung selbst; DialOS braucht dafür
+>    keine Fensterverwaltung (`wmctrl` ist nicht installiert, die
+>    GNOME-Schnittstelle ist gesperrt).
+> 4. **Es gibt kein „schließen".** Ein „Postfach schließen" könnte die
+>    ungespeicherte Arbeit eines sehenden Helfers wegwerfen, und der Nutzer
+>    hört nicht, was dabei verlorenginge. Beenden bleibt Handarbeit, bis es
+>    einen Grund gibt, der das aufwiegt.
+>
+> **„Postfach öffnen" ist außerdem die Auflösung für vorgemerkte Entwürfe.**
+> Seit dem 2026-09-21 schreibt DialOS nicht mehr in Thunderbirds Dateien,
+> sondern lässt Thunderbird selbst ablegen (siehe
+> [erweiterungen.md](erweiterungen.md)). Ist Thunderbird zu, wird vorgemerkt -
+> und dieser Satz macht es auf.
+
 | **„Hilfe rufen"** ⏸ **zurückgestellt** | *Nicht in der Grammatik, siehe unten.* Startet die Fernwartung - **mit Rückfrage**, die erklärt, was passiert: „Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." Danach wird die RustDesk-Nummer **ziffernweise und zweimal** vorgelesen. Während einer laufenden Sitzung **verlängert** derselbe Satz sie um eine Stunde. Danach fragt DialOS nach: „Hast Du das Deinem Betreuer weitergegeben?" - bei „nein" oder wenn nichts verstanden wurde: „Soll ich es wiederholen?" Höchstens zwei Wiederholungen, danach der Hinweis, dass „Hilfe rufen" die Zahlen jederzeit wiederholt. Der Nutzer sieht die Zahlen nicht und kann nichts mitschreiben; ein wartender Betreuer und ein Nutzer, der die Hälfte verloren hat, sind der wahrscheinlichste Fehlerfall dieses Befehls. |
 | **„Fernwartung beenden"** ⏸ **zurückgestellt** | Beendet sie. „Niemand kann mehr zusehen." Passiert auch von selbst nach einer Stunde, mit Vorwarnung drei Minuten vorher. Kernwort ist **„fernwartung"** und nicht „beenden": Letzteres kennt der Nutzer als Schlusswort des Diktats, und ein Wort in zwei Rollen ist beim Sprechen zweideutig, auch wenn die Grammatik es nicht ist. |
 | „100" / „75" / „50" / „25" / „aus" | Antwort auf die Lautstärke-Frage der Start-Ansage. Wird **einmalig** gemerkt; „aus" gilt bewusst nur für die laufende Anmeldung. |

@@ -8,18 +8,22 @@ missverstandenes Wort nichts anrichten, was sich nicht zurueckholen laesst -
 dieselbe Ueberlegung wie beim Drucken mit Rueckfrage, nur ernster: Eine
 abgeschickte Mail ist aus der Welt.
 
-WOHIN DER ENTWURF KOMMT: in "Local Folders/Drafts", nicht in den
-IMAP-Entwurfsordner. Der IMAP-Ordner ist auf dem Gerät nur eine Kopie des
-Servers; was dort hineingeschrieben wird, kennt der Server nicht und
-verschwindet beim naechsten Abgleich. Die lokalen Ordner gehoeren dagegen dem
-Geraet - Thunderbird zeigt den Entwurf dort, und von dort laesst er sich
-absenden oder weiterbearbeiten.
+SEIT DEM 2026-09-21 FRAGT DIALOS THUNDERBIRD, STATT IN SEINE DATEIEN ZU
+SCHREIBEN. Der Entwurf geht ueber die Bruecke (dialos-thunderbird-bruecke.py)
+an die MailExtension, und Thunderbird legt ihn selbst ab - im Entwurfsordner
+des KONTOS, der zum Server hochgeladen wird. Am Geraet gemessen und belegt.
 
-NICHT SCHREIBEN, WAEHREND THUNDERBIRD LAEUFT. Dieselbe Regel und derselbe Weg
-wie bei den Kontakten (dialos-empfaenger.py, 2026-09-17): Thunderbird haelt
-seine mbox-Dateien offen und wuerde eine Aenderung von aussen ueberschreiben.
-Laeuft es, kommt der Entwurf in eine Warteschlange und wird beim naechsten
-Anmelden nachgetragen.
+WARUM DER ALTE WEG WEG IST: Vorher schrieb DialOS den Entwurf selbst in
+"Local Folders/Drafts". Das ging nur bei geschlossenem Thunderbird, landete
+nie beim Server - und kostete zwei Fehler, die niemand sehen konnte: LF statt
+CR LF (Thunderbird zeigte den Ordner leer) und "X-Mozilla-Status: 0008", was
+nicht "Entwurf" heisst, sondern GELOESCHT. Beides ist gegenstandslos, sobald
+das Programm gefragt wird, dem die Dateien gehoeren.
+
+IST THUNDERBIRD ZU, WIRD VORGEMERKT (Stephans Wahl vom 2026-09-21): Die
+Bruecke arbeitet die Warteschlange ab, sobald Thunderbird startet. Der Entwurf
+landet dann ebenfalls im Konto-Ordner - nur spaeter. Der Nutzer hoert beides,
+das Ablegen wie das Vormerken.
 
 Aufruf:
   dialos-mail-entwurf.py anlegen --an ADRESSE --betreff TEXT --text DATEI
@@ -28,8 +32,6 @@ Aufruf:
   dialos-mail-entwurf.py zeigen         Was in den Entwuerfen liegt
 """
 
-import email.message
-import email.utils
 import importlib.util
 import json
 import os
@@ -52,118 +54,10 @@ def melde(text):
         pass
 
 
-def profil():
-    """Thunderbirds Profilordner - der mit der groessten abook.sqlite gewinnt."""
-    wurzel = os.path.join(HEIM, ".thunderbird")
-    if not os.path.isdir(wurzel):
-        return None
-    beste, groesse = None, -1
-    for name in sorted(os.listdir(wurzel)):
-        ordner = os.path.join(wurzel, name)
-        if not os.path.isdir(ordner):
-            continue
-        marke = os.path.join(ordner, "prefs.js")
-        if not os.path.isfile(marke):
-            continue
-        wert = os.path.getsize(marke)
-        if wert > groesse:
-            beste, groesse = ordner, wert
-    return beste
 
 
-def entwurfsordner():
-    """Pfad der lokalen Entwurfs-mbox - sie wird bei Bedarf angelegt."""
-    ordner = profil()
-    if not ordner:
-        return None
-    lokal = os.path.join(ordner, "Mail", "Local Folders")
-    if not os.path.isdir(lokal):
-        return None
-    return os.path.join(lokal, "Drafts")
 
 
-def thunderbird_laeuft():
-    try:
-        p = subprocess.run(["pgrep", "-x", "thunderbird"], capture_output=True, timeout=10)
-        return p.returncode == 0
-    except (OSError, subprocess.TimeoutExpired):
-        return True            # im Zweifel belegt - lieber vormerken
-
-
-def eigene_adresse():
-    """Die eigene Mailadresse aus den persoenlichen Daten - oder ""."""
-    try:
-        spec = importlib.util.spec_from_file_location("persoenliche_daten",
-                                                      PERSOENLICHE_DATEN_SKRIPT)
-        modul = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(modul)
-        daten = modul.lesen()
-        name = modul.voller_name(daten)
-        adresse = (daten.get("mail") or "").strip()
-        return email.utils.formataddr((name, adresse)) if adresse else ""
-    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
-        melde(f"persoenliche Daten nicht lesbar: {fehler}")
-        return ""
-
-
-def nachricht_bauen(an, betreff, text, bezug=None, zitat=""):
-    """Die Mail als Nachricht - Text, kein HTML.
-
-    REINER TEXT IST ABSICHT: Er ist vorlesbar, klein und in jedem Programm
-    lesbar. HTML brauchte eine zweite Fassung, die auseinanderlaufen kann - und
-    ein Screenreader liest sie schlechter.
-    """
-    nachricht = email.message.EmailMessage()
-    nachricht["To"] = an
-    nachricht["Subject"] = betreff
-    absender = eigene_adresse()
-    if absender:
-        nachricht["From"] = absender
-    nachricht["Date"] = email.utils.formatdate(localtime=True)
-    nachricht["Message-ID"] = email.utils.make_msgid(domain="dialos.local")
-    if bezug:
-        nachricht["In-Reply-To"] = bezug
-        nachricht["References"] = bezug
-    koerper = text.strip()
-    if zitat.strip():
-        # Das Zitat mit "> " - so kennt es jeder Mailer, und der Vorleser
-        # erkennt daran, wo die eigene Antwort aufhoert.
-        koerper += "\n\n" + "\n".join("> " + z for z in zitat.strip().splitlines())
-    nachricht.set_content(koerper + "\n")
-    return nachricht
-
-
-def als_mbox_eintrag(nachricht):
-    """Ein mbox-Eintrag, so wie Thunderbird ihn selbst schreibt.
-
-    ZEILENENDEN CR LF, UND DAS IST DER GANZE PUNKT (2026-09-18, an Stephans
-    erstem Entwurf gefunden): Die Datei stand richtig auf der Platte, und
-    Thunderbird zeigte den Ordner trotzdem als "0 Nachrichten". Zum Vergleich
-    das eigene Postfach angesehen - dort endet JEDE Zeile auf CR LF. Mit
-    blossem LF hat Thunderbirds Parser den Eintrag nicht erkannt, ohne Fehler
-    und ohne Meldung: genau die Art Fehlschlag, die ein blinder Nutzer nie
-    bemerken wuerde.
-
-    X-MOZILLA-STATUS IST EIN BITFELD, UND 0008 HEISST GELOESCHT (2026-09-18, im
-    Gegenversuch gefunden): Neben Stephans Entwurf lag eine Nachricht, die
-    Thunderbird selbst geschrieben hatte - die wurde angezeigt, unsere nicht.
-    Thunderbird hatte sie also gelesen und sofort ausgeblendet. Die Bits sind
-    0001 gelesen, 0002 beantwortet, 0004 markiert, 0008 geloescht; dass eine
-    Nachricht ein Entwurf ist, sagt nicht dieses Feld, sondern der Ordner - und
-    fuer den Bearbeiten-Knopf die Zeile X-Mozilla-Draft-Info.
-    """
-    roh = nachricht.as_string()
-    kopf = (f"From - {time.strftime('%a %b %d %H:%M:%S %Y')}\n"
-            "X-Mozilla-Status: 0000\n"
-            "X-Mozilla-Status2: 00000000\n"
-            "X-Mozilla-Draft-Info: internal/draft; vcard=0; receipt=0; DSN=0; "
-            "uuencode=0; attachmentreminder=0; deliveryformat=4\n")
-    # In einer mbox beginnt keine Zeile im Text mit "From " - sonst faengt dort
-    # scheinbar eine neue Nachricht an.
-    roh = "\n".join((">" + z) if z.startswith("From ") else z
-                    for z in roh.splitlines())
-    text = kopf + roh + "\n\n"
-    return text.replace("\r\n", "\n").replace("\n", "\r\n")
 
 
 def _vormerken(daten):
@@ -180,30 +74,66 @@ def _vormerken(daten):
         json.dump(liste, f, ensure_ascii=False, indent=1)
 
 
+# WAS HIER BIS ZUM 2026-09-21 STAND, UND WARUM ES WEG IST: profil(),
+# entwurfsordner(), thunderbird_laeuft(), nachricht_bauen() und
+# als_mbox_eintrag() - der ganze Weg, der eine Nachricht selbst zusammenbaute
+# und an "Local Folders/Drafts" anhaengte. Er ist nicht auskommentiert, sondern
+# geloescht: Ein zweiter Schreibweg, der noch dasteht, wird irgendwann wieder
+# benutzt, und dann sind die beiden Fehler vom 2026-09-18 zurueck (LF statt
+# CR LF, und "X-Mozilla-Status: 0008" heisst GELOESCHT). Ueber die Git-Historie
+# ist er erreichbar, falls jemand nachsehen will, wie es aussah.
+
+BRUECKE_SKRIPT = "/usr/local/bin/dialos-thunderbird-bruecke.py"
+
+
+def bruecke():
+    """Das Bruecken-Modul laden. None, wenn es nicht da ist."""
+    try:
+        spec = importlib.util.spec_from_file_location("dialos_bruecke", BRUECKE_SKRIPT)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        melde(f"Brücke nicht ladbar: {fehler}")
+        return None
+
+
+def thunderbird_erreichbar():
+    """Laeuft Thunderbird MIT Erweiterung? Nur dann kann etwas abgelegt werden.
+
+    GEFRAGT WIRD MIT "hallo", NICHT MIT EINEM ENTWURF. Die erste Fassung hat
+    hier einen leeren Entwurf losgeschickt, um zu sehen, ob jemand antwortet -
+    und haette bei jedem Anmelden einen leeren Entwurf im Postfach hinterlassen.
+    Eine Probe darf nichts anlegen.
+    """
+    modul = bruecke()
+    if modul is None:
+        return False
+    return bool(modul.fragen({"befehl": "hallo"}, zeitgrenze=5.0).get("ok"))
+
+
+def ueber_bruecke(an, betreff, text, bezug=None, zitat=""):
+    """Thunderbird bitten, den Entwurf abzulegen. Antwort-dict."""
+    modul = bruecke()
+    if modul is None:
+        return {"ok": False, "fehler": "Brücke nicht ladbar"}
+    koerper = text.strip()
+    if zitat.strip():
+        koerper += "\n\n" + "\n".join("> " + z for z in zitat.strip().splitlines())
+    return modul.fragen({"befehl": "entwurf", "an": an, "betreff": betreff,
+                         "text": koerper, "bezug": bezug})
+
+
 def ablegen(an, betreff, text, bezug=None, zitat=""):
     """Entwurf ablegen. True: in Thunderbird, False: vorgemerkt."""
-    daten = {"an": an, "betreff": betreff, "text": text, "bezug": bezug,
-             "zitat": zitat}
-    ziel = entwurfsordner()
-    if ziel is None or thunderbird_laeuft():
-        _vormerken(daten)
-        melde(f"vorgemerkt (Thunderbird laeuft oder kein Profil): {betreff!r}")
-        return False
-    nachricht = nachricht_bauen(an, betreff, text, bezug, zitat)
-    # Binaer anhaengen: Sonst uebersetzt Python die Zeilenenden je nach System
-    # wieder zurueck, und genau darauf kam es hier an.
-    with open(ziel, "ab") as f:
-        f.write(als_mbox_eintrag(nachricht).encode("utf-8"))
-    # Die .msf-Datei ist Thunderbirds Verzeichnis der mbox. Ist sie aelter als
-    # die mbox, baut Thunderbird sie neu auf - sonst zeigte es den Entwurf nicht.
-    msf = ziel + ".msf"
-    if os.path.exists(msf):
-        try:
-            os.unlink(msf)
-        except OSError as fehler:
-            melde(f".msf nicht loeschbar: {fehler}")
-    melde(f"Entwurf abgelegt: {betreff!r} an {an}")
-    return True
+    antwort = ueber_bruecke(an, betreff, text, bezug, zitat)
+    if antwort.get("ok"):
+        melde(f"Entwurf über die Brücke abgelegt: {betreff!r} an {an}")
+        return True
+    melde(f"Brücke nicht nutzbar ({antwort.get('fehler')}) - wird vorgemerkt")
+    _vormerken({"an": an, "betreff": betreff, "text": text, "bezug": bezug,
+                "zitat": zitat})
+    return False
 
 
 def nachholen():
@@ -216,8 +146,11 @@ def nachholen():
     except (OSError, ValueError) as fehler:
         melde(f"Warteschlange nicht lesbar: {fehler}")
         return 0
-    if thunderbird_laeuft() or entwurfsordner() is None:
-        melde("Nachholen verschoben - Thunderbird laeuft oder kein Profil")
+    # NACHGEHOLT WIRD NUR, WENN DIE BRUECKE DA IST - also wenn Thunderbird
+    # laeuft. Genau umgekehrt wie frueher: Damals war ein laufender Thunderbird
+    # das Hindernis, jetzt ist er die Voraussetzung.
+    if not thunderbird_erreichbar():
+        melde("Nachholen verschoben - Thunderbird ist zu")
         return 0
     geschafft = 0
     for daten in liste:
@@ -241,12 +174,8 @@ def main():
             print(f"{anzahl} Entwurf/Entwuerfe eingetragen")
         return 0
     if befehl == "zeigen":
-        ziel = entwurfsordner()
-        print(f"Entwuerfe: {ziel or 'kein Thunderbird-Profil'}")
-        if ziel and os.path.isfile(ziel):
-            anzahl = sum(1 for z in open(ziel, encoding="utf-8", errors="replace")
-                         if z.startswith("From - "))
-            print(f"Eintraege: {anzahl}")
+        print("Thunderbird erreichbar: "
+              + ("ja" if thunderbird_erreichbar() else "nein (dann wird vorgemerkt)"))
         if os.path.isfile(WARTESCHLANGE):
             with open(WARTESCHLANGE, encoding="utf-8") as f:
                 print(f"Vorgemerkt: {len(json.load(f))}")

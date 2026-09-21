@@ -3458,6 +3458,86 @@ Tag") always stands alone with comma and blank line and ends the subject
 counts (before, Parakeet's "Upsets." remained). Test bench: 8 cases, none worse,
 all punctuation right.
 
+### 15c. Thunderbird gets an extension instead of DialOS writing into its files (new 2026-09-21)
+
+**Why this is the day's most important rebuild.** DialOS wrote contacts into
+`abook.sqlite`, drafts into the mbox, and built the search index over the
+mailbox files. Each of the three routes produced its own error: a queue,
+because you must not write into a running Thunderbird's database; LF instead
+of CR LF, which made the drafts folder look empty; and
+`X-Mozilla-Status: 0008`, which does not mean "draft" but **deleted**. The
+same pattern three times - rebuilding someone else's file format instead of
+asking the program that owns it.
+
+**The line since 2026-09-21: reading from outside is fine, writing is not.**
+The search index keeps reading the mbox files (that disturbs nobody and needs
+no running Thunderbird). Everything that has to go *into* Thunderbird's data
+goes through Thunderbird itself.
+
+Four parts, in this order:
+
+```bash
+# 1. Build the MailExtension (from thunderbird-erweiterung/ in the repo)
+cd /path/to/repo/thunderbird-erweiterung && zip -r /tmp/dialos-bruecke.xpi manifest.json hintergrund.js
+```
+
+```bash
+# 2. Install the bridge and the host manifest
+sudo install -m 755 /path/to/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-thunderbird-bruecke.py /usr/local/bin/ && sudo install -m 644 -D /path/to/repo/iso-build/config/includes.chroot/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json /usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json
+```
+
+3. In Thunderbird: hamburger menu → Add-ons → gear → *Install Add-on From
+   File* → `/tmp/dialos-bruecke.xpi`. **Unsigned is fine here:** Debian's
+   Thunderbird has `xpinstall.signatures.required=false`; a Thunderbird from
+   Mozilla would refuse it.
+
+4. Restart Thunderbird. It must then have started the bridge:
+
+```bash
+ls -l "$XDG_RUNTIME_DIR/dialos-thunderbird.sock" && /usr/local/bin/dialos-thunderbird-bruecke.py --bitte '{"befehl": "hallo"}'
+```
+
+The answer names the Thunderbird version and the accounts. If
+`{"ok": false, "fehler": "Thunderbird läuft nicht"}` comes back, the socket is
+missing - the extension is not active, or the host manifest is in the wrong
+place (`~/.log/dialos-thunderbird.log` says what happened).
+
+**The socket's permissions are deliberate:** `0600`, for the logged-in user
+only. The socket carries mail addresses and subject lines.
+
+**Two permissions, not one.** `compose` allows opening a compose window -
+`compose.save` is what allows filing it as a draft. Without the second one
+Thunderbird reports `browser.compose.saveMessage is not a function`, and the
+cause looks like a programming error.
+
+**If Thunderbird is closed, the draft is queued and caught up** (Stephan's
+choice): `dialos-mail-entwurf.py` puts it into
+`~/.config/dialos/mail-entwuerfe.json`, DialOS says "Thunderbird ist zu. Ich
+lege den Entwurf beim nächsten Start von Thunderbird ab.", and the bridge
+works the queue off as soon as Thunderbird starts it. **The condition has
+flipped:** a running Thunderbird used to be the obstacle, now it is the
+prerequisite.
+
+**German spell checking** (Stephan saw "something about English in the bottom
+right"): `user_pref("spellchecker.dictionary", "de-DE");` is written into the
+profile's `user.js` by `dialos-mail-signatur.py`.
+
+### 11k. Opening programs on command (new 2026-09-21)
+
+```bash
+sudo install -m 755 /path/to/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-programm.py /usr/local/bin/
+```
+
+Nine sentences - "Postfach öffnen", "neue E-Mail schreiben", "E-Mail
+schreiben", "Kalender öffnen", "Kontakte öffnen", "Internet öffnen", "Browser
+öffnen", "Musik öffnen", "Radio öffnen". They live in `dialos-programm.py` and
+nowhere else; `dialos-sprachbefehl-desktop.py` reads the list at startup, like
+the extensions' sentences. **After installing, the voice service must be
+restarted** (log out and in), otherwise the grammar does not know them.
+
+"Postfach öffnen" is also the resolution for queued drafts: it starts
+Thunderbird, and the bridge files whatever is waiting - announcing it first.
+
 ## 16. Backup image (Clonezilla)
 
 **Decision of 2026-08-16: Penguins' Eggs is dropped, Clonezilla takes

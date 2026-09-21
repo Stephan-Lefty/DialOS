@@ -64,6 +64,24 @@ finished too, and then move down together. That way no reference breaks.
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
   that DialOS can show or read out on the device.
 
+- [ ] **Carry the program list further - and resolve one contradiction**
+  (2026-09-21, from Stephan's prompt "we need a list of commands that start
+  the programs anyway"). Nine sentences live in `dialos-programm.py` and are
+  checked. Two things are open:
+
+  - **"Radio einschalten" and "Musik abspielen" still say DialOS cannot do
+    that yet** - while "Radio öffnen" and "Musik öffnen" now open Shortwave
+    and Rhythmbox. Two sentences on the same subject with different answers
+    are not explainable to the user. **For Stephan to decide:** either the old
+    sentences open the same program, or the new ones get the same honest note
+    until voice operation of music and radio really stands.
+  - **Which programs are missing?** LibreOffice Writer and the file manager
+    are obvious candidates; "open settings" would be a trap rather than a help
+    for the user. Every new sentence must pass both mandatory checks.
+
+  **Deliberately not built:** a "close". It could throw away a sighted
+  helper's unsaved work, and the user cannot hear what would be lost.
+
 - [ ] **Give Thunderbird a MailExtension instead of writing past its files -
   and do NOT fork it** (Stephan's question of 2026-09-18: „Wäre es sinnvoll,
   Thunderbird zu clonen … und auf die Bedürfnisse von DialOS und die
@@ -108,25 +126,44 @@ finished too, and then move down together. That way no reference breaks.
   makes the fork unnecessary.
 
   **To settle, in this order:**
-  1. **Measure first, believe second.** A small extension on the device that
-     files a draft and creates a contact - does the API suffice without an
-     Experiment? The attempt decides that, not the documentation.
-  2. **The path from the command service to the extension.** It runs INSIDE
-     Thunderbird, the service outside; in between it needs native messaging or
-     a local socket.
-  3. **What if Thunderbird is closed?** The mbox path works even then, an
-     extension does not. For a blind user "the program was closed" is not an
-     explainable state - this is where the decision hangs.
-  4. **If it holds, `docs/anwendungen.md` must be corrected** (both
-     languages): that sentence about controllability is what justified the
-     entire division of labour.
-  5. **DialOS keeps doing the reading aloud**, not the extension - otherwise
-     the system has two voices.
+  - [x] 1. **Measure first, believe second.** Done on 2026-09-21, on the
+     device: create a contact ✓, file a draft ✓ - and into the **account's**
+     folder `ImapMail/imap.dialos.org/Drafts`, which is uploaded to the
+     server. **No Experiment needed.** Two findings on the way: `compose` and
+     `compose.save` are separate permissions (without the second:
+     `browser.compose.saveMessage is not a function`), and Debian's
+     Thunderbird accepts the unsigned extension
+     (`xpinstall.signatures.required=false`).
+  - [x] 2. **The path from the command service to the extension** (2026-09-21):
+     native messaging (4-byte length, then JSON) to
+     `dialos-thunderbird-bruecke.py`, which opens a UNIX socket with `0600`
+     towards the outside. **A socket, not a file**, because a file would again
+     be a format two programs must agree on - exactly the error the bridge
+     replaces. And it gives an honest answer: no socket, no Thunderbird.
+  - [x] 3. **What if Thunderbird is closed?** Decided by Stephan on
+     2026-09-21: **queue and catch up.** DialOS says "Thunderbird ist zu. Ich
+     lege den Entwurf beim nächsten Start von Thunderbird ab.", and the bridge
+     works the queue off as soon as Thunderbird starts it. Since the same day
+     there is also the voice command **"Postfach öffnen"** - so the user can
+     resolve the state themselves.
+  - [x] 4. **`docs/anwendungen.md` corrected** (2026-09-21, both languages).
+     The sentence holds for the command line and only there; the division of
+     labour in the table stays, because an extension only acts while
+     Thunderbird runs.
+  - [x] 5. **DialOS keeps doing the reading aloud** - the extension has no
+     voice and will not get one.
 
-  **No priority, no rebuild order:** the mbox path works and is proven on the
-  device (search → hit → reply → draft). This is worth doing **before**
-  attachments and further IMAP folders arrive - that is, before the outside
-  access grows beyond what an extension could do cleanly.
+  **Still open from this item (2026-09-21):**
+  - [ ] **Contacts still go through `abook.sqlite`** (`dialos-empfaenger.py`,
+    with a queue while Thunderbird runs). The draft already goes through the
+    bridge, the contact does not - so the old pattern still stands in one
+    place. `{"befehl": "kontakt"}` is built and measured in the extension;
+    only the rewiring is missing.
+  - [ ] **How does the extension reach a customer device?** Today it is
+    installed by hand. For route A (every device is built in the office) a
+    step in the build recipe suffices; a system-wide install through
+    `/usr/lib/thunderbird/distribution/extensions/` would be cleaner. To be
+    decided before the second device is built.
 
 - [ ] **Build the extension interface, then DialOS Search as the first
   extension** (decided with Stephan on 2026-09-17). The draft is complete in

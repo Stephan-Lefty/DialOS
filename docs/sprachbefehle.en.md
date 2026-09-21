@@ -68,6 +68,38 @@ listen?".
 | **"Einkaufszettel wegwerfen"** (throw the shopping list away) | Equivalent to "Einkauf erledigt". Two phrasings for the same thing so the user need not memorise one - as with "auf Linux" and "auf Gnome". |
 | **"Einkaufszettel löschen"** (delete the shopping list) | Equivalent, with the same confirmation (since 2026-09-14). Like the other two, never suggested. |
 | **"ja" / "nein"** (yes/no) | Answer to a confirmation - before emptying a note and, since 2026-09-14, before every print and dictation. Valid **only during the confirmation**: a recognizer of its own runs for it, with a grammar of exactly these two words, while the command service keeps out. If nothing usable arrives, DialOS asks once more; after that the list stays. |
+| **"Postfach öffnen"** (open the mailbox) | Opens Thunderbird. If a draft is waiting, DialOS says so ("Ich öffne das Postfach. Ich trage dabei den vorgemerkten Entwurf ein.") - the bridge works the queue off at startup. |
+| **"Neue E-Mail schreiben"** / **"E-Mail schreiben"** (write a new e-mail) | Opens an empty compose window (`thunderbird -compose`). Two wordings for the same thing, as with "Brief schreiben"/"Brief aufnehmen". |
+| **"Kalender öffnen"** (open the calendar) | Opens Thunderbird's calendar (`-calendar`). |
+| **"Kontakte öffnen"** (open contacts) | Opens Thunderbird's address book (`-addressbook`). |
+| **"Internet öffnen"** / **"Browser öffnen"** | Opens Firefox ESR. |
+| **"Musik öffnen"** (open music) | Opens Rhythmbox. |
+| **"Radio öffnen"** (open radio) | Opens Shortwave. |
+
+> **Opening programs (since 2026-09-21).** Stephan's prompt: "we need a list
+> of commands that start the programs anyway." Until then DialOS could do a
+> lot by itself - read out, dictate, print, search - but could not open a
+> window. Four things hold for this group:
+>
+> 1. **The list lives in `dialos-programm.py` and nowhere else.** The voice
+>    service reads it at startup, exactly like the extensions' sentences. A
+>    second list in the grammar would drift apart at the next program, and
+>    unnoticed at that.
+> 2. **The microphone stays with DialOS.** Opening a program is neither a
+>    dictation nor an extension - the voice control keeps listening, and the
+>    next command goes through immediately.
+> 3. **Saying it again raises the window.** Thunderbird, Firefox and Rhythmbox
+>    detect a running session themselves; DialOS needs no window management for
+>    it (`wmctrl` is not installed, the GNOME interface is locked down).
+> 4. **There is no "close".** A "close the mailbox" could throw away a sighted
+>    helper's unsaved work, and the user cannot hear what would be lost.
+>    Quitting stays manual until there is a reason that outweighs this.
+>
+> **"Postfach öffnen" is also the resolution for queued drafts.** Since
+> 2026-09-21 DialOS no longer writes into Thunderbird's files but has
+> Thunderbird file the draft itself (see [erweiterungen.md](erweiterungen.md)).
+> If Thunderbird is closed, the draft is queued - and this sentence opens it.
+
 | **"Hilfe rufen"** (call for help) ⏸ **deferred** | *Not in the grammar, see below.* Starts remote support - **with a confirmation** that explains what happens: "Dein Betreuer kann dann sehen, was auf dem Bildschirm steht, und das Gerät bedienen. Soll ich sie starten? Sage ja oder nein." The RustDesk number is then read out **digit by digit and twice**. During a running session the same sentence **extends** it by an hour. DialOS then asks back: "Hast Du das Deinem Betreuer weitergegeben?" - on "nein", or when nothing was understood: "Soll ich es wiederholen?" At most two repetitions, then the hint that "Hilfe rufen" repeats the numbers at any time. The user cannot see the numbers and cannot write them down; a waiting supporter and a user who lost half of them are this command's most likely failure mode. |
 | **"Fernwartung beenden"** (end remote support) ⏸ **deferred** | Ends it. "Niemand kann mehr zusehen." Also happens by itself after an hour, with a warning three minutes before. The core word is **"fernwartung"**, not "beenden": the user knows the latter as the dictation's closing word, and a word in two roles is ambiguous when spoken even when the grammar is not. |
 | "100" / "75" / "50" / "25" / "aus" (off) | Answer to the volume question in the login announcement. Remembered **once**; "aus" deliberately applies to the current session only. |

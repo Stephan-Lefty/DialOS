@@ -90,6 +90,29 @@ ein vorbefülltes Fenster, das jemand anklicken muss. Nach dem Kriterium
 oben - Steuerbarkeit von außen - fällt Thunderbird damit als Motor für die
 Sprachbedienung durch, genau wie `gnome-podcasts`.
 
+> **Berichtigt am 2026-09-21: Der Absatz darüber stimmt nur für die
+> Kommandozeile.** Thunderbird ist von außen sehr wohl steuerbar - nur nicht
+> über Argumente, sondern über eine **MailExtension**. Am Gerät gemessen:
+> Kontakt anlegen, Entwurf im Konto-Entwurfsordner ablegen (der zum Server
+> hochgeladen wird), Konten und Adressbücher auflisten. Kein Experiment-API
+> nötig, und Debians Thunderbird nimmt die unsignierte Erweiterung an
+> (`xpinstall.signatures.required=false`). Der Weg steht in
+> [erweiterungen.md](erweiterungen.md) und in `dialos-thunderbird-bruecke.py`.
+>
+> **Was daraus folgt, ist eine Linie, keine Umplanung:** *Lesen darf man von
+> außen, Schreiben nicht.* Der Suchindex liest die mbox-Dateien weiter - das
+> stört niemanden und braucht kein laufendes Thunderbird. Geschrieben wird
+> ausschließlich durch Thunderbird selbst. Die beiden Fehler, die den
+> 2026-09-18 gekostet haben (LF statt CR LF, `X-Mozilla-Status: 0008` heißt
+> GELÖSCHT), können damit nicht wiederkommen: Sie entstanden beide beim
+> Nachbauen eines fremden Dateiformats.
+>
+> **Die Arbeitsteilung in der Tabelle bleibt trotzdem stehen.** Zum
+> *Vorlesen und Senden* ohne Thunderbird braucht DialOS weiterhin IMAP/SMTP -
+> eine Erweiterung kann nur etwas tun, solange das Programm läuft. Sie ist
+> der Weg für alles, was in Thunderbirds Daten **hinein** soll, nicht der
+> Ersatz für den eigenen Zugang zum Postfach.
+
 **Die Folge ist keine neue Programmwahl, sondern eine Arbeitsteilung:**
 
 | Aufgabe | Wer |

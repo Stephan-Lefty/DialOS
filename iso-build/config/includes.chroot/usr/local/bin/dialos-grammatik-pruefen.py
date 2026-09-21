@@ -62,9 +62,37 @@ import subprocess
 import sys
 import tempfile
 
-BIN = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                   "iso-build/config/includes.chroot/usr/local/bin")
-DIENST = os.path.join(BIN, "dialos-sprachbefehl-desktop.py")
+def _dienst_suchen():
+    """Den Sprachdienst finden - NEBEN MIR zuerst.
+
+    BIS ZUM 2026-09-21 STAND HIER NUR EIN RATEN: zwei Ordner nach oben, dann
+    "iso-build/config/includes.chroot/usr/local/bin". Das trifft nur, wenn
+    dieses Werkzeug aus einem Repo-Unterordner heraus laeuft - installiert
+    aufgerufen kam dabei "/usr/local/iso-build/..." heraus, und das Werkzeug
+    brach mit einer FileNotFoundError ab, bevor es einen einzigen Satz geprueft
+    hatte. Eine Pflichtpruefung, die beim Aufruf abstuerzt, wird uebersprungen -
+    genau das, was sie verhindern soll.
+
+    Die Datei neben mir ist immer die richtige: im Repo die Repo-Fassung, unter
+    /usr/local/bin die installierte. Geprueft wird damit der Stand, der auch
+    laeuft.
+    """
+    hier = os.path.dirname(os.path.abspath(__file__))
+    kandidaten = (
+        os.path.join(hier, "dialos-sprachbefehl-desktop.py"),
+        os.path.join(os.path.dirname(hier),
+                     "iso-build/config/includes.chroot/usr/local/bin",
+                     "dialos-sprachbefehl-desktop.py"),
+        "/usr/local/bin/dialos-sprachbefehl-desktop.py",
+    )
+    for pfad in kandidaten:
+        if os.path.isfile(pfad):
+            return pfad
+    return kandidaten[0]
+
+
+DIENST = _dienst_suchen()
+BIN = os.path.dirname(DIENST)
 PIPER_DIR = "/usr/local/share/dialos-piper"
 STIMME = "voices/de_DE-thorsten-high.onnx"
 MODELL = "/usr/local/share/vosk-model-de-small"

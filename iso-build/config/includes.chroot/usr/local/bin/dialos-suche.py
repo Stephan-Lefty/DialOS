@@ -934,9 +934,12 @@ def antworten_auf(t, erkenner, modell, weiterleiten=False):
         sprich("Der Entwurf ließ sich nicht ablegen.")
         return 1
     if ergebnis == "vorgemerkt":
-        sprich("Der Entwurf kommt in die Warteschlange, weil Thunderbird gerade "
-               "läuft. Beim nächsten Anmelden liegt er in den Entwürfen. "
-               "Gesendet wird nichts.")
+        # UMGEKEHRT SEIT DEM 2026-09-21: Frueher war ein laufender Thunderbird
+        # das Hindernis - DialOS schrieb selbst in seine Dateien. Jetzt legt
+        # Thunderbird den Entwurf ab, also ist ein GESCHLOSSENER Thunderbird
+        # der Grund fuers Vormerken.
+        sprich("Thunderbird ist zu. Ich lege den Entwurf beim nächsten Start "
+               "von Thunderbird ab. Gesendet wird nichts.")
     else:
         sprich("Der Entwurf liegt in Thunderbird unter Entwürfe. Gesendet wird "
                "nichts, das machst Du selbst.")

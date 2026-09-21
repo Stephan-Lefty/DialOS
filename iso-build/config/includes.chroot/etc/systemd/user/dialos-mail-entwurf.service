@@ -2,13 +2,15 @@
 # Traegt beim Anmelden Mail-Entwuerfe in Thunderbird ein, die beim Antworten
 # vorgemerkt wurden, weil Thunderbird gerade lief (2026-09-18).
 #
-# WARUM NICHT SOFORT: Thunderbird haelt seine mbox-Dateien offen und
-# ueberschreibt eine Aenderung von aussen beim Beenden. Beim Anmelden laeuft es
-# noch nicht. Ist die Warteschlange leer, tut der Dienst nichts.
+# SEIT DEM 2026-09-21 IST DAS NUR NOCH DAS NETZ UNTER DEM NETZ. Nachgeholt
+# wird jetzt dort, wo es hingehoert: Die Bruecke (dialos-thunderbird-bruecke.py)
+# arbeitet die Warteschlange ab, sobald Thunderbird sie startet - dann ist
+# Thunderbird naemlich da und legt den Entwurf selbst im Konto-Ordner ab.
 #
-# DASSELBE VERFAHREN WIE BEI DEN KONTAKTEN (dialos-kontakte.service): Es hat
-# sich dort bewaehrt, und zwei verschiedene Wege fuer dieselbe Lage waeren zwei
-# Stellen zum Nachsehen, wenn etwas fehlt.
+# Warum der Dienst trotzdem bleibt: Laeuft Thunderbird beim Anmelden bereits
+# (Autostart), findet er hier eine Warteschlange, die sonst bis zum naechsten
+# Thunderbird-Start liegenbliebe. Ist Thunderbird zu oder die Schlange leer,
+# tut er nichts - er kann also nicht schaden.
 Description=DialOS: vorgemerkte Mail-Entwuerfe in Thunderbird
 Documentation=file:///usr/local/bin/dialos-mail-entwurf.py
 After=graphical-session.target

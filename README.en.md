@@ -129,6 +129,57 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **Programs open on command - "Postfach öffnen", "neue E-Mail schreiben"**
+  (Stephan, 2026-09-21: "we need a list of commands that start the programs
+  anyway"). Nine sentences in `dialos-programm.py`: mailbox, new e-mail (two
+  wordings), calendar, contacts, internet/browser, music, radio. **The list
+  lives there and nowhere else** - the voice service reads it at startup, like
+  the extensions' sentences; a second list in the grammar would drift apart at
+  the next program, unnoticed. The microphone stays with DialOS (opening a
+  program is not a dictation), and saying it again raises the window, because
+  Thunderbird, Firefox and Rhythmbox detect a running session themselves. **No
+  "close"**: that could throw away a sighted helper's unsaved work, and the
+  user cannot hear what would be lost. Mandatory check passed: all 59
+  sentences recognised verbatim, none broken by the nine new ones.
+
+- **Thunderbird now writes drafts itself - DialOS only asks** (2026-09-21).
+  `dialos-mail-entwurf.py` no longer appends to the mbox; it asks the
+  MailExtension through `dialos-thunderbird-bruecke.py`. The draft therefore
+  lands in the **account's** drafts folder, which is uploaded to the server -
+  no longer in the local folders that only the device knows. **The two errors
+  of 2026-09-18 are moot**: LF instead of CR LF, and `X-Mozilla-Status: 0008`
+  (which means DELETED, not draft). Both came from rebuilding someone else's
+  file format, and that no longer happens.
+
+- **If Thunderbird is closed, the draft is queued and caught up** (Stephan's
+  choice, 2026-09-21). DialOS says "Thunderbird ist zu. Ich lege den Entwurf
+  beim nächsten Start von Thunderbird ab." - **the condition has flipped:**
+  a *running* Thunderbird used to be the obstacle, because DialOS wrote into
+  its files; now it is the prerequisite. Catching up therefore no longer
+  happens at login but in the bridge itself, as soon as Thunderbird starts it.
+  The login service stays as a safety net for the case where Thunderbird is
+  already running. **One bug found and fixed before it hit anyone:** the check
+  "is Thunderbird there?" first sent an empty draft - it would have left an
+  empty draft in the mailbox at every login. A probe must not create anything;
+  it now asks "hallo".
+
+- **The grammar check tool crashed when called from its installed path**
+  (2026-09-21). `dialos-grammatik-pruefen.py` always looked for the voice
+  service two directories up in a repo layout - from `/usr/local/bin` that
+  became `/usr/local/iso-build/…`, and it aborted with a FileNotFoundError
+  before checking a single sentence. **A mandatory check that crashes on
+  invocation gets skipped** - precisely what it exists to prevent. It now
+  takes the file next to itself: the repo copy in the repo, the installed copy
+  when installed.
+
+- **`docs/anwendungen.md` claimed Thunderbird could not be controlled from
+  outside** (corrected 2026-09-21). True for the command line and only there.
+  Through a MailExtension it works - measured on the device: create a contact,
+  file a draft, list accounts and address books. The result is a line rather
+  than a replan: **reading from outside is fine, writing is not.** The search
+  index keeps reading the mbox files; writing happens through Thunderbird
+  itself, exclusively.
+
 - **The question for the search term now says what it wants** (Stephan,
   2026-09-21: "when I am supposed to say a term, can the question mention the
   term as well"). "What shall I search for?" becomes **"What shall I search for

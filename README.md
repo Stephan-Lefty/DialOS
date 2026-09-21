@@ -137,6 +137,61 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Programme öffnen sich auf Zuruf - „Postfach öffnen", „neue E-Mail
+  schreiben"** (Stephan, 2026-09-21: „Wir müssen doch sowieso eine Liste von
+  Befehlen machen, die dann die Programme startet"). Neun Sätze in
+  `dialos-programm.py`: Postfach, neue E-Mail (zwei Formulierungen), Kalender,
+  Kontakte, Internet/Browser, Musik, Radio. **Die Liste steht dort und nur
+  dort** - die Sprachsteuerung liest sie beim Start ein, wie die Sätze der
+  Erweiterungen; eine zweite Liste in der Grammatik liefe beim nächsten
+  Programm unbemerkt auseinander. Das Mikrofon bleibt dabei bei DialOS (ein
+  Programm zu öffnen ist kein Diktat), und nochmal gesagt holt es das Fenster
+  nach vorn, weil Thunderbird, Firefox und Rhythmbox eine laufende Sitzung
+  selbst erkennen. **Kein „schließen"**: Das könnte die ungespeicherte Arbeit
+  eines sehenden Helfers wegwerfen, und der Nutzer hört nicht, was dabei
+  verlorenginge. Pflichtprüfung bestanden: alle 59 Sätze wörtlich erkannt,
+  kein bestehender geht durch die neun kaputt.
+
+- **Entwürfe schreibt jetzt Thunderbird selbst - DialOS fragt nur noch**
+  (2026-09-21). `dialos-mail-entwurf.py` legt nichts mehr in die mbox, sondern
+  bittet über `dialos-thunderbird-bruecke.py` die MailExtension darum. Der
+  Entwurf landet damit im **Konto-Entwurfsordner**, der zum Server
+  hochgeladen wird - nicht mehr in den lokalen Ordnern, die nur das Gerät
+  kennt. **Die beiden Fehler vom 2026-09-18 sind damit gegenstandslos**: LF
+  statt CR LF und `X-Mozilla-Status: 0008` (das heißt GELÖSCHT, nicht
+  Entwurf). Beide entstanden beim Nachbauen eines fremden Dateiformats, und
+  genau das passiert nicht mehr.
+
+- **Ist Thunderbird zu, wird vorgemerkt und nachgeholt** (Stephans Wahl vom
+  2026-09-21). DialOS sagt „Thunderbird ist zu. Ich lege den Entwurf beim
+  nächsten Start von Thunderbird ab." - **die Bedingung hat sich umgedreht:**
+  Früher war ein *laufender* Thunderbird das Hindernis, weil DialOS in seine
+  Dateien schrieb; jetzt ist er die Voraussetzung. Nachgeholt wird deshalb
+  nicht mehr beim Anmelden, sondern von der Brücke selbst, sobald Thunderbird
+  sie startet. Der Anmelde-Dienst bleibt als Netz darunter, für den Fall, dass
+  Thunderbird schon läuft. **Ein Fehler dabei, gefunden und behoben, bevor er
+  jemanden traf:** Die Prüfung „ist Thunderbird da?" schickte zuerst einen
+  leeren Entwurf los - sie hätte bei jedem Anmelden einen leeren Entwurf im
+  Postfach hinterlassen. Eine Probe darf nichts anlegen; jetzt fragt sie
+  „hallo".
+
+- **Das Prüfwerkzeug für die Grammatik stürzte ab, wenn man es installiert
+  aufrief** (2026-09-21). `dialos-grammatik-pruefen.py` suchte den Sprachdienst
+  immer zwei Ordner über sich in einer Repo-Struktur - aus `/usr/local/bin`
+  wurde daraus `/usr/local/iso-build/…`, und es brach mit einer
+  FileNotFoundError ab, bevor es einen einzigen Satz geprüft hatte. **Eine
+  Pflichtprüfung, die beim Aufruf abstürzt, wird übersprungen** - genau das,
+  was sie verhindern soll. Jetzt nimmt es die Datei neben sich: im Repo die
+  Repo-Fassung, installiert die installierte.
+
+- **`docs/anwendungen.md` behauptete, Thunderbird sei von außen nicht
+  steuerbar** (berichtigt 2026-09-21). Das stimmt für die Kommandozeile und
+  nur für sie. Über eine MailExtension geht es - am Gerät gemessen: Kontakt
+  anlegen, Entwurf ablegen, Konten und Adressbücher auflisten. Daraus wird
+  eine Linie statt einer Umplanung: **Lesen darf man von außen, Schreiben
+  nicht.** Der Suchindex liest die mbox-Dateien weiter; geschrieben wird
+  ausschließlich durch Thunderbird selbst.
+
 - **Die Frage nach dem Suchbegriff sagt jetzt, was sie will** (Stephan,
   2026-09-21: „können wir bei Dokument, wenn ich einen Begriff sagen soll, in der
   Frage auch Begriff einfließen lassen"). Aus „Wonach soll ich suchen?" wird

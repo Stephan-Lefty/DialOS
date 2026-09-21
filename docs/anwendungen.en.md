@@ -86,6 +86,27 @@ opens a prefilled window that somebody has to click. By the criterion
 above - controllability from outside - Thunderbird therefore fails as the
 engine for voice operation, exactly like `gnome-podcasts`.
 
+> **Corrected on 2026-09-21: the paragraph above holds for the command line
+> only.** Thunderbird *is* controllable from outside - not through arguments
+> but through a **MailExtension**. Measured on the device: create a contact,
+> file a draft in the *account's* drafts folder (which is uploaded to the
+> server), list accounts and address books. No Experiment API needed, and
+> Debian's Thunderbird accepts the unsigned extension
+> (`xpinstall.signatures.required=false`). The route is described in
+> [erweiterungen.md](erweiterungen.md) and in `dialos-thunderbird-bruecke.py`.
+>
+> **What follows is a line, not a replan:** *reading from outside is fine,
+> writing is not.* The search index keeps reading the mbox files - that
+> disturbs nobody and needs no running Thunderbird. Writing happens through
+> Thunderbird itself, exclusively. The two errors that cost 2026-09-18 (LF
+> instead of CR LF, and `X-Mozilla-Status: 0008`, which means DELETED) cannot
+> return: both came from rebuilding someone else's file format.
+>
+> **The division of labour in the table still stands.** For *reading out and
+> sending* without Thunderbird, DialOS still needs IMAP/SMTP - an extension
+> can only act while the program runs. It is the way into Thunderbird's data,
+> not a replacement for having one's own access to the mailbox.
+
 **The consequence is not a new choice of program but a division of
 labour:**
 

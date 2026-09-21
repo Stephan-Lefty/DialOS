@@ -29,6 +29,7 @@ Zum Pruefen von Hand:
 import json
 import os
 import socket
+import subprocess
 import struct
 import sys
 import threading
@@ -39,6 +40,17 @@ SOCKET_PFAD = os.path.join(
     "dialos-thunderbird.sock")
 PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-thunderbird.log")
 ANTWORT_ZEITGRENZE_S = 30.0
+# Was nachgeholt wird, sobald Thunderbird da ist. Jedes Programm raeumt seine
+# eigene Warteschlange ab - die Bruecke kennt deren Inhalt nicht und muss es
+# auch nicht: Sie weiss nur, dass jetzt der Zeitpunkt dafuer ist.
+NACHHOLER = (
+    ("/usr/local/bin/dialos-mail-entwurf.py", "nachholen"),
+)
+# Erst wenn die Erweiterung sich gemeldet hat, kann etwas abgelegt werden.
+# Thunderbird startet die Bruecke beim Verbinden - aber die Antwort auf die
+# erste Bitte braucht noch einen Augenblick, bis Konten und Adressbuecher
+# geladen sind.
+VORLAUF_S = 8.0
 
 
 def melde(text):
@@ -109,6 +121,29 @@ class Vermittlung:
         with self.schloss:
             self.warten.pop(n, None)
         return antwort
+
+
+def warteschlangen_abarbeiten():
+    """Vorgemerktes nachholen, jetzt wo Thunderbird laeuft.
+
+    DAS IST STEPHANS WAHL VOM 2026-09-21 ("Vormerken und nachholen"): Ist
+    Thunderbird zu, wenn DialOS einen Entwurf ablegen will, sagt DialOS das und
+    merkt ihn vor. Nachgeholt wird nicht beim Anmelden - da laeuft Thunderbird
+    ja meist noch nicht -, sondern genau hier: Thunderbird hat die Bruecke
+    gestartet, also ist es da.
+    """
+    time.sleep(VORLAUF_S)
+    for befehl in NACHHOLER:
+        if not os.path.exists(befehl[0]):
+            continue
+        try:
+            fertig = subprocess.run(list(befehl), capture_output=True, text=True,
+                                    timeout=120)
+            ausgabe = (fertig.stdout or fertig.stderr or "").strip()
+            if ausgabe:
+                melde(f"Nachholen {os.path.basename(befehl[0])}: {ausgabe[:200]}")
+        except (OSError, subprocess.SubprocessError) as fehler:
+            melde(f"Nachholen fehlgeschlagen ({befehl[0]}): {fehler}")
 
 
 def socket_bedienen(vermittlung):
@@ -195,6 +230,7 @@ def main():
     melde("=== Brücke gestartet (von Thunderbird) ===")
     vermittlung = Vermittlung()
     threading.Thread(target=socket_bedienen, args=(vermittlung,), daemon=True).start()
+    threading.Thread(target=warteschlangen_abarbeiten, daemon=True).start()
     try:
         while True:
             nachricht = lesen()

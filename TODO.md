@@ -67,6 +67,26 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
   Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
 
+- [ ] **Die Programmliste weiterziehen - und einen Widerspruch auflösen**
+  (2026-09-21, aus Stephans Anstoß „Wir müssen doch sowieso eine Liste von
+  Befehlen machen, die dann die Programme startet"). Neun Sätze stehen in
+  `dialos-programm.py` und sind geprüft. Offen ist zweierlei:
+
+  - **„Radio einschalten" und „Musik abspielen" sagen weiter, dass DialOS das
+    noch nicht kann** - „Radio öffnen" und „Musik öffnen" öffnen aber jetzt
+    Shortwave und Rhythmbox. Zwei Sätze für dasselbe Thema mit verschiedener
+    Antwort sind für den Nutzer nicht erklärbar. **Zu entscheiden von
+    Stephan:** entweder die alten Sätze öffnen dasselbe Programm, oder die
+    neuen bekommen denselben ehrlichen Hinweis, bis die Sprachbedienung von
+    Musik und Radio wirklich steht.
+  - **Welche Programme fehlen?** LibreOffice Writer und die Dateien liegen
+    nahe; „Einstellungen öffnen" wäre für den Nutzer eher eine Falle als eine
+    Hilfe. Jeder neue Satz muss durch beide Pflichtprüfungen.
+
+  **Nicht gebaut und mit Absicht:** ein „schließen". Es könnte die
+  ungespeicherte Arbeit eines sehenden Helfers wegwerfen, und der Nutzer hört
+  nicht, was dabei verlorenginge.
+
 - [ ] **Thunderbird eine MailExtension geben, statt an seinen Dateien vorbei
   zu schreiben - und ihn NICHT forken** (Stephans Frage vom 2026-09-18: „Wäre
   es sinnvoll, Thunderbird zu clonen … und auf die Bedürfnisse von DialOS und
@@ -113,24 +133,43 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Fork überflüssig macht.
 
   **Zu klären, in dieser Reihenfolge:**
-  1. **Erst messen, dann glauben.** Eine kleine Erweiterung am Gerät, die
-     einen Entwurf ablegt und einen Kontakt anlegt - reicht die API dafür ohne
-     Experiment? Das entscheidet der Versuch, nicht die Dokumentation.
-  2. **Der Weg vom Befehlsdienst zur Erweiterung.** Sie läuft IN Thunderbird,
-     der Dienst außerhalb; dazwischen braucht es Native Messaging oder einen
-     lokalen Socket.
-  3. **Was, wenn Thunderbird zu ist?** Der mbox-Weg funktioniert auch dann,
-     eine Erweiterung nicht. Für einen blinden Nutzer ist „das Programm war
-     geschlossen" kein erklärbarer Zustand - hier hängt die Entscheidung.
-  4. **Trägt sie, gehört `docs/anwendungen.md` berichtigt** (beide Sprachen):
-     Der Satz über die Steuerbarkeit hat die ganze Arbeitsteilung begründet.
-  5. **Vorgelesen wird weiter von DialOS**, nicht von der Erweiterung - sonst
-     hat das System zwei Stimmen.
+  - [x] 1. **Erst messen, dann glauben.** Erledigt am 2026-09-21, am Gerät:
+     Kontakt anlegen ✓, Entwurf ablegen ✓ - und zwar im **Konto**-Ordner
+     `ImapMail/imap.dialos.org/Drafts`, der zum Server hochgeladen wird.
+     **Kein Experiment nötig.** Zwei Befunde nebenbei: `compose` und
+     `compose.save` sind getrennte Berechtigungen (ohne die zweite:
+     `browser.compose.saveMessage is not a function`), und Debians Thunderbird
+     nimmt die unsignierte Erweiterung an (`xpinstall.signatures.required=false`).
+  - [x] 2. **Der Weg vom Befehlsdienst zur Erweiterung** (2026-09-21):
+     Native Messaging (4 Byte Länge, dann JSON) zu `dialos-thunderbird-bruecke.py`,
+     das nach außen einen UNIX-Socket mit `0600` aufmacht. **Ein Socket und
+     keine Datei**, weil eine Datei wieder ein Format wäre, auf das sich zwei
+     Programme einigen müssten - genau der Fehler, den die Brücke ablöst. Und
+     er gibt die ehrliche Auskunft: kein Socket, kein Thunderbird.
+  - [x] 3. **Was, wenn Thunderbird zu ist?** Entschieden von Stephan am
+     2026-09-21: **vormerken und nachholen.** DialOS sagt „Thunderbird ist zu.
+     Ich lege den Entwurf beim nächsten Start von Thunderbird ab.", die Brücke
+     arbeitet die Warteschlange ab, sobald Thunderbird sie startet. Seit
+     demselben Tag gibt es dafür auch den Sprachbefehl **„Postfach öffnen"** -
+     der Nutzer kann den Zustand also selbst auflösen.
+  - [x] 4. **`docs/anwendungen.md` berichtigt** (2026-09-21, beide Sprachen).
+     Der Satz stimmt für die Kommandozeile und nur für sie; die Arbeitsteilung
+     in der Tabelle bleibt, weil eine Erweiterung nur wirkt, solange
+     Thunderbird läuft.
+  - [x] 5. **Vorgelesen wird weiter von DialOS** - die Erweiterung hat keine
+     Stimme und bekommt keine.
 
-  **Kein Vorrang, kein Umbauauftrag:** Der mbox-Weg läuft und ist am Gerät
-  belegt (Suche → Fund → Antwort → Entwurf). Der Punkt lohnt sich, **bevor**
-  Anhänge und weitere IMAP-Ordner dazukommen - also bevor der Fremdzugriff
-  größer wird als das, was eine Erweiterung sauber könnte.
+  **Offen aus diesem Punkt (2026-09-21):**
+  - [ ] **Kontakte laufen noch über `abook.sqlite`** (`dialos-empfaenger.py`,
+    mit Warteschlange bei laufendem Thunderbird). Der Entwurf geht schon über
+    die Brücke, der Kontakt noch nicht - und damit steht das alte Muster noch
+    an einer Stelle. `{"befehl": "kontakt"}` ist in der Erweiterung gebaut und
+    gemessen; es fehlt nur das Umhängen.
+  - [ ] **Wie kommt die Erweiterung auf ein Kundengerät?** Heute ist sie von
+    Hand installiert. Für Weg A (jedes Gerät entsteht im Büro) reicht ein
+    Schritt im Aufbau-Rezept; sauberer wäre eine systemweite Installation über
+    `/usr/lib/thunderbird/distribution/extensions/`. Zu entscheiden, bevor das
+    zweite Gerät entsteht.
 
 - [ ] **Erweiterungsschnittstelle bauen, danach DialOS-Suche als erste
   Erweiterung** (entschieden mit Stephan am 2026-09-17). Der Entwurf steht

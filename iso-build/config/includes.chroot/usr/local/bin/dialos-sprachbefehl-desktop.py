@@ -302,7 +302,31 @@ def erweiterungen_lesen():
     return zuordnung
 
 
+PROGRAMM_WERKZEUG = "/usr/local/bin/dialos-programm.py"
+
+
+def programme_lesen():
+    """Satz -> Programm, aus dialos-programm.py.
+
+    NICHT HIER NOCHMAL AUFSCHREIBEN (Stephan, 2026-09-21: "Wir muessen doch
+    sowieso eine Liste von Befehlen machen, die dann die Programme startet").
+    Die Liste steht in dialos-programm.py, samt Begruendung, welcher Aufruf
+    welches Fenster oeffnet. Eine zweite hier liefe beim naechsten Programm
+    auseinander - dieselbe Falle wie bei den Erweiterungen.
+    """
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "dialos_programm", PROGRAMM_WERKZEUG)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul.saetze()
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        print(f"Programmliste nicht lesbar: {fehler}", file=sys.stderr)
+        return ()
+
+
 ERWEITERUNG_SAETZE = erweiterungen_lesen()
+PROGRAMM_SAETZE = programme_lesen()
 
 if ERWEITERUNG_SAETZE:
     _liste = json.loads(GRAMMATIK_AN)
@@ -310,6 +334,13 @@ if ERWEITERUNG_SAETZE:
     # Reihenfolge ist in der Grammatik nicht bedeutungslos.
     _liste = ([x for x in _liste if x != "[unk]"]
               + [s for s in ERWEITERUNG_SAETZE if s not in _liste]
+              + ["[unk]"])
+    GRAMMATIK_AN = json.dumps(_liste, ensure_ascii=False)
+
+if PROGRAMM_SAETZE:
+    _liste = json.loads(GRAMMATIK_AN)
+    _liste = ([x for x in _liste if x != "[unk]"]
+              + [s for s in PROGRAMM_SAETZE if s not in _liste]
               + ["[unk]"])
     GRAMMATIK_AN = json.dumps(_liste, ensure_ascii=False)
 
@@ -1489,6 +1520,20 @@ def umschalten(ziel):
     subprocess.run([UMSCHALT_SKRIPT, ziel], capture_output=True, timeout=120)
 
 
+def programm_starten(satz):
+    """Ein Programm oeffnen - die Ansage macht dialos-programm.py selbst.
+
+    IM EIGENEN PROZESS, nicht hier im Dienst: Ein Programm, das an dieser
+    Prozessgruppe haengt, geht mit, wenn die Sprachsteuerung neu startet. Beim
+    Bildschirmfoto war genau das der Fehler, der drei Wochen unbemerkt blieb.
+    """
+    try:
+        subprocess.Popen([PROGRAMM_WERKZEUG, satz], start_new_session=True,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except OSError as fehler:
+        print(f"Programm {satz!r} nicht startbar: {fehler}", file=sys.stderr)
+
+
 def erweiterung_starten(manifest):
     """Eine Erweiterung starten und ihr das Mikrofon ueberlassen.
 
@@ -2255,6 +2300,16 @@ def main():
             # (dieselbe Marke wie beim Diktat, siehe diktat_laeuft()).
             if satz in ERWEITERUNG_SAETZE:
                 erweiterung_starten(ERWEITERUNG_SAETZE[satz])
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Programme oeffnen ---
+            # NACH den Erweiterungen, VOR allem anderen: Ein Programm zu
+            # starten nimmt das Mikrofon nicht - die Sprachsteuerung hoert
+            # weiter zu, und der naechste Befehl kommt sofort durch.
+            if satz in PROGRAMM_SAETZE:
+                programm_starten(satz)
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue
