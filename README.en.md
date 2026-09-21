@@ -129,6 +129,24 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **After reading out, it is not over** (Stephan, 2026-09-21, from the document
+  trial: "after the reading nothing comes any more!"). The search ended after the
+  first action - whoever had heard a letter and wanted to print it had to speak
+  the whole path again. **But it is right after the reading that the user knows
+  what he wants.** DialOS now asks again: "Anything else with it? Say: read out,
+  print or nothing" - up to four times, ending at "nothing" or silence.
+
+- **A single name narrows too** (2026-09-21, seen in the same trial). After
+  "Brief" eleven hits remained, two of them from GESOBAU AG - and it did not ask,
+  because the rule required two distinct values. **But two with and nine without
+  is exactly a split.** The question is now "Von wem? GESOBAU AG. Oder sage:
+  keiner."
+
+- **Searching documents is confirmed on the device** (2026-09-21): "Dokumente" →
+  "Forderung" (17 hits) → "Brief" (11) → "Gesobau" (2) → list → "the second" →
+  read out. The listing names subject and sender instead of file names, and
+  reading starts at the salutation.
+
 - **Email addresses are read out with pauses** (Stephan, 2026-09-21, after
   listening to two versions: "at is fine but with a small pause, and at the dot
   in the address too"). `kontakt@dialos.org` is read as "kontakt! at! dialos!

@@ -403,6 +403,7 @@ def art_aus_antwort(texte, gruppen):
     return beste
 MONATE = ("Januar", "Februar", "März", "April", "Mai", "Juni", "Juli",
           "August", "September", "Oktober", "November", "Dezember")
+OHNE_NAMEN = "ohne Absender"
 ORDNUNGSZAHLEN = {"erste": 0, "ersten": 0, "erster": 0, "zweite": 1, "zweiten": 1,
                   "dritte": 2, "dritten": 2, "vierte": 3, "vierten": 3,
                   "fünfte": 4, "fünften": 4}
@@ -468,6 +469,17 @@ def merkmal_waehlen(treffer):
         for person in t.get("personen") or []:
             if person.strip():
                 personen.setdefault(person.strip(), set()).add(nummer)
+    # EIN EINZIGER NAME TRENNT AUCH (2026-09-21, an Stephans Probe gesehen):
+    # Nach "Brief" blieben elf Treffer, zwei davon von der GESOBAU AG - gefragt
+    # wurde trotzdem nicht, weil die Regel zwei verschiedene Werte verlangte.
+    # Zwei mit und neun ohne ist aber genau eine Trennung. Deshalb bekommt die
+    # Personenfrage eine Gegengruppe fuer alle, bei denen kein Name steht.
+    if personen and len(personen) < 2:
+        mit = set().union(*personen.values())
+        ohne = set(range(len(treffer))) - mit
+        if ohne:
+            personen = dict(personen)
+            personen[OHNE_NAMEN] = ohne
     for name, gruppen in (("jahr", jahre), ("art", arten), ("person", personen),
                           ("monat", monate)):
         if len(gruppen) > 1:
@@ -502,7 +514,8 @@ def eingrenzen(treffer, erkenner, modell):
                      + " Oder ".join(MONATE[m - 1] for m in sorted(gruppen)) + ".")
         else:
             namen = sorted(gruppen, key=lambda x: -len(gruppen[x]))[:4]
-            frage = sprechbar(f"{len(treffer)} Treffer. Von wem? " + ", ".join(namen) + ".")
+            frage = sprechbar(f"{len(treffer)} Treffer. Von wem? " + ", ".join(namen)
+                              + ". Oder sage: keiner.")
         texte, gesprochen = antwort_hoeren(frage, erkenner, modell, mit_pegel=True)
         melde(f"  {name}: Antwort {texte!r}")
         if _abbruch(texte):
@@ -540,7 +553,13 @@ def eingrenzen(treffer, erkenner, modell):
         else:
             beste, bester_wert = None, 0.6
             for text in texte:
+                if re.search(r"(?i)\b(keiner|keine|keinen|niemand|ohne)\b", text) \
+                        and OHNE_NAMEN in gruppen:
+                    beste, bester_wert = OHNE_NAMEN, 1.0
+                    break
                 for person in gruppen:
+                    if person == OHNE_NAMEN:
+                        continue
                     wert = _aehnlich(text, person)
                     if wert > bester_wert:
                         beste, bester_wert = person, wert
@@ -1099,43 +1118,8 @@ def empfaenger_erfragen_fuer_mail(erkenner, modell):
     return ""
 
 
-def vorlesen_anbieten(t, erkenner, modell):
-    """Was mit dem Fund geschehen soll - vorlesen, drucken oder nichts.
-
-    (Stephan, 2026-09-18: "Wenn ich eine Mail oder Datei gefunden habe, dann muss
-    der Nutzer ja damit was anfangen koennen. Vorlesen, drucken, bei einer Mail
-    antworten oder weiterleiten.") Antworten und Weiterleiten kommen als
-    Naechstes - sie brauchen das Diktat und einen Entwurf in Thunderbird.
-    """
-    if not t.get("erreichbar"):
-        sprich("Diese Datei liegt im Archiv, das gerade nicht angeschlossen ist.")
-        return 0
-    ist_mail = t.get("art") == "Mail"
-    moeglich = ("vorlesen, drucken, antworten, weiterleiten oder nichts"
-                if ist_mail else "vorlesen, drucken oder nichts")
-    texte = antwort_hoeren(f"Es bleibt: {treffer_nennen(t)}. Was soll ich damit tun? "
-                           f"Sage: {moeglich}.", erkenner, modell)
-    wahl = None
-    for text in texte or []:
-        for wort in text.lower().split():
-            wahl = wahl or WAHL_WORTE.get(wort.strip(".,!?"))
-    if wahl is None and texte:
-        for wort, ziel in WAHL_WORTE.items():
-            if any(_aehnlich(text, wort) >= 0.7 for text in texte):
-                wahl = ziel
-                break
-    melde(f"  Wahl: {wahl!r} aus {texte!r}")
-    if wahl == "drucken":
-        return drucken_treffer(t, erkenner, modell)
-    if wahl in ("antworten", "weiterleiten") and ist_mail:
-        return antworten_auf(t, erkenner, modell,
-                             weiterleiten=(wahl == "weiterleiten"))
-    if wahl in ("antworten", "weiterleiten"):
-        sprich("Antworten kann ich nur bei einer E-Mail.")
-        return 0
-    if wahl != "vorlesen":
-        sprich("Gut, ich lasse es.")
-        return 0
+def vorlesen(t):
+    """Liest den Treffer vor - ab der Anrede."""
     text = text_holen(t)
     if not text:
         sprich("Ich kann den Text nicht vorlesen.")
@@ -1158,34 +1142,59 @@ def vorlesen_anbieten(t, erkenner, modell):
               and not z.strip().startswith("Dieser Brief wurde per Spracheingabe")
               and z.strip() != "unterschrieben."]
     melde(f"  vorlesen: {len(' '.join(zeilen))} Zeichen")
-    sprich(" ".join(z.strip() for z in zeilen if z.strip()))
+    sprich(sprechbar(" ".join(z.strip() for z in zeilen if z.strip())))
     return 0
 
 
-def bereich_erfragen(erkenner, modell):
-    """Welcher Bereich - Dokumente oder Postfach. Arten-Tupel oder None."""
-    for _versuch in range(2):
-        texte, gesprochen = antwort_hoeren(ANSAGE_BEREICH, erkenner, modell, mit_pegel=True)
-        if _abbruch(texte):
-            return None
-        worte = [w.strip(".,!?").lower() for text in texte for w in text.split()]
-        for wort in worte:
-            if wort in NOCH_NICHT:
-                sprich(ANSAGE_NOCH_NICHT_BEREICH)
-                return None
-            if wort in BEREICHE:
-                melde(f"  Bereich: {BEREICHE[wort]}")
-                return BEREICHE[wort]
-        # Klang und Aehnlichkeit wie bei der Art - "Postfach" kam als "Hostwa" an.
-        arten = {a for arten in BEREICHE.values() for a in arten}
-        art = art_aus_antwort(texte, arten)
-        if art:
-            return ("Mail",) if art == "Mail" else ("Brief", "Notiz", "Ablage")
-        if not gesprochen:
-            sprich("Ich höre nichts mehr. Die Suche ist beendet.")
-            return None
-        sprich("Das habe ich nicht verstanden.")
-    return None
+def vorlesen_anbieten(t, erkenner, modell):
+    """Was mit dem Fund geschehen soll - und danach die Frage noch einmal.
+
+    NACH DEM VORLESEN IST NICHT SCHLUSS (Stephan, 2026-09-21: "nach dem
+    Vorlesen kommt nix mehr!"). Wer einen Brief gehoert hat, will ihn oft gleich
+    drucken, und wer eine Mail gehoert hat, will antworten - das ist der Moment,
+    in dem er weiss, was drinsteht. Frueher endete die Suche hier, und der
+    Nutzer musste den ganzen Weg noch einmal sprechen. Jetzt fragt DialOS nach
+    jeder Handlung erneut, hoechstens viermal, und endet bei "nichts" oder
+    Schweigen.
+    """
+    if not t.get("erreichbar"):
+        sprich("Diese Datei liegt im Archiv, das gerade nicht angeschlossen ist.")
+        return 0
+    ist_mail = t.get("art") == "Mail"
+    moeglich = ("vorlesen, drucken, antworten, weiterleiten oder nichts"
+                if ist_mail else "vorlesen, drucken oder nichts")
+    ergebnis = 0
+    for runde in range(4):
+        if runde == 0:
+            frage = (f"Es bleibt: {treffer_nennen(t)}. Was soll ich damit tun? "
+                     f"Sage: {moeglich}.")
+        else:
+            frage = f"Noch etwas damit? Sage: {moeglich}."
+        texte = antwort_hoeren(frage, erkenner, modell)
+        wahl = None
+        for text in texte or []:
+            for wort in text.lower().split():
+                wahl = wahl or WAHL_WORTE.get(wort.strip(".,!?"))
+        if wahl is None and texte:
+            for wort, ziel in WAHL_WORTE.items():
+                if any(_aehnlich(text, wort) >= 0.7 for text in texte):
+                    wahl = ziel
+                    break
+        melde(f"  Wahl: {wahl!r} aus {texte!r}")
+        if wahl is None or wahl == "nichts":
+            sprich("Gut, ich lasse es." if runde == 0 else "Gut.")
+            return ergebnis
+        if wahl == "drucken":
+            ergebnis = drucken_treffer(t, erkenner, modell)
+        elif wahl in ("antworten", "weiterleiten"):
+            if not ist_mail:
+                sprich("Antworten kann ich nur bei einer E-Mail.")
+                continue
+            ergebnis = antworten_auf(t, erkenner, modell,
+                                     weiterleiten=(wahl == "weiterleiten"))
+        else:
+            ergebnis = vorlesen(t)
+    return ergebnis
 
 
 def suchen(begriffe, erkenner=None, modell=None, arten=None):

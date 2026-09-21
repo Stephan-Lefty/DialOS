@@ -137,6 +137,25 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Nach dem Vorlesen ist nicht Schluss** (Stephan, 2026-09-21, aus der Probe mit
+  Dokumenten: „nach dem Vorlesen kommt nix mehr!"). Die Suche endete nach der
+  ersten Handlung - wer einen Brief gehört hatte und ihn drucken wollte, musste
+  den ganzen Weg noch einmal sprechen. **Genau nach dem Vorlesen weiß der Nutzer
+  aber erst, was er will.** Jetzt fragt DialOS erneut: „Noch etwas damit? Sage:
+  vorlesen, drucken oder nichts" - bis zu viermal, Ende bei „nichts" oder
+  Schweigen.
+
+- **Ein einziger Name grenzt auch ein** (2026-09-21, an derselben Probe gesehen).
+  Nach „Brief" blieben elf Treffer, zwei davon von der GESOBAU AG - gefragt wurde
+  trotzdem nicht, weil die Regel zwei verschiedene Werte verlangte. **Zwei mit
+  und neun ohne ist aber genau eine Trennung.** Die Frage lautet jetzt „Von wem?
+  GESOBAU AG. Oder sage: keiner."
+
+- **Die Suche in Dokumenten ist am Gerät belegt** (2026-09-21): „Dokumente" →
+  „Forderung" (17 Treffer) → „Brief" (11) → „Gesobau" (2) → aufzählen → „den
+  zweiten" → vorlesen. Die Aufzählung nennt Betreff und Absender statt
+  Dateinamen, und gelesen wird ab der Anrede.
+
 - **Mailadressen werden mit Pausen vorgelesen** (Stephan, 2026-09-21, nach dem
   Anhören zweier Fassungen: „at ist ok aber mit einer kleinen Pause und auch bei
   dem Punkt in der Mailadresse"). Aus `kontakt@dialos.org` wird beim Vorlesen

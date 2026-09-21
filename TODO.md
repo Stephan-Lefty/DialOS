@@ -455,6 +455,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       Gesetzt für `dialosadmin` und in `/etc/skel`, damit jedes künftige Konto
       ihn hat. **Offen: für das bestehende Konto `nutzer` setzen** (Befehl in
       `docs/Debian-zu-DialOS.md`).
+    - [x] **Suche in Dokumenten am Gerät belegt** (2026-09-21, 14:17): Bereich,
+      Begriff, Art, weiteres Suchwort, Aufzählung, Auswahl, Vorlesen ab der
+      Anrede. Zwei Lücken dabei gefunden und behoben: nach dem Vorlesen endete
+      die Suche, und ein einzelner Absendername galt nicht als Merkmal zum
+      Eingrenzen.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den
