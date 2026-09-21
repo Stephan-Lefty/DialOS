@@ -459,7 +459,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       Begriff, Art, weiteres Suchwort, Aufzählung, Auswahl, Vorlesen ab der
       Anrede. Zwei Lücken dabei gefunden und behoben: nach dem Vorlesen endete
       die Suche, und ein einzelner Absendername galt nicht als Merkmal zum
-      Eingrenzen.
+      Eingrenzen. **Zweiter Durchlauf (14:26) vollständig bestanden:**
+      Personenfrage kam („Von wem? GESOBAU AG. Oder sage: keiner."), „Gesobau"
+      wurde trotz „wieso bau" zugeordnet (0,71), nach dem Vorlesen kam „Noch
+      etwas damit?". Dabei stürzte die Suche einmal still ab, weil beim Umbau
+      eine Funktion verlorenging - seitdem wird jeder Absturz angesagt und
+      protokolliert.
     - [ ] **Am echten Stick prüfen.** Bisher nur mit einem nachgestellten
       Einhängepunkt getestet, nicht gegen `/dev/disk/by-label`. Am T490 heißt
       das: Stick einstecken, `dialos-suche-index.py stand` muss den

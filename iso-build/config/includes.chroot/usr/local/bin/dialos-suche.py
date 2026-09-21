@@ -513,9 +513,14 @@ def eingrenzen(treffer, erkenner, modell):
             frage = (f"{len(treffer)} Treffer. Aus welchem Monat? "
                      + " Oder ".join(MONATE[m - 1] for m in sorted(gruppen)) + ".")
         else:
-            namen = sorted(gruppen, key=lambda x: -len(gruppen[x]))[:4]
+            # DIE GEGENGRUPPE GEHOERT ANS ENDE (2026-09-21, an der Ansage
+            # gehoert): "Von wem? ohne Absender, GESOBAU AG" stellte sie nach
+            # vorn, wo sie wie ein Name klingt. Erst die echten Namen, dann der
+            # Ausweg.
+            namen = [n for n in sorted(gruppen, key=lambda x: -len(gruppen[x]))
+                     if n != OHNE_NAMEN][:4]
             frage = sprechbar(f"{len(treffer)} Treffer. Von wem? " + ", ".join(namen)
-                              + ". Oder sage: keiner.")
+                              + (". Oder sage: keiner." if OHNE_NAMEN in gruppen else "."))
         texte, gesprochen = antwort_hoeren(frage, erkenner, modell, mit_pegel=True)
         melde(f"  {name}: Antwort {texte!r}")
         if _abbruch(texte):
