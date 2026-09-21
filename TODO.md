@@ -435,7 +435,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
       Gegenlesen mit bekannten Adressen und Domains, getrenntes Vorlesen vor
       und nach dem At, bis zu drei Anläufe. Erneute Probe offen.
     - [x] **Buchstaben-Messung mit Stephans Stimme ausgewertet** (2026-09-21):
-      Buchstabieralphabet 43 von 43, Buchstabennamen 2 von 5 - und „ef", „vau",
+      Buchstabieralphabet 43 von 43, Buchstabennamen 16 von 26 - und „ef", „vau",
       „ix" fehlen im Wortschatz des kleinen Modells, F, V und X wären damit
       unbuchstabierbar. **Das Alphabet bleibt.** Werkzeug:
       `scripts/dialos-buchstaben-messen.py`, Aufnahmen unter

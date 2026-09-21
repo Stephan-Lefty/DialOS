@@ -144,10 +144,14 @@ das Erfolg meldet, während es versagt.
 
   | | Buchstabieralphabet | Buchstabennamen |
   |---|---|---|
-  | Treffer | **43 von 43** | 2 von 5, dann abgebrochen |
+  | Treffer | **43 von 43** | **16 von 26** |
   | Fehlt im Wortschatz | nichts | „ef", „vau", „ix" - also **F, V und X** |
 
-  **Der Ausschlag ist nicht die Trefferquote, sondern der Wortschatz:** Die
+  Die Verwechslungen sind die erwartbaren - ce/zett, e/el, i/el, en/em, pe/be,
+  er/a: kurze Silben mit demselben Vokal. Die Piper-Messung vom 2026-09-17 hatte
+  15 von 26 ergeben, die Stimme aendert daran also nichts.
+
+  **Der Ausschlag ist aber nicht die Trefferquote, sondern der Wortschatz:** Die
   Namen für F, V und X kennt das kleine Modell nicht, Vosk wirft sie beim Bauen
   der Grammatik **still** aus - drei Buchstaben wären damit unbuchstabierbar,
   ohne dass es jemand erführe. Dasselbe Muster wie bei „löschen" am 2026-08-18.

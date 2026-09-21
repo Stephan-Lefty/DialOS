@@ -136,10 +136,14 @@ background) and `splash.png` (boot/login screen).
 
   | | spelling alphabet | letter names |
   |---|---|---|
-  | correct | **43 of 43** | 2 of 5, then aborted |
+  | correct | **43 of 43** | **16 of 26** |
   | missing from the vocabulary | nothing | "ef", "vau", "ix" - i.e. **F, V and X** |
 
-  **What decides it is not the hit rate but the vocabulary:** the small model
+  The confusions are the expected ones - ce/zett, e/el, i/el, en/em, pe/be,
+  er/a: short syllables with the same vowel. The Piper measurement of 2026-09-17
+  gave 15 of 26, so the voice changes nothing here.
+
+  **What decides it, though, is not the hit rate but the vocabulary:** the small model
   does not know the names for F, V and X, and Vosk drops them **silently** when
   building the grammar - three letters would be unspellable without anyone being
   told. The same pattern as "löschen" on 2026-08-18.
