@@ -152,15 +152,33 @@ fragt es die MailExtension, und Thunderbird legt selbst ab.
 - **Entwuerfe gehen jetzt durch die Bruecke**, der mbox-Weg ist weg. Ist
   Thunderbird zu, wird vorgemerkt (Stephans Wahl: "Vormerken und nachholen"),
   und die Bruecke holt es nach, sobald Thunderbird sie startet.
-- **Programme auf Zuruf** (Stephans Anstoss am Nachmittag): neun Saetze in
-  `dialos-programm.py`, alle 59 Saetze der Pflichtpruefung woertlich erkannt.
-  "Postfach oeffnen" loest vorgemerkte Entwuerfe selbst auf.
+- **Programme auf Zuruf** (Stephans Anstoss am Nachmittag): vierzehn Saetze in
+  `dialos-programm.py` - neun zum Oeffnen, fuenf zum Schliessen. Pflichtpruefung
+  in zwei Laeufen bestanden (59 und 64 Saetze, alle woertlich erkannt).
+- **Schliessen mit Rueckfrage und SIGTERM, am Geraet belegt** (15:33): Antwort
+  "ja" gehoert, SIGTERM an den Hauptprozess, Thunderbird zu - und die Bruecke
+  meldete "beendet (Thunderbird ist zu)", also ein ordentlicher Abschied, kein
+  Abschuss. NIEMALS SIGKILL; wer nach zwoelf Sekunden noch da ist, darf
+  bleiben (dann fragt das Programm etwas, das der Nutzer nicht sieht).
+- **Vormerken und Nachholen am Geraet belegt** (15:35, der ganze Bogen): Entwurf
+  bei geschlossenem Thunderbird vorgemerkt -> "Postfach oeffnen" -> Bruecke
+  startet, fragt "hallo", legt ab -> Stephan: "Entwurf ist da." Zehn Sekunden
+  vom Satz bis zum Entwurf, Warteschlange leer.
+- **Fenster nach vorn holen geht nicht und wird nicht weiter versucht**
+  (Stephans Entscheidung nach zwei Messungen): Unter Wayland darf ein fremder
+  Prozess kein Fenster heben, auch nicht ueber die .desktop-Datei. DialOS sagt
+  stattdessen den Zustand an ("Das Postfach ist schon offen."). Der einzige
+  saubere Weg waere eine eigene GNOME-Shell-Erweiterung - steht im TODO,
+  entschieden ist nichts.
 
 **Dienstag, in dieser Reihenfolge:**
-1. Aufspielen (`sudo /usr/local/sbin/dialos-aufspielen --wirklich`), danach
-   **ab- und anmelden** - die neuen Saetze kennt die Grammatik erst dann.
-2. Am Geraet proben: "Postfach oeffnen" mit geschlossenem Thunderbird, davor
-   eine Antwort diktieren - der Entwurf muss beim Start von selbst eintreffen.
+1. **Ab- und anmelden** - alles ist aufgespielt, aber der Sprachdienst laeuft
+   noch in der alten Fassung; die vierzehn Programmsaetze kennt die Grammatik
+   erst nach einem Neustart ueber den Autostart. Danach dieselben Proben mit
+   der Stimme statt mit der Kommandozeile.
+2. Die eine Probe, die noch fehlt: **schliessen mit ungespeichertem Entwurf**.
+   Dann fragt Thunderbird nach und beendet sich nicht - DialOS muss sagen "ist
+   noch offen", statt nachzutreten. Nur der gute Fall ist bisher belegt.
 3. Widerspruch aufloesen: "Radio einschalten" sagt "kann ich noch nicht",
    "Radio oeffnen" oeffnet Shortwave (TODO-Punkt, Stephan entscheidet).
 4. Kontakte auf die Bruecke umhaengen (letzter Schreibweg an Thunderbird
