@@ -86,10 +86,19 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 > 2. **Das Mikrofon bleibt bei DialOS.** Ein Programm zu öffnen ist kein
 >    Diktat und keine Erweiterung - die Sprachsteuerung hört weiter zu, der
 >    nächste Befehl kommt sofort durch.
-> 3. **Nochmal sagen holt das Fenster nach vorn.** Thunderbird, Firefox und
->    Rhythmbox erkennen eine laufende Sitzung selbst; DialOS braucht dafür
->    keine Fensterverwaltung (`wmctrl` ist nicht installiert, die
->    GNOME-Schnittstelle ist gesperrt).
+> 3. **Gestartet wird über die `.desktop`-Datei, nicht über den Programmpfad**
+>    (berichtigt am 2026-09-21, nachdem Stephan es geprüft hat: „Wenn
+>    Thunderbird bereits offen ist, dann wird bei Postfach öffnen das
+>    vorhandene Fenster nicht nach vorn geholt."). Unter Wayland **darf** ein
+>    fremder Prozess kein Fenster heben - das ist ausdrücklich unterbunden,
+>    damit kein Hintergrundprogramm ins Bild springt. Heben darf sich nur die
+>    Anwendung selbst, und nur mit einem Aktivierungs-Token
+>    (`XDG_ACTIVATION_TOKEN`), das es nur beim Start über die `.desktop`-Datei
+>    gibt. Deshalb `gio launch`. Eine Fensterverwaltung hilft nicht: `wmctrl`
+>    und `xdotool` sind nicht installiert und wären unter Wayland wirkungslos,
+>    die GNOME-Schnittstelle ist gesperrt. **Wo Schalter nötig sind**
+>    (`-compose`, `-calendar`, `-addressbook`), bleibt der direkte Aufruf -
+>    dort entsteht ohnehin ein neues Fenster, und ein neues kommt nach vorn.
 > 4. **Es gibt kein „schließen".** Ein „Postfach schließen" könnte die
 >    ungespeicherte Arbeit eines sehenden Helfers wegwerfen, und der Nutzer
 >    hört nicht, was dabei verlorenginge. Beenden bleibt Handarbeit, bis es

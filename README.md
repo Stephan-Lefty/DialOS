@@ -145,9 +145,13 @@ das Erfolg meldet, während es versagt.
   dort** - die Sprachsteuerung liest sie beim Start ein, wie die Sätze der
   Erweiterungen; eine zweite Liste in der Grammatik liefe beim nächsten
   Programm unbemerkt auseinander. Das Mikrofon bleibt dabei bei DialOS (ein
-  Programm zu öffnen ist kein Diktat), und nochmal gesagt holt es das Fenster
-  nach vorn, weil Thunderbird, Firefox und Rhythmbox eine laufende Sitzung
-  selbst erkennen. **Kein „schließen"**: Das könnte die ungespeicherte Arbeit
+  Programm zu öffnen ist kein Diktat). **Gestartet wird über die
+  `.desktop`-Datei** (`gio launch`) - das war zuerst falsch: Ich hatte
+  behauptet, ein zweiter Start hebe das vorhandene Fenster von selbst, und
+  Stephan hat am selben Tag das Gegenteil gesehen. Unter Wayland darf ein
+  fremder Prozess kein Fenster heben; nur die Anwendung selbst darf es, und
+  nur mit einem Aktivierungs-Token, das es allein beim Start über die
+  `.desktop`-Datei gibt. **Kein „schließen"**: Das könnte die ungespeicherte Arbeit
   eines sehenden Helfers wegwerfen, und der Nutzer hört nicht, was dabei
   verlorenginge. Pflichtprüfung bestanden: alle 59 Sätze wörtlich erkannt,
   kein bestehender geht durch die neun kaputt.

@@ -25,10 +25,30 @@ verlockend, kann aber ungespeicherte Arbeit eines sehenden Helfers wegwerfen -
 und der Nutzer hoert nicht, was dabei verlorenginge. Beenden bleibt Handarbeit,
 bis es einen Grund gibt, der das aufwiegt.
 
-NOCHMAL STARTEN HOLT DAS FENSTER NACH VORN. Thunderbird, Firefox und Rhythmbox
-erkennen eine laufende Sitzung und heben deren Fenster, statt ein zweites zu
-oeffnen. Deshalb braucht es hier keine Fensterverwaltung (wmctrl ist nicht
-installiert, und die GNOME-Schnittstelle dafuer ist gesperrt).
+DAS FENSTER NACH VORN ZU HOLEN, BRAUCHT DIE .desktop-DATEI - GEMESSEN AM
+2026-09-21. Hier stand vorher, ein zweiter Start hebe das vorhandene Fenster
+von selbst. Stephan hat das Gegenteil gesehen: "Wenn Thunderbird bereits offen
+ist, dann wird bei Postfach oeffnen das vorhandene Fenster nicht nach vorn
+geholt."
+
+WARUM, UND WARUM DAS KEIN FEHLER VON THUNDERBIRD IST: Unter Wayland darf ein
+fremder Prozess kein Fenster nach vorn holen - das ist ausdruecklich
+unterbunden, damit kein Hintergrundprogramm dem Nutzer ins Bild springt. Heben
+darf sich nur die Anwendung selbst, und nur mit einem Aktivierungs-Token
+(XDG_ACTIVATION_TOKEN), das ihr beim Start mitgegeben wird. Ein Token gibt es
+aber nur, wenn ueber die .desktop-Datei gestartet wird - "/usr/bin/thunderbird"
+von Hand aufgerufen bekommt keins. Genau das stand hier.
+
+Deshalb: "gio launch <desktop-Datei>", wo es eine gibt. Fensterverwaltung
+braucht es weiterhin keine (wmctrl und xdotool sind nicht installiert und
+waeren unter Wayland ohnehin wirkungslos, die GNOME-Schnittstelle ist
+gesperrt).
+
+WO ES NICHT GEHT, UND WARUM DAS HINNEHMBAR IST: "gio launch" uebergibt
+Argumente als DATEINAMEN, nicht als Schalter - fuer "-compose", "-calendar"
+und "-addressbook" bleibt also der direkte Aufruf. Dort entsteht aber ein
+NEUES Fenster, und ein neues Fenster kommt nach vorn; das Problem betrifft nur
+das Heben eines vorhandenen.
 
 Aufruf:
   dialos-programm.py "postfach öffnen"      # startet und sagt es an
@@ -41,6 +61,7 @@ import sys
 import time
 
 SAY = "/usr/local/bin/dialos-say.py"
+GIO = "/usr/bin/gio"
 PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-programm.log")
 
 # Satz -> was passiert. "befehl" ist die Programmzeile, "ansage" das, was der
@@ -52,6 +73,7 @@ PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-programm.log")
 PROGRAMME = {
     "postfach öffnen": {
         "befehl": ["/usr/bin/thunderbird"],
+        "fenster": "/usr/share/applications/thunderbird.desktop",
         "ansage": "Ich öffne das Postfach.",
     },
     # ZWEI SAETZE FUER DASSELBE, wie bei "auf Linux"/"auf Gnome" und
@@ -75,18 +97,22 @@ PROGRAMME = {
         "ansage": "Ich öffne die Kontakte.",
     },
     "internet öffnen": {
+        "fenster": "/usr/share/applications/firefox-esr.desktop",
         "befehl": ["/usr/bin/firefox-esr"],
         "ansage": "Ich öffne das Internet.",
     },
     "browser öffnen": {
+        "fenster": "/usr/share/applications/firefox-esr.desktop",
         "befehl": ["/usr/bin/firefox-esr"],
         "ansage": "Ich öffne den Browser.",
     },
     "musik öffnen": {
+        "fenster": "/usr/share/applications/org.gnome.Rhythmbox3.desktop",
         "befehl": ["/usr/bin/rhythmbox"],
         "ansage": "Ich öffne die Musik.",
     },
     "radio öffnen": {
+        "fenster": "/usr/share/applications/de.haeckerfelix.Shortwave.desktop",
         "befehl": ["/usr/bin/shortwave"],
         "ansage": "Ich öffne das Radio.",
     },
@@ -144,16 +170,23 @@ def starten(satz):
                    if wartende == 1
                    else f" Ich trage dabei {wartende} vorgemerkte Entwürfe ein.")
     sprich(ansage)
+    # UEBER DIE .desktop-DATEI, WENN ES EINE GIBT - siehe oben: nur so bekommt
+    # die Anwendung das Aktivierungs-Token, mit dem sie ihr vorhandenes Fenster
+    # nach vorn holen darf.
+    zeile = eintrag["befehl"]
+    fenster = eintrag.get("fenster")
+    if fenster and os.path.exists(fenster) and os.path.exists(GIO):
+        zeile = [GIO, "launch", fenster]
     try:
         # start_new_session: Das Programm soll weiterlaufen, wenn die
         # Sprachsteuerung neu startet - es haengt sonst an deren Prozessgruppe.
-        subprocess.Popen(eintrag["befehl"], start_new_session=True,
+        subprocess.Popen(zeile, start_new_session=True,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except OSError as fehler:
         melde(f"Start fehlgeschlagen ({programm}): {fehler}")
         sprich("Das Programm ließ sich nicht öffnen.")
         return False
-    melde(f"{satz!r} -> {' '.join(eintrag['befehl'])}")
+    melde(f"{satz!r} -> {' '.join(zeile)}")
     return True
 
 

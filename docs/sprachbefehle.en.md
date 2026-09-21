@@ -88,9 +88,18 @@ listen?".
 > 2. **The microphone stays with DialOS.** Opening a program is neither a
 >    dictation nor an extension - the voice control keeps listening, and the
 >    next command goes through immediately.
-> 3. **Saying it again raises the window.** Thunderbird, Firefox and Rhythmbox
->    detect a running session themselves; DialOS needs no window management for
->    it (`wmctrl` is not installed, the GNOME interface is locked down).
+> 3. **Launching goes through the `.desktop` file, not the program path**
+>    (corrected on 2026-09-21 after Stephan checked: "if Thunderbird is already
+>    open, 'Postfach öffnen' does not bring the existing window to the front").
+>    Under Wayland a foreign process **may not** raise a window - that is
+>    deliberately prevented so no background program can jump into view. Only
+>    the application may raise itself, and only with an activation token
+>    (`XDG_ACTIVATION_TOKEN`), which exists only when it is started through the
+>    `.desktop` file. Hence `gio launch`. Window management does not help:
+>    `wmctrl` and `xdotool` are not installed and would be ineffective under
+>    Wayland, and the GNOME interface is locked down. **Where flags are needed**
+>    (`-compose`, `-calendar`, `-addressbook`) the direct call stays - a new
+>    window appears there anyway, and a new window does come to the front.
 > 4. **There is no "close".** A "close the mailbox" could throw away a sighted
 >    helper's unsaved work, and the user cannot hear what would be lost.
 >    Quitting stays manual until there is a reason that outweighs this.

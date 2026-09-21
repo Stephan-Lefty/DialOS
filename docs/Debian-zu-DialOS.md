@@ -3781,6 +3781,14 @@ dort; `dialos-sprachbefehl-desktop.py` liest die Liste beim Start ein, wie die
 Sätze der Erweiterungen. **Nach dem Aufspielen muss der Sprachdienst neu
 starten** (ab- und anmelden), sonst kennt die Grammatik die Sätze nicht.
 
+**Gestartet wird über die `.desktop`-Datei** (`gio launch`), wo es eine gibt -
+nicht über `/usr/bin/…`. Unter Wayland darf ein fremder Prozess kein Fenster
+nach vorn holen; nur die Anwendung selbst darf das, und nur mit dem
+Aktivierungs-Token, das der Start über die `.desktop`-Datei mitgibt. Mit dem
+nackten Programmpfad blieb ein bereits offenes Thunderbird-Fenster im
+Hintergrund (am 2026-09-21 von Stephan gesehen, vorher von mir falsch
+behauptet).
+
 „Postfach öffnen" ist zugleich die Auflösung für vorgemerkte Entwürfe: Es
 startet Thunderbird, die Brücke trägt ein, was wartet - und sagt es vorher an.
 

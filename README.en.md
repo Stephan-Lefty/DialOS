@@ -136,9 +136,12 @@ background) and `splash.png` (boot/login screen).
   lives there and nowhere else** - the voice service reads it at startup, like
   the extensions' sentences; a second list in the grammar would drift apart at
   the next program, unnoticed. The microphone stays with DialOS (opening a
-  program is not a dictation), and saying it again raises the window, because
-  Thunderbird, Firefox and Rhythmbox detect a running session themselves. **No
-  "close"**: that could throw away a sighted helper's unsaved work, and the
+  program is not a dictation). **Launching goes through the `.desktop` file**
+  (`gio launch`) - which was wrong at first: I claimed a second start would
+  raise the existing window by itself, and Stephan saw the opposite the same
+  day. Under Wayland a foreign process may not raise a window; only the
+  application itself may, and only with an activation token that exists solely
+  when started through the `.desktop` file. **No "close"**: that could throw away a sighted helper's unsaved work, and the
   user cannot hear what would be lost. Mandatory check passed: all 59
   sentences recognised verbatim, none broken by the nine new ones.
 

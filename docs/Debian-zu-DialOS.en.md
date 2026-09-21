@@ -3535,6 +3535,13 @@ nowhere else; `dialos-sprachbefehl-desktop.py` reads the list at startup, like
 the extensions' sentences. **After installing, the voice service must be
 restarted** (log out and in), otherwise the grammar does not know them.
 
+**Launching goes through the `.desktop` file** (`gio launch`) wherever one
+exists - not through `/usr/bin/…`. Under Wayland a foreign process may not
+bring a window to the front; only the application itself may, and only with
+the activation token that a start through the `.desktop` file provides. With
+the bare program path an already open Thunderbird window stayed in the
+background (seen by Stephan on 2026-09-21, wrongly claimed by me before).
+
 "Postfach öffnen" is also the resolution for queued drafts: it starts
 Thunderbird, and the bridge files whatever is waiting - announcing it first.
 
