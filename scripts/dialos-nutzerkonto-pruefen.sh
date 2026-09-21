@@ -33,7 +33,18 @@ da()     { sagen "da" "$1"; }
 echo "=== Thunderbird-Profile von $KONTO ==="
 PROFILE=$(find "$HEIM/.thunderbird" -maxdepth 1 -type d -name "*.default*" 2>/dev/null)
 if [ -z "$PROFILE" ]; then
-    fehlt "kein Thunderbird-Profil (Thunderbird im Konto nie gestartet?)"
+    # KEIN MANGEL, SONDERN DER NORMALZUSTAND: Das Profil entsteht erst, wenn im
+    # Konto ein Mailkonto eingerichtet wird. Als "FEHLT" gemeldet stuende hier
+    # fuer immer eine rote Zeile - und eine Warnung, die immer dasteht, wird
+    # nach der dritten Woche nicht mehr gelesen. Die Erweiterung wartet
+    # derweil in der Richtlinie und kommt mit dem Profil von selbst.
+    sagen "offen" "noch kein Thunderbird-Profil - entsteht mit dem Mailkonto"
+    if [ -f /usr/lib/thunderbird/distribution/policies.json ] \
+       && grep -q "bruecke@dialos.org" /usr/lib/thunderbird/distribution/policies.json; then
+        sagen "bereit" "die Erweiterung setzt Thunderbird dann selbst ein (policies.json)"
+    else
+        fehlt "policies.json mit bruecke@dialos.org - die Erweiterung käme nie an"
+    fi
 else
     for P in $PROFILE; do
         echo "  [$P]"
