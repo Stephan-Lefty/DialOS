@@ -838,6 +838,45 @@ Befehl gelten** - ausführlich in `docs/sprachbefehle.md`:
 Hardware-Entscheidung), Chat (WhatsApp priorisiert, Bestätigung fehlt),
 Videoaufnahme (Zweck ungeklärt).
 
+## Was installiert wird, muss im Konto `nutzer` ankommen (Regel seit 2026-09-21)
+
+**Stephan, 2026-09-21:** „Alles was wir jetzt auch bei den installierten
+Programmen machen und nicht exklusiv für Dialosadmin ist, muss dann auch sofort
+im Nutzer Konto zur Verfügung stehen. Sonst übersehen wir was."
+
+**Der Anlass war die Thunderbird-Erweiterung.** Sie wurde am 2026-09-21 von Hand
+in Thunderbird installiert - und damit **nur** ins Profil von `dialosadmin`. Ein
+ganzer Tag Arbeit (Entwürfe ablegen, Senden, Hinweis auf liegende Entwürfe,
+Sichern vor dem Schließen) wäre im Konto des Kunden wirkungslos gewesen, ohne
+dass irgendetwas eine Fehlermeldung ergeben hätte. Aufgefallen ist es nur, weil
+Stephan von sich aus danach gefragt hat.
+
+**Das ist dieselbe Fehlerklasse wie „Installationsstand prüfen, nicht annehmen"**
+(unten) - nur eine Ebene tiefer: Dort ging es darum, dass das Repo nicht das
+Gerät ist. Hier geht es darum, dass **`dialosadmin` nicht der Kunde ist**.
+
+**Was pro Konto liegt und deshalb einzeln geprüft gehört:**
+
+| Sache | Wo sie pro Konto liegt |
+|---|---|
+| Thunderbird-Erweiterungen | im Profil unter `~/.thunderbird/<profil>/extensions/` |
+| Thunderbird-`user.js` (Signatur, Wörterbuch) | im Profil |
+| `systemd --user`-Dienste und Timer | `systemctl --user enable` gilt je Konto |
+| Autostart-Einträge | `~/.config/autostart/` |
+| GNOME-Einstellungen (dconf) | je Konto |
+| DialOS-eigene Schalter | `~/.config/dialos/` (Frageton, persönliche Daten, Warteschlangen) |
+
+**Systemweit und damit unkritisch** sind `/usr/local/bin`, `/usr/local/share`,
+`/etc`, die Native-Messaging-Hosts unter `/usr/lib/thunderbird/` und alles, was
+`dialos-aufspielen` anfasst.
+
+**Die Regel lautet deshalb:** Wird etwas am Gerät eingerichtet, das nicht
+ausdrücklich Entwicklerwerkzeug ist, gehört im selben Arbeitsschritt die Frage
+beantwortet, **wie es ins Konto `nutzer` kommt** - und die Antwort gehört ins
+Aufbau-Rezept (`docs/Debian-zu-DialOS.md`), nicht in eine Handbewegung. Ein
+Werkzeug, das das prüft, steht als erste Aufgabe in `TODO.md`; eine Regel, die
+nur im Kopf gilt, hält genau bis zum nächsten langen Tag.
+
 ## Installationsstand prüfen, nicht annehmen (Regel seit 2026-08-19)
 
 **Das Repo ist die Vorlage, nicht der Beweis.** Am 2026-08-19 kam heraus, dass

@@ -91,6 +91,26 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Dienst mit Root-Rechten, der beliebige Eingaben erzeugen kann. Auf einem
   Gerät, das bei fremden Leuten steht, ist das die falsche Ecke zum Sparen.
 
+- [ ] **Werkzeug: prüfen, ob im Konto `nutzer` wirklich alles ankommt**
+  (Stephans Regel vom 2026-09-21, ausführlich in [CLAUDE.md](CLAUDE.md)). Die
+  Regel selbst hält nur so lange, wie jemand daran denkt - bei
+  `dialos-installstand.sh` war das die Lehre, und dort hat ein Werkzeug sie
+  ersetzt. Dasselbe hier.
+
+  **Was es vergleichen muss** (alles, was pro Konto liegt): Thunderbird-Profil
+  auf die Erweiterung `bruecke@dialos.org` und auf die `user.js`-Einträge
+  (Signatur, Wörterbuch `de-DE`), `systemctl --user is-enabled` für die
+  DialOS-Dienste und -Timer, `~/.config/autostart/`, und die Schalter unter
+  `~/.config/dialos/` (Frageton, persönliche Daten).
+
+  **Es braucht `sudo`**, weil `/home/nutzer` dem anderen Konto gehört - also
+  dasselbe Muster wie `dialos-installstand.sh --befehl`: melden, was fehlt, und
+  den Befehl ausgeben, der es einrichtet.
+
+  **Zwei Dinge sind heute schon bekannt und wären der erste Testfall:** die
+  MailExtension (hängt nur bei `dialosadmin`) und der Frageton im Nutzerkonto
+  (`sudo -u nutzer …` wurde am 2026-09-21 genannt, aber nie bestätigt).
+
 - [ ] **Die Programmliste weiterziehen - und einen Widerspruch auflösen**
   (2026-09-21, aus Stephans Anstoß „Wir müssen doch sowieso eine Liste von
   Befehlen machen, die dann die Programme startet"). Neun Sätze stehen in

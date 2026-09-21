@@ -3732,8 +3732,27 @@ cd /pfad/zum/repo/thunderbird-erweiterung && python3 -c "import zipfile; z=zipfi
 sudo install -m 755 /pfad/zum/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-thunderbird-bruecke.py /usr/local/bin/ && sudo install -m 644 -D /pfad/zum/repo/iso-build/config/includes.chroot/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json /usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json
 ```
 
-3. In Thunderbird: Hamburger-Menü → Add-ons → Zahnrad → *Add-on aus Datei
-   installieren* → `/tmp/dialos-bruecke.xpi`. **Unsigniert ist in Ordnung:**
+3. **Nicht von Hand installieren** (Lehre vom 2026-09-21, siehe unten) -
+   stattdessen an den festen Platz packen und Thunderbird es selbst einsetzen
+   lassen:
+
+```bash
+sudo /pfad/zum/repo/scripts/dialos-erweiterung-bauen.sh && sudo install -D -m 0644 /pfad/zum/repo/iso-build/config/includes.chroot/usr/lib/thunderbird/distribution/policies.json /usr/lib/thunderbird/distribution/policies.json
+```
+
+   **WARUM NICHT VON HAND (Stephan, 2026-09-21):** „Alles was wir jetzt auch
+   bei den installierten Programmen machen und nicht exklusiv für Dialosadmin
+   ist, muss dann auch sofort im Nutzer Konto zur Verfügung stehen. Sonst
+   übersehen wir was." Von Hand installiert landet die Erweiterung in **einem**
+   Profil - dem des Admins. Im Konto `nutzer`, also dem des Kunden, wäre sie
+   nicht da, und Entwürfe, Senden und der Hinweis auf liegende Entwürfe
+   blieben wirkungslos, **ohne eine einzige Fehlermeldung**. `policies.json`
+   mit `force_installed` greift dagegen in vorhandenen Profilen und in jedem
+   neuen. Zum Prüfen: `sudo scripts/dialos-nutzerkonto-pruefen.sh`.
+
+   Nur zum Ausprobieren einer Zwischenfassung noch von Hand: Hamburger-Menü →
+   Add-ons → Zahnrad → *Add-on aus Datei installieren*. **Unsigniert ist in
+   Ordnung:**
    Debians Thunderbird hat `xpinstall.signatures.required=false`; bei einem
    Thunderbird von Mozilla wäre das anders.
 

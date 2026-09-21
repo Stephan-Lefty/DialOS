@@ -1,0 +1,26 @@
+{
+  "_kommentar": [
+    "DialOS: Die MailExtension muss in JEDEM Konto ankommen, nicht nur bei dialosadmin.",
+    "Anlass (Stephan, 2026-09-21): 'Alles was wir jetzt auch bei den installierten",
+    "Programmen machen und nicht exklusiv fuer Dialosadmin ist, muss dann auch sofort",
+    "im Nutzer Konto zur Verfuegung stehen. Sonst uebersehen wir was.'",
+    "Vorher war die Erweiterung von Hand installiert - und damit nur in einem Profil.",
+    "Ein ganzer Tag Arbeit waere im Konto des Kunden wirkungslos gewesen, ohne eine",
+    "einzige Fehlermeldung.",
+    "force_installed statt normal_installed: Sie greift auch in VORHANDENEN Profilen,",
+    "sie entsteht mit jedem neuen Profil, und sie laesst sich nicht versehentlich",
+    "entfernen - ohne sie verliert der Nutzer Entwuerfe, Senden und den Hinweis auf",
+    "liegende Entwuerfe, ohne zu erfahren, warum.",
+    "Unsigniert ist in Ordnung: Debians Thunderbird hat xpinstall.signatures.required",
+    "auf false. Bei einem Thunderbird von Mozilla waere das anders.",
+    "Die .xpi baut scripts/dialos-erweiterung-bauen.sh an ihren festen Platz."
+  ],
+  "policies": {
+    "ExtensionSettings": {
+      "bruecke@dialos.org": {
+        "installation_mode": "force_installed",
+        "install_url": "file:///usr/local/share/dialos/dialos-bruecke.xpi"
+      }
+    }
+  }
+}
