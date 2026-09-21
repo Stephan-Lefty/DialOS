@@ -524,6 +524,34 @@ background) and `splash.png` (boot/login screen).
   **It touches nothing** - no file, no service, no index. Where something needs
   doing, it names the command and leaves it to the human.
 
+- **The search index is built - DialOS Search now really finds**
+  (2026-09-17, `dialos-suche-index.py`). Its own SQLite-FTS5 index over the
+  files that are already there anyway: letters from `~/Dokumente/`, notes from
+  `~/Notizen/`, PDFs from the archive. **It only indexes** - path, timestamp,
+  text; the file stays where it is. If the index is lost, nothing is lost with
+  it, it can be rebuilt at any time. `refresh` reads only what changed, and
+  vanished files are removed: a hit that no longer exists is worse than no hit
+  - the user then searches for it on the device.
+
+  **From MailBurg, `extract/` is shared**, not the program - PDF, OCR, Office.
+  If it is missing, the index falls back to `pdftotext` and plain text: worse,
+  but not dead.
+
+  **The Cologne phonetics are the difference from MailBurg** - there you type,
+  here you speak, and no speech recognition reliably hits proper names. Checked:
+  "Meier", "Mayer", "Maier" and "Mayr" collapse to `67`,
+  "Müller"/"Mueller"/"Miller" to `657`. In the test the spoken term "Meier"
+  finds the letter with "Mayer" and "Schmidt" the note with "Schmitt"; "Fahrrad"
+  correctly returns nothing. **It runs as a second pass**, because it naturally
+  collides ("Müller" and "Mahler" share `657`) - literal hits come first.
+
+  **The announcement names the count, not the list.** Someone who finds forty
+  letters does not want to hear them; they want to know that there are forty,
+  and then to narrow down - the same rule as with the shopping list. If a hit
+  came only through the sound, DialOS says "the spelling only sounds similar":
+  otherwise the user is puzzled during read-out, and cannot hold the screen up
+  beside it.
+
 - **Guard against orphaned microphone markers** (2026-09-17). `diktat_laeuft()`
   now reads the PID out of the marker and checks with signal 0 whether the
   process is still alive; an orphaned marker is cleared away and reported.
@@ -599,6 +627,13 @@ background) and `splash.png` (boot/login screen).
   Recorded because the lesson is bigger than the fault - a number that cannot be
   explained has more than once been the beginning of a wrong diagnosis here, and
   this time the beginning of the right one.
+
+- **Two numbers corrected in the docs** (2026-09-17). The count of the grammar
+  from the same day gave 69 different words; the correct figure is **71**. The
+  cause was the counting method: `STARTSATZ` and `STOPPSATZ` are constants in
+  `GRAMMATIK_AN`, not string literals, so a text search misses them. Counting
+  now goes through the syntax tree. The sentence count of 49 and all conclusions
+  remain untouched.
 
 - **DialOS gets an extension interface - a draft, no code yet**
   (2026-09-17, Stephan's decision: build DialOS Search "als eigenständige
