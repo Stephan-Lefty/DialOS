@@ -312,6 +312,11 @@ def offenes_sichern():
 # Warten auf etwas, das gar nicht anstand.
 NACHHOLEN_GRENZE_S = 25
 BRUECKE_GEDULD_S = 40
+# Hoechstens so viele Entwuerfe werden einzeln durchgefragt. Beim ersten Lauf
+# am 2026-09-21 lagen fuenf aus den Tests im Postfach, und DialOS fragte jeden
+# einzeln ab - vier Fragen, bevor Stephan zu dem kam, was er eigentlich wollte.
+# Wer mehr Entwuerfe liegen hat, will sie nicht per Sprache sortieren.
+EINZELN_HOECHSTENS = 3
 
 
 def entwuerfe_ansagen(beim_oeffnen):
@@ -358,11 +363,23 @@ def entwuerfe_ansagen(beim_oeffnen):
         sprich("Gut, sie bleiben liegen.")
         melde(f"{anzahl} Entwürfe, nichts gesendet")
         return
+    gefragt = 0
+    ohne_empfaenger = 0
     for eintrag in entwuerfe:
         betreff = (eintrag.get("betreff") or "ohne Betreff").strip()
         an = (eintrag.get("an") or "").strip()
-        wer = f" an {an}" if an else ""
-        if ja_oder_nein(f"{betreff}{wer} verschicken? Sage ja oder nein.") is not True:
+        # OHNE EMPFAENGER GAR NICHT ERST FRAGEN: Ein solcher Entwurf laesst sich
+        # nicht verschicken, und die Frage danach ist fuer den Nutzer nicht zu
+        # beantworten - er hoert "ohne Betreff verschicken?" und weiss nicht
+        # einmal, um welche E-Mail es geht. Am 2026-09-21 genau so passiert.
+        if not an:
+            ohne_empfaenger += 1
+            continue
+        if gefragt >= EINZELN_HOECHSTENS:
+            break
+        gefragt += 1
+        if ja_oder_nein(f"{betreff} an {an} verschicken? "
+                        "Sage ja oder nein.") is not True:
             continue
         antwort = bruecke_fragen({"befehl": "entwurf senden", "id": eintrag.get("id")})
         if antwort.get("ok"):
@@ -371,6 +388,15 @@ def entwuerfe_ansagen(beim_oeffnen):
         else:
             sprich("Das hat nicht geklappt. Der Entwurf bleibt liegen.")
             melde(f"Entwurf {eintrag.get('id')} nicht gesendet: {antwort.get('fehler')}")
+    if ohne_empfaenger:
+        sprich("Ein angefangener Entwurf hat keinen Empfänger. Den lasse ich liegen."
+               if ohne_empfaenger == 1 else
+               f"{ohne_empfaenger} angefangene Entwürfe haben keinen Empfänger. "
+               "Die lasse ich liegen.")
+    uebrig = len([e for e in entwuerfe if (e.get("an") or "").strip()]) - gefragt
+    if uebrig > 0:
+        sprich(f"{uebrig} weitere lasse ich liegen. In Thunderbird kannst Du sie "
+               "in Ruhe durchgehen.")
 
 
 def nachholen_abwarten():
