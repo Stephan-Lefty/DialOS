@@ -371,14 +371,21 @@ def schliessen(satz):
     # Rhythmbox offen haben, kann DialOS nicht sichern - dort ist SIGTERM alles,
     # was geht, und beide fragen selbst nach, wenn etwas offen ist.
     if "thunderbird" in eintrag["programm"]:
-        satz = offenes_sichern()
-        if satz == "FEHLER":
+        # EIGENER NAME, NICHT "satz" (Fehler vom 2026-09-21): Die erste Fassung
+        # ueberschrieb damit den Befehlssatz - im Protokoll stand danach
+        # "'Eine angefangene E-Mail lege ich noch als Entwurf ab.': SIGTERM an
+        # [44557]" statt "'postfach schliessen': SIGTERM an [44557]". Gelaufen
+        # ist alles richtig, aber das Protokoll log: Es nannte als Befehl eine
+        # Ansage. Ein Protokoll ist die Beweiskette - steht dort der falsche
+        # Befehl, fuehrt die naechste Fehlersuche in die Irre.
+        hinweis = offenes_sichern()
+        if hinweis == "FEHLER":
             sprich("Es ist noch eine E-Mail offen, die ich nicht speichern "
                    "konnte. Ich lasse das Postfach offen.")
             melde(f"{satz!r}: abgebrochen, Sichern fehlgeschlagen")
             return False
-        if satz:
-            sprich(satz)
+        if hinweis:
+            sprich(hinweis)
     for pid in pids:
         try:
             os.kill(pid, signal.SIGTERM)
