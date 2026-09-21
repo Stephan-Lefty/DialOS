@@ -140,11 +140,18 @@ das Erfolg meldet, während es versagt.
 - **Mailadressen werden mit Pausen vorgelesen** (Stephan, 2026-09-21, nach dem
   Anhören zweier Fassungen: „at ist ok aber mit einer kleinen Pause und auch bei
   dem Punkt in der Mailadresse"). Aus `kontakt@dialos.org` wird beim Vorlesen
-  „kontakt. at. dialos. Punkt. org." **Die Pause kostet einen Satzpunkt, und das
+  „kontakt! at! dialos! Punkt! org." **Die Pause kostet ein Satzzeichen, und das
   ist die einzige Möglichkeit:** Gemessen am 2026-08-24 erzeugt Piper nur an
-  Satzende-Zeichen Stille (Punkt 220 ms), während Semikolon, Doppelpunkt,
-  Gedankenstrich und mehrere Leerzeichen exakt 0 ms ergeben. Die Sprechmelodie
-  fällt dadurch ab - bei einer Adresse zählt Verständlichkeit mehr als Melodie.
+  Satzende-Zeichen Stille, während Semikolon, Doppelpunkt, Gedankenstrich und
+  mehrere Leerzeichen exakt 0 ms ergeben.
+
+  **Warum das Ausrufezeichen und nicht der Punkt:** Mit Punkten kamen die Pausen
+  ungleichmäßig - 90, 530, 330 ms, und ausgerechnet **vor** dem „at" nur 90 ms.
+  Genau das hat Stephan gehört („können wir vor at noch eine kleine Pause
+  einbauen?"). Mit Ausrufezeichen liegen sie bei 300 bis 430 ms und gleichmäßig,
+  „so lange wie bei einem Satzzeichen". Die Adresse dauert damit 3,8 statt 2,6
+  Sekunden - bei einer Adresse zählt Verständlichkeit mehr als Tempo. Fünf
+  Fassungen gemessen, Entscheidung nach dem Hören.
 
   **Gesprochen wird weiter „at", nicht „ät"** (auch das Stephans Wahl nach dem
   Hörvergleich): Beim Erkennen traf „at" in der Messung 43 von 43, und „ät"

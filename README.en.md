@@ -131,12 +131,18 @@ background) and `splash.png` (boot/login screen).
 
 - **Email addresses are read out with pauses** (Stephan, 2026-09-21, after
   listening to two versions: "at is fine but with a small pause, and at the dot
-  in the address too"). `kontakt@dialos.org` is read as "kontakt. at. dialos.
-  Punkt. org." **The pause costs a full stop, and that is the only way:**
-  measured on 2026-08-24, Piper only produces silence at sentence-ending marks
-  (full stop 220 ms), while semicolon, colon, dash and multiple spaces give
-  exactly 0 ms. The intonation falls as a result - for an address,
-  intelligibility counts more than melody.
+  in the address too"). `kontakt@dialos.org` is read as "kontakt! at! dialos!
+  Punkt! org." **The pause costs a sentence mark, and that is the only way:**
+  measured on 2026-08-24, Piper only produces silence at sentence-ending marks,
+  while semicolon, colon, dash and multiple spaces give exactly 0 ms.
+
+  **Why the exclamation mark and not the full stop:** with full stops the pauses
+  came out uneven - 90, 530, 330 ms, and of all places only 90 ms **before** the
+  "at". That is exactly what Stephan heard ("can we add a small pause before
+  at?"). With exclamation marks they sit at 300 to 430 ms and evenly, "as long
+  as at a sentence mark". The address then takes 3.8 instead of 2.6 seconds -
+  for an address, intelligibility counts more than speed. Five versions
+  measured, decided by ear.
 
   **It stays "at", not "ät"** (also Stephan's choice by ear): in the measurement
   "at" was recognised 43 out of 43, and "ät" is not in the small model's
