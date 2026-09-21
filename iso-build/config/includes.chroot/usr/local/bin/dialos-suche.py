@@ -91,7 +91,18 @@ BEREICHE = {
 NOCH_NICHT = ("bilder", "bild", "fotos", "foto", "videos", "video", "filme", "film")
 ANSAGE_NOCH_NICHT_BEREICH = ("Bilder und Videos kann ich noch nicht durchsuchen. "
                              "Das kommt später.")
-ANSAGE_START = "Wonach soll ich suchen?"
+# DAS WORT "BEGRIFF" GEHOERT IN DIE FRAGE (Stephan, 2026-09-21: "koennen wir bei
+# Dokument, wenn ich einen Begriff sagen soll, in der Frage auch Begriff
+# einfliessen lassen"). "Wonach soll ich suchen?" laesst offen, was erwartet
+# wird - ein Dateiname? ein Datum? ein ganzer Satz? Wer den Bildschirm nicht
+# sieht, hat keine Liste vor sich, an der er das ablesen koennte. Dazu der
+# Bereich, den er gerade gewaehlt hat: So hoert er zugleich, dass die Wahl
+# angekommen ist.
+ANSAGE_START = "Wonach soll ich suchen? Sage einen Begriff."
+ANSAGE_BEGRIFF = {
+    "dokumente": "Wonach soll ich in den Dokumenten suchen? Sage einen Begriff.",
+    "postfach": "Wonach soll ich im Postfach suchen? Sage einen Begriff.",
+}
 ANSAGE_NICHTS = "Ich habe nichts verstanden. Die Suche ist beendet."
 ANSAGE_NOCH_NICHT = ("Der Suchindex ist noch nicht eingerichtet. "
                      "Ich konnte deshalb nicht nachsehen.")
@@ -1364,7 +1375,8 @@ def main():
         arten = bereich_erfragen(erkenner, modell)
         if arten is None:
             return 0
-        begriffe = antwort_hoeren(ANSAGE_START, erkenner, modell)
+        frage = ANSAGE_BEGRIFF["postfach" if arten == ("Mail",) else "dokumente"]
+        begriffe = antwort_hoeren(frage, erkenner, modell)
         melde(f"  verstanden: {begriffe!r}")
         if not begriffe:
             sprich(ANSAGE_NICHTS)
