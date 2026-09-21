@@ -1,0 +1,18 @@
+{
+  "name": "DialOS-Mail",
+  "version": "0.1.0",
+  "braucht_dialos": "0.5.2",
+  "startsaetze": [
+    "neue e mail schreiben",
+    "e mail schreiben"
+  ],
+  "befehl": "/usr/local/bin/dialos-mail-schreiben.py",
+  "eigene_grammatik": [
+    "ja",
+    "nein",
+    "vorlesen",
+    "abbrechen"
+  ],
+  "braucht_mikrofon": true,
+  "beschreibung": "Eine E-Mail diktieren und nach Bestätigung verschicken"
+}

@@ -1096,13 +1096,20 @@ def adresse_buchstabieren_lassen():
     return ""
 
 
-def empfaenger_erfragen_fuer_mail(erkenner, modell):
-    """An wen weitergeleitet wird - aus den Kontakten oder buchstabiert."""
+def empfaenger_erfragen_fuer_mail(erkenner, modell, frage=None):
+    """An wen weitergeleitet wird - aus den Kontakten oder buchstabiert.
+
+    "frage" seit 2026-09-21: Dieselbe Arbeit macht auch die neue E-Mail
+    (dialos-mail-schreiben.py), nur heisst die Frage dort anders. Der Dialog
+    dahinter - Kontakt suchen, vorlesen, bestaetigen, sonst buchstabieren mit
+    drei Anlaeufen - ist derselbe und wird nicht ein zweites Mal geschrieben.
+    """
     em = _modul(EMPFAENGER_SKRIPT, "dialos_empfaenger")
+    if frage is None:
+        frage = ("An wen soll ich weiterleiten? Sage den Namen aus "
+                 "Deinen Kontakten, oder sage: buchstabieren.")
     for _versuch in range(2):
-        texte = antwort_hoeren("An wen soll ich weiterleiten? Sage den Namen aus "
-                               "Deinen Kontakten, oder sage: buchstabieren.",
-                               erkenner, modell)
+        texte = antwort_hoeren(frage, erkenner, modell)
         if not texte or _abbruch(texte):
             return ""
         if any(re.search(r"(?i)buchstab", t) or _aehnlich(t, "buchstabieren") >= 0.7

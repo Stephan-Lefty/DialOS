@@ -122,18 +122,12 @@ PROGRAMME = {
         "fenster": "/usr/share/applications/thunderbird.desktop",
         "ansage": "Ich öffne das Postfach.",
     },
-    # ZWEI SAETZE FUER DASSELBE, wie bei "auf Linux"/"auf Gnome" und
-    # "Brief aufnehmen"/"Brief schreiben": Niemand soll sich eine Formulierung
-    # merken muessen. "e mail" ohne Bindestrich, weil die Grammatik Woerter
-    # zaehlt, nicht Schreibweisen - gesprochen ist es dasselbe.
-    "neue e mail schreiben": {
-        "befehl": ["/usr/bin/thunderbird", "-compose"],
-        "ansage": "Ich öffne ein leeres E-Mail-Fenster.",
-    },
-    "e mail schreiben": {
-        "befehl": ["/usr/bin/thunderbird", "-compose"],
-        "ansage": "Ich öffne ein leeres E-Mail-Fenster.",
-    },
+    # "NEUE E-MAIL SCHREIBEN" GEHOERT SEIT DEM 2026-09-21 NICHT MEHR HIERHER.
+    # Der Satz oeffnete ein leeres Verfassen-Fenster - fuer jemanden, der den
+    # Bildschirm nicht sieht, ist das ein leerer Raum. Jetzt fuehrt er den
+    # Dialog: Empfaenger, Betreff, Text, Bestaetigung, senden
+    # (dialos-mail-schreiben.py, angemeldet als Erweiterung DialOS-Mail). Wer
+    # sehen kann, oeffnet das Fenster in Thunderbird selbst.
     "kalender öffnen": {
         "befehl": ["/usr/bin/thunderbird", "-calendar"],
         "ansage": "Ich öffne den Kalender.",

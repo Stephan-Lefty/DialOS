@@ -80,6 +80,39 @@ async function entwurfAblegen({ an, betreff, text, bezug }) {
            antwort_auf: bezugs_mail ? bezugs_mail.id : null };
 }
 
+async function mailSenden({ an, betreff, text }) {
+  // Senden ist die einzige Sache hier, die sich NICHT rueckgaengig machen
+  // laesst - deshalb steht die Bestaetigung nicht in dieser Datei, sondern
+  // dort, wo der Nutzer spricht (dialos-mail-schreiben.py). Diese Funktion
+  // fragt nichts und prueft nichts; sie wird nur gerufen, wenn der Mensch
+  // "ja" gesagt hat.
+  //
+  // "compose.send" ist eine EIGENE Berechtigung, getrennt von "compose" und
+  // "compose.save" - dieselbe Falle wie am 2026-09-21 beim Speichern, wo
+  // "browser.compose.saveMessage is not a function" nach einem Programmfehler
+  // aussah und in Wahrheit eine fehlende Zeile im Manifest war.
+  const tab = await browser.compose.beginNew({
+    to: an ? [an] : [],
+    subject: betreff || "(ohne Betreff)",
+    body: (text || "").replace(/\n/g, "<br>"),
+  });
+  try {
+    await browser.compose.sendMessage(tab.id, { mode: "sendNow" });
+  } catch (fehler) {
+    // NICHT WEGWERFEN, WENN DAS SENDEN SCHEITERT (kein Netz, Server sagt
+    // nein): Der Text ist diktiert und waere sonst verloren. Er kommt als
+    // Entwurf in Sicherheit, und DialOS sagt es.
+    try {
+      await browser.compose.saveMessage(tab.id, { mode: "draft" });
+    } catch (zweiter) {
+      /* dann bleibt das Fenster offen stehen - immer noch besser als weg */
+    }
+    return { ok: false, was: "senden", fehler: String(fehler),
+             entwurf: true };
+  }
+  return { ok: true, was: "senden", an, betreff };
+}
+
 async function schreibfenster() {
   // Welche Schreibfenster stehen offen - und was steht darin?
   //
@@ -143,6 +176,7 @@ async function kontaktAnlegen({ name, mail, firma }) {
 async function ausfuehren(bitte) {
   try {
     if (bitte.befehl === "entwurf") return await entwurfAblegen(bitte);
+    if (bitte.befehl === "senden") return await mailSenden(bitte);
     if (bitte.befehl === "schreibfenster") return await schreibfenster();
     if (bitte.befehl === "schreibfenster sichern") return await schreibfensterSichern();
     if (bitte.befehl === "kontakt") return await kontaktAnlegen(bitte);
