@@ -63,6 +63,15 @@ ZEITGRENZE_S = 12.0      # bis die Antwort BEGINNT - Zeit zum Luftholen
 PAUSE_NACH_WORT_S = 3.0
 BLOCK_LAENGE = 10        # nach so vielen Woertern eine echte Pause
 
+# DER FRAGETON GEHOERT HIER ZUM WERKZEUG (Stephan, 2026-09-21: "der ton kommt
+# nie"). In DialOS ist er eine Option, die ueber ~/.config/dialos/frageton
+# eingeschaltet wird - bei Stephan steht sie nicht, und "--frage" erzeugt dann
+# nur Pipers steigende Satzmelodie. Die hoert man bei einem einzelnen "a" oder
+# "be" nicht. Bei einer Messung muss aber unmissverstaendlich klar sein, WANN
+# gesprochen werden soll; deshalb spielt das Werkzeug den Ton selbst, ohne an
+# der Einstellung des Geraets zu drehen.
+FRAGE_TON = "/usr/local/share/dialos/frage-ton.wav"
+
 MESSORDNER = ("/media/dialosadmin/SanDisk-Extreme/DialOS/erkenner-vergleich/"
               "buchstaben")
 
@@ -104,6 +113,15 @@ def diktat_modul():
     return modul
 
 
+def frageton_abspielen():
+    if not os.path.exists(FRAGE_TON):
+        return
+    try:
+        subprocess.run(["paplay", FRAGE_TON], capture_output=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+
 def sprechen_und_mithoeren(text, prozess, frage=False):
     """Spricht und LIEST DABEI DEN MIKROFONSTROM LEER.
 
@@ -127,6 +145,22 @@ def sprechen_und_mithoeren(text, prozess, frage=False):
         if not prozess.stdout.read(800):
             break
     fertig.wait()
+    if frage:
+        # Der Ton laeuft ebenfalls bei offener Aufnahme - mitgelesen und
+        # verworfen, sonst stuende er als erstes in der naechsten Aufnahme.
+        fertig_ton = threading.Event()
+
+        def ton():
+            try:
+                frageton_abspielen()
+            finally:
+                fertig_ton.set()
+
+        threading.Thread(target=ton, daemon=True).start()
+        while not fertig_ton.is_set():
+            if not prozess.stdout.read(800):
+                break
+        fertig_ton.wait()
 
 
 def bis_ruhe(prozess, hoechstens_s=2.5, ruhe_s=0.4):
