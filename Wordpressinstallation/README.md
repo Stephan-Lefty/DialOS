@@ -83,6 +83,33 @@ liefert Benutzer `ClaudIA` mit Administrator-Rechten.
 
 ## Änderungsprotokoll
 
+### 0.4.0 (22.09.2026)
+- **Das Änderungsprotokoll ist geteilt.** `/status/` und `/en/idea/` zeigen je
+  Version nur noch eine Kurzfassung mit Verweis auf die vollständige Liste; die
+  steht neu auf `/aenderungsprotokoll/` (Seite 644) und `/en/changelog/`
+  (Seite 645). Beide neuen Seiten hängen nicht im Menü – Menü 7 hat
+  `auto_add = False`, neue Seiten landen dort also nicht von selbst.
+- **Der Grund war messbar:** `/status/` war **373 KB** groß, 262 Einzelpunkte
+  über sieben Versionen, allein 0.5.1 mit 138. Auf einem Handy im Mobilfunknetz
+  ist das eine halbe Minute Laden für eine Seite, die jemand überfliegen will.
+  Jetzt sind es 71 KB, und davon ist das Protokoll nur noch ein kleiner Teil.
+- **Die Kurzfassung wird nicht erfunden, sondern gefunden.** In den großen
+  Versionen beginnt praktisch jeder Punkt mit einem fett gesetzten Kopf (53 von
+  53, 138 von 138, 48 von 52), im Schnitt 57 bis 81 Zeichen lang gegenüber 939
+  bis 1318 für den ganzen Punkt. Genau dieser Kopf wird übernommen. Ältere
+  Versionen ohne Fettschrift liefern den ersten Satz. Damit behauptet das
+  Skript nichts über Wichtigkeit, was es nicht wissen kann.
+- **Markdown-Links werden endlich umgewandelt.** `md_inline_to_html()` kannte
+  Code-Spannen, Fett und Kursiv – aber keine Links. Auf `/status/` standen
+  dadurch **17 Stück wörtlich** auf der Seite, Besucher lasen
+  `[rustdesk#5074](https://github.com/rustdesk/rustdesk/issues/5074)`. Dieselbe
+  Klasse Fehler wie bei der Fettschrift am 17.09.: Was im Protokoll vorher
+  nicht vorkam, fiel nie auf. Verweise auf Repo-Dateien (`docs/…`, `TODO.md`)
+  gehen jetzt auf GitHub, weil es auf der Website kein `docs/` gibt. Neu ist
+  auch eine Warnung, wenn doch einmal ein Link stehen bleibt.
+- Gefunden wurde das alles nebenbei: Die langen Adressen waren es, die
+  `/status/` auf dem Handy breiter machten als den Bildschirm.
+
 ### 0.3.0 (17.09.2026)
 - Hörfassungen der deutschen Neuigkeiten, gesprochen von Anna
   (`de_DE-kerstin-low`, Tempo 0,95 wie am Gerät). Erster Beitrag ist
