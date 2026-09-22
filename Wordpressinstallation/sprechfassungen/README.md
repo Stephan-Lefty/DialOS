@@ -101,7 +101,7 @@ geschrieben, und ihr Zuhause ist die Mediathek von dialos.org.
 
 ## Bisher vertont
 
-Alle zwanzig deutschen Beiträge, Stand 2026-09-21. Die englischen bewusst nicht:
+Alle zwanzig deutschen Beiträge, Stand 2026-09-22. Die englischen bewusst nicht:
 Anna ist eine deutsche Stimme, und eine englische Hörfassung bräuchte eine eigene.
 
 **Die Lücke schließt sich nicht von selbst.** Am 2026-09-21 fehlten zwei
@@ -132,6 +132,7 @@ deutschen Beiträgen.
 | [Von drei auf 26 Sätze](https://dialos.org/von-drei-auf-26-saetze/) | 2026-09-16 | 1:43 |
 | [Der Prüfstand: Messen statt glauben](https://dialos.org/der-pruefstand-messen-statt-glauben/) | 2026-09-19 | 1:58 |
 | [Tag 41 bis 47: Schreiben und wiederfinden](https://dialos.org/dialos-tag-41-bis-47-schreiben-und-wiederfinden/) | 2026-09-21 | 1:58 |
+| [Ein Text zum Lesen ist kein Text zum Hören](https://dialos.org/ein-text-zum-lesen-ist-kein-text-zum-hoeren/) | 2026-09-22 | 1:51 |
 | [Ein Server in Innsbruck](https://dialos.org/ein-server-in-innsbruck/) | 2026-09-24 | 1:49 |
 
 ### Was beim Kürzen der Chronik-Folgen zu beachten war
