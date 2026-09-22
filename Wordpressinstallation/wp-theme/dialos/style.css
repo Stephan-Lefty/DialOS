@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.13
+Version: 1.6.14
 Text Domain: dialos
 */
 
@@ -699,5 +699,68 @@ body.dialos-a11y-mode .dialos-neueste-datum {
     align-items: flex-start;
     justify-content: flex-start;
     gap: 0.4rem 0;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Neuigkeiten-Uebersicht: keine leeren Bloecke mehr auf dem Handy
+   (Stephan, 2026-09-22: "bei der Seite Neuigkeiten auf dem Handy sind
+   immer so viel Leerzeilen").
+
+   Die Ursache ist dieselbe Falle wie im Fusszeilen-Block, nur eine
+   Ebene tiefer: "flex: 0 0 340px" an der Ueberschrift und
+   "flex: 1 1 300px" am Textabsatz meinen in der Zeilenrichtung des
+   Desktops die BREITE. Die Abfrage unten schaltet auf
+   "flex-direction: column" - und ab da meint derselbe Wert die HOEHE.
+   Jede Ueberschrift war damit 340 px hoch, egal ob eine Zeile darin
+   stand, und jeder Auszug mindestens 300 px. Die alte Abfrage setzte
+   nur "max-width: none" zurueck, die flex-Angabe blieb stehen.
+
+   Gemessen bei 356 px: Ein Eintrag war 643 px hoch, davon rund 300 px
+   leer. Danach 159 bis 224 px, je nach tatsaechlicher Textlaenge, und
+   die ganze Seite 1731 statt 3953 px - also 56 Prozent kuerzer.
+
+   Das "body" davor ist noetig, solange die Datei ein zweites Mal mit
+   wlows Cache-Marke geladen wird (Begruendung bei 1.6.13 weiter oben).
+   ------------------------------------------------------------------ */
+@media (max-width: 700px) {
+  body .dialos-news-entry h3 {
+    flex: 0 0 auto;
+  }
+  body .dialos-news-entry p {
+    flex: 0 1 auto;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Lange Pfade und Adressen duerfen umbrechen (Stephan, 2026-09-22:
+   "Die Seite https://dialos.org/status/ hat immer noch das Problem mit
+   dem Verschieben").
+
+   Auf /status/ und /en/idea/ steht das Aenderungsprotokoll, und darin
+   stehen Dateipfade wie
+   "/usr/local/share/applications/org.gnome.Evolution.desktop" - 57
+   Zeichen ohne ein einziges Leerzeichen. Ein Browser bricht so etwas
+   von sich aus nicht um; das Element war 439 px breit bei 360 px
+   Sichtfeld. Geprueft wurden alle 62 veroeffentlichten Seiten und
+   Beitraege: genau diese zwei sind betroffen, beide werden aus dem
+   README gefuellt.
+
+   "anywhere" statt "break-word" fuer Pfade, weil break-word erst dann
+   bricht, wenn ein Wort allein in einer eigenen Zeile nicht passt -
+   steht davor noch Text, bleibt der Ueberstand. Der Umbruch am
+   Wortende auf body-Ebene ist das Sicherheitsnetz fuer alles andere;
+   er greift nur bei Woertern, die sonst ueberstehen wuerden.
+   ------------------------------------------------------------------ */
+@media (max-width: 991px) {
+  body {
+    overflow-wrap: break-word;
+  }
+  body code,
+  body kbd,
+  body samp,
+  body pre {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
