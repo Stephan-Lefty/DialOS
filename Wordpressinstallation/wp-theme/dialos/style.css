@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.14
+Version: 1.6.15
 Text Domain: dialos
 */
 
@@ -670,19 +670,24 @@ body.dialos-a11y-mode .dialos-neueste-datum {
    nicht zu treffen, und untereinander ist jedes Ziel eine eigene,
    ausreichend grosse Flaeche.
 
-   ZWEI "body" VOR JEDEM SELEKTOR, UND DAS IST KEIN SCHOENHEITSFEHLER:
+   DAS "body" VOR JEDEM SELEKTOR IST KEIN SCHOENHEITSFEHLER:
    Das Eltern-Theme wlow bindet "get_stylesheet_uri()" ein - bei einem
    aktiven Child-Theme ist das NICHT wlows eigene style.css, sondern
    DIESE hier. Die Datei wird dadurch ZWEIMAL geladen, das zweite Mal
-   ganz am Ende und mit wlows Versionsnummer (7.1.1) als Cache-Marke.
-   Diese Marke aendert sich nie, wenn sich unser Theme aendert - ein
-   Besucher bekommt an dieser Stelle also die alte Datei aus seinem
-   Browserspeicher, und weil sie SPAETER geladen wird, gewinnt dort die
-   alte "nowrap"-Regel gegen die neue. Genau daran ist 1.6.12
-   wirkungslos geblieben, obwohl die Datei auf dem Server richtig war.
-   Mit dem zusaetzlichen "body" ist die neue Regel spezifischer und
-   gewinnt unabhaengig von der Reihenfolge. Die Ursache selbst ist in
-   functions.php entschaerft.
+   ganz am Ende der Kette und mit einer Cache-Marke, die sich nicht
+   bewegt, wenn sich unser Theme aendert. Ein Besucher bekommt an dieser
+   Stelle also die alte Datei aus seinem Browserspeicher, und weil sie
+   SPAETER geladen wird, gewinnt dort die alte "nowrap"-Regel gegen die
+   neue. Genau daran ist 1.6.12 wirkungslos geblieben, obwohl die Datei
+   auf dem Server richtig war. Mit dem zusaetzlichen "body" ist die neue
+   Regel spezifischer und gewinnt unabhaengig von der Reihenfolge.
+
+   Welche Marke das ist, stand hier bis 1.6.14 FALSCH ("wlows
+   Versionsnummer 7.1.1"). Es ist die WORDPRESS-KERNVERSION - wlow
+   selbst traegt die 1.2.7. Belegt am 2026-09-22: Beim Update von
+   WordPress 7.1.1 auf 7.1.2 wanderte die Marke im selben Schritt mit,
+   ohne dass an wlow oder an diesem Theme etwas geaendert wurde. Die
+   Ursache ist seit 1.6.15 in functions.php entschaerft.
    ------------------------------------------------------------------ */
 @media (max-width: 991px) {
   body .footer .col-md-6:first-child p,

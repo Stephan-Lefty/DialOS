@@ -34,13 +34,31 @@ function dialos_child_enqueue_styles() {
  * an und verweist dabei auf get_stylesheet_uri(). Bei einem AKTIVEN
  * CHILD-THEME liefert diese Funktion aber nicht wlows eigene style.css,
  * sondern unsere. Unsere Datei wird dadurch zweimal geladen - das zweite
- * Mal ganz am Ende und mit wlows Version (7.1.1) als Cache-Marke.
+ * Mal ganz am Ende der Kette.
  *
- * Und diese Marke aendert sich nie, wenn sich unser Theme aendert. Ein
- * Besucher, der die Seite schon einmal besucht hat, bekommt an dieser
- * Stelle also fuer immer die alte Datei aus seinem Browserspeicher. Weil
- * sie SPAETER geladen wird als die richtige, gewinnen dort die alten
- * Regeln. Genau daran ist Fassung 1.6.12 gescheitert.
+ * DIE MARKE IST DIE WORDPRESS-KERNVERSION, nicht die von wlow. In
+ * 1.6.13 stand hier das Falsche ("wlows Version 7.1.1"); wlow traegt
+ * laut WordPress die 1.2.7. Richtig ist: Wer wp_enqueue_style() ohne
+ * eigene Versionsangabe aufruft, bekommt von WordPress die Version des
+ * KERNS als Marke angehaengt. Belegt am 2026-09-22 durch das Update von
+ * WordPress 7.1.1 auf 7.1.2 - die Marke wanderte im selben Schritt von
+ * ?ver=7.1.1 auf ?ver=7.1.2 mit, ohne dass an wlow oder an diesem Theme
+ * irgendetwas geaendert wurde.
+ *
+ * Fuer die Wirkung aendert das nichts: Die Marke bewegt sich nur, wenn
+ * WORDPRESS aktualisiert wird, nicht wenn sich unser Theme aendert. Ein
+ * Besucher, der die Seite schon kennt, bekommt an dieser Stelle also die
+ * alte Datei aus seinem Browserspeicher, und weil sie SPAETER geladen
+ * wird als die richtige, gewinnen dort die alten Regeln. Genau daran ist
+ * Fassung 1.6.12 gescheitert.
+ *
+ * UMGEBAUT IN 1.6.15 - die erste Fassung griff nachweislich nicht. Sie
+ * hing an "wp_enqueue_scripts" mit Prioritaet 20 und suchte den Eintrag
+ * im Register; nach dem Hochladen stand die Marke aber unveraendert auf
+ * der Kernversion. Offenbar meldet wlow das Stylesheet erst spaeter an,
+ * sodass zu diesem Zeitpunkt noch gar nichts zu finden war. Der Filter
+ * "style_loader_src" laeuft dagegen beim Erzeugen JEDES Stylesheet-Links
+ * und kennt keine Registrierungsreihenfolge.
  *
  * Bewusst nur die Versionsnummer korrigiert und die Einbindung NICHT
  * entfernt: An einem Handle koennen ueber wp_add_inline_style weitere
@@ -48,24 +66,24 @@ function dialos_child_enqueue_styles() {
  * geladen kostet eine Anfrage - falsch zwischengespeichert kostet jede
  * kuenftige Aenderung.
  */
-add_action( 'wp_enqueue_scripts', 'dialos_child_cache_marke_richtigstellen', 20 );
+add_filter( 'style_loader_src', 'dialos_child_cache_marke_richtigstellen', 10, 2 );
 
-function dialos_child_cache_marke_richtigstellen() {
-	global $wp_styles;
-
-	if ( ! isset( $wp_styles->registered['wlow-css'] ) ) {
-		return;
+function dialos_child_cache_marke_richtigstellen( $src, $handle ) {
+	if ( 'wlow-css' !== $handle ) {
+		return $src;
 	}
-
-	$eintrag = $wp_styles->registered['wlow-css'];
 
 	// Nur anfassen, wenn dort wirklich UNSERE Datei haengt - laedt wlow
 	// eines Tages seine eigene, bleibt alles unberuehrt.
-	if ( false === strpos( (string) $eintrag->src, get_stylesheet() . '/style.css' ) ) {
-		return;
+	if ( false === strpos( (string) $src, get_stylesheet() . '/style.css' ) ) {
+		return $src;
 	}
 
-	$eintrag->ver = wp_get_theme()->get( 'Version' );
+	return add_query_arg(
+		'ver',
+		wp_get_theme()->get( 'Version' ),
+		remove_query_arg( 'ver', $src )
+	);
 }
 
 /**
