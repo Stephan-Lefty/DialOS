@@ -52,13 +52,28 @@ function dialos_child_enqueue_styles() {
  * wird als die richtige, gewinnen dort die alten Regeln. Genau daran ist
  * Fassung 1.6.12 gescheitert.
  *
- * UMGEBAUT IN 1.6.15 - die erste Fassung griff nachweislich nicht. Sie
- * hing an "wp_enqueue_scripts" mit Prioritaet 20 und suchte den Eintrag
- * im Register; nach dem Hochladen stand die Marke aber unveraendert auf
- * der Kernversion. Offenbar meldet wlow das Stylesheet erst spaeter an,
- * sodass zu diesem Zeitpunkt noch gar nichts zu finden war. Der Filter
- * "style_loader_src" laeuft dagegen beim Erzeugen JEDES Stylesheet-Links
- * und kennt keine Registrierungsreihenfolge.
+ * ZWEIMAL DANEBEN, BEVOR ES SASS - beide Fehlversuche stehen hier,
+ * damit sie niemand ein drittes Mal macht:
+ *
+ *   1.6.14 hing an "wp_enqueue_scripts" mit Prioritaet 20 und suchte den
+ *   Eintrag im Register. Nach dem Hochladen stand die Marke unveraendert
+ *   da - wlow meldet das Stylesheet offenbar spaeter an, zu diesem
+ *   Zeitpunkt war nichts zu finden.
+ *
+ *   1.6.15 wechselte auf den Filter "style_loader_src" (richtig), fragte
+ *   darin aber nach dem Handle "wlow-css" (falsch). Diesen Namen hatte
+ *   ich aus dem HTML abgelesen - dort steht id="wlow-css". WordPress
+ *   haengt beim Ausgeben aber ein "-css" an den Handle an. Beleg aus der
+ *   eigenen Seite: Unser Aufruf oben nutzt "dialos-child-style", im HTML
+ *   erscheint id="dialos-child-style-css". Das gesuchte Handle heisst
+ *   also schlicht "wlow", und die Bedingung traf nie zu.
+ *
+ * Deshalb fragt diese Fassung GAR NICHT MEHR nach dem Handle, sondern
+ * nur noch danach, ob die Adresse auf unsere style.css zeigt. Ein Name,
+ * den man raten muss, ist eine Fehlerquelle; die Adresse steht dagegen
+ * unmittelbar in dem Wert, der ohnehin zurueckgegeben wird. Die richtige
+ * Einbindung wird dabei mitgetroffen - sie traegt die Theme-Version aber
+ * bereits, fuer sie aendert sich also nichts.
  *
  * Bewusst nur die Versionsnummer korrigiert und die Einbindung NICHT
  * entfernt: An einem Handle koennen ueber wp_add_inline_style weitere
@@ -69,12 +84,9 @@ function dialos_child_enqueue_styles() {
 add_filter( 'style_loader_src', 'dialos_child_cache_marke_richtigstellen', 10, 2 );
 
 function dialos_child_cache_marke_richtigstellen( $src, $handle ) {
-	if ( 'wlow-css' !== $handle ) {
-		return $src;
-	}
-
-	// Nur anfassen, wenn dort wirklich UNSERE Datei haengt - laedt wlow
-	// eines Tages seine eigene, bleibt alles unberuehrt.
+	// Nur unsere eigene style.css, egal unter welchem Handle sie
+	// eingebunden wurde. Laedt wlow eines Tages seine eigene Datei,
+	// bleibt sie unberuehrt.
 	if ( false === strpos( (string) $src, get_stylesheet() . '/style.css' ) ) {
 		return $src;
 	}
