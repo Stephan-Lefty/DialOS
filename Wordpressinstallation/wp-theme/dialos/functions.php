@@ -26,6 +26,49 @@ function dialos_child_enqueue_styles() {
 }
 
 /**
+ * Die Cache-Marke der zweiten Einbindung unserer style.css richtigstellen
+ * (Stephan, 2026-09-22 - gefunden, weil ein Fix am Handy wirkungslos blieb,
+ * obwohl die Datei auf dem Server nachweislich richtig war).
+ *
+ * Das Eltern-Theme wlow meldet ein Stylesheet unter dem Handle "wlow-css"
+ * an und verweist dabei auf get_stylesheet_uri(). Bei einem AKTIVEN
+ * CHILD-THEME liefert diese Funktion aber nicht wlows eigene style.css,
+ * sondern unsere. Unsere Datei wird dadurch zweimal geladen - das zweite
+ * Mal ganz am Ende und mit wlows Version (7.1.1) als Cache-Marke.
+ *
+ * Und diese Marke aendert sich nie, wenn sich unser Theme aendert. Ein
+ * Besucher, der die Seite schon einmal besucht hat, bekommt an dieser
+ * Stelle also fuer immer die alte Datei aus seinem Browserspeicher. Weil
+ * sie SPAETER geladen wird als die richtige, gewinnen dort die alten
+ * Regeln. Genau daran ist Fassung 1.6.12 gescheitert.
+ *
+ * Bewusst nur die Versionsnummer korrigiert und die Einbindung NICHT
+ * entfernt: An einem Handle koennen ueber wp_add_inline_style weitere
+ * Angaben haengen, die sonst lautlos verschwinden wuerden. Doppelt
+ * geladen kostet eine Anfrage - falsch zwischengespeichert kostet jede
+ * kuenftige Aenderung.
+ */
+add_action( 'wp_enqueue_scripts', 'dialos_child_cache_marke_richtigstellen', 20 );
+
+function dialos_child_cache_marke_richtigstellen() {
+	global $wp_styles;
+
+	if ( ! isset( $wp_styles->registered['wlow-css'] ) ) {
+		return;
+	}
+
+	$eintrag = $wp_styles->registered['wlow-css'];
+
+	// Nur anfassen, wenn dort wirklich UNSERE Datei haengt - laedt wlow
+	// eines Tages seine eigene, bleibt alles unberuehrt.
+	if ( false === strpos( (string) $eintrag->src, get_stylesheet() . '/style.css' ) ) {
+		return;
+	}
+
+	$eintrag->ver = wp_get_theme()->get( 'Version' );
+}
+
+/**
  * Seiten-Cache (WP Super Cache) bei jeder Aenderung an Seiten/
  * Beitraegen vollstaendig leeren (Stephan, 2026-08-25, beim Einrichten
  * des Cache-Plugins). Dessen eigene Einstellung dafuer

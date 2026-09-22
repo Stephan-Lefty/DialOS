@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.12
+Version: 1.6.13
 Text Domain: dialos
 */
 
@@ -650,37 +650,54 @@ body.dialos-a11y-mode .dialos-neueste-datum {
    2026-09-22, am Handy bemerkt: "kann aber den Tab nicht nur nach
    unten scrollen, sondern auch nach rechts und links schieben").
 
-   Gemessen in einem 375 px breiten Rahmen: Die Seite war 519 px breit,
-   also 144 px zu viel - auf JEDER Seite gleich, weil beide Ursachen im
+   Gemessen in einem 356 px breiten Rahmen: Die Seite war 519 px breit,
+   also 163 px zu viel - auf JEDER Seite gleich, weil beide Ursachen im
    Fusszeilen-Block stehen. Beide Regeln stammen aus der Desktop-Ansicht
    und waren dort richtig:
 
    1. Die Copyright-Zeile oben (Zeile ~177) hat "white-space: nowrap",
       damit sie in der 50/50-Aufteilung nicht umbricht. Sie enthaelt
-      aber auch die Mailadresse - und die lief damit bis x=518 hinaus,
-      weit ueber den Bildschirmrand.
+      aber auch die Mailadresse - und die lief damit bis x=518 hinaus.
+      Stephans eigene Diagnose am Geraet: "die Textzeile copyright ...
+      bestimmt die Breite". Genau so war es.
    2. Die rechte Spalte hat "flex: 0 0 auto", darf also NICHT
       schrumpfen. Ihre Links tragen einzeln "nowrap", und weil die
       Spalte beliebig breit werden durfte, kam das "flex-wrap: wrap"
-      von .dialos-footer-links nie zum Zug: 435 px statt der 331 px,
-      die zur Verfuegung standen.
+      von .dialos-footer-links nie zum Zug.
 
-   Unter 992 px stehen die beiden col-md-6 ohnehin untereinander - dort
-   braucht keine der beiden Regeln zu gelten. Nach dem Einbau in
-   derselben Messung: 375 px Sichtfeld, 375 px Seitenbreite, kein
-   einziges ueberstehendes Element mehr.
+   Die Links stehen auf dem Handy jetzt untereinander statt nebeneinander
+   (Stephans Wunsch) - drei Ziele in einer Zeile sind auf 356 px ohnehin
+   nicht zu treffen, und untereinander ist jedes Ziel eine eigene,
+   ausreichend grosse Flaeche.
+
+   ZWEI "body" VOR JEDEM SELEKTOR, UND DAS IST KEIN SCHOENHEITSFEHLER:
+   Das Eltern-Theme wlow bindet "get_stylesheet_uri()" ein - bei einem
+   aktiven Child-Theme ist das NICHT wlows eigene style.css, sondern
+   DIESE hier. Die Datei wird dadurch ZWEIMAL geladen, das zweite Mal
+   ganz am Ende und mit wlows Versionsnummer (7.1.1) als Cache-Marke.
+   Diese Marke aendert sich nie, wenn sich unser Theme aendert - ein
+   Besucher bekommt an dieser Stelle also die alte Datei aus seinem
+   Browserspeicher, und weil sie SPAETER geladen wird, gewinnt dort die
+   alte "nowrap"-Regel gegen die neue. Genau daran ist 1.6.12
+   wirkungslos geblieben, obwohl die Datei auf dem Server richtig war.
+   Mit dem zusaetzlichen "body" ist die neue Regel spezifischer und
+   gewinnt unabhaengig von der Reihenfolge. Die Ursache selbst ist in
+   functions.php entschaerft.
    ------------------------------------------------------------------ */
 @media (max-width: 991px) {
-  .footer .col-md-6:first-child p,
-  .dialos-footer-links a {
+  body .footer .col-md-6:first-child p,
+  body .dialos-footer-links a {
     white-space: normal;
   }
-  .footer .col-md-6:last-child {
+  body .footer .col-md-6:last-child {
     flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
   }
-  .dialos-footer-links {
+  body .dialos-footer-links {
+    flex-direction: column;
+    align-items: flex-start;
     justify-content: flex-start;
+    gap: 0.4rem 0;
   }
 }
