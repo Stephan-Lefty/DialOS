@@ -10,3 +10,9 @@ tmp/
 
 # Erzeugte Hörfassungen – gehören in die Mediathek, nicht ins Repo
 sprechfassungen/*.mp3
+
+# Fremde Firmenlogos – gehören in die Mediathek, nicht in ein GPL-Repo.
+# Das Nutzungsrecht gilt der Nennung auf dialos.org, nicht der Weitergabe
+# unter der Repo-Lizenz.
+logo-*.svg
+logo-*.png
