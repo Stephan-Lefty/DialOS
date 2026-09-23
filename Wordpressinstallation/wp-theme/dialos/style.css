@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.16
+Version: 1.6.17
 Text Domain: dialos
 */
 
@@ -767,5 +767,83 @@ body.dialos-a11y-mode .dialos-neueste-datum {
   body pre {
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Tester-Aufkleber auf der Startseite
+
+   Der Hinweis auf den geschlossenen Test von DialOS Mobil stand als
+   gewoehnlicher Button ganz unten auf der Startseite - also erst nach
+   rund 1200 Pixeln Text. Wer nicht scrollt, hat ihn nie gesehen. Er
+   sitzt jetzt als runder Aufkleber in der freien Flaeche links neben
+   dem Inhaltskasten, auf halber Fensterhoehe.
+
+   Warum "position: fixed" erst ab 1640 Pixeln: Der Inhaltskasten ist
+   1170 Pixel breit und steht mittig. Links bleibt also
+   (Fensterbreite - 1170) / 2. Fuer den 200 Pixel breiten Aufkleber
+   plus 20 Pixel Abstand braucht es dort 220 Pixel, und das ist ab
+   1640 Pixeln Fensterbreite der Fall (nachgemessen: bei genau 1640
+   bleiben links 15 Pixel Luft zum Fensterrand, bei 1610 waeren es 0).
+   Darunter steht der Aufkleber im Textfluss direkt unter der
+   Ueberschrift, wo er ohne Scrollen sichtbar ist - auch auf dem Handy
+   (bei 375 Pixeln Breite endet er 521 Pixel unter der Oberkante).
+
+   Ihn auf schmalen Fenstern trotzdem nach links zu schieben, wuerde
+   die Seite wieder seitlich verschiebbar machen. Genau das war in
+   1.6.12 das Problem; gemessen wurde deshalb bei jeder Breite die
+   Dokumentbreite gegen die Fensterbreite.
+
+   Das "body" vor jedem Selektor hat denselben Grund wie oben: unsere
+   style.css wird von wlow ein zweites Mal eingebunden.
+   ------------------------------------------------------------------ */
+body .dialos-sticker {
+  margin: 1.6rem 0 2.2rem;
+}
+
+body .dialos-sticker .wp-block-button__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+  padding: 0 1.2rem;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35),
+              inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  white-space: normal;
+  transform: rotate(-8deg);
+}
+
+/* Der Fokusring muss auf dem hellen Hintergrundbild sichtbar bleiben,
+   deshalb aussen in Themenblau statt des Browser-Standards. */
+body .dialos-sticker .wp-block-button__link:focus-visible {
+  outline: 3px solid #0d4280;
+  outline-offset: 5px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body .dialos-sticker .wp-block-button__link {
+    transition: transform 0.15s ease-out;
+  }
+  body .dialos-sticker .wp-block-button__link:hover,
+  body .dialos-sticker .wp-block-button__link:focus-visible {
+    transform: rotate(-4deg) scale(1.05);
+  }
+}
+
+@media (min-width: 1640px) {
+  body .dialos-sticker {
+    position: fixed;
+    left: calc(50vw - 805px);
+    top: 50%;
+    z-index: 20;
+    margin: 0;
+    transform: translateY(-50%);
   }
 }
