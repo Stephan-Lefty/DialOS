@@ -38,6 +38,20 @@ Servers), sondern die Analyse-, Konfigurations- und Skriptablage dazu.
 - [dialos-hoerfassung-hochladen.py](dialos-hoerfassung-hochladen.py) – lädt die
   fertige Datei in die Mediathek und setzt den Audio-Block in den Beitrag.
   **Läuft nur auf Zuruf** – erst anhören, dann hochladen.
+- [wp-theme/dialos/](wp-theme/dialos/) – das Child-Theme (Eltern-Theme:
+  `wlow`), in dem alle eigenen Anpassungen liegen: `style.css`,
+  `functions.php`, `screenshot.png`. **Es kommt ausschließlich über eine
+  ZIP-Datei auf den Server** – die REST-API kann keine Theme-Dateien
+  schreiben, einen zweiten Weg gibt es nicht. Ablauf und Fallstricke stehen
+  unten unter [Theme pflegen](#theme-pflegen), die Fassungen unter
+  [Theme-Fassungen](#theme-fassungen).
+- [wp-plugin/dialos-kommentare/](wp-plugin/dialos-kommentare/) – eigenes
+  Plugin für die Kommentarfunktion
+- Skripte zum Anlegen einzelner Seiten und Beiträge:
+  [dialos-kommentare-einstellen.py](dialos-kommentare-einstellen.py),
+  [dialos-mobil-datenschutz.py](dialos-mobil-datenschutz.py),
+  [dialos-mobil-neuigkeit.py](dialos-mobil-neuigkeit.py),
+  [dialos-mobil-tester-gesucht.py](dialos-mobil-tester-gesucht.py)
 - [.env.example](.env.example) – Vorlage für die Zugangsdaten
 
 ## Zugang einrichten
@@ -81,7 +95,107 @@ Zusätzlich eingerichtet:
 Verbindungstest erfolgreich: `wp-api.sh GET wp/v2/users/me?context=edit`
 liefert Benutzer `ClaudIA` mit Administrator-Rechten.
 
+## Theme pflegen
+
+Das Child-Theme liegt unter [wp-theme/dialos/](wp-theme/dialos/) und besteht
+aus genau drei Dateien: `style.css`, `functions.php`, `screenshot.png`. Auf
+dem Server liegt nichts darüber hinaus – ein ZIP-Upload ersetzt das ganze
+Verzeichnis.
+
+**Der Weg auf den Server führt nur über eine ZIP-Datei.** Die REST-API kann
+keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
+SSH-Zugang. Ablauf:
+
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.19`). **Ohne
+   das greift die Änderung nicht** – siehe die Cache-Marke unten.
+2. Archiv packen, mit dem Ordner `dialos/` darin:
+   ```bash
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.19.zip dialos
+   ```
+3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
+   hochgeladen.
+4. Hochladen über **Design → Themes → Theme hinzufügen → Theme hochladen**,
+   danach gegenprüfen:
+   ```bash
+   curl -s "https://dialos.org/wp-content/themes/dialos/style.css?x=$(date +%s)" | head -8
+   ```
+
+**Drei Fallstricke, die jeweils Zeit gekostet haben:**
+
+- **`functions.php` legt bei einem Syntaxfehler die ganze Seite lahm.** Hier
+  ist kein PHP installiert, deshalb vor dem Packen prüfen:
+  ```bash
+  docker run --rm -v "$PWD/wp-theme/dialos:/x:ro" php:8.2-cli php -l /x/functions.php
+  ```
+- **Das Eltern-Theme `wlow` bindet unsere `style.css` ein zweites Mal ein.**
+  Es ruft `get_stylesheet_uri()` auf – bei aktivem Child-Theme ist das nicht
+  seine eigene Datei, sondern unsere. Diese zweite Einbindung trug früher die
+  WordPress-Kernversion als Cache-Marke, die sich bei Theme-Änderungen nie
+  bewegte; Besucher bekamen dort die alte Datei aus dem Browserspeicher, und
+  weil sie später geladen wird, gewann sie. Seit 1.6.16 stellt ein Filter in
+  `functions.php` das richtig. Zur Kontrolle müssen **beide** Verweise
+  dieselbe Fassung tragen:
+  ```bash
+  curl -s https://dialos.org/ | grep -o "themes/dialos/style.css?ver=[0-9.]*"
+  ```
+- **`id="wlow-css"` im HTML ist nicht der Handle.** WordPress hängt beim
+  Ausgeben `-css` an. Eine Bedingung auf den Handle-Namen, die sich an der
+  HTML-ID orientiert, greift nie.
+
+## Theme-Fassungen
+
+Eigene Zählung, unabhängig vom Änderungsprotokoll dieses Verzeichnisses. Die
+Fassung steht im Kopf von `style.css`; die Einzelheiten stehen in den
+Commit-Nachrichten und als Begründung im Quelltext.
+
+| Fassung | Datum | Worum es ging |
+|---|---|---|
+| (ohne Nummer) | 23.08.2026 | Child-Theme angelegt, Startseiten-Hintergrund, Kontaktformular, Fußzeilenfarben, Navigationsleiste transparent |
+| 1.0.0 | 23.08.2026 | Menü und Fußzeile neu geordnet, Überlappungsfehler behoben, Suche im Menü, Barrierefreiheit (Sprachmarkierung, Sprunglink, Umschalter), „Nach oben"-Knopf statt Hamburger |
+| 1.0.x–1.4.0 | 23.–25.08.2026 | Fußzeilenlinks beim Überfahren sichtbar, Menü blendet beim Scrollen aus, WCAG-Nachprüfung, Linkkontrast auf `#027a5c`, englische Beiträge unter `/en/` mit Flaggen-Umschalter |
+| 1.4.1 | 25.08.2026 | Flaggen ins Suchfeld verschoben |
+| 1.5.0–1.5.5 | 25.08.2026 | Englische Startseite im Stil der deutschen, News von Neuigkeiten getrennt, `/en/`-Routing repariert, englische Rechtstexte verlinkt |
+| 1.6.0–1.6.2 | 25.08.2026 | „Vorheriger/Nächster Beitrag" unter den Kommentaren, Cache wird bei jeder Inhaltsänderung geleert |
+| 1.6.3–1.6.4 | 17.09.2026 | Englische Anführungszeichen auf englischen Seiten, Filter kennt auch benannte Entitäten |
+| 1.6.5–1.6.11 | 17./18.09.2026 | Die drei neuesten Beiträge in der rechten Spalte, quadratische Kacheln, Schriftgröße in mehreren Schritten auf 18 px |
+| 1.6.12–1.6.13 | 22.09.2026 | Seite lässt sich auf dem Handy nicht mehr seitlich schieben; Fußzeilenlinks untereinander. **1.6.12 blieb wirkungslos** – erst 1.6.13 mit `body`-Präfix griff |
+| 1.6.14 | 22.09.2026 | Leere Blöcke in den Neuigkeiten, lange Pfade auf `/status/` |
+| 1.6.15–1.6.16 | 22.09.2026 | Cache-Marke der doppelten Einbindung richtiggestellt – zwei Fehlversuche, bis der Handle-Name ganz entfiel |
+| 1.6.17 | 23.09.2026 | Tester-Hinweis als runder Aufkleber links neben dem Inhaltskasten, fest stehend ab 1640 px Fensterbreite |
+| 1.6.18 | 23.09.2026 | Startseiten gestrafft, damit sie ohne Scrollen in den Bildschirm passen |
+| 1.6.19 | 23.09.2026 | **Rücknahme aus 1.6.18:** Der `.spacer` ist kein Weißraum, sondern der Platzhalter der fest stehenden Navigationsleiste. Gekürzt saßen „DIALOS" und das Menü im Inhaltskasten |
+
 ## Änderungsprotokoll
+
+### 0.5.0 (23.09.2026)
+- **Das Theme steht endlich in diesem Verzeichnis.** Es lag seit dem
+  23.08.2026 unter `wp-theme/dialos/` im Repo, kam aber in der Inhaltsliste
+  nicht vor, und seine 48 Commits in fünf Wochen standen in keinem
+  Änderungsprotokoll – nur im Kopf der `style.css` und in den
+  Commit-Nachrichten. Nachgetragen sind jetzt der Eintrag im Verzeichnis,
+  der Abschnitt [Theme pflegen](#theme-pflegen) mit dem ZIP-Weg und den drei
+  Fallstricken sowie die Übersicht [Theme-Fassungen](#theme-fassungen).
+  Gleiches gilt für das Plugin `wp-plugin/dialos-kommentare/` und die vier
+  Skripte für einzelne Seiten und Beiträge.
+- **Tester-Hinweis als Aufkleber** (Theme 1.6.17): Der Button „Tester für
+  DialOS Mobil werden" stand am Fuß beider Startseiten, rund 1200 Pixel unter
+  der Oberkante – ohne Scrollen nicht zu sehen. Er ist jetzt ein runder,
+  fest stehender Aufkleber links neben dem Inhaltskasten. Platz dafür ist ab
+  1640 Pixeln Fensterbreite; darunter steht er im Textfluss unter der
+  Überschrift, auf 375 Pixeln Breite endet er 521 Pixel unter der Oberkante.
+- **Startseiten gestrafft** (1.6.18/1.6.19): 175 Pixel aus Abständen und
+  Polsterung, dazu eine Höhengrenze fürs Splash-Bild. Die deutsche Startseite
+  passt damit auf einem großen Bildschirm ohne Scrollen ins Bild (1266 von
+  1307 Pixeln). **Dabei ein eigener Fehler:** Der `.spacer` wurde mitgekürzt,
+  obwohl er der Platzhalter der `position: fixed`-Navigationsleiste ist –
+  danach saßen Logo und Menü im weißen Kasten. 1.6.19 nimmt das zurück.
+- **Zwei Absätze auf beiden Startseiten gekürzt**, mit Verweis auf
+  `/status/` bzw. `/en/idea/` für die gestrichenen Einzelheiten. **Gemessen
+  und ernüchternd:** Auf Bildschirmen ab etwa 1080p bestimmt nicht der Text
+  die Seitenhöhe, sondern die rechte Spalte „Neueste Beiträge" mit 1057
+  Pixeln. Absätze zu kürzen bringt dort exakt null Pixel. Scrollfrei ist die
+  Startseite deshalb nur auf großen Bildschirmen – der Aufkleber ist über
+  seine feste Position davon unabhängig immer sichtbar.
 
 ### 0.4.0 (22.09.2026)
 - **Das Änderungsprotokoll ist geteilt.** `/status/` und `/en/idea/` zeigen je
