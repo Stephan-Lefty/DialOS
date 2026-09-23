@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.17
+Version: 1.6.18
 Text Domain: dialos
 */
 
@@ -845,5 +845,68 @@ body .dialos-sticker .wp-block-button__link:focus-visible {
     z-index: 20;
     margin: 0;
     transform: translateY(-50%);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Startseiten straffen, damit sie ohne Scrollen in den Bildschirm passen
+
+   Stephans Ziel: die Startseite soll ohne Scrollen lesbar sein. Gemessen
+   war sie bei 1307 Pixeln Fensterhoehe 1385 Pixel hoch - es fehlten also
+   78 Pixel. Der Platz steckte nicht im Text, sondern in Leerraum:
+
+     .spacer zwischen Kopf und Inhalt   80 px
+     Abstand unter der Ueberschrift     60 px
+     Polsterung unter dem letzten Absatz 50 px (.content-article)
+     Polsterung unter der Spalte        20 px (#main)
+
+   Zusammen mit kleineren Absatzabstaenden und einer Hoehenbegrenzung
+   fuer das Splash-Bild ergibt das 175 Pixel. Die deutsche Startseite ist
+   damit 1210 Pixel hoch (97 Pixel Reserve), die englische 1144.
+
+   NUR die beiden Startseiten, nicht das ganze Theme: Auf /status/ und den
+   Neuigkeiten ist der groesszuegige Weissraum richtig, dort liest man
+   laengere Texte. Nachgemessen, dass /status/ sich um 0 Pixel aendert.
+
+   Die Hoehenbegrenzung des Bildes erst ab 992 Pixeln Breite: "vh" ist auf
+   Handys unzuverlaessig, weil die Browserleisten beim Scrollen ein- und
+   ausfahren und die Einheit mitwandert. Auf dem Handy nutzt das Splash-
+   Bild ohnehin die volle Breite (272 x 153 gemessen).
+
+   Was damit NICHT geloest ist, und das ehrlich: Auf einem gewoehnlichen
+   1080p-Laptop (rund 950 Pixel Fensterhoehe) bleiben 1144 Pixel uebrig,
+   es fehlen also weiter rund 194 Pixel. Die stecken im Text selbst - mit
+   Abstaenden allein ist da nichts mehr zu holen.
+   ------------------------------------------------------------------ */
+body.home .spacer,
+body.page-id-135 .spacer {
+  height: 24px;
+}
+
+body.home .content-article h1.huge,
+body.page-id-135 .content-article h1.huge {
+  margin-bottom: 20px;
+}
+
+body.home .content-article p.wp-block-paragraph,
+body.page-id-135 .content-article p.wp-block-paragraph {
+  margin-bottom: 6px;
+}
+
+body.home .content-article,
+body.page-id-135 .content-article {
+  padding-bottom: 16px;
+}
+
+body.home #main,
+body.page-id-135 #main {
+  padding-bottom: 4px;
+}
+
+@media (min-width: 992px) {
+  body.home .content-article .wp-block-image img,
+  body.page-id-135 .content-article .wp-block-image img {
+    max-height: 33vh;
+    width: auto;
   }
 }
