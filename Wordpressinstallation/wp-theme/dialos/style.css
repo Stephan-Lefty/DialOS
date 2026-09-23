@@ -4,7 +4,7 @@ Theme URI: https://dialos.org
 Description: Privates Child-Theme von "wlow" für dialos.org. Bündelt alle eigenen Anpassungen (CSS, Templates) an einem Ort, statt sie über Additional CSS und einzelne Seiteninhalte zu verstreuen. Nicht für die Veröffentlichung im WordPress.org-Verzeichnis gedacht.
 Author: Stephan Rösner
 Template: wlow
-Version: 1.6.18
+Version: 1.6.19
 Text Domain: dialos
 */
 
@@ -855,14 +855,25 @@ body .dialos-sticker .wp-block-button__link:focus-visible {
    war sie bei 1307 Pixeln Fensterhoehe 1385 Pixel hoch - es fehlten also
    78 Pixel. Der Platz steckte nicht im Text, sondern in Leerraum:
 
-     .spacer zwischen Kopf und Inhalt   80 px
      Abstand unter der Ueberschrift     60 px
      Polsterung unter dem letzten Absatz 50 px (.content-article)
      Polsterung unter der Spalte        20 px (#main)
 
    Zusammen mit kleineren Absatzabstaenden und einer Hoehenbegrenzung
-   fuer das Splash-Bild ergibt das 175 Pixel. Die deutsche Startseite ist
-   damit 1210 Pixel hoch (97 Pixel Reserve), die englische 1144.
+   fuer das Splash-Bild reicht das, um die Startseite auf einem grossen
+   Bildschirm ohne Scrollen zu zeigen.
+
+   DER .spacer WURDE IN 1.6.18 MITGEKUERZT, UND DAS WAR EIN FEHLER.
+   Er stand auf 80 Pixeln, ich habe 24 daraus gemacht - danach sassen
+   "DIALOS" und die Menueleiste IM weissen Kasten statt darueber
+   (Stephan: "Ueber den Block sollen DIALOS und die Menueleiste
+   stehen"). Der Kopf ist naemlich "position: fixed" und nimmt im Fluss
+   keinen Platz ein; genau dafuer ist der .spacer da. Gemessen ist er
+   ab 992 Pixeln Breite 118 Pixel hoch, bei 768 Pixeln 168, auf dem
+   Handy 66. Der .spacer steht deshalb jetzt auf 126 Pixeln - 118 fuer
+   den Kopf, 8 Pixel Luft - und zwar NUR ab 992 Pixeln Breite. Darunter
+   bleibt der Wert des Eltern-Themes stehen, weil dort ein anderer Kopf
+   gilt und ich ihn nicht nachgemessen verstellen will.
 
    NUR die beiden Startseiten, nicht das ganze Theme: Auf /status/ und den
    Neuigkeiten ist der groesszuegige Weissraum richtig, dort liest man
@@ -878,11 +889,6 @@ body .dialos-sticker .wp-block-button__link:focus-visible {
    es fehlen also weiter rund 194 Pixel. Die stecken im Text selbst - mit
    Abstaenden allein ist da nichts mehr zu holen.
    ------------------------------------------------------------------ */
-body.home .spacer,
-body.page-id-135 .spacer {
-  height: 24px;
-}
-
 body.home .content-article h1.huge,
 body.page-id-135 .content-article h1.huge {
   margin-bottom: 20px;
@@ -904,6 +910,12 @@ body.page-id-135 #main {
 }
 
 @media (min-width: 992px) {
+  /* Platz fuer den fest stehenden Kopf - siehe Begruendung oben. */
+  body.home .spacer,
+  body.page-id-135 .spacer {
+    height: 126px;
+  }
+
   body.home .content-article .wp-block-image img,
   body.page-id-135 .content-article .wp-block-image img {
     max-height: 33vh;
