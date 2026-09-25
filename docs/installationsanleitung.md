@@ -118,6 +118,18 @@ Ganz normal vom Debian-Stick booten, **ohne** Sonderzeilen im Startmenü. Die ei
 
 Nach dem Neustart: anmelden, Netzwerk verbinden, die externe Platte anstecken. Sie hängt dann unter `/media/dialosadmin/SanDisk-Extreme`.
 
+## Erst das Grundsystem aktualisieren
+
+Bevor irgendetwas dazukommt, das frisch installierte Debian auf den neuesten Stand bringen. Das Installationsmedium ist oft Wochen alt; Sicherheitskorrekturen und ein neuerer Kernel kommen erst so ins System - und alles, was danach installiert wird, baut auf dem aktuellen Stand auf statt auf dem des Sticks.
+
+```bash
+sudo apt update && sudo apt upgrade
+```
+
+Fragt apt „Möchten Sie fortfahren? [J/n]", mit der Eingabetaste bestätigen. **Danach einmal neu starten** - war ein neuer Kernel dabei, läuft er erst dann.
+
+> **Nachgetragen am 25.09.2026** (Stephan): Beim Neuaufbau an diesem Tag von Hand gemacht, stand aber nirgends.
+
 > **Es gibt auch einen Weg ohne Handarbeit** - eine Preseed-Datei gibt dem Installer das Layout vor (`website/d-i/trixie/preseed.cfg`). Sie muss über einfaches HTTP erreichbar sein, und das Zielgerät wird gerade gelöscht, kann sie also nicht selbst ausliefern. Dafür bräuchte es einen **zweiten Rechner** im selben Netz (`./scripts/dialos-preseed-server.sh`). **`dialos.org` taugt nicht dafür** - am 25.09.2026 geprüft: Der Aufruf über HTTP wird auf HTTPS umgeleitet, und dort kommt HTML statt der Datei. Ohne zweiten Rechner sind die drei Punkte oben der Weg; sie nennen dieselben Werte.
 
 ---

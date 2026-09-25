@@ -16,6 +16,23 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Mikrofon im neuen Konto `nutzer` - Ursache nachliefern** (Stephan,
+  2026-09-25, nach dem Neuaufbau). Beim ersten Anmelden ließ sich die
+  Lautstärke-Frage nicht beantworten; Stephan sah das Mikrofon **oben in der
+  Leiste** als ausgeschaltet und hat „Mikrofon ohne Echo" gewählt. Gemessen:
+  ALSA-Aufnahme an (100 %), im Konto `nutzer` `"mute":false`, Stufe wie bei
+  `dialosadmin`; die Frage nimmt die Echo-Quelle ohnehin selbst. **Verdacht:**
+  Die fehlende Stimme Anna - `spd-say` hing 20 s (bei `dialosadmin` im Journal
+  belegt), die Frage kam zu spät. **Nächster Schritt:** mit funktionierender
+  Stimme als `nutzer` anmelden und antworten; klappt es nicht, das Symbol in
+  der Leiste ansehen (durchgestrichen oder die GNOME-Datenschutzanzeige?). Das
+  Ergebnis gehört auch in den Beitragsentwurf
+  `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`.
+- [ ] **Beitrag „Ein Gerät, eine Anleitung, ein Nachmittag" veröffentlichen**
+  (von Stephan am 2026-09-25 freigegeben). Entwurf in
+  `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom
+  zweiten Rechner (dort liegt die `.env`); vorher englische Fassung und
+  Hörfassung, und den Mikrofon-Absatz nach dem Punkt darüber anpassen.
 - [ ] **Kompletter Brief nach DIN 5008** (Stephan, 2026-09-16, nach dem festen
   Einbau von Parakeet). (1) Persönliche Daten des Nutzers - zuerst Stephans -
   einmal fest für alle Programme festlegen und eintragen (Briefbogen,

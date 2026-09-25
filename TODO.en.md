@@ -15,6 +15,23 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Microphone in the new `nutzer` account - deliver the cause** (Stephan,
+  2026-09-25, after the rebuild). At the first login the volume question
+  could not be answered; Stephan saw the microphone **in the top bar** as
+  switched off and selected "Mikrofon ohne Echo". Measured: ALSA capture on
+  (100 %), `"mute":false` in the `nutzer` account, same level as
+  `dialosadmin`; the question picks the echo source by itself anyway.
+  **Suspicion:** the missing voice Anna - `spd-say` hung for 20 s (logged in
+  the journal for `dialosadmin`), so the question came too late. **Next
+  step:** log in as `nutzer` with the voice working and answer; if it fails,
+  look at the icon in the top bar (crossed out, or GNOME's privacy
+  indicator?). The result also belongs in the post draft
+  `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`.
+- [ ] **Publish the post "Ein Gerät, eine Anleitung, ein Nachmittag"**
+  (approved by Stephan on 2026-09-25). Draft in
+  `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Only possible from
+  the second machine (the `.env` lives there); first add the English version
+  and the audio version, and adjust the microphone paragraph per the item above.
 - [ ] **Complete letter following DIN 5008** (Stephan, 2026-09-16, after building
   Parakeet in). (1) Define the user's personal data - Stephan's first - once for
   all programs and enter it (letterhead, Thunderbird signature, weather place;

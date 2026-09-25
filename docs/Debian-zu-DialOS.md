@@ -344,6 +344,19 @@ Aufbau aus** - noch von Hand partitioniert, am 2026-08-16 nachgemessen:
 | `nvme0n1p3` | 37,3 GiB | Swap (wurde in Schritt 12 durch 8 GiB verschlüsselt ersetzt) |
 | *(unpartitioniert)* | **345,6 GiB** | wurde `dialos-nutzer-home` |
 
+### 1e. Erst das Grundsystem aktualisieren (neu 2026-09-25)
+
+Direkt nach dem ersten Start, bevor irgendetwas dazukommt:
+
+```bash
+sudo apt update && sudo apt upgrade
+```
+
+Danach einmal neu starten, damit ein neuer Kernel auch läuft. Das
+Installationsmedium ist oft Wochen alt; alles Weitere soll auf dem aktuellen
+Stand aufbauen, nicht auf dem des Sticks. Stephan hat das beim Neuaufbau am
+2026-09-25 von Hand gemacht - im Rezept stand es nicht.
+
 ## 2. Paketliste installieren
 
 Die vollständige, aktuelle Paketliste steht in

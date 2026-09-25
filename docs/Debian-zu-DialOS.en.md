@@ -322,6 +322,19 @@ NVMe) during the first build - still partitioned by hand, measured on
 | `nvme0n1p3` | 37.3 GiB | swap (replaced in step 12 by 8 GiB encrypted) |
 | *(unpartitioned)* | **345.6 GiB** | became `dialos-nutzer-home` |
 
+### 1e. Update the base system first (new 2026-09-25)
+
+Right after the first boot, before anything else is added:
+
+```bash
+sudo apt update && sudo apt upgrade
+```
+
+Then reboot once so that a new kernel is actually running. The installation
+medium is often weeks old; everything that follows should build on the current
+state, not on the stick's. Stephan did this by hand during the rebuild on
+2026-09-25 - the recipe did not mention it.
+
 ## 2. Install the package list
 
 The complete, current package list lives in

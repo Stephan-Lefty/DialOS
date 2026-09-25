@@ -159,9 +159,18 @@ vermeiden.
   zufaellige sudo-Passwort von `nutzer` im Terminal AUS - am 2026-09-25 stand es
   damit im Chat. "Niemand kennt es" (unten) stimmt so nicht mehr.
 
-**Als Naechstes:** Maske ausfuellen und speichern, dann neu starten (mit Stick).
-Danach Teil 5 (Thunderbird, Stimme, Bluetooth) und Teil 6 (Abnahme mit sudo,
-Sprachprobe im Konto `nutzer`).
+- **Neustart durch, Geraet laeuft** (16:18). Danach zwei Funde: Anna fehlte
+  (Doku-Schritt 12c nie im Skript) - jetzt Schritt 16e, am Geraet gelaufen;
+  Stephan hat danach selbst auf Michael umgestellt. Und Update des Grundsystems
+  als Schritt 1e nachgetragen (Stephan). Acht Luecken insgesamt, Liste im
+  Aenderungsprotokoll 0.5.2 ("Neuaufbau nach Anleitung").
+
+**Als Naechstes:** (1) Mikrofon-Frage im Konto `nutzer` klaeren (TODO, oberster
+Punkt; Stephan startet das Geraet erst NACH dieser Klaerung neu -
+Punkt - Verdacht fehlende Stimme, nicht belegt). (2) Beitrag veroeffentlichen,
+Entwurf `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom
+zweiten Rechner (.env). (3) Teil 5 (Thunderbird, Bluetooth) und Teil 6
+(Abnahme mit sudo).
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 

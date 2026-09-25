@@ -137,6 +137,23 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Neuaufbau nach Anleitung - fast reibungslos** (2026-09-25). Das Testgerät
+  wurde komplett gelöscht und nur nach `docs/installationsanleitung.md` neu
+  aufgebaut, beide Konten neu. Die Anleitung war dabei der Prüfling: Jeder
+  Handgriff, der nicht darin stand, wurde sofort nachgetragen. **Acht Lücken**,
+  jede mit eigenem Eintrag hier darunter: (1) Teil 2 zur Claude-App - Befehle
+  nicht die des Herstellers; (2) im PDF mitten in der URL umgebrochene Befehle;
+  (3) `dialos-claude-setup.sh` ohne `sudo`; (4) die Stick-Auswahl bot die
+  externe Arbeitsplatte zum Löschen an; (5) kein Hinweis, einen benutzten Stick
+  vorher zu sichern (neuer Teil 0.4); (6) die Sicherung des Nutzerkontos ohne
+  Briefe und Archiv; (7) Anna fehlte - Stimme zu schnell, falscher Name;
+  (8) kein Update des Grundsystems vor dem Aufbau (neuer Schritt 1e, Stephan).
+  **Offen:** Im neuen Konto `nutzer` ließ sich die erste Lautstärke-Frage
+  nicht beantworten; Stephan sah das Mikrofon oben in der Leiste als
+  ausgeschaltet. Der gespeicherte Zustand zeigt es nicht stumm - Verdacht ist
+  die fehlende Stimme (Lücke 7), belegt ist es nicht. Die Anleitung ist von 10
+  auf 12 Seiten gewachsen.
+
 - **Anna fehlte nach dem Neuaufbau** (2026-09-25, Stephan: „die Stimme ist zu
   schnell", und die Lautstärke-Frage im Konto `nutzer` ließ sich nicht
   beantworten). Doku-Schritt 12c - Annas Stimmdatei holen und mit
