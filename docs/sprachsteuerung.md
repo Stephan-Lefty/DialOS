@@ -4,7 +4,14 @@
 
 ## Stack
 
-- **Spracherkennung (STT)**: Vosk mit deutschem Modell, offline.
+- **Spracherkennung (STT)**: Vosk mit deutschem Modell, offline - für
+  Befehle und den Einkaufszettel, mit eingeschränkter Grammatik.
+- **Texterkennung für freien Text**: **Parakeet** (NVIDIA Parakeet TDT 0.6B v3
+  über sherpa-onnx, offline), seit 2026-09-16 fest eingebaut - für Brief,
+  Notizen, den Text einer E-Mail und Suchbegriffe. Gewählt nach dem Prüfstand
+  vom 2026-09-15: 2,8 % Wortfehler gegen 12,7 % bei Vosk, und nur Parakeet
+  setzt die Satzzeichen selbst (siehe [pruefstand.md](pruefstand.md)).
+  Abschaltbar mit `~/.config/dialos/parakeet-aus`.
 - **Sprachausgabe (TTS)**: Piper (natürlicher als espeak-ng), als
   Backend für Orca - RHVoice stand zur Wahl und ist verworfen.
 - **Screenreader**: Orca (Standard-GNOME-Screenreader).
@@ -13,8 +20,46 @@
 - **Intent-Erkennung**: [hassil](https://github.com/OHF-Voice/hassil)
   (Home Assistant Intent Language) - lernfähige Zuordnung über
   Beispielsatz-Vorlagen statt starrer Befehlsgrammatik (siehe unten).
+  **Stand 2026-09-25: installiert, aber im Code nicht eingebunden** - siehe
+  „Stand der Umsetzung".
+
+## Stand der Umsetzung (2026-09-25)
+
+Damit klar bleibt, was hier Konzept und was gebaut ist - der Stand vom
+2026-08-16 steht darunter als Geschichte.
+
+- **Sprachausgabe: im Einsatz.** Piper über speech-dispatcher,
+  `dialos-say.py` spricht jede Ansage; Stimmen Michael und Anna.
+- **Befehle: im Einsatz, rund 64 Befehlssätze** (gezählt bei der
+  Pflichtprüfung vom 2026-09-21), die Sätze aus `dialos-programm.py` und die
+  Startsätze der Erweiterungen eingeschlossen. Erkannt vom kleinen
+  Vosk-Modell mit eingeschränkter Grammatik. Die vollständige Liste steht in [sprachbefehle.md](sprachbefehle.md).
+- **Einschalten per Satz statt Aufweckwort:** „Sprachsteuerung starten" /
+  „Sprachsteuerung stoppen" (entschieden am 2026-08-17, siehe unten). Ein
+  eigenes Aufweckwort gibt es weiterhin nicht.
+- **Freier Text: Parakeet seit 2026-09-16** für Brief, Notizen und den Text
+  einer E-Mail; der Einkaufszettel bleibt bei Vosk. Einzelheiten in
+  [diktat.md](diktat.md).
+- **Intent-Erkennung: hassil ist installiert, aber im Code nicht
+  eingebunden** (nachgesehen am 2026-09-25: kein DialOS-Skript importiert
+  es). Die Zuordnung von Erkanntem zu Befehl macht der Sprachdienst selbst:
+  Die Vosk-Grammatik lässt nur die Wörter der Befehlssätze zu, und eigene
+  Regeln entscheiden, wann ein Satz gilt - Kernwort, ganze Wortfolge mit
+  höchstens zwei Zusatzwörtern, kein `[unk]`. Warum die Entscheidung vom
+  2026-08-13 so nie umgesetzt wurde: siehe den Hinweis im Abschnitt
+  „Intent-Erkennung" unten.
+- **Mikrofon:** Die Sprachdienste nehmen die echo-bereinigte Quelle
+  `dialos_mikrofon_ohne_echo` selbst. Das Standard-Mikrofon des Systems
+  bleibt bewusst das rohe eingebaute - Begründung in
+  [anwendungen.md](anwendungen.md), Abschnitt „Zwei Regeln".
+- **Screenreader Orca:** installiert; ob er an Piper gekoppelt ist, wurde für
+  diesen Stand nicht neu geprüft. **Numen:** nicht installiert.
 
 ## Stand der Umsetzung (2026-08-16)
+
+> **Überholt seit 2026-08-16 abends** (erster echter Sprachbefehl) - der
+> aktuelle Stand steht direkt darüber. Dieser Abschnitt bleibt als
+> Momentaufnahme stehen: So sah es aus, bevor die Sprachsteuerung gebaut wurde.
 
 Damit klar bleibt, was hier Konzept und was gebaut ist:
 
@@ -78,6 +123,14 @@ Ausschlaggebende Kriterien und geprüfte Alternativen:
   überschaubare, klar abgegrenzte Anzahl an Aktionen (WLAN, Lautstärke,
   Programme starten, Anrufen, ...) erschien der Beispielsatz-Ansatz von
   hassil als besseres Aufwand-Nutzen-Verhältnis.
+
+> **Stand 2026-09-25: so nicht umgesetzt.** Gebaut wurde ab dem 2026-08-16
+> eine eingeschränkte Vosk-Grammatik mit eigener Zuordnung (siehe „Stand der
+> Umsetzung" oben). Den Grund nennt `TODO.md` schon am 2026-08-16: hassil lohnt
+> sich erst, wenn es mehrere Befehle mit Varianten gibt. Mehrere Formulierungen
+> für denselben Befehl stehen seitdem als eigene Sätze in der Grammatik („Wie
+> viel Uhr ist es?", „Wie spät ist es?"). Ob hassil bei den Erweiterungen noch
+> seinen Platz findet, ist in [erweiterungen.md](erweiterungen.md) offen.
 
 Die Flexibilität gilt fürs **Verstehen**, nicht fürs **Ausführen** –
 sicherheitskritische Aktionen (Systemwartung, Freigabe der

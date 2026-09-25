@@ -57,12 +57,20 @@ up.
 
 **Source code obligation.** Anyone distributing GPL software - including
 on a device that has been sold - owes the recipient the corresponding
-source. DialOS satisfies this by installing packages **unmodified** from
-Debian's own repositories: the source is publicly available from Debian
-(`deb-src` sources, https://sources.debian.org). If a package is
-**modified**, the modified source has to be provided directly - one of
-the reasons DialOS places its own scripts alongside rather than patching
-other people's packages.
+source. For the **Debian packages** DialOS satisfies this by installing
+them **unmodified** from Debian's own repositories: the source is publicly
+available from Debian (`deb-src` sources, https://sources.debian.org). If a
+package is **modified**, the modified source has to be provided directly -
+one of the reasons DialOS places its own scripts alongside rather than
+patching other people's packages.
+
+**Corrected on 2026-09-25:** until then the paragraph above said DialOS
+installs "packages unmodified from Debian's own repositories" - as if that
+applied to everything. It only applies to the Debian packages. Part of the
+system reaches the device bypassing Debian, from GitHub, Hugging Face,
+languagetool.org, PyPI or Anthropic's own package repository; for that part
+the evidence via `/usr/share/doc/` and sources.debian.org does **not**
+apply. It is therefore listed item by item in the next section.
 
 **Trademarks.** "Debian" is a trademark of Software in the Public
 Interest, "GNOME" a trademark of the GNOME Foundation. Saying "based on
@@ -73,6 +81,42 @@ Debian or GNOME product.
 **Thunderbird** and **Firefox** are likewise Mozilla trademarks. DialOS
 does not modify these programs, it only configures them (the footer in
 every mail, for instance) - which does not touch trademark law.
+
+## What does not come from Debian
+
+Checked on 2026-09-25, looked up on the freshly built development device
+(the programs' licence files, package metadata under
+`/usr/local/lib/python3.13/dist-packages/`, `/usr/share/doc/claude-desktop/copyright`).
+The speech models and voices are in the section below.
+
+| Component | Origin | Use | Licence |
+|---|---|---|---|
+| RustDesk 1.4.9 | `.deb` from GitHub (rustdesk.com) | remote support, service off, deliberately deferred | AGPL-3.0 |
+| LanguageTool 6.6 | zip archive from languagetool.org, under `/opt/languagetool` | writing aid in dictation | LGPL-2.1 (per `COPYING.txt`); the bundled libraries have licences of their own (`third-party-licenses/`) - **to be checked in detail** |
+| Piper (program) | release archive from GitHub (rhasspy/piper), under `/usr/local/share/dialos-piper` | speech output | MIT; the archive bundles **espeak-ng** (GPL-3.0) and ONNX Runtime (MIT) - whether this creates a source obligation of its own for DialOS is **to be checked** |
+| vosk 0.3.45 | pip (PyPI) | command recognition | Apache-2.0 |
+| hassil 3.11.0 | pip | builds the command grammar | Apache-2.0 |
+| sherpa-onnx 1.13.8 (+ `sherpa-onnx-core`) | pip | Parakeet in dictation | Apache-2.0 |
+| dependencies of the pip packages | pip | - | unicode-rbnf MIT, PyYAML MIT, srt MIT, tqdm MPL-2.0 and MIT, websockets BSD-3-Clause, cffi MIT-0, pycparser BSD-3-Clause |
+| DialOS bridge (MailExtension `bruecke@dialos.org`) | built from this repository, placed in every Thunderbird profile via `policies.json` | drafts and sending through Thunderbird | part of DialOS: GPL-3.0 |
+| Claude desktop app | Anthropic's own apt repository | setup and development, so far only on the development device | **proprietary** (Anthropic PBC); includes Electron (MIT) |
+
+**The Claude app is an open question, not a decision.** It is the only
+non-free component on the device and so far serves the build only: the
+installation guide sets it up in part 2 because the rest runs with its
+help. **Whether it may stay on a customer device or is removed before
+delivery is open.** To note for the decision: it needs an Anthropic
+account, it cannot be passed on freely like the rest of the software, and
+whether passing it on with a sold device is permitted at all depends on
+Anthropic's terms of use - **to be checked**. Until this is decided: yes on
+the development device, not to be regarded as settled on customer devices.
+
+**Why pip packages are listed here although the package list otherwise does
+not belong in the repository** (see below): they do **not** travel with a
+licence text under `/usr/share/doc/` and are not covered by any
+`apt upgrade`. For them the evidence obligation is therefore not met
+automatically. Switching eight of the packages to Debian packages is in
+`TODO.en.md` - after that this table shrinks.
 
 ## Speech output and speech recognition
 
@@ -198,6 +242,15 @@ dpkg-query -W -f='${Package}\t${Version}\t${Homepage}\n' | sort > packages.txt
 
 ## Open
 
+- **Claude desktop app on customer devices** (noted here since 2026-09-25):
+  does it stay or is it removed before delivery? See "What does not come
+  from Debian". Not decided.
+- **Licence notice for Parakeet on the device** (CC-BY-4.0 requires
+  attribution, wording above) - open item in `TODO.md`, belongs in a licence
+  overview that DialOS can show or read out on the device.
+- **To be checked:** the libraries in LanguageTool's `third-party-licenses/`,
+  and whether the espeak-ng (GPL-3.0) bundled with Piper requires source to
+  be provided separately.
 - Registration of the "DialOS" word/figurative mark, should the trademark
   reservation need to be enforceable (see above). Until then it carries
   only as far as use and recognition reach.

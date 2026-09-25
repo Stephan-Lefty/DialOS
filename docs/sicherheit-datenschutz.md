@@ -148,6 +148,19 @@ Skripte/Units:
   bleiben `nutzer` dadurch automatisch ca. 62 GB als mobiler
   Datenträger (z. B. für Fotos, Dokumente), den er unabhängig vom
   Gerät mitnehmen kann.
+- **Beim Einrichten wird der Stick komplett gelöscht** - beide Bereiche,
+  also auch `DIALOS-DATA` mit dem PDF-Archiv des Nutzers. Ein schon
+  benutzter Stick gehört deshalb vorher gesichert (Anleitung:
+  [installationsanleitung.md](installationsanleitung.md), Teil 0.4). Der
+  alte Schlüssel darauf ist nach einem Neuaufbau ohnehin wertlos, die
+  Daten des Nutzers sind es nicht.
+- **Die Stick-Auswahl bietet seit 2026-09-25 keine eingehängten Laufwerke
+  mehr an.** Vorher stand beim Neuaufbau die externe Arbeitsplatte
+  gleichrangig neben dem Stick in der Liste - ein Klick daneben hätte
+  Repository, Rescuezilla-Abbild und Sicherungen gelöscht. Ein Stick, den
+  GNOME beim Anstecken selbst einhängt (bei einem alten Stick passiert das
+  mit `DIALOS-DATA`), muss deshalb vorher in der Dateiverwaltung
+  ausgeworfen werden, sonst steht er nicht zur Wahl.
 - `scripts/dialos-setup-nutzer.sh` (legt das `nutzer`-Konto im
   Büro-Setup an) prüft vor `adduser`, ob `/home/nutzer` schon gemountet
   ist, und bricht sonst kontrolliert ab - sonst würde `nutzer`s Home mit
@@ -212,6 +225,65 @@ Backup-Datei selbst.
 
 ## Zugangsdaten für Dienste (Mail und später mehr)
 
+**Stand seit 2026-09-25: Das Mailpasswort liegt in Thunderbirds eigenem,
+verschlüsseltem Passwortspeicher - und in keiner Datei von DialOS.**
+
+- **Angelegt wird das Mailkonto über die Maske der persönlichen Daten**
+  (`dialos-persoenliche-daten-maske.py`), die dafür
+  `/usr/local/bin/dialos-mailkonto.py` aufruft. Für das Konto `nutzer`
+  läuft das über `pkexec` und `/usr/local/sbin/dialos-persoenliche-daten-konto`
+  (Aktion `mailkonto`), weil die Maske in der Regel aus `dialosadmin`
+  heraus bedient wird und `/home/nutzer` einem anderen Konto gehört.
+- **Die Server** kommen aus der Maske, wenn sie dort stehen; sonst fragt
+  das Werkzeug Mozillas Anbieter-Datenbank (ISPDB,
+  `autoconfig.thunderbird.net`) - dieselbe Quelle, die Thunderbirds eigener
+  Assistent benutzt. Dabei geht nur die **Domain** der Mailadresse hinaus,
+  nicht die Adresse selbst.
+- **Das Passwort** wird in der Maske eingegeben, geht über die
+  Standardeingabe an das Werkzeug und von dort über NSS (Thunderbirds
+  eigene Kryptobibliothek) direkt in `logins.json`/`key4.db` im
+  Thunderbird-Profil. Mailadresse, Benutzername und Server stehen wie alle
+  Kundendaten in `~/.config/dialos/persoenliche-daten.txt` - das Passwort
+  **nie**, auch in keiner anderen DialOS-Datei. Beide Dateien legt
+  Thunderbird mit `0600` an (nachgesehen am 2026-09-25).
+- **Die Signatur** trägt das Werkzeug gleich mit ein; der frühere
+  Handschritt nach der Konto-Einrichtung entfällt damit (siehe
+  [ersteinrichtung.md](ersteinrichtung.md)).
+- **DialOS hat keinen eigenen IMAP/SMTP-Zugang gebaut.** Entwürfe ablegen
+  und Senden laufen über die **DialOS-Brücke**, eine MailExtension
+  (`bruecke@dialos.org`), die über `policies.json` in jedes
+  Thunderbird-Profil kommt und per Native Messaging mit DialOS spricht.
+  Beim Mailserver meldet sich Thunderbird selbst an. DialOS braucht das
+  Passwort damit überhaupt nicht - es hat es nur einmal in der Hand, beim
+  Weiterreichen aus der Maske.
+
+**Warum das derselbe Schutz ist wie die Entscheidung vom 2026-08-18 unten,
+nur an anderem Ort:** Thunderbirds Speicher liegt im Profil unter
+`/home/nutzer/.thunderbird/`, also auf der LUKS-Partition. Ein
+**Hauptpasswort ist bewusst nicht gesetzt** (das Werkzeug legt `key4.db`
+mit leerem Hauptpasswort an, wie Thunderbird selbst) - sonst erschiene
+beim Abrufen ein Passwortdialog, den der Nutzer nicht sehen kann, also
+genau der Fehler, der unten gegen den Schlüsselbund spricht. Ohne
+Hauptpasswort ist die Verschlüsselung in `logins.json` ehrlich gesagt nur
+Verschleierung: Wer das Profil lesen kann, kann auch entschlüsseln. Der
+tatsächliche Schutz ist deshalb wie damals: **ohne Stick kein
+entschlüsseltes Home, ohne Home keine Zugangsdaten.** Die Begründungen
+gegen Stick und Schlüsselbund unten gelten für Thunderbirds Speicher
+unverändert.
+
+Was gegenüber der geplanten Datei gewonnen ist: kein Klartext auf der
+Platte, keine eigene Geheimnis-Datei, die DialOS pflegen müsste, und ein
+Passwortwechsel geht über Thunderbirds eigene Oberfläche, ohne dass
+DialOS davon wissen muss.
+
+### Frühere Entscheidung (2026-08-18): eine Datei mit `0600` - entschieden, aber nie gebaut
+
+**Überholt seit 2026-09-25.** Die Datei wurde nie angelegt. Ihr Anlass -
+DialOS spreche selbst IMAP/SMTP, weil Thunderbird von außen nicht
+steuerbar sei - ist mit der DialOS-Brücke (Entwürfe seit 2026-09-21)
+entfallen. Der Abschnitt bleibt stehen, weil seine Begründungen gegen
+Stick und Schlüsselbund weiter tragen.
+
 Entschieden mit Stephan am 2026-08-18. Anlass: DialOS liest und schreibt
 Mail direkt über IMAP/SMTP, weil Thunderbird von außen nicht steuerbar ist
 (siehe [anwendungen.md](anwendungen.md)). Damit braucht DialOS das
@@ -271,21 +343,48 @@ nutzlos ist.
 
 ## Protokolle: was DialOS über den Nutzer mitschreibt
 
-Vier Programme schreiben mit - Befehlsdienst, Diktat, Auskunft und Notizen.
-Das ist für die Fehlersuche unverzichtbar und war schon mehrfach der einzige
-Weg, einen Fehler überhaupt zu finden. Es heißt aber auch: **auf dem Gerät
-liegt, was der Nutzer gesagt hat.** Deshalb gehört hierher, was wo liegt und
-wer es sehen kann.
+Fast jedes DialOS-Programm schreibt ein Protokoll. Das ist für die
+Fehlersuche unverzichtbar und war schon mehrfach der einzige Weg, einen
+Fehler überhaupt zu finden. Es heißt aber auch: **auf dem Gerät liegt, was
+der Nutzer gesagt hat - und was DialOS ihm vorgelesen hat.** Deshalb gehört
+hierher, was wo liegt und wer es sehen kann.
+
+**Seit 2026-08-22 liegen alle Programmprotokolle unter `~/.log/`** (Stephans
+Wunsch), nicht mehr offen im Heimatverzeichnis. Vorher lagen dort 25
+Dateien zwischen „Notizen", „Dokumente" und „Bilder"; der Nutzer sieht sie
+nicht, aber ein sehender Helfer sucht dazwischen. Der Punkt am Anfang macht
+den Ordner unsichtbar; er darf gelöscht werden, jedes Skript legt ihn neu an.
+
+**Überholt seit 2026-09-25:** Hier stand „Vier Programme schreiben mit -
+Befehlsdienst, Diktat, Auskunft und Notizen", und die Tabelle nannte Pfade
+direkt im Heimatverzeichnis (`~/dialos-….log`). Beides stimmte längst nicht
+mehr. Eine feste Zahl steht hier deshalb bewusst nicht mehr: Jedes Programm
+legt seine Datei beim ersten Eintrag an, welche es auf einem Gerät gibt,
+hängt davon ab, was benutzt wurde - und jedes neue Programm hätte die Zahl
+wieder falsch gemacht.
 
 | Datei | Inhalt | Rechte | Aufbewahrung |
 |---|---|---|---|
-| `~/dialos-sprachbefehl.log` | erkannte Befehle | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
-| `~/dialos-diktat.log` | **jeder diktierte Satz wörtlich** | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
-| `~/dialos-auskunft.log` | Fragen und Antworten | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
-| `~/dialos-notiz.log` | Aktionen, **keine** Einträge | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
-| `~/dialos-ton-ausgabe.log` | Wechsel des Ausgabegeräts | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
-| `~/dialos-hilfe.log` | Fernwartung an/aus, **keine** ID, **kein** Passwort | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-sprachbefehl.log` | erkannte Befehle, mit Pegel | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-say.log` | **jede Ansage**, auf 120 Zeichen gekürzt | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-diktat.log` | **jeder diktierte Satz wörtlich** | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-auskunft.log` | Fragen und Antworten | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-notiz.log` | Aktionen, **keine** Einträge | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-mail-schreiben.log` | Empfänger und Betreff, **nicht** der Text | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-mailarchiv.log` | abgelegte Mail-PDFs; die Dateinamen enthalten Datum und Betreff | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-ton-ausgabe.log` | Wechsel des Ausgabegeräts | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-hilfe.log` | Fernwartung an/aus, **keine** ID, **kein** Passwort | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
+| `~/.log/dialos-akku.log`, `dialos-update.log`, `dialos-jahreszeit.log`, `dialos-stimme-wechseln.log` | Akkuwarnung, Update-Läufe, Hintergrundwechsel, Stimmwechsel - nichts, was der Nutzer gesagt hat | 0600 ab der ersten Rotation | **7 Tage** (logrotate) |
 | `~/.local/share/dialos/support/befehle-JJJJ-MM-TT.log` | Befehle + erste Zeile eines Diktats | **0600** | **7 Tage**, räumt sich selbst |
+
+**Warum `dialos-say.log` kürzt** (seit 2026-08-24): Jede Ansage steht darin,
+damit sich im Support nachvollziehen lässt, was das Gerät gesagt hat - das
+hat schon Fehler aufgeklärt, die sonst unsichtbar geblieben wären. Bei einem
+Vorlese-Befehl ist die Ansage aber das ganze Dokument; ungekürzt stünde
+jeder vorgelesene Brief und jede vorgelesene Mail wörtlich im Protokoll. Die
+Grenze von 120 Zeichen ist also eine Datenschutz-Entscheidung, kein
+Platzsparen: Sie reicht, um eine Ansage zu erkennen, nicht, um Post
+nachzulesen.
 
 Alle liegen in `/home/nutzer` und damit **innerhalb der verschlüsselten
 Home-Partition** - ohne Sicherheits-Stick ist keines davon lesbar. Nach außen
@@ -301,7 +400,7 @@ Gerät wirklich gehört hat. Genau deshalb ist es die einzige, die **filtert**:
 - dazu der Zusammenhang als Überschrift (Diktat, Einkaufszettel, Frage an das
   System, später Mail und Brief).
 
-Der Grund für die Grenze: `~/dialos-diktat.log` enthält jeden diktierten Satz
+Der Grund für die Grenze: `~/.log/dialos-diktat.log` enthält jeden diktierten Satz
 wörtlich, also den ganzen Brief. Eine Datei, die für einen fremden Helfer
 gedacht ist, darf die Post des Nutzers nicht enthalten. Eine Zeile genügt, um
 zu erkennen, **dass** etwas erfasst wurde und ob es Sinn ergab - und ohne den
@@ -322,7 +421,8 @@ Entscheidungen dahinter:
 
 - **logrotate statt Selbstaufräumen.** Das Support-Protokoll räumt sich selbst
   auf, weil `dialos-mitschrift.py` ohnehin läuft, während es geschrieben wird.
-  Bei sechs Programmen wäre dasselbe sechsmal derselbe Code - und ein Dienst,
+  Bei sechs Programmen (Stand 2026-08-20, heute sind es mehr als zehn) wäre
+  dasselbe sechsmal derselbe Code - und ein Dienst,
   der eine Woche durchläuft, käme nie zum Aufräumen, weil er nur beim Start
   nachsähe. logrotate läuft täglich per systemd-Timer.
 - **Kein `copytruncate`.** Geprüft am 2026-08-20: Die Programme halten ihre
@@ -334,11 +434,19 @@ Entscheidungen dahinter:
   nachsieht, sucht einen Tag und keine laufende Nummer - dieselbe Überlegung wie
   beim Support-Protokoll.
 
+- **Ein Muster für beide Konten:** `/etc/logrotate.d/dialos` dreht
+  `~/.log/dialos-*.log` in `/home/nutzer` und in `/home/dialosadmin`. Ein neues
+  Programm, das dort protokolliert, ist damit ohne Zutun erfasst.
+
 **Rest-Lücke, ehrlich benannt:** Die Programme legen eine *fehlende* Datei mit
 0644 an (Standard-umask). Erst die erste Rotation setzt 0600. Wer das schließen
-will, muss die `melde()`-Funktion in sechs Skripten anfassen; solange die
-Protokolle innerhalb der verschlüsselten Home-Partition liegen, ist der Gewinn
-gering.
+will, muss die `melde()`-Funktion in jedem protokollierenden Skript anfassen
+(am 2026-08-20 waren es sechs); solange die Protokolle innerhalb der
+verschlüsselten Home-Partition liegen, ist der Gewinn gering. **Nachgemessen
+am 2026-09-25** im frisch aufgebauten Konto `dialosadmin`: Neue Dateien stehen
+auf 0664 (Debians umask 0002 mit eigener Gruppe je Konto), der Ordner `~/.log`
+auf 0775. Nach außen schützt das Heimatverzeichnis selbst - `/home/nutzer`
+und `/home/dialosadmin` stehen beide auf 0700.
 
 ## Fernwartung (RustDesk)
 

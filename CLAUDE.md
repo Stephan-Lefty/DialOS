@@ -167,9 +167,16 @@ vermeiden.
 
 - **Mikrofon-Frage geklaert:** zu fruehes Antworten, nicht das Mikrofon. In
   beiden Konten war aber das rohe Mikrofon eingestellt (Stephan hat umgestellt).
-- **Echo-Quelle als Standard gebaut und belegt:** `priority.session = 2500`;
-  mit geleerter Kontowahl nimmt `dialosadmin` sie von selbst, auch nach dem
-  Neustart. Stephan: "jetzt laeuft alles".
+- **Echo-Quelle als Standard - gebaut und am Abend ZURUECKGENOMMEN:** verstiess
+  gegen die Regel in docs/anwendungen.md (Firefox/Jitsi filtern doppelt). Rohes
+  Mikrofon ist Standard, DialOS nimmt die Echo-Quelle selbst. Nach Neustart belegt.
+- **Doku-Durchsicht (Stephans Wunsch):** drei Pruefungen, rund 70 Funde, alle
+  Dokumente in beiden Sprachen nachgezogen. Dabei gefunden: `dialos-aufraeumen.sh`
+  und `dialos-menue-pro-konto.sh` fehlten in der Anleitung und fielen beim
+  Neuaufbau aus - jetzt Teil 4.4/4.5, am Geraet nachgeholt (simple-scan bewusst
+  entfernt). `python3-gi-cairo` stand nicht in der Paketliste und waere per
+  autoremove gegangen (Brief-PDF!) - ergaenzt und auf dem Geraet als manuell
+  markiert. `hassil` wird installiert, aber von nichts benutzt.
 
 - **Mailkonto aus der Maske gebaut** (0.5.3, `dialos-mailkonto.py`): im
   Test-Heimatverzeichnis belegt, am Geraet im Konto `dialosadmin` mit echtem
@@ -352,7 +359,8 @@ dann auch die Mail verschicken!"):
    Antwort: nein, nicht alles). 10 pip-Pakete, LanguageTool, Piper, die Modelle
    und eine GNOME-Erweiterung fallen aus jeder Automatik heraus. Erster Schritt:
    8 der 10 pip-Pakete auf Debian-Pakete umstellen (vorher Grammatik und
-   Prüfstand, `hassil` baut die Grammatik). Einzelheiten in TODO.md.
+   Prüfstand; **`hassil` wird entgegen dieser alten Notiz von keinem
+   DialOS-Programm benutzt**, geprueft 2026-09-25). Einzelheiten in TODO.md.
 10. Offen aus den Vortagen: Satzende bei abgebrochenem Satz,
    Befehlsuebersicht unterbrechbar, Du/Sie aus den Daten, polkit-Regel,
    Parakeet-Lizenzhinweis, echter Stick, MailBurgs `extract/`, Bilder/Videos.
@@ -857,7 +865,8 @@ ersetzt einen verlorenen oder defekten Sicherheits-Stick und ist damit
 ein Wartungswerkzeug, kein Installer. Die ISO dient nur noch als
 Sicherungs-Schnappschuss (seit 2026-08-16 als Rescuezilla-Abbild).
 
-**Vosk/hassil ist jetzt produktiv im Einsatz** (nicht mehr nur das
+**Vosk ist jetzt produktiv im Einsatz** (hassil wird zwar installiert, aber
+von keinem DialOS-Programm importiert - geprueft 2026-09-25; nicht mehr nur das
 Testskript `dialos-vosk-test.py`): `dialos-start-ansage.py` fragt
 `nutzer` bei der Start-Ansage per Sprache nach der gewünschten
 Lautstärke (100/75/50/25 %/aus) - echt mit Stephans Stimme getestet

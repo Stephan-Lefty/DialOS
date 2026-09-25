@@ -9,8 +9,12 @@ Menschen, die einen Computer nur eingeschränkt nutzen können – insbesondere
 blinde und motorisch eingeschränkte Personen. Es wird nicht als Live-ISO
 verteilt, sondern im Büro auf jedem Gerät aus einer regulären
 Debian-Installation aufgebaut (siehe
-[Debian-zu-DialOS.md](Debian-zu-DialOS.md)); eine ISO gibt es nur noch
-als Sicherungs-Abbild. Das System soll vollständig
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md), maßgebliche Anleitung seit
+2026-09-25: [installationsanleitung.md](installationsanleitung.md)). Eine ISO
+gibt es nicht mehr, auch nicht als Sicherung: Ein fertiges Gerät wird als
+Rescuezilla-Abbild gesichert. (Bis 2026-09-25 stand hier „eine ISO gibt es nur
+noch als Sicherungs-Abbild" - das war seit dem Wechsel auf Rescuezilla am
+2026-08-16 überholt.) Das System soll vollständig
 per Sprache bedienbar sein, inklusive der Systemwartung, und dabei gleich
 einfach für eine 18-Jährige wie für einen 80-Jährigen funktionieren.
 
@@ -39,30 +43,40 @@ vollständig ohne Tastatur/Maus bedienbar sein.
 Details siehe [telefonie.md](telefonie.md), [sicherheit-datenschutz.md](sicherheit-datenschutz.md),
 [sprachsteuerung.md](sprachsteuerung.md), [ersteinrichtung.md](ersteinrichtung.md).
 
-## Software-Stack (Stand 2026-08-16)
+## Software-Stack (Stand 2026-09-25)
 
 Die Spalte "Stand" trennt Entschiedenes von Eingebautem: **installiert**
 heißt, das Paket kommt aus der DialOS-Paketliste; **im Einsatz** heißt,
 es wird von DialOS aktiv angesteuert; **geplant** heißt, entschieden,
 aber noch nichts davon im System.
 
+Die Tabelle ersetzt die Fassung vom 2026-08-16. Die alte steht in der
+Git-Historie dieser Datei; sie war der Stand, bevor der erste Sprachbefehl
+lief (hassil „noch keine Befehlsgrammatik", Vosk nur für die
+Lautstärke-Frage). Zeilen, die seitdem niemand neu geprüft hat, sind als
+solche markiert.
+
 | Bereich | Wahl | Begründung | Stand |
 |---|---|---|---|
-| Distribution | Debian 13 + GNOME 48 | Beste Orca/AT-SPI-Integration, Hardware-Support | im Einsatz |
-| Spracherkennung (STT) | Vosk 0.3.45 (deutsche Modelle groß + klein), offline | Datenschutz bei vulnerabler Zielgruppe, funktioniert auch unterwegs ohne Internet | installiert, erste produktive Nutzung: Lautstärke-Abfrage bei der Start-Ansage |
-| Sprachausgabe (TTS) | Piper (RHVoice verworfen) | Natürlicher als espeak-ng, als Orca-Backend nutzbar | im Einsatz, über ein speech-dispatcher-Generic-Modul |
-| Intent-Erkennung | [hassil](https://github.com/OHF-Voice/hassil) (Entscheidung 2026-08-13, statt Rhasspy) | Muss unterschiedliche Formulierungen derselben Absicht verstehen (18- bis 80-Jährige) | installiert, aber noch keine Befehlsgrammatik hinterlegt |
-| Low-Level-Desktopsteuerung | Numen (Wayland-nativ, Vosk-basiert) | Maus/Fenster-Steuerung für motorisch eingeschränkte Nutzer | geplant, nicht installiert |
-| Screenreader | Orca | Standard-GNOME-Screenreader | installiert, Kopplung an Piper noch offen |
-| Mail/Kalender/Kontakte | Thunderbird | Eine App für alle drei Funktionen, gute Orca-Unterstützung | installiert, als Standard für `mailto:`/`text/calendar` gesetzt |
-| Radio | Shortwave | GNOME-Internetradio-App | installiert |
-| Musik | Rhythmbox/GNOME Music | — | installiert |
-| Podcasts | GNOME Podcasts | — | installiert |
+| Distribution | Debian 13 + GNOME 48 | Beste Orca/AT-SPI-Integration, Hardware-Support; kein Sprung auf Debian 14 (entschieden 2026-09-18, siehe [offene-punkte.md](offene-punkte.md)) | im Einsatz |
+| Befehlserkennung | Vosk 0.3.45, kleines deutsches Modell, **eingeschränkte Grammatik** (rund 64 Sätze) | Offline wegen Datenschutz; frei erkannt macht das Modell aus „gnome" zuverlässig „genug" - mit der Satzliste liegt es wörtlich richtig | im Einsatz, für alle Befehle und den Einkaufszettel |
+| Satzvorlagen → Grammatik | [hassil](https://github.com/OHF-Voice/hassil) (Entscheidung 2026-08-13, statt Rhasspy) | Unterschiedliche Formulierungen derselben Absicht (18- bis 80-Jährige) aus einer Vorlage | im Einsatz, baut die Befehlsgrammatik |
+| Freies Diktat (Brief, Notizen) | Parakeet TDT 0.6B v3 (int8) über sherpa-onnx, Modell unter `/usr/local/share/dialos-parakeet` | Prüfstand 2026-09-15: 2,8 % Wortfehler und alle Satzzeichen richtig, Vosk 12,7 % ohne Punkte | im Einsatz seit 2026-09-16 |
+| Schreibhilfe | LanguageTool (lokal, Java) | Rechtschreibung und Grammatik im Diktat, offline | im Einsatz |
+| Sprachausgabe (TTS) | Piper (RHVoice verworfen), Stimmen Anna (`de_DE-kerstin-low`, Auslieferung) und Michael (`de_DE-thorsten-high`) | Natürlicher als espeak-ng | im Einsatz, über ein speech-dispatcher-Generic-Modul |
+| Audio | PipeWire mit Echo-Unterdrückung (`module-echo-cancel`, WebRTC), Quelle `dialos_mikrofon_ohne_echo` | Die Erkennung soll die eigene Ansage nicht mithören (rund 32 dB Dämpfung gemessen) | im Einsatz; die Sprachdienste wählen die Echo-Quelle selbst, Standard-Mikrofon für andere Programme bleibt bewusst das rohe (siehe [hardware.md](hardware.md)) |
+| Mail/Kalender/Kontakte | Thunderbird + **DialOS-Brücke** (MailExtension `bruecke@dialos.org`, Native Messaging, per `policies.json` in jedem Profil) | Thunderbird legt selbst ab und sendet; DialOS hat keinen eigenen IMAP/SMTP-Zugang und braucht das Mailpasswort nicht (siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md)) | im Einsatz: Entwürfe, Senden, Kontakte; Mailkonto über die Maske der persönlichen Daten |
+| Brief als PDF | eigener Erzeuger über cairo/Pango | Briefbogen nach DIN 5008, Fensterumschlag | im Einsatz |
+| Low-Level-Desktopsteuerung | Numen (Wayland-nativ, Vosk-basiert) | Maus/Fenster-Steuerung für motorisch eingeschränkte Nutzer | geplant, nicht installiert (Stand 2026-08-16, nicht neu geprüft) |
+| Screenreader | Orca | Standard-GNOME-Screenreader | installiert, Kopplung an Piper noch offen (Stand 2026-08-16, nicht neu geprüft) |
+| Radio | heute Shortwave, künftig Rhythmbox | Shortwave ist von außen nicht steuerbar, siehe [anwendungen.md](anwendungen.md) | installiert, „Radio öffnen" öffnet Shortwave; Wechsel entschieden 2026-09-25, nicht gebaut |
+| Musik, Podcasts, Hörbücher | Rhythmbox (ein Player für alles) | GNOME Music und GNOME Podcasts entfernt `dialos-aufraeumen.sh`, siehe [anwendungen.md](anwendungen.md) | installiert |
 | Textverarbeitung | LibreOffice Writer | — | installiert |
 | Browser | Firefox ESR | Für Suchfragen und ARD/ZDF-Mediatheken (kein nativer Linux-Client) | installiert, Startseite per Enterprise-Policy gesetzt |
-| Fernwartung | RustDesk | Open Source, selbst hostbar, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md) | installiert, Autostart bewusst abgeschaltet |
+| Fernwartung | RustDesk 1.4.9 (`.deb` von GitHub) | Open Source, selbst hostbar, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md) | Paket installiert, Dienst aus; der Sprachbefehl „Hilfe rufen" ist gebaut, aber bewusst zurückgestellt (nicht in der Befehlsgrammatik) |
 | Videocall | Jitsi Meet (Browser) | Kein Konto nötig, WebRTC | geplant |
 | Telefonie | ModemManager + GNOME Calls | siehe [telefonie.md](telefonie.md) | geplant, nicht installiert (kein WWAN-Modul im Testgerät) |
+| Einrichtung | Claude-Desktop-App (Anthropic, proprietär, aus deren apt-Quelle) | Hilft beim Aufbau und bei der Entwicklung | bisher nur auf dem Entwicklungsgerät; **ob sie auf Kundengeräten bleibt, ist offen** (siehe [lizenzen.md](lizenzen.md)) |
 
 ## Design-Prinzipien
 

@@ -1,6 +1,6 @@
 [Deutsch](Debian-zu-DialOS.md) | [English](Debian-zu-DialOS.en.md)
 
-# Build guide: From Debian 13 + GNOME 48 to DialOS 0.5.0
+# Build guide: From Debian 13 + GNOME 48 to DialOS 0.5.3
 
 > **Maintenance note:** This document is the gap-free "rebuild from
 > scratch" recipe, not just a historical retrospective. Any future
@@ -11,40 +11,40 @@
 > can't be trusted for the next rebuild. Goal: by the final DialOS
 > version, the system should be fully reproducible from this one file.
 
+> **For the hands-on work: [installationsanleitung.md](installationsanleitung.md)**
+> (German). The installation guide (as PDF next to the repo on the external
+> disk) is the short form for whoever sets up a device - command by command,
+> in the right order. This recipe explains every step and gives the reasons.
+> On 2026-09-25 the reference device was rebuilt purely from that guide;
+> every gap found on the way is in both documents.
+
 This guide brings together all the steps that, spread across many
-separate chat sessions, led to the current state (0.5.0) - in the order
+separate chat sessions, led to the current state (0.5.3) - in the order
 in which they actually make sense, so DialOS can be rebuilt from a
 fresh Debian 13/GNOME install in a traceable, reproducible way. The
 point is transparency: nothing here is newly invented, everything
 points back to the file/commit/doc it comes from.
 
-**Important context:** There are two parallel build paths in the repo
-(see `CLAUDE.md`):
-1. An older Docker/live-build pipeline (`iso-build/build.sh`) - after
-   about 18 attempts it never produced a single finished ISO, and is
-   not currently being pursued further.
-2. **The path described here, currently in use:** Debian 13 + GNOME is
-   installed directly on real hardware and set up interactively (no
-   chroot, no Docker); the files under `iso-build/config/includes.chroot*/`
-   in the repo serve as a **template/recipe, not automatic build
-   input** - every file has to be manually copied onto the real system
-   after a change. At the end, [Penguins' Eggs](https://penguins-eggs.net/)
-   A backup image is taken from the finished system at the end (step
-   16) - since 2026-08-16 using [Rescuezilla](https://rescuezilla.com/),
-   the graphical front-end for Clonezilla. Penguins' Eggs is gone.
+**There is exactly one build path** (since 2026-08-16, "path A"): Debian 13
++ GNOME is installed directly on real hardware and set up there - no chroot,
+no Docker, no ISO. Despite the folder name, the files under
+`iso-build/config/includes.chroot*/` in the repo are the **template for the
+real system**: `dialos-aufspielen` brings them onto the device (step 16 of the
+setup script). At the end a **Rescuezilla image** is taken of the finished
+system (see "Backup image" below). The former Docker/live-build pipeline
+(`iso-build/build.sh`, about 18 attempts without one finished ISO) and
+Penguins' Eggs are gone and only reachable through the Git history.
 
-This guide describes path 2. Reference test device: Lenovo ThinkPad
-T490 (see [hardware.en.md](hardware.en.md)).
+Reference test device: Lenovo ThinkPad T490 (see [hardware.en.md](hardware.en.md)).
 
-> **Fast path (as of 2026-08-19): five commands from Debian to DialOS.**
-> Three until 2026-08-19; the two new ones clear out what Debian ships and
-> DialOS does not need (Stephan's requirement, see step 13b).
-> After the base install (step 1), everything except the ISO build is
-> covered by scripts - there is no manual command left to type out of
-> this document:
+> **Fast path (as of 2026-09-25): from Debian to DialOS.**
+> First: install Debian (step 1, account exactly `dialosadmin`), update the
+> base system (step 1e), set up the Claude app from Anthropic's package
+> repository (step 7). After that everything is covered by scripts:
 >
 > ```bash
-> # 1) Steps 2-12 + 15 - as dialosadmin, WITHOUT sudo:
+> # 1) Steps 2-12, 15 and 16 (all DialOS files, services for all accounts,
+> #    Thunderbird bridge, 16e: Anna) - as dialosadmin, WITHOUT sudo:
 > ./scripts/dialos-full-office-setup.sh
 >
 > # 2) Step 12b - plug in the security stick, again WITHOUT sudo
@@ -53,15 +53,28 @@ T490 (see [hardware.en.md](hardware.en.md)).
 >
 > # 3) Step 13 - leave the stick plugged in:
 > sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
+>
+> # 4) Step 13b - removes what Debian ships and DialOS does not need.
+> #    FIRST run without --wirklich and look at the list:
+> ./scripts/dialos-aufraeumen.sh
+> sudo ./scripts/dialos-aufraeumen.sh --wirklich
+>
+> # 5) Step 13c - menu per account: nutzer only sees their applications,
+> #    dialosadmin sees everything. Also without --wirklich first:
+> ./scripts/dialos-menue-pro-konto.sh
+> sudo ./scripts/dialos-menue-pro-konto.sh --wirklich
 > ```
 >
-> Then reboot, then step 16 (build the ISO). The individual steps below
-> remain the actual detailed reference - the scripts are built directly
-> from them, and if a single step causes trouble, script 1 can be run for
-> just that one step (`./scripts/dialos-full-office-setup.sh 08`). Step
-> 14 (Bluetooth pairing data) only runs along with
-> `--bluetooth-kopplung`, since it's device-specific. Steps 1 (base
-> install) and 16 (build the ISO) deliberately remain manual - see there.
+> Then reboot, create the mail account through the personal-data mask and
+> finally take the Rescuezilla image. **4) and 5) were missing from the
+> installation guide until 2026-09-25** and were skipped in that day's
+> rebuild - they are there now as part 4.4 and 4.5. The individual steps below
+> remain the actual detailed reference - the scripts are built directly from
+> them, and if a single step causes trouble, script 1 can be run for just that
+> one step (`./scripts/dialos-full-office-setup.sh 08`). Step 14 (Bluetooth
+> pairing data) only runs along with `--bluetooth-kopplung`, since it's
+> device-specific. Step 1 (base install) and the backup image deliberately
+> remain manual - see there.
 >
 > **Two pitfalls when invoking these** (both found on 2026-08-16, before
 > the first real run started):
@@ -90,11 +103,12 @@ T490 (see [hardware.en.md](hardware.en.md)).
 ## 1. Install Debian 13 + GNOME
 
 Standard Debian installation, choose GNOME as the desktop. The first
-account created (the installer requires one) should be named
-**`DialOS-Admin`**, or in practice on this test device
-**`dialosadmin`** - convention: the admin/setup account gets the same
-name on every rollout, so scripts and docs don't need per-device
-adjustment.
+account created (the installer requires one) must be named **exactly
+`dialosadmin`**. The name appears in about 30 files, among them the sudoers
+rules - a different name does not fail loudly but silently: the rules simply
+don't apply. On 2026-09-25 `dialosadim` was typed here and the build started
+over. (Until then this said "should be `DialOS-Admin`, or in practice
+`dialosadmin`" - there never was a device with the first name.)
 
 **Timezone/language - decided on 2026-08-16:** the reference and build
 device runs **`Europe/Vienna` + `de_AT.UTF-8`** (Stephan's location in
@@ -106,9 +120,12 @@ timezone is **chosen per device in step 1**. For a device destined for use
 outside Austria, simply pick the appropriate timezone there - there is no
 second path left that could inherit a different setting.
 
-**Partitioning - automated since 2026-08-16 (path A).** So that you
-neither have to partition by hand nor think about disk size, a preseed
-file gives the Debian installer the layout:
+**Partitioning.** The layout below is mandatory. In practice the way there
+is **by hand (step 1d)** - the preseed file (1a-1c) needs a second machine on
+the same network, because `dialos.org` does not work as a source: checked on
+2026-09-25, the HTTP request is redirected to HTTPS, and HTML comes back
+instead of the file. The rebuild that day was therefore partitioned by hand.
+The layout:
 
 | Partition | Size | |
 |---|---|---|
@@ -3060,6 +3077,133 @@ After this step: reboot, verify that `nutzer` starts automatically with
 no login screen - and that `nutzer`'s own desktop is **empty** of admin
 tools.
 
+## 12c. Second voice and the two names (new 2026-08-20)
+
+> **Since 2026-09-25 `dialos-full-office-setup.sh` does this as step 16e.**
+> Until then this step existed ONLY here - the rebuild on 2026-09-25 ran
+> without Anna. `piper-generic.conf` from the repo selects Anna, though, so
+> what played was Michael at Anna's tempo (too fast), the greeting said
+> "I am Michael", and `spd-say` aborted after 20 s because the configured
+> voice file was missing - which also swallowed the volume question.
+> (Translated into this English version on 2026-09-25; until then the step
+> was missing here entirely.)
+
+Stephan's decision: a friendly female voice. The listening comparison picked
+**`de_DE-kerstin-low`**, tempo **1.00**, name **Anna**.
+
+```bash
+# Fetch the voice (about 60 MB)
+BASIS=https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE
+curl -s -L -o /tmp/kerstin.onnx      "$BASIS/kerstin/low/de_DE-kerstin-low.onnx?download=true"
+curl -s -L -o /tmp/kerstin.onnx.json "$BASIS/kerstin/low/de_DE-kerstin-low.onnx.json?download=true"
+sudo install -m 0644 /tmp/kerstin.onnx      /usr/local/share/dialos-piper/voices/de_DE-kerstin-low.onnx
+sudo install -m 0644 /tmp/kerstin.onnx.json /usr/local/share/dialos-piper/voices/de_DE-kerstin-low.onnx.json
+
+# Switch - voice, name and tempo TOGETHER
+sudo dialos-stimme.py setzen kerstin
+systemctl --user restart speech-dispatcher.service
+```
+
+**Why three things switch together.** A female voice introducing herself as
+Michael would be wrong - and a user who cannot see the screen has only this
+name to address the device. The tempo differs per voice. **The first figures
+for it were wrong** (corrected on 2026-08-22): they came from a generator that
+declared Kerstin's 16 kHz raw data as 22050 Hz - every Kerstin sample ran 38 %
+too fast. Measured correctly, the same sentence takes about 6.15 s with
+Michael at 0.88 and about 7.04 s with Anna at 1.00; Anna is therefore **14 %
+slower**, not level. Since 2026-08-22 Anna is set to **0.95** - chosen by
+Stephan from correctly generated samples. One shared value for all voices
+would always be wrong for one of them.
+
+**The choice was made by ear, not by calculation.** Three female Piper voices
+were available (`eva_k-x_low`, `kerstin-low`, `ramona-low`); there are no
+better ones for German. All three run at 16 000 Hz against Thorsten's
+22 050 Hz - that is the audible quality difference and the price of this
+decision.
+
+**The user's name.** `/usr/local/share/dialos/nutzer-name.txt`, one line,
+example in [beispiele/nutzer-name.txt](beispiele/nutzer-name.txt). On the test
+device it says "Stephan" - **standing in for the customer's name**, which is
+entered during the office setup. The file is deliberately not in the repo: a
+customer's name does not belong in version control.
+
+Where the name is used is defined in `dialos-namen.py`, and the rule is
+sparing:
+
+| Place | Name? | Why |
+|---|---|---|
+| Greeting at login | **yes** | once per session, and the moment where it means the most |
+| Decisions (remote support, deleting a note) | **yes** | where consent is given, the name brings attention back |
+| Errors ("Ich finde kein Mikrofon") | **yes** | when something fails it must be clear who is meant |
+| Confirmations ("Diktat beendet") | no | twenty times a day a name wears out |
+| Time limit every two minutes | no | same |
+
+**Why this is more than politeness:** the name at the start of a sentence is a
+**signal**. With the radio on or visitors in the room, "Stephan, …" says
+unmistakably: this is for you, listen. That is exactly why it must not appear
+everywhere - whoever hears it all the time stops hearing it.
+
+**Without a name file it stays with a plain "Du",** and every announcement is
+still correct. None of them depends on a name being entered - that was the
+condition when building it.
+
+## 13a. Unattended security updates (new 2026-08-20)
+
+(Translated into this English version on 2026-09-25; until then the step was
+missing here, although other steps already referred to it.)
+
+```bash
+sudo apt-get install -y unattended-upgrades
+sudo install -m 0644 iso-build/config/includes.chroot/etc/apt/apt.conf.d/52dialos-unattended-upgrades /etc/apt/apt.conf.d/
+sudo install -m 0644 iso-build/config/includes.chroot/etc/apt/apt.conf.d/20auto-upgrades /etc/apt/apt.conf.d/
+```
+
+Decided in [anwendungen.en.md](anwendungen.en.md): security updates run
+automatically, anything bigger only on request. Three settings carry that, and
+each has a reason beyond the normal case:
+
+**`#clear` before `Origins-Pattern` is mandatory.** An `Origins-Pattern` line
+**appends** (`::`), it does not replace. Without clearing, after the first
+attempt there were five patterns in the list - our own two **and** Debian's
+three, among them `label=Debian` without `-Security`. That is the normal
+stable repository: everything coming from stable would have been installed
+unattended. Noticed only because `apt-config dump` was read after installing
+instead of trusting our own file - **writing a configuration file is not the
+same as setting a setting.**
+
+**`Remove-Unused-Dependencies "false"` is the most important line.** After
+step 13b, 49 packages count as "automatically installed" that were previously
+held only by `gnome-core` - among them `gnome-shell`, `nautilus` and
+`pipewire-audio`. An automatic `autoremove` would therefore offer at night to
+remove the desktop and the audio stack. The cleanup script protects them, but
+this setting must not rely on that: if the protection misses **one** package,
+the device would be unusable in the morning - and the user could not even call
+for help.
+
+**`Automatic-Reboot "false"`,** for a reason that weighs more than the usual
+one: `/home/nutzer` is on the LUKS partition that `dialos-stick-gate.service`
+opens with the security stick. If the device reboots at night while the stick
+is not plugged in, the user cannot get into their session at all in the
+morning - and does not understand why.
+
+**Cross-check, not trust.** The dry run shows in
+`/var/log/unattended-upgrades/unattended-upgrades.log` what really applies:
+
+```
+Marking not allowed <... trixie ... l=Debian ...> with -32768 pin
+Applying pin -32768 to ... trixie-updates ... l=Debian
+Applying pin -32768 to ... downloads.claude.ai ... l=Anthropic
+left to upgrade set()
+```
+
+`-32768` is apt's "under no circumstances". Only `Debian-Security` is missing
+from this list, so it is allowed.
+
+**Deliberately locked as well: `trixie-updates`.** Among other things `tzdata`
+comes from there. The time zone database therefore ages until someone says
+"System aktualisieren" - worth mentioning on a device whose time announcement
+is a core command. It stays locked, because "security only" was the decision.
+
 ## 13b. Cleanup: remove what Debian ships and DialOS does not need
 
 Stephan's requirement of 2026-08-19: once Debian + GNOME is installed on a new
@@ -3628,7 +3772,13 @@ the screenshot (see the rule of 2026-09-14).
 "Postfach öffnen" is also the resolution for queued drafts: it starts
 Thunderbird, and the bridge files whatever is waiting - announcing it first.
 
-## 16. Backup image (Clonezilla)
+## 16. Backup image (Rescuezilla)
+
+> **Number used twice - do not mix them up:** in the setup script, step 16 is
+> `16_dialos_dateien` since 2026-09-25 (all DialOS files via
+> `dialos-aufspielen`, 16b-16e). This documentation step 16 is the backup image
+> at the very end. It is taken with Rescuezilla, the graphical front-end for
+> Clonezilla.
 
 **Decision of 2026-08-16: Penguins' Eggs is dropped, Clonezilla takes
 over.** This step used to read `eggs produce`. With path A (see step 5)
@@ -3695,8 +3845,8 @@ like `~/DialOS` pointing at the external repo path.
 
 ## What's deliberately NOT covered here
 
-This guide covers the path up to 0.5.0. Known open items (wake-word
-engine, Bluetooth microphone fallback, spell-checking, the final sudo
-policy for `nutzer`, among others) are listed in
+This guide covers the path up to 0.5.3. Known open items (wake-word
+engine, radio and music by voice, the final sudo policy for `nutzer`,
+among others) are listed in
 [offene-punkte.en.md](offene-punkte.en.md); smaller, concrete follow-ups
 are in [TODO.en.md](../TODO.en.md).

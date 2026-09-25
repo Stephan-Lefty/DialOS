@@ -4,7 +4,14 @@
 
 ## Stack
 
-- **Speech recognition (STT)**: Vosk with a German model, offline.
+- **Speech recognition (STT)**: Vosk with a German model, offline - for
+  commands and the shopping list, with a restricted grammar.
+- **Recognition of free text**: **Parakeet** (NVIDIA Parakeet TDT 0.6B v3
+  via sherpa-onnx, offline), built in for good since 2026-09-16 - for letters,
+  notes, the text of an e-mail and search terms. Chosen after the test bench of
+  2026-09-15: 2.8 % word errors against 12.7 % for Vosk, and only Parakeet sets
+  punctuation itself (see [pruefstand.en.md](pruefstand.en.md)). Can be
+  switched off with `~/.config/dialos/parakeet-aus`.
 - **Speech output (TTS)**: Piper (more natural than espeak-ng), used as
   a backend for Orca - RHVoice was considered and dropped.
 - **Screen reader**: Orca (the standard GNOME screen reader).
@@ -13,9 +20,46 @@
 - **Intent recognition**: [hassil](https://github.com/OHF-Voice/hassil)
   (Home Assistant Intent Language) - adaptable matching via
   example-sentence templates instead of a rigid command grammar (see
-  below).
+  below). **Status 2026-09-25: installed, but not wired into the code** -
+  see "Implementation status".
+
+## Implementation status (2026-09-25)
+
+So it stays clear what is concept and what is built - the state of
+2026-08-16 follows below as history.
+
+- **Speech output: in use.** Piper via speech-dispatcher; `dialos-say.py`
+  speaks every announcement; voices Michael and Anna.
+- **Commands: in use, around 64 command sentences** (counted at the mandatory
+  check of 2026-09-21), including the sentences from `dialos-programm.py` and
+  the extensions' start sentences. Recognised by the small Vosk model with a
+  restricted grammar. The full list is in
+  [sprachbefehle.en.md](sprachbefehle.en.md).
+- **Switching on by sentence instead of a wake word:** "Sprachsteuerung
+  starten" / "Sprachsteuerung stoppen" (decided on 2026-08-17, see below).
+  There is still no wake word of its own.
+- **Free text: Parakeet since 2026-09-16** for letters, notes and the text of
+  an e-mail; the shopping list stays with Vosk. Details in
+  [diktat.en.md](diktat.en.md).
+- **Intent recognition: hassil is installed but not wired into the code**
+  (checked on 2026-09-25: no DialOS script imports it). The voice service maps
+  what was recognised to a command itself: the Vosk grammar only admits the
+  words of the command sentences, and rules of our own decide when a sentence
+  counts - core word, the whole word sequence with at most two extra words, no
+  `[unk]`. Why the decision of 2026-08-13 was never implemented that way: see
+  the note in the section "Intent recognition" below.
+- **Microphone:** the voice services pick the echo-cancelled source
+  `dialos_mikrofon_ohne_echo` themselves. The system's default microphone
+  deliberately stays the raw built-in one - reasoning in
+  [anwendungen.en.md](anwendungen.en.md), section "Two rules".
+- **Orca screen reader:** installed; whether it is paired with Piper was not
+  rechecked for this status. **Numen:** not installed.
 
 ## Implementation status (2026-08-16)
+
+> **Superseded since the evening of 2026-08-16** (first real voice command) -
+> the current status is directly above. This section stays as a snapshot:
+> this is how things looked before voice control was built.
 
 So it stays clear what is concept and what is built:
 
@@ -44,12 +88,51 @@ must be just as easy for an 18-year-old as for an 80-year-old — different
 generations phrase the same command differently ("call Anna" vs. "connect
 me to Anna" vs. "phone Anna please").
 
-Solution: a small, locally running language model interprets the Vosk
-transcription and maps it to the matching action, instead of expecting
-exact phrasings. The flexibility applies to **understanding**, not to
-**execution** — security-critical actions (system maintenance, approving
-remote support) always stay behind an explicit yes/no confirmation,
-regardless of how the command was recognized.
+**Decision (2026-08-13): [hassil](https://github.com/OHF-Voice/hassil)**
+takes over mapping the Vosk transcription to an action. Instead of demanding
+exact phrasings, several example-sentence templates with alternatives and
+optional words are stored per action (e.g.
+`(ruf|verbind mich mit) [bitte] {person} an`) - new phrasings can be "taught"
+by adding further templates, without changing code.
+
+Decisive criteria and alternatives examined:
+
+- **Offline/privacy**: cloud solutions (e.g. using the already installed
+  Claude Code CLI for classification) are ruled out by this - hassil runs
+  entirely locally, no internet connection needed.
+- **Free of charge**: open source, no running API costs.
+- **Adaptable**: by adding example-sentence templates, without retraining or
+  fine-tuning a model.
+- Originally **Rhasspy** was considered as a starting point (it uses the same
+  example-sentence approach internally). During the installation research,
+  however, it turned out that Rhasspy was archived by its author in 2026
+  (reason: looming burnout) and is no longer developed - unsuitable as the
+  basis for a system meant to run for years. hassil is the actively
+  maintained successor component (part of the Open Home Foundation/Home
+  Assistant, as of 2026: over 600 commits), offering the same
+  example-sentence approach but without Docker or a service of its own - just
+  a lean Python library (only dependency: PyYAML) that can be embedded
+  directly in our own scripts such as `dialos-vosk-test.py`/`dialos-say.py`.
+- A small local language model of our own (e.g. via llama.cpp) would have
+  been freer in recognising phrasings, but considerably more effort in
+  selection, integration and quality assurance - for the manageable, clearly
+  bounded number of actions (Wi-Fi, volume, starting programs, calling, ...)
+  hassil's example-sentence approach seemed the better effort-to-benefit
+  ratio.
+
+> **Status 2026-09-25: not implemented this way.** From 2026-08-16 onwards
+> what was built is a restricted Vosk grammar with a mapping of our own (see
+> "Implementation status" above). `TODO.md` already gives the reason on
+> 2026-08-16: hassil only pays off once there are several commands with
+> variants. Several phrasings for the same command have stood as separate
+> sentences in the grammar since then ("Wie viel Uhr ist es?", "Wie spät ist
+> es?"). Whether hassil still finds its place with the extensions is open in
+> [erweiterungen.en.md](erweiterungen.en.md).
+
+The flexibility applies to **understanding**, not to **execution** —
+security-critical actions (system maintenance, approving remote support)
+always stay behind an explicit yes/no confirmation, regardless of how the
+command was recognized.
 
 ## Voice-controlled system maintenance
 
@@ -251,6 +334,9 @@ instead of being silently dead.
 
 ## Open questions
 
-- The concrete intent layer (custom middleware vs. an existing framework
-  such as Rhasspy as a starting point) has not been decided yet.
+- ~~The concrete intent layer (custom middleware vs. an existing framework
+  such as Rhasspy as a starting point) has not been decided yet.~~
+  **Settled:** decided on 2026-08-13 in favour of hassil (see "Intent
+  recognition" above); in practice a restricted Vosk grammar with a mapping of
+  our own has been doing the job since 2026-08-16.
 - The wake-word engine has not been finally decided yet.

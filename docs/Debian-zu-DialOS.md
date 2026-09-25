@@ -1,6 +1,6 @@
 [Deutsch](Debian-zu-DialOS.md) | [English](Debian-zu-DialOS.en.md)
 
-# Aufbauanleitung: Von Debian 13 + GNOME 48 zu DialOS 0.5.0
+# Aufbauanleitung: Von Debian 13 + GNOME 48 zu DialOS 0.5.3
 
 > **Pflegehinweis:** Dieses Dokument ist das lückenlose "von Grund auf
 > nachbauen"-Rezept, nicht nur ein historischer Rückblick. Bei jeder
@@ -13,42 +13,42 @@
 > DialOS-Version soll sich das System aus dieser einen Datei heraus
 > lückenlos nachbauen lassen.
 
+> **Zum Handgriff: [installationsanleitung.md](installationsanleitung.md).**
+> Die Installationsanleitung (als PDF neben dem Repo auf der externen Platte)
+> ist die Kurzform für den, der ein Gerät aufsetzt - Befehl für Befehl, in der
+> richtigen Reihenfolge. Dieses Rezept hier erklärt jeden Schritt und
+> begründet ihn. Am 2026-09-25 wurde das Referenzgerät nur nach der Anleitung
+> neu aufgebaut; jede Lücke, die dabei auffiel, steht in beiden Dokumenten.
+
 Diese Anleitung fasst alle Schritte zusammen, die bisher über viele
-einzelne Chat-Sessions verteilt zum aktuellen Stand (0.5.0) geführt
+einzelne Chat-Sessions verteilt zum aktuellen Stand (0.5.3) geführt
 haben - in der Reihenfolge, in der sie tatsächlich sinnvoll sind, damit
 sich DialOS aus einer frischen Debian-13/GNOME-Installation heraus
 nachvollziehbar und reproduzierbar wieder aufbauen lässt. Transparenz
 ist der Zweck: nichts hier ist neu erfunden, alles verweist auf die
 Datei/den Commit/die Doku, aus der es stammt.
 
-**Wichtig zum Kontext:** Es gibt zwei parallele Bau-Wege im Repo (siehe
-`CLAUDE.md`):
-1. Eine ältere Docker/live-build-Pipeline (`iso-build/build.sh`) - blieb
-   nach ca. 18 Versuchen ohne eine einzige fertige ISO, wird aktuell
-   nicht weiterverfolgt.
-2. **Der hier beschriebene, aktuell genutzte Weg:** Debian 13 + GNOME
-   wird direkt auf echter Hardware installiert und interaktiv
-   eingerichtet (kein Chroot, kein Docker), die Dateien unter
-   `iso-build/config/includes.chroot*/` im Repo dienen dabei als
-   **Vorlage/Rezept, kein automatischer Build-Input** - jede Datei muss
-   nach einer Änderung manuell auf das echte System kopiert werden.
-   Vom fertig eingerichteten System wird zum Schluss ein
-   Sicherungs-Abbild gezogen (Schritt 16) - seit 2026-08-16 mit
-   [Rescuezilla](https://rescuezilla.com/), der grafischen Oberfläche
-   für Clonezilla. Penguins' Eggs ist entfallen.
+**Es gibt genau einen Bau-Weg** (seit 2026-08-16, „Weg A"): Debian 13 +
+GNOME wird direkt auf echter Hardware installiert und eingerichtet - kein
+Chroot, kein Docker, keine ISO. Die Dateien unter
+`iso-build/config/includes.chroot*/` im Repo sind trotz des Ordnernamens
+die **Vorlage für das echte System**: `dialos-aufspielen` bringt sie auf das
+Gerät (im Aufbau-Skript Schritt 16). Vom fertig eingerichteten System wird
+zum Schluss ein **Rescuezilla-Abbild** gezogen (siehe „Sicherungs-Abbild"
+unten). Die frühere Docker/live-build-Pipeline (`iso-build/build.sh`, rund
+18 Versuche ohne eine fertige ISO) und Penguins' Eggs sind entfallen und nur
+noch über die Git-Historie erreichbar.
 
-Diese Anleitung beschreibt Weg 2. Referenz-Testgerät: Lenovo ThinkPad
-T490 (siehe [hardware.md](hardware.md)).
+Referenz-Testgerät: Lenovo ThinkPad T490 (siehe [hardware.md](hardware.md)).
 
-> **Schnellweg (Stand 2026-08-19): fünf Befehle von Debian zu DialOS.**
-> Bis zum 2026-08-19 waren es drei; die beiden neuen räumen auf, was Debian
-> mitbringt und DialOS nicht braucht (Stephans Vorgabe, siehe Schritt 13b).
-> Nach der Basis-Installation (Schritt 1) ist der gesamte Rest bis auf den
-> ISO-Bau in Skripten abgebildet - es bleibt keine Handarbeit mehr aus
-> dieser Doku abzutippen:
+> **Schnellweg (Stand 2026-09-25): von Debian zu DialOS.**
+> Vorher: Debian installieren (Schritt 1, Konto genau `dialosadmin`),
+> Grundsystem aktualisieren (Schritt 1e), die Claude-App aus Anthropics
+> Paketquelle einrichten (Schritt 7). Danach ist alles in Skripten abgebildet:
 >
 > ```bash
-> # 1) Schritte 2-12 + 15 - als dialosadmin, OHNE sudo:
+> # 1) Schritte 2-12, 15 und 16 (alle DialOS-Dateien, Dienste für alle Konten,
+> #    Thunderbird-Brücke, 16e: Anna) - als dialosadmin, OHNE sudo:
 > ./scripts/dialos-full-office-setup.sh
 >
 > # 2) Schritt 12b - Sicherheits-Stick einstecken, ebenfalls OHNE sudo
@@ -69,14 +69,17 @@ T490 (siehe [hardware.md](hardware.md)).
 > sudo ./scripts/dialos-menue-pro-konto.sh --wirklich
 > ```
 >
-> Danach neu starten, dann Schritt 16 (ISO bauen). Die Einzelschritte
-> unten bleiben die eigentliche, ausführliche Referenz - genau daraus sind
-> die Skripte gebaut, und bei Problemen mit einem einzelnen Schritt lässt
-> sich Skript 1 gezielt nur für diesen einen Schritt aufrufen
+> Danach neu starten, das Mailkonto über die Maske der persönlichen Daten
+> anlegen und zum Schluss das Rescuezilla-Abbild ziehen. **4) und 5) fehlten
+> bis zum 2026-09-25 in der Installationsanleitung** und fielen beim
+> Neuaufbau an dem Tag aus - sie stehen dort jetzt als Teil 4.4 und 4.5. Die
+> Einzelschritte unten bleiben die eigentliche, ausführliche Referenz - genau
+> daraus sind die Skripte gebaut, und bei Problemen mit einem einzelnen
+> Schritt lässt sich Skript 1 gezielt nur für diesen einen Schritt aufrufen
 > (`./scripts/dialos-full-office-setup.sh 08`). Schritt 14
 > (Bluetooth-Kopplungsdaten) läuft nur mit `--bluetooth-kopplung` mit, da
-> er gerätespezifisch ist. Schritt 1 (Basis-Installation) und 16 (ISO
-> bauen) bleiben bewusst manuell - siehe dort.
+> er gerätespezifisch ist. Schritt 1 (Basis-Installation) und das
+> Sicherungs-Abbild bleiben bewusst manuell - siehe dort.
 >
 > **Zwei Fallen bei den Aufrufen** (beide 2026-08-16 gefunden, bevor der
 > erste echte Durchlauf startete):
@@ -106,10 +109,12 @@ T490 (siehe [hardware.md](hardware.md)).
 ## 1. Debian 13 + GNOME installieren
 
 Standard-Debian-Installation, GNOME als Desktop wählen. Das erste
-angelegte Konto (der Installer verlangt eines) sollte **`DialOS-Admin`**
-bzw. auf diesem Testgerät praktisch **`dialosadmin`** heißen -
-Konvention: Das Admin-/Setup-Konto trägt bei jedem Rollout denselben
-Namen, damit Skripte und Doku nicht pro Gerät angepasst werden müssen.
+angelegte Konto (der Installer verlangt eines) muss **genau `dialosadmin`**
+heißen. Der Name steht in rund 30 Dateien, darunter die sudoers-Regeln - ein
+anderer Name bricht nicht laut, sondern lautlos: Die Regeln greifen einfach
+nicht. Am 2026-09-25 ist hier `dialosadim` entstanden, und der Aufbau begann
+von vorn. (Bis dahin stand hier „sollte `DialOS-Admin` bzw. praktisch
+`dialosadmin`" - es gab nie ein Gerät mit dem ersten Namen.)
 
 **Zeitzone/Sprache - entschieden am 2026-08-16:** Das Referenz- und
 Baugerät läuft auf **`Europe/Vienna` + `de_AT.UTF-8`** (Stephans Standort
@@ -122,9 +127,12 @@ außerhalb Österreichs eingesetzt wird, dort einfach die passende Zeitzone
 angeben - es gibt keinen zweiten Weg mehr, der eine andere Einstellung
 vererben könnte.
 
-**Partitionierung - seit 2026-08-16 automatisiert (Weg A).** Damit du
-weder von Hand partitionieren noch über die Plattengröße nachdenken
-musst, gibt eine Preseed-Datei dem Debian-Installer das Layout vor:
+**Partitionierung.** Das Layout unten ist Pflicht. Der Weg dorthin ist in
+der Praxis **von Hand (Schritt 1d)** - die Preseed-Datei (1a-1c) braucht
+einen zweiten Rechner im selben Netz, denn `dialos.org` taugt als Quelle
+nicht: Am 2026-09-25 geprüft, der Aufruf über HTTP wird auf HTTPS
+umgeleitet, und dort kommt HTML statt der Datei. Beim Neuaufbau an dem Tag
+wurde deshalb von Hand partitioniert. Das Layout:
 
 | Partition | Größe | |
 |---|---|---|
@@ -3208,7 +3216,7 @@ systemctl --user restart speech-dispatcher.service
 **Warum drei Dinge zusammen umschalten.** Eine Frauenstimme, die sich als
 Michael vorstellt, wäre falsch - und ein Nutzer, der den Bildschirm nicht sieht,
 hat nur diesen Namen, um das Gerät anzusprechen. Das Tempo ist pro Stimme
-**Diese Zahlen waren falsch** (berichtigt am 2026-08-22): Sie stammen aus
+verschieden. **Die ersten Zahlen dazu waren falsch** (berichtigt am 2026-08-22): Sie stammen aus
 einem Erzeuger, der Kerstins 16-kHz-Rohdaten als 22050 Hz deklarierte - jede
 Kerstin-Probe lief damit 38 % zu schnell. Richtig gemessen braucht derselbe
 Satz bei Michael mit 0,88 rund 6,15 s und bei Anna mit 1,00 rund 7,04 s; Anna
@@ -3908,7 +3916,13 @@ Wochen unbemerkt blieb (siehe Regel vom 2026-09-14).
 „Postfach öffnen" ist zugleich die Auflösung für vorgemerkte Entwürfe: Es
 startet Thunderbird, die Brücke trägt ein, was wartet - und sagt es vorher an.
 
-## 16. Sicherungs-Abbild (Clonezilla)
+## 16. Sicherungs-Abbild (Rescuezilla)
+
+> **Nummer doppelt belegt - bitte nicht verwechseln:** Im Aufbau-Skript heißt
+> Schritt 16 seit dem 2026-09-25 `16_dialos_dateien` (alle DialOS-Dateien über
+> `dialos-aufspielen`, 16b-16e). Dieser Doku-Schritt 16 ist das
+> Sicherungs-Abbild ganz am Ende. Gezogen wird es mit Rescuezilla, der
+> grafischen Oberfläche für Clonezilla.
 
 **Entscheidung vom 2026-08-16: Penguins' Eggs entfällt, Clonezilla
 übernimmt.** Bis dahin stand hier `eggs produce`. Mit Weg A (siehe
@@ -3978,8 +3992,8 @@ setzen.
 
 ## Was hier bewusst NICHT drinsteht
 
-Diese Anleitung deckt den Weg bis 0.5.0 ab. Bekannte offene
-Baustellen (Wake-Word-Engine, Bluetooth-Mikrofon-Fallback,
-Rechtschreibprüfung, endgültige sudo-Policy für `nutzer`, u. a.) stehen
+Diese Anleitung deckt den Weg bis 0.5.3 ab. Bekannte offene
+Baustellen (Wake-Word-Engine, Radio und Musik per Sprache,
+endgültige sudo-Policy für `nutzer`, u. a.) stehen
 in [offene-punkte.md](offene-punkte.md); kleinere, konkrete
 Nacharbeiten in [TODO.md](../TODO.md).

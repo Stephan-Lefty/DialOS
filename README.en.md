@@ -21,48 +21,50 @@ This project was created in collaboration with [Claude](https://claude.com).
 
 ## Status
 
-**Since 2026-08-16, DialOS runs on real hardware.** Five commands turn a
-bare Debian 13/GNOME install into the finished system – verified
-end-to-end on the reference device (ThinkPad T490):
+**State 0.5.3, 2026-09-25: on that day DialOS was wiped from the reference
+device (ThinkPad T490) and rebuilt purely from its own guide**
+([docs/installationsanleitung.md](docs/installationsanleitung.md), German).
+From a bare Debian 13/GNOME installation - base system updated, Claude app from
+Anthropic's package repository for the setup - the finished system comes from:
 
 ```bash
-./scripts/dialos-full-office-setup.sh                    # packages, branding, speech output, Vosk
-/usr/local/sbin/dialos-setup-home-partition.sh           # encrypted swap + nutzer partition
-sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # account + autologin
-./scripts/dialos-aufraeumen.sh                           # remove programs that are not needed
-./scripts/dialos-menue-pro-konto.sh                      # set up the start menu per account
+./scripts/dialos-full-office-setup.sh                    # packages, voices, Vosk, Parakeet, all DialOS files
+/usr/local/sbin/dialos-setup-home-partition.sh           # encrypted swap + nutzer partition + stick
+sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # nutzer account, autologin, acceptance check
+sudo ./scripts/dialos-aufraeumen.sh --wirklich           # remove programs that are not needed
+sudo ./scripts/dialos-menue-pro-konto.sh --wirklich      # start menu per account
 ```
 
-**What works:** speech output via Piper, speech recognition via Vosk, the
-complete security design (encrypted `nutzer` partition and encrypted
-swap, the security stick as a presence token – proven in both directions:
-without the stick the account is locked and the data sealed, with it
-`nutzer` logs in automatically), autologin, branding, default
-applications.
+Run the last two without `sudo … --wirklich` first - then they only show what
+they would do. The acceptance check afterwards reported nothing missing in the
+`nutzer` account, and the voice test there ran cleanly.
 
-**Since the evening of 2026-08-16 that includes the first real voice
-command.** A continuously listening service switches the desktop's look
-on command:
+**What works:**
 
-> "auf Windows umschalten" &nbsp;·&nbsp; "auf Linux umschalten"
-> (German for "switch to Windows/Linux")
+- **Voice control:** about 64 command sentences via Vosk with a restricted
+  grammar; switched on with "Sprachsteuerung starten".
+- **Free text:** letters and notes are dictated with Parakeet (punctuation
+  included), shopping lists with Vosk; LanguageTool as writing aid.
+- **Letter following DIN 5008** with a recipient dialog from the Thunderbird
+  contacts, reading aloud, printing and PDF archive.
+- **Mail:** Thunderbird with DialOS's own bridge - "Postfach öffnen",
+  "Neue E-Mail schreiben" (recipient, subject, dictation, confirmation before
+  sending), drafts; since 0.5.3 the mail account comes from the personal-data
+  mask.
+- **Searching documents:** find letters, notes and mails by voice, read them
+  aloud, print, reply.
+- **Two voices:** Anna (default) and Michael, via Piper.
+- **Security:** encrypted `nutzer` partition and encrypted swap, security
+  stick as presence token; without the stick the account stays locked.
+- Time, weather, battery warnings, screenshot, opening and closing programs by
+  voice, updates on request, optional Windows 11 look
+  ("auf Windows umschalten" / "auf Linux umschalten").
 
-Behind it sits the optional Windows 11 look – for people who want DialOS
-for the voice control but come from the Windows world. GNOME is preserved
-in full (Orca, AT-SPI); only three extensions are added on top, and it
-can be switched back at any time in either direction. The chosen look
-persists across restarts.
-
-**What is still missing:** the wake word – the ready-made models for it
-come under a licence that rules out commercial use. Also open are
-telephony and the WWAN variant, radio and streaming libraries,
-appointments and contacts. And the DIN 5008 letter is built, but has not
-yet been spoken through from start to finish on the device.
-
-**What works by now:** more than two dozen command sentences, free
-dictation for notes and shopping lists, the dictated letter all the way
-to the printout and into the PDF archive, and since 2026-09-17 an
-extension interface with full-text search as its first building block.
+**Still missing:** radio and music by voice (decided on 2026-09-25: both
+through Rhythmbox, not built yet), announcing appointments, scanning letters,
+alarms and reminders, telephony and chat, the wake word (the ready-made models
+exclude commercial use). Switching voice control on is still unreliable in
+noisy surroundings.
 
 Details on the respective state are in the [changelog](#changelog),
 concrete next steps in [TODO.en.md](TODO.en.md).
@@ -114,12 +116,15 @@ background) and `splash.png` (boot/login screen).
 ## Test environment
 
 - **Laptop:** Lenovo ThinkPad T490 (no WWAN module)
-- **Audio:** AIRHUG 01 – Bluetooth headset, the reference device for
-  voice control since 2026-08-16 (see [hardware.en.md](docs/hardware.en.md)).
-  Falling back to the built-in speakers/microphone is mandatory and has
-  been proven for the output side. The built-in microphone was
-  over-amplified by 60 dB until 2026-08-16 – corrected since, and
-  secured by a service at every boot.
+- **Microphone:** the built-in one, always since 2026-08-17 (Stephan's
+  decision). DialOS listens through the echo-cancelled source "Mikrofon ohne
+  Echo"; the default microphone for all other programs deliberately stays the
+  raw built-in one, otherwise video calls would be filtered twice. It was
+  over-amplified by 60 dB until 2026-08-16 – corrected since, and secured by a
+  service at every boot. For measurements also a USB desk microphone TONOR
+  TC30 (test bench since 2026-09-15).
+- **Output:** AIRHUG 01 – Bluetooth speaker, as long as it really plays;
+  otherwise the built-in speakers (see [hardware.en.md](docs/hardware.en.md)).
 - **Input devices:** Logitech Pebble M350s (mouse), Pebble K380s (keyboard)
 - **Security stick:** 64 GB, split into `DIALOS-KEY` (key file, ext4) and
   `DIALOS-DATA` (exFAT, also readable on Windows/macOS)
@@ -128,6 +133,23 @@ background) and `splash.png` (boot/login screen).
 ## Changelog
 
 ### 0.5.3
+
+- **All documentation brought up to the state of 2026-09-25** (Stephan: "please
+  first check the docs in the repo and bring them up to date"). Three reviews
+  found about 70 outdated spots - dated states never marked as superseded, and
+  English versions missing whole sections (steps 12c and 13a in the recipe, and
+  parts of `offene-punkte`, `sprachsteuerung`, `sprachbefehle`,
+  `kundendaten-felder`, `anwendungen`). Superseded text is marked, not deleted.
+  Three findings go beyond documentation: **(1)** `dialos-aufraeumen.sh` and
+  `dialos-menue-pro-konto.sh` have been part of the build since 2026-08-19 but
+  were missing from the installation guide and were skipped in the rebuild -
+  now part 4.4/4.5, done on the device (`simple-scan` deliberately removed as
+  well; DialOS will scan via `scanimage`). **(2)** `python3-gi-cairo` was not in
+  the package list; after the cleanup `apt autoremove` offered to remove it -
+  the DIN 5008 letter as PDF would have broken silently. Now in
+  `desktop.list.chroot` and marked manual on the device. **(3)** `hassil` is
+  installed in step 15 but used by no DialOS program - DialOS builds the grammar
+  itself. A candidate to drop; nothing decided.
 
 - **"Mikrofon ohne Echo" is again NOT the default microphone** (2026-09-25,
   Stephan's decision). In the afternoon, under 0.5.2, it was made the default

@@ -190,7 +190,7 @@ finished too, and then move down together. That way no reference breaks.
     pip packages (all but `vosk` and `sherpa_onnx`). They then run with the
     update automation. Most important are `websockets` and `yaml`: exactly the
     kind of library where security holes turn up. **Check first:** Debian's
-    version may differ from the pip one - `hassil` builds our grammar, so run
+    version may differ from the pip one - (corrected 2026-09-25: this said "`hassil` builds our grammar" - it does not; hassil is installed in step 15 but no DialOS program imports it, DialOS builds the grammar itself, so hassil is a candidate to drop - Stephan decides) run
     `dialos-grammatik-pruefen.py` and the test bench after switching. Remove
     the pip versions only once that passes (otherwise pip silently shadows the
     Debian version, because `/usr/local` comes first in the search path).
@@ -1884,14 +1884,18 @@ finished too, and then move down together. That way no reference breaks.
       letter to the health insurer it must be decided whether that suffices
       or whether it has to be checked before sending.
   - [ ] **Reading out** mails, documents and web pages.
-  - [ ] **Radio and music by voice** - Shortwave by station name,
-    Rhythmbox via `rhythmbox-client`. Implement the one-player rule while
-    doing it: stop one before starting the other.
+  - [ ] **Radio and music by voice** - **decided on 2026-09-25 (Stephan):
+    both through Rhythmbox.** DialOS looks up the station itself in
+    radio-browser.info, Rhythmbox plays it via `rhythmbox-client --play-uri`.
+    Shortwave offers no interface to choose a station (over MPRIS only
+    play/pause of the last one). So there is only ONE player left, and the
+    one-player rule takes care of itself. Next build project.
   - [ ] **Resume position for podcasts and audiobooks** - Rhythmbox does
     not provide it (checked: no `playback-position`, no `bookmark`). DialOS
     reads and sets it over MPRIS and must be able to announce it.
   - [ ] **Scanning post and reading it out** - install `tesseract-ocr`
-    (5.5.0); simple-scan/sane/CUPS are present.
+    (5.5.0); `sane-utils` (`scanimage`) and CUPS are present. `simple-scan`
+    was deliberately removed in the cleanup on 2026-09-25 (Stephan).
   - [ ] **Alarm, timer, reminders.**
   - [ ] **Shutting down and locking the computer by voice**; **announcing
     appointments and weather** (Thunderbird resp. the existing weather

@@ -58,12 +58,20 @@ werden**.
 
 **Quelltext-Pflicht.** Wer GPL-Software weitergibt - auch auf einem
 verkauften Gerät -, schuldet dem Empfänger den zugehörigen Quelltext.
-DialOS erfüllt das, indem es die Pakete **unverändert** aus Debians
-Quellen installiert: Der Quelltext liegt öffentlich bei Debian
+Für die **Debian-Pakete** erfüllt DialOS das, indem es sie **unverändert**
+aus Debians Quellen installiert: Der Quelltext liegt öffentlich bei Debian
 (`deb-src`-Quellen, https://sources.debian.org). Wird ein Paket
 **geändert**, muss der geänderte Quelltext selbst bereitgestellt werden -
 das ist einer der Gründe, warum DialOS eigene Skripte danebenlegt,
 statt fremde Pakete zu patchen.
+
+**Berichtigt am 2026-09-25:** Im Absatz darüber stand bis dahin, DialOS installiere „die
+Pakete unverändert aus Debians Quellen" - als gelte das für alles. Das
+stimmt nur für die Debian-Pakete. Ein Teil kommt an Debian vorbei aufs
+Gerät, von GitHub, Hugging Face, languagetool.org, PyPI oder Anthropics
+eigener Paketquelle; für diesen Teil gilt der Nachweis über
+`/usr/share/doc/` und sources.debian.org **nicht**. Er steht deshalb
+einzeln im nächsten Abschnitt.
 
 **Marken.** „Debian" ist eine Marke von Software in the Public Interest,
 „GNOME" eine Marke der GNOME Foundation. Die Aussage „basiert auf
@@ -74,6 +82,44 @@ offizielles Debian- oder GNOME-Produkt.
 Ebenso sind **Thunderbird** und **Firefox** Marken von Mozilla. DialOS
 verändert diese Programme nicht, sondern konfiguriert sie nur (etwa die
 Fußzeile in jeder Mail) - das berührt das Markenrecht nicht.
+
+## Was nicht aus Debian kommt
+
+Stand der Prüfung: 2026-09-25, nachgesehen auf dem frisch aufgebauten
+Entwicklungsgerät (Lizenzdateien der Programme, Paket-Metadaten unter
+`/usr/local/lib/python3.13/dist-packages/`, `/usr/share/doc/claude-desktop/copyright`).
+Die Sprachmodelle und Stimmen stehen im Abschnitt darunter.
+
+| Bestandteil | Herkunft | Verwendung | Lizenz |
+|---|---|---|---|
+| RustDesk 1.4.9 | `.deb` von GitHub (rustdesk.com) | Fernwartung, Dienst aus, bewusst zurückgestellt | AGPL-3.0 |
+| LanguageTool 6.6 | Zip-Archiv von languagetool.org, unter `/opt/languagetool` | Schreibhilfe im Diktat | LGPL-2.1 (laut `COPYING.txt`); die mitgelieferten Bibliotheken haben eigene Lizenzen (`third-party-licenses/`) - **im Einzelnen zu prüfen** |
+| Piper (Programm) | Release-Archiv von GitHub (rhasspy/piper), unter `/usr/local/share/dialos-piper` | Sprachausgabe | MIT; das Archiv bringt **espeak-ng** (GPL-3.0) und ONNX Runtime (MIT) mit - ob daraus für DialOS eine eigene Quelltext-Pflicht folgt, ist **zu prüfen** |
+| vosk 0.3.45 | pip (PyPI) | Befehlserkennung | Apache-2.0 |
+| hassil 3.11.0 | pip | baut die Befehlsgrammatik | Apache-2.0 |
+| sherpa-onnx 1.13.8 (+ `sherpa-onnx-core`) | pip | Parakeet im Diktat | Apache-2.0 |
+| Abhängigkeiten der pip-Pakete | pip | - | unicode-rbnf MIT, PyYAML MIT, srt MIT, tqdm MPL-2.0 und MIT, websockets BSD-3-Clause, cffi MIT-0, pycparser BSD-3-Clause |
+| DialOS-Brücke (MailExtension `bruecke@dialos.org`) | aus diesem Repository gebaut, per `policies.json` in jedes Thunderbird-Profil | Entwürfe und Senden über Thunderbird | Teil von DialOS: GPL-3.0 |
+| Claude-Desktop-App | Anthropics eigene apt-Quelle | Einrichtung und Entwicklung, bisher nur auf dem Entwicklungsgerät | **proprietär** (Anthropic PBC); enthält Electron (MIT) |
+
+**Die Claude-App ist eine offene Frage, keine Entscheidung.** Sie ist der
+einzige nicht freie Bestandteil auf dem Gerät und dient bisher nur dem
+Aufbau: Die Installationsanleitung richtet sie in Teil 2 ein, weil der Rest
+mit ihrer Hilfe läuft. **Ob sie auf einem Kundengerät bleiben darf oder vor
+der Auslieferung entfernt wird, ist offen.** Für die Entscheidung
+festzuhalten: Sie braucht ein Anthropic-Konto, sie ist nicht frei
+weitergebbar wie die übrige Software, und ob ihre Weitergabe auf einem
+verkauften Gerät überhaupt erlaubt ist, richtet sich nach den
+Nutzungsbedingungen von Anthropic - **zu prüfen**. Bis das entschieden ist,
+gilt: auf dem Entwicklungsgerät ja, auf Kundengeräten nicht als geklärt
+ansehen.
+
+**Warum pip-Pakete hier stehen, obwohl die Paketliste sonst nicht ins Repo
+gehört** (siehe unten): Sie reisen **nicht** mit einem Lizenztext unter
+`/usr/share/doc/` und werden von keinem `apt upgrade` erfasst. Für sie
+erfüllt sich die Nachweispflicht also nicht von selbst. Die Umstellung von
+acht der Pakete auf Debian-Pakete steht in `TODO.md` - danach schrumpft
+diese Tabelle.
 
 ## Sprachausgabe und Spracherkennung
 
@@ -202,6 +248,15 @@ dpkg-query -W -f='${Package}\t${Version}\t${Homepage}\n' | sort > pakete.txt
 
 ## Offen
 
+- **Claude-Desktop-App auf Kundengeräten** (seit 2026-09-25 hier notiert):
+  bleibt sie oder wird sie vor der Auslieferung entfernt? Siehe „Was nicht
+  aus Debian kommt". Nicht entschieden.
+- **Lizenzhinweis für Parakeet am Gerät** (CC-BY-4.0 verlangt Namensnennung,
+  Wortlaut oben) - offener Punkt in `TODO.md`, gehört in eine
+  Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
+- **Zu prüfen:** die Bibliotheken in LanguageTools `third-party-licenses/`
+  und ob das in Piper mitgelieferte espeak-ng (GPL-3.0) eine eigene
+  Quelltext-Bereitstellung verlangt.
 - Anmeldung der Wort-/Bildmarke „DialOS" beim DPMA, falls der
   Markenvorbehalt belastbar sein soll (siehe oben). Bis dahin trägt er
   nur so weit wie Benutzung und Bekanntheit.

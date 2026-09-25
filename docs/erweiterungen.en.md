@@ -4,7 +4,21 @@
 
 How a program joins DialOS without anything in the core having to change.
 
-> **Status on 2026-09-18: built and confirmed on the device.** The interface is
+> **Status on 2026-09-25: two extensions, plus the bridge to Thunderbird.**
+>
+> - **DialOS-Suche** ("Unterlagen durchsuchen") - built since 2026-09-18 and
+>   tried out on the device, in the mailbox and in the documents (details in
+>   the box below).
+> - **DialOS-Mail** ("Neue E-Mail schreiben", `dialos-mail-schreiben.py`) -
+>   built since 2026-09-21, ran through on the device on 2026-09-25 from the
+>   recipient to the draft. See "The second extension: DialOS-Mail" at the end.
+> - **The DialOS bridge** is the interface to Thunderbird through which both
+>   file drafts, send and enter contacts. It is an extension *of Thunderbird*,
+>   not of DialOS - see "The Thunderbird bridge" at the end.
+>
+> Tasks in [TODO.en.md](../TODO.en.md), details in the changelog under 0.5.2.
+>
+> **Earlier status on 2026-09-18: built and confirmed on the device.** The interface is
 > in place (manifest, `dialos-erweiterung.py`, start sentence in the core
 > grammar, microphone handover with a watchdog), and **DialOS-Suche runs**: an
 > index over letters, notes, filing and Thunderbird mails, a voice dialogue that
@@ -548,8 +562,9 @@ answer has to be measured:
 
 Purpose: searching and reading out letters, documents, notes and e-mails
 by voice. The choice of program is in
-[anwendungen.en.md](anwendungen.en.md), the intended sentences in
-[sprachbefehle.en.md](sprachbefehle.en.md), the tasks in
+[anwendungen.en.md](anwendungen.en.md), the sentences in
+[sprachbefehle.en.md](sprachbefehle.en.md) (under "Implemented" since
+2026-09-18, before that under "Planned"), the tasks in
 [TODO.en.md](../TODO.en.md).
 
 **From MailBurg the extraction chain is shared, not the program**
@@ -611,3 +626,78 @@ and are therefore listed here, because they shaped the design:
   `dialos-say.py`.** The 144 seconds of the command overview are already
   an open item today, and they belong to no extension. Whoever builds
   interruptibility for the archive solves it for everything.
+
+## The second extension: DialOS-Mail
+
+Since 2026-09-21 (Stephan: "Dann müssen wir ja bei einer neuen Mail die
+Mailadresse, den Betreff und den Text noch hin bekommen und dann auch die Mail
+verschicken!" - so for a new mail we still need the address, the subject and
+the text, and then send it too). **Ran through on the device on 2026-09-25**,
+from the recipient to the draft.
+
+- **Manifest:** `/usr/local/share/dialos/erweiterungen/dialos-mail.json`,
+  start sentences "neue e mail schreiben" and "e mail schreiben", own grammar
+  "ja", "nein", "vorlesen", "abbrechen". Program: `dialos-mail-schreiben.py`.
+- **The dialogue:** recipient from the Thunderbird contacts or spelled →
+  subject → dictate the text as in a letter → only the **key facts** ("3 Sätze
+  an …, Betreff …"), the full text on request. On anything but a clear "ja" it
+  is **filed instead of sent**. The individual sentences are in
+  [sprachbefehle.en.md](sprachbefehle.en.md).
+- **None of it is newly written:** recipient dialogue, dictation and
+  confirmations come from DialOS-Suche (`dialos-suche.py`). The second
+  extension is thus largely assembled from building blocks of the first - a
+  second recipient dialogue would have had to be repaired twice at the next
+  fault.
+- **Writing happens only through Thunderbird itself**, via the bridge (next
+  section). Sending is built but not yet tried on the device (status
+  2026-09-25: so far the answer to the question has always been "nein").
+
+## The Thunderbird bridge
+
+**Not an extension in the sense of this file, even though both are called
+that.** The DialOS bridge (DialOS-Brücke) is a *MailExtension for
+Thunderbird*: it has no DialOS manifest, no grammar and no microphone. It
+stands here because both extensions talk to Thunderbird through it - and
+because [anwendungen.en.md](anwendungen.en.md) has pointed to this file since
+2026-09-21, while nothing about it stood here until 2026-09-25.
+
+**Why it exists** (since 2026-09-21): before, DialOS wrote into Thunderbird's
+files itself - drafts into the mbox, contacts into `abook.sqlite`. Each of
+these routes produced a fault (LF instead of CR LF, `X-Mozilla-Status: 0008`
+means DELETED). Three times the same pattern: writing into someone else's file
+formats instead of asking the program they belong to. Since then: *reading
+from outside is fine, writing is not.*
+
+| Part | Where |
+|---|---|
+| Source of the MailExtension (`manifest.json`, `hintergrund.js`) | folder `thunderbird-erweiterung/` in the repo |
+| ID | `bruecke@dialos.org` |
+| Packed `.xpi` | `/usr/local/share/dialos/dialos-bruecke.xpi`, built by `sudo scripts/dialos-erweiterung-bauen.sh` |
+| Installed into every profile | `/usr/lib/thunderbird/distribution/policies.json`, `force_installed` |
+| Counterpart on the DialOS side (native messaging) | `dialos-thunderbird-bruecke.py`, registered via `/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json` |
+
+**What it can do:** file drafts in the *account's* drafts folder (which is
+uploaded to the server, unlike the local folders), send, create contacts,
+save open compose windows as drafts before closing, and list drafts lying
+around. If Thunderbird is closed, DialOS queues a draft, and the bridge files
+it as soon as Thunderbird starts it. **Still open:** the letter's recipient
+dialogue still enters contacts into `abook.sqlite` itself; the bridge can do
+it, the switch-over is missing (`TODO.en.md`).
+
+**Three decisions and their reason:**
+
+- **The `.xpi` is not in the repo.** It would be a second copy of the same two
+  files - and the first one to be forgotten when someone changes
+  `hintergrund.js`. Then a different extension would run on the device than
+  the one in the repo, and nobody would see it. After every change, bump the
+  version in `manifest.json`, otherwise Thunderbird does not accept the new
+  file.
+- **`force_installed` via `policies.json`, not by hand.** On 2026-09-21 the
+  extension was first installed by hand - and therefore only in the profile of
+  `dialosadmin`. In the customer's account a whole day of work would have been
+  without effect, without a single error message. `force_installed` also
+  applies to existing profiles, arrives with every new one and cannot be
+  removed by accident.
+- **Unsigned is fine**, because Debian's Thunderbird has
+  `xpinstall.signatures.required` set to `false`. With a Thunderbird from
+  Mozilla that would be different.

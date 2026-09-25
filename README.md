@@ -20,48 +20,51 @@ Dieses Projekt ist in Zusammenarbeit mit [Claude](https://claude.com) entstanden
 
 ## Status
 
-**Seit dem 2026-08-16 läuft DialOS auf echter Hardware.** Aus einer
-nackten Debian-13/GNOME-Installation entsteht das fertige System in fünf
-Befehlen – am Referenzgerät (ThinkPad T490) end-to-end durchgeprüft:
+**Stand 0.5.3, 2026-09-25: Am Referenzgerät (ThinkPad T490) wurde DialOS an
+diesem Tag komplett gelöscht und nur nach der eigenen Anleitung neu
+aufgebaut** ([docs/installationsanleitung.md](docs/installationsanleitung.md)).
+Aus einer nackten Debian-13/GNOME-Installation - Grundsystem aktualisiert,
+Claude-App aus Anthropics Paketquelle für die Einrichtung - entsteht das
+fertige System so:
 
 ```bash
-./scripts/dialos-full-office-setup.sh                    # Pakete, Branding, Sprachausgabe, Vosk
-/usr/local/sbin/dialos-setup-home-partition.sh           # verschlüsselter Swap + nutzer-Partition
-sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # Konto + Autologin
-./scripts/dialos-aufraeumen.sh                           # nicht benötigte Programme entfernen
-./scripts/dialos-menue-pro-konto.sh                      # Startmenü je Konto einrichten
+./scripts/dialos-full-office-setup.sh                    # Pakete, Stimmen, Vosk, Parakeet, alle DialOS-Dateien
+/usr/local/sbin/dialos-setup-home-partition.sh           # verschlüsselter Swap + nutzer-Partition + Stick
+sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin   # Konto nutzer, Autologin, Abnahme
+sudo ./scripts/dialos-aufraeumen.sh --wirklich           # nicht benötigte Programme entfernen
+sudo ./scripts/dialos-menue-pro-konto.sh --wirklich      # Startmenü je Konto einrichten
 ```
 
-**Was funktioniert:** Sprachausgabe über Piper, Spracherkennung über
-Vosk, das vollständige Sicherheitskonzept (verschlüsselte
-`nutzer`-Partition und verschlüsselter Swap, Sicherheits-Stick als
-Anwesenheits-Token – in beiden Richtungen nachgewiesen: ohne Stick ist
-das Konto gesperrt und die Daten sind verschlossen, mit Stick meldet sich
-`nutzer` automatisch an), Autologin, Branding, Standardprogramme.
+Die letzten beiden zuerst ohne `sudo … --wirklich` aufrufen - dann zeigen sie
+nur, was sie tun würden. Die Abnahme danach meldete „Im Konto nutzer fehlt
+nichts", der Sprachtest im Konto `nutzer` lief sauber.
 
-**Seit dem Abend des 2026-08-16 gehört dazu der erste echte
-Sprachbefehl.** Ein dauerhaft lauschender Dienst schaltet auf Zuruf die
-Optik des Schreibtischs um:
+**Was funktioniert:**
 
-> "auf Windows umschalten" &nbsp;·&nbsp; "auf Linux umschalten"
+- **Sprachsteuerung:** rund 64 Befehlssätze über Vosk mit eingeschränkter
+  Grammatik; Einschalten mit „Sprachsteuerung starten".
+- **Freier Text:** Brief und Notizen werden mit Parakeet diktiert (Satzzeichen
+  inklusive), Einkaufszettel mit Vosk; LanguageTool als Schreibhilfe.
+- **Brief nach DIN 5008** mit Empfängerdialog aus den Thunderbird-Kontakten,
+  Vorlesen, Drucken und PDF-Archiv.
+- **Mail:** Thunderbird mit der eigenen DialOS-Brücke - „Postfach öffnen",
+  „Neue E-Mail schreiben" (Empfänger, Betreff, Diktat, Rückfrage vor dem
+  Senden), Entwürfe; das Mailkonto kommt seit 0.5.3 aus der Maske der
+  persönlichen Daten.
+- **Unterlagen durchsuchen:** Briefe, Notizen und Mails per Sprache finden,
+  vorlesen, drucken, beantworten.
+- **Zwei Stimmen:** Anna (Auslieferung) und Michael, über Piper.
+- **Sicherheit:** verschlüsselte `nutzer`-Partition und verschlüsselter Swap,
+  Sicherheits-Stick als Anwesenheits-Token; ohne Stick bleibt das Konto zu.
+- Uhrzeit, Wetter, Akkuwarnung, Bildschirmfoto, Programme öffnen und
+  schließen auf Zuruf, Updates auf Ansage, optionale Windows-11-Optik
+  („auf Windows umschalten" / „auf Linux umschalten").
 
-Dahinter steht die optionale Windows-11-Optik – für Menschen, die DialOS
-wegen der Sprachsteuerung wollen, aber aus der Windows-Welt kommen. GNOME
-bleibt dabei vollständig erhalten (Orca, AT-SPI), es kommen nur drei
-Erweiterungen obendrauf, und es lässt sich jederzeit in beide Richtungen
-zurückschalten. Die gewählte Optik bleibt über Neustarts hinweg
-bestehen.
-
-**Was noch fehlt:** das Aufweckwort – die fertigen Modelle dafür stehen
-unter einer Lizenz, die eine kommerzielle Nutzung ausschließt. Ebenso
-offen sind Telefonie und die WWAN-Variante, Radio und Mediatheken,
-Termine und Kontakte. Und der Brief nach DIN 5008 ist gebaut, aber noch
-nicht am Gerät von Anfang bis Ende durchgesprochen.
-
-**Was inzwischen läuft:** über zwei Dutzend Befehlssätze, freies Diktat
-für Notizen und Einkaufszettel, der diktierte Brief bis zum Ausdruck und
-ins PDF-Archiv, und seit dem 2026-09-17 eine Erweiterungsschnittstelle
-mit der Volltextsuche als erstem Baustein.
+**Was noch fehlt:** Radio und Musik per Sprache (entschieden am 2026-09-25:
+beides über Rhythmbox, noch nicht gebaut), Termine ansagen, Post einscannen,
+Wecker und Erinnerungen, Telefonie und Chat, das Aufweckwort (die fertigen
+Modelle schließen eine kommerzielle Nutzung aus). Das Einschalten der
+Sprachsteuerung ist in lauter Umgebung noch unzuverlässig.
 
 Details zum jeweiligen Stand stehen im
 [Änderungsprotokoll](#änderungsprotokoll), konkrete nächste Schritte in
@@ -114,12 +117,16 @@ Referenzübersicht. Dazu `wallpaper-light.png`/`wallpaper-dark.png`
 ## Testumgebung
 
 - **Laptop:** Lenovo ThinkPad T490 (ohne WWAN-Modul)
-- **Audio:** AIRHUG 01 – Bluetooth-Headset, seit 2026-08-16 das
-  Referenzgerät für die Sprachsteuerung (siehe
-  [hardware.md](docs/hardware.md)). Rückfall auf die eingebauten
-  Lautsprecher/Mikrofone ist Pflicht und für die Ausgabe nachgewiesen.
-  Das eingebaute Mikrofon war bis zum 2026-08-16 um 60 dB übersteuert –
-  seither korrigiert und per Dienst bei jedem Start abgesichert.
+- **Mikrofon:** das eingebaute, seit 2026-08-17 immer (Stephans Festlegung).
+  DialOS hört über die echo-bereinigte Quelle „Mikrofon ohne Echo" zu; als
+  Standard-Mikrofon für alle anderen Programme bleibt bewusst das rohe
+  eingebaute, sonst klängen Videoanrufe doppelt gefiltert. Bis zum 2026-08-16
+  war es um 60 dB übersteuert – seither korrigiert und per Dienst bei jedem
+  Start abgesichert. Zum Messen zusätzlich ein USB-Tischmikrofon TONOR TC30
+  (Prüfstand seit 2026-09-15).
+- **Ausgabe:** AIRHUG 01 – Bluetooth-Lautsprecher, solange er wirklich
+  abspielt; sonst die eingebauten Lautsprecher (siehe
+  [hardware.md](docs/hardware.md)).
 - **Eingabegeräte:** Logitech Pebble M350s (Maus), Pebble K380s (Tastatur)
 - **Sicherheits-Stick:** 64 GB, aufgeteilt in `DIALOS-KEY` (Schlüssel,
   ext4) und `DIALOS-DATA` (exFAT, auch an Windows/macOS lesbar)
@@ -136,6 +143,24 @@ das Erfolg meldet, während es versagt.
 ## Änderungsprotokoll
 
 ### 0.5.3
+
+- **Die ganze Doku auf den Stand vom 2026-09-25 gebracht** (Stephan: „bitte
+  erst mal die docs im repo prüfen und auf den neuesten Stand bringen"). Drei
+  Prüfungen fanden rund 70 veraltete Stellen - datierte Stände, die nie als
+  überholt markiert wurden, und englische Fassungen, denen ganze Abschnitte
+  fehlten (im Rezept die Schritte 12c und 13a, in `offene-punkte`, `sprachsteuerung`,
+  `sprachbefehle`, `kundendaten-felder`, `anwendungen`). Überholtes ist
+  gekennzeichnet, nicht gelöscht. Dabei drei Funde, die über Doku hinausgehen:
+  **(1)** `dialos-aufraeumen.sh` und `dialos-menue-pro-konto.sh` gehören seit dem
+  2026-08-19 zum Aufbau, standen aber nicht in der Installationsanleitung und
+  fielen beim Neuaufbau aus - jetzt Teil 4.4/4.5, am Gerät nachgeholt
+  (`simple-scan` bewusst mit entfernt, DialOS scannt künftig über `scanimage`).
+  **(2)** `python3-gi-cairo` stand nicht in der Paketliste; nach dem Aufräumen bot
+  `apt autoremove` an, es zu entfernen - der Brief nach DIN 5008 als PDF wäre
+  lautlos kaputt gewesen. Jetzt in `desktop.list.chroot`, auf dem Gerät als
+  manuell markiert. **(3)** `hassil` wird in Schritt 15 installiert, aber von
+  keinem DialOS-Programm benutzt - die Grammatik baut DialOS selbst. Kandidat
+  zum Weglassen, entschieden ist nichts.
 
 - **„Mikrofon ohne Echo" ist wieder NICHT das Standard-Mikrofon** (2026-09-25,
   Stephans Entscheidung). Am Nachmittag unter 0.5.2 per `priority.session = 2500`

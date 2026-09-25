@@ -110,8 +110,29 @@ reached.
   a helper reads the one out loud while setting the device up, and must never
   see the other.
 
+  **Superseded since 2026-09-25 - the principle holds, the file never
+  existed.** The 0600 file was meant for DialOS's own IMAP/SMTP access, which
+  was not built (see [anwendungen.en.md](anwendungen.en.md), section "Mail").
+  Today the **password lives in Thunderbird's encrypted password store**,
+  entered by the form via `dialos-mailkonto.py`. User name and servers, on the
+  other hand, are in this file - they reveal nothing a helper must not see (see
+  the next section).
+
 That line has to be drawn before anything is built. Otherwise everything ends up
 in one file and nobody knows what to delete when the device changes hands.
+
+### E-mail account - fields for Thunderbird (since 2026-09-25)
+
+Stephan: "Ich möchte gerne alle Kundendaten zentral erfassen und dann auf die
+Programme verteilen! So kann ich nix übersehen." (I want to record all customer
+data centrally and then distribute it to the programs - that way I can't miss
+anything.) That is why the mail account details sit in the same file:
+`mail_benutzer`, `imap_server`, `imap_port`, `smtp_server`, `smtp_port` - all
+optional, for well-known providers the e-mail address is enough: if the server
+fields stay empty, the servers come from Mozilla's provider database (ISPDB).
+**The password is deliberately NOT a field:** the form hands it straight to
+Thunderbird's encrypted password store (`dialos-mailkonto.py`); it never
+appears in this file.
 
 ## The template
 

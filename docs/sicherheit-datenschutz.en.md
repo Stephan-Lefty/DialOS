@@ -139,6 +139,19 @@ Scripts/units:
   gives `nutzer` about 62 GB of it automatically as portable storage
   (e.g. for photos, documents) they can take along independently of the
   device.
+- **Setup wipes the stick completely** - both areas, including
+  `DIALOS-DATA` with the user's PDF archive. A stick that has already been
+  in use must therefore be backed up first (instructions:
+  [installationsanleitung.md](installationsanleitung.md), part 0.4, German
+  only). The old key on it is worthless after a rebuild anyway; the user's
+  data is not.
+- **Since 2026-09-25 the stick selection no longer offers mounted
+  drives.** Before that, during the rebuild, the external work drive was
+  listed right next to the stick - one wrong click would have wiped the
+  repository, the Rescuezilla image and the backups. A stick that GNOME
+  mounts by itself when plugged in (with an old stick this happens with
+  `DIALOS-DATA`) therefore has to be ejected in the file manager first,
+  otherwise it is not offered.
 - `scripts/dialos-setup-nutzer.sh` (creates the `nutzer` account during
   office setup) checks before `adduser` whether `/home/nutzer` is
   already mounted, and aborts cleanly if not - otherwise `nutzer`'s home
@@ -198,6 +211,63 @@ manager), never together with the backup file itself.
 
 ## Credentials for services (mail, and more later)
 
+**Current state since 2026-09-25: the mail password lives in Thunderbird's
+own encrypted password store - and in no DialOS file.**
+
+- **The mail account is created through the personal-data form**
+  (`dialos-persoenliche-daten-maske.py`), which calls
+  `/usr/local/bin/dialos-mailkonto.py` for it. For the `nutzer` account this
+  goes through `pkexec` and `/usr/local/sbin/dialos-persoenliche-daten-konto`
+  (action `mailkonto`), because the form is usually operated from
+  `dialosadmin` and `/home/nutzer` belongs to a different account.
+- **The servers** come from the form if they are filled in there;
+  otherwise the tool asks Mozilla's provider database (ISPDB,
+  `autoconfig.thunderbird.net`) - the same source Thunderbird's own wizard
+  uses. Only the **domain** of the mail address leaves the device, not the
+  address itself.
+- **The password** is entered in the form, passed to the tool via standard
+  input, and from there written via NSS (Thunderbird's own crypto library)
+  directly into `logins.json`/`key4.db` in the Thunderbird profile. Mail
+  address, user name and servers sit in
+  `~/.config/dialos/persoenliche-daten.txt` like all customer data - the
+  password **never**, nor in any other DialOS file. Thunderbird creates both
+  files with mode `0600` (checked on 2026-09-25).
+- **The signature** is set by the tool in the same run; the former manual
+  step after account setup is gone (see
+  [ersteinrichtung.en.md](ersteinrichtung.en.md)).
+- **DialOS has not built its own IMAP/SMTP access.** Saving drafts and
+  sending go through the **DialOS bridge**, a MailExtension
+  (`bruecke@dialos.org`) that reaches every Thunderbird profile via
+  `policies.json` and talks to DialOS over native messaging. Thunderbird
+  itself logs in to the mail server. DialOS therefore does not need the
+  password at all - it only holds it once, while handing it on from the
+  form.
+
+**Why this is the same protection as the 2026-08-18 decision below, just
+in a different place:** Thunderbird's store lives in the profile under
+`/home/nutzer/.thunderbird/`, i.e. on the LUKS partition. A **primary
+password is deliberately not set** (the tool creates `key4.db` with an
+empty primary password, just as Thunderbird does itself) - otherwise a
+password dialog the user cannot see would appear when fetching mail,
+which is exactly the failure that argues against the keyring below.
+Without a primary password the encryption in `logins.json` is, honestly,
+only obfuscation: whoever can read the profile can decrypt it. The actual
+protection is therefore the same as back then: **no stick, no decrypted
+home; no home, no credentials.** The arguments against the stick and the
+keyring below apply to Thunderbird's store unchanged.
+
+What is gained over the planned file: no plain text on disk, no secrets
+file of its own for DialOS to maintain, and a password change goes through
+Thunderbird's own UI without DialOS needing to know.
+
+### Earlier decision (2026-08-18): a file with `0600` - decided, but never built
+
+**Superseded since 2026-09-25.** The file was never created. Its premise -
+that DialOS itself would speak IMAP/SMTP because Thunderbird cannot be
+controlled from outside - fell away with the DialOS bridge (drafts since
+2026-09-21). The section stays because its arguments against the stick and
+the keyring still hold.
+
 Decided with Stephan on 2026-08-18. Trigger: DialOS reads and writes mail
 directly over IMAP/SMTP, because Thunderbird cannot be controlled from
 outside (see [anwendungen.en.md](anwendungen.en.md)). So DialOS needs the
@@ -251,20 +321,46 @@ day/carrier), so that an intercepted package alone is useless.
 
 ## Logs: what DialOS records about the user
 
-Four programs write logs - command service, dictation, information and notes.
-That is indispensable for debugging and has more than once been the only way to
-find a fault at all. But it also means: **what the user said is on the
-device.** So this is the place to record what sits where, and who can see it.
+Almost every DialOS program writes a log. That is indispensable for debugging
+and has more than once been the only way to find a fault at all. But it also
+means: **what the user said is on the device - and what DialOS read out to
+them.** So this is the place to record what sits where, and who can see it.
+
+**Since 2026-08-22 all program logs live under `~/.log/`** (Stephan's
+request), no longer out in the open in the home directory. Before that, 25
+files lay there between "Notizen", "Dokumente" and "Bilder"; the user does
+not see them, but a sighted helper has to search around them. The leading dot
+hides the folder; it may be deleted, every script recreates it.
+
+**Superseded since 2026-09-25:** this used to say "Four programs write logs -
+command service, dictation, information and notes", and the table gave paths
+directly in the home directory (`~/dialos-….log`). Neither had been true for a
+long time. A fixed number is therefore deliberately no longer given here:
+every program creates its file with its first entry, which files exist on a
+device depends on what has been used - and every new program would have made
+the number wrong again.
 
 | File | Content | Mode | Retention |
 |---|---|---|---|
-| `~/dialos-sprachbefehl.log` | recognized commands | 0600 from the first rotation | **7 days** (logrotate) |
-| `~/dialos-diktat.log` | **every dictated sentence verbatim** | 0600 from the first rotation | **7 days** (logrotate) |
-| `~/dialos-auskunft.log` | questions and answers | 0600 from the first rotation | **7 days** (logrotate) |
-| `~/dialos-notiz.log` | actions, **not** the entries | 0600 from the first rotation | **7 days** (logrotate) |
-| `~/dialos-ton-ausgabe.log` | output device changes | 0600 from the first rotation | **7 days** (logrotate) |
-| `~/dialos-hilfe.log` | remote support on/off, **no** ID, **no** password | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-sprachbefehl.log` | recognized commands, with level | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-say.log` | **every announcement**, truncated to 120 characters | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-diktat.log` | **every dictated sentence verbatim** | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-auskunft.log` | questions and answers | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-notiz.log` | actions, **not** the entries | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-mail-schreiben.log` | recipient and subject, **not** the text | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-mailarchiv.log` | archived mail PDFs; the file names contain date and subject | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-ton-ausgabe.log` | output device changes | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-hilfe.log` | remote support on/off, **no** ID, **no** password | 0600 from the first rotation | **7 days** (logrotate) |
+| `~/.log/dialos-akku.log`, `dialos-update.log`, `dialos-jahreszeit.log`, `dialos-stimme-wechseln.log` | battery warning, update runs, wallpaper changes, voice changes - nothing the user said | 0600 from the first rotation | **7 days** (logrotate) |
 | `~/.local/share/dialos/support/befehle-YYYY-MM-DD.log` | commands + first line of a dictation | **0600** | **7 days**, self-clearing |
+
+**Why `dialos-say.log` truncates** (since 2026-08-24): every announcement is
+in it, so that support can trace what the device said - this has already
+explained faults that would otherwise have stayed invisible. For a read-aloud
+command, though, the announcement is the whole document; untruncated, every
+letter and every mail read out would sit verbatim in the log. The 120-character
+limit is therefore a privacy decision, not a space saving: enough to recognize
+an announcement, not enough to read someone's post.
 
 All of them live in `/home/nutzer` and therefore **inside the encrypted home
 partition** - without the security stick none of them is readable. None leaves
@@ -281,7 +377,7 @@ device actually heard. That is precisely why it is the only one that
 - plus the context as a heading (dictation, shopping list, question to the
   system, later mail and letter).
 
-The reason for the boundary: `~/dialos-diktat.log` contains every dictated
+The reason for the boundary: `~/.log/dialos-diktat.log` contains every dictated
 sentence verbatim - the whole letter. A file meant for an outside helper must
 not contain the user's mail. One line is enough to see **that** something was
 captured and whether it made sense - and without the context even that would be
@@ -301,8 +397,8 @@ Done via `/etc/logrotate.d/dialos`, not inside the programs. Three decisions
 behind that:
 
 - **logrotate instead of self-clearing.** The support log clears itself because
-  `dialos-mitschrift.py` runs anyway while it is written. For six programs that
-  would be the same code six times - and a service running for a week would never
+  `dialos-mitschrift.py` runs anyway while it is written. For six programs (as of
+  2026-08-20; today there are more than ten) that would be the same code six times - and a service running for a week would never
   get round to clearing, because it only looks on startup. logrotate runs daily
   via the systemd timer.
 - **No `copytruncate`.** Verified on 2026-08-20: the programs do **not** hold
@@ -312,11 +408,18 @@ behind that:
 - **`dateext`,** i.e. `dialos-diktat.log-2026-08-20` instead of `.1`. Whoever
   looks during support searches for a day, not a sequence number - the same
   reasoning as for the support log.
+- **One pattern for both accounts:** `/etc/logrotate.d/dialos` rotates
+  `~/.log/dialos-*.log` in `/home/nutzer` and in `/home/dialosadmin`. A new
+  program that logs there is covered without further work.
 
 **Remaining gap, stated honestly:** the programs create a *missing* file with
 0644 (default umask). Only the first rotation sets 0600. Closing that means
-touching `melde()` in six scripts; as long as the logs live inside the encrypted
-home partition, the gain is small.
+touching `melde()` in every script that logs (on 2026-08-20 there were six); as
+long as the logs live inside the encrypted home partition, the gain is small.
+**Re-measured on 2026-09-25** in the freshly built `dialosadmin` account: new
+files are at 0664 (Debian's umask 0002 with a private group per account), the
+`~/.log` folder at 0775. Towards other accounts the home directory itself
+protects - `/home/nutzer` and `/home/dialosadmin` are both at 0700.
 
 ## Remote support (RustDesk)
 
@@ -382,8 +485,11 @@ home partition, the gain is small.
 
 Debian remains the base (no switch to an atomic/immutable system such as
 Fedora Atomic/Silverblue or openSUSE Aeon) — Stephan prioritizes Debian's
-stability, hardware support, and the mature live-build tooling over
-built-in atomic rollback. A rollback safety net would need to be added
+stability and hardware support over built-in atomic rollback. (The
+originally listed reason "mature live-build tooling" no longer applies -
+live-build has not been used since 2026-08-16, see
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), step 16.) A rollback
+safety net would need to be added
 separately via Btrfs snapshots if needed.
 
 ## Screenshots show everything that is open (open, 2026-08-21)

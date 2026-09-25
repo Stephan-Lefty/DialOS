@@ -14,6 +14,15 @@ encryption stick, possibly WWAN telephony), the project moves from "ISO
 for any laptop" towards "ISO + a defined/recommended reference hardware" —
 a concrete model choice (e.g. ThinkPad X1 class) is still open.
 
+**Superseded since 2026-08-16, added here on 2026-09-25:** there is no ISO
+any more, neither for arbitrary laptops nor as a reference ISO. Every device
+is built in the office from a regular Debian 13 installation (see
+[installationsanleitung.md](installationsanleitung.md), German only, and
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md)); a finished device is
+backed up as a Rescuezilla image. The direction of this paragraph still
+holds: DialOS needs defined reference hardware, because microphone,
+Bluetooth audio and standby have to be checked per model.
+
 ## Computer specification for DialOS (as of 2026-09-17)
 
 Stephan on 2026-09-17: an assessment of the laptop hardware needed so that voice
@@ -169,6 +178,20 @@ Why a headset rather than the built-in laptop microphone: the comparison
 test was unambiguous (see [offene-punkte.en.md](offene-punkte.en.md),
 section "Voice control"). The built-in microphone remains intended as a
 not-yet-implemented fallback.
+
+**Superseded since 2026-08-17 (audio ruling, Stephan):** the AIRHUG now
+serves **output** only (A2DP). **Input is always the built-in microphone** -
+the voice services take it via the echo source `dialos_mikrofon_ohne_echo`,
+which itself sits on the built-in microphone. The switch to HFP
+(`headset-head-unit`) above only happens as a **fallback** now, when a
+device has no built-in microphone at all. Reasons: switching back to A2DP
+got stuck three times on 2026-08-17, echo cancellation exists only on the
+built-in path, and the comparison test ran with the built-in microphone
+over-amplified by 60 dB (details further down under "What remains" and in
+[offene-punkte.en.md](offene-punkte.en.md)). For other programs the raw
+built-in microphone deliberately stays the default microphone
+(Firefox/Jitsi cancel echo themselves; Stephan's decision of 2026-09-25).
+The paragraph above stays as the state of 2026-08-16.
 
 **Mandatory rule (Stephan, 2026-08-16): the fallback to the built-in
 speakers and microphone must always be guaranteed.** A switched-off,
@@ -492,7 +515,19 @@ call case.
 ## Current test hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – no WWAN/LTE module fitted.
-- **Audio**: AIRHUG 01 (see above) – reference device since 2026-08-16.
+- **Audio**: AIRHUG 01 (see above) – reference device since 2026-08-16,
+  **output only since 2026-08-17**.
+- **Microphone**: the T490's built-in one, via the echo source
+  `dialos_mikrofon_ohne_echo` - this is the input for all voice services.
+- **USB desk microphone TONOR TC30** - **test hardware, not a standard.**
+  Measured on the test bench since 2026-09-15 (see
+  [pruefstand.en.md](pruefstand.en.md)): for letter dictation with the TV
+  running it keeps Parakeet at **4.2 %** word errors, while the built-in
+  microphone drops to **9.9 %**; without interference both are on a par.
+  Commands are hardly disturbed by the TV with either. Against it so far:
+  no echo cancellation on this path (Anna's announcements reached the
+  command service through it) and clipping at 100 % gain. It is a measuring tool for the question of an external
+  microphone, not a decision for one.
 - **Input devices**: Logitech Pebble M350s (mouse) and Pebble K380s
   (keyboard), both over Bluetooth. Their battery level is read out by the
   startup announcement – but only for administrator accounts; `nutzer`

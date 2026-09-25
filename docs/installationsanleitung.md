@@ -236,11 +236,13 @@ cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
 
 Das Skript legt den Symlink `~/DialOS`, trägt Name und E-Mail für Git ein, schaltet den Zugangsdaten-Speicher an und trägt die externe Platte in `/etc/fstab` ein, damit sie nach jedem Start da ist (seit 25.09.2026). Beim **ersten** `git push` fragt Git einmalig nach Benutzername und Token; danach merkt es sich beides.
 
+> **Nur für das Entwicklungsgerät.** `dialos-claude-setup.sh` richtet die Arbeitsumgebung für Claude ein - Git-Zugang, Symlink, externe Platte. Ein Kundengerät bekommt diesen Schritt nicht.
+
 > **Die Verbindungen der App selbst - Ordner-Connector und GitHub-Integration - lassen sich nicht sichern.** Es gibt dafür keinen Wiederherstellungsweg, weder per Skript noch in der App. Sie werden nach jeder Neuinstallation neu eingerichtet; deshalb steht Schritt 3 hier so ausführlich.
 
 ---
 
-# Teil 4: DialOS aufbauen - drei Befehle
+# Teil 4: DialOS aufbauen - drei Befehle, dann Aufräumen
 
 Die Reihenfolge und das `sudo` sind nicht beliebig. Der erste Befehl richtet Dateien im Heimatverzeichnis ein, der zweite braucht die grafische Umgebung für seine Dialoge - beide laufen deshalb **ohne** `sudo`.
 
@@ -250,7 +252,7 @@ Die Reihenfolge und das `sudo` sind nicht beliebig. Der erste Befehl richtet Dat
 cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && ./scripts/dialos-full-office-setup.sh
 ```
 
-Das dauert am längsten: Pakete, Branding, Autologin, Piper-Sprachausgabe, GNOME-Erweiterungen, Vosk, Parakeet, LanguageTool - und seit dem 25.09.2026 als **Schritt 16** das Aufspielen aller DialOS-Dateien über `dialos-aufspielen`, das Einschalten der Dienste für **alle** Konten und den Bau der Thunderbird-Erweiterung.
+Das dauert am längsten: Pakete, Branding, Autologin, Piper-Sprachausgabe, GNOME-Erweiterungen, Vosk, Parakeet, LanguageTool - und seit dem 25.09.2026 als **Schritt 16** das Aufspielen aller DialOS-Dateien über `dialos-aufspielen`, das Einschalten der Dienste für **alle** Konten, den Bau der Thunderbird-Erweiterung und als **16e** die Auslieferungsstimme Anna.
 
 ## 4.2 Verschlüsseltes Heimatverzeichnis (ohne sudo, Stick stecken)
 
@@ -274,6 +276,39 @@ sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
 
 Legt `nutzer` an, richtet das Autologin ein, setzt den Frageton für `nutzer`, öffnet die Maske für die persönlichen Daten und prüft am Ende selbst nach, ob Gerät und Repository übereinstimmen und im Nutzerkonto nichts fehlt.
 
+## 4.4 Aufräumen: was Debian mitbringt und DialOS nicht braucht
+
+Spiele, doppelte Programme, Sprachpakete. Das Skript schützt vorher den Desktop und den Ton-Unterbau, damit ein späteres `apt autoremove` sie nicht mitnimmt - erst danach wird entfernt. **Zuerst nur ansehen**, was weg soll:
+
+```bash
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && ./scripts/dialos-aufraeumen.sh
+```
+
+Steht in der Liste nichts, was bleiben soll, dann ausführen:
+
+```bash
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
+  && sudo ./scripts/dialos-aufraeumen.sh --wirklich
+```
+
+Am Ende zeigt es, was ein `apt autoremove` anbieten würde - **nicht** ausführen, ohne die Liste gelesen zu haben.
+
+## 4.5 Menü pro Konto
+
+Im Konto `nutzer` bleiben nur die DialOS-Programme im Menü - für den sehenden Helfer, der neben dem Nutzer sitzt und nicht suchen soll. `dialosadmin` sieht weiterhin alles. Erst nach 4.4, weil es ausblendet, was das Aufräumen stehen ließ. Wieder zuerst ansehen, dann ausführen:
+
+```bash
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
+  && ./scripts/dialos-menue-pro-konto.sh
+```
+
+```bash
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
+  && sudo ./scripts/dialos-menue-pro-konto.sh --wirklich
+```
+
+> **4.4 und 4.5 fehlten bis zum 25.09.2026 in dieser Anleitung** - beim Neuaufbau an dem Tag fielen beide aus, obwohl sie seit dem 19.08.2026 zum Aufbau gehören. Sie stehen bewusst nicht im Abschluss-Skript: Das Entfernen von Paketen soll eine Handlung mit Blick auf die Liste bleiben (Stephans Entscheidung, 25.09.2026).
+
 Danach **einmal neu starten**.
 
 ---
@@ -285,7 +320,7 @@ Alles hier braucht Zugangsdaten oder ein Urteil - beides kann kein Skript liefer
 - **Persönliche Daten** für beide Konten in der Maske ausfüllen: Name, Anschrift, Telefon, E-Mail, Ort fürs Wetter. Ohne sie hat der Brief keinen Absender und das Wetter keinen Ort.
 - **Das Mailkonto in derselben Maske** (seit 25.09.2026): Abschnitt „E-Mail-Konto" und das Feld „Mail-Passwort" ausfüllen, dann **Speichern** - DialOS legt das Konto in Thunderbird an, mit Passwort, Brücke und Signatur. Thunderbird muss dabei geschlossen sein. Bei bekannten Anbietern genügt die Mailadresse; bei einer eigenen Domain die Server aus dem Kundenbereich des Hosters eintragen. Für das Konto `nutzer` oben in der Maske `nutzer` wählen. Thunderbird von Hand einzurichten ist nicht mehr nötig.
 - **Mikrofon nicht umstellen**: In den Einstellungen steht als Eingabegerät das eingebaute Mikrofon, nicht „Mikrofon ohne Echo". Das ist Absicht - DialOS nimmt die Echo-Quelle selbst, und Videoanrufe klängen mit ihr verwaschen.
-- **Stimme wählen**: Michael oder Anna, mit `Strg`+`Alt`+`S` umschalten. Die Wahl bleibt beim Aufspielen unangetastet.
+- **Stimme wählen**: Ausgeliefert wird Anna (Schritt 16e). Umschalten auf Michael und zurück im Admin-Konto mit `Strg`+`Alt`+`S`, in jedem Konto mit `sudo dialos-stimme.py setzen thorsten` bzw. `kerstin`. Die Wahl gilt für das ganze Gerät und bleibt beim Aufspielen unangetastet.
 - **Bluetooth-Lautsprecher** koppeln, falls verwendet.
 - **GitHub-Token** beim ersten `git push` eintippen (siehe Teil 3).
 

@@ -5,7 +5,23 @@
 Wie ein Programm zu DialOS dazukommt, ohne dass am Kern etwas geändert
 werden muss.
 
-> **Stand am 2026-09-18: gebaut und am Gerät belegt.** Die Schnittstelle steht
+> **Stand am 2026-09-25: zwei Erweiterungen, dazu die Brücke zu Thunderbird.**
+>
+> - **DialOS-Suche** („Unterlagen durchsuchen") - seit 2026-09-18 gebaut und
+>   am Gerät erprobt, im Postfach und in den Dokumenten (Einzelheiten im
+>   Kasten darunter).
+> - **DialOS-Mail** („Neue E-Mail schreiben", `dialos-mail-schreiben.py`) -
+>   seit 2026-09-21 gebaut, am 2026-09-25 am Gerät vom Empfänger bis zum
+>   Entwurf durchgelaufen. Siehe „Die zweite Erweiterung: DialOS-Mail" am Ende.
+> - **Die DialOS-Brücke** ist die Schnittstelle zu Thunderbird, über die beide
+>   Entwürfe ablegen, senden und Kontakte eintragen. Sie ist eine Erweiterung
+>   *von Thunderbird*, keine von DialOS - siehe „Die Thunderbird-Brücke" am
+>   Ende.
+>
+> Aufgaben in [TODO.md](../TODO.md), Einzelheiten im Änderungsprotokoll unter
+> 0.5.2.
+>
+> **Früherer Stand am 2026-09-18: gebaut und am Gerät belegt.** Die Schnittstelle steht
 > (Manifest, `dialos-erweiterung.py`, Startsatz in der Kern-Grammatik,
 > Mikrofon-Übergabe mit Wache), und **DialOS-Suche läuft**: Index über Briefe,
 > Notizen, Ablage und Thunderbird-Mails, Sprachdialog mit Eingrenzen bis zu einer
@@ -551,7 +567,8 @@ die Antwort gemessen werden muss:
 
 Zweck: Briefe, Dokumente, Notizen und E-Mails per Sprache suchen und
 vorlesen. Die Programmwahl steht in [anwendungen.md](anwendungen.md), die
-vorgesehenen Sätze in [sprachbefehle.md](sprachbefehle.md), die Aufgaben
+Sätze in [sprachbefehle.md](sprachbefehle.md) (seit 2026-09-18 unter
+„Umgesetzt", davor unter „Vorgesehen"), die Aufgaben
 in [TODO.md](../TODO.md).
 
 **Von MailBurg wird die Extraktionskette geteilt, nicht das Programm**
@@ -609,3 +626,77 @@ mitbestimmt haben:
   Die 144 Sekunden der Befehlsübersicht sind heute schon ein offener Punkt,
   und sie gehören keiner Erweiterung. Wer die Unterbrechbarkeit für das
   Archiv baut, löst sie für alles mit.
+
+## Die zweite Erweiterung: DialOS-Mail
+
+Seit 2026-09-21 (Stephan: „Dann müssen wir ja bei einer neuen Mail die
+Mailadresse, den Betreff und den Text noch hin bekommen und dann auch die Mail
+verschicken!"). **Am 2026-09-25 am Gerät durchgelaufen**, vom Empfänger bis zum
+Entwurf.
+
+- **Manifest:** `/usr/local/share/dialos/erweiterungen/dialos-mail.json`,
+  Startsätze „neue e mail schreiben" und „e mail schreiben", eigene Grammatik
+  „ja", „nein", „vorlesen", „abbrechen". Programm:
+  `dialos-mail-schreiben.py`.
+- **Der Dialog:** Empfänger aus den Thunderbird-Kontakten oder buchstabiert →
+  Betreff → Text diktieren wie im Brief → nur die **Eckdaten** („3 Sätze an …,
+  Betreff …"), der ganze Text auf Zuruf. Bei allem außer einem klaren „ja"
+  wird **abgelegt statt gesendet**. Die Sätze im Einzelnen stehen in
+  [sprachbefehle.md](sprachbefehle.md).
+- **Nichts davon ist neu geschrieben:** Empfängerdialog, Diktat und
+  Rückfragen kommen aus DialOS-Suche (`dialos-suche.py`). Die zweite
+  Erweiterung ist damit zum größten Teil aus Bausteinen der ersten
+  zusammengesetzt - ein zweiter Empfängerdialog hätte beim nächsten Fehler
+  zweimal repariert werden müssen.
+- **Geschrieben wird nur durch Thunderbird selbst**, über die Brücke
+  (nächster Abschnitt). Senden ist gebaut, am Gerät aber noch nicht geprobt
+  (Stand 2026-09-25: bei der Frage wurde bisher immer „nein" gesagt).
+
+## Die Thunderbird-Brücke
+
+**Keine Erweiterung im Sinne dieser Datei, obwohl beide so heißen.** Die
+DialOS-Brücke ist eine *MailExtension für Thunderbird*: Sie hat kein
+DialOS-Manifest, keine Grammatik und kein Mikrofon. Sie steht hier, weil
+beide Erweiterungen über sie mit Thunderbird sprechen - und weil
+[anwendungen.md](anwendungen.md) seit dem 2026-09-21 auf diese Datei verweist,
+hier aber bis zum 2026-09-25 nichts darüber stand.
+
+**Warum es sie gibt** (seit 2026-09-21): DialOS hatte vorher selbst in
+Thunderbirds Dateien geschrieben - Entwürfe in die mbox, Kontakte in
+`abook.sqlite`. Jeder dieser Wege hat einen Fehler erzeugt (LF statt CR LF,
+`X-Mozilla-Status: 0008` heißt GELÖSCHT). Dreimal dasselbe Muster: in fremde
+Dateiformate schreiben, statt das Programm zu fragen, dem sie gehören. Seitdem
+gilt: *Lesen darf man von außen, Schreiben nicht.*
+
+| Teil | Wo |
+|---|---|
+| Quelltext der MailExtension (`manifest.json`, `hintergrund.js`) | Ordner `thunderbird-erweiterung/` im Repo |
+| Kennung | `bruecke@dialos.org` |
+| Gepackte `.xpi` | `/usr/local/share/dialos/dialos-bruecke.xpi`, gebaut von `sudo scripts/dialos-erweiterung-bauen.sh` |
+| Einbau in jedes Profil | `/usr/lib/thunderbird/distribution/policies.json`, `force_installed` |
+| Gegenstelle auf DialOS-Seite (Native Messaging) | `dialos-thunderbird-bruecke.py`, angemeldet über `/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json` |
+
+**Was sie kann:** Entwürfe im Entwurfsordner des *Kontos* ablegen (der wird
+zum Server hochgeladen, anders als die lokalen Ordner), senden, Kontakte
+anlegen, offene Schreibfenster vor dem Schließen als Entwurf sichern und
+liegende Entwürfe auflisten. Ist Thunderbird zu, merkt DialOS einen Entwurf
+vor, und die Brücke holt ihn nach, sobald Thunderbird sie startet.
+**Noch offen:** Der Empfänger-Dialog des Briefs trägt Kontakte weiter selbst
+in `abook.sqlite` ein; die Brücke kann es, das Umhängen fehlt (`TODO.md`).
+
+**Drei Entscheidungen und ihr Grund:**
+
+- **Die `.xpi` liegt nicht im Repo.** Sie wäre eine zweite Fassung derselben
+  zwei Dateien - und die erste, die vergessen wird, wenn jemand
+  `hintergrund.js` ändert. Dann liefe auf dem Gerät eine andere Erweiterung,
+  als im Repo steht, und niemand sähe es. Nach jeder Änderung die Fassung in
+  `manifest.json` hochzählen, sonst nimmt Thunderbird die neue Datei nicht an.
+- **`force_installed` über `policies.json`, nicht von Hand.** Am 2026-09-21
+  war die Erweiterung zuerst von Hand installiert - und damit nur im Profil
+  von `dialosadmin`. Im Konto des Kunden wäre ein ganzer Tag Arbeit
+  wirkungslos gewesen, ohne jede Fehlermeldung. `force_installed` greift auch
+  in vorhandenen Profilen, entsteht mit jedem neuen und lässt sich nicht
+  versehentlich entfernen.
+- **Unsigniert ist in Ordnung**, weil Debians Thunderbird
+  `xpinstall.signatures.required` auf `false` hat. Bei einem Thunderbird von
+  Mozilla wäre das anders.

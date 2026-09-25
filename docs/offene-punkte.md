@@ -64,12 +64,28 @@ Zeitpunkt: **wenn Forky eingefroren ist.**
   mindestens 12 Zeichen) – ob das die
   endgültige Lösung sein soll (vs. Ersatz-Stick vs. kein Recovery) ist
   noch nicht final entschieden.
-- Wie sudo/Admin-Rechte für den Standard-Benutzer ("nutzer") gehandhabt
-  werden sollen, ist noch offen: normales Passwort (sicherer, aber die
-  sprachgesteuerte Wartung muss das dann gezielt umgehen), auf einzelne
-  Wartungsbefehle beschränktes passwortloses sudo, oder komplett
-  passwortlos. Aktuell wird pro Build ein zufälliges Passwort erzeugt
-  (nicht im Repo hinterlegt) statt eines festen Platzhalters.
+- **sudo für den Standard-Benutzer `nutzer`: Der Zustand ist nicht offen,
+  sondern VOLLER ADMINISTRATOR** (Stand 2026-09-25). `nutzer` steckt in der
+  Gruppe `sudo`, `sudo -l -U nutzer` meldet `(ALL : ALL) ALL` (nachgesehen am
+  2026-09-14). Das Passwort wird bei der Einrichtung zufällig erzeugt, aber
+  `dialos-buero-setup-abschliessen.sh` **gibt es im Terminal aus** - beim
+  Neuaufbau am 2026-09-25 stand es dadurch im Chat mit Claude. Geheim ist es
+  damit nicht: Wer es gesehen hat oder neu setzt, hat root auf dem Gerät
+  eines Nutzers, der das nicht bemerken kann. Die sprachgesteuerten
+  Wartungsaufrufe brauchen die Gruppe nach bisherigem Stand nicht, weil sie
+  über enge NOPASSWD-Regeln auf feste Pfade laufen. Was vor einer Änderung zu
+  klären ist (woher die Mitgliedschaft kommt, welche Gruppen `nutzer` wirklich
+  braucht, Gegenprobe), steht in `TODO.md`, Punkt „Das Kundenkonto `nutzer`
+  hat volle Root-Rechte".
+
+  **Frühere Fassung (bis 2026-09-25, überholt):** „Wie sudo/Admin-Rechte für
+  den Standard-Benutzer gehandhabt werden sollen, ist noch offen: normales
+  Passwort, auf einzelne Wartungsbefehle beschränktes passwortloses sudo, oder
+  komplett passwortlos. Aktuell wird pro Build ein zufälliges Passwort erzeugt
+  (nicht im Repo hinterlegt) statt eines festen Platzhalters." - „offen"
+  verschleierte, dass faktisch schon volle Rechte bestanden, und „pro Build"
+  stammt aus der Zeit der ISO-Builds, die es seit 2026-08-16 nicht mehr gibt.
+  Die drei Varianten bleiben als Entscheidungsvorlage gültig.
 - Eigener RustDesk-Relay-Server (hbbs/hbbr) ist für später geplant, sobald
   das System stabil läuft – noch kein konkreter Zeitpunkt/Ablauf.
 - Boot-Zeit-Tastenkombination für direkten `dialosadmin`-Zugriff (statt
@@ -140,10 +156,25 @@ Zeitpunkt: **wenn Forky eingefroren ist.**
 
   **Stand der Umsetzung (korrigiert am 2026-08-16 - hier stand vorher
   fälschlich "nicht implementiert"):**
-  - **Mikrofon: umgesetzt.** `waehle_mikrofon_fuer_lautstaerke()` in
+  - **Mikrofon: umgesetzt.** ~~`waehle_mikrofon_fuer_lautstaerke()` in
     `dialos-start-ansage.py` nimmt eine `bluez_input.`-Quelle, wenn eine
     da ist, sonst die erste Nicht-Monitor-Quelle - also das eingebaute
-    Mikrofon.
+    Mikrofon.~~ **Überholt seit 2026-08-17** (hier erst am 2026-09-25
+    nachgetragen): Die Reihenfolge ist umgedreht. Die Sprachdienste wählen
+    ihr Mikrofon selbst, in dieser Reihenfolge: (1) die Echo-Quelle
+    `dialos_mikrofon_ohne_echo`, die selbst am eingebauten Mikrofon hängt,
+    (2) das eingebaute Mikrofon, (3) Bluetooth **nur**, wenn es gar kein
+    eingebautes gibt. Das Umschalten des AIRHUG auf HFP kommt damit nur noch
+    in diesem Rückfall vor.
+  - **Standard-Mikrofon für alle anderen Programme bleibt bewusst das rohe
+    eingebaute** (Stephans Entscheidung, 2026-09-25). Firefox und damit
+    Jitsi haben eine eigene Echo-Unterdrückung; mit der bereinigten Quelle
+    liefe sie doppelt, und die Gegenseite hörte verwaschene Sprache. Am
+    2026-09-25 war die Echo-Quelle für einige Stunden per
+    `priority.session = 2500` Standard und wurde am selben Abend
+    zurückgenommen (Einzelheiten in
+    [Debian-zu-DialOS.md](Debian-zu-DialOS.md) und
+    [anwendungen.md](anwendungen.md)).
   - **Lautsprecher: implizit umgesetzt.** `spd-say` spricht über
     Speech-Dispatchers Standard-Senke; verschwindet das
     Bluetooth-Gerät, zieht PipeWire die Standard-Senke selbst auf die
@@ -157,6 +188,11 @@ Zeitpunkt: **wenn Forky eingefroren ist.**
     (`sudo rm /home/nutzer/.config/dialos/lautstaerke`) und sich bei
     ausgeschaltetem Headset als `nutzer` anmeldet: Dann kommt die Frage
     erneut und muss über das eingebaute Mikrofon verstanden werden.
+    **Erledigt durch die Umstellung vom 2026-08-17** (nachgetragen
+    2026-09-25): Seitdem hört DialOS immer über das eingebaute Mikrofon,
+    auch wenn der Lautsprecher verbunden ist. Der Weg, der hier als
+    ungetestet stand, ist damit der tägliche und seither in jeder Sitzung
+    benutzt.
 
   **Nicht abgedeckt und schwieriger:** ein Gerät, das *verbunden* ist,
   aber nichts überträgt (fast leerer Akku, Funkstörung). Dann greift kein

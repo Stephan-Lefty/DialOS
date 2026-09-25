@@ -179,6 +179,13 @@ es" (3x), "wie viel" (2x). That fits finding 2.
 The user account is untouched by all switches: Vosk, built-in microphone, no
 recording.
 
+> **Superseded since 2026-09-16: the `parakeet-test` switch.** Parakeet has been
+> built in for good since that day and is on by default for all accounts - for
+> `nutzer` too, so the sentence above no longer holds for text recognition. The
+> switch file `parakeet-test` no longer has any effect; today it is switched off
+> with `~/.config/dialos/parakeet-aus` (see the switch table above). The table
+> stays as the state of the evening of 2026-09-15.
+
 ## 8. Order for Wednesday
 
 **State 2026-09-16:** items 1 and 2 built, simulated and installed. First test

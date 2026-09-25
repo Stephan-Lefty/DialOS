@@ -195,8 +195,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Update-Automatik. Am wichtigsten sind `websockets` und `yaml`: genau die
     Sorte Bibliothek, in der Sicherheitslücken auftauchen. **Vorher prüfen:**
     Debians Fassung kann eine andere sein als die per pip installierte -
-    `hassil` baut unsere Grammatik, also nach dem Umstellen
-    `dialos-grammatik-pruefen.py` laufen lassen und den Prüfstand. Die
+    nach dem Umstellen `dialos-grammatik-pruefen.py` laufen lassen und den
+    Prüfstand. **Berichtigt 2026-09-25:** Hier stand „`hassil` baut unsere
+    Grammatik" - das stimmt nicht. hassil wird in Schritt 15 installiert, aber
+    kein DialOS-Programm importiert es (nachgesehen in `/usr/local/bin` und
+    `scripts/`); die Grammatik baut DialOS selbst. hassil ist damit ein
+    Kandidat zum Weglassen - Stephan entscheidet. Die
     pip-Fassungen erst entfernen, wenn das besteht (sonst überdeckt pip die
     Debian-Fassung still, weil `/usr/local` vorn im Suchpfad steht).
   - [ ] **2. Festhalten, aber beobachten:** `vosk`, `sherpa_onnx`, Piper,
@@ -2080,14 +2084,18 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Ausgang, schlimmer als eine Fehlermeldung. Die Einzahl ist jetzt
     zweite Formulierung. Der allgemeine Fall bleibt offen: erlaubte
     Wortkombinationen, die keinen Befehl ergeben, fallen still durch.
-  - [ ] **Radio und Musik per Sprache** - Shortwave nach Stationsname,
-    Rhythmbox über `rhythmbox-client`. Dabei die Ein-Player-Regel
-    umsetzen: das eine beenden, bevor das andere startet.
+  - [ ] **Radio und Musik per Sprache** - **entschieden am 2026-09-25
+    (Stephan): beides über Rhythmbox.** DialOS sucht den Sender selbst in
+    radio-browser.info, Rhythmbox spielt per `rhythmbox-client --play-uri`.
+    Shortwave hat keine Schnittstelle, um einen Sender vorzugeben (per MPRIS
+    nur Abspielen/Pause des zuletzt gehörten). Damit gibt es nur noch EINEN
+    Player, und die Ein-Player-Regel erledigt sich. Nächstes Bauvorhaben.
   - [ ] **Merkposition für Podcasts und Hörbücher** - Rhythmbox liefert
     sie nicht (geprüft: kein `playback-position`, kein `bookmark`). DialOS
     liest und setzt sie über MPRIS und muss sie ansagen können.
   - [ ] **Post einscannen und vorlesen** - `tesseract-ocr` (5.5.0)
-    nachinstallieren, simple-scan/sane/CUPS sind da.
+    nachinstallieren, `sane-utils` (`scanimage`) und CUPS sind da. `simple-scan`
+    ist seit dem Aufräumen am 2026-09-25 bewusst entfernt (Stephan).
   - [ ] **Wecker, Timer, Erinnerungen.**
   - [ ] **Rechner ausschalten und sperren per Sprache**; **Termine und
     Wetter ansagen** (Thunderbird bzw. die vorhandene Wetterabfrage).

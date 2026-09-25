@@ -58,6 +58,7 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Notizen drucken"** / **„Notiz drucken"** | Dasselbe für die Sammelnotiz. Die Einzahl gilt seit dem 2026-08-22 mit: Vosk hatte beim ersten Nachtest „notiz drucken" verstanden, und weil beide Wörter in der Grammatik stehen, war das eine erlaubte, aber befehlslose Kombination - der Befehl fiel **lautlos** durch, ohne jede Rückmeldung. |
 | **„von vorne"** *(nur im Diktat von Brief und Notiz)* | Fragt „Soll ich alles bisher Diktierte verwerfen und von vorne beginnen?" - bei ja beginnt der Text neu, ein Empfänger bleibt. Seit 2026-09-17. Im Empfänger-Dialog beginnt „von vorne" den Dialog neu. |
 | **„alles verwerfen"** *(nur im Diktat von Brief und Notiz)* | Fragt „Soll ich alles verwerfen? Es wird nichts gespeichert." - bei ja endet das Diktat ohne Datei. Bewusst nicht „Diktat abbrechen": klingt wie „Diktat beenden". Im Empfänger-Dialog: „abbrechen". |
+| **„Unterlagen durchsuchen"** | Startsatz der Erweiterung **DialOS-Suche** - gebaut seit 2026-09-18 und am Gerät erprobt, im Postfach und in den Dokumenten. Fragt zuerst, wo gesucht werden soll (Dokumente, Postfach, Bilder, Videos), dann „Wonach soll ich in den Dokumenten suchen? Sage einen Begriff." Danach grenzt sie Schritt für Schritt ein (Art, Person, Jahr, Monat, weitere Wörter), nennt bei Bedarf die drei neuesten Treffer und fragt: vorlesen, drucken, bei einer E-Mail auch antworten oder weiterleiten. Nach jeder Aktion: „Noch etwas damit?" Bilder und Videos sagen ehrlich, dass sie sich noch nicht durchsuchen lassen. Der Startsatz wurde am 2026-09-17 am Gerät gegen die ganze Grammatik geprüft: alle Sätze wörtlich erkannt, kein bestehender Befehl geht durch ihn kaputt (`/usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). Bis zum 2026-09-18 stand er unter „Vorgesehen". |
 | **„Mailadresse buchstabieren"** *(nur im Diktat von Brief und Notiz)* | Buchstabieralphabet plus „at", „Punkt", „Minus", „Unterstrich" und Ziffern, Ende mit „fertig", Rückfrage Zeichen für Zeichen - die Adresse kommt ans Textende. Seit 2026-09-17. Im Satz wirken außerdem **„meine Mailadresse"** (E-Mail aus den persönlichen Daten) und **„Mailadresse von …"** (E-Mail aus den Thunderbird-Kontakten). |
 | **„Einkaufszettel vorlesen"** | Sagt die Anzahl der Einträge und liest sie vor, mit Pausen dazwischen. |
 | **„Notizen vorlesen"** | Dasselbe für die Sammelnotiz. |
@@ -74,11 +75,11 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Kontakte öffnen"** | Öffnet Thunderbirds Adressbuch (`-addressbook`). |
 | **„Internet öffnen"** / **„Browser öffnen"** | Öffnet Firefox ESR. |
 | **„Musik öffnen"** | Öffnet Rhythmbox. |
-| **„Radio öffnen"** | Öffnet Shortwave. |
+| **„Radio öffnen"** | Öffnet Shortwave. **Künftig Rhythmbox** - Stephans Entscheidung vom 2026-09-25, noch nicht gebaut (siehe die Anmerkung unter „Vorgesehen" und [anwendungen.md](anwendungen.md)). |
 | **„Postfach schließen"** | **Mit Rückfrage:** „Soll ich das Postfach schließen? Sage ja oder nein." **Vorher werden angefangene E-Mails gesichert** - DialOS fragt die Brücke, was an Schreibfenstern offen steht, lässt Thunderbird sie als Entwurf ablegen und sagt es an („Eine angefangene E-Mail lege ich noch als Entwurf ab."). Das ist die Antwort auf eine Messung vom 2026-09-21: **Thunderbird fragt bei `SIGTERM` nicht nach** - es geht nach einer Sekunde zu, und ungespeicherter Text ist lautlos weg (der Entwurfsordner wuchs um kein Byte). Lässt sich etwas nicht sichern, bleibt das Postfach offen. Danach erst `SIGTERM`, nie `SIGKILL`. Läuft es gar nicht: „Das Postfach ist gar nicht offen." |
 | **„Internet schließen"** / **„Browser schließen"** | Dasselbe für Firefox. |
 | **„Musik ausschalten"** | Dasselbe für Rhythmbox - „ausschalten" statt „schließen", weil Musik läuft und nicht offen steht. |
-| **„Radio ausschalten"** | Dasselbe für Shortwave. |
+| **„Radio ausschalten"** | Dasselbe für Shortwave. Nach dem Wechsel zu Rhythmbox (entschieden am 2026-09-25, noch nicht gebaut) gilt es für Rhythmbox. |
 
 > **Programme öffnen (seit 2026-09-21).** Stephans Anstoß: „Wir müssen doch
 > sowieso eine Liste von Befehlen machen, die dann die Programme startet."
@@ -162,9 +163,29 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | Sprachbefehl | Aktion |
 |---|---|
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
-| „Radio hören" / „Musik hören" | Startet Shortwave bzw. Rhythmbox. |
+| „Radio hören" / „Musik hören" | Spielt einen gesprochenen Sender bzw. Musik ab - **beides künftig über Rhythmbox** (siehe unten). Bis zum 2026-09-25 stand hier: „Startet Shortwave bzw. Rhythmbox." |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |
-| **„Unterlagen durchsuchen"** | Startsatz der Erweiterung **DialOS-Suche** - Briefe, Dokumente, Notizen und Mails finden und vorlesen. **Am 2026-09-17 am Gerät geprüft und bestanden:** alle Sätze wörtlich erkannt, kein bestehender Befehl geht durch ihn kaputt (`/usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). Der Test mit echter Stimme bleibt der Abschluss. |
+
+**„Unterlagen durchsuchen" stand hier bis zum 2026-09-18.** Seitdem ist die
+Erweiterung DialOS-Suche gebaut und am Gerät erprobt; der Satz steht jetzt
+oben unter „Umgesetzt". Die zwei Abschnitte darunter bleiben, weil sie
+begründen, warum der Satz so heißt und warum er allein steht.
+
+> **Radio und Musik: geänderte Entscheidung vom 2026-09-25 (Stephan).** Radio
+> soll künftig **über Rhythmbox** laufen, nicht über Shortwave: DialOS sucht
+> den gesprochenen Sender selbst in der Datenbank von radio-browser.info
+> (dieselbe, die Shortwave benutzt), und Rhythmbox spielt ihn per
+> `rhythmbox-client --play-uri`. **Warum:** Shortwave hat keine Kommandozeile
+> und keine Schnittstelle, über die sich ein Sender vorgeben ließe - per MPRIS
+> gibt es nur Abspielen/Pause des zuletzt gehörten. Damit bleibt ein einziger
+> Player für Radio, Musik, Podcasts und Hörbücher, und „lauter" oder „stopp"
+> meint immer dasselbe Programm. Begründung vollständig in
+> [anwendungen.md](anwendungen.md).
+>
+> **Noch nicht gebaut.** Heute gilt: „Radio öffnen" öffnet Shortwave, „Musik
+> öffnen" Rhythmbox (beides öffnet nur das Programm und gibt keinen Sender und keinen Titel vor), und
+> „Radio einschalten" / „Musik abspielen" antworten „Radio und Musik kann ich
+> noch nicht abspielen." (siehe „Rückfall-Antworten" unten).
 
 ### Warum „Unterlagen durchsuchen" und nicht „Briefe durchsuchen"
 
@@ -444,7 +465,7 @@ geben!" Seine Wahl: alle vier Wege, der vierte später.
 | **„Befehle für Fragen"**, **„… für Briefe"**, **„… für Notizen"**, **„… für den Einkauf"**, **„… für den Bildschirm"**, **„… für das Diktat"** | Nur dieses Thema, 16 bis 28 Sekunden. „Für das Diktat" nennt die Befehle IM Diktat (Absatz, neue Zeile, Satz löschen, Satz wiederholen, Betreff, Diktat beenden) - geholt aus dialos-diktat.py. Alle sieben Sätze im Wortschatz und gegen Piper geprüft (49 von 49 wörtlich). |
 | **„Wie ist das Wetter"**, **„Wie wird das Wetter"** | Menschlich statt Wetterbericht (Stephans Beispiel: „Heute wird es regnen bei 15 Grad. Denke an einen Regenschirm, wenn Du raus gehst!"): eine Wetterart für den Rest des Tages oder die erste Änderung, die Spanne der Temperatur, ein passender Tipp, **immer mit Ort**. Standort gemessen, sonst der **Rückfall-Ort** aus `~/.config/dialos/wetter-ort` (nur auf dem Gerät, später aus den Kundendaten). Ohne Ort: „Für das Wetter fehlt mir Dein Wohnort." Die Begrüßung nutzt dieselbe Fassung. |
 | „Nachrichten vorlesen", „Was gibt es Neues" | „Nachrichten kann ich noch nicht vorlesen." |
-| „Radio einschalten", „Musik abspielen" | „Radio und Musik kann ich noch nicht abspielen." |
+| „Radio einschalten", „Musik abspielen" | „Radio und Musik kann ich noch nicht abspielen." (Stand 2026-09-25 unverändert; künftig beides über Rhythmbox, siehe „Vorgesehen" oben.) |
 | „Jemanden anrufen" | „Telefonieren kann ich noch nicht." |
 | „Mails vorlesen" | „E-Mails kann ich noch nicht vorlesen." |
 | „Termine vorlesen", „Was steht heute an" | „Termine kann ich noch nicht vorlesen." |

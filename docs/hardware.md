@@ -15,6 +15,15 @@ Verschlüsselungs-Stick, ggf. WWAN-Telefonie) bewegt sich das Projekt von
 Referenz-Hardware" – eine konkrete Modellfestlegung (z. B. ThinkPad-X1-Klasse)
 steht noch aus.
 
+**Überholt seit 2026-08-16, hier nachgetragen am 2026-09-25:** Eine ISO gibt es
+nicht mehr, weder für beliebige Laptops noch als Referenz-ISO. Jedes Gerät wird
+im Büro aus einer regulären Debian-13-Installation aufgebaut (siehe
+[installationsanleitung.md](installationsanleitung.md) und
+[Debian-zu-DialOS.md](Debian-zu-DialOS.md)), gesichert wird ein fertiges Gerät
+als Rescuezilla-Abbild. Die Richtung des Absatzes gilt trotzdem weiter: DialOS
+braucht definierte Referenz-Hardware, weil Mikrofon, Bluetooth-Audio und Standby
+je Modell geprüft sein müssen.
+
 ## Rechnerausstattung für DialOS (Stand 2026-09-17)
 
 Stephan am 2026-09-17: eine Einschätzung, „wie die Hardwareausstattung bei einem
@@ -172,6 +181,21 @@ Warum ein Headset und nicht das eingebaute Laptop-Mikrofon: Der
 Vergleichstest fiel eindeutig aus (siehe
 [offene-punkte.md](offene-punkte.md), Abschnitt "Sprachsteuerung"). Das
 eingebaute Mikrofon bleibt als noch nicht umgesetzter Rückfall gedacht.
+
+**Überholt seit 2026-08-17 (Audio-Festlegung, Stephan):** Der AIRHUG dient
+nur noch der **Ausgabe** (A2DP). **Eingabe ist immer das eingebaute
+Mikrofon** - die Sprachdienste nehmen es über die Echo-Quelle
+`dialos_mikrofon_ohne_echo`, die selbst am eingebauten Mikrofon hängt. Das
+Umschalten auf HFP (`headset-head-unit`) oben passiert nur noch im
+**Rückfall**, wenn ein Gerät gar kein eingebautes Mikrofon hat. Gründe: Das
+Zurückschalten auf A2DP ist am 2026-08-17 dreimal hängengeblieben, die
+Echo-Unterdrückung gibt es nur auf dem eingebauten Weg, und der
+Vergleichstest lief unter 60 dB Übersteuerung des eingebauten Mikrofons
+(Einzelheiten weiter unten unter „Was bleibt" und in
+[offene-punkte.md](offene-punkte.md)). Für andere Programme bleibt das rohe
+eingebaute Mikrofon bewusst das Standard-Mikrofon (Firefox/Jitsi filtern
+Echo selbst; Stephans Entscheidung vom 2026-09-25). Der Absatz oben bleibt
+als Stand vom 2026-08-16 stehen.
 
 **Zwingende Regel (Stephan, 2026-08-16): Der Rückfall auf die
 eingebauten Lautsprecher und das eingebaute Mikrofon muss immer
@@ -504,7 +528,19 @@ ein gutes Zeichen, aber kein Beweis für den Gesprächsfall.
 ## Aktuelle Test-Hardware
 
 - **Laptop**: Lenovo ThinkPad T490 – kein WWAN-/LTE-Modul verbaut.
-- **Audio**: AIRHUG 01 (siehe oben) – seit 2026-08-16 Referenzgerät.
+- **Audio**: AIRHUG 01 (siehe oben) – seit 2026-08-16 Referenzgerät,
+  **seit 2026-08-17 nur für die Ausgabe**.
+- **Mikrofon**: das eingebaute des T490, über die Echo-Quelle
+  `dialos_mikrofon_ohne_echo` - das ist die Eingabe für alle Sprachdienste.
+- **USB-Tischmikrofon TONOR TC30** - **Test-Hardware, kein Standard.** Seit
+  2026-09-15 auf dem Prüfstand gemessen (siehe
+  [pruefstand.md](pruefstand.md)): Beim Brief-Diktat mit laufendem Fernseher
+  hält es Parakeet bei **4,2 %** Wortfehlern, das eingebaute Mikrofon fällt
+  auf **9,9 %**; ohne Störung liegen beide gleichauf. Befehle stört der
+  Fernseher bei beiden kaum. Dagegen sprechen bisher: keine
+  Echo-Unterdrückung auf diesem Weg (Annas Ansagen erreichten darüber den
+  Befehlsdienst) und Übersteuerung bei 100 % Verstärkung. Es ist ein Messwerkzeug für die Frage nach einem externen Mikrofon,
+  keine Entscheidung dafür.
 - **Eingabegeräte**: Logitech Pebble M350s (Maus) und Pebble K380s
   (Tastatur), beide über Bluetooth. Ihr Akkustand wird von der
   Start-Ansage vorgelesen – allerdings nur für Administratorkonten;

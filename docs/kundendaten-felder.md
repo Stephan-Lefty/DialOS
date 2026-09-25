@@ -111,6 +111,14 @@ nicht erreicht wird.
   eine Postanschrift: Die eine liest ein Helfer beim Einrichten vor, die andere
   darf er nie sehen.
 
+  **Überholt seit 2026-09-25 - der Grundsatz gilt, die Datei gab es nie.** Die
+  0600-Datei war für einen eigenen IMAP/SMTP-Zugang von DialOS gedacht, der
+  nicht gebaut wurde (siehe [anwendungen.md](anwendungen.md), Abschnitt
+  „Mail"). Heute liegt das **Passwort in Thunderbirds verschlüsseltem
+  Passwortspeicher**, eingetragen von der Maske über `dialos-mailkonto.py`.
+  Benutzername und Server stehen dagegen in dieser Datei - sie verraten nichts,
+  was ein Helfer nicht sehen dürfte (siehe den nächsten Abschnitt).
+
 Diese Trennlinie gehört gezogen, bevor etwas gebaut wird. Sonst wandert am Ende
 alles in eine Datei, und beim Gerätewechsel weiß niemand mehr, was zu löschen
 ist.
@@ -121,7 +129,8 @@ Stephan: „Ich möchte gerne alle Kundendaten zentral erfassen und dann auf die
 Programme verteilen! So kann ich nix übersehen." Deshalb stehen die Daten fürs
 Mailkonto in derselben Datei: `mail_benutzer`, `imap_server`, `imap_port`,
 `smtp_server`, `smtp_port` - alle freiwillig, bei bekannten Anbietern genügt
-die Mailadresse. **Das Passwort ist bewusst KEIN Feld:** Die Maske gibt es direkt
+die Mailadresse: Bleiben die Serverfelder leer, kommen die Server aus Mozillas
+Anbieter-Datenbank (ISPDB). **Das Passwort ist bewusst KEIN Feld:** Die Maske gibt es direkt
 an Thunderbirds verschlüsselten Passwortspeicher weiter (`dialos-mailkonto.py`),
 in dieser Datei steht es nie.
 

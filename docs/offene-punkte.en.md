@@ -22,6 +22,39 @@ so nothing gets lost from the discussions.
   there to e.g. 900, so SIM only kicks in when neither wired nor WLAN
   provides a route.
 
+## Debian version: 13 stays, no jump to 14 (decided 2026-09-18)
+
+Stephan's question: "Would it already make sense today to test with Debian 14
+and the current GNOME version?" Answer after weighing it up: **no, we stay on
+Debian 13 and GNOME 48** (state on the device: 13.7, GNOME Shell 48.7,
+Python 3.13.5).
+
+The reasons, in order of weight:
+
+1. **Debian 14 ("Forky") is currently *testing*, i.e. a moving base.**
+   Security updates arrive there with a delay - for a device that sits in a
+   blind user's everyday life, that is the wrong trade.
+2. **A bug that is there today is gone tomorrow and a new one has appeared.**
+   Exactly this pattern has already cost days in this project: a cause that
+   can no longer be reproduced is no cause.
+3. **No time pressure:** Debian 13 receives security updates until about
+   2028, with LTS until about 2030.
+4. **The Windows look breaks first.** `dash-to-panel`, `arc-menu` and
+   `tiling-assistant` are GNOME extensions and typically break with every
+   GNOME jump. That work is done once - when the target version is fixed.
+
+**What really needs checking at the later jump is not GNOME, but the compiled
+third-party libraries:** Vosk, sherpa-onnx (Parakeet), cairo/Pango, GTK4. They
+depend on the Python version and glibc; if one of them fails, voice control
+itself is affected, not just the look.
+
+**The proposed approach when the time comes** (not built, deliberately
+deferred): a container with Debian testing in which the **test bench**
+(Prüfstand) runs. It needs neither a microphone nor a desktop - it plays back
+the existing recordings and thereby checks Vosk, Parakeet, the number and
+punctuation rules and the PDF generation in one pass, without touching the
+T490. Sensible timing: **once Forky is frozen.**
+
 ## Security
 - Recovery path for the USB security stick in case of loss/damage:
   provisionally implemented as a master passphrase (second LUKS key
@@ -29,12 +62,28 @@ so nothing gets lost from the discussions.
   least 12 characters) – whether that
   should be the final solution (vs. a backup stick vs. no recovery) is
   not finally decided yet.
-- How sudo/admin rights for the default user ("nutzer") should work is
-  still open: a normal password (safer, but the voice-guided maintenance
-  flow then has to work around it specifically), passwordless sudo
-  scoped to specific maintenance commands only, or fully passwordless.
-  Currently a random password is generated per build (not stored in
-  the repo) instead of a fixed placeholder.
+- **sudo for the default user `nutzer`: the state is not open, it is FULL
+  ADMINISTRATOR** (as of 2026-09-25). `nutzer` is in the `sudo` group,
+  `sudo -l -U nutzer` reports `(ALL : ALL) ALL` (checked on 2026-09-14). The
+  password is generated randomly during setup, but
+  `dialos-buero-setup-abschliessen.sh` **prints it in the terminal** - during
+  the rebuild on 2026-09-25 it therefore ended up in the chat with Claude. So
+  it is not secret: whoever has seen it or sets a new one has root on the
+  device of a user who cannot notice. As far as known, the voice-driven
+  maintenance calls do not need the group, because they go through narrow
+  NOPASSWD rules on fixed paths. What needs to be clarified before any change
+  (where the membership comes from, which groups `nutzer` really needs, the
+  counter-check) is in `TODO.md`, item "Das Kundenkonto `nutzer` hat volle
+  Root-Rechte" (the customer account has full root rights).
+
+  **Earlier version (until 2026-09-25, superseded):** "How sudo/admin rights
+  for the default user should work is still open: a normal password,
+  passwordless sudo scoped to specific maintenance commands only, or fully
+  passwordless. Currently a random password is generated per build (not
+  stored in the repo) instead of a fixed placeholder." - "open" hid the fact
+  that full rights already existed, and "per build" dates from the time of
+  the ISO builds, which have not existed since 2026-08-16. The three
+  variants remain valid as a basis for the decision.
 - A self-hosted RustDesk relay server (hbbs/hbbr) is planned for later,
   once the system runs stably — no concrete timing/process yet.
 - Boot-time key combination for direct `dialosadmin` access (instead of
@@ -102,9 +151,24 @@ so nothing gets lost from the discussions.
 
   **Implementation status (corrected 2026-08-16 - this previously said
   "not implemented", which was wrong):**
-  - **Microphone: implemented.** `waehle_mikrofon_fuer_lautstaerke()` in
+  - **Microphone: implemented.** ~~`waehle_mikrofon_fuer_lautstaerke()` in
     `dialos-start-ansage.py` takes a `bluez_input.` source if one exists,
-    otherwise the first non-monitor source - i.e. the built-in mic.
+    otherwise the first non-monitor source - i.e. the built-in mic.~~
+    **Superseded since 2026-08-17** (only added here on 2026-09-25): the
+    order is reversed. The voice services pick their microphone
+    themselves, in this order: (1) the echo source
+    `dialos_mikrofon_ohne_echo`, which itself sits on the built-in
+    microphone, (2) the built-in microphone, (3) Bluetooth **only** if
+    there is no built-in one at all. Switching the AIRHUG to HFP therefore
+    only happens in that fallback.
+  - **The default microphone for all other programs deliberately stays
+    the raw built-in one** (Stephan's decision, 2026-09-25). Firefox, and
+    therefore Jitsi, has its own echo cancellation; with the cleaned
+    source it would run twice and the other side would hear washed-out
+    speech. On 2026-09-25 the echo source was the default for a few hours
+    via `priority.session = 2500` and was reverted the same evening
+    (details in [Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md) and
+    [anwendungen.en.md](anwendungen.en.md)).
   - **Speaker: implicitly implemented.** `spd-say` speaks through
     speech-dispatcher's default sink; when the Bluetooth device
     disappears, PipeWire moves the default sink to the built-in one by
@@ -118,6 +182,10 @@ so nothing gets lost from the discussions.
     (`sudo rm /home/nutzer/.config/dialos/lautstaerke`) and logging in as
     `nutzer` with the headset off: the question then comes again and has
     to be understood through the built-in microphone.
+    **Settled by the switch of 2026-08-17** (added 2026-09-25): since then
+    DialOS always listens through the built-in microphone, even when the
+    speaker is connected. The path listed here as untested is therefore
+    the everyday one and has been used in every session since.
 
   **Not covered and harder:** a device that is *connected* but transmits
   nothing (nearly dead battery, radio interference). No fallback triggers

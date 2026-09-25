@@ -28,7 +28,7 @@ Damit ist es keine Option, obwohl es die naheliegende gewesen wäre.
 | Browser | **Firefox ESR** 140 | Steht seit Beginn; Startseite per Enterprise-Policy, siehe [Debian-zu-DialOS.md](Debian-zu-DialOS.md) Schritt 10. |
 | Mail, Kalender, Kontakte | **Thunderbird** 140 | Ein Programm für alle drei - jedes weitere wäre ein weiterer Satz Sprachbefehle. Evolution und GNOME-Kalender sind bewusst nur ausgeblendet, nicht entfernt (sie hängen an `gnome-core`). |
 | Support/Fernwartung | **RustDesk** 1.4.9 | Bewusst deaktiviert und nur auf ausdrückliche Ansage startbar, siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md). |
-| Radio | **Shortwave** 5.0.0 | Wegen der Stationsdatenbank von radio-browser.info. Nur damit lässt sich ein **gesprochener Name** in einen Stream auflösen - „spiel Radio Tirol". Rhythmbox kann Streams auch, aber nur aus handgepflegten Adressen, und die kennt der Nutzer nicht. |
+| Radio | **Heute Shortwave** 5.0.0 - **künftig Rhythmbox** (Stephans Entscheidung vom 2026-09-25, **noch nicht gebaut**) | **Künftig:** DialOS sucht den Sender selbst in der Datenbank von radio-browser.info - dieselbe, die Shortwave benutzt - und lässt Rhythmbox die gefundene Adresse per `rhythmbox-client --play-uri` abspielen. **Warum der Wechsel:** Shortwave hat keine Kommandozeile und keine Schnittstelle, über die sich ein Sender vorgeben ließe; per MPRIS gibt es nur Abspielen/Pause des zuletzt gehörten. Nach dem Kriterium oben - Steuerbarkeit von außen - reicht das nicht für „spiel Radio Tirol". Damit bleibt **ein** Player für Radio, Musik, Podcasts und Hörbücher (siehe „Nur ein Player" unten). **Heute** öffnet „Radio öffnen" Shortwave, „Radio einschalten" sagt, dass DialOS das noch nicht kann. **Früher (bis 2026-09-25) stand hier:** Shortwave wegen der Stationsdatenbank von radio-browser.info - nur damit lasse sich ein **gesprochener Name** in einen Stream auflösen; Rhythmbox könne Streams auch, aber nur aus handgepflegten Adressen, und die kenne der Nutzer nicht. Genau diese Lücke schließt DialOS jetzt selbst, indem es die Adresse nachschlägt. |
 | Lokale Musik | **Rhythmbox** 3.4.8 | `rhythmbox-client` kann alles, was Sprachbefehle brauchen - geprüft am 2026-08-18: `--play`, `--pause`, `--next`, `--previous`, `--play-uri`, `--set-volume`, `--print-playing`. Das letzte ist wichtig: DialOS kann ansagen, was gerade läuft. |
 | Podcasts, Hörbücher | **Rhythmbox** (dasselbe Programm), Merkposition durch DialOS | Podcasts sind im Kern enthalten (GSettings-Schema `org.gnome.rhythmbox.podcast`), nicht als Erweiterung. Ein Programm weniger, und vor allem ein Player weniger - siehe „Nur ein Player" unten. **Die Merkposition liefert Rhythmbox aber nicht** - siehe „Die Position gehört DialOS" unten. |
 | Briefe | **LibreOffice Writer** 25.2 | Ein Brief muss gedruckt oder als PDF verschickt werden können, mit Absender und Datum. Das einzige installierte Programm mit Vorlagen und Druck. |
@@ -51,10 +51,20 @@ Punkte müssen alle mit rein"). Sie sind damit im Umfang, aber noch nicht
 umgesetzt - die Trennung ist Absicht, damit Geplantes nicht wie
 Vorhandenes aussieht.
 
+**Stand 2026-09-25:** Zwei Punkte der Liste sind inzwischen gebaut - das
+Diktat und die Wetteransage auf Zuruf. Sie bleiben hier stehen, deutlich
+gekennzeichnet, damit die Freigabe vom 2026-08-18 vollständig nachlesbar
+bleibt; was sie heute können, steht in [sprachbefehle.md](sprachbefehle.md).
+
 Die ersten zwei sind keine Anwendungen, sondern Voraussetzungen für vier
 der obigen:
 
-- **Diktat (Sprache zu Text)** - Messungen und offene Punkte in
+- **Diktat (Sprache zu Text) - gebaut.** Brief und Notizen erkennt
+  **Parakeet** (seit 2026-09-16 fest eingebaut, weil es auf dem Prüfstand
+  deutlich weniger Wortfehler machte und als einziges die Satzzeichen selbst
+  setzt), Befehle und den Einkaufszettel weiter **Vosk**. Einzelheiten in
+  [diktat.md](diktat.md) und [pruefstand.md](pruefstand.md).
+  **Früher (bis 2026-09-16) stand hier:** Messungen und offene Punkte in
   [diktat.md](diktat.md). Briefe, Notizen, Mail und Chat kann der
   Nutzer ohne Diktat gar nicht erzeugen. **`vosk-model-de-big` mit 3,2 GB
   liegt schon auf der Platte** - freies Diktat braucht also keine neue
@@ -63,8 +73,9 @@ der obigen:
   desselben Werkzeugs.
 - **Vorlesen von Mails, Dokumenten und Webseiten.** Das Gegenstück zum
   Diktat und für die Zielgruppe genauso zentral.
-- **Post einscannen und vorlesen.** `simple-scan`, `sane-utils` und CUPS
-  sind installiert, nur `tesseract-ocr` fehlt (5.5.0 verfügbar). Damit
+- **Post einscannen und vorlesen.** `sane-utils` (`scanimage`) und CUPS
+  sind installiert (`simple-scan` seit dem 2026-09-25 bewusst entfernt -
+  DialOS scannt über `scanimage`), nur `tesseract-ocr` fehlt (5.5.0 verfügbar). Damit
   löst DialOS ein Problem, das kein Screenreader lösen kann: den Brief von
   der Krankenkasse, der auf Papier kommt.
 - **Hörbücher.** Bewusst getrennt von Musik zu betrachten, weil dort die
@@ -74,7 +85,9 @@ der obigen:
   Tabletten."
 - **Rechner ausschalten und sperren per Sprache**, und **Termine und
   Wetter ansagen** (aus Thunderbird; die Wetterabfrage steckt schon in der
-  Start-Ansage).
+  Start-Ansage). **Das Wetter auf Zuruf ist seit 2026-09-16 gebaut** („Wie
+  ist das Wetter?", „Wie wird das Wetter?"). Ausschalten, Sperren und Termine
+  ansagen sind weiter nicht gebaut.
 
 ## Mail: Thunderbird ist die Oberfläche, nicht der Motor
 
@@ -97,7 +110,10 @@ Sprachbedienung durch, genau wie `gnome-podcasts`.
 > hochgeladen wird), Konten und Adressbücher auflisten. Kein Experiment-API
 > nötig, und Debians Thunderbird nimmt die unsignierte Erweiterung an
 > (`xpinstall.signatures.required=false`). Der Weg steht in
-> [erweiterungen.md](erweiterungen.md) und in `dialos-thunderbird-bruecke.py`.
+> [erweiterungen.md](erweiterungen.md), Abschnitt „Die Thunderbird-Brücke"
+> (dort erst seit 2026-09-25 - vorher verwies dieser Satz auf eine Stelle, an
+> der es noch nicht stand), der Quelltext der Erweiterung im Ordner
+> `thunderbird-erweiterung/`, die Gegenstelle in `dialos-thunderbird-bruecke.py`.
 >
 > **Was daraus folgt, ist eine Linie, keine Umplanung:** *Lesen darf man von
 > außen, Schreiben nicht.* Der Suchindex liest die mbox-Dateien weiter - das
@@ -121,18 +137,66 @@ Sprachbedienung durch, genau wie `gnome-podcasts`.
 | Mail ansehen und bearbeiten durch einen sehenden Helfer | Thunderbird |
 | Kalender und Kontakte | Thunderbird, unangefochten |
 
+> **Überholt seit 2026-09-25: Die erste Tabellenzeile ist nie gebaut worden,
+> und so bleibt es.** Einen eigenen IMAP/SMTP-Zugang von DialOS gibt es nicht
+> (geplant am 2026-08-18). Stattdessen steuert DialOS Thunderbird über die
+> eigene MailExtension **DialOS-Brücke** (`bruecke@dialos.org`, siehe
+> [erweiterungen.md](erweiterungen.md), Abschnitt „Die Thunderbird-Brücke"):
+> Entwürfe ablegen, Senden, Kontakte. Die Sorge aus dem Kasten oben - „eine
+> Erweiterung kann nur etwas tun, solange das Programm läuft" - ist damit
+> anders beantwortet als erwartet: Ist Thunderbird zu, wird ein Entwurf
+> vorgemerkt und beim nächsten Start nachgeholt, und zum Senden öffnet DialOS
+> Thunderbird selbst. Gelesen wird weiter von außen, aus Thunderbirds
+> mbox-Dateien (Suchindex der Erweiterung DialOS-Suche).
+>
+> **Warum es dabei bleibt:** Es folgt aus der Linie vom 2026-09-21 im Kasten
+> oben - *Lesen darf man von außen, Schreiben nicht*. Eine über eigenes SMTP
+> verschickte Mail wäre an Thunderbird vorbei geschrieben. Und seit dem
+> 2026-09-25 liegt das Passwort in Thunderbirds Passwortspeicher; ein eigener
+> Zugang bräuchte eine zweite Stelle für dasselbe Passwort.
+>
+> Die Tabelle bleibt als Stand vom 2026-08-18 stehen.
+
 **Offen und bewusst nicht hier entschieden:** Damit braucht DialOS die
 Zugangsdaten der Mailbox selbst. Ob sie in den GNOME-Schlüsselbund
 (libsecret) gehören oder in eine Datei, die nur dem Konto gehört, ist eine
 Frage der Sicherheits-Architektur - siehe
 [sicherheit-datenschutz.md](sicherheit-datenschutz.md) und `TODO.md`.
 
+> **Überholt - entschieden, und die Entscheidung ist inzwischen selbst
+> überholt.** Am 2026-08-18 fiel sie in `TODO.md` auf eine Datei in
+> `/home/nutzer` mit Rechten 0600. **Gebaut wurde diese Datei nie**, denn sie
+> war nur für den eigenen IMAP-Zugang gedacht, den es nicht gibt (siehe
+> oben). **Seit 2026-09-25 gilt:** Das Mailkonto kommt aus der Maske der
+> persönlichen Daten; beim Speichern legt `dialos-mailkonto.py` es in
+> Thunderbird an. Das **Passwort ist bewusst kein Feld** in
+> `persoenliche-daten.txt`, sondern geht direkt in Thunderbirds
+> verschlüsselten Passwortspeicher - so steht es nie in einer DialOS-Datei
+> (Stephans Wahl gegen den einfacheren Weg „Thunderbird fragt selbst"). Die
+> Felder stehen in [kundendaten-felder.md](kundendaten-felder.md).
+
 Zur Testmailbox: Der Mailserver von dialos.org ist `s111.goserver.host`.
 **Autoconfig-Einträge gibt es nicht** (`_imaps._tcp`, `_submission._tcp`,
 `_autodiscover._tcp` sind alle leer), Thunderbird muss die Einstellungen
 also raten - die IMAP-/SMTP-Daten des Hosters gehören bereitgehalten.
 
+> **Seit 2026-09-25 kommen die Server aus der Maske.** In
+> `persoenliche-daten.txt` stehen dafür `imap_server`, `imap_port`,
+> `smtp_server` und `smtp_port` (dazu `mail_benutzer`, falls der Anbieter
+> einen anderen Anmeldenamen verlangt). **Bei bekannten Anbietern bleiben sie
+> leer** - dann kommen die Server aus Mozillas Anbieter-Datenbank (ISPDB),
+> dieselbe, aus der Thunderbird selbst schöpft. Nur bei eigenen Domains wie
+> dialos.org hilft die Datenbank nicht; dort müssen die Serverdaten in der
+> Maske eingetragen werden. Ein Hinweis auf den MX-Eintrag der Domain steht
+> als offener Punkt in `TODO.md`.
+
 ### Welchen Servernamen DialOS benutzt - und warum nicht den offensichtlichen
+
+> **Hinweis seit 2026-09-25:** Dieser Abschnitt galt dem geplanten eigenen
+> IMAP/SMTP-Zugang von DialOS, der nicht gebaut wird (siehe oben). DialOS baut
+> heute keine eigene Mailverbindung auf; die Verbindung hält Thunderbird mit den
+> Serverdaten aus der Maske. Die Messungen und die Lehre zur TLS-Prüfung bleiben
+> trotzdem richtig und stehen deshalb weiter hier.
 
 Gemessen am 2026-08-18 an der Testmailbox. Das Zertifikat des Hosters
 lautet `CN=*.goserver.host`, die Alternativnamen sind nur
@@ -269,9 +333,24 @@ nachsehen, welches Fenster gerade vorn ist. Deshalb Rhythmbox für Musik
 UND Podcasts: Es bleiben genau zwei Player, Rhythmbox und Shortwave, und
 DialOS muss das eine beenden, bevor es das andere startet.
 
+> **Geänderte Entscheidung vom 2026-09-25 (Stephan): Radio künftig auch über
+> Rhythmbox** - siehe die Zeile „Radio" in der Tabelle oben. Dann gibt es nur
+> noch **einen** Player für Radio, Musik, Podcasts und Hörbücher, und die
+> Regel erledigt sich von selbst: Es gibt nichts mehr, das DialOS vor dem
+> Starten beenden müsste, und „lauter" oder „stopp" meint immer dasselbe
+> Programm. **Noch nicht gebaut** - bis dahin gibt es weiter zwei Programme:
+> „Radio öffnen" öffnet Shortwave, „Musik öffnen" Rhythmbox.
+
 **Die echo-bereinigte Quelle darf nie die Vorgabe-Quelle werden.**
 Geprüft am 2026-08-18, und es stimmt derzeit nur, weil es WirePlumbers
 Standard ist - festgelegt hat es niemand:
+
+> **Überholt seit 2026-09-25: Heute ist es ausdrücklich festgelegt.** In
+> `/etc/pipewire/pipewire.conf.d/99-dialos-echo-unterdrueckung.conf` steht an
+> der Echo-Quelle „BEWUSST KEIN priority.session", mit Begründung. Die
+> DialOS-Sprachdienste nehmen `dialos_mikrofon_ohne_echo` selbst; das
+> Standard-Mikrofon bleibt bewusst das rohe eingebaute. Anlass war der
+> Vorfall im Absatz unten.
 
 | Wer nimmt auf | Quelle |
 |---|---|
@@ -288,7 +367,9 @@ Videocalls, ohne dass der Zusammenhang sichtbar wäre.
 stand in beiden Konten das rohe Mikrofon, das sah wie ein Fehler aus, und die
 Echo-Quelle wurde per `priority.session` zur Vorgabe gemacht - ohne diese Regel
 nachzulesen. Am selben Abend auf Stephans Entscheidung zurückgenommen. Das rohe
-Mikrofon als Vorgabe ist der Sollzustand, kein Fehler.
+Mikrofon als Vorgabe ist der Sollzustand, kein Fehler. Seitdem steht der Satz
+als Warnung in der Konfigurationsdatei selbst - dort, wo die nächste Änderung
+ansetzen würde, nicht nur in dieser Datei.
 
 **Die Position gehört DialOS, nicht dem Player.** Geprüft am 2026-08-18:
 Rhythmbox' Bibliothek kennt `play-count` und `last-played`, aber **kein**

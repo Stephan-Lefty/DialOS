@@ -34,7 +34,7 @@ listen?".
 | Voice command | Action |
 |---|---|
 | **"Sprachsteuerung starten"** (start voice control) | Switches command recognition on, reply: "Ich höre Dir zu." If already running: "Ich höre Dir schon zu." Also opens the [transcript window](Debian-zu-DialOS.en.md) for sighted onlookers - once, not on every command. **Only valid with silence afterwards**; if it is not silent, the first time is rejected without a word, only a second time within 20 s gets "… es ist zu laut …" (since 2026-09-15 - before, the announcement also came for noises nobody had said). After login voice control is on standby; the greeting names this sentence. |
-| **"Sprachsteuerung stoppen"** (stop voice control) | Switches it off again, reply: "Ich höre Dir nicht mehr zu." After two minutes without a command this happens by itself, with an announcement. The transcript window closes with it in both cases. |
+| **"Sprachsteuerung stoppen"** (stop voice control) | Switches it off again, reply: "Ich höre Dir nicht mehr zu." This happens by itself after **30 seconds** if no command came at all, and after **two minutes** in an ongoing conversation - with different announcements: the long explanation only when a conversation really was going on. The transcript window closes with it in both cases. |
 | "auf Windows umschalten" (switch to Windows) | Switches the desktop to the Windows 11 look (taskbar at the bottom, start menu on the left, window buttons on the right). Reply: "Windows Desktop." If it is already there: "Der Schreibtisch steht schon auf Windows Desktop." |
 | "auf Linux umschalten" (switch to Linux) | Switches back to the GNOME standard. Reply: "Linux Desktop." or "Der Schreibtisch steht schon auf Linux Desktop." |
 | "auf Gnome umschalten" (switch to Gnome) | Equivalent to "auf Linux umschalten". |
@@ -59,7 +59,7 @@ listen?".
 | **"Notizen drucken"** / **"Notiz drucken"** (print the notes) | The same for the collected notes. The singular counts too since 2026-08-22: on the first retest Vosk heard "notiz drucken", and because both words are in the grammar that was a permitted but command-less combination - the command fell through **silently**, with no feedback at all. |
 | **"von vorne"** *(only while dictating a letter or note)* | Asks "Soll ich alles bisher Diktierte verwerfen und von vorne beginnen?" - on yes the text starts over, a recipient stays. Since 2026-09-17. In the recipient dialogue "von vorne" restarts the dialogue. |
 | **"alles verwerfen"** *(only while dictating a letter or note)* | Asks "Soll ich alles verwerfen? Es wird nichts gespeichert." - on yes dictation ends without a file. Deliberately not "Diktat abbrechen": sounds like "Diktat beenden". In the recipient dialogue: "abbrechen". |
-| **"Unterlagen durchsuchen"** (search the documents) | Start sentence of the **DialOS-Suche** extension. It first asks where to search (documents, mailbox, images, videos), then "what shall I search for in the documents? Say a term". It then narrows down step by step (kind, person, year, month, further words), lists the three newest if needed, and asks: read out, print, and for an e-mail also reply or forward. After each action: "anything else with it?" Images and videos honestly say they cannot be searched yet. |
+| **"Unterlagen durchsuchen"** (search the documents) | Start sentence of the **DialOS-Suche** extension - built since 2026-09-18 and tried out on the device, in the mailbox and in the documents. It first asks where to search (documents, mailbox, images, videos), then "what shall I search for in the documents? Say a term". It then narrows down step by step (kind, person, year, month, further words), lists the three newest if needed, and asks: read out, print, and for an e-mail also reply or forward. After each action: "anything else with it?" Images and videos honestly say they cannot be searched yet. The start sentence was checked on the device against the whole grammar on 2026-09-17: every sentence recognized word for word, no existing command breaks because of it (`/usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). Until 2026-09-18 it was listed under "Planned". |
 | **"Mailadresse buchstabieren"** *(only while dictating a letter or note)* | Spelling alphabet plus "at", "Punkt", "Minus", "Unterstrich" and digits, end with "fertig", confirmation character by character - the address goes to the end of the text. Since 2026-09-17. Within a sentence, **"meine Mailadresse"** (email from the personal data) and **"Mailadresse von …"** (email from the Thunderbird contacts) also work. |
 | **"Einkaufszettel vorlesen"** (read the shopping list) | Says the number of entries and reads them out, with pauses in between. |
 | **"Notizen vorlesen"** (read the notes) | The same for the collective note. |
@@ -70,17 +70,17 @@ listen?".
 | **"ja" / "nein"** (yes/no) | Answer to a confirmation - before emptying a note and, since 2026-09-14, before every print and dictation. Valid **only during the confirmation**: a recognizer of its own runs for it, with a grammar of exactly these two words, while the command service keeps out. If nothing usable arrives, DialOS asks once more; after that the list stays. |
 | **"Postfach öffnen"** (open the mailbox) | Opens Thunderbird. If a draft is waiting, DialOS says so ("Ich öffne das Postfach. Ich trage dabei den vorgemerkten Entwurf ein.") - the bridge works the queue off at startup. **Afterwards DialOS names any drafts lying there** (see below). |
 | *(when opening and closing the mailbox)* | **Notice about drafts lying around** (Stephan, 2026-09-21: "we must tell the user, when he closes and/or opens Thunderbird, that drafts are still there - and of course ask how to deal with them"). DialOS says "Drei Entwürfe liegen im Postfach: Terminabsage an Michael Meier; …" (at most three subjects, then "und zwei weitere") and asks "Soll ich einen davon verschicken? Sage ja oder nein." On "ja" it goes through them **one by one**. **There is deliberately no "shall I send them all?"** - a single misheard "ja" would otherwise send half-finished texts to real people. When closing, the notice comes **before** closing: once Thunderbird is gone, nothing can be sent. The point only arose because DialOS files drafts itself since 2026-09-21 - a draft is the only result that does **not** arrive anywhere by itself. |
-| **"Neue E-Mail schreiben"** / **"E-Mail schreiben"** | **Runs the whole dialogue** (extension *DialOS-Mail*, since 2026-09-21): recipient from the contacts or spelled → "what should the subject be?" → dictate the text as in a letter ("Diktat beenden") → **key facts and decision**. Until 2026-09-21 the sentence only opened an empty compose window - for someone who cannot see the screen, that is an empty room. |
+| **"Neue E-Mail schreiben"** / **"E-Mail schreiben"** (write a new e-mail) | **Ran through on the device on 2026-09-25**, from the recipient to the draft. **Runs the whole dialogue** (extension *DialOS-Mail*, since 2026-09-21): recipient from the contacts or spelled → "what should the subject be?" → dictate the text as in a letter ("Diktat beenden") → **key facts and decision**. Until 2026-09-21 the sentence only opened an empty compose window - for someone who cannot see the screen, that is an empty room. |
 | **"ja" / "nein" / "vorlesen"** *(before sending)* | The decision, in Stephan's form: "**3 Sätze an Michael Meier, Betreff Terminabsage.** Soll ich sie verschicken? Sage ja, nein, oder vorlesen." - **the key facts only**, the full text on request. Reason: whoever has to sit through four paragraphs before every send will eventually say "ja" without listening. On **anything but a clear "ja"** - including "not understood" - it is **not sent but filed**. If Thunderbird is closed, DialOS opens it for sending (a draft is queued, a send is not: a mail that goes out "some time later" would be impossible for the user to place). |
 | **"Kalender öffnen"** (open the calendar) | Opens Thunderbird's calendar (`-calendar`). |
 | **"Kontakte öffnen"** (open contacts) | Opens Thunderbird's address book (`-addressbook`). |
 | **"Internet öffnen"** / **"Browser öffnen"** | Opens Firefox ESR. |
 | **"Musik öffnen"** (open music) | Opens Rhythmbox. |
-| **"Radio öffnen"** (open radio) | Opens Shortwave. |
+| **"Radio öffnen"** (open radio) | Opens Shortwave. **Rhythmbox in future** - Stephan's decision of 2026-09-25, not built yet (see the note under "Planned" and [anwendungen.en.md](anwendungen.en.md)). |
 | **"Postfach schließen"** (close the mailbox) | **With a confirmation:** "Soll ich das Postfach schließen? Sage ja oder nein." **Unfinished e-mails are saved first** - DialOS asks the bridge which compose windows are open, has Thunderbird file them as drafts, and says so. This answers a measurement from 2026-09-21: **Thunderbird does not ask on `SIGTERM`** - it quits after one second and unsaved text is silently gone (the drafts folder did not grow by a single byte). If something cannot be saved, the mailbox stays open. Only then `SIGTERM`, never `SIGKILL`. If it is not running: "Das Postfach ist gar nicht offen." |
 | **"Internet schließen"** / **"Browser schließen"** | The same for Firefox. |
 | **"Musik ausschalten"** (turn the music off) | The same for Rhythmbox - "turn off" rather than "close", because music plays rather than standing open. |
-| **"Radio ausschalten"** (turn the radio off) | The same for Shortwave. |
+| **"Radio ausschalten"** (turn the radio off) | The same for Shortwave. After the switch to Rhythmbox (decided on 2026-09-25, not built yet) it applies to Rhythmbox. |
 
 > **Opening programs (since 2026-09-21).** Stephan's prompt: "we need a list
 > of commands that start the programs anyway." Until then DialOS could do a
@@ -142,9 +142,28 @@ listen?".
 | Voice command | Action |
 |---|---|
 | "System aktualisieren" (update the system) | System maintenance with a yes/no confirmation before execution. |
-| "Radio hören" / "Musik hören" (listen to radio/music) | Starts Shortwave or Rhythmbox. |
+| "Radio hören" / "Musik hören" (listen to radio/music) | Plays a spoken station or music - **both through Rhythmbox in future** (see below). Until 2026-09-25 this read: "Starts Shortwave or Rhythmbox." |
 | "Ruf {person} an" (call {person}) | Telephony via SIM or paired phone, see [telefonie.en.md](telefonie.en.md). |
-| **"Unterlagen durchsuchen"** (search the documents) | Start sentence of the **DialOS-Suche** extension - finding letters, documents, notes and mails and reading them out. **Checked on the device on 2026-09-17 and passed:** every sentence recognized word for word, no existing command breaks because of it (`/usr/local/bin/dialos-grammatik-pruefen.py --neu "unterlagen durchsuchen"`). The test with a real voice remains the conclusion. |
+
+**"Unterlagen durchsuchen" was listed here until 2026-09-18.** Since then the
+DialOS-Suche extension has been built and tried out on the device; the sentence
+now stands above under "Implemented". The two sections below stay, because they
+explain why the sentence is worded this way and why it stands alone.
+
+> **Radio and music: changed decision of 2026-09-25 (Stephan).** Radio is to
+> run **through Rhythmbox** in future, not through Shortwave: DialOS looks the
+> spoken station up itself in the radio-browser.info database (the same one
+> Shortwave uses), and Rhythmbox plays it via `rhythmbox-client --play-uri`.
+> **Why:** Shortwave has no command line and no interface through which a
+> station could be set - over MPRIS there is only play/pause of whatever was
+> heard last. That leaves a single player for radio, music, podcasts and
+> audiobooks, and "louder" or "stop" always means the same program. Full
+> reasoning in [anwendungen.en.md](anwendungen.en.md).
+>
+> **Not built yet.** Today: "Radio öffnen" opens Shortwave, "Musik öffnen"
+> Rhythmbox (both only open the program and set no station and no track), and
+> "Radio einschalten" / "Musik abspielen" answer "Radio und Musik kann ich noch
+> nicht abspielen." (see "Fallback answers" below).
 
 ### Why "Unterlagen durchsuchen" and not "Briefe durchsuchen" (search the letters)
 
@@ -222,11 +241,30 @@ occurred:
     of open microphone. On 2026-08-20 at 14:04, during one of those phases,
     pure noise produced `'hilfe rufen'` and remote support was requested
     without anyone having said a thing. Only the yes/no confirmation prevented
-    it. Since then the core word is **"sprachsteuerung"**: long, distinctive,
-    present in only 16 of 157 utterances. That turns 22 activations into 9. The
-    price: if the recognizer swallows exactly that word, the user has to repeat
-    the sentence. An inconvenience - a microphone that switches itself on is
-    not.
+    it. At first the core word was switched to **"sprachsteuerung"**: long,
+    distinctive, present in only 16 of 157 utterances.
+  - **And the same evening further, to BOTH words**, because even that was not
+    enough. Two hours of operation, the same data run through all three rules:
+
+    | required | activations in 2 hrs |
+    |---|---|
+    | core word "starten" | **30** |
+    | core word "sprachsteuerung" | 7 |
+    | **both words** | **3** |
+
+    The 27 false starts of the first rule came from `'starten'` alone, four of
+    the seven from `'sprachsteuerung'` alone - and **none** of the seven was
+    followed by a command. Two particular words in a row practically never
+    occur in conversation; one does.
+
+    The price is accepted deliberately: if the recognizer swallows one of the
+    two, the user has to repeat the sentence. Exactly this fault had led to the
+    relaxation on 2026-08-19 - only now the counter-calculation is measured.
+    Repeating is an inconvenience; a microphone that arms itself is not.
+  - **Swapped or doubled words still count.** The check is done as a **set**,
+    not as a string - the recognizer also delivers words twice or in a
+    different order ("sprachsteuerung sprachsteuerung stoppen" happened). Only
+    `[unk]` excludes: then something else was in there too.
 - **An operating rule the user cannot see has to be spoken.** A shopping list
   only becomes a list if there is a small pause between items - that was how it
   was built from the start, but it was never announced. On 2026-08-19 Stephan
@@ -395,7 +433,7 @@ all four ways, the fourth later.
 | **"Befehle für Fragen"**, **"… für Briefe"**, **"… für Notizen"**, **"… für den Einkauf"**, **"… für den Bildschirm"**, **"… für das Diktat"** | Only this topic, 16 to 28 seconds. "Für das Diktat" names the commands INSIDE dictation (Absatz, neue Zeile, Satz löschen, Satz wiederholen, Betreff, Diktat beenden) - taken from dialos-diktat.py. All seven sentences in the vocabulary and checked against Piper (49 of 49 verbatim). |
 | **"Wie ist das Wetter"**, **"Wie wird das Wetter"** | Human instead of a weather report (Stephan's example: "Heute wird es regnen bei 15 Grad. Denke an einen Regenschirm, wenn Du raus gehst!"): one kind of weather for the rest of the day or the first change, the temperature range, a fitting tip, **always with the place**. Measured location, otherwise the **fallback place** from `~/.config/dialos/wetter-ort` (device only, later from the customer data). Without a place: "Für das Wetter fehlt mir Dein Wohnort." The greeting uses the same wording. |
 | "Nachrichten vorlesen", "Was gibt es Neues" | "Nachrichten kann ich noch nicht vorlesen." |
-| "Radio einschalten", "Musik abspielen" | "Radio und Musik kann ich noch nicht abspielen." |
+| "Radio einschalten", "Musik abspielen" | "Radio und Musik kann ich noch nicht abspielen." (Unchanged as of 2026-09-25; in future both through Rhythmbox, see "Planned" above.) |
 | "Jemanden anrufen" | "Telefonieren kann ich noch nicht." |
 | "Mails vorlesen" | "E-Mails kann ich noch nicht vorlesen." |
 | "Termine vorlesen", "Was steht heute an" | "Termine kann ich noch nicht vorlesen." |

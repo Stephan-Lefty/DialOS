@@ -185,6 +185,13 @@ Die häufigsten „Das war kein Befehl" sind abgeschnittene Fragen - „haben wi
 Das Nutzerkonto ist von allen Schaltern unberührt: Vosk, eingebautes Mikrofon,
 kein Mitschnitt.
 
+> **Überholt seit 2026-09-16: der Schalter `parakeet-test`.** Parakeet ist seit
+> diesem Tag fest eingebaut und für alle Konten standardmäßig an - auch für
+> `nutzer`, der Satz darüber gilt für die Texterkennung also nicht mehr. Die
+> Schalterdatei `parakeet-test` wirkt nicht mehr; abgeschaltet wird heute mit
+> `~/.config/dialos/parakeet-aus` (siehe die Schaltertabelle oben). Die Tabelle
+> bleibt als Zustand vom Abend des 2026-09-15 stehen.
+
 ## 8. Reihenfolge für Mittwoch
 
 **Stand 2026-09-16:** Punkt 1 und 2 gebaut, nachgebildet und aufgespielt. Erste
