@@ -1113,6 +1113,13 @@ Terminalbefehle für Stephan. Lokale Git-Identität
 (`user.name`/`user.email`/`credential.helper=store`) ist seit 2026-08-14
 eingerichtet und verifiziert - `git push` funktioniert direkt.
 
+**Seit 2026-09-25 haengt die externe Platte beim Start ein** (Stephan: „das
+die externe Festplatte auch für Dich immer sichtbar und nutzbar ist"): Eintrag
+in `/etc/fstab` über die UUID, gleicher Pfad `/media/dialosadmin/SanDisk-Extreme`,
+mit `nofail`. Eingerichtet von `sudo scripts/dialos-claude-setup.sh` (Schritt
+4/4) - nach einem Reinstall also dort wieder mitgenommen. Nur Entwicklungsgerät,
+nicht im Kunden-Rezept.
+
 `TODO.md` im Repo-Root ist für kurzfristige, konkrete Aufgaben gedacht -
 anders als `docs/offene-punkte.md`, das für grundsätzliche, noch
 unentschiedene Architekturfragen gedacht ist. Erledigte Einträge werden

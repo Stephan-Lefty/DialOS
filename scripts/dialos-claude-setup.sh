@@ -9,6 +9,8 @@
 #   3. Git-Identitaet (user.name/user.email) + credential.helper=store
 #      fuer den Admin-Nutzer, damit "git push" nicht bei jedem Reinstall
 #      erneut mit "Identitaet unbekannt" abbricht.
+#   4. Die externe Platte in /etc/fstab, damit sie nach jedem Start da ist
+#      (seit 2026-09-25, nur Entwicklungsgeraet).
 #
 # Deckt ABSICHTLICH NICHT ab (kein Bug, sondern Sicherheitsgrenze):
 #   - Die Claude-Chat-Anmeldung selbst (Login-Session/Zugangsdaten) -
@@ -47,7 +49,7 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-echo "=== 1/3: Alte 'eggs produce'-Sudoers-Regel entfernen ==="
+echo "=== 1/4: Alte 'eggs produce'-Sudoers-Regel entfernen ==="
 if [ -f "$SUDOERS_FILE" ]; then
   rm -f "$SUDOERS_FILE"
   echo "  Entfernt: $SUDOERS_FILE (eggs wird nicht mehr verwendet)."
@@ -56,7 +58,7 @@ else
 fi
 
 echo ""
-echo "=== 2/3: Symlink ~/DialOS -> externe Platte ==="
+echo "=== 2/4: Symlink ~/DialOS -> externe Platte ==="
 if [ ! -d "$REPO_PATH" ]; then
   echo "  WARNUNG: $REPO_PATH nicht gefunden - ist die externe Platte eingesteckt?" >&2
 elif [ -L "$SYMLINK_PATH" ] && [ "$(readlink -f "$SYMLINK_PATH")" = "$(readlink -f "$REPO_PATH")" ]; then
@@ -70,7 +72,7 @@ else
 fi
 
 echo ""
-echo "=== 3/3: Git-Identitaet + Credential-Speicher fuer $ADMIN_USER ==="
+echo "=== 3/4: Git-Identitaet + Credential-Speicher fuer $ADMIN_USER ==="
 CURRENT_NAME=$(sudo -u "$ADMIN_USER" -H git config --global user.name 2>/dev/null || true)
 CURRENT_EMAIL=$(sudo -u "$ADMIN_USER" -H git config --global user.email 2>/dev/null || true)
 if [ "$CURRENT_NAME" = "$GIT_NAME" ] && [ "$CURRENT_EMAIL" = "$GIT_EMAIL" ]; then
@@ -90,6 +92,45 @@ else
 fi
 echo "  Hinweis: Beim naechsten 'git push' fragt Git einmalig nach"
 echo "  Benutzername (Stephan-Lefty) + GitHub-Token - danach gemerkt."
+
+echo ""
+echo "=== 4/4: Externe Platte beim Start einhaengen (/etc/fstab) ==="
+# Seit 2026-09-25 (Stephan: "das die externe Festplatte auch fuer Dich immer
+# sichtbar und nutzbar ist"). Vorher haengte GNOME die Platte erst beim
+# Anmelden von dialosadmin ein - nach einem Neustart war sie nicht da, und
+# eine Claude-Sitzung mit Arbeitsordner auf der Platte fand ihn nicht.
+# Jetzt ueber die UUID, unter demselben Pfad wie bisher, also aendert sich
+# fuer Skripte und Doku nichts. NUR fuer das Entwicklungsgeraet - deshalb hier
+# und nicht im Aufbau-Rezept fuer Kundengeraete.
+#   nofail                        Fehlt die Platte, startet das Geraet normal.
+#   x-systemd.device-timeout=10s  ... und wartet nicht 90 s auf sie.
+#   nosuid,nodev                  wie bisher beim Einhaengen durch GNOME.
+#   x-gvfs-show                   bleibt in der Dateiverwaltung sichtbar.
+# Das Konto nutzer sieht trotzdem nichts: Die Wurzel der Platte gehoert
+# dialosadmin mit 0700 - geprueft am 2026-09-25.
+PLATTE_PFAD="/media/$ADMIN_USER/SanDisk-Extreme"
+# Nur eintragen, wenn das Repo WIRKLICH auf einer unter $PLATTE_PFAD
+# eingehaengten Platte liegt - sonst waere die UUID die der Systemplatte.
+PLATTE_ZIEL=$(findmnt -no TARGET --target "$REPO_PATH" 2>/dev/null || true)
+PLATTE_UUID=$(findmnt -no UUID --target "$REPO_PATH" 2>/dev/null || true)
+PLATTE_FS=$(findmnt -no FSTYPE --target "$REPO_PATH" 2>/dev/null || true)
+if [ "$PLATTE_ZIEL" != "$PLATTE_PFAD" ] || [ -z "$PLATTE_UUID" ]; then
+  echo "  WARNUNG: Platte nicht unter $PLATTE_PFAD eingehaengt - nichts eingetragen." >&2
+elif grep -q "UUID=$PLATTE_UUID" /etc/fstab; then
+  echo "  Bereits in /etc/fstab eingetragen, nichts zu tun."
+else
+  cp /etc/fstab /etc/fstab.vor-dialos-platte
+  printf '\n# DialOS-Entwicklungsgeraet: externe Arbeitsplatte (dialos-claude-setup.sh)\nUUID=%s %s %s nosuid,nodev,nofail,x-systemd.device-timeout=10s,x-gvfs-show 0 0\n' \
+    "$PLATTE_UUID" "$PLATTE_PFAD" "$PLATTE_FS" >> /etc/fstab
+  if findmnt --verify --tab-file /etc/fstab >/dev/null 2>&1; then
+    systemctl daemon-reload
+    echo "  Eingetragen: UUID=$PLATTE_UUID -> $PLATTE_PFAD ($PLATTE_FS)"
+    echo "  (Sicherung: /etc/fstab.vor-dialos-platte)"
+  else
+    cp /etc/fstab.vor-dialos-platte /etc/fstab
+    echo "  FEHLER: findmnt --verify meldet einen Fehler - /etc/fstab zurueckgesetzt." >&2
+  fi
+fi
 
 echo ""
 echo "=== Nicht automatisiert (siehe Kommentar oben) ==="

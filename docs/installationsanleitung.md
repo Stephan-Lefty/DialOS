@@ -234,7 +234,7 @@ cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
 
 > **Hier stand bis zum 25.09.2026 der Aufruf ohne `sudo`** - das Skript bricht dann sofort mit „Bitte mit sudo ausfuehren" ab. Es braucht root, weil es eine alte sudoers-Datei entfernt; die Git-Einstellungen trägt es trotzdem für `dialosadmin` ein, nicht für root.
 
-Das Skript legt den Symlink `~/DialOS`, trägt Name und E-Mail für Git ein und schaltet den Zugangsdaten-Speicher an. Beim **ersten** `git push` fragt Git einmalig nach Benutzername und Token; danach merkt es sich beides.
+Das Skript legt den Symlink `~/DialOS`, trägt Name und E-Mail für Git ein, schaltet den Zugangsdaten-Speicher an und trägt die externe Platte in `/etc/fstab` ein, damit sie nach jedem Start da ist (seit 25.09.2026). Beim **ersten** `git push` fragt Git einmalig nach Benutzername und Token; danach merkt es sich beides.
 
 > **Die Verbindungen der App selbst - Ordner-Connector und GitHub-Integration - lassen sich nicht sichern.** Es gibt dafür keinen Wiederherstellungsweg, weder per Skript noch in der App. Sie werden nach jeder Neuinstallation neu eingerichtet; deshalb steht Schritt 3 hier so ausführlich.
 
