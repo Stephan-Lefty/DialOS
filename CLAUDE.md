@@ -125,7 +125,7 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## NEUAUFBAU LAEUFT (Stand: 2026-09-25, Freitag abends)
+## NEUAUFBAU ABGESCHLOSSEN UND ABGENOMMEN (Stand: 2026-09-25, Freitag abends)
 
 **Hier stehen wir:**
 - Rescuezilla-Abbild ist gezogen (`../dialos-rscuezilla-25-09-2026/`, 41 GB).
@@ -175,10 +175,16 @@ vermeiden.
   Test-Heimatverzeichnis belegt, am Geraet im Konto `dialosadmin` mit echtem
   Konto belegt ("Thunderbird zeigt das Postfach"). Konto `nutzer` offen.
 
-**Als Naechstes:** (0) Mailkonto im Konto `nutzer` ueber die Maske proben.
-(1) Beitrag veroeffentlichen, Entwurf
+- **Mailkonto auch im Konto `nutzer`** ueber die Maske angelegt (Helfer/pkexec).
+- **Teil 6 Abnahme bestanden:** Installationsstand nur mit den gewollten
+  Abweichungen (Stimme, Fernwartung); `dialos-nutzerkonto-pruefen.sh`: "Im Konto
+  nutzer fehlt nichts" (Bruecke, Woerterbuch, Signatur, Dienste, Daten).
+  Sprachtest als `nutzer`: "Es lief alles sauber inkl. Thunderbird" (Stephan).
+
+**Als Naechstes:** (1) Beitrag veroeffentlichen, Entwurf
 `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom zweiten
-Rechner (.env). (2) Teil 5 (Thunderbird, Bluetooth) und Teil 6 (Abnahme mit sudo).
+Rechner (.env). (2) Bluetooth-Lautsprecher koppeln (einziger offener Punkt aus Teil 5).
+(3) Mailkonto: MX-Hinweis bei eigenen Domains (TODO).
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 

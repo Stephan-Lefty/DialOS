@@ -160,6 +160,8 @@ das Erfolg meldet, während es versagt.
   **Am Gerät belegt** im Konto `dialosadmin` (Stephan: „Mailkonto eingerichtet,
   Thunderbird zeigt das Postfach"). Die Signatur trägt das Werkzeug seitdem
   gleich mit ein - beim ersten echten Konto fehlte sie bis zum nächsten Anmelden.
+  Danach auch im Konto `nutzer` angelegt; Abnahme (Teil 6) bestanden: „Im Konto
+  nutzer fehlt nichts", Sprachtest „lief alles sauber inkl. Thunderbird".
 
 ### 0.5.2
 

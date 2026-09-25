@@ -152,6 +152,9 @@ background) and `splash.png` (boot/login screen).
   **Verified on the device** in the `dialosadmin` account (Stephan: "mail
   account set up, Thunderbird shows the mailbox"). The tool now also writes the
   signature - with the first real account it was missing until the next login.
+  Then also set up in the `nutzer` account; acceptance check (part 6) passed:
+  nothing missing in `nutzer`, voice test "everything ran cleanly including
+  Thunderbird".
 
 ### 0.5.2
 

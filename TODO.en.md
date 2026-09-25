@@ -42,7 +42,7 @@ finished too, and then move down together. That way no reference breaks.
   account `dialosadmin`, Stephan: "mail account set up, Thunderbird shows the
   mailbox"). One profile, one account, two password entries, bridge installed.
   The signature was missing until the next login - the tool now writes it
-  itself. Open: account `nutzer`.
+  itself. **Account `nutzer` verified too**, acceptance check: nothing missing.
 - [ ] **Publish the post "Ein Gerät, eine Anleitung, ein Nachmittag"**
   (approved by Stephan on 2026-09-25). Draft in
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Only possible from

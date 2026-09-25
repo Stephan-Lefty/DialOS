@@ -43,7 +43,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [x] **Mailkonto aus der Maske am Gerät belegt** (2026-09-25, Konto `dialosadmin`,
   Stephan: „Mailkonto eingerichtet, Thunderbird zeigt das Postfach"). Ein Profil,
   ein Konto, zwei Passwort-Einträge, Brücke installiert. Signatur fehlte bis zum
-  nächsten Anmelden - trägt das Werkzeug jetzt selbst ein. Offen: Konto `nutzer`.
+  nächsten Anmelden - trägt das Werkzeug jetzt selbst ein. **Konto `nutzer` ebenfalls
+  belegt**, Abnahme: „Im Konto nutzer fehlt nichts".
 - [ ] **Beitrag „Ein Gerät, eine Anleitung, ein Nachmittag" veröffentlichen**
   (von Stephan am 2026-09-25 freigegeben). Entwurf in
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom
