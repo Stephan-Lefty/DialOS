@@ -2214,10 +2214,28 @@ admin account's menu. New packages listed explicitly: `python3-gi`,
 
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten-maske.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mailkonto.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/sbin/dialos-persoenliche-daten-konto /usr/local/sbin/
 sudo install -D -m 644 iso-build/config/includes.chroot/usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy /usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy
 sudo install -m 644 iso-build/config/includes.chroot/usr/share/applications/dialos-persoenliche-daten.desktop /usr/share/applications/
 ```
+
+**The mail account comes from the same mask** (since 2026-09-25, Stephan: "I
+want to capture all customer data centrally and then distribute it to the
+programs - that way I can't miss anything."). Section "E-Mail-Konto": user
+name, incoming and outgoing server with port - leave empty for known providers,
+the servers then come from Mozilla's provider database (ISPDB). Plus a hidden
+**Mail-Passwort** field. If it is filled, the mask runs
+`dialos-mailkonto.py einrichten` after saving (for `nutzer` through the helper,
+action `mailkonto`). The tool lets Thunderbird create its own profile (one
+`--headless` start) and reads the choice from `installs.ini` - a profile made
+with `-CreateProfile` is ignored and a second one created (measured); writes the
+account into `prefs.js` (not `user.js`) and recognises its own account by
+`dialos.mailkonto.eingetragen`, because Thunderbird drops comments when it
+rewrites the file; and stores the password through NSS (`PK11SDR_Encrypt`) in
+the profile's `logins.json`/`key4.db`, decrypting it again as a check. **The
+password never appears in `persoenliche-daten.txt`.** Thunderbird must be closed
+while saving. Tested on 2026-09-25 in a test home directory.
 
 In the setup run: `dialos-full-office-setup.sh` step 12 installs everything,
 `dialos-buero-setup-abschliessen.sh` step 6/6 puts the launcher on the desktop

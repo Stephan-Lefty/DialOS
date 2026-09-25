@@ -55,6 +55,24 @@ Telefon Handy privat:
 Fax privat:
 Webseite:
 
+# ---------------------------------------------------------------- E-Mail-Konto
+# Daraus legt DialOS beim Speichern in der Maske das Konto in Thunderbird an.
+# Das PASSWORT steht nie in dieser Datei - die Maske gibt es direkt an
+# Thunderbirds verschluesselten Passwortspeicher weiter.
+# Bei bekannten Anbietern (GMX, web.de, Gmail, T-Online ...) genügt die
+# E-Mail-Adresse oben - die Server kommen aus Thunderbirds Anbieter-Datenbank.
+# Leer: die E-Mail-Adresse. Nur eintragen, wenn der Anbieter einen anderen
+# Anmeldenamen verlangt.
+Mail-Benutzername:
+# Nur bei Anbietern, die Thunderbird nicht kennt: z.B. imap.example.org
+Posteingang-Server:
+# Leer: 993 (verschlüsselt)
+Posteingang-Port:
+# Nur bei Anbietern, die Thunderbird nicht kennt: z.B. smtp.example.org
+Postausgang-Server:
+# Leer: 587
+Postausgang-Port:
+
 # ---------------------------------------------------------------- Dienstlich (optional)
 Firma:
 Position:

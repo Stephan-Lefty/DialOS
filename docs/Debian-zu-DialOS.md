@@ -2293,10 +2293,36 @@ im Menü des Admin-Kontos. Neue Pakete ausdrücklich in der Paketliste:
 
 ```bash
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-persoenliche-daten-maske.py /usr/local/bin/
+sudo install -m 755 iso-build/config/includes.chroot/usr/local/bin/dialos-mailkonto.py /usr/local/bin/
 sudo install -m 755 iso-build/config/includes.chroot/usr/local/sbin/dialos-persoenliche-daten-konto /usr/local/sbin/
 sudo install -D -m 644 iso-build/config/includes.chroot/usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy /usr/share/polkit-1/actions/org.dialos.persoenliche-daten.policy
 sudo install -m 644 iso-build/config/includes.chroot/usr/share/applications/dialos-persoenliche-daten.desktop /usr/share/applications/
 ```
+
+**Das Mailkonto kommt aus derselben Maske** (seit 2026-09-25, Stephan: „Ich
+möchte gerne alle Kundendaten zentral erfassen und dann auf die Programme
+verteilen! So kann ich nix übersehen."). Abschnitt „E-Mail-Konto": Benutzername,
+Posteingang- und Postausgang-Server mit Port - bei bekannten Anbietern leer
+lassen, die Server kommen dann aus Mozillas Anbieter-Datenbank (ISPDB). Dazu ein
+verdecktes Feld **Mail-Passwort**. Steht dort etwas, ruft die Maske nach dem
+Speichern `dialos-mailkonto.py einrichten` auf (für `nutzer` über den Helfer,
+Aktion `mailkonto`). Das Werkzeug:
+
+- lässt Thunderbird sein Profil selbst anlegen (einmal `--headless`) und liest
+  die Wahl aus `installs.ini` - ein mit `-CreateProfile` angelegtes Profil
+  übergeht Thunderbird und legt ein zweites an (gemessen),
+- trägt das Konto in `prefs.js` ein (nicht `user.js`, sonst würde ein später
+  von Hand angelegtes Konto bei jedem Start aus der Liste fallen) und erkennt
+  sein eigenes Konto an `dialos.mailkonto.eingetragen` wieder - Kommentare
+  wirft Thunderbird beim Neuschreiben weg,
+- schreibt das Passwort über NSS (`PK11SDR_Encrypt`, `libnss3`) in
+  `logins.json`/`key4.db` des Profils und entschlüsselt es zur Gegenprobe.
+
+**Das Passwort steht nie in `persoenliche-daten.txt`.** Thunderbird muss beim
+Speichern geschlossen sein; sonst meldet die Maske das (Rückgabewert 3).
+Ohne Passwort im Feld bleibt Thunderbird unberührt. Geprüft am 2026-09-25 in
+einem Test-Heimatverzeichnis: Konto angelegt, Thunderbird gestartet, Konto und
+Passwörter behalten, zweites Speichern ersetzt statt verdoppelt.
 
 Im Einrichtungslauf: `dialos-full-office-setup.sh` Schritt 12 installiert alles,
 `dialos-buero-setup-abschliessen.sh` Schritt 6/6 legt das Startsymbol auf die

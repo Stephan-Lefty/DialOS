@@ -135,6 +135,23 @@ das Erfolg meldet, während es versagt.
 
 ## Änderungsprotokoll
 
+### 0.5.3
+
+- **Das Mailkonto kommt aus der Maske der persönlichen Daten** (2026-09-25,
+  Stephan: „Ich möchte gerne alle Kundendaten zentral erfassen und dann auf die
+  Programme verteilen! So kann ich nix übersehen."). Neuer Abschnitt
+  „E-Mail-Konto" mit Benutzername und Servern - bei bekannten Anbietern leer,
+  die Server kommen aus Mozillas Anbieter-Datenbank - und ein verdecktes
+  Passwortfeld. Beim Speichern legt `dialos-mailkonto.py` das Konto in
+  Thunderbird an, auch im Konto `nutzer`. Das Passwort geht direkt in
+  Thunderbirds verschlüsselten Passwortspeicher und steht nie in einer
+  DialOS-Datei (Stephans Wahl gegen den einfacheren Weg „Thunderbird fragt
+  selbst"). Drei Fallen, alle vorher in einem Test-Heimatverzeichnis gemessen:
+  Ein fremd angelegtes Profil übergeht Thunderbird und legt ein zweites an -
+  jetzt legt Thunderbird es selbst an; Konten gehören nach `prefs.js`, nicht
+  `user.js`; und Thunderbird wirft beim Neuschreiben jede Kommentarzeile weg,
+  das eigene Konto wird deshalb an einer Einstellung wiedererkannt.
+
 ### 0.5.2
 
 - **„Mikrofon ohne Echo" ist jetzt das Standard-Mikrofon jedes Kontos**

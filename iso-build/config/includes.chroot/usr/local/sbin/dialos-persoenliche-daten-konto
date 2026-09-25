@@ -25,6 +25,14 @@ Deshalb Abbruch mit Rueckgabewert 3.
 Aufruf (als root, ueber pkexec):
   dialos-persoenliche-daten-konto lesen KONTO       Datei nach stdout (4 = gibt es noch nicht)
   dialos-persoenliche-daten-konto schreiben KONTO   Datei von stdin, hoechstens 64 KB, UTF-8
+  dialos-persoenliche-daten-konto mailkonto KONTO   Mailkonto in Thunderbird anlegen,
+                                                    Passwort von stdin (seit 2026-09-25)
+
+MAILKONTO: Ruft ALS DAS KONTO /usr/local/bin/dialos-mailkonto.py auf - dasselbe
+Werkzeug, das die Maske im eigenen Konto direkt startet. Das Passwort geht nur
+durch stdin hindurch; weder dieser Helfer noch das Werkzeug schreibt es in eine
+Datei ausser in Thunderbirds verschluesselten Passwortspeicher. Rueckgabewerte
+des Werkzeugs werden durchgereicht (3 = Thunderbird laeuft, 4 = Server unbekannt).
 
 Rueckgabewerte: 0 ok, 2 falscher Aufruf, 3 Heimatverzeichnis nicht eingehaengt,
 4 Datei fehlt, 5 Schreiben/Lesen fehlgeschlagen.
@@ -43,6 +51,7 @@ UNTERPFAD = (".config", "dialos", "persoenliche-daten.txt")
 # Arbeitsverzeichnis "/": Unter pkexec ist es sonst eines, in das das Zielkonto
 # nicht hineinkommt.
 RUNUSER = "/usr/sbin/runuser"
+MAILKONTO = "/usr/local/bin/dialos-mailkonto.py"
 HOECHSTENS = 64 * 1024
 
 
@@ -82,7 +91,7 @@ def eingehaengt_oder_egal(heim):
 
 
 def main():
-    if len(sys.argv) != 3 or sys.argv[1] not in ("lesen", "schreiben"):
+    if len(sys.argv) != 3 or sys.argv[1] not in ("lesen", "schreiben", "mailkonto"):
         fehler(__doc__, 2)
     if os.geteuid() != 0:
         fehler("Nur ueber pkexec aufrufen.", 2)
@@ -95,6 +104,19 @@ def main():
     datei = os.path.join(ordner, UNTERPFAD[-1])
     als_konto = [RUNUSER, "-u", name, "--"]
     umgebung = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LANG": "C.UTF-8"}
+
+    if aktion == "mailkonto":
+        passwort = sys.stdin.buffer.read(4097)
+        if len(passwort) > 4096:
+            fehler("Zu gross.", 2)
+        # HOME ist hier Pflicht: Thunderbird findet sein Profil ueber $HOME, und
+        # die sonst bewusst leere Umgebung dieses Helfers hat keins.
+        mit_heim = dict(umgebung, HOME=eintrag.pw_dir, USER=name, LOGNAME=name)
+        ergebnis = subprocess.run(als_konto + [MAILKONTO, "einrichten", "--passwort-stdin"],
+                                  input=passwort, capture_output=True, env=mit_heim, cwd="/")
+        sys.stdout.buffer.write(ergebnis.stdout)
+        sys.stderr.buffer.write(ergebnis.stderr)
+        sys.exit(ergebnis.returncode)
 
     if aktion == "lesen":
         pruefung = subprocess.run(als_konto + ["test", "-f", datei], env=umgebung, cwd="/")

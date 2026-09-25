@@ -42,6 +42,10 @@ MODUL = os.path.join(HIER, "dialos-persoenliche-daten.py")
 VORLAGE_DANEBEN = os.path.normpath(os.path.join(HIER, "..", "share", "dialos",
                                                 "persoenliche-daten-vorlage.txt"))
 HELFER = "/usr/local/sbin/dialos-persoenliche-daten-konto"
+MAILKONTO = os.path.join(HIER, "dialos-mailkonto.py")
+# In diesem Abschnitt der Vorlage steht das Passwortfeld (es selbst steht nie
+# in der Datei - siehe dialos-mailkonto.py).
+MAIL_ABSCHNITT = "E-Mail-Konto"
 # Feste Auswahl statt Freitext, wo es nur wenige richtige Werte gibt.
 AUSWAHL = {"anrede": ("", "Herr", "Frau"), "ansprache": ("", "Du", "Sie")}
 LEER = "–"
@@ -133,6 +137,8 @@ class Fenster(Adw.ApplicationWindow):
                 zeile.set_activatable_widget(eingabe)
                 gruppe.add(zeile)
                 self.felder[schluessel] = eingabe
+            if abschnitt == MAIL_ABSCHNITT:
+                gruppe.add(self.passwortzeile())
             seite.add(gruppe)
 
         ansicht.set_content(seite)
@@ -145,6 +151,24 @@ class Fenster(Adw.ApplicationWindow):
         self.kontowahl.set_selected(self.konten.index(start))
         if self.konten.index(start) == 0:
             self.konto_gewechselt()
+
+    def passwortzeile(self):
+        """Verdecktes Feld - wird NIE gespeichert, nur an Thunderbird weitergegeben."""
+        zeile = Adw.ActionRow(title="Mail-Passwort")
+        hinweis = ("Nur ausfüllen, wenn das Thunderbird-Konto jetzt angelegt oder das "
+                   "Passwort geändert werden soll. Wird nicht in der Datei gespeichert, "
+                   "sondern direkt in Thunderbirds verschlüsseltem Passwortspeicher. "
+                   "Thunderbird muss dafür geschlossen sein.")
+        zeile.set_subtitle(hinweis)
+        self.passwort = Gtk.PasswordEntry(show_peek_icon=True)
+        self.passwort.set_width_chars(32)
+        self.passwort.set_valign(Gtk.Align.CENTER)
+        self.passwort.update_property([Gtk.AccessibleProperty.LABEL], ["Mail-Passwort"])
+        self.passwort.update_property([Gtk.AccessibleProperty.DESCRIPTION], [hinweis])
+        self.passwort.connect("activate", lambda *_: self.speichern())
+        zeile.add_suffix(self.passwort)
+        zeile.set_activatable_widget(self.passwort)
+        return zeile
 
     # ------------------------------------------------------------ Werte
     def aendern(self):
@@ -308,6 +332,43 @@ class Fenster(Adw.ApplicationWindow):
         self.geaendert = False
         self.status.set_subtitle(self.pfad_von(konto))
         self.melden(f"Gespeichert für {konto}.")
+        # VERTEILEN: Steht ein Passwort im Feld, geht das Mailkonto nach
+        # Thunderbird. Ohne Passwort bleibt Thunderbird unberuehrt - sonst
+        # muesste es bei jedem Speichern (etwa einer neuen Telefonnummer)
+        # geschlossen sein.
+        passwort = self.passwort.get_text() if hasattr(self, "passwort") else ""
+        if passwort:
+            self.mailkonto_einrichten(konto, passwort)
+
+    def mailkonto_einrichten(self, konto, passwort):
+        if konto == self.eigenes:
+            befehl = [MAILKONTO, "einrichten", "--passwort-stdin"]
+        else:
+            befehl = ["pkexec", HELFER, "mailkonto", konto]
+        self.set_sensitive(False)
+        self.melden("Richte das Mailkonto in Thunderbird ein …")
+        prozess = Gio.Subprocess.new(befehl, Gio.SubprocessFlags.STDIN_PIPE
+                                     | Gio.SubprocessFlags.STDOUT_PIPE
+                                     | Gio.SubprocessFlags.STDERR_PIPE)
+        prozess.communicate_utf8_async(passwort + "\n", None, self.mailkonto_fertig, konto)
+
+    def mailkonto_fertig(self, prozess, ergebnis, konto):
+        self.set_sensitive(True)
+        try:
+            _, ausgabe, fehler = prozess.communicate_utf8_finish(ergebnis)
+        except GLib.Error as e:
+            self.fehler_zeigen("Mailkonto nicht eingerichtet", e.message)
+            return
+        code = prozess.get_exit_status()
+        if code == 0:
+            self.passwort.set_text("")
+            self.fehler_zeigen(f"Mailkonto für {konto} eingerichtet",
+                               (ausgabe or "").strip())
+        elif code in (126, 127):
+            self.melden("Mailkonto nicht eingerichtet – das Passwort wurde nicht bestätigt.")
+        else:
+            self.fehler_zeigen(f"Mailkonto für {konto} nicht eingerichtet",
+                               (fehler or "").strip() or f"Rückgabewert {code}")
 
     # ------------------------------------------------------------ Dialoge
     def melden(self, text):

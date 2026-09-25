@@ -115,6 +115,16 @@ Diese Trennlinie gehört gezogen, bevor etwas gebaut wird. Sonst wandert am Ende
 alles in eine Datei, und beim Gerätewechsel weiß niemand mehr, was zu löschen
 ist.
 
+### E-Mail-Konto - Felder für Thunderbird (seit 2026-09-25)
+
+Stephan: „Ich möchte gerne alle Kundendaten zentral erfassen und dann auf die
+Programme verteilen! So kann ich nix übersehen." Deshalb stehen die Daten fürs
+Mailkonto in derselben Datei: `mail_benutzer`, `imap_server`, `imap_port`,
+`smtp_server`, `smtp_port` - alle freiwillig, bei bekannten Anbietern genügt
+die Mailadresse. **Das Passwort ist bewusst KEIN Feld:** Die Maske gibt es direkt
+an Thunderbirds verschlüsselten Passwortspeicher weiter (`dialos-mailkonto.py`),
+in dieser Datei steht es nie.
+
 ## Die Vorlage
 
 Ein Feld je Zeile, `schlüssel = wert`, UTF-8. Leere Felder bleiben leer und

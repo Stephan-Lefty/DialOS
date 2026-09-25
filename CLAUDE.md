@@ -171,7 +171,11 @@ vermeiden.
   mit geleerter Kontowahl nimmt `dialosadmin` sie von selbst, auch nach dem
   Neustart. Stephan: "jetzt laeuft alles".
 
-**Als Naechstes:** (1) Beitrag veroeffentlichen, Entwurf
+- **Mailkonto aus der Maske gebaut** (0.5.3, `dialos-mailkonto.py`): im
+  Test-Heimatverzeichnis belegt, am Geraet mit echtem Konto NOCH NICHT.
+
+**Als Naechstes:** (0) Mailkonto am Geraet mit Stephans echtem Konto proben.
+(1) Beitrag veroeffentlichen, Entwurf
 `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom zweiten
 Rechner (.env). (2) Teil 5 (Thunderbird, Bluetooth) und Teil 6 (Abnahme mit sudo).
 
@@ -771,13 +775,15 @@ mehr, sondern der etablierte Ansatz:
    Sicherungs-Abbild mit **[Rescuezilla](https://rescuezilla.com/)**
    (seit 2026-08-16; Penguins' Eggs ist entfallen, siehe Schritt 16).
 
-**Aktuelle Version: 0.5.2** (in Arbeit seit 2026-09-17, Stephans Ansage). 0.5.1
+**Aktuelle Version: 0.5.3** (seit 2026-09-25 abends, Stephans Ansage: „ab sofort
+veröffentlichen wir im Änderungsprotokoll mit der 0.5.3"). 0.5.2 (2026-09-17
+bis 2026-09-25) umfasst Mail-Dialog, Suche und den Neuaufbau. 0.5.1
 (2026-08-17 bis 2026-09-17) ist mit dem Brief nach DIN 5008 abgeschlossen, 0.5.0
 mit dem Sprachbefehl für die Desktop-Umschaltung. Alle Details
 im [README.md-Änderungsprotokoll](README.md#änderungsprotokoll).
 
 > **Dauerregel (Stephan, 2026-08-17):** Neue Änderungsprotokoll-Einträge
-> kommen unter die **oberste Versionsnummer** - derzeit `### 0.5.2` -
+> kommen unter die **oberste Versionsnummer** - derzeit `### 0.5.3` -
 > **bis Stephan ausdrücklich eine andere ansagt.** Nicht selbst eine neue
 > Nummer erfinden, weil viel dazugekommen ist, und nicht auf eine
 > abgeschlossene zurückfallen. Sagt Stephan eine neue Nummer an: neuen

@@ -127,6 +127,23 @@ background) and `splash.png` (boot/login screen).
 
 ## Changelog
 
+### 0.5.3
+
+- **The mail account comes from the personal-data mask** (2026-09-25,
+  Stephan: "I want to capture all customer data centrally and then distribute
+  it to the programs - that way I can't miss anything."). New section
+  "E-Mail-Konto" with user name and servers - empty for known providers, the
+  servers come from Mozilla's provider database - and a hidden password field.
+  On saving, `dialos-mailkonto.py` creates the account in Thunderbird, also in
+  the `nutzer` account. The password goes straight into Thunderbird's
+  encrypted password store and never appears in a DialOS file (Stephan's
+  choice over the simpler "Thunderbird asks itself"). Three traps, all measured
+  beforehand in a test home directory: Thunderbird ignores a profile created
+  from outside and makes a second one - now Thunderbird creates it itself;
+  accounts belong in `prefs.js`, not `user.js`; and Thunderbird drops every
+  comment line when it rewrites the file, so the own account is recognised by
+  a preference.
+
 ### 0.5.2
 
 - **Programs open on command - "Postfach öffnen", "neue E-Mail schreiben"**
