@@ -16,23 +16,28 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
-- [ ] **Mikrofon im neuen Konto `nutzer` - Ursache nachliefern** (Stephan,
-  2026-09-25, nach dem Neuaufbau). Beim ersten Anmelden ließ sich die
-  Lautstärke-Frage nicht beantworten; Stephan sah das Mikrofon **oben in der
-  Leiste** als ausgeschaltet und hat „Mikrofon ohne Echo" gewählt. Gemessen:
-  ALSA-Aufnahme an (100 %), im Konto `nutzer` `"mute":false`, Stufe wie bei
-  `dialosadmin`; die Frage nimmt die Echo-Quelle ohnehin selbst. **Verdacht:**
-  Die fehlende Stimme Anna - `spd-say` hing 20 s (bei `dialosadmin` im Journal
-  belegt), die Frage kam zu spät. **Nächster Schritt:** mit funktionierender
-  Stimme als `nutzer` anmelden und antworten; klappt es nicht, das Symbol in
-  der Leiste ansehen (durchgestrichen oder die GNOME-Datenschutzanzeige?). Das
-  Ergebnis gehört auch in den Beitragsentwurf
-  `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`.
+- [x] **Mikrofon im neuen Konto `nutzer` - Ursache geklärt** (2026-09-25).
+  Die erste Lautstärke-Frage scheiterte an zu **frühem Antworten** - bevor die
+  Aufnahme lief (Stephan, beim zweiten Versuch mit richtiger Antwortzeit
+  geklappt); beim ersten Anmelden hing dazu die Sprachausgabe 20 s, weil Anna
+  fehlte. Das Mikrofon war nicht stumm (gemessen). **Daneben gefunden:** In
+  BEIDEN Konten war das rohe Mikrofon als Eingabegerät eingestellt, nicht
+  `dialos_mikrofon_ohne_echo` - Stephan hat es von Hand umgestellt. Die
+  DialOS-Dienste wählen die Echo-Quelle selbst, alle anderen Programme nicht.
+- [ ] **„Mikrofon ohne Echo" als Voreinstellung für jedes Konto** (aus dem
+  Punkt darüber). Ein neues Konto startet mit dem rohen Mikrofon. Vorschlag:
+  in `99-dialos-echo-unterdrueckung.conf` der Echo-Quelle eine hohe
+  `priority.session` geben, dann wählt WirePlumber sie von selbst - gilt für
+  jedes Konto ohne eigene gespeicherte Wahl. Wartet auf Stephans Freigabe;
+  der PipeWire-Neustart zum Testen wirft Bluetooth in HFP (Schritt 11f).
+- [ ] **Hinweis zur Antwortzeit** prüfen: Wer vor dem Frageton antwortet, wird
+  nicht gehört - ohne Rückmeldung. Ist die Pause zwischen Frage und Aufnahme
+  zu lang, oder fehlt eine Ansage „Ich habe nichts gehört"?
 - [ ] **Beitrag „Ein Gerät, eine Anleitung, ein Nachmittag" veröffentlichen**
   (von Stephan am 2026-09-25 freigegeben). Entwurf in
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom
   zweiten Rechner (dort liegt die `.env`); vorher englische Fassung und
-  Hörfassung, und den Mikrofon-Absatz nach dem Punkt darüber anpassen.
+  Hörfassung. Der Mikrofon-Absatz ist schon angepasst.
 - [ ] **Kompletter Brief nach DIN 5008** (Stephan, 2026-09-16, nach dem festen
   Einbau von Parakeet). (1) Persönliche Daten des Nutzers - zuerst Stephans -
   einmal fest für alle Programme festlegen und eintragen (Briefbogen,

@@ -148,10 +148,11 @@ das Erfolg meldet, während es versagt.
   vorher zu sichern (neuer Teil 0.4); (6) die Sicherung des Nutzerkontos ohne
   Briefe und Archiv; (7) Anna fehlte - Stimme zu schnell, falscher Name;
   (8) kein Update des Grundsystems vor dem Aufbau (neuer Schritt 1e, Stephan).
-  **Offen:** Im neuen Konto `nutzer` ließ sich die erste Lautstärke-Frage
-  nicht beantworten; Stephan sah das Mikrofon oben in der Leiste als
-  ausgeschaltet. Der gespeicherte Zustand zeigt es nicht stumm - Verdacht ist
-  die fehlende Stimme (Lücke 7), belegt ist es nicht. Die Anleitung ist von 10
+  **Geklärt am selben Abend:** Die erste Lautstärke-Frage im Konto `nutzer`
+  scheiterte an zu frühem Antworten, nicht am Mikrofon (beim ersten Anmelden
+  hing zudem die Sprachausgabe, Lücke 7). Nebenbei: In beiden Konten war das
+  rohe Mikrofon als Eingabegerät eingestellt statt „Mikrofon ohne Echo" -
+  offen als TODO. Die Anleitung ist von 10
   auf 12 Seiten gewachsen.
 
 - **Anna fehlte nach dem Neuaufbau** (2026-09-25, Stephan: „die Stimme ist zu

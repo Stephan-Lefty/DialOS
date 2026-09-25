@@ -3,9 +3,8 @@ Entwurf fuer eine Neuigkeit auf dialos.org - von Stephan am 2026-09-25
 freigegeben ("Passt so"). NOCH NICHT VEROEFFENTLICHT: Die WordPress-
 Zugangsdaten (.env) liegen auf dem zweiten Rechner, nicht auf dem T490.
 Offen vor dem Veroeffentlichen: englische Fassung und Hoerfassung (wie bei
-den bisherigen Beitraegen), und der Absatz zum Mikrofon - "Die Ursache liefern
-wir nach" (Stephan). Wird sie gefunden, den Absatz ersetzen oder einen
-Nachtrag anhaengen.
+den bisherigen Beitraegen), und der Absatz zum Mikrofon ist seit dem Abend des
+2026-09-25 auf dem geklaerten Stand (zu fruehes Antworten, nicht das Mikrofon).
 -->
 
 # Ein Gerät, eine Anleitung, ein Nachmittag
@@ -22,6 +21,6 @@ Die hörbarste Lücke kam nach dem Neustart. Die Stimme sprach zu schnell und st
 
 Der Rest war kleiner, aber genauso lehrreich: Befehle, die im PDF mitten in einer Internetadresse umbrachen. Ein Einrichtungs-Skript, dem in der Anleitung das „sudo" fehlte. Kein Hinweis darauf, dass ein bereits benutzter Sicherheits-Stick vorher gesichert werden muss. Und kein Hinweis darauf, das frisch installierte System zuerst auf den neuesten Stand zu bringen.
 
-Was noch offen ist: Im neu angelegten Nutzerkonto war das Mikrofon nach der Installation ausgeschaltet. Die erste Frage des Geräts konnte deshalb nicht beantwortet werden. Die Ursache wird gerade gesucht.
+Und eine Frage, die zuerst nach einem Fehler aussah: Im neuen Nutzerkonto ließ sich die erste Frage des Geräts, die nach der Lautstärke, nicht beantworten. Der Verdacht fiel aufs Mikrofon. Es lag aber an der Reihenfolge: Die Antwort kam, bevor das Gerät zuhörte. Beim zweiten Versuch, mit etwas Geduld, hat es geklappt. Dabei fiel noch etwas auf: In beiden Konten war das Mikrofon ohne Echo-Unterdrückung eingestellt. DialOS selbst wählt das richtige von allein, andere Programme nicht. Das soll künftig von Anfang an stimmen.
 
 Die Anleitung ist danach von zehn auf zwölf Seiten gewachsen. Jede neue Zeile darin ist ein Fehler, den beim nächsten Gerät niemand mehr machen muss.

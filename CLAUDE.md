@@ -165,12 +165,13 @@ vermeiden.
   als Schritt 1e nachgetragen (Stephan). Acht Luecken insgesamt, Liste im
   Aenderungsprotokoll 0.5.2 ("Neuaufbau nach Anleitung").
 
-**Als Naechstes:** (1) Mikrofon-Frage im Konto `nutzer` klaeren (TODO, oberster
-Punkt; Stephan startet das Geraet erst NACH dieser Klaerung neu -
-Punkt - Verdacht fehlende Stimme, nicht belegt). (2) Beitrag veroeffentlichen,
-Entwurf `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom
-zweiten Rechner (.env). (3) Teil 5 (Thunderbird, Bluetooth) und Teil 6
-(Abnahme mit sudo).
+- **Mikrofon-Frage geklaert:** zu fruehes Antworten, nicht das Mikrofon. In
+  beiden Konten war aber das rohe Mikrofon eingestellt (Stephan hat umgestellt).
+
+**Als Naechstes:** (1) Echo-Quelle als Voreinstellung fuer jedes Konto (TODO,
+wartet auf Stephans Freigabe). (2) Beitrag veroeffentlichen, Entwurf
+`Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom zweiten
+Rechner (.env). (3) Teil 5 (Thunderbird, Bluetooth) und Teil 6 (Abnahme mit sudo).
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 
