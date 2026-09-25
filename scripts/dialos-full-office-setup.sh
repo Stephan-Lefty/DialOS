@@ -533,13 +533,69 @@ schritt_15b_parakeet() {
   scripts/dialos-parakeet-einrichten.sh
 }
 
+schritt_15c_languagetool() {
+  log "Schritt 15c: LanguageTool (Schreibhilfe)"
+  # Von Hand, weil Debian es nicht paketiert - siehe Debian-zu-DialOS.md.
+  # 241 MB gepackt; laeuft nur auf 127.0.0.1:8081, nicht im Netz erreichbar.
+  if [ -f /opt/languagetool/languagetool-server.jar ]; then
+    echo "  LanguageTool liegt schon in /opt - uebersprungen."
+    return
+  fi
+  curl -L -o /tmp/lt.zip https://languagetool.org/download/LanguageTool-stable.zip
+  rm -rf /tmp/lt && mkdir -p /tmp/lt && unzip -q /tmp/lt.zip -d /tmp/lt
+  sudo mkdir -p /opt/languagetool
+  sudo cp -r /tmp/lt/LanguageTool-*/. /opt/languagetool/
+  rm -rf /tmp/lt /tmp/lt.zip
+}
+
+schritt_16_dialos_dateien() {
+  log "Schritt 16: Alle DialOS-Dateien aufspielen"
+  # DIESER SCHRITT IST AM 2026-09-25 DAZUGEKOMMEN, UND ER SCHLIESST EINE
+  # LUECKE, DIE EINEN NEUAUFBAU WERTLOS GEMACHT HAETTE: Bis hierher kopierte
+  # dieses Skript eine FESTE LISTE von Dateien - und die war seit Mitte
+  # August nicht nachgezogen. Von 118 Geraetedateien im Repo kannte es 52
+  # nicht, darunter dialos-diktat.py, die Suche, den Brief nach DIN, alle
+  # Benutzerdienste und die sudoers-Regeln. Ein Geraet aus diesem Skript
+  # haette ungefaehr dem Stand vom 2026-08-16 entsprochen, ohne dass
+  # irgendetwas eine Fehlermeldung ergeben haette.
+  #
+  # Statt die Liste zu pflegen (und beim naechsten Mal wieder zu vergessen),
+  # ruft der Aufbau jetzt genau den Weg auf, der taeglich benutzt wird:
+  # dialos-aufspielen vergleicht Repo und Geraet und kopiert, was abweicht -
+  # samt seiner Ausschlussliste (Stimmwahl, Bluetooth-Kopplung, Fernwartung).
+  # Es findet seinen Repo-Baum selbst, auch wenn die Platte woanders haengt.
+  sudo iso-build/config/includes.chroot/usr/local/sbin/dialos-aufspielen --wirklich
+
+  log "Schritt 16b: Dienste fuer ALLE Konten einschalten"
+  # "--global" und nicht "--user": Ein Dienst, der nur im Konto des Admins
+  # eingeschaltet ist, fehlt dem Kunden - am 2026-09-21 genau so passiert,
+  # der Mail-Archiv-Timer lief nur bei dialosadmin.
+  for einheit in dialos-akku-warnung.service dialos-kontakte.service \
+                 dialos-languagetool.service dialos-mail-entwurf.service \
+                 dialos-mail-signatur.service dialos-mailarchiv.timer; do
+    sudo systemctl --global enable "$einheit"
+  done
+
+  log "Schritt 16c: Thunderbird-Erweiterung fuer jedes Profil"
+  # Die .xpi wird gebaut (nicht im Repo, sonst laeuft sie der Quelle davon),
+  # policies.json kommt aus Schritt 16 mit. Thunderbird setzt die Erweiterung
+  # damit in JEDEM Profil selbst ein - auch im noch nicht vorhandenen des
+  # Nutzers.
+  sudo scripts/dialos-erweiterung-bauen.sh
+
+  log "Schritt 16d: Frageton fuer dialosadmin"
+  mkdir -p "$HOME/.config/dialos"
+  echo an > "$HOME/.config/dialos/frageton"
+}
+
 # Vollstaendige Liste in Doku-Reihenfolge - 14_bluetooth ist bewusst
 # NICHT Teil des normalen Laufs (device-spezifisch, siehe Funktion
 # oben), nur per --bluetooth-kopplung zuschaltbar oder einzeln per
 # "./dialos-full-office-setup.sh 14" aufrufbar.
 ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 04_autologin 05_calamares_entfernen 06_rustdesk
   07_claude_cli 08_piper 09_gnome_erweiterungen 10_standardprogramme
-  11_sprachausgabe 11c_admin_tastenkuerzel 12_sicherheit 14_bluetooth 15_vosk 15b_parakeet)
+  11_sprachausgabe 11c_admin_tastenkuerzel 12_sicherheit 14_bluetooth 15_vosk 15b_parakeet
+  15c_languagetool 16_dialos_dateien)
 
 main() {
   local bluetooth_kopplung=0
@@ -577,7 +633,7 @@ main() {
     fi
     "schritt_${schritt}"
   done
-  log "Fertig (Schritte 2-12 + 15)."
+  log "Fertig (Schritte 2-12 + 15 + 16)."
   cat <<'HINWEIS'
 
 Noch zwei Befehle bis zum fertigen DialOS:

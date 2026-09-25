@@ -23,9 +23,21 @@ den Rechten, die zum Ort gehoeren. Danach laedt es systemd neu und startet die
 DialOS-Dienste neu, deren Datei sich geaendert hat.
 
 WAS ES NICHT TUT: keine Pakete installieren, keine Konfiguration ausserhalb
-der bekannten Ziele anfassen, nichts loeschen. Die Quelle ist FEST
-eingetragen; ein Pfad als Argument waere genau das Schlupfloch, das die enge
-Regel verhindern soll.
+der bekannten Ziele anfassen, nichts loeschen. Die Quelle ist FEST eingetragen;
+ein Pfad als Argument waere genau das Schlupfloch, das die enge Regel verhindern
+soll.
+
+EINE ZWEITE QUELLE GIBT ES SEIT DEM 2026-09-25, UND SIE IST KEIN SCHLUPFLOCH:
+Liegt dieses Skript selbst in einem Repo-Baum (also unter
+".../iso-build/config/includes.chroot/usr/local/sbin/"), nimmt es DIESEN Baum.
+Das ist kein Argument von aussen, sondern der eigene Ort - wer das Skript aus
+einem fremden Repo startet, hat ohnehin schon volle Rechte auf die Datei.
+
+WOZU: Beim Neuaufbau eines Geraets ist noch nichts installiert, und die externe
+Platte kann woanders haengen als unter "/media/dialosadmin/SanDisk-Extreme".
+Ohne diesen Weg muesste der Aufbau die 52 Gerätedateien selbst auflisten - und
+genau das ist am 2026-09-21 als Luecke aufgefallen: Das Aufbau-Skript kannte
+sie nicht, ein Neuaufbau haette ungefaehr den Stand vom 2026-08-16 ergeben.
 
 Aufruf:
     dialos-aufspielen                    zeigt, was sich unterscheidet
@@ -38,8 +50,19 @@ import shutil
 import subprocess
 import sys
 
-QUELLE = ("/media/dialosadmin/SanDisk-Extreme/DialOS/repo/"
-          "iso-build/config/includes.chroot")
+def _quelle_finden():
+    """Der eigene Repo-Baum, sonst der fest eingetragene Platz."""
+    hier = os.path.dirname(os.path.abspath(__file__))
+    marke = os.path.join("iso-build", "config", "includes.chroot")
+    if marke in hier:
+        baum = hier[:hier.index(marke) + len(marke)]
+        if os.path.isdir(os.path.join(baum, "usr", "local", "bin")):
+            return baum
+    return ("/media/dialosadmin/SanDisk-Extreme/DialOS/repo/"
+            "iso-build/config/includes.chroot")
+
+
+QUELLE = _quelle_finden()
 NUTZER = "dialosadmin"
 
 # Welche Rechte an welchem Ort gelten. Laengster Treffer gewinnt.

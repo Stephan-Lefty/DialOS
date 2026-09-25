@@ -185,4 +185,29 @@ if [ -x /usr/local/bin/dialos-persoenliche-daten-maske.py ] && id nutzer >/dev/n
 fi
 
 echo ""
+echo "=== [dialos] Schritt 7/8: Frageton im Konto 'nutzer' ==="
+# PRO KONTO, DESHALB HIER UND NICHT IM AUFBAU-SKRIPT (Stephans Regel vom
+# 2026-09-21: "Alles was wir jetzt auch bei den installierten Programmen
+# machen und nicht exklusiv fuer Dialosadmin ist, muss dann auch sofort im
+# Nutzer Konto zur Verfuegung stehen. Sonst uebersehen wir was."). Der
+# Frageton stand danach im Nutzerkonto tagelang nicht, ohne dass es auffiel.
+if id nutzer >/dev/null 2>&1; then
+  sudo -u nutzer mkdir -p /home/nutzer/.config/dialos
+  echo an | sudo -u nutzer tee /home/nutzer/.config/dialos/frageton >/dev/null
+  echo "[dialos] Frageton fuer 'nutzer' eingeschaltet."
+fi
+
+echo ""
+echo "=== [dialos] Schritt 8/8: Abnahme ==="
+# ZWEI WERKZEUGE STATT EINES BLICKS: Ein Aufbau, der durchlaeuft, beweist
+# nicht, dass er vollstaendig war - am 2026-08-19 liefen zwei Skripte zwei
+# Tage lang in einer aelteren Fassung, ohne dass jemand es sah.
+HIER="$(cd "$(dirname "$0")" && pwd)"
+"$HIER/dialos-installstand.sh" || true
+sudo "$HIER/dialos-nutzerkonto-pruefen.sh" || true
+
+echo ""
 echo "=== [dialos] Alles erledigt. Nach dem Ausfuellen der persoenlichen Daten einmal neu starten. ==="
+echo "[dialos] Danach fehlen nur noch die Dinge, die Zugangsdaten brauchen:"
+echo "[dialos]   - Thunderbird-Konto einrichten (die Erweiterung kommt dann von selbst)"
+echo "[dialos]   - Claude-App: Anmeldung, Ordnerfreigabe, GitHub-Token"
