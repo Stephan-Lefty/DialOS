@@ -1273,6 +1273,14 @@ would have been expected given the variable latency. Control test: the
 same announcement played via `paplay`, i.e. with no safeguard at all -
 the service recognized **nothing** and did not switch.
 
+**It is the default microphone of every account** (since 2026-09-25):
+`priority.session = 2500` in `source.props`. WirePlumber picks the default
+source by this rank; the built-in microphone has 2009, the echo source had
+none before. After the rebuild both accounts therefore had the raw microphone
+as input. DialOS services pick the echo source themselves anyway - but every
+other program uses the default. A choice made by hand in the account still
+takes precedence.
+
 Two decisions in the configuration:
 
 - **`monitor.mode = true`.** Without it, every program would have to play

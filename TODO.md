@@ -24,7 +24,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   BEIDEN Konten war das rohe Mikrofon als Eingabegerät eingestellt, nicht
   `dialos_mikrofon_ohne_echo` - Stephan hat es von Hand umgestellt. Die
   DialOS-Dienste wählen die Echo-Quelle selbst, alle anderen Programme nicht.
-- [ ] **„Mikrofon ohne Echo" als Voreinstellung für jedes Konto** (aus dem
+- [x] **„Mikrofon ohne Echo" als Voreinstellung für jedes Konto** (gebaut 2026-09-25, `priority.session = 2500`; Probe mit leerem Kontostand steht aus) (aus dem
   Punkt darüber). Ein neues Konto startet mit dem rohen Mikrofon. Vorschlag:
   in `99-dialos-echo-unterdrueckung.conf` der Echo-Quelle eine hohe
   `priority.session` geben, dann wählt WirePlumber sie von selbst - gilt für

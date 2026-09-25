@@ -137,6 +137,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **„Mikrofon ohne Echo" ist jetzt das Standard-Mikrofon jedes Kontos**
+  (2026-09-25, Stephan: „Müssen wir nicht das Mikrofon ohne Echo als Standard
+  einrichten. Auch bei den nächsten Laptops?"). WirePlumber wählt die
+  Vorgabe-Quelle nach `priority.session`: das eingebaute Mikrofon 2009, die
+  Echo-Quelle bisher gar keine - nach dem Neuaufbau stand in beiden Konten das
+  rohe Mikrofon. Jetzt 2500 in `99-dialos-echo-unterdrueckung.conf`; die Datei
+  kommt mit `dialos-aufspielen` auf jedes Gerät.
+
 - **Neuaufbau nach Anleitung - fast reibungslos** (2026-09-25). Das Testgerät
   wurde komplett gelöscht und nur nach `docs/installationsanleitung.md` neu
   aufgebaut, beide Konten neu. Die Anleitung war dabei der Prüfling: Jeder

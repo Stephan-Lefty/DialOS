@@ -1323,6 +1323,14 @@ schwankenden Laufzeit deutlich weniger zu erwarten gewesen wäre.
 Gegenprobe: dieselbe Ansage per `paplay` abgespielt, also ohne jeden
 Schutz - der Dienst erkannte **nichts** und schaltete nicht um.
 
+**Sie ist das Standard-Mikrofon jedes Kontos** (seit 2026-09-25):
+`priority.session = 2500` in `source.props`. WirePlumber wählt die
+Vorgabe-Quelle nach dieser Rangzahl; das eingebaute Mikrofon hat 2009, die
+Echo-Quelle hatte vorher gar keine. Nach dem Neuaufbau stand deshalb in beiden
+Konten das rohe Mikrofon als Eingabegerät. Die DialOS-Dienste wählen die
+Echo-Quelle ohnehin selbst - alle anderen Programme aber nehmen die Vorgabe.
+Eine von Hand getroffene Wahl im Konto geht weiterhin vor.
+
 Zwei Entscheidungen in der Konfiguration:
 
 - **`monitor.mode = true`.** Ohne diese Option müssten alle Programme
