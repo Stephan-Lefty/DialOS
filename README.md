@@ -144,6 +144,12 @@ das Erfolg meldet, während es versagt.
   LÖSCHENDEN Geräte. Das Skript schloss nur die Systemplatte aus. Aufgefallen
   beim Durchsehen vor dem Lauf, nicht durch einen Schaden. Die Anleitung warnt
   außerdem, dass auch `DIALOS-DATA` mit dem Archiv gelöscht wird.
+  **Neuer Teil 0.4** (Stephans Wunsch): den benutzten Stick VOR dem Neuaufbau
+  sichern - `DIALOS-DATA` per Kopie mit `diff -r`-Gegenprobe, ausdrücklich
+  NICHT per Rescuezilla, weil dann der Schlüssel neben dem verschlüsselten
+  Abbild läge. Dazu in 0.2: Nach dem Neuaufbau öffnet nur noch das alte
+  Wiederherstellungs-Passwort `/home/nutzer` im Abbild. Und die Sicherung des
+  Nutzerkontos nahm bisher nur die Einstellungen mit, nicht Briefe und Archiv.
 
 - **Installationsanleitung Teil 2 (Claude-App) ist jetzt wörtlich die
   offizielle Anleitung von Anthropic** (2026-09-25, Stephan: „Deine Angaben

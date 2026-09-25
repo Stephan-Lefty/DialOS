@@ -33,6 +33,8 @@ Beide Ausgaben müssen **leer** sein. Steht dort etwas, erst committen und pushe
 
 Ohne Abbild gibt es keinen Weg zurück zum heutigen Stand. Vom Rescuezilla-Stick booten, „Backup" wählen, Ziel ist die externe Platte. Dauer etwa 30 bis 45 Minuten.
 
+> **Das Abbild enthält `/home/nutzer` verschlüsselt - der Schlüssel liegt auf dem Sicherheits-Stick, und der wird in Teil 4.2 gelöscht.** Danach öffnet nur noch das **alte Wiederherstellungs-Passwort** diesen Teil des Abbilds. Deshalb: das Passwort zusammen mit dem Namen des Abbilds aufschreiben und getrennt von der Platte aufbewahren. Den Stick selbst **nicht** mit Rescuezilla auf dieselbe Platte sichern - dann lägen Schlüssel und verschlüsselte Daten nebeneinander, und wer die Platte hat, hat beides.
+
 ## 0.3 Was nicht im Repository liegt - und liegen darf
 
 Diese Dinge gehören **bewusst** nicht ins öffentliche Repository und müssen einzeln gesichert werden:
@@ -53,14 +55,39 @@ Dann das Nutzerkonto - dafür braucht es `sudo`, weil das Verzeichnis dem andere
 
 ```bash
 cd /media/dialosadmin/SanDisk-Extreme/DialOS && sudo tar czf sicherung-nutzer.tar.gz \
-  -C /home/nutzer .config/dialos
+  --ignore-failed-read -C /home/nutzer .config/dialos Dokumente Notizen
 ```
+
+`--ignore-failed-read` sorgt dafür, dass ein Ordner, den es im Nutzerkonto noch nicht gibt, die Sicherung nicht abbricht. Bis zum 25.09.2026 sicherte dieser Befehl nur die Einstellungen - Briefe und PDF-Archiv des Nutzers fehlten.
 
 Zum Schluss nachsehen, dass beide Dateien wirklich da sind und nicht nur ein paar Kilobyte groß:
 
 ```bash
 ls -lh /media/dialosadmin/SanDisk-Extreme/DialOS/sicherung-*.tar.gz
 ```
+
+## 0.4 Den Sicherheits-Stick sichern - er wird in Teil 4.2 gelöscht
+
+> **Ein schon benutzter Sicherheits-Stick wird beim Neuaufbau KOMPLETT gelöscht - beide Bereiche.** `DIALOS-KEY` (der Schlüssel) ist danach ohnehin wertlos. Aber `DIALOS-DATA` ist der Datenspeicher des Nutzers: Dort liegt `DialOS-Archiv/` mit den PDFs aller Briefe und Mails, und oft auch, was der Nutzer selbst darauf abgelegt hat. **Das muss vorher auf die externe Platte.**
+
+Stick anstecken - GNOME hängt `DIALOS-DATA` von selbst ein. Dann den ganzen Inhalt kopieren:
+
+```bash
+mkdir -p /media/dialosadmin/SanDisk-Extreme/DialOS/stick-sicherung \
+  && cp -a /media/dialosadmin/DIALOS-DATA/. \
+     /media/dialosadmin/SanDisk-Extreme/DialOS/stick-sicherung/
+```
+
+Und prüfen, dass die Kopie vollständig ist - es darf **nichts** ausgegeben werden außer der letzten Zeile:
+
+```bash
+diff -r /media/dialosadmin/DIALOS-DATA \
+  /media/dialosadmin/SanDisk-Extreme/DialOS/stick-sicherung && echo "Kopie vollständig"
+```
+
+Danach den Stick in der Dateiverwaltung **auswerfen**. Er wird erst in Teil 4.2 wieder gebraucht.
+
+**Warum nicht mit Rescuezilla:** Das ginge als zweiter Lauf mit dem Stick als Quelle, würde aber auch `DIALOS-KEY` mitsichern - siehe den Hinweis in 0.2. Für `DIALOS-DATA` ist die einfache Kopie ohnehin besser: Sie ist ohne Zurückspielen lesbar, und man sieht jede Datei.
 
 > **Claudes Gedächtnis geht verloren, und zwar vollständig.** Der Chatverlauf, die Verbindungen der App und das Memory-System liegen auf der internen Platte. Was über den Tag hinaus wichtig ist, muss in `CLAUDE.md`, `TODO.md` oder `docs/` stehen - dort steht es auch.
 
@@ -215,7 +242,7 @@ Das dauert am längsten: Pakete, Branding, Autologin, Piper-Sprachausgabe, GNOME
 
 ## 4.2 Verschlüsseltes Heimatverzeichnis (ohne sudo, Stick stecken)
 
-> **Der Stick wird dabei KOMPLETT gelöscht - beide Bereiche, auch `DIALOS-DATA` mit dem PDF-Archiv des Nutzers.** Ist es ein schon benutzter Stick, vorher den Ordner `DialOS-Archiv/` darauf auf die externe Platte kopieren. Der alte Schlüssel darauf ist nach dem Neuaufbau ohnehin wertlos.
+> **Der Stick wird dabei KOMPLETT gelöscht - beide Bereiche, auch `DIALOS-DATA` mit dem PDF-Archiv des Nutzers.** Ist es ein schon benutzter Stick und Teil 0.4 ist nicht gemacht: **jetzt anhalten und 0.4 nachholen.** Der alte Schlüssel darauf ist nach dem Neuaufbau ohnehin wertlos.
 
 > **Eingehängte Laufwerke bietet das Skript seit dem 25.09.2026 nicht mehr an.** Vorher stand die externe Arbeitsplatte gleichrangig neben dem Stick in der Liste - ein Klick daneben hätte Repository, Rescuezilla-Abbild und Sicherungen gelöscht. Hängt GNOME den Stick beim Anstecken selbst ein (bei einem alten Stick passiert das mit `DIALOS-DATA`), ihn in der Dateiverwaltung **auswerfen** (nicht abziehen), sonst steht er nicht zur Wahl.
 
