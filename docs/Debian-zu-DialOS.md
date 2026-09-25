@@ -2929,6 +2929,14 @@ doch einmal über ein Terminal ohne Grafik laufen, fragt das Skript
 Passwörter seit 2026-08-16 ersatzweise im Terminal ab, statt sich (wie
 vorher) an dieser Stelle wortlos zu beenden.
 
+**Eingehängte Laufwerke stehen nicht zur Wahl** (seit 2026-09-25): Beim
+Neuaufbau stand die externe Arbeitsplatte (USB, eingehängt, mit Repo,
+Rescuezilla-Abbild und Sicherungen) gleichrangig neben dem Stick in der
+Liste - ein Klick daneben hätte alles gelöscht. Ein frischer Stick ist nie
+eingehängt; einen alten, dessen `DIALOS-DATA` GNOME selbst einhängt, vorher in
+der Dateiverwaltung auswerfen. **Der Stick wird komplett gelöscht, auch
+`DIALOS-DATA`** - bei einem benutzten Stick vorher `DialOS-Archiv/` sichern.
+
 Fragt nach Sicherheits-Stick, Wiederherstellungs-Passwort (≥12 Zeichen)
 und Bestätigung ("LOESCHEN" eingeben), bietet danach das gleiche
 verschlüsselte Nextcloud-Schlüssel-Backup wie `dialos-install` an. Am

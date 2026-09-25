@@ -215,6 +215,10 @@ Das dauert am längsten: Pakete, Branding, Autologin, Piper-Sprachausgabe, GNOME
 
 ## 4.2 Verschlüsseltes Heimatverzeichnis (ohne sudo, Stick stecken)
 
+> **Der Stick wird dabei KOMPLETT gelöscht - beide Bereiche, auch `DIALOS-DATA` mit dem PDF-Archiv des Nutzers.** Ist es ein schon benutzter Stick, vorher den Ordner `DialOS-Archiv/` darauf auf die externe Platte kopieren. Der alte Schlüssel darauf ist nach dem Neuaufbau ohnehin wertlos.
+
+> **Eingehängte Laufwerke bietet das Skript seit dem 25.09.2026 nicht mehr an.** Vorher stand die externe Arbeitsplatte gleichrangig neben dem Stick in der Liste - ein Klick daneben hätte Repository, Rescuezilla-Abbild und Sicherungen gelöscht. Hängt GNOME den Stick beim Anstecken selbst ein (bei einem alten Stick passiert das mit `DIALOS-DATA`), ihn in der Dateiverwaltung **auswerfen** (nicht abziehen), sonst steht er nicht zur Wahl.
+
 Erst den Stick `DIALOS-KEY` anstecken, dann:
 
 ```bash

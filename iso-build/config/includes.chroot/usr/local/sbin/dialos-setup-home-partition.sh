@@ -317,9 +317,20 @@ say "Freier Platz gefunden auf $SYS_DISK: ${FREE_SIZE_MIB} MiB (ab ${FREE_START_
 # --- 2. Sicherheits-Stick waehlen (System-Platte automatisch ausgeschlossen) ---
 mapfile -t USB_ROWS < <(lsblk -dnb -o NAME,SIZE,TRAN | awk -v skip="$ROOT_DISK_NAME" '$1 != skip && $3=="usb"')
 USB_ARGS=()
+AUSGELASSEN=()
 for row in "${USB_ROWS[@]}"; do
   name=$(echo "$row" | awk '{print $1}')
   size=$(echo "$row" | awk '{print $2}')
+  # Eingehaengte Laufwerke gar nicht erst anbieten. Beim Neuaufbau am
+  # 2026-09-25 stand hier die externe Arbeitsplatte (USB, eingehaengt,
+  # mit Repo, Rescuezilla-Abbild und Sicherungen) gleichrangig neben dem
+  # Stick - ein Klick daneben, und alles waere geloescht gewesen. Ein
+  # frischer Sicherheits-Stick ist nie eingehaengt; ist ein alter es doch
+  # (GNOME haengt DIALOS-DATA automatisch ein), wird er vorher ausgeworfen.
+  if lsblk -nro MOUNTPOINTS "/dev/$name" 2>/dev/null | grep -q .; then
+    AUSGELASSEN+=("/dev/$name ($(lsblk -no LABEL "/dev/$name" 2>/dev/null | awk 'NF' | head -n1))")
+    continue
+  fi
   sizeh=$(numfmt --to=iec --suffix=B "$size" 2>/dev/null || echo "$size")
   # Bisherigen Inhalt mit anzeigen: sonst sind in der Liste z. B. der
   # Debian-Installationsstick und ein leerer Sicherheits-Stick nicht
@@ -330,8 +341,11 @@ for row in "${USB_ROWS[@]}"; do
   USB_ARGS+=("/dev/$name" "$sizeh" "$inhalt")
 done
 
+if [ "${#AUSGELASSEN[@]}" -gt 0 ]; then
+  say "Nicht zur Auswahl, weil eingehängt: ${AUSGELASSEN[*]}. Soll ein Stick davon der Sicherheits-Stick werden, ihn erst in der Dateiverwaltung auswerfen (nicht abziehen) und das Skript neu starten."
+fi
 if [ "${#USB_ARGS[@]}" -eq 0 ]; then
-  die "Kein USB-Stick gefunden. Sicherheits-Stick anschließen und erneut versuchen."
+  die "Kein freier USB-Stick gefunden. Sicherheits-Stick anschließen (und, falls eingehängt, auswerfen) und erneut versuchen."
 fi
 
 # "|| true" ist noetig, damit ein Abbruch im Dialog hier unten sauber mit

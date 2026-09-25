@@ -137,6 +137,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Die Stick-Auswahl bietet eingehängte Laufwerke nicht mehr an**
+  (`dialos-setup-home-partition.sh`, 2026-09-25). Beim Neuaufbau stand vor
+  Teil 4.2 die externe Arbeitsplatte - USB wie der Stick, eingehängt, mit Repo,
+  Rescuezilla-Abbild und allen Sicherungen - gleichrangig in der Liste der zu
+  LÖSCHENDEN Geräte. Das Skript schloss nur die Systemplatte aus. Aufgefallen
+  beim Durchsehen vor dem Lauf, nicht durch einen Schaden. Die Anleitung warnt
+  außerdem, dass auch `DIALOS-DATA` mit dem Archiv gelöscht wird.
+
 - **Installationsanleitung Teil 2 (Claude-App) ist jetzt wörtlich die
   offizielle Anleitung von Anthropic** (2026-09-25, Stephan: „Deine Angaben
   haben nicht funktioniert"). Beim Neuaufbau scheiterten zwei Fassungen: Die

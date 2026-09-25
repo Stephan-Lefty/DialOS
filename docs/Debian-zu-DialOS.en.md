@@ -2827,6 +2827,14 @@ to run from a non-graphical terminal, the script has asked for passwords
 on the terminal instead since 2026-08-16, rather than (as before)
 terminating silently at that point.
 
+**Mounted drives are not offered** (since 2026-09-25): during the rebuild
+the external work disk (USB, mounted, holding the repo, the Rescuezilla image
+and the backups) was listed right next to the stick - one wrong click would
+have erased everything. A fresh stick is never mounted; for an old one whose
+`DIALOS-DATA` GNOME mounts by itself, eject it in the file manager first.
+**The stick is wiped completely, including `DIALOS-DATA`** - back up
+`DialOS-Archiv/` from a used stick first.
+
 Asks for the security stick, a recovery passphrase (≥12 characters),
 and confirmation (type "LOESCHEN"), then offers the same encrypted
 Nextcloud key backup as `dialos-install`. At the end it mounts
