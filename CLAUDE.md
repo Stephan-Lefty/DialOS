@@ -214,7 +214,9 @@ laut docs/anwendungen.md. "Nachrichten hoeren" ist neu - zu klaeren: Nachrichten
 als Radiosender (z. B. ein Nachrichtensender) oder als Podcast-Folge (neueste
 Ausgabe abspielen). Vor dem Bauen: Satz-Pruefungen (Wortschatz + volle
 Grammatik), Ein-Player-Regel erledigt sich, Widerspruch "Radio oeffnen" vs.
-"Radio einschalten" aufloesen, Shortwave ggf. aus dem Menue.
+"Radio einschalten" aufloesen, Shortwave ggf. aus dem Menue. **Die Auswahl
+kommt aus `docs/medienliste.md`** - Stephan baut dafuer eine kleine App;
+vorgeschlagenes JSON-Format steht in der Datei (noch nicht entschieden).
 
 Danach offen: Beitrag veroeffentlichen (Entwurf
 `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`, nur vom zweiten

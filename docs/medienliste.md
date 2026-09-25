@@ -23,6 +23,25 @@ Sprache anbietet - abgespielt wird alles mit Rhythmbox (entschieden am
   Daten.
 - Keine personenbezogenen Daten - die Liste liegt im öffentlichen Repository.
 
+## Stephans App dafür (angekündigt 2026-09-25)
+
+Stephan baut aus dieser Liste eine kleine App zum Erfassen. Vorgeschlagenes
+Austauschformat (noch nicht entschieden), damit DialOS die Datei direkt liest -
+später als `docs/medienliste.json` neben dieser Vorlage:
+
+```json
+{"stand": "2026-09-25",
+ "eintraege": [
+  {"art": "radio", "sprechform": "ö drei", "name": "Hitradio Ö3", "land": "AT", "quelle": ""},
+  {"art": "nachrichten-sender", "sprechform": "", "name": "", "land": "", "quelle": ""},
+  {"art": "nachrichten-podcast", "sprechform": "", "name": "", "land": "", "quelle": ""},
+  {"art": "podcast", "sprechform": "", "name": "", "land": "", "quelle": ""},
+  {"art": "hoerbuch", "sprechform": "", "name": "", "herkunft": ""}]}
+```
+
+`sprechform` klein und mit Zahlen als Wort, `quelle` darf leer bleiben. Hilfreich
+wäre eine Warnung der App bei fast gleichen Sprechformen.
+
 ## Radio
 
 | So sagt man es | Sender | Land | Quelle | Bemerkung |
