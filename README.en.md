@@ -129,6 +129,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The acceptance check now only inspects the Thunderbird profile actually in
+  use** (`dialos-nutzerkonto-pruefen.sh`, 2026-09-25). On first start
+  Thunderbird creates a second, empty `….default` next to its profile; the
+  check reported "FEHLT" twice there and so hid the one real item (signature
+  not yet written). `installs.ini` now decides.
+
 - **The mail account comes from the personal-data mask** (2026-09-25,
   Stephan: "I want to capture all customer data centrally and then distribute
   it to the programs - that way I can't miss anything."). New section

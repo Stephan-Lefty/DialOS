@@ -137,6 +137,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Die Abnahme prüft nur noch das Thunderbird-Profil, das wirklich benutzt wird**
+  (`dialos-nutzerkonto-pruefen.sh`, 2026-09-25). Thunderbird legt beim ersten
+  Start neben seinem Profil ein zweites, leeres `….default` an; die Abnahme
+  meldete dort zweimal „FEHLT" und verdeckte damit den einen echten Punkt
+  (Signatur noch nicht eingetragen). Maßgeblich ist jetzt `installs.ini`.
+
 - **Das Mailkonto kommt aus der Maske der persönlichen Daten** (2026-09-25,
   Stephan: „Ich möchte gerne alle Kundendaten zentral erfassen und dann auf die
   Programme verteilen! So kann ich nix übersehen."). Neuer Abschnitt

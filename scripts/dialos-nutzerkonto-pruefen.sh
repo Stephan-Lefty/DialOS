@@ -31,7 +31,19 @@ fehlt()  { sagen "FEHLT" "$1"; FEHLT=$((FEHLT+1)); }
 da()     { sagen "da" "$1"; }
 
 echo "=== Thunderbird-Profile von $KONTO ==="
-PROFILE=$(find "$HEIM/.thunderbird" -maxdepth 1 -type d -name "*.default*" 2>/dev/null)
+# NUR DAS PROFIL, DAS THUNDERBIRD WIRKLICH BENUTZT (seit 2026-09-25): Thunderbird
+# legt beim ersten Start neben seinem Profil ein zweites, leeres "….default" an
+# und benutzt es nie. Die Abnahme meldete dort zweimal "FEHLT" - ein Fehlalarm,
+# der den echten dritten Punkt verdeckt haette. Welches Profil gilt, steht in
+# installs.ini; nur wenn es die (noch) nicht gibt, alle wie bisher.
+PROFILE=""
+if [ -f "$HEIM/.thunderbird/installs.ini" ]; then
+    for REL in $(sed -n 's/^Default=//p' "$HEIM/.thunderbird/installs.ini" | sort -u); do
+        case "$REL" in /*) P="$REL" ;; *) P="$HEIM/.thunderbird/$REL" ;; esac
+        [ -d "$P" ] && PROFILE="$PROFILE $P"
+    done
+fi
+[ -n "$PROFILE" ] || PROFILE=$(find "$HEIM/.thunderbird" -maxdepth 1 -type d -name "*.default*" 2>/dev/null)
 if [ -z "$PROFILE" ]; then
     # KEIN MANGEL, SONDERN DER NORMALZUSTAND: Das Profil entsteht erst, wenn im
     # Konto ein Mailkonto eingerichtet wird. Als "FEHLT" gemeldet stuende hier
