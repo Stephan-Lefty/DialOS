@@ -16,6 +16,12 @@ Kann: # ## ### Ueberschriften, Absaetze, - Aufzaehlung, 1. Nummerierung,
 Quelltextbloecke mit ```, Hinweise mit >, **fett**, `Befehl`, --- als Linie.
 Mehr braucht eine Anleitung nicht, und mehr kann falsch aussehen.
 
+KANN KEINE TABELLEN, und das steht hier, weil es am 2026-09-25 beim ersten
+Durchsehen aufgefallen ist: Eine Markdown-Tabelle landete mit ihren
+senkrechten Strichen roh im PDF. Wer eine braucht, schreibt sie als
+Aufzaehlung - auf Papier liest sich das ohnehin besser als eine Tabelle, die
+ueber die Seitenbreite gequetscht wird.
+
 Aufruf:
   dialos-anleitung-pdf.py docs/installationsanleitung.md [ziel.pdf]
 """

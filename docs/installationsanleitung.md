@@ -4,13 +4,12 @@ Diese Anleitung führt ein leeres ThinkPad zu einem fertigen DialOS - beide Kont
 
 > **Diese Anleitung vor dem Anfangen ausdrucken oder auf ein zweites Gerät legen.** Sie liegt auf derselben Platte, die während der Installation gebraucht wird - am Zielgerät ist sie dann nicht lesbar.
 
-**Stand:** 25.09.2026 · **Zeit:** ein halber Tag, davon viel Wartezeit · **Grundlage:** `docs/Debian-zu-DialOS.md` im Repo. Diese Anleitung ist die Kurzform für den Handgriff; das Rezept dort erklärt jeden Schritt und begründet ihn.
+**Stand:** 25.09.2026, nachmittags · **Zeit:** ein halber Tag, davon viel Wartezeit · **Grundlage:** `docs/Debian-zu-DialOS.md` im Repo. Diese Anleitung ist die Kurzform für den Handgriff; das Rezept dort erklärt jeden Schritt und begründet ihn.
 
 ## Was bereitliegen muss
 
 - **USB-Stick mit Debian 13 (trixie)**, aktuelle Netinst- oder DVD-Fassung von `debian.org`
 - **Die externe Platte** mit diesem Repository (`SanDisk-Extreme`)
-- **Ein zweiter Rechner** im selben Netz - nur für die Partitionierung, siehe Teil 2. Er braucht nichts außer `python3`.
 - **Die beiden Sicherheits-Sticks** `DIALOS-KEY` und `DIALOS-DATA`
 - **Netzwerk**, Kabel oder WLAN, und das Netzteil - die Installation braucht beides durchgehend
 - **Rescuezilla-Stick**, falls ein Abbild gezogen werden soll (Teil 0)
@@ -64,46 +63,40 @@ ls -lh /media/dialosadmin/SanDisk-Extreme/DialOS/sicherung-*.tar.gz
 
 ---
 
-# Teil 1: Vorbereitung am zweiten Rechner
+# Teil 1: Debian 13 installieren
 
-Das Zielgerät wird gleich gelöscht, kann die Partitionierungsvorlage also nicht selbst ausliefern. Deshalb läuft der kleine Webserver auf einem **zweiten Rechner**, an dem die externe Platte steckt.
+Ganz normal vom Debian-Stick booten, **ohne** Sonderzeilen im Startmenü. Die einzige Stelle, an der genau hingesehen werden muss, ist die Partitionierung.
 
-```bash
-cd /pfad/zur/platte/DialOS/repo && ./scripts/dialos-preseed-server.sh
-```
+1. Sprache **Deutsch**, Land **Österreich**, Zeitzone **Europe/Vienna** - so läuft das Referenzgerät, und das bleibt so. Für ein Gerät außerhalb Österreichs hier die passende Zeitzone wählen.
+2. Netzwerk verbinden (Kabel oder WLAN) - der Installer lädt Pakete nach.
+3. **Kein Wurzel-Passwort vergeben.** Bleibt das Feld leer, bekommt das erste Konto `sudo` - genau das wird gebraucht.
+4. Das erste Konto heißt **`dialosadmin`**. Dieser Name steht in Skripten und Doku; ein anderer Name bricht beides.
 
-Das Skript prüft die Datei, ermittelt die IP-Adresse und gibt die Zeile aus, die gleich im Installer einzutippen ist. Es muss **laufen bleiben**, bis die Installation die Partitionen angelegt hat.
+## Die Partitionierung - der einzige heikle Schritt
 
-> **`dialos.org` geht dafür nicht** (geprüft am 25.09.2026): Der Aufruf über einfaches HTTP wird auf HTTPS umgeleitet, und dort liefert die Seite HTML statt der Datei. Der Debian-Installer kann beides nicht.
+**„Manuell" wählen**, nicht „Geführt". Es werden genau zwei Partitionen angelegt, und der Rest der Platte bleibt **unberührt**:
 
-**Ohne zweiten Rechner** geht es auch von Hand - im Installer „Manuell partitionieren" wählen und anlegen: EFI mit 538 MB, `/` mit **100 GiB** als ext4, und den **gesamten Rest unpartitioniert lassen**. Der freie Rest ist der Zweck der Übung: Dort entstehen später der verschlüsselte Swap und `/home/nutzer`.
+- **Erste Partition: 538 MB, „EFI-Systempartition".** Den Einbindungspunkt setzt der Installer selbst.
+- **Zweite Partition: 100 GB, ext4, Einbindungspunkt `/`.**
+- **Der ganze Rest bleibt frei** - nicht anlegen, nicht formatieren.
 
----
+- **Keinen Swap anlegen.** Der kommt später verschlüsselt dazu, im freien Bereich.
+- Warnt der Installer, es sei kein Swap eingerichtet: **bestätigen und weitermachen**.
+- Der freie Rest ist der Zweck der Übung: Dort entstehen später der verschlüsselte Swap und `/home/nutzer`. Je größer die Platte, desto mehr Platz bekommt der Nutzer - ohne dass irgendwo eine Zahl anzupassen wäre.
 
-# Teil 2: Debian 13 installieren
-
-1. Vom Debian-Stick booten. Im Startmenü **`e`** drücken, um die Startzeile zu bearbeiten.
-2. Ans Ende der `linux`-Zeile anhängen (die IP durch die des zweiten Rechners ersetzen):
-
-```
-auto=true priority=critical preseed/url=http://192.168.1.50:8080/d-i/trixie/preseed.cfg
-```
-
-3. Mit **Strg+X** starten.
-4. Sprache **Deutsch**, Land **Österreich**, Zeitzone **Europe/Vienna** - so läuft das Referenzgerät, und das bleibt so. Für ein Gerät außerhalb Österreichs hier die passende Zeitzone wählen.
 5. Als Desktop **GNOME** wählen.
-6. Das erste Konto heißt **`dialosadmin`** - dieser Name steht in Skripten und Doku und darf nicht abweichen.
-7. Kein Wurzel-Passwort vergeben; `dialosadmin` bekommt dadurch `sudo`.
 
 Nach dem Neustart: anmelden, Netzwerk verbinden, die externe Platte anstecken. Sie hängt dann unter `/media/dialosadmin/SanDisk-Extreme`.
 
+> **Es gibt auch einen Weg ohne Handarbeit** - eine Preseed-Datei gibt dem Installer das Layout vor (`website/d-i/trixie/preseed.cfg`). Sie muss über einfaches HTTP erreichbar sein, und das Zielgerät wird gerade gelöscht, kann sie also nicht selbst ausliefern. Dafür bräuchte es einen **zweiten Rechner** im selben Netz (`./scripts/dialos-preseed-server.sh`). **`dialos.org` taugt nicht dafür** - am 25.09.2026 geprüft: Der Aufruf über HTTP wird auf HTTPS umgeleitet, und dort kommt HTML statt der Datei. Ohne zweiten Rechner sind die drei Punkte oben der Weg; sie nennen dieselben Werte.
+
 ---
 
-# Teil 3: Die Claude-App installieren
+# Teil 2: Die Claude-App installieren
 
 Ab hier hilft Claude wieder mit - aber erst, wenn die App läuft. Die drei Befehle stehen nirgends sonst; sie stammen aus der Befehlsgeschichte des bisherigen Geräts.
 
-## 3.1 Paketquelle und Schlüssel
+## 2.1 Paketquelle und Schlüssel
 
 ```bash
 sudo curl -fsSLo /usr/share/keyrings/claude-desktop-archive-keyring.asc https://downloads.claude.ai/claude-desktop/key.asc
@@ -113,7 +106,7 @@ sudo curl -fsSLo /usr/share/keyrings/claude-desktop-archive-keyring.asc https://
 echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc] https://downloads.claude.ai/claude-desktop/apt/stable stable main" | sudo tee /etc/apt/sources.list.d/claude-desktop.list
 ```
 
-## 3.2 App installieren
+## 2.2 App installieren
 
 ```bash
 sudo apt update && sudo apt install -y curl claude-desktop
@@ -121,7 +114,7 @@ sudo apt update && sudo apt install -y curl claude-desktop
 
 Fehlt `curl` noch, vorher `sudo apt install -y curl` - auf einer frischen Debian-Installation ist es nicht immer dabei.
 
-## 3.3 Claude Code auf der Kommandozeile
+## 2.3 Claude Code auf der Kommandozeile
 
 Die App bringt die Oberfläche, das Kommandozeilen-Werkzeug kommt über npm:
 
@@ -133,7 +126,7 @@ sudo apt install -y nodejs npm && sudo npm install -g @anthropic-ai/claude-code
 
 ---
 
-# Teil 4: In der Claude-App - Schritt für Schritt
+# Teil 3: In der Claude-App - Schritt für Schritt
 
 1. **App starten**: Übersichtstaste drücken, „Claude" eintippen, starten.
 2. **Anmelden** mit dem üblichen Konto. Das dauert wenige Sekunden - die Anmeldung lässt sich nicht sichern und nicht wiederherstellen, sie wird jedes Mal neu gemacht.
@@ -155,11 +148,11 @@ Das Skript legt den Symlink `~/DialOS`, trägt Name und E-Mail für Git ein und 
 
 ---
 
-# Teil 5: DialOS aufbauen - drei Befehle
+# Teil 4: DialOS aufbauen - drei Befehle
 
 Die Reihenfolge und das `sudo` sind nicht beliebig. Der erste Befehl richtet Dateien im Heimatverzeichnis ein, der zweite braucht die grafische Umgebung für seine Dialoge - beide laufen deshalb **ohne** `sudo`.
 
-## 5.1 Grundaufbau (ohne sudo)
+## 4.1 Grundaufbau (ohne sudo)
 
 ```bash
 cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && ./scripts/dialos-full-office-setup.sh
@@ -167,7 +160,7 @@ cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && ./scripts/dialos-full-offic
 
 Das dauert am längsten: Pakete, Branding, Autologin, Piper-Sprachausgabe, GNOME-Erweiterungen, Vosk, Parakeet, LanguageTool - und seit dem 25.09.2026 als **Schritt 16** das Aufspielen aller DialOS-Dateien über `dialos-aufspielen`, das Einschalten der Dienste für **alle** Konten und den Bau der Thunderbird-Erweiterung.
 
-## 5.2 Verschlüsseltes Heimatverzeichnis (ohne sudo, Stick stecken)
+## 4.2 Verschlüsseltes Heimatverzeichnis (ohne sudo, Stick stecken)
 
 Erst den Stick `DIALOS-KEY` anstecken, dann:
 
@@ -177,7 +170,7 @@ Erst den Stick `DIALOS-KEY` anstecken, dann:
 
 Das Skript holt sich die Rechte selbst über `pkexec`. Unter `sudo` fehlt ihm die grafische Umgebung, und es bricht ohne verständliche Meldung ab.
 
-## 5.3 Nutzerkonto und Abschluss (mit sudo, Stick stecken lassen)
+## 4.3 Nutzerkonto und Abschluss (mit sudo, Stick stecken lassen)
 
 ```bash
 sudo ./scripts/dialos-buero-setup-abschliessen.sh dialosadmin
@@ -189,7 +182,7 @@ Danach **einmal neu starten**.
 
 ---
 
-# Teil 6: Was nur von Hand geht
+# Teil 5: Was nur von Hand geht
 
 Alles hier braucht Zugangsdaten oder ein Urteil - beides kann kein Skript liefern.
 
@@ -197,11 +190,11 @@ Alles hier braucht Zugangsdaten oder ein Urteil - beides kann kein Skript liefer
 - **Thunderbird einrichten**: Konto anlegen, Passwort eintippen. Die DialOS-Brücke wird dabei **von selbst** installiert, weil sie über `policies.json` in jedes Profil kommt.
 - **Stimme wählen**: Michael oder Anna, mit `Strg`+`Alt`+`S` umschalten. Die Wahl bleibt beim Aufspielen unangetastet.
 - **Bluetooth-Lautsprecher** koppeln, falls verwendet.
-- **GitHub-Token** beim ersten `git push` eintippen (siehe Teil 4).
+- **GitHub-Token** beim ersten `git push` eintippen (siehe Teil 3).
 
 ---
 
-# Teil 7: Abnahme
+# Teil 6: Abnahme
 
 Ein Aufbau, der durchläuft, beweist noch nicht, dass er vollständig war.
 
@@ -228,9 +221,9 @@ Läuft das, ist das Gerät fertig.
 
 ---
 
-# Teil 8: Wenn etwas schiefgeht
+# Teil 7: Wenn etwas schiefgeht
 
-- **Der Installer findet die Preseed-Datei nicht:** Läuft der kleine Webserver noch? Stimmt die IP-Adresse? Hängen beide Geräte im selben Netz? Notfalls im Installer von Hand partitionieren (Teil 1).
+- **Die Partitionierung sieht anders aus als erwartet:** Im Installer zurückgehen und die Partitionstabelle prüfen - es dürfen nur die EFI- und die 100-GB-Partition angelegt sein, der Rest muss als „FREIER SPEICHER" dastehen. Ist die ganze Platte belegt, findet Teil 4.2 später keinen Platz für `/home/nutzer`.
 - **Ein Aufbau-Skript bricht ab:** Es lässt sich einzeln fortsetzen, zum Beispiel `./scripts/dialos-full-office-setup.sh 15_vosk`. Die Schrittnamen stehen im Skript unter `ALLE_SCHRITTE`.
 - **Die Sprachsteuerung reagiert nicht:** Nach dem Aufspielen neuer Sätze einmal ab- und anmelden - die Grammatik wird beim Start gelesen. Protokolle liegen in `~/.log/`.
 - **Alles zurück:** Vom Rescuezilla-Stick booten und das Abbild aus Teil 0 zurückspielen.
