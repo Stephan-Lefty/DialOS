@@ -652,6 +652,68 @@ Entwurf.
   (nächster Abschnitt). Senden ist gebaut, am Gerät aber noch nicht geprobt
   (Stand 2026-09-25: bei der Frage wurde bisher immer „nein" gesagt).
 
+## DialOS-Rhythmbox: eine Erweiterung ohne Manifest (seit 2026-09-25)
+
+Stephan am 2026-09-25, auf die Frage nach der Einordnung: „Ja es ist eine
+Erweiterung für DialOS." Sie trägt das Präfix damit zu Recht - sie ergibt
+ohne DialOS keinen Sinn, weil ihr einziges Erzeugnis die Medienliste
+dieses Systems ist.
+
+**Sie ist trotzdem der erste Fall ohne Manifest**, und das ist keine
+Nachlässigkeit, sondern folgt aus dem Manifest selbst: Seine Felder sind
+`startsaetze`, `eigene_grammatik` und `braucht_mikrofon`. DialOS-Rhythmbox
+hat nichts davon. Es wird mit Maus und Tastatur bedient, nimmt das
+Mikrofon nie, spricht nicht und wird nie durch einen Satz gestartet. Ein
+Manifest mit leeren Startsätzen würde behaupten, es gäbe einen
+Sprachbefehl, den es nicht gibt - und die Grammatikprüfung beim Einbauen
+liefe über nichts.
+
+Damit ist sie strukturell die Zwillingsschwester von
+`dialos-persoenliche-daten-maske.py`: eine Maske, die eine Datei pflegt,
+aus der andere Programme lesen. Auch die hat kein Manifest.
+
+**Was sie tut:** Sender bei radio-browser.info suchen - landesweit, nach
+Bundesland, Stadt oder Genre -, jeden antesten und als `medienliste.json`
+im Format aus [medienliste.md](medienliste.md) ausgeben. Auf Wunsch trägt
+sie die Auswahl auch gleich in Rhythmbox ein.
+
+- **Programm:** `/usr/local/bin/dialos-rhythmbox.py` (Oberfläche,
+  GTK4/libadwaita), `/usr/local/bin/dialos_rhythmbox_sender.py` (die
+  Arbeit, zugleich Kommandozeilen-Werkzeug), `/usr/local/bin/dialos_farben.py`
+  (die gemeinsame Palette).
+- **Menüeintrag:** `/usr/share/applications/dialos-rhythmbox.desktop`,
+  Symbol unter `/usr/share/icons/hicolor/<größe>/apps/dialos-rhythmbox.png`.
+- **Kein Manifest**, siehe oben. Keine Einträge in der Kern-Grammatik.
+
+**Geprüft wird, ob Ton kommt - nicht, ob der Server antwortet.** Jeder
+Stream wird von `ffprobe` dekodiert, und zusätzlich wird der ICY-Name
+verglichen, den der Sender über sich selbst sendet. Das ist dieselbe
+Haltung wie die Regel „keiner Zustandsmeldung glauben, wenn sich das
+Ergebnis messen lässt" aus der Audio-Arbeit - und sie hat sich sofort
+bezahlt gemacht: „MDR Aktuell" zeigte über eine `.m3u`-Datei auf **MDR
+Kultur**, „Radio Swiss Classic" war die **italienische** Fassung (sie
+meldete sich als „Swiss Classic I"), und „Kronehit" zeigte auf eine
+JSON-Schnittstelle. Alle drei hätten HTTP 200 geliefert.
+
+**Nur frei zugängliche Quellen** (Stephan: „Ohne einen Account oder so").
+Adressen mit `token`, `sid` oder Benutzername werden abgewertet, HTTP
+401/403 wird als „verlangt Zugangsdaten" gemeldet. Dabei kam ein
+grundsätzlicher Fehler heraus: Gespeichert wurde `url_resolved`, die
+**aufgelöste** Adresse - bei der ARD-Verteilung hängt die eine
+Sitzungskennung an, die abläuft. `http://radioeins.de/stream` ist der
+dauerhafte Einstieg. Auf einem Gerät, das jahrelang läuft, ist das keine
+Feinheit: Der Sender verstummt irgendwann ohne erkennbaren Grund, und der
+blinde Nutzer kann nicht nachsehen, warum.
+
+**Das Symbol wurde gemessen, nicht beurteilt.** Stephans Entwurf hatte
+rechts Schallwellen **und** ein Mikrofon - zwei Objekte, also genau die
+Konstellation, an der der Suche-Entwurf bei 32 Pixeln gescheitert ist
+(siehe oben). Nachgemessen mit demselben Verfahren: bei 64 px klar, bei
+48 px verschmelzend, bei 32 px ein Klumpen. Gebaut wurde deshalb die
+reduzierte Fassung mit `assets/rhythmbox-icon-bauen.py` - Wellen raus,
+Mikrofon gezeichnet statt ausgeschnitten. Der Entwurf liegt als
+`assets/rhythmbox-icon-entwurf.png` daneben.
+
 ## Die Thunderbird-Brücke
 
 **Keine Erweiterung im Sinne dieser Datei, obwohl beide so heißen.** Die

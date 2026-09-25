@@ -24,9 +24,34 @@ steht im Konzept [medien-konzept.md](medien-konzept.md).
   Daten.
 - Keine personenbezogenen Daten - die Liste liegt im öffentlichen Repository.
 
-## Stephans App dafür (angekündigt 2026-09-25)
+## Stephans App dafür - gebaut am 2026-09-25
 
-Stephan baut aus dieser Liste eine kleine App zum Erfassen. Vorgeschlagenes
+**Sie ist da: DialOS-Rhythmbox.** Das Programm liegt als
+`dialos-rhythmbox.py` im Repo (Oberfläche) mit
+`dialos_rhythmbox_sender.py` darunter, das zugleich ein vollständiges
+Kommandozeilen-Werkzeug ist. Es holt Sender von radio-browser.info,
+testet jeden an - mit `ffprobe`, und zusätzlich wird der ICY-Name
+verglichen, den der Sender über sich selbst sendet -, schlägt eine
+Sprechform vor und schreibt genau das unten vorgeschlagene Format.
+Einzelheiten im [Änderungsprotokoll](../README.md#änderungsprotokoll)
+unter 0.5.3 und in [erweiterungen.md](erweiterungen.md).
+
+**Die Warnung bei fast gleichen Sprechformen ist gebaut** - der Wunsch
+unten wurde also erfüllt, und zwar sowohl in der Oberfläche (rot
+markiert, schon beim Tippen) als auch vor dem Speichern. Sie ist kein
+Beiwerk: Über alle 78 zunächst gesammelten Sender gerechnet meldet sie
+elf verwechselbare Paare, etwa „we de er zwei" gegen „en de er zwei"
+oder „radio niederoesterreich" gegen „radio oberoesterreich". Das ist
+zugleich die praktische Bestätigung der Regel „weniger ist mehr" von
+weiter oben: Bei 78 Sendern sind Kollisionen unvermeidlich. Die
+Oberfläche startet deshalb **ohne gesetzte Haken** - die Auswahl trifft
+der Mensch.
+
+**Ein Feld mehr als unten vorgeschlagen:** `stationuuid`. Das
+[Konzept](medien-konzept.md) verlangt sie, damit DialOS bei einem
+ausgefallenen Stream die aktuelle Adresse nachschlagen kann.
+
+Vorgeschlagenes
 Austauschformat (noch nicht entschieden), damit DialOS die Datei direkt liest -
 später als `docs/medienliste.json` neben dieser Vorlage:
 

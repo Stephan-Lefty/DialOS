@@ -652,6 +652,64 @@ from the recipient to the draft.
   section). Sending is built but not yet tried on the device (status
   2026-09-25: so far the answer to the question has always been "nein").
 
+## DialOS-Rhythmbox: an extension without a manifest (since 2026-09-25)
+
+Stephan on 2026-09-25, asked about the classification: "Yes, it is an
+extension for DialOS." It carries the prefix rightly - it makes no sense
+without DialOS, because its only product is this system's media list.
+
+**It is nevertheless the first case without a manifest**, and that is not
+sloppiness but follows from the manifest itself: its fields are
+`startsaetze`, `eigene_grammatik` and `braucht_mikrofon`. DialOS-Rhythmbox
+has none of them. It is operated with mouse and keyboard, never takes the
+microphone, does not speak and is never started by a phrase. A manifest
+with empty start phrases would claim a voice command that does not exist -
+and the grammar check on installation would run over nothing.
+
+Structurally it is therefore the twin sister of
+`dialos-persoenliche-daten-maske.py`: a mask maintaining a file that other
+programs read. That one has no manifest either.
+
+**What it does:** search radio-browser.info - nationwide, by state, city
+or genre -, test every station and write `medienliste.json` in the format
+from [medienliste.md](medienliste.md). On request it also enters the
+selection into Rhythmbox.
+
+- **Program:** `/usr/local/bin/dialos-rhythmbox.py` (interface,
+  GTK4/libadwaita), `/usr/local/bin/dialos_rhythmbox_sender.py` (the work,
+  also a command line tool), `/usr/local/bin/dialos_farben.py` (the shared
+  palette).
+- **Menu entry:** `/usr/share/applications/dialos-rhythmbox.desktop`, icon
+  at `/usr/share/icons/hicolor/<size>/apps/dialos-rhythmbox.png`.
+- **No manifest**, see above. No entries in the core grammar.
+
+**What is checked is whether sound arrives** - not whether the server
+answers. Every stream is decoded by `ffprobe`, and the ICY name the
+station sends about itself is compared as well. This is the same attitude
+as the rule "believe no status report when the result can be measured"
+from the audio work - and it paid off immediately: "MDR Aktuell" pointed
+via an `.m3u` file at **MDR Kultur**, "Radio Swiss Classic" was the
+**Italian** edition (announcing itself as "Swiss Classic I"), and
+"Kronehit" pointed at a JSON endpoint. All three would have returned
+HTTP 200.
+
+**Freely accessible sources only** (Stephan: "Without an account or
+anything"). Addresses carrying `token`, `sid` or a user name are demoted,
+HTTP 401/403 is reported as "requires credentials". This surfaced a
+fundamental mistake: we stored `url_resolved`, the **resolved** address -
+but with the ARD distribution that carries a session key which expires.
+`http://radioeins.de/stream` is the durable entry point. On a device
+running for years this is not a nicety: the station falls silent at some
+point for no visible reason, and a blind user cannot look up why.
+
+**The icon was measured, not judged.** Stephan's draft had sound waves
+**and** a microphone on the right - two objects, exactly the constellation
+the Suche draft failed on at 32 pixels (see above). Measured with the same
+method: clear at 64 px, merging at 48 px, a blob at 32 px. The reduced
+version was built with `assets/rhythmbox-icon-bauen.py` - waves removed,
+microphone drawn rather than cut out. The draft sits beside it as
+`assets/rhythmbox-icon-entwurf.png`.
+
 ## The Thunderbird bridge
 
 **Not an extension in the sense of this file, even though both are called

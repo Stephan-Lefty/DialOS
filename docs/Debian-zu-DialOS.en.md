@@ -3517,6 +3517,54 @@ timestamp speaks again for both; an unwritable acknowledgement stays silent.
 after the firmware update via the automation and a reboot, the sentence came
 first for `nutzer` (autologin), then for `dialosadmin` - once each.
 
+## 13e. DialOS-Rhythmbox: maintaining the station list (new 2026-09-25)
+
+The tool that produces the media list - not a player, but the tool in
+front of it. It searches radio-browser.info, tests the stations and writes
+the `medienliste.json` from which DialOS later builds its command sets.
+Classification and reasoning in [erweiterungen.md](erweiterungen.md), the
+format in [medienliste.md](medienliste.md).
+
+It reaches the device entirely through `dialos-aufspielen`; nothing has to
+be set up by hand. What is installed:
+
+```
+/usr/local/bin/dialos-rhythmbox.py            # interface (executable, 0755)
+/usr/local/bin/dialos_rhythmbox_sender.py     # the work + command line
+/usr/local/bin/dialos_farben.py               # shared colour palette
+/usr/share/applications/dialos-rhythmbox.desktop
+/usr/share/icons/hicolor/<size>/apps/dialos-rhythmbox.png
+```
+
+**The prerequisites are already there:** `python3-gi` with GTK 4 and
+libadwaita (step 11), GStreamer for previewing (present with GNOME) and
+`curl`. The thorough check uses `ffprobe` from `ffmpeg` - if `ffmpeg` is
+missing, the tool only checks reachability and says so. Install if needed:
+
+```bash
+sudo apt-get install -y ffmpeg
+```
+
+**Two differences from the other extensions**, so nobody goes looking:
+there is **no manifest** under `/usr/local/share/dialos/erweiterungen/`
+(the tool has no voice commands), and it is **not** in the core grammar.
+It is started from the application menu.
+
+**Refresh the directories once after the first install.**
+`dialos-aufspielen` copies the files but does not touch GNOME's caches -
+without this the entry only appears after the next login, and the icon
+stays a grey placeholder:
+
+```bash
+sudo update-desktop-database /usr/share/applications && sudo gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+```
+
+Check that it arrived:
+
+```bash
+ls -l /usr/local/bin/dialos-rhythmbox.py /usr/local/bin/dialos_rhythmbox_sender.py && /usr/local/bin/dialos_rhythmbox_sender.py genres | head -3
+```
+
 ## 14. Bake in Bluetooth pairing data (optional, device-specific)
 
 Only relevant if you stay on the **same** test device (the built-in

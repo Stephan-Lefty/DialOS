@@ -3640,6 +3640,56 @@ Quittung schweigt. **Am Gerät über zwei Konten belegt am 2026-09-14, 13:26-13:
 Firmware-Update über die Automatik und einem Neustart kam der Satz zuerst bei
 `nutzer` (Autologin), danach bei `dialosadmin` - je einmal.
 
+## 13e. DialOS-Rhythmbox: Senderliste pflegen (neu 2026-09-25)
+
+Das Werkzeug, mit dem die Medienliste entsteht - kein Player, sondern das
+Werkzeug davor. Es sucht Sender bei radio-browser.info, testet sie an und
+schreibt die `medienliste.json`, aus der DialOS später die Befehlssätze
+baut. Einordnung und Begründung in [erweiterungen.md](erweiterungen.md),
+das Format in [medienliste.md](medienliste.md).
+
+Es kommt vollständig über `dialos-aufspielen` aufs Gerät; von Hand ist
+nichts einzurichten. Aufgespielt werden:
+
+```
+/usr/local/bin/dialos-rhythmbox.py            # Oberflaeche (ausfuehrbar, 0755)
+/usr/local/bin/dialos_rhythmbox_sender.py     # die Arbeit + Kommandozeile
+/usr/local/bin/dialos_farben.py               # gemeinsame Farbpalette
+/usr/share/applications/dialos-rhythmbox.desktop
+/usr/share/icons/hicolor/<groesse>/apps/dialos-rhythmbox.png
+```
+
+**Voraussetzungen sind schon da:** `python3-gi` mit GTK 4 und libadwaita
+(Schritt 11), GStreamer fürs Vorhören (mit GNOME vorhanden) und `curl`.
+Für die gründliche Prüfung wird `ffprobe` aus `ffmpeg` benutzt - ist
+`ffmpeg` nicht installiert, prüft das Werkzeug nur die Erreichbarkeit und
+sagt das auch. Nachinstallieren, falls nötig:
+
+```bash
+sudo apt-get install -y ffmpeg
+```
+
+**Zwei Unterschiede zu den anderen Erweiterungen**, damit niemand sie
+sucht: Es gibt **kein Manifest** unter
+`/usr/local/share/dialos/erweiterungen/` (das Werkzeug hat keine
+Sprachbefehle), und es steht **nicht** in der Kern-Grammatik. Gestartet
+wird es über das Anwendungsmenü.
+
+**Nach dem ersten Aufspielen einmal die Verzeichnisse auffrischen.**
+`dialos-aufspielen` kopiert die Dateien, rührt aber die Zwischenspeicher
+von GNOME nicht an - ohne das erscheint der Eintrag erst nach der
+nächsten Anmeldung, und das Symbol bleibt ein graues Ersatzbild:
+
+```bash
+sudo update-desktop-database /usr/share/applications && sudo gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+```
+
+Prüfen, ob es angekommen ist:
+
+```bash
+ls -l /usr/local/bin/dialos-rhythmbox.py /usr/local/bin/dialos_rhythmbox_sender.py && /usr/local/bin/dialos_rhythmbox_sender.py genres | head -3
+```
+
 ## 14. Bluetooth-Kopplungsdaten fest einbauen (optional, geräte­spezifisch)
 
 Nur relevant, wenn du auf **demselben** Testgerät bleibst (der
