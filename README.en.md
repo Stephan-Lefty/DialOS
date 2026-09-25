@@ -129,6 +129,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **"Mikrofon ohne Echo" is again NOT the default microphone** (2026-09-25,
+  Stephan's decision). In the afternoon, under 0.5.2, it was made the default
+  via `priority.session = 2500` - without reading the rule in
+  `docs/anwendungen.md`: Firefox and so Jitsi cancel echo themselves; with the
+  cleaned source it would run twice and video calls would sound washed out.
+  DialOS keeps picking the echo source itself. The trigger was no real problem
+  anyway: the volume question failed because of answering too early.
+
 - **The acceptance check now only inspects the Thunderbird profile actually in
   use** (`dialos-nutzerkonto-pruefen.sh`, 2026-09-25). On first start
   Thunderbird creates a second, empty `….default` next to its profile; the

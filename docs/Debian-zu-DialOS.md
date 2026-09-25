@@ -1323,13 +1323,15 @@ schwankenden Laufzeit deutlich weniger zu erwarten gewesen wäre.
 Gegenprobe: dieselbe Ansage per `paplay` abgespielt, also ohne jeden
 Schutz - der Dienst erkannte **nichts** und schaltete nicht um.
 
-**Sie ist das Standard-Mikrofon jedes Kontos** (seit 2026-09-25):
-`priority.session = 2500` in `source.props`. WirePlumber wählt die
-Vorgabe-Quelle nach dieser Rangzahl; das eingebaute Mikrofon hat 2009, die
-Echo-Quelle hatte vorher gar keine. Nach dem Neuaufbau stand deshalb in beiden
-Konten das rohe Mikrofon als Eingabegerät. Die DialOS-Dienste wählen die
-Echo-Quelle ohnehin selbst - alle anderen Programme aber nehmen die Vorgabe.
-Eine von Hand getroffene Wahl im Konto geht weiterhin vor.
+**Sie ist bewusst NICHT das Standard-Mikrofon.** Die DialOS-Dienste wählen sie
+selbst; alle anderen Programme bekommen das rohe Mikrofon. Grund: Firefox, also
+auch Jitsi, hat eine eigene Echo-Unterdrückung - mit dieser Quelle liefe sie
+doppelt, und die Gegenseite hört verwaschene Sprache (Regel in
+`docs/anwendungen.md`). Am 2026-09-25 war sie für einige Stunden per
+`priority.session = 2500` Standard - gebaut, ohne diese Regel nachzulesen, am
+selben Abend auf Stephans Entscheidung zurückgenommen. Steht in einem Konto
+„Mikrofon ohne Echo" als Eingabegerät, ist das eine Wahl von Hand
+(`~/.local/state/wireplumber/default-nodes`) und gehört für Videoanrufe zurück.
 
 Zwei Entscheidungen in der Konfiguration:
 

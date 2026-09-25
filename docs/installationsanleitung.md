@@ -283,7 +283,8 @@ Danach **einmal neu starten**.
 Alles hier braucht Zugangsdaten oder ein Urteil - beides kann kein Skript liefern.
 
 - **Persönliche Daten** für beide Konten in der Maske ausfüllen: Name, Anschrift, Telefon, E-Mail, Ort fürs Wetter. Ohne sie hat der Brief keinen Absender und das Wetter keinen Ort.
-- **Thunderbird einrichten**: Konto anlegen, Passwort eintippen. Die DialOS-Brücke wird dabei **von selbst** installiert, weil sie über `policies.json` in jedes Profil kommt.
+- **Das Mailkonto in derselben Maske** (seit 25.09.2026): Abschnitt „E-Mail-Konto" und das Feld „Mail-Passwort" ausfüllen, dann **Speichern** - DialOS legt das Konto in Thunderbird an, mit Passwort, Brücke und Signatur. Thunderbird muss dabei geschlossen sein. Bei bekannten Anbietern genügt die Mailadresse; bei einer eigenen Domain die Server aus dem Kundenbereich des Hosters eintragen. Für das Konto `nutzer` oben in der Maske `nutzer` wählen. Thunderbird von Hand einzurichten ist nicht mehr nötig.
+- **Mikrofon nicht umstellen**: In den Einstellungen steht als Eingabegerät das eingebaute Mikrofon, nicht „Mikrofon ohne Echo". Das ist Absicht - DialOS nimmt die Echo-Quelle selbst, und Videoanrufe klängen mit ihr verwaschen.
 - **Stimme wählen**: Michael oder Anna, mit `Strg`+`Alt`+`S` umschalten. Die Wahl bleibt beim Aufspielen unangetastet.
 - **Bluetooth-Lautsprecher** koppeln, falls verwendet.
 - **GitHub-Token** beim ersten `git push` eintippen (siehe Teil 3).
@@ -299,7 +300,7 @@ cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
   && ./scripts/dialos-installstand.sh --befehl
 ```
 
-Erwartet wird: nur die bewussten Ausnahmen weichen ab - die gewählte Stimme, die Bluetooth-Kopplung und die zurückgestellte Fernwartung.
+Erwartet wird: nur die bewussten Ausnahmen weichen ab - die gewählte Stimme, die Bluetooth-Kopplung und die zurückgestellte Fernwartung. **Die `sudo install …`-Zeilen, die das Skript darunter vorschlägt, hier NICHT ausführen** - sie würden die Stimmwahl überschreiben und die Fernwartung einschalten.
 
 ```bash
 sudo /media/dialosadmin/SanDisk-Extreme/DialOS/repo/scripts/dialos-nutzerkonto-pruefen.sh
@@ -311,7 +312,7 @@ Erwartet wird: nichts fehlt. Solange in `nutzer` noch kein Mailkonto eingerichte
 
 - „Sprachsteuerung starten" → „Ich höre Dir zu."
 - „Wie spät ist es" → Uhrzeit
-- „Postfach öffnen" → Thunderbird startet
+- „Postfach öffnen" → Thunderbird startet direkt mit dem Postfach, ohne Assistent und ohne Passwortfrage
 - „Brief schreiben" → der Empfängerdialog beginnt
 
 Läuft das, ist das Gerät fertig.

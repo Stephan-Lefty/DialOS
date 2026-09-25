@@ -284,6 +284,12 @@ Gegenseite hört dünne, verwaschene Sprache mit Artefakten. Wer die
 Vorgabe-Quelle umstellt, verschlechtert also die Tonqualität in
 Videocalls, ohne dass der Zusammenhang sichtbar wäre.
 
+**Am 2026-09-25 genau so passiert - und zurückgenommen.** Nach dem Neuaufbau
+stand in beiden Konten das rohe Mikrofon, das sah wie ein Fehler aus, und die
+Echo-Quelle wurde per `priority.session` zur Vorgabe gemacht - ohne diese Regel
+nachzulesen. Am selben Abend auf Stephans Entscheidung zurückgenommen. Das rohe
+Mikrofon als Vorgabe ist der Sollzustand, kein Fehler.
+
 **Die Position gehört DialOS, nicht dem Player.** Geprüft am 2026-08-18:
 Rhythmbox' Bibliothek kennt `play-count` und `last-played`, aber **kein**
 `playback-position` und kein `bookmark`. Ein achtstündiges Hörbuch würde

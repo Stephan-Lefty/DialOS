@@ -137,6 +137,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **„Mikrofon ohne Echo" ist wieder NICHT das Standard-Mikrofon** (2026-09-25,
+  Stephans Entscheidung). Am Nachmittag unter 0.5.2 per `priority.session = 2500`
+  dazu gemacht - ohne die Regel aus `docs/anwendungen.md` nachzulesen: Firefox
+  und damit Jitsi filtern Echo selbst, mit der bereinigten Quelle liefe es
+  doppelt und Videoanrufe klängen verwaschen. DialOS wählt die Echo-Quelle
+  weiterhin selbst. Der Auslöser war ohnehin keiner: Die Lautstärke-Frage
+  scheiterte an zu frühem Antworten, nicht am Mikrofon.
+
 - **Die Abnahme prüft nur noch das Thunderbird-Profil, das wirklich benutzt wird**
   (`dialos-nutzerkonto-pruefen.sh`, 2026-09-25). Thunderbird legt beim ersten
   Start neben seinem Profil ein zweites, leeres `….default` an; die Abnahme

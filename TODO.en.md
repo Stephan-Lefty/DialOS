@@ -23,7 +23,7 @@ finished too, and then move down together. That way no reference breaks.
   the way:** in BOTH accounts the raw microphone was the selected input, not
   `dialos_mikrofon_ohne_echo` - Stephan switched it by hand. DialOS services
   pick the echo source themselves, other programs do not.
-- [x] **"Mikrofon ohne Echo" as the default for every account** (built 2026-09-25, `priority.session = 2500`; verified on the device: picked by itself with the account's choice cleared, also after the reboot) (from the item
+- [x] **"Mikrofon ohne Echo" as the default for every account** **REVERTED the same evening** (Stephan): violates the rule in `docs/anwendungen.md` - Firefox/Jitsi would filter twice. The raw microphone as default is the intended state. (from the item
   above). A new account starts with the raw microphone. Proposal: give the
   echo source a high `priority.session` in `99-dialos-echo-unterdrueckung.conf`
   so WirePlumber picks it by itself - for every account without its own stored
