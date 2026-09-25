@@ -586,6 +586,30 @@ schritt_16_dialos_dateien() {
   log "Schritt 16d: Frageton fuer dialosadmin"
   mkdir -p "$HOME/.config/dialos"
   echo an > "$HOME/.config/dialos/frageton"
+
+  log "Schritt 16e: Anna - die Auslieferungsstimme (Doku-Schritt 12c)"
+  # FEHLTE BIS 2026-09-25 und fiel erst nach dem Neuaufbau auf: Schritt 8
+  # holt nur Michael (thorsten-high), piper-generic.conf aus dem Repo stellt
+  # aber Anna ein (kerstin-low, Tempo 0.95). Zu hoeren war damit Michael mit
+  # Annas Tempo - deutlich zu schnell, Stephan: "die Stimme ist zu schnell" -,
+  # und die Begruessung sagte "ich bin Michael", weil nur "dialos-stimme.py
+  # setzen" die Namensdatei schreibt. Steht hinter Schritt 16, weil
+  # dialos-stimme.py erst dort aufgespielt wird.
+  local stimmen=/usr/local/share/dialos-piper/voices
+  local basis=https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/kerstin/low
+  if [ ! -f "$stimmen/de_DE-kerstin-low.onnx" ]; then
+    curl -fsSL -o /tmp/kerstin.onnx      "$basis/de_DE-kerstin-low.onnx?download=true"
+    curl -fsSL -o /tmp/kerstin.onnx.json "$basis/de_DE-kerstin-low.onnx.json?download=true"
+    sudo install -m 0644 /tmp/kerstin.onnx      "$stimmen/de_DE-kerstin-low.onnx"
+    sudo install -m 0644 /tmp/kerstin.onnx.json "$stimmen/de_DE-kerstin-low.onnx.json"
+    rm -f /tmp/kerstin.onnx /tmp/kerstin.onnx.json
+  fi
+  sudo /usr/local/bin/dialos-stimme.py setzen kerstin
+  # Der Ansagen-Speicher traegt Stimme und Tempo im Dateinamen - alte
+  # Michael-Dateien werden also nicht mehr gegriffen. Leeren schadet aber
+  # nicht und spart die Frage, woher eine Ansage kam.
+  rm -rf "$HOME/.cache/dialos/ansagen"
+  systemctl --user restart speech-dispatcher.service 2>/dev/null || true
 }
 
 # Vollstaendige Liste in Doku-Reihenfolge - 14_bluetooth ist bewusst

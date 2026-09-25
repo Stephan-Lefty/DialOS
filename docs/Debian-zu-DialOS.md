@@ -3133,6 +3133,13 @@ ohne Anmeldebildschirm startet - und dass `nutzer`s eigener Desktop
 
 ## 12c. Zweite Stimme und die beiden Namen (neu 2026-08-20)
 
+> **Seit 2026-09-25 erledigt das `dialos-full-office-setup.sh` als Schritt 16e.**
+> Bis dahin stand dieser Schritt NUR hier - der Neuaufbau am 2026-09-25 lief
+> ohne Anna durch. `piper-generic.conf` aus dem Repo stellt aber Anna ein; zu
+> hören war deshalb Michael mit Annas Tempo (zu schnell), die Begrüßung sagte
+> "ich bin Michael", und `spd-say` brach nach 20 s ab, weil die eingestellte
+> Stimmdatei fehlte - darüber ging auch die Lautstärke-Frage verloren.
+
 Stephans Entscheidung: eine freundliche Damenstimme. Aus dem Hörvergleich wurde
 **`de_DE-kerstin-low`**, Tempo **1.00**, Name **Anna**.
 

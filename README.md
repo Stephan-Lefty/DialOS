@@ -137,6 +137,17 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Anna fehlte nach dem Neuaufbau** (2026-09-25, Stephan: „die Stimme ist zu
+  schnell", und die Lautstärke-Frage im Konto `nutzer` ließ sich nicht
+  beantworten). Doku-Schritt 12c - Annas Stimmdatei holen und mit
+  `dialos-stimme.py setzen kerstin` einschalten - stand nur im Rezept, nie im
+  Aufbau-Skript. Die Konfiguration aus dem Repo stellt aber Anna ein. Folge:
+  Michael sprach mit Annas Tempo 0,95 statt 0,88, stellte sich als „Michael"
+  vor, und `spd-say` brach nach 20 s ab („Sprachausgabe antwortet nicht"),
+  weil die eingestellte Stimmdatei fehlte. Jetzt Schritt 16e im
+  `dialos-full-office-setup.sh`, am Gerät gelaufen; `spd-say` antwortet wieder
+  (6,2 s für den Testsatz).
+
 - **Die Stick-Auswahl bietet eingehängte Laufwerke nicht mehr an**
   (`dialos-setup-home-partition.sh`, 2026-09-25). Beim Neuaufbau stand vor
   Teil 4.2 die externe Arbeitsplatte - USB wie der Stick, eingehängt, mit Repo,
