@@ -146,7 +146,8 @@ vermeiden.
   und gepusht.
 
 **Als Naechstes:** Teil 3, Schritt 6 - `sudo apt install git` (auf diesem Geraet
-schon da) und `scripts/dialos-claude-setup.sh`, dann Teil 4.
+schon da) und `sudo scripts/dialos-claude-setup.sh` (MIT sudo - stand ohne in der
+  Anleitung, berichtigt), dann `git push` ohne sudo mit Token, dann Teil 4.
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 

@@ -186,11 +186,14 @@ Das Kommandozeilen-Werkzeug `claude` braucht es an dieser Stelle **nicht** - die
 sudo apt install git
 ```
 
-Dann:
+Dann das Einrichtungs-Skript - **mit `sudo`**, und danach der erste Push **ohne** `sudo` (er fragt nach Benutzername und Token):
 
 ```bash
-cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && ./scripts/dialos-claude-setup.sh
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
+  && sudo ./scripts/dialos-claude-setup.sh && git push
 ```
+
+> **Hier stand bis zum 25.09.2026 der Aufruf ohne `sudo`** - das Skript bricht dann sofort mit „Bitte mit sudo ausfuehren" ab. Es braucht root, weil es eine alte sudoers-Datei entfernt; die Git-Einstellungen trägt es trotzdem für `dialosadmin` ein, nicht für root.
 
 Das Skript legt den Symlink `~/DialOS`, trägt Name und E-Mail für Git ein und schaltet den Zugangsdaten-Speicher an. Beim **ersten** `git push` fragt Git einmalig nach Benutzername und Token; danach merkt es sich beides.
 
