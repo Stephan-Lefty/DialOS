@@ -188,10 +188,22 @@ vermeiden.
   nutzer fehlt nichts" (Bruecke, Woerterbuch, Signatur, Dienste, Daten).
   Sprachtest als `nutzer`: "Es lief alles sauber inkl. Thunderbird" (Stephan).
 
-**Als Naechstes:** (1) Beitrag veroeffentlichen, Entwurf
-`Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom zweiten
-Rechner (.env). (2) Bluetooth-Lautsprecher koppeln (einziger offener Punkt aus Teil 5).
-(3) Mailkonto: MX-Hinweis bei eigenen Domains (TODO).
+- **Grafik** `assets/debian-zu-dialos.{svg,png}` aus `scripts/dialos-grafik-aufbau.py`.
+
+**Feierabend 2026-09-25, alles gepusht. Naechstes Vorhaben (Stephan): Radio,
+Musik hoeren, Nachrichten hoeren, Podcasts hoeren** - alles ueber Rhythmbox
+(entschieden 2026-09-25): DialOS sucht Sender selbst in radio-browser.info,
+Rhythmbox spielt per `rhythmbox-client --play-uri`; Podcasts und Merkposition
+laut docs/anwendungen.md. "Nachrichten hoeren" ist neu - zu klaeren: Nachrichten
+als Radiosender (z. B. ein Nachrichtensender) oder als Podcast-Folge (neueste
+Ausgabe abspielen). Vor dem Bauen: Satz-Pruefungen (Wortschatz + volle
+Grammatik), Ein-Player-Regel erledigt sich, Widerspruch "Radio oeffnen" vs.
+"Radio einschalten" aufloesen, Shortwave ggf. aus dem Menue.
+
+Danach offen: Beitrag veroeffentlichen (Entwurf
+`Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`, nur vom zweiten
+Rechner), Bluetooth-Lautsprecher koppeln, hassil weglassen (Stephan
+entscheidet), MX-Hinweis in der Maske, englische Grafik.
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 

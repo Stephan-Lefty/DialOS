@@ -1884,7 +1884,9 @@ finished too, and then move down together. That way no reference breaks.
       letter to the health insurer it must be decided whether that suffices
       or whether it has to be checked before sending.
   - [ ] **Reading out** mails, documents and web pages.
-  - [ ] **Radio and music by voice** - **decided on 2026-09-25 (Stephan):
+  - [ ] **Radio, music, news and podcasts by voice** (Stephan, 2026-09-25:
+    next up). New: news - as a station or as the latest podcast episode, to be
+    decided. **Decided on 2026-09-25 (Stephan):
     both through Rhythmbox.** DialOS looks up the station itself in
     radio-browser.info, Rhythmbox plays it via `rhythmbox-client --play-uri`.
     Shortwave offers no interface to choose a station (over MPRIS only
