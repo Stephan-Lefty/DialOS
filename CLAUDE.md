@@ -167,11 +167,13 @@ vermeiden.
 
 - **Mikrofon-Frage geklaert:** zu fruehes Antworten, nicht das Mikrofon. In
   beiden Konten war aber das rohe Mikrofon eingestellt (Stephan hat umgestellt).
+- **Echo-Quelle als Standard gebaut und belegt:** `priority.session = 2500`;
+  mit geleerter Kontowahl nimmt `dialosadmin` sie von selbst, auch nach dem
+  Neustart. Stephan: "jetzt laeuft alles".
 
-**Als Naechstes:** (1) Echo-Quelle als Voreinstellung fuer jedes Konto (TODO,
-wartet auf Stephans Freigabe). (2) Beitrag veroeffentlichen, Entwurf
+**Als Naechstes:** (1) Beitrag veroeffentlichen, Entwurf
 `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom zweiten
-Rechner (.env). (3) Teil 5 (Thunderbird, Bluetooth) und Teil 6 (Abnahme mit sudo).
+Rechner (.env). (2) Teil 5 (Thunderbird, Bluetooth) und Teil 6 (Abnahme mit sudo).
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 
@@ -1118,7 +1120,8 @@ die externe Festplatte auch für Dich immer sichtbar und nutzbar ist"): Eintrag
 in `/etc/fstab` über die UUID, gleicher Pfad `/media/dialosadmin/SanDisk-Extreme`,
 mit `nofail`. Eingerichtet von `sudo scripts/dialos-claude-setup.sh` (Schritt
 4/4) - nach einem Reinstall also dort wieder mitgenommen. Nur Entwicklungsgerät,
-nicht im Kunden-Rezept.
+nicht im Kunden-Rezept. **Beim Neustart belegt (16:53):** eingehaengt 8 s nach
+dem Start, vor der ersten Anmeldung (Autologin `nutzer`).
 
 `TODO.md` im Repo-Root ist für kurzfristige, konkrete Aufgaben gedacht -
 anders als `docs/offene-punkte.md`, das für grundsätzliche, noch
