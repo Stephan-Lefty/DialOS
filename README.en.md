@@ -197,6 +197,69 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.2
 
+- **DialOS-Rhythmbox: the extension that produces the media list**
+  (Stephan, 2026-09-25: "Can you put together a list of German, Austrian
+  and Swiss stations" - and the same evening: "Yes, it is an extension for
+  DialOS"). It fetches stations from radio-browser.info, tests them and
+  writes `medienliste.json` in the format described in
+  [docs/medienliste.md](docs/medienliste.md). The app announced there is
+  thereby built. `dialos-rhythmbox.py` is the interface
+  (GTK4/libadwaita, colours from `dialos_farben.py`),
+  `dialos_rhythmbox_sender.py` does the work and doubles as a complete
+  command line tool.
+
+- **What is checked is whether sound actually arrives** - not whether the
+  server answers. Every stream is decoded by `ffprobe`, and the ICY name
+  the station sends about itself is compared with the expected one. That
+  was not academic: in one evening it found three faults a reachability
+  test would never have noticed. "MDR Aktuell" pointed via an `.m3u` file
+  at **MDR Kultur** (swapped station IDs), "Radio Swiss Classic" was the
+  **Italian** edition (`rsc_it`, announcing itself as "Swiss Classic I"),
+  and "Kronehit" pointed at a JSON endpoint of onlineradiobox instead of
+  the stream. Playlist addresses are demoted since then, and for SRG
+  stations a pattern in the stream address decides the language edition.
+
+- **Freely accessible sources only** (Stephan, 2026-09-25: "It is
+  important that all stations are freely accessible. Without an account
+  or anything"). Addresses carrying `token`, `sid`, `session` or a user
+  name are demoted, and HTTP 401/403 is reported as "requires
+  credentials" rather than as a dead station. This surfaced a fundamental
+  mistake: we stored `url_resolved`, the **resolved** address - but with
+  the ARD distribution that carries a session key which expires.
+  `http://radioeins.de/stream` is the durable entry point. Since then:
+  if the resolved address carries a key and the original does not, the
+  original is stored.
+
+- **Warning about confusable spoken forms**, as requested in
+  medienliste.md. Two phrases that sound too alike are not a cosmetic
+  issue: recognition confuses them, and a blind user cannot look up what
+  is playing. Across all 78 stations the check reports eleven such pairs.
+  That is also the practical proof of the "less is more" rule: with 78
+  stations collisions are unavoidable. The interface therefore starts
+  with no boxes ticked.
+
+- **Search by state, city and genre** (Stephan, 2026-09-25: "We need to
+  break the station lists down further"). The `state` field is curated by
+  hand and correspondingly inconsistent - for Germany alone 53 spellings
+  with at least four stations. `BUNDESLAENDER` therefore records what
+  must actually be asked for. The difference is not a detail: North
+  Rhine-Westphalia yields **494** stations across six spellings, but only
+  **72** under the official one. There is no city field; the search uses
+  the name, the tags and `state` (for city states the city sits there).
+  That works for Berlin (155) and fails for Innsbruck (1) - a property of
+  the data that belongs stated in the interface.
+
+- **Icon derived from the DialOS app icon.** Stephan's draft had sound
+  waves **and** a microphone with headphones on the right - two objects,
+  exactly the constellation the Suche draft failed on at 32 pixels on
+  2026-09-17. Measured with the same method
+  (`assets/rhythmbox-icon-groessenvergleich.png`): clear at 64 px,
+  merging at 48 px, a blob at 32 px. The reduced version was built
+  instead - waves removed, microphone **drawn** rather than cut out
+  (`assets/rhythmbox-icon-bauen.py`). It carries at all three sizes.
+  Stephan's draft remains as `assets/rhythmbox-icon-entwurf.png`.
+
+
 - **Programs open on command - "Postfach öffnen", "neue E-Mail schreiben"**
   (Stephan, 2026-09-21: "we need a list of commands that start the programs
   anyway" - and shortly after: "we still need the command for closing").

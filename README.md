@@ -272,6 +272,74 @@ das Erfolg meldet, während es versagt.
   still umzubrechen, und hält eine Überschrift mit dem folgenden Befehlsblock
   zusammen. In `docs/Debian-zu-DialOS.md` (+ `.en.md`) stand Schritt 7 noch
   „kein fester Installationsschritt" für die App - berichtigt.
+- **DialOS-Rhythmbox: die Erweiterung, mit der die Medienliste entsteht**
+  (Stephan, 2026-09-25: „Kannst du mir eine Liste zusammen stellen über
+  deutsche österreichische und schweizer Sender" - und am selben Abend:
+  „Ja es ist eine Erweiterung für DialOS"). Sie holt Sender von
+  radio-browser.info, testet sie an und schreibt `medienliste.json` im
+  Format aus [docs/medienliste.md](docs/medienliste.md). Damit ist die
+  dort angekündigte App gebaut. `dialos-rhythmbox.py` ist die Oberfläche
+  (GTK4/libadwaita, Farben aus `dialos_farben.py`),
+  `dialos_rhythmbox_sender.py` die Arbeit darunter und zugleich ein
+  vollständiges Kommandozeilen-Werkzeug.
+
+- **Geprüft wird, ob wirklich Ton kommt - nicht, ob der Server antwortet.**
+  Jeder Stream wird von `ffprobe` dekodiert, und zusätzlich wird der
+  ICY-Name verglichen, den der Sender selbst mitsendet. Das war kein
+  Selbstzweck: Es hat an einem Abend drei Fehler gefunden, die ein
+  Erreichbarkeitstest nie bemerkt hätte. „MDR Aktuell" zeigte über eine
+  `.m3u`-Datei auf **MDR Kultur** (vertauschte Sender-IDs), „Radio Swiss
+  Classic" war die **italienische** Fassung (`rsc_it`, meldete sich als
+  „Swiss Classic I"), und „Kronehit" zeigte auf eine JSON-Schnittstelle
+  von onlineradiobox statt auf den Stream. Playlist-Adressen werden
+  seitdem grundsätzlich abgewertet, und bei der SRG entscheidet
+  zusätzlich ein Muster in der Stream-Adresse über die Sprachfassung.
+
+- **Nur frei zugängliche Quellen** (Stephan, 2026-09-25: „Wichtig ist das
+  die Sender alle frei zugänglich sind. Ohne einen Account oder so").
+  Adressen mit `token`, `sid`, `session` oder Benutzername im Link werden
+  abgewertet, HTTP 401/403 wird als „verlangt Zugangsdaten" gemeldet
+  statt als toter Sender. Dabei kam ein grundsätzlicher Fehler heraus:
+  Gespeichert wurde bisher `url_resolved`, die **aufgelöste** Adresse -
+  bei der ARD-Verteilung hängt die aber eine Sitzungskennung an, die
+  abläuft. `http://radioeins.de/stream` ist der dauerhafte Einstieg.
+  Seitdem gilt: Trägt die aufgelöste Adresse eine Kennung und die
+  ursprüngliche nicht, wird die ursprüngliche gespeichert.
+
+- **Warnung bei verwechselbaren Sprechformen**, wie in medienliste.md
+  gewünscht. Zwei Sätze, die sich zu ähnlich anhören, sind kein
+  Schönheitsfehler: Die Erkennung verwechselt sie, und der blinde Nutzer
+  kann nicht nachsehen, was gerade läuft. Über alle 78 Sender gerechnet
+  meldet die Prüfung elf solcher Paare - „we de er zwei" gegen „en de er
+  zwei", „radio niederoesterreich" gegen „radio oberoesterreich". Das ist
+  zugleich die praktische Bestätigung der Regel „weniger ist mehr":
+  Bei 78 Sendern sind Kollisionen unvermeidlich. Die Oberfläche startet
+  deshalb ohne gesetzte Haken.
+
+- **Suchen nach Bundesland, Stadt und Genre** (Stephan, 2026-09-25: „Wir
+  müssen die Senderlisten noch weiter runter brechen"). Das Feld `state`
+  in der Datenbank ist von Hand gepflegt und entsprechend uneinheitlich -
+  allein für Deutschland 53 Schreibweisen mit mindestens vier Sendern.
+  Deshalb steht in `BUNDESLAENDER` je Land, wonach wirklich gefragt werden
+  muss. Der Unterschied ist kein Detail: Nordrhein-Westfalen liefert über
+  sechs Schreibweisen **494** Sender, über die amtliche allein **72**.
+  Für Städte gibt es kein Feld; gesucht wird im Namen, in den
+  Schlagwörtern und in `state` (bei Stadtstaaten steht die Stadt dort).
+  Das trägt bei Berlin (155) und versagt bei Innsbruck (1) - eine
+  Eigenschaft der Daten, die in der Oberfläche benannt gehört.
+
+- **Symbol vom DialOS-App-Icon abgeleitet.** Stephans Entwurf hatte rechts
+  Schallwellen **und** ein Mikrofon mit Kopfhörer - also zwei Objekte, und
+  damit genau die Konstellation, an der der Suche-Entwurf am 2026-09-17
+  bei 32 Pixeln gescheitert ist. Nachgemessen mit demselben Verfahren
+  (`assets/rhythmbox-icon-groessenvergleich.png`): bei 64 px klar, bei
+  48 px verschmelzend, bei 32 px ein Klumpen. Gebaut wurde deshalb die
+  reduzierte Fassung - Wellen raus, Mikrofon **gezeichnet** statt
+  ausgeschnitten (`assets/rhythmbox-icon-bauen.py`). Sie trägt bei allen
+  drei Größen und ist von Denkzettels schrägem Stift und der runden Lupe
+  der Suche eindeutig zu unterscheiden. Stephans Entwurf bleibt als
+  `assets/rhythmbox-icon-entwurf.png` liegen.
+
 
 - **Programme öffnen sich auf Zuruf - „Postfach öffnen", „neue E-Mail
   schreiben", „Postfach schließen"** (Stephan, 2026-09-21: „Wir müssen doch

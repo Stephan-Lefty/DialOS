@@ -52,6 +52,35 @@ finished too, and then move down together. That way no reference breaks.
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Only possible from
   the second machine (the `.env` lives there); first add the English version
   and the audio version. The microphone paragraph is already updated.
+- [ ] **Finish DialOS-Rhythmbox** (built 2026-09-25, see changelog 0.5.2).
+  The tool runs, but four things are missing:
+  - [ ] **The menu for state, city and genre in the interface.** In
+    `dialos_rhythmbox_sender.py` the search is complete and usable from
+    the command line (`suchen --bundesland`, `--stadt`, `--genre`,
+    `--text`); the filter bar in the window is still missing. It should
+    state honestly that the city search is an approximation - the
+    database has no city field (Berlin 155 hits, Innsbruck 1).
+  - [ ] **Tests and CI**, as for every new program. Testable without
+    network: spoken-form suggestions, the confusable-form warning,
+    `braucht_zugang()`, `beste_adresse()` and the state normalisation.
+    The queries themselves must be switched off, or CI would test
+    third-party servers along the way.
+  - [ ] **SWR Kultur still hangs on a session key.** For this station
+    *both* address fields carry a `sid`. The official free address is
+    `https://liveradio.swr.de/sw331ch/swr2/play.mp3` (tested 2026-09-25,
+    announces itself as "SWR2 AAC 96"). Either record it as a fixed
+    fallback or submit it to radio-browser.info.
+  - [ ] **Catch up the documentation**, in both languages:
+    `docs/erweiterungen.md` (the classification - deliberately **without**
+    a manifest, as the tool needs neither start phrases nor the
+    microphone), `docs/anwendungen.md`, and the note in
+    `docs/medienliste.md` that the announced app now exists. Also
+    `docs/Debian-zu-DialOS.md` once the tool is part of device setup.
+  - [ ] **Have Stephan sign off the icon.** The measured version (microphone
+    only) is built. His draft with waves *and* microphone sits beside it as
+    `assets/rhythmbox-icon-entwurf.png` and failed at 32 pixels - the
+    decision is still his.
+
 - [ ] **Complete letter following DIN 5008** (Stephan, 2026-09-16, after building
   Parakeet in). (1) Define the user's personal data - Stephan's first - once for
   all programs and enter it (letterhead, Thunderbird signature, weather place;

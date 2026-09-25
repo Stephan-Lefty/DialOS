@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS-Rhythmbox
+GenericName=Medienliste pflegen (DialOS-Familie)
+Comment=Radiosender auswählen, antesten und als Medienliste für DialOS speichern
+Exec=/usr/local/bin/dialos-rhythmbox.py
+Icon=dialos-rhythmbox
+Terminal=false
+Categories=AudioVideo;Player;
+Keywords=Radio;Sender;Medienliste;DialOS;Rhythmbox;Stream;
+StartupNotify=true
+StartupWMClass=org.dialos.Rhythmbox
