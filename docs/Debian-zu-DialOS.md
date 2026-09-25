@@ -41,6 +41,11 @@ noch über die Git-Historie erreichbar.
 
 Referenz-Testgerät: Lenovo ThinkPad T490 (siehe [hardware.md](hardware.md)).
 
+![Von Debian 13 + GNOME zu DialOS](../assets/debian-zu-dialos.png)
+
+Die Grafik setzt `scripts/dialos-grafik-aufbau.py` aus einer Liste der Schritte
+- ändert sich die Installationsanleitung, dort nachziehen und neu setzen.
+
 > **Schnellweg (Stand 2026-09-25): von Debian zu DialOS.**
 > Vorher: Debian installieren (Schritt 1, Konto genau `dialosadmin`),
 > Grundsystem aktualisieren (Schritt 1e), die Claude-App aus Anthropics

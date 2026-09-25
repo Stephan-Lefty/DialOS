@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="1272" viewBox="0 0 1140 1272" role="img" font-family="Quicksand, 'Nunito', 'Noto Sans', 'DejaVu Sans', sans-serif">
+<title>Von Debian 13 + GNOME zu DialOS 0.5.3</title>
+<desc>Aufbau eines DialOS-Geräts in drei Abschnitten - Basis von Hand, Aufbau per Skript, Einrichten und abnehmen - mit einer Erklärung zu jedem Schritt.</desc>
+<defs>
+<linearGradient id="marke" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#0a5fd6"/><stop offset="0.5" stop-color="#0f9fb0"/><stop offset="1" stop-color="#5cbf2a"/>
+</linearGradient>
+<!-- Verlauf fuer "OS" in Nutzer-Koordinaten: bezogen auf die ganze Zeile
+     kam bei den zwei Buchstaben nur das gruene Ende an (2026-09-25 gesehen). -->
+<linearGradient id="marke-os" gradientUnits="userSpaceOnUse" x1="518" y1="0" x2="560" y2="0">
+<stop offset="0" stop-color="#0a5fd6"/><stop offset="0.5" stop-color="#0f9fb0"/><stop offset="1" stop-color="#5cbf2a"/>
+</linearGradient>
+<marker id="spitze" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#8a94a3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+<rect width="1140" height="1272" fill="#ffffff"/>
+<text x="40" y="62" font-size="32" font-weight="700" fill="#0b1a2e">Von Debian 13 + GNOME zu Dial<tspan id="os" fill="url(#marke-os)">OS</tspan></text>
+<text x="40" y="98" font-size="16" font-weight="500" fill="#5b6675">So wird aus einem frisch installierten Debian ein Rechner, der sich mit der Stimme bedienen lässt.</text>
+<rect x="40" y="116" width="1060" height="4" rx="2" fill="url(#marke)"/>
+<rect x="40" y="888" width="1060" height="206" rx="14" fill="none" stroke="#cfd6df" stroke-width="1" stroke-dasharray="5 5"/><text x="454" y="910" dominant-baseline="central" font-size="14" font-weight="700" fill="#5b6675">Einrichten und abnehmen</text>
+<rect x="40" y="476" width="1060" height="378" rx="14" fill="none" stroke="#cfd6df" stroke-width="1" stroke-dasharray="5 5"/><text x="454" y="498" dominant-baseline="central" font-size="14" font-weight="700" fill="#5b6675">Aufbau - per Skript</text>
+<rect x="40" y="150" width="1060" height="292" rx="14" fill="none" stroke="#cfd6df" stroke-width="1" stroke-dasharray="5 5"/><text x="454" y="172" dominant-baseline="central" font-size="14" font-weight="700" fill="#5b6675">Basis - von Hand</text>
+<rect x="70" y="192" width="340" height="60" rx="10" fill="#e8f0fc" stroke="#1a66d6" stroke-width="1.2"/>
+<text x="240.0" y="212.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#0b3d8c">Debian 13 + GNOME installieren</text>
+<text x="240.0" y="234.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#1a57b8">Konto dialosadmin, Platz frei lassen</text>
+<text x="454" y="202.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Aktuelles Debian 13 mit GNOME vom USB-Stick. Das erste Konto heißt genau</text>
+<text x="454" y="222.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">dialosadmin - die Skripte verlassen sich darauf. Nur EFI und 100 GB fürs</text>
+<text x="454" y="242.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">System anlegen, der Rest bleibt frei für die verschlüsselte Nutzer-Partition.</text>
+<line x1="418" y1="222.0" x2="442" y2="222.0" stroke="#1a66d6" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="255" x2="240.0" y2="273" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="278" width="340" height="60" rx="10" fill="#e8f0fc" stroke="#1a66d6" stroke-width="1.2"/>
+<text x="240.0" y="298.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#0b3d8c">Grundsystem aktualisieren</text>
+<text x="240.0" y="320.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#1a57b8">apt update und apt upgrade</text>
+<text x="454" y="288.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Der Installations-Stick ist oft Wochen alt. Sicherheitskorrekturen und ein</text>
+<text x="454" y="308.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">neuer Kernel kommen erst so ins System - alles Weitere baut auf dem</text>
+<text x="454" y="328.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">aktuellen Stand auf. Danach einmal neu starten.</text>
+<line x1="418" y1="308.0" x2="442" y2="308.0" stroke="#1a66d6" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="341" x2="240.0" y2="359" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="364" width="340" height="60" rx="10" fill="#e8f0fc" stroke="#1a66d6" stroke-width="1.2"/>
+<text x="240.0" y="384.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#0b3d8c">Claude-App einrichten</text>
+<text x="240.0" y="406.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#1a57b8">aus Anthropics Paketquelle</text>
+<text x="454" y="374.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Claude hilft beim Aufbau mit. Die App kommt aus der offiziellen</text>
+<text x="454" y="394.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Paketquelle von Anthropic; der Schlüssel wird vorher am Fingerabdruck</text>
+<text x="454" y="414.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">geprüft. Sie dient der Einrichtung im Büro.</text>
+<line x1="418" y1="394.0" x2="442" y2="394.0" stroke="#1a66d6" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="427" x2="240.0" y2="513" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="518" width="340" height="60" rx="10" fill="#e6f7f1" stroke="#04b484" stroke-width="1.2"/>
+<text x="240.0" y="538.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#025c46">Grundaufbau</text>
+<text x="240.0" y="560.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#027a5c">Stimmen, Erkenner, alle DialOS-Dateien</text>
+<text x="454" y="528.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Pakete, Branding, Autologin, die Stimmen Anna und Michael, Vosk für die</text>
+<text x="454" y="548.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Befehle, Parakeet fürs Diktat, LanguageTool. Zum Schluss kommen alle</text>
+<text x="454" y="568.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">DialOS-Dateien aufs Gerät, und die Dienste laufen für jedes Konto.</text>
+<line x1="418" y1="548.0" x2="442" y2="548.0" stroke="#04b484" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="581" x2="240.0" y2="599" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="604" width="340" height="60" rx="10" fill="#e6f7f1" stroke="#04b484" stroke-width="1.2"/>
+<text x="240.0" y="624.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#025c46">Verschlüsselung</text>
+<text x="240.0" y="646.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#027a5c">nutzer-Partition, Swap, Sicherheits-Stick</text>
+<text x="454" y="614.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Im freien Platz entstehen der verschlüsselte Swap und die Partition für</text>
+<text x="454" y="634.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">die Daten des Nutzers. Der Schlüssel liegt auf dem Sicherheits-Stick -</text>
+<text x="454" y="654.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">ohne Stick bleibt das Konto zu. Der Stick wird dabei neu angelegt.</text>
+<line x1="418" y1="634.0" x2="442" y2="634.0" stroke="#04b484" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="667" x2="240.0" y2="685" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="690" width="340" height="60" rx="10" fill="#e6f7f1" stroke="#04b484" stroke-width="1.2"/>
+<text x="240.0" y="710.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#025c46">Nutzerkonto und Abschluss</text>
+<text x="240.0" y="732.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#027a5c">Konto nutzer, Autologin, erste Prüfung</text>
+<text x="454" y="700.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Legt das Konto des Nutzers an, lässt es sich automatisch anmelden und</text>
+<text x="454" y="720.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">öffnet die Maske für die persönlichen Daten. Am Ende prüft das Skript</text>
+<text x="454" y="740.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">selbst, ob Gerät und Repository übereinstimmen.</text>
+<line x1="418" y1="720.0" x2="442" y2="720.0" stroke="#04b484" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="753" x2="240.0" y2="771" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="776" width="340" height="60" rx="10" fill="#e6f7f1" stroke="#04b484" stroke-width="1.2"/>
+<text x="240.0" y="796.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#025c46">Aufräumen und Menü</text>
+<text x="240.0" y="818.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#027a5c">Unnötiges weg, Menü je Konto</text>
+<text x="454" y="786.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Entfernt, was Debian mitbringt und DialOS nicht braucht - der Desktop</text>
+<text x="454" y="806.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">wird vorher geschützt. Im Konto des Nutzers zeigt das Menü danach nur</text>
+<text x="454" y="826.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">noch die DialOS-Programme; das Admin-Konto sieht weiter alles.</text>
+<line x1="418" y1="806.0" x2="442" y2="806.0" stroke="#04b484" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="839" x2="240.0" y2="925" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="930" width="340" height="60" rx="10" fill="#e8f0fc" stroke="#1a66d6" stroke-width="1.2"/>
+<text x="240.0" y="950.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#0b3d8c">Persönliche Daten und Mailkonto</text>
+<text x="240.0" y="972.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#1a57b8">eine Maske für alles</text>
+<text x="454" y="940.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Name, Anschrift, Telefon, Wetter-Ort und das Mailkonto samt Passwort.</text>
+<text x="454" y="960.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">DialOS verteilt die Angaben an Brief, Wetter, Signatur und Thunderbird.</text>
+<text x="454" y="980.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Das Passwort liegt nur in Thunderbirds verschlüsseltem Speicher.</text>
+<line x1="418" y1="960.0" x2="442" y2="960.0" stroke="#1a66d6" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="993" x2="240.0" y2="1011" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="1016" width="340" height="60" rx="10" fill="#e6f7f1" stroke="#04b484" stroke-width="1.2"/>
+<text x="240.0" y="1036.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#025c46">Abnahme</text>
+<text x="240.0" y="1058.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#027a5c">Prüfskripte und Sprachtest</text>
+<text x="454" y="1026.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Zwei Prüfskripte vergleichen Gerät und Repository und suchen Lücken im</text>
+<text x="454" y="1046.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Konto des Nutzers. Dann der Sprachtest: „Sprachsteuerung starten“,</text>
+<text x="454" y="1066.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">„Wie spät ist es“, „Postfach öffnen“, „Brief schreiben“.</text>
+<line x1="418" y1="1046.0" x2="442" y2="1046.0" stroke="#04b484" stroke-width="1" stroke-dasharray="2 4"/>
+<line x1="240.0" y1="1079" x2="240.0" y2="1123" stroke="#8a94a3" stroke-width="1.4" marker-end="url(#spitze)"/>
+<rect x="70" y="1128" width="340" height="60" rx="10" fill="#0b1a2e" stroke="#0b1a2e" stroke-width="1.2"/>
+<text x="240.0" y="1148.0" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#ffffff">DialOS 0.5.3</text>
+<text x="240.0" y="1170.0" text-anchor="middle" dominant-baseline="central" font-size="13.5" font-weight="500" fill="#7fd9b8">Sprachsteuerung für beide Konten</text>
+<text x="454" y="1138.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Blinde und motorisch eingeschränkte Menschen bedienen den Rechner mit der</text>
+<text x="454" y="1158.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">Stimme - Briefe, Mails, Notizen, Suche, Uhrzeit und Wetter. Zum Schluss</text>
+<text x="454" y="1178.0" dominant-baseline="central" font-size="14.5" font-weight="500" fill="#2b3440">ein Rescuezilla-Abbild der Platte als Rückweg.</text>
+<line x1="418" y1="1158.0" x2="442" y2="1158.0" stroke="#0b1a2e" stroke-width="1" stroke-dasharray="2 4"/>
+<rect x="70" y="1224" width="16" height="16" rx="4" fill="#e8f0fc" stroke="#1a66d6" stroke-width="1.2"/>
+<text x="94" y="1232" dominant-baseline="central" font-size="14" font-weight="500" fill="#5b6675">von Hand</text>
+<rect x="220" y="1224" width="16" height="16" rx="4" fill="#e6f7f1" stroke="#04b484" stroke-width="1.2"/>
+<text x="244" y="1232" dominant-baseline="central" font-size="14" font-weight="500" fill="#5b6675">per Skript</text>
+<rect x="370" y="1224" width="16" height="16" rx="4" fill="#0b1a2e" stroke="#0b1a2e" stroke-width="1.2"/>
+<text x="394" y="1232" dominant-baseline="central" font-size="14" font-weight="500" fill="#5b6675">Ergebnis</text>
+<text x="1100" y="1232" text-anchor="end" dominant-baseline="central" font-size="13" font-weight="500" fill="#5b6675">Nach docs/installationsanleitung.md · dialos.org</text>
+</svg>

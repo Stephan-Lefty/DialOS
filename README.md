@@ -35,6 +35,8 @@ sudo ./scripts/dialos-aufraeumen.sh --wirklich           # nicht benötigte Prog
 sudo ./scripts/dialos-menue-pro-konto.sh --wirklich      # Startmenü je Konto einrichten
 ```
 
+![Von Debian 13 + GNOME zu DialOS - der Aufbau in drei Abschnitten](assets/debian-zu-dialos.png)
+
 Die letzten beiden zuerst ohne `sudo … --wirklich` aufrufen - dann zeigen sie
 nur, was sie tun würden. Die Abnahme danach meldete „Im Konto nutzer fehlt
 nichts", der Sprachtest im Konto `nutzer` lief sauber.
@@ -143,6 +145,13 @@ das Erfolg meldet, während es versagt.
 ## Änderungsprotokoll
 
 ### 0.5.3
+
+- **Grafik „Von Debian 13 + GNOME zu DialOS"** (`assets/debian-zu-dialos.svg` und
+  `.png`, Stephans Wunsch vom 2026-09-25): der Aufbau in drei Abschnitten mit
+  einer Erklärung zu jedem Schritt, in den DialOS-Farben aus dem Markenblatt
+  und in Quicksand. Gesetzt von `scripts/dialos-grafik-aufbau.py` aus einer
+  Liste der Schritte, damit sie mit der Anleitung Schritt hält; eingebunden im
+  README und im Rezept.
 
 - **Die ganze Doku auf den Stand vom 2026-09-25 gebracht** (Stephan: „bitte
   erst mal die docs im repo prüfen und auf den neuesten Stand bringen"). Drei
