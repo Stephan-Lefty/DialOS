@@ -564,9 +564,35 @@ system): Debian's npm prefix is `/usr/local`, which `dialosadmin` cannot
 write to, so the command otherwise fails with `EACCES`.
 
 (The `EBADENGINE` warning about the Node version can be ignored, it
-works anyway.) For the desktop app: no fixed install step - the `.deb`
-is instead freshly downloaded during every office setup and placed on
-the desktop of every new account (see step 12).
+works anyway.)
+
+**The Claude desktop app comes BEFORE everything else** - from Anthropic's
+package repository, right after the Debian installation, because Claude helps
+with the build (corrected 2026-09-25; this previously said "no fixed install
+step"). The commands are verbatim the official guide
+`code.claude.com/docs/en/desktop-linux`; if it says otherwise, the page wins:
+
+```bash
+sudo apt install curl gnupg
+sudo curl -fsSLo /usr/share/keyrings/claude-desktop-archive-keyring.asc \
+  https://downloads.claude.ai/claude-desktop/key.asc
+gpg --show-keys /usr/share/keyrings/claude-desktop-archive-keyring.asc
+echo "deb [arch=amd64,arm64 \
+signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc] \
+https://downloads.claude.ai/claude-desktop/apt/stable stable main" \
+  | sudo tee /etc/apt/sources.list.d/claude-desktop.list
+sudo apt update && sudo apt install claude-desktop
+```
+
+The fingerprint from `gpg --show-keys` must be
+`31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE`; otherwise stop. **Two earlier
+versions failed on 2026-09-25:** the first fetched the key with `curl` before
+`curl` was installed; the second mixed in extra ingredients, and in the PDF of
+the installation guide the long commands wrapped in the middle of the URL.
+That is why they are split with `\` here, and `scripts/dialos-anleitung-pdf.py`
+now aborts instead of silently wrapping a command. Step 12 needs the same
+repository: it fetches the `.deb` with `apt-get download` and places it on the
+desktop of every new account.
 
 ## 8. Piper instead of espeak-ng (more natural voice output)
 

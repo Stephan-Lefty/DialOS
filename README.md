@@ -137,6 +137,21 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.2
 
+- **Installationsanleitung Teil 2 (Claude-App) ist jetzt wörtlich die
+  offizielle Anleitung von Anthropic** (2026-09-25, Stephan: „Deine Angaben
+  haben nicht funktioniert"). Beim Neuaufbau scheiterten zwei Fassungen: Die
+  erste lud den Schlüssel mit `curl`, bevor `curl` installiert war; die zweite
+  mischte eigene Zutaten dazu (`git`, `-y`), und im PDF brachen die langen
+  Befehle mitten in der Adresse um - aus dem PDF kopiert, wären daraus zwei
+  kaputte Befehle geworden. Jetzt: Befehle wie auf
+  `code.claude.com/docs/en/desktop-linux`, lange Zeilen mit `\` geteilt,
+  Fingerabdruck-Prüfung, Starten und Anmelden, Fehlerhilfe. `git` ist nach
+  Teil 3 gewandert, wo es gebraucht wird. `scripts/dialos-anleitung-pdf.py`
+  **bricht ab**, wenn eine Befehlszeile nicht auf das Blatt passt, statt sie
+  still umzubrechen, und hält eine Überschrift mit dem folgenden Befehlsblock
+  zusammen. In `docs/Debian-zu-DialOS.md` (+ `.en.md`) stand Schritt 7 noch
+  „kein fester Installationsschritt" für die App - berichtigt.
+
 - **Programme öffnen sich auf Zuruf - „Postfach öffnen", „neue E-Mail
   schreiben", „Postfach schließen"** (Stephan, 2026-09-21: „Wir müssen doch
   sowieso eine Liste von Befehlen machen, die dann die Programme startet" -

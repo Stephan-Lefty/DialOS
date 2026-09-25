@@ -602,9 +602,36 @@ npm-Prefix ist `/usr/local`, dort darf `dialosadmin` nicht schreiben, der
 Befehl scheitert sonst mit `EACCES`.
 
 (`EBADENGINE`-Warnung wegen Node-Version ist ignorierbar, funktioniert
-trotzdem.) Für die Desktop-App: kein fester Installationsschritt, das
-`.deb` wird stattdessen bei jedem Büro-Setup frisch heruntergeladen und
-auf den Desktop jedes neuen Kontos gelegt (siehe Schritt 12).
+trotzdem.)
+
+**Die Claude-Desktop-App kommt VOR allem anderen** - über Anthropics
+Paketquelle, gleich nach der Debian-Installation, weil Claude beim Aufbau
+mithilft (berichtigt 2026-09-25; hier stand vorher „kein fester
+Installationsschritt"). Die Befehle sind wörtlich die offizielle Anleitung
+`code.claude.com/docs/en/desktop-linux`; gilt dort etwas anderes, hat die Seite
+recht:
+
+```bash
+sudo apt install curl gnupg
+sudo curl -fsSLo /usr/share/keyrings/claude-desktop-archive-keyring.asc \
+  https://downloads.claude.ai/claude-desktop/key.asc
+gpg --show-keys /usr/share/keyrings/claude-desktop-archive-keyring.asc
+echo "deb [arch=amd64,arm64 \
+signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc] \
+https://downloads.claude.ai/claude-desktop/apt/stable stable main" \
+  | sudo tee /etc/apt/sources.list.d/claude-desktop.list
+sudo apt update && sudo apt install claude-desktop
+```
+
+Der Fingerabdruck aus `gpg --show-keys` muss
+`31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE` sein, sonst nicht weitermachen.
+**Zwei Fassungen davor sind am 2026-09-25 gescheitert:** Die erste lud den
+Schlüssel mit `curl`, bevor `curl` installiert war; die zweite hatte eigene
+Zutaten dazugemischt, und im PDF der Installationsanleitung brachen die langen
+Befehle mitten in der Adresse um. Deshalb stehen sie hier mit `\` geteilt, und
+`scripts/dialos-anleitung-pdf.py` bricht jetzt ab, statt einen Befehl still
+umzubrechen. Dieselbe Paketquelle braucht Schritt 12: Dort wird das `.deb` mit
+`apt-get download` frisch geholt und auf den Desktop jedes neuen Kontos gelegt.
 
 ## 8. Piper statt espeak-ng (natürlichere Sprachausgabe)
 

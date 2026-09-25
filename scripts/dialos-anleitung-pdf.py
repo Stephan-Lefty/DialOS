@@ -152,6 +152,17 @@ def setzen(quelle, ziel):
             i += 1
             lay = blatt.layout(html.escape("\n".join(block)), groesse=9,
                                fest=True, breite=BREITE - 8 * MM)
+            # Ein Befehl, den der Setzer umbricht, ist beim Kopieren aus dem
+            # PDF zwei kaputte Befehle - am 2026-09-25 stand so "https://"
+            # allein am Zeilenende. Also abbrechen statt still umbrechen; zu
+            # lange Zeilen gehoeren in der Quelle mit \ geteilt.
+            if lay.get_line_count() > len(block):
+                for zeile in block:
+                    probe = blatt.layout(html.escape(zeile), groesse=9, fest=True,
+                                         breite=BREITE - 8 * MM)
+                    if probe.get_line_count() > 1:
+                        sys.exit(f"Befehlszeile zu lang fuer das Blatt, bitte mit \\ "
+                                 f"teilen:\n  {zeile}")
             h = blatt.hoehe(lay)
             blatt.platz(h + 7 * MM)
             blatt.stift.set_source_rgb(*KASTEN)
@@ -173,7 +184,19 @@ def setzen(quelle, ziel):
             blatt.y += 5 * MM
         elif z.startswith("## "):
             lay = blatt.layout(auszeichnen(z[3:]), groesse=14, fett=True)
-            blatt.platz(blatt.hoehe(lay) + 14 * MM)   # nie allein am Fuss
+            # nie allein am Fuss - und folgt direkt ein Befehlsblock, dann
+            # mit ihm zusammen (2026-09-25: "2.4" unten, der Befehl eine Seite
+            # weiter)
+            folge = 14 * MM
+            j = i + 1
+            while j < len(zeilen) and not zeilen[j].strip():
+                j += 1
+            if j < len(zeilen) and zeilen[j].startswith("```"):
+                n = 0
+                while j + 1 + n < len(zeilen) and not zeilen[j + 1 + n].startswith("```"):
+                    n += 1
+                folge = max(folge, n * 4.5 * MM + 12 * MM)
+            blatt.platz(blatt.hoehe(lay) + folge)
             blatt.y += 3 * MM
             blatt.schreiben(lay, abstand=2.5 * MM)
         elif z.startswith("### "):

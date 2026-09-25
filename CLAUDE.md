@@ -125,7 +125,30 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-25, Freitag mittags - Version 0.5.2)
+## NEUAUFBAU LAEUFT (Stand: 2026-09-25, Freitag abends)
+
+**Hier stehen wir:**
+- Rescuezilla-Abbild ist gezogen (`../dialos-rscuezilla-25-09-2026/`, 41 GB).
+- **Erster Anlauf abgebrochen:** Debian war installiert, Partitionierung richtig
+  (EFI 512 MB, `/` 93 GiB, Rest frei) - aber das Konto hiess `dialosadim`
+  (Tippfehler). Stephan hat sich fuer eine NEUE Installation entschieden, nicht
+  fuers Umbenennen ("ich muss sorgfaeltiger arbeiten").
+- **Zweiter Anlauf: Konto geprueft** - `id dialosadmin` meldet uid 1000, Gruppe
+  `sudo`. Git samt Identitaet und Zugang hat den Neuaufbau ueberstanden (liegt
+  im Repo auf der externen Platte).
+- **Teil 2 der Anleitung ist zweimal gescheitert** und jetzt WOERTLICH die
+  offizielle Seite `code.claude.com/docs/en/desktop-linux` (Stephan: "Deine
+  Angaben haben nicht funktioniert"). Fassung 1: `curl` vor seiner Installation
+  benutzt. Fassung 2: eigene Zutaten (`git`, `-y`) und im PDF mitten in der URL
+  umgebrochene Befehle. **Regel daraus: Bei fremder Software die Befehle des
+  Herstellers uebernehmen, nicht nachbauen** - und lange Befehle mit `\` teilen;
+  `dialos-anleitung-pdf.py` bricht jetzt ab, statt still umzubrechen. Committet
+  und gepusht.
+
+**Als Naechstes:** Teil 3, Schritt 6 - `sudo apt install git` (auf diesem Geraet
+schon da) und `scripts/dialos-claude-setup.sh`, dann Teil 4.
+
+## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 
 **VOR DEM NEUAUFBAU. Das Geraet steht kurz vor dem Loeschen** (Stephans Wunsch:
 "die komplette Installation sowohl fuer dialosadmin und dem nutzer neu

@@ -4,7 +4,7 @@ Diese Anleitung führt ein leeres ThinkPad zu einem fertigen DialOS - beide Kont
 
 > **Diese Anleitung vor dem Anfangen ausdrucken oder auf ein zweites Gerät legen.** Sie liegt auf derselben Platte, die während der Installation gebraucht wird - am Zielgerät ist sie dann nicht lesbar.
 
-**Stand:** 25.09.2026, nachmittags · **Zeit:** ein halber Tag, davon viel Wartezeit · **Grundlage:** `docs/Debian-zu-DialOS.md` im Repo. Diese Anleitung ist die Kurzform für den Handgriff; das Rezept dort erklärt jeden Schritt und begründet ihn.
+**Stand:** 25.09.2026, abends (Teil 2 ist jetzt wörtlich die offizielle Anleitung von Anthropic) · **Zeit:** ein halber Tag, davon viel Wartezeit · **Grundlage:** `docs/Debian-zu-DialOS.md` im Repo. Diese Anleitung ist die Kurzform für den Handgriff; das Rezept dort erklärt jeden Schritt und begründet ihn.
 
 ## Was bereitliegen muss
 
@@ -23,7 +23,8 @@ Alles, was hier nicht gesichert wird, ist danach weg. Das Repository ist gesiche
 ## 0.1 Ist alles gepusht?
 
 ```bash
-cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && git status --short && git log origin/master..HEAD --oneline
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && git status --short \
+  && git log origin/master..HEAD --oneline
 ```
 
 Beide Ausgaben müssen **leer** sein. Steht dort etwas, erst committen und pushen.
@@ -44,13 +45,15 @@ Diese Dinge gehören **bewusst** nicht ins öffentliche Repository und müssen e
 Zuerst das Admin-Konto:
 
 ```bash
-cd /media/dialosadmin/SanDisk-Extreme/DialOS && tar czf sicherung-admin.tar.gz -C /home/dialosadmin .config/dialos .thunderbird Dokumente Notizen
+cd /media/dialosadmin/SanDisk-Extreme/DialOS && tar czf sicherung-admin.tar.gz \
+  -C /home/dialosadmin .config/dialos .thunderbird Dokumente Notizen
 ```
 
 Dann das Nutzerkonto - dafür braucht es `sudo`, weil das Verzeichnis dem anderen Konto gehört:
 
 ```bash
-cd /media/dialosadmin/SanDisk-Extreme/DialOS && sudo tar czf sicherung-nutzer.tar.gz -C /home/nutzer .config/dialos
+cd /media/dialosadmin/SanDisk-Extreme/DialOS && sudo tar czf sicherung-nutzer.tar.gz \
+  -C /home/nutzer .config/dialos
 ```
 
 Zum Schluss nachsehen, dass beide Dateien wirklich da sind und nicht nur ein paar Kilobyte groß:
@@ -70,7 +73,7 @@ Ganz normal vom Debian-Stick booten, **ohne** Sonderzeilen im Startmenü. Die ei
 1. Sprache **Deutsch**, Land **Österreich**, Zeitzone **Europe/Vienna** - so läuft das Referenzgerät, und das bleibt so. Für ein Gerät außerhalb Österreichs hier die passende Zeitzone wählen.
 2. Netzwerk verbinden (Kabel oder WLAN) - der Installer lädt Pakete nach.
 3. **Kein Wurzel-Passwort vergeben.** Bleibt das Feld leer, bekommt das erste Konto `sudo` - genau das wird gebraucht.
-4. Das erste Konto heißt **`dialosadmin`**. Dieser Name steht in Skripten und Doku; ein anderer Name bricht beides.
+4. Das erste Konto heißt **`dialosadmin`** - Buchstabe für Buchstabe: d-i-a-l-o-s-a-d-m-i-n. Dieser Name steht in 30 Dateien, darunter die sudoers-Regeln. Ein anderer Name bricht nicht laut, sondern **lautlos**: Die Regeln greifen einfach nicht. **Vor dem Weiterklicken zweimal lesen** - am 25.09.2026 ist genau hier `dialosadim` entstanden, und der Aufbau musste von vorn beginnen.
 
 ## Die Partitionierung - der einzige heikle Schritt
 
@@ -94,41 +97,82 @@ Nach dem Neustart: anmelden, Netzwerk verbinden, die externe Platte anstecken. S
 
 # Teil 2: Die Claude-App installieren
 
-Ab hier hilft Claude wieder mit - aber erst, wenn die App läuft. Die drei Befehle stehen nirgends sonst; sie stammen aus der Befehlsgeschichte des bisherigen Geräts.
+Ab hier hilft Claude wieder mit - aber erst, wenn die App läuft. **Dieser Teil ist die offizielle Anleitung von Anthropic, Befehl für Befehl:** `code.claude.com/docs/en/desktop-linux`. Nichts ist dazugemischt. Weicht die Seite irgendwann von diesem Blatt ab, gilt die Seite - und dieses Blatt gehört nachgezogen.
 
-## 2.1 Paketquelle und Schlüssel
+> **Warum das so streng ist:** Die ersten beiden Fassungen dieses Teils haben am 25.09.2026 nicht funktioniert. Die erste holte den Schlüssel mit `curl`, bevor `curl` installiert war. Die zweite hatte eigene Zutaten dazugemischt, und im PDF brachen die langen Befehle mitten in der Adresse um. Stephan hat die App dann nach der offiziellen Seite installiert - damit ging es.
 
-```bash
-sudo curl -fsSLo /usr/share/keyrings/claude-desktop-archive-keyring.asc https://downloads.claude.ai/claude-desktop/key.asc
-```
+> **Lange Befehle stehen hier auf mehreren Zeilen.** Endet eine Zeile mit `\`, gehört die nächste noch zum selben Befehl. Der ganze Block wird **auf einmal** eingefügt (oder abgetippt) und dann einmal mit der Eingabetaste abgeschickt.
 
-```bash
-echo "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc] https://downloads.claude.ai/claude-desktop/apt/stable stable main" | sudo tee /etc/apt/sources.list.d/claude-desktop.list
-```
+## 2.1 Werkzeuge für den Schlüssel
 
-## 2.2 App installieren
+Der Schlüssel wird mit `curl` geladen und mit `gpg` geprüft. Auf einem frischen Debian fehlt mindestens `curl` - deshalb immer zuerst:
 
 ```bash
-sudo apt update && sudo apt install -y curl claude-desktop
+sudo apt install curl gnupg
 ```
 
-Fehlt `curl` noch, vorher `sudo apt install -y curl` - auf einer frischen Debian-Installation ist es nicht immer dabei.
+Fragt apt „Möchten Sie fortfahren? [J/n]", mit der Eingabetaste bestätigen.
 
-## 2.3 Claude Code auf der Kommandozeile
-
-Die App bringt die Oberfläche, das Kommandozeilen-Werkzeug kommt über npm:
+## 2.2 Den Schlüssel von Anthropic laden
 
 ```bash
-sudo apt install -y nodejs npm && sudo npm install -g @anthropic-ai/claude-code
+sudo curl -fsSLo /usr/share/keyrings/claude-desktop-archive-keyring.asc \
+  https://downloads.claude.ai/claude-desktop/key.asc
 ```
 
-> **`sudo` ist hier Pflicht:** Debians npm schreibt nach `/usr/local`, und dort darf `dialosadmin` nicht schreiben. Ohne `sudo` bricht es mit `EACCES` ab.
+**Klappt es, erscheint gar nichts.** Nur bei einem Fehler steht dort eine Zeile, die mit `curl:` beginnt.
+
+## 2.3 Prüfen, dass der Schlüssel wirklich von Anthropic ist
+
+```bash
+gpg --show-keys /usr/share/keyrings/claude-desktop-archive-keyring.asc
+```
+
+In der Ausgabe muss dieser Fingerabdruck stehen:
+
+```text
+31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE
+```
+
+Steht dort etwas anderes, oder meldet gpg, die Datei lasse sich nicht öffnen oder enthalte keine gültigen OpenPGP-Daten: **nicht weitermachen.** Prüfen, ob das Netz steht, und 2.2 wiederholen. Ein fehlender oder falscher Schlüssel fällt sonst erst später auf, als `NO_PUBKEY BAA929FF1A7ECACE` bei `apt update`.
+
+## 2.4 Die Paketquelle eintragen
+
+```bash
+echo "deb [arch=amd64,arm64 \
+signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc] \
+https://downloads.claude.ai/claude-desktop/apt/stable stable main" \
+  | sudo tee /etc/apt/sources.list.d/claude-desktop.list
+```
+
+Das Terminal wiederholt danach die eingetragene Zeile - **eine** lange Zeile, die mit `deb [arch=amd64,arm64 signed-by=` beginnt und mit `stable main` endet. So sieht es richtig aus.
+
+## 2.5 Die App installieren
+
+```bash
+sudo apt update && sudo apt install claude-desktop
+```
+
+Wieder mit der Eingabetaste bestätigen. Dabei kommen auch QEMU und die Virtualisierungspakete mit - die braucht nur der Cowork-Bereich der App, sie schaden aber nicht.
+
+## 2.6 Starten und anmelden
+
+Übersichtstaste drücken, **„Claude"** eintippen, starten - oder im Terminal `claude-desktop`. Dann mit dem Anthropic-Konto anmelden (claude.ai-Abo). Die App **nie mit `sudo` starten**: Als root bricht sie mit „Running as root without --no-sandbox is not supported" ab.
+
+Das Kommandozeilen-Werkzeug `claude` braucht es an dieser Stelle **nicht** - die App bringt Claude Code mit. `nodejs`, `npm` und `@anthropic-ai/claude-code` installiert das Aufbau-Skript in Teil 4.
+
+## 2.7 Wenn etwas nicht klappt
+
+- **`command not found` bei curl oder gpg:** 2.1 fehlt oder ist abgebrochen - wiederholen.
+- **`NO_PUBKEY BAA929FF1A7ECACE` bei `apt update`:** Der Schlüssel fehlt oder ist falsch. 2.2 und 2.3 wiederholen.
+- **`E: Unable to locate package claude-desktop`:** apt kennt die Paketquelle nicht. Nachsehen mit `cat /etc/apt/sources.list.d/claude-desktop.list` - dort muss die `deb`-Zeile aus 2.4 stehen. Fehlt sie oder ist die Datei leer: 2.4 wiederholen, dann 2.5.
+- **Aktualisiert wird die App später mit dem System** (`sudo apt update && sudo apt upgrade`, oder über die Update-Automatik von DialOS). Sie aktualisiert sich unter Linux nicht selbst.
 
 ---
 
 # Teil 3: In der Claude-App - Schritt für Schritt
 
-1. **App starten**: Übersichtstaste drücken, „Claude" eintippen, starten.
+1. **App starten**, falls sie nicht schon läuft - wie in 2.6.
 2. **Anmelden** mit dem üblichen Konto. Das dauert wenige Sekunden - die Anmeldung lässt sich nicht sichern und nicht wiederherstellen, sie wird jedes Mal neu gemacht.
 3. **Ordner freigeben:** In der App den Arbeitsordner wählen und auf `/media/dialosadmin/SanDisk-Extreme/DialOS/repo` zeigen. **Ohne diesen Schritt sieht Claude das Repository nicht** - und damit weder die Doku noch die Skripte.
 4. **Prüfen, ob es sitzt:** Claude bitten, `CLAUDE.md` zu lesen. Kommt eine Zusammenfassung des Projektstands, ist die Verbindung da.
@@ -136,7 +180,13 @@ sudo apt install -y nodejs npm && sudo npm install -g @anthropic-ai/claude-code
 
 > „Wir bauen das Gerät gerade neu auf. Lies CLAUDE.md und docs/Debian-zu-DialOS.md und sag mir, welcher Schritt als Nächstes dran ist."
 
-6. **GitHub-Zugang einrichten** - das geht nur von Hand, kein Skript und keine KI kann es übernehmen:
+6. **GitHub-Zugang einrichten** - das geht nur von Hand, kein Skript und keine KI kann es übernehmen. Zuerst `git`, das ein frisches Debian nicht mitbringt (das Aufbau-Skript installiert es erst in Teil 4, gebraucht wird es hier):
+
+```bash
+sudo apt install git
+```
+
+Dann:
 
 ```bash
 cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && ./scripts/dialos-claude-setup.sh
@@ -199,7 +249,8 @@ Alles hier braucht Zugangsdaten oder ein Urteil - beides kann kein Skript liefer
 Ein Aufbau, der durchläuft, beweist noch nicht, dass er vollständig war.
 
 ```bash
-cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo && ./scripts/dialos-installstand.sh --befehl
+cd /media/dialosadmin/SanDisk-Extreme/DialOS/repo \
+  && ./scripts/dialos-installstand.sh --befehl
 ```
 
 Erwartet wird: nur die bewussten Ausnahmen weichen ab - die gewählte Stimme, die Bluetooth-Kopplung und die zurückgestellte Fernwartung.
@@ -226,6 +277,7 @@ Läuft das, ist das Gerät fertig.
 - **Die Partitionierung sieht anders aus als erwartet:** Im Installer zurückgehen und die Partitionstabelle prüfen - es dürfen nur die EFI- und die 100-GB-Partition angelegt sein, der Rest muss als „FREIER SPEICHER" dastehen. Ist die ganze Platte belegt, findet Teil 4.2 später keinen Platz für `/home/nutzer`.
 - **Ein Aufbau-Skript bricht ab:** Es lässt sich einzeln fortsetzen, zum Beispiel `./scripts/dialos-full-office-setup.sh 15_vosk`. Die Schrittnamen stehen im Skript unter `ALLE_SCHRITTE`.
 - **Die Sprachsteuerung reagiert nicht:** Nach dem Aufspielen neuer Sätze einmal ab- und anmelden - die Grammatik wird beim Start gelesen. Protokolle liegen in `~/.log/`.
+- **Beim Kontonamen vertippt** (am 25.09.2026 passiert: `dialosadim`): Der sichere Weg ist, Teil 1 **noch einmal** zu machen - so wurde es am 25.09.2026 auch entschieden. Solange außer der Claude-App nichts eingerichtet ist, kostet das nur eine halbe Stunde. Umbenennen über ein Hilfskonto (`usermod -l`, `groupmod -n`) ginge auch, ist aber **nie erprobt** und deshalb hier nicht als Anleitung aufgeführt.
 - **Alles zurück:** Vom Rescuezilla-Stick booten und das Abbild aus Teil 0 zurückspielen.
 
 > **Jeder Handgriff, der in dieser Anleitung fehlt, ist eine Lücke - kein Missgeschick.** Beim Neuaufbau am 25.09.2026 war die Anleitung selbst der Prüfling. Was von Hand nachgeholt werden musste, gehört sofort hier hinein und in `docs/Debian-zu-DialOS.md`.
