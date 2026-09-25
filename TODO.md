@@ -2091,7 +2091,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   - [ ] **Radio, Musik, Nachrichten und Podcasts per Sprache** (Stephan, 2026-09-25:
     „als nächstes kümmern wir uns um Radio, Musik hören, Nachrichten hören,
     Podcast hören"). Neu dabei: Nachrichten - als Sender oder als neueste
-    Podcast-Folge, zu klären. **Entschieden am 2026-09-25
+    Podcast-Folge, zu klären. **Die Auswahl kommt aus [docs/medienliste.md](docs/medienliste.md)** -
+    Stephan füllt sie parallel (Namen genügen, Quellen sucht Claude). **Entschieden am 2026-09-25
     (Stephan): beides über Rhythmbox.** DialOS sucht den Sender selbst in
     radio-browser.info, Rhythmbox spielt per `rhythmbox-client --play-uri`.
     Shortwave hat keine Schnittstelle, um einen Sender vorzugeben (per MPRIS
