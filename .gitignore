@@ -14,3 +14,6 @@ iso-build/**/.build/
 # Python-Bytecode-Cache (z. B. durch lokale Syntax-Checks entstanden).
 __pycache__/
 *.pyc
+
+# Das PDF wird erzeugt, nicht versioniert (scripts/dialos-anleitung-pdf.py)
+docs/installationsanleitung.pdf
