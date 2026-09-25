@@ -125,7 +125,63 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
-## Aktueller Stand (Stand: 2026-09-21, Montag - Version 0.5.2)
+## Aktueller Stand (Stand: 2026-09-25, Freitag mittags - Version 0.5.2)
+
+**VOR DEM NEUAUFBAU. Das Geraet steht kurz vor dem Loeschen** (Stephans Wunsch:
+"die komplette Installation sowohl fuer dialosadmin und dem nutzer neu
+aufzusetzen"). Wer hier nach einem Reinstall weiterliest: Der Weg zurueck steht
+in `docs/installationsanleitung.md` (als PDF auf der externen Platte neben dem
+Repo), das vollstaendige Rezept in `docs/Debian-zu-DialOS.md`.
+
+**Dienstag und Mittwoch ging es um die Webseite**, nicht ums Geraet (Theme
+1.6.12 bis 1.6.19, Hoerfassungen, geteiltes Aenderungsprotokoll). Donnerstag
+nichts. Die Vorarbeit fuer den Neuaufbau ist deshalb erst heute entstanden.
+
+**Heute erledigt:**
+- **Das Aufbau-Skript baute nicht DialOS, sondern den Stand vom 2026-08-16.**
+  Gemessen: Es kopierte eine feste Liste, der 52 Geraetedateien fehlten -
+  darunter `dialos-diktat.py`, die Suche, der Brief nach DIN, alle
+  Benutzerdienste und die sudoers-Regeln. Jetzt ruft es in Schritt 16
+  `dialos-aufspielen` auf; damit kann die Liste nicht wieder veralten.
+  `dialos-aufspielen` findet seinen Repo-Baum dafuer selbst (belegt mit einer
+  Kopie unter /tmp). Dazu die Handlungen, die keine Dateien sind: Dienste mit
+  `--global`, Erweiterung bauen, LanguageTool, Frageton je Konto, Abnahme am
+  Ende des Buero-Skripts.
+- **Installationsanleitung** (`docs/installationsanleitung.md`, 10 Seiten als
+  PDF) - fuer den Tag, an dem Claude nicht da ist. Enthaelt den Weg zur
+  Claude-App, der bisher NIRGENDS stand (Schluessel, Paketquelle, apt), und den
+  Satz fuer die App nach der Anmeldung. Gesetzt mit cairo und Pango
+  (`scripts/dialos-anleitung-pdf.py`), weil pandoc und weasyprint fehlen.
+  **Geprueft: `http://dialos.org/d-i/trixie/preseed.cfg` leitet auf HTTPS um UND
+  liefert dort HTML** - fuer die Partitionierung braucht es den zweiten Rechner
+  oder Handarbeit.
+- **Der E-Mail-Dialog ist am Geraet durchgelaufen** (Empfaenger, Betreff,
+  Diktat, Eckdaten, "vorlesen", Entwurf vorgemerkt). Zwei Fehler davor: Die
+  Kontaktsuche verlangte immer eine ANSCHRIFT - fuer Briefe richtig, fuer
+  E-Mail verkehrt herum, ein Kontakt mit nur einer Mailadresse war unsichtbar;
+  und Vosk zerlegt Wortzusammensetzungen ("probe kontakt"), der Vergleich fand
+  nichts. Beides behoben. Danach zwei Nachbesserungen: Betreff aus der Lesart
+  MIT Grossbuchstaben (Parakeet), und keine zwei verschiedenen Satzzahlen mehr.
+- **Gesichert:** `sicherung-admin-2026-09-25.tar.gz` (22 MB: Thunderbird-Profil,
+  76 Briefe, Notizen, persoenliche Daten) und `sicherung-nutzer-2026-09-25.tar.gz`
+  (2,1 KB: Einstellungen) auf der externen Platte.
+
+**Offen, und zwar in dieser Reihenfolge:**
+1. **Rescuezilla-Abbild** - es gibt keins, und ohne ist der heutige Stand nach
+   dem Loeschen weg. Die Dateisicherung rettet Daten, nicht das System.
+2. **Neuaufbau** nach `docs/installationsanleitung.md`; jeder Handgriff, der
+   nicht darin steht, ist eine Luecke und gehoert sofort hinein.
+3. **Nicht geprobt:** Senden ueber die Bruecke (bisher immer "nein" gesagt),
+   Schliessen mit ungespeichertem Entwurf, der Entwurfs-Hinweis nach dem
+   Beschleunigen.
+4. **Das Einschalten ist weiter unzuverlaessig:** Heute 11:15-11:18 mehrfach
+   "Hier wird gerade viel gesprochen" und "es ist zu laut", dazwischen
+   Wortsalat aus mehreren Befehlen. Dasselbe Muster wie am 2026-09-21 (zehn
+   Anlaeufe) und am 2026-08-24. **Stephans Antwort zur Umgebung steht noch
+   aus** - erst danach ist zu entscheiden, ob es am Geraeusch liegt oder am
+   Erkenner.
+
+## Stand vom 2026-09-21, Montag - Version 0.5.2
 
 **Der 2026-09-21 war der Tag, an dem Thunderbird aufgehoert hat, ein fremdes
 Dateiformat zu sein.** Bis heute hat DialOS in `abook.sqlite`, in die mbox und
