@@ -145,9 +145,23 @@ vermeiden.
   `dialos-anleitung-pdf.py` bricht jetzt ab, statt still umzubrechen. Committet
   und gepusht.
 
-**Als Naechstes:** Teil 3, Schritt 6 - `sudo apt install git` (auf diesem Geraet
-schon da) und `sudo scripts/dialos-claude-setup.sh` (MIT sudo - stand ohne in der
-  Anleitung, berichtigt), dann `git push` ohne sudo mit Token, dann Teil 4.
+- **Teil 3 und 4 durch** (Abend 2026-09-25): GitHub-Zugang eingerichtet und
+  gepusht; Grundaufbau durchgelaufen (RustDesk-Abhaengigkeit libxdo3 vom Skript
+  selbst nachgezogen, Dienst aus); `/home/nutzer` auf LUKS (375 GB), Swap
+  verschluesselt; Konto `nutzer` mit Autologin. Abnahme: nur Bluetooth-Kopplung
+  und Fernwartung weichen ab (gewollt), im Konto `nutzer` fehlt nur
+  `persoenliche-daten.txt` (Maske offen).
+- **Vor 4.2 gefunden:** Die Stick-Auswahl bot die externe Arbeitsplatte zum
+  LOESCHEN an - behoben (eingehaengte Laufwerke fallen heraus). Der alte Stick
+  wurde vorher gesichert (`../stick-sicherung-2026-09-25/`, 4 Test-PDFs); neuer
+  Anleitungsteil 0.4 dafuer (Stephans Wunsch).
+- **Offen, TODO-Punkt sudo fuer `nutzer`:** Das Abschluss-Skript GIBT das
+  zufaellige sudo-Passwort von `nutzer` im Terminal AUS - am 2026-09-25 stand es
+  damit im Chat. "Niemand kennt es" (unten) stimmt so nicht mehr.
+
+**Als Naechstes:** Maske ausfuellen und speichern, dann neu starten (mit Stick).
+Danach Teil 5 (Thunderbird, Stimme, Bluetooth) und Teil 6 (Abnahme mit sudo,
+Sprachprobe im Konto `nutzer`).
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
 
