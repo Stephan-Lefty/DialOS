@@ -125,6 +125,22 @@ Plymouth-Splash, Piper-TTS, Vosk/hassil, Rechte-
 Fallen bei `/etc/skel/` usw.) stehen dort - nicht hier, um Doppelung zu
 vermeiden.
 
+## Alle 4 Wochen ein Neuaufbau (Dauerregel seit 2026-09-25)
+
+> **Stephan, 2026-09-25:** „Wir machen jetzt alle 4 Wochen eine Neuinstallation.
+> Damit Routine rein kommt und wir die Anleitung noch optimieren."
+
+**Naechster Termin: Freitag, 2026-10-23**, danach jeweils vier Wochen spaeter.
+Ablauf wie am 2026-09-25: Teil 0 der Anleitung (Sichern, Rescuezilla-Abbild,
+benutzten Stick sichern), dann **nur nach `docs/installationsanleitung.md`**
+neu aufbauen. **Die Anleitung ist der Pruefling:** Jeder Handgriff, der nicht
+darin steht, ist eine Luecke und kommt sofort in Anleitung UND Rezept
+(`docs/Debian-zu-DialOS.md`, beide Sprachen), dazu ins Aenderungsprotokoll.
+Am Ende Teil 6 (Abnahme) und die Grafik pruefen
+(`scripts/dialos-grafik-aufbau.py`, falls sich Schritte geaendert haben).
+Beim ersten Mal (2026-09-25) waren es neun Luecken - die Zahl pro Durchgang
+gehoert ins Aenderungsprotokoll, sie zeigt, ob die Anleitung reift.
+
 ## NEUAUFBAU ABGESCHLOSSEN UND ABGENOMMEN (Stand: 2026-09-25, Freitag abends)
 
 **Hier stehen wir:**

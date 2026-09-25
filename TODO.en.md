@@ -43,6 +43,10 @@ finished too, and then move down together. That way no reference breaks.
   mailbox"). One profile, one account, two password entries, bridge installed.
   The signature was missing until the next login - the tool now writes it
   itself. **Account `nutzer` verified too**, acceptance check: nothing missing.
+- [ ] **Rebuild every 4 weeks - next on Friday, 2026-10-23** (standing rule,
+  Stephan, 2026-09-25: "so routine sets in and we keep improving the guide").
+  Only from `docs/installationsanleitung.md`; every gap goes into guide and
+  recipe right away. Afterwards enter the next date here (+4 weeks).
 - [ ] **Publish the post "Ein Gerät, eine Anleitung, ein Nachmittag"**
   (approved by Stephan on 2026-09-25). Draft in
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Only possible from

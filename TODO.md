@@ -45,6 +45,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   ein Konto, zwei Passwort-Einträge, Brücke installiert. Signatur fehlte bis zum
   nächsten Anmelden - trägt das Werkzeug jetzt selbst ein. **Konto `nutzer` ebenfalls
   belegt**, Abnahme: „Im Konto nutzer fehlt nichts".
+- [ ] **Neuaufbau alle 4 Wochen - nächster am Freitag, 2026-10-23** (Dauerregel,
+  Stephan, 2026-09-25: „Damit Routine rein kommt und wir die Anleitung noch
+  optimieren"). Nur nach `docs/installationsanleitung.md`; jede Lücke sofort in
+  Anleitung und Rezept. Danach den nächsten Termin hier eintragen (+4 Wochen).
 - [ ] **Beitrag „Ein Gerät, eine Anleitung, ein Nachmittag" veröffentlichen**
   (von Stephan am 2026-09-25 freigegeben). Entwurf in
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom
