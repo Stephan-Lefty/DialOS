@@ -1125,7 +1125,10 @@ def empfaenger_erfragen_fuer_mail(erkenner, modell, frage=None):
                     return ""
             return ""
         for gesagt in texte:
-            for kontakt in (em.suchen(gesagt) if em else []):
+            # "fuer_mail": Hier zaehlt die Mailadresse, nicht die Anschrift -
+            # siehe dialos-empfaenger.suchen(). Ohne das blieb ein Kontakt, der
+            # nur eine Mailadresse hat, unsichtbar (2026-09-25 am Geraet).
+            for kontakt in (em.suchen(gesagt, fuer_mail=True) if em else []):
                 adresse = (kontakt.get("mail") or "").strip()
                 name = kontakt.get("name") or kontakt.get("firma") or adresse
                 if not adresse:

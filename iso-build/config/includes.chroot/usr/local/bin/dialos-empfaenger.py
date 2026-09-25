@@ -211,20 +211,31 @@ def koelner_phonetik(text):
     return ergebnis[:1] + ergebnis[1:].replace("0", "")
 
 
-def suchen(gesprochen, liste=None):
-    """Kontakte mit Adresse, die zum gesprochenen Namen passen - beste zuerst.
+def suchen(gesprochen, liste=None, fuer_mail=False):
+    """Kontakte, die zum gesprochenen Namen passen - beste zuerst.
 
     Aehnlichkeit statt Gleichheit: Die Erkennung schreibt "Hausverwaltung
     Beispiel" als "Hausverwaltung Beispiele" oder "Maier" als "Meier". Ein
     Treffer braucht 80 % Aehnlichkeit des ganzen Namens oder alle gesprochenen
     Woerter im Kontakt.
+
+    "fuer_mail" SEIT DEM 2026-09-25, UND ES WAR EIN ECHTER AUSFALL: Diese Suche
+    verlangte IMMER eine Anschrift - sie ist fuer Briefe gebaut worden, und dort
+    ist ein Kontakt ohne Strasse nutzlos. Beim ersten Lauf des E-Mail-Dialogs
+    sagte Stephan "Probekontakt", und DialOS antwortete "Dazu finde ich keine
+    Mailadresse" - obwohl der Kontakt existierte, mit Mailadresse, aber eben
+    ohne Anschrift. Fuer eine E-Mail ist genau umgekehrt die Mailadresse das
+    Pflichtfeld und die Anschrift gleichgueltig.
     """
     ziel = _vergleichbar(gesprochen)
     if not ziel:
         return []
     treffer = []
     for k in (liste if liste is not None else kontakte()):
-        if not (k["strasse"] or k["ort"]):
+        if fuer_mail:
+            if not (k.get("mail") or "").strip():
+                continue
+        elif not (k["strasse"] or k["ort"]):
             continue
         besten = 0.0
         felder = {k["name"], k["firma"]}
@@ -235,6 +246,12 @@ def suchen(gesprochen, liste=None):
             if not v:
                 continue
             wert = difflib.SequenceMatcher(None, ziel, v).ratio()
+            # ZUSAMMENGESCHRIEBEN GEGEN AUSEINANDER (2026-09-25): Vosk zerlegt
+            # gesprochene Wortzusammensetzungen - aus "Probekontakt" wurde
+            # "probe kontakt", und der Vergleich Wort fuer Wort fand nichts.
+            # Ohne Leerzeichen sind beide dasselbe Wort.
+            wert = max(wert, difflib.SequenceMatcher(
+                None, ziel.replace(" ", ""), v.replace(" ", "")).ratio())
             # Gleicher Klang ("G so bau" / "GESOBAU") zaehlt wie ein Treffer.
             # Rechtsform zaehlt nicht: "Gesobau" ist gemeint, im Kontakt steht "GESOBAU AG".
             ohne_form = " ".join(w for w in v.split() if w not in RECHTSFORMEN) or v
