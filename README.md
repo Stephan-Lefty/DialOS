@@ -205,73 +205,6 @@ das Erfolg meldet, während es versagt.
   Danach auch im Konto `nutzer` angelegt; Abnahme (Teil 6) bestanden: „Im Konto
   nutzer fehlt nichts", Sprachtest „lief alles sauber inkl. Thunderbird".
 
-### 0.5.2
-
-- **„Mikrofon ohne Echo" ist jetzt das Standard-Mikrofon jedes Kontos**
-  (2026-09-25, Stephan: „Müssen wir nicht das Mikrofon ohne Echo als Standard
-  einrichten. Auch bei den nächsten Laptops?"). WirePlumber wählt die
-  Vorgabe-Quelle nach `priority.session`: das eingebaute Mikrofon 2009, die
-  Echo-Quelle bisher gar keine - nach dem Neuaufbau stand in beiden Konten das
-  rohe Mikrofon. Jetzt 2500 in `99-dialos-echo-unterdrueckung.conf`; die Datei
-  kommt mit `dialos-aufspielen` auf jedes Gerät.
-
-- **Neuaufbau nach Anleitung - fast reibungslos** (2026-09-25). Das Testgerät
-  wurde komplett gelöscht und nur nach `docs/installationsanleitung.md` neu
-  aufgebaut, beide Konten neu. Die Anleitung war dabei der Prüfling: Jeder
-  Handgriff, der nicht darin stand, wurde sofort nachgetragen. **Acht Lücken**,
-  jede mit eigenem Eintrag hier darunter: (1) Teil 2 zur Claude-App - Befehle
-  nicht die des Herstellers; (2) im PDF mitten in der URL umgebrochene Befehle;
-  (3) `dialos-claude-setup.sh` ohne `sudo`; (4) die Stick-Auswahl bot die
-  externe Arbeitsplatte zum Löschen an; (5) kein Hinweis, einen benutzten Stick
-  vorher zu sichern (neuer Teil 0.4); (6) die Sicherung des Nutzerkontos ohne
-  Briefe und Archiv; (7) Anna fehlte - Stimme zu schnell, falscher Name;
-  (8) kein Update des Grundsystems vor dem Aufbau (neuer Schritt 1e, Stephan).
-  **Geklärt am selben Abend:** Die erste Lautstärke-Frage im Konto `nutzer`
-  scheiterte an zu frühem Antworten, nicht am Mikrofon (beim ersten Anmelden
-  hing zudem die Sprachausgabe, Lücke 7). Nebenbei: In beiden Konten war das
-  rohe Mikrofon als Eingabegerät eingestellt statt „Mikrofon ohne Echo" -
-  offen als TODO. Die Anleitung ist von 10
-  auf 12 Seiten gewachsen.
-
-- **Anna fehlte nach dem Neuaufbau** (2026-09-25, Stephan: „die Stimme ist zu
-  schnell", und die Lautstärke-Frage im Konto `nutzer` ließ sich nicht
-  beantworten). Doku-Schritt 12c - Annas Stimmdatei holen und mit
-  `dialos-stimme.py setzen kerstin` einschalten - stand nur im Rezept, nie im
-  Aufbau-Skript. Die Konfiguration aus dem Repo stellt aber Anna ein. Folge:
-  Michael sprach mit Annas Tempo 0,95 statt 0,88, stellte sich als „Michael"
-  vor, und `spd-say` brach nach 20 s ab („Sprachausgabe antwortet nicht"),
-  weil die eingestellte Stimmdatei fehlte. Jetzt Schritt 16e im
-  `dialos-full-office-setup.sh`, am Gerät gelaufen; `spd-say` antwortet wieder
-  (6,2 s für den Testsatz).
-
-- **Die Stick-Auswahl bietet eingehängte Laufwerke nicht mehr an**
-  (`dialos-setup-home-partition.sh`, 2026-09-25). Beim Neuaufbau stand vor
-  Teil 4.2 die externe Arbeitsplatte - USB wie der Stick, eingehängt, mit Repo,
-  Rescuezilla-Abbild und allen Sicherungen - gleichrangig in der Liste der zu
-  LÖSCHENDEN Geräte. Das Skript schloss nur die Systemplatte aus. Aufgefallen
-  beim Durchsehen vor dem Lauf, nicht durch einen Schaden. Die Anleitung warnt
-  außerdem, dass auch `DIALOS-DATA` mit dem Archiv gelöscht wird.
-  **Neuer Teil 0.4** (Stephans Wunsch): den benutzten Stick VOR dem Neuaufbau
-  sichern - `DIALOS-DATA` per Kopie mit `diff -r`-Gegenprobe, ausdrücklich
-  NICHT per Rescuezilla, weil dann der Schlüssel neben dem verschlüsselten
-  Abbild läge. Dazu in 0.2: Nach dem Neuaufbau öffnet nur noch das alte
-  Wiederherstellungs-Passwort `/home/nutzer` im Abbild. Und die Sicherung des
-  Nutzerkontos nahm bisher nur die Einstellungen mit, nicht Briefe und Archiv.
-
-- **Installationsanleitung Teil 2 (Claude-App) ist jetzt wörtlich die
-  offizielle Anleitung von Anthropic** (2026-09-25, Stephan: „Deine Angaben
-  haben nicht funktioniert"). Beim Neuaufbau scheiterten zwei Fassungen: Die
-  erste lud den Schlüssel mit `curl`, bevor `curl` installiert war; die zweite
-  mischte eigene Zutaten dazu (`git`, `-y`), und im PDF brachen die langen
-  Befehle mitten in der Adresse um - aus dem PDF kopiert, wären daraus zwei
-  kaputte Befehle geworden. Jetzt: Befehle wie auf
-  `code.claude.com/docs/en/desktop-linux`, lange Zeilen mit `\` geteilt,
-  Fingerabdruck-Prüfung, Starten und Anmelden, Fehlerhilfe. `git` ist nach
-  Teil 3 gewandert, wo es gebraucht wird. `scripts/dialos-anleitung-pdf.py`
-  **bricht ab**, wenn eine Befehlszeile nicht auf das Blatt passt, statt sie
-  still umzubrechen, und hält eine Überschrift mit dem folgenden Befehlsblock
-  zusammen. In `docs/Debian-zu-DialOS.md` (+ `.en.md`) stand Schritt 7 noch
-  „kein fester Installationsschritt" für die App - berichtigt.
 - **DialOS-Rhythmbox: die Erweiterung, mit der die Medienliste entsteht**
   (Stephan, 2026-09-25: „Kannst du mir eine Liste zusammen stellen über
   deutsche österreichische und schweizer Sender" - und am selben Abend:
@@ -340,7 +273,73 @@ das Erfolg meldet, während es versagt.
   der Suche eindeutig zu unterscheiden. Stephans Entwurf bleibt als
   `assets/rhythmbox-icon-entwurf.png` liegen.
 
+### 0.5.2
 
+- **„Mikrofon ohne Echo" ist jetzt das Standard-Mikrofon jedes Kontos**
+  (2026-09-25, Stephan: „Müssen wir nicht das Mikrofon ohne Echo als Standard
+  einrichten. Auch bei den nächsten Laptops?"). WirePlumber wählt die
+  Vorgabe-Quelle nach `priority.session`: das eingebaute Mikrofon 2009, die
+  Echo-Quelle bisher gar keine - nach dem Neuaufbau stand in beiden Konten das
+  rohe Mikrofon. Jetzt 2500 in `99-dialos-echo-unterdrueckung.conf`; die Datei
+  kommt mit `dialos-aufspielen` auf jedes Gerät.
+
+- **Neuaufbau nach Anleitung - fast reibungslos** (2026-09-25). Das Testgerät
+  wurde komplett gelöscht und nur nach `docs/installationsanleitung.md` neu
+  aufgebaut, beide Konten neu. Die Anleitung war dabei der Prüfling: Jeder
+  Handgriff, der nicht darin stand, wurde sofort nachgetragen. **Acht Lücken**,
+  jede mit eigenem Eintrag hier darunter: (1) Teil 2 zur Claude-App - Befehle
+  nicht die des Herstellers; (2) im PDF mitten in der URL umgebrochene Befehle;
+  (3) `dialos-claude-setup.sh` ohne `sudo`; (4) die Stick-Auswahl bot die
+  externe Arbeitsplatte zum Löschen an; (5) kein Hinweis, einen benutzten Stick
+  vorher zu sichern (neuer Teil 0.4); (6) die Sicherung des Nutzerkontos ohne
+  Briefe und Archiv; (7) Anna fehlte - Stimme zu schnell, falscher Name;
+  (8) kein Update des Grundsystems vor dem Aufbau (neuer Schritt 1e, Stephan).
+  **Geklärt am selben Abend:** Die erste Lautstärke-Frage im Konto `nutzer`
+  scheiterte an zu frühem Antworten, nicht am Mikrofon (beim ersten Anmelden
+  hing zudem die Sprachausgabe, Lücke 7). Nebenbei: In beiden Konten war das
+  rohe Mikrofon als Eingabegerät eingestellt statt „Mikrofon ohne Echo" -
+  offen als TODO. Die Anleitung ist von 10
+  auf 12 Seiten gewachsen.
+
+- **Anna fehlte nach dem Neuaufbau** (2026-09-25, Stephan: „die Stimme ist zu
+  schnell", und die Lautstärke-Frage im Konto `nutzer` ließ sich nicht
+  beantworten). Doku-Schritt 12c - Annas Stimmdatei holen und mit
+  `dialos-stimme.py setzen kerstin` einschalten - stand nur im Rezept, nie im
+  Aufbau-Skript. Die Konfiguration aus dem Repo stellt aber Anna ein. Folge:
+  Michael sprach mit Annas Tempo 0,95 statt 0,88, stellte sich als „Michael"
+  vor, und `spd-say` brach nach 20 s ab („Sprachausgabe antwortet nicht"),
+  weil die eingestellte Stimmdatei fehlte. Jetzt Schritt 16e im
+  `dialos-full-office-setup.sh`, am Gerät gelaufen; `spd-say` antwortet wieder
+  (6,2 s für den Testsatz).
+
+- **Die Stick-Auswahl bietet eingehängte Laufwerke nicht mehr an**
+  (`dialos-setup-home-partition.sh`, 2026-09-25). Beim Neuaufbau stand vor
+  Teil 4.2 die externe Arbeitsplatte - USB wie der Stick, eingehängt, mit Repo,
+  Rescuezilla-Abbild und allen Sicherungen - gleichrangig in der Liste der zu
+  LÖSCHENDEN Geräte. Das Skript schloss nur die Systemplatte aus. Aufgefallen
+  beim Durchsehen vor dem Lauf, nicht durch einen Schaden. Die Anleitung warnt
+  außerdem, dass auch `DIALOS-DATA` mit dem Archiv gelöscht wird.
+  **Neuer Teil 0.4** (Stephans Wunsch): den benutzten Stick VOR dem Neuaufbau
+  sichern - `DIALOS-DATA` per Kopie mit `diff -r`-Gegenprobe, ausdrücklich
+  NICHT per Rescuezilla, weil dann der Schlüssel neben dem verschlüsselten
+  Abbild läge. Dazu in 0.2: Nach dem Neuaufbau öffnet nur noch das alte
+  Wiederherstellungs-Passwort `/home/nutzer` im Abbild. Und die Sicherung des
+  Nutzerkontos nahm bisher nur die Einstellungen mit, nicht Briefe und Archiv.
+
+- **Installationsanleitung Teil 2 (Claude-App) ist jetzt wörtlich die
+  offizielle Anleitung von Anthropic** (2026-09-25, Stephan: „Deine Angaben
+  haben nicht funktioniert"). Beim Neuaufbau scheiterten zwei Fassungen: Die
+  erste lud den Schlüssel mit `curl`, bevor `curl` installiert war; die zweite
+  mischte eigene Zutaten dazu (`git`, `-y`), und im PDF brachen die langen
+  Befehle mitten in der Adresse um - aus dem PDF kopiert, wären daraus zwei
+  kaputte Befehle geworden. Jetzt: Befehle wie auf
+  `code.claude.com/docs/en/desktop-linux`, lange Zeilen mit `\` geteilt,
+  Fingerabdruck-Prüfung, Starten und Anmelden, Fehlerhilfe. `git` ist nach
+  Teil 3 gewandert, wo es gebraucht wird. `scripts/dialos-anleitung-pdf.py`
+  **bricht ab**, wenn eine Befehlszeile nicht auf das Blatt passt, statt sie
+  still umzubrechen, und hält eine Überschrift mit dem folgenden Befehlsblock
+  zusammen. In `docs/Debian-zu-DialOS.md` (+ `.en.md`) stand Schritt 7 noch
+  „kein fester Installationsschritt" für die App - berichtigt.
 - **Programme öffnen sich auf Zuruf - „Postfach öffnen", „neue E-Mail
   schreiben", „Postfach schließen"** (Stephan, 2026-09-21: „Wir müssen doch
   sowieso eine Liste von Befehlen machen, die dann die Programme startet" -

@@ -195,8 +195,6 @@ background) and `splash.png` (boot/login screen).
   nothing missing in `nutzer`, voice test "everything ran cleanly including
   Thunderbird".
 
-### 0.5.2
-
 - **DialOS-Rhythmbox: the extension that produces the media list**
   (Stephan, 2026-09-25: "Can you put together a list of German, Austrian
   and Swiss stations" - and the same evening: "Yes, it is an extension for
@@ -259,6 +257,7 @@ background) and `splash.png` (boot/login screen).
   (`assets/rhythmbox-icon-bauen.py`). It carries at all three sizes.
   Stephan's draft remains as `assets/rhythmbox-icon-entwurf.png`.
 
+### 0.5.2
 
 - **Programs open on command - "Postfach öffnen", "neue E-Mail schreiben"**
   (Stephan, 2026-09-21: "we need a list of commands that start the programs

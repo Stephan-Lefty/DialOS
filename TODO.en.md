@@ -52,7 +52,7 @@ finished too, and then move down together. That way no reference breaks.
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Only possible from
   the second machine (the `.env` lives there); first add the English version
   and the audio version. The microphone paragraph is already updated.
-- [ ] **Finish DialOS-Rhythmbox** (built 2026-09-25, see changelog 0.5.2).
+- [ ] **Finish DialOS-Rhythmbox** (built 2026-09-25, see changelog 0.5.3).
   The tool runs, but four things are missing:
   - [ ] **The menu for state, city and genre in the interface.** In
     `dialos_rhythmbox_sender.py` the search is complete and usable from

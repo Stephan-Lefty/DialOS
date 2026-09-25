@@ -55,7 +55,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   zweiten Rechner (dort liegt die `.env`); vorher englische Fassung und
   Hörfassung. Der Mikrofon-Absatz ist schon angepasst.
 - [ ] **DialOS-Rhythmbox fertigstellen** (gebaut 2026-09-25, siehe
-  Änderungsprotokoll 0.5.2). Das Werkzeug läuft, aber vier Dinge fehlen:
+  Änderungsprotokoll 0.5.3). Das Werkzeug läuft, aber vier Dinge fehlen:
   - [ ] **Das Menü für Bundesland, Stadt und Genre in der Oberfläche.**
     In `dialos_rhythmbox_sender.py` ist die Suche fertig und über die
     Kommandozeile bedienbar (`suchen --bundesland`, `--stadt`, `--genre`,
