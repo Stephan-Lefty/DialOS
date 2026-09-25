@@ -151,6 +151,9 @@ das Erfolg meldet, während es versagt.
   jetzt legt Thunderbird es selbst an; Konten gehören nach `prefs.js`, nicht
   `user.js`; und Thunderbird wirft beim Neuschreiben jede Kommentarzeile weg,
   das eigene Konto wird deshalb an einer Einstellung wiedererkannt.
+  **Am Gerät belegt** im Konto `dialosadmin` (Stephan: „Mailkonto eingerichtet,
+  Thunderbird zeigt das Postfach"). Die Signatur trägt das Werkzeug seitdem
+  gleich mit ein - beim ersten echten Konto fehlte sie bis zum nächsten Anmelden.
 
 ### 0.5.2
 

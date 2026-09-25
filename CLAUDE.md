@@ -172,9 +172,10 @@ vermeiden.
   Neustart. Stephan: "jetzt laeuft alles".
 
 - **Mailkonto aus der Maske gebaut** (0.5.3, `dialos-mailkonto.py`): im
-  Test-Heimatverzeichnis belegt, am Geraet mit echtem Konto NOCH NICHT.
+  Test-Heimatverzeichnis belegt, am Geraet im Konto `dialosadmin` mit echtem
+  Konto belegt ("Thunderbird zeigt das Postfach"). Konto `nutzer` offen.
 
-**Als Naechstes:** (0) Mailkonto am Geraet mit Stephans echtem Konto proben.
+**Als Naechstes:** (0) Mailkonto im Konto `nutzer` ueber die Maske proben.
 (1) Beitrag veroeffentlichen, Entwurf
 `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md` - nur vom zweiten
 Rechner (.env). (2) Teil 5 (Thunderbird, Bluetooth) und Teil 6 (Abnahme mit sudo).

@@ -143,6 +143,9 @@ background) and `splash.png` (boot/login screen).
   accounts belong in `prefs.js`, not `user.js`; and Thunderbird drops every
   comment line when it rewrites the file, so the own account is recognised by
   a preference.
+  **Verified on the device** in the `dialosadmin` account (Stephan: "mail
+  account set up, Thunderbird shows the mailbox"). The tool now also writes the
+  signature - with the first real account it was missing until the next login.
 
 ### 0.5.2
 

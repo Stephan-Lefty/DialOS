@@ -33,6 +33,17 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [ ] **Hinweis zur Antwortzeit** prüfen: Wer vor dem Frageton antwortet, wird
   nicht gehört - ohne Rückmeldung. Ist die Pause zwischen Frage und Aufnahme
   zu lang, oder fehlt eine Ansage „Ich habe nichts gehört"?
+- [ ] **Mailkonto: Mailserver aus dem MX-Eintrag als Hinweis** (2026-09-25). Bei
+  eigenen Domains (Stephans `dialos.org`, später Kunden mit eigener Domain) hilft
+  die Anbieter-Datenbank nicht; die Maske sagt dann nur „Server eintragen". Sie
+  könnte den MX-Rechner der Domain nennen (bei `dialos.org`: `s111.goserver.host`,
+  per DNS-over-HTTPS gefunden - `host`/`dig` sind nicht installiert) und auf den
+  Kundenbereich des Hosters verweisen. Nur als Hinweis, nicht als Wert: Der
+  richtige Server war am Ende `imap.dialos.org`.
+- [x] **Mailkonto aus der Maske am Gerät belegt** (2026-09-25, Konto `dialosadmin`,
+  Stephan: „Mailkonto eingerichtet, Thunderbird zeigt das Postfach"). Ein Profil,
+  ein Konto, zwei Passwort-Einträge, Brücke installiert. Signatur fehlte bis zum
+  nächsten Anmelden - trägt das Werkzeug jetzt selbst ein. Offen: Konto `nutzer`.
 - [ ] **Beitrag „Ein Gerät, eine Anleitung, ein Nachmittag" veröffentlichen**
   (von Stephan am 2026-09-25 freigegeben). Entwurf in
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom

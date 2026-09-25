@@ -32,6 +32,17 @@ finished too, and then move down together. That way no reference breaks.
 - [ ] **Check the answer timing:** whoever answers before the question tone is
   not heard - with no feedback. Is the pause between question and recording
   too long, or is a "I heard nothing" announcement missing?
+- [ ] **Mail account: offer the MX host as a hint** (2026-09-25). For own
+  domains the provider database does not help; the mask then just says "enter
+  the servers". It could name the domain's MX host (for `dialos.org`:
+  `s111.goserver.host`, found via DNS over HTTPS - `host`/`dig` are not
+  installed) and point to the hoster's customer area. As a hint only, not as a
+  value: the right server turned out to be `imap.dialos.org`.
+- [x] **Mail account from the mask verified on the device** (2026-09-25,
+  account `dialosadmin`, Stephan: "mail account set up, Thunderbird shows the
+  mailbox"). One profile, one account, two password entries, bridge installed.
+  The signature was missing until the next login - the tool now writes it
+  itself. Open: account `nutzer`.
 - [ ] **Publish the post "Ein Gerät, eine Anleitung, ein Nachmittag"**
   (approved by Stephan on 2026-09-25). Draft in
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Only possible from

@@ -411,6 +411,15 @@ def main():
         print("Passwort:     im Passwortspeicher von Thunderbird (Posteingang und Postausgang)")
     else:
         print("Passwort:     keins angegeben - Thunderbird fragt beim ersten Abruf")
+    # Signatur gleich mit eintragen. Sonst fehlt die Fusszeile bis zum
+    # naechsten Anmelden (dialos-mail-signatur.service), weil es das Profil
+    # beim letzten Anmelden noch nicht gab - am 2026-09-25 beim ersten echten
+    # Konto so passiert und von Hand nachgeholt.
+    signatur = os.path.join(HIER, "dialos-mail-signatur.py")
+    if os.path.exists(signatur):
+        ergebnis = subprocess.run([signatur], capture_output=True, text=True)
+        print("Signatur:     " + ("eingetragen" if ergebnis.returncode == 0
+                                  else "nicht eingetragen - kommt beim naechsten Anmelden"))
     return 0
 
 
