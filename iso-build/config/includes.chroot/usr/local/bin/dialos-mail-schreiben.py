@@ -108,6 +108,25 @@ def saetze_zaehlen(text):
     return max(anzahl, 1 if text.strip() else 0)
 
 
+def betreff_waehlen(texte):
+    """Von mehreren Lesarten die mit Grossbuchstaben - das ist der Betreff.
+
+    GEMESSEN AM 2026-09-25, ERSTER ECHTER LAUF: Vosk hoerte "probe am freitag",
+    Parakeet "Probe am Freitag". Genommen wurde die erste Lesart, und im
+    Entwurf stand die kleingeschriebene - in einer Betreffzeile, die der
+    Empfaenger sieht. Parakeet kann Gross- und Kleinschreibung, Vosk nicht;
+    welche Lesart an welcher Stelle steht, ist nicht garantiert. Also wird
+    danach gesucht, statt sich auf die Reihenfolge zu verlassen.
+    """
+    kandidaten = [t.strip() for t in (texte or []) if t and t.strip()]
+    if not kandidaten:
+        return ""
+    for text in kandidaten:
+        if any(zeichen.isupper() for zeichen in text):
+            return text
+    return kandidaten[0]
+
+
 def eckdaten(an, betreff, text, suche):
     """Der Satz, den der Nutzer vor dem Senden hoert."""
     zahl = saetze_zaehlen(text)
@@ -260,7 +279,7 @@ def main():
         melde(f"  an: {an}")
 
         texte = suche.antwort_hoeren("Was soll im Betreff stehen?", erkenner, modell)
-        betreff = (texte[0].strip() if texte else "")
+        betreff = betreff_waehlen(texte)
         melde(f"  Betreff: {betreff!r}")
 
         text = suche.text_diktieren(

@@ -816,9 +816,12 @@ d.notiz_schreiben = lambda name, zeilen: (
 # besser?"). Das Diktat sagt sonst "Diktat beendet, 2 Eintraege geschrieben.
 # Moechtest Du Deine Notizen vorgelesen haben" - beides falsch: Es sind Saetze
 # einer Mail, und "Notizen vorlesen" laese etwas ganz anderes vor.
-d.ansage_ende = lambda name, anzahl: (
-    "Die E-Mail ist geschrieben, ein Satz." if anzahl == 1
-    else "Die E-Mail ist geschrieben, %d Sätze." % anzahl)
+# OHNE ZAHL (2026-09-25): Das Diktat zaehlt Aeusserungen, die Eckdaten vor dem
+# Senden zaehlen Saetze - beim ersten echten Lauf sagte DialOS erst "ein Satz"
+# und zwei Zeilen spaeter "2 Saetze an ...". Zwei Zahlen fuer denselben Text
+# sind fuer den Nutzer nicht aufzuloesen; die Zahl, auf die es ankommt, steht
+# in der Frage vor dem Senden.
+d.ansage_ende = lambda name, anzahl: "Die E-Mail ist geschrieben."
 d.diktat_fuehren("notiz", "notizen", sys.argv[2])
 sys.stdout.write(gesammelt.get("text", ""))
 """
