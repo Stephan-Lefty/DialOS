@@ -3,7 +3,8 @@
 Stephan, 2026-09-25: „ich will parallel eine Liste zusammen stellen. Die wir
 dann für die Auswahl nutzen können." Daraus wird die Auswahl, die DialOS per
 Sprache anbietet - abgespielt wird alles mit Rhythmbox (entschieden am
-2026-09-25, siehe [anwendungen.md](anwendungen.md)).
+2026-09-25, siehe [anwendungen.md](anwendungen.md)). Wie das zusammenspielt,
+steht im Konzept [medien-konzept.md](medien-konzept.md).
 
 ## So wird ausgefüllt
 

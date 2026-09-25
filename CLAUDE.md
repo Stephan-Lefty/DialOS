@@ -217,6 +217,8 @@ Grammatik), Ein-Player-Regel erledigt sich, Widerspruch "Radio oeffnen" vs.
 "Radio einschalten" aufloesen, Shortwave ggf. aus dem Menue. **Die Auswahl
 kommt aus `docs/medienliste.md`** - Stephan baut dafuer eine kleine App;
 vorgeschlagenes JSON-Format steht in der Datei (noch nicht entschieden).
+**Bauplan: `docs/medien-konzept.md`** (+ .en) - Ideen, Bausteine, Befehlsentwurf,
+Reihenfolge; Stephan laesst es in seine App einfliessen.
 
 Danach offen: Beitrag veroeffentlichen (Entwurf
 `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`, nur vom zweiten

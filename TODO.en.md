@@ -1890,7 +1890,8 @@ finished too, and then move down together. That way no reference breaks.
   - [ ] **Reading out** mails, documents and web pages.
   - [ ] **Radio, music, news and podcasts by voice** (Stephan, 2026-09-25:
     next up). New: news - as a station or as the latest podcast episode, to be
-    decided. **Decided on 2026-09-25 (Stephan):
+    decided. **Build plan: [docs/medien-konzept.en.md](docs/medien-konzept.en.md).**
+    **Decided on 2026-09-25 (Stephan):
     both through Rhythmbox.** DialOS looks up the station itself in
     radio-browser.info, Rhythmbox plays it via `rhythmbox-client --play-uri`.
     Shortwave offers no interface to choose a station (over MPRIS only
