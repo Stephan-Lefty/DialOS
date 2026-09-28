@@ -84,6 +84,8 @@ Details zum jeweiligen Stand stehen im
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
 - [Vorführvideos aufnehmen](docs/video-aufnahme.md) – OBS-Einrichtung mit getrennten Tonspuren, und die zwei Fallen, die den Ton ruinieren
+- [Medien-Konzept](docs/medien-konzept.md) – Bauplan für Radio, Musik, Nachrichten und Podcasts: Ideen, Bausteine, Befehlsentwurf, Reihenfolge
+- [Medienliste](docs/medienliste.md) – das Austauschformat für die Senderliste (Radio, Nachrichten, Podcasts, Hörbücher), aus dem DialOS-Rhythmbox liest
 - [Offene Punkte](docs/offene-punkte.md) – was noch zu klären/entscheiden ist
 - [Abbild-Verzeichnis](docs/iso-builds.md) – welches Sicherungs-Abbild zu welchem Code-Stand gehört (Rescuezilla/Clonezilla)
 - [Lizenzen und Herkunft](docs/lizenzen.md) – was von wem stammt, unter welcher Lizenz, und welche Pflichten beim Weitergeben eines Geräts entstehen

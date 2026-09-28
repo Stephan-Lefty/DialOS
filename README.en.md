@@ -83,6 +83,8 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
 - [Recording demo videos](docs/video-aufnahme.en.md) – OBS setup with separate audio tracks, and the two traps that ruin the audio
+- [Media concept](docs/medien-konzept.en.md) – blueprint for radio, music, news and podcasts: ideas, building blocks, command draft, order
+- [Media list](docs/medienliste.md) – the exchange format for the station list (radio, news, podcasts, audiobooks) that DialOS-Rhythmbox reads (German only)
 - [Open questions](docs/offene-punkte.en.md) – what still needs to be decided
 - [Image ledger](docs/iso-builds.en.md) – which backup image belongs to which code state (Rescuezilla/Clonezilla)
 - [Licences and provenance](docs/lizenzen.en.md) – what comes from where, under which licence, and what obligations arise when a device is passed on
