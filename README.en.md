@@ -455,15 +455,17 @@ background) and `splash.png` (boot/login screen).
   good but not error-free, and in a chain of eighteen spelling words such a slip
   is easy to miss when it is read back.
 
-  1. **Cross-checked against what the device already knows:** own data,
-     Thunderbird contacts and the senders of the indexed mails (the index now
-     prints `adressen` for this). If a known address almost matches it is
-     offered; if only the **domain** is similar it comes back corrected
-     (`…@teialos.or` → `…@dialos.org`). What is behind the at sign decides
-     deliverability; what is in front is at most noticed by the recipient.
-  2. **Read back in two parts:** first before the at sign, then after it.
-  3. **Up to three attempts:** a "no" leads back into spelling instead of
-     aborting the forward.
+  **Cross-checked against what the device already knows:** own data,
+  Thunderbird contacts and the senders of the indexed mails (the index now
+  prints `adressen` for this). If a known address almost matches it is
+  offered; if only the **domain** is similar it comes back corrected
+  (`…@teialos.or` → `…@dialos.org`). What is behind the at sign decides
+  deliverability; what is in front is at most noticed by the recipient.
+
+  **Read back in two parts:** first before the at sign, then after it.
+
+  **Up to three attempts:** a "no" leads back into spelling instead of
+  aborting the forward.
 
 - **Forwarding to a spelled-out address** (2026-09-18, Stephan's decision after
   the finding that **none** of his Thunderbird contacts has an email address -
@@ -480,13 +482,14 @@ background) and `splash.png` (boot/login screen).
   Stephan's test). The file was correct on disk every time, and Thunderbird kept
   reporting "Local Folders - Drafts, 0 messages":
 
-  1. **Line endings.** Thunderbird writes its mailboxes with CR LF, DialOS wrote
-     LF. The parser did not recognise the entry - no error, no message.
-  2. **`X-Mozilla-Status: 0008` does not mean "draft", it means "deleted".** The
-     field is a bit field (0001 read, 0002 replied, 0004 marked, 0008 deleted);
-     what makes a message a draft is the folder, and the edit button comes from
-     `X-Mozilla-Draft-Info`. Thunderbird had read the draft and immediately
-     hidden it.
+  **Line endings.** Thunderbird writes its mailboxes with CR LF, DialOS wrote
+  LF. The parser did not recognise the entry - no error, no message.
+
+  **`X-Mozilla-Status: 0008` does not mean "draft", it means "deleted".** The
+  field is a bit field (0001 read, 0002 replied, 0004 marked, 0008 deleted);
+  what makes a message a draft is the folder, and the edit button comes from
+  `X-Mozilla-Draft-Info`. Thunderbird had read the draft and immediately
+  hidden it.
 
   **The second error was found by a counter-test:** a message Thunderbird itself
   had written was placed next to the draft in the same file. Only one was

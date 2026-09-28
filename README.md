@@ -542,15 +542,17 @@ das Erfolg meldet, während es versagt.
   Buchstabieralphabet ist gut, aber nicht fehlerfrei, und in einer Kette aus
   achtzehn Buchstabierwörtern fällt so ein Fehler beim Vorlesen kaum auf.
 
-  1. **Gegengelesen mit dem, was das Gerät schon kennt:** eigene Daten,
-     Thunderbird-Kontakte und die Absender der indizierten Mails (dafür gibt der
-     Index jetzt `adressen` aus). Passt eine bekannte Adresse fast, wird sie
-     vorgeschlagen; ist nur die **Domain** ähnlich, kommt sie korrigiert zurück
-     (`…@teialos.or` → `…@dialos.org`). Was hinter dem At steht, entscheidet
-     über die Zustellbarkeit; was davor steht, fällt höchstens dem Empfänger auf.
-  2. **Vorgelesen wird getrennt:** erst vor dem At-Zeichen, dann danach.
-  3. **Bis zu drei Anläufe:** Ein „nein" führt zurück ins Buchstabieren, statt
-     das Weiterleiten abzubrechen.
+  **Gegengelesen mit dem, was das Gerät schon kennt:** eigene Daten,
+  Thunderbird-Kontakte und die Absender der indizierten Mails (dafür gibt der
+  Index jetzt `adressen` aus). Passt eine bekannte Adresse fast, wird sie
+  vorgeschlagen; ist nur die **Domain** ähnlich, kommt sie korrigiert zurück
+  (`…@teialos.or` → `…@dialos.org`). Was hinter dem At steht, entscheidet
+  über die Zustellbarkeit; was davor steht, fällt höchstens dem Empfänger auf.
+
+  **Vorgelesen wird getrennt:** erst vor dem At-Zeichen, dann danach.
+
+  **Bis zu drei Anläufe:** Ein „nein" führt zurück ins Buchstabieren, statt
+  das Weiterleiten abzubrechen.
 
 - **Weiterleiten an eine buchstabierte Adresse** (2026-09-18, Stephans
   Entscheidung nach dem Befund, dass **keiner** seiner Thunderbird-Kontakte eine
@@ -567,14 +569,15 @@ das Erfolg meldet, während es versagt.
   Stephans Test). Die Datei stand jedes Mal richtig auf der Platte, und
   Thunderbird meldete „Lokale Ordner - Entwürfe, 0 Nachrichten":
 
-  1. **Zeilenenden.** Thunderbird schreibt seine Postfächer mit CR LF, DialOS
-     schrieb LF. Der Parser erkannte den Eintrag nicht - ohne Fehler, ohne
-     Meldung.
-  2. **`X-Mozilla-Status: 0008` heißt nicht „Entwurf", sondern „gelöscht".** Das
-     Feld ist ein Bitfeld (0001 gelesen, 0002 beantwortet, 0004 markiert, 0008
-     gelöscht); dass eine Nachricht ein Entwurf ist, sagt der Ordner, und den
-     Bearbeiten-Knopf bringt `X-Mozilla-Draft-Info`. Thunderbird hatte den
-     Entwurf also gelesen und sofort ausgeblendet.
+  **Zeilenenden.** Thunderbird schreibt seine Postfächer mit CR LF, DialOS
+  schrieb LF. Der Parser erkannte den Eintrag nicht - ohne Fehler, ohne
+  Meldung.
+
+  **`X-Mozilla-Status: 0008` heißt nicht „Entwurf", sondern „gelöscht".** Das
+  Feld ist ein Bitfeld (0001 gelesen, 0002 beantwortet, 0004 markiert, 0008
+  gelöscht); dass eine Nachricht ein Entwurf ist, sagt der Ordner, und den
+  Bearbeiten-Knopf bringt `X-Mozilla-Draft-Info`. Thunderbird hatte den
+  Entwurf also gelesen und sofort ausgeblendet.
 
   **Gefunden hat den zweiten Fehler ein Gegenversuch:** eine Nachricht, die
   Thunderbird selbst geschrieben hatte, wurde neben den Entwurf in dieselbe
