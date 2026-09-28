@@ -1074,6 +1074,9 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.1
 
+*In progress since 2026-08-17. Everything created from now on goes here -
+0.5.0 is closed with the voice command for the desktop switch.*
+
 - **Email addresses in dictation** (2026-09-17): "meine Mailadresse" inserts your
   own email from the personal data, "Mailadresse von GESOBAU" the one from the
   Thunderbird contacts, and "Mailadresse buchstabieren" takes any other address
@@ -1594,9 +1597,6 @@ background) and `splash.png` (boot/login screen).
   have worked. The retest revealed a second fault: Vosk heard "notiz drucken"
   while the grammar only knew "notizen drucken", so the command fell through
   silently. The singular is now a second wording.
-
-*In progress since 2026-08-17. Everything created from now on goes here -
-0.5.0 is closed with the voice command for the desktop switch.*
 
 - **Screenshot on request (Stephan, 2026-08-21).** "Bildschirmfoto erstellen"
   or "Bildschirmfoto machen". All 21 grammar sentences afterwards spoken by

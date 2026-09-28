@@ -1162,6 +1162,10 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.1
 
+*In Arbeit seit 2026-08-17. Alles, was ab jetzt entsteht, wird hier
+eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
+abgeschlossen.*
+
 - **Mailadressen im Diktat** (2026-09-17): „meine Mailadresse" setzt die eigene
   E-Mail aus den persönlichen Daten ein, „Mailadresse von GESOBAU" die aus den
   Thunderbird-Kontakten, und „Mailadresse buchstabieren" nimmt jede fremde Adresse
@@ -1679,10 +1683,6 @@ das Erfolg meldet, während es versagt.
   funktioniert. Der Nachtest zeigte einen zweiten Fehler: Vosk verstand
   "notiz drucken", die Grammatik kannte nur "notizen drucken", und der Befehl
   fiel lautlos durch. Die Einzahl ist jetzt zweite Formulierung.
-
-*In Arbeit seit 2026-08-17. Alles, was ab jetzt entsteht, wird hier
-eingetragen - 0.5.0 ist mit dem Sprachbefehl für die Desktop-Umschaltung
-abgeschlossen.*
 
 - **Bildschirmfoto auf Zuruf (Stephan, 2026-08-21).** „Bildschirmfoto
   erstellen" oder „Bildschirmfoto machen". Alle 21 Grammatiksätze danach von
