@@ -75,12 +75,16 @@ Details zum jeweiligen Stand stehen im
 ## Dokumentation
 
 - [Debian-zu-DialOS](docs/Debian-zu-DialOS.md) – Schritt-für-Schritt-Rezept: von einer nackten Debian-13/GNOME-Installation bis zur aktuellen Version
+- [Installationsanleitung](docs/installationsanleitung.md) – Schritt-für-Schritt-Anleitung für den kompletten Neuaufbau eines Geräts, als PDF für den Fall, dass Claude nicht da ist
 - [Architektur-Übersicht](docs/architektur-uebersicht.md) – Ziel, Zielgruppe, Kernfunktionen, Software-Stack
 - [Hardware](docs/hardware.md) – Referenzgerät, Test-Hardware, WWAN-Anforderungen
 - [Sicherheit & Datenschutz](docs/sicherheit-datenschutz.md) – Autologin, Verschlüsselung, Fernwartung, Versand
 - [Sprachbefehle](docs/sprachbefehle.md) – die Liste aller Sprachbefehle: was das System versteht und was es dann tut
 - [Prüfstand](docs/pruefstand.md) – echte Aufnahmen durch das echte Programm: Erkenner, Mikrofone, Befehle, mit allen Messungen vom 2026-09-15
 - [Sprachsteuerung](docs/sprachsteuerung.md) – STT/TTS-Stack, Intent-Erkennung, Design-Prinzipien
+- [Anwendungen](docs/anwendungen.md) – welches Programm für welchen Zweck, und warum Steuerbarkeit von außen (Kommandozeile/D-Bus) das Auswahlkriterium ist
+- [Diktat](docs/diktat.md) – freie Texterkennung, Schreibkorrektur und die Grenzen der Groß-/Kleinschreibung
+- [Erweiterungen](docs/erweiterungen.md) – die Erweiterungsschnittstelle: wie Werkzeuge andocken, ohne den Kern anzutasten
 - [Telefonie & Videocall](docs/telefonie.md) – SIM- und Handy-Anbindung, Fallback-Logik
 - [Ersteinrichtung & Rollout](docs/ersteinrichtung.md) – Zwei-Phasen-Provisionierung, Sprachassistent, Datenschutz-Varianten
 - [Vorführvideos aufnehmen](docs/video-aufnahme.md) – OBS-Einrichtung mit getrennten Tonspuren, und die zwei Fallen, die den Ton ruinieren
@@ -89,6 +93,7 @@ Details zum jeweiligen Stand stehen im
 - [Offene Punkte](docs/offene-punkte.md) – was noch zu klären/entscheiden ist
 - [Abbild-Verzeichnis](docs/iso-builds.md) – welches Sicherungs-Abbild zu welchem Code-Stand gehört (Rescuezilla/Clonezilla)
 - [Lizenzen und Herkunft](docs/lizenzen.md) – was von wem stammt, unter welcher Lizenz, und welche Pflichten beim Weitergeben eines Geräts entstehen
+- [Entstehungsgeschichte](docs/entstehungsgeschichte.md) – wie DialOS entstanden ist: die Geschichte hinter dem Projekt
 
 ## Lizenz
 

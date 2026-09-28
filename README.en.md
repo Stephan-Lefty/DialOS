@@ -74,12 +74,16 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 ## Documentation
 
 - [Debian to DialOS](docs/Debian-zu-DialOS.en.md) – step-by-step recipe: from a bare Debian 13/GNOME install to the current version
+- [Installation guide](docs/installationsanleitung.md) – step-by-step guide for the complete rebuild of a device, as a PDF for when Claude isn't around (German only)
 - [Architecture overview](docs/architektur-uebersicht.en.md) – goal, target audience, core features, software stack
 - [Hardware](docs/hardware.en.md) – reference device, test hardware, WWAN requirements
 - [Security & privacy](docs/sicherheit-datenschutz.en.md) – autologin, encryption, remote support, shipping
 - [Voice commands](docs/sprachbefehle.en.md) – the list of all voice commands: what the system understands and what it then does
 - [Test bench](docs/pruefstand.en.md) – real recordings through the real program: recognisers, microphones, commands, with all measurements of 2026-09-15
 - [Voice control](docs/sprachsteuerung.en.md) – STT/TTS stack, intent recognition, design principles
+- [Applications](docs/anwendungen.en.md) – which program for which purpose, and why external controllability (command line/D-Bus) is the selection criterion
+- [Dictation](docs/diktat.en.md) – free text recognition, spell-checking, and the limits of capitalisation
+- [Extensions](docs/erweiterungen.en.md) – the extension interface: how tools plug in without touching the core
 - [Telephony & video calls](docs/telefonie.en.md) – SIM and phone-tethering, fallback logic
 - [Initial setup & rollout](docs/ersteinrichtung.en.md) – two-phase provisioning, voice assistant, privacy variants
 - [Recording demo videos](docs/video-aufnahme.en.md) – OBS setup with separate audio tracks, and the two traps that ruin the audio
@@ -88,6 +92,7 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 - [Open questions](docs/offene-punkte.en.md) – what still needs to be decided
 - [Image ledger](docs/iso-builds.en.md) – which backup image belongs to which code state (Rescuezilla/Clonezilla)
 - [Licences and provenance](docs/lizenzen.en.md) – what comes from where, under which licence, and what obligations arise when a device is passed on
+- [Origin story](docs/entstehungsgeschichte.en.md) – how DialOS came to be: the story behind the project
 
 ## Licence
 
