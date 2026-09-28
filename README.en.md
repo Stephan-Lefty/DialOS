@@ -421,10 +421,9 @@ background) and `splash.png` (boot/login screen).
   mis-spelled address: "spelling with just the letters, wouldn't that make more
   sense?" Measured with `scripts/dialos-buchstaben-messen.py`:
 
-  | | spelling alphabet | letter names |
-  |---|---|---|
-  | correct | **43 of 43** | **16 of 26** |
-  | missing from the vocabulary | nothing | "ef", "vau", "ix" - i.e. **F, V and X** |
+  The spelling alphabet is correct **43 of 43**, the letter names only **16 of
+  26**: for the alphabet nothing is missing from the vocabulary, for the names
+  "ef", "vau" and "ix" are - i.e. **F, V and X**.
 
   The confusions are the expected ones - ce/zett, e/el, i/el, en/em, pe/be,
   er/a: short syllables with the same vowel. The Piper measurement of 2026-09-17
@@ -2792,12 +2791,9 @@ background) and `splash.png` (boot/login screen).
   fine but 3 and 4 had to be spoken "much louder". Command 2 was a real
   switch. After it the service was **deaf for about five seconds:**
 
-  | Segment | Duration |
-  |---|---|
-  | switch script runs and speaks, blocking the service | 2.4 s |
-  | lockout afterwards | 2.0 s |
-  | reverberation pause, then new recording | 0.7 s |
-  | **total** | **≈ 5.1 s** |
+  The switch script runs and speaks, blocking the service for **2.4 s**, the
+  lockout afterwards lasts **2.0 s** and the reverberation pause before the new
+  recording **0.7 s** - **about 5.1 s in total**.
 
   But the announcement ends after 1.5 s. So the user hears the answer,
   keeps speaking - and talks into a deaf system for 3.6 seconds. Then they
@@ -2820,10 +2816,10 @@ background) and `splash.png` (boot/login screen).
   wish for announcements 30 % quieter, and his question how to keep the
   device permanently at 100 % and control everything from the OS.
 
-  | Route | What happens | Does it work? |
-  |---|---|---|
-  | sink volume (GNOME slider, `pactl`) | the value goes **to the device via AVRCP**, the signal is unchanged | yes, audibly |
-  | attenuation in the signal (file, sox, `paplay --volume`) | the signal leaves the laptop correctly attenuated | **no** - the AIRHUG undoes it |
+  Via the sink volume (GNOME slider, `pactl`) the value goes **to the device
+  via AVRCP** and the signal itself is unchanged - that works, audibly.
+  Attenuation in the signal, by contrast (file, sox, `paplay --volume`), leaves
+  the laptop correctly attenuated but does **not** work - the AIRHUG undoes it.
 
   The proof is a measurement on the Bluetooth sink's monitor, i.e. on what
   leaves the laptop: at half amplitude in the file it arrives as

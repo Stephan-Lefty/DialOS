@@ -509,10 +509,9 @@ das Erfolg meldet, während es versagt.
   buchstabierten Adresse: „Buchstabieren nur mit den Buchstaben, ist das nicht
   sinnvoller?" Gemessen mit `scripts/dialos-buchstaben-messen.py`:
 
-  | | Buchstabieralphabet | Buchstabennamen |
-  |---|---|---|
-  | Treffer | **43 von 43** | **16 von 26** |
-  | Fehlt im Wortschatz | nichts | „ef", „vau", „ix" - also **F, V und X** |
+  Das Buchstabieralphabet trifft **43 von 43**, die Buchstabennamen nur **16
+  von 26**: Beim Alphabet fehlt kein Wort im Wortschatz, bei den Namen fehlen
+  „ef", „vau" und „ix" - also **F, V und X**.
 
   Die Verwechslungen sind die erwartbaren - ce/zett, e/el, i/el, en/em, pe/be,
   er/a: kurze Silben mit demselben Vokal. Die Piper-Messung vom 2026-09-17 hatte
@@ -2957,12 +2956,9 @@ abgeschlossen.*
   Befehl 2 war ein echtes Umschalten. Danach war der Dienst **rund fünf
   Sekunden taub:**
 
-  | Abschnitt | Dauer |
-  |---|---|
-  | Umschalt-Skript läuft und spricht dabei, blockiert den Dienst | 2,4 s |
-  | Sperrfrist danach | 2,0 s |
-  | Nachhall-Pause, dann neue Aufnahme | 0,7 s |
-  | **zusammen** | **≈ 5,1 s** |
+  Das Umschalt-Skript läuft und spricht dabei und blockiert den Dienst **2,4
+  s**, die Sperrfrist danach dauert **2,0 s** und die Nachhall-Pause vor der
+  neuen Aufnahme **0,7 s** - **zusammen rund 5,1 s**.
 
   Die Ansage endet aber nach 1,5 s. Der Nutzer hört also die Antwort,
   spricht weiter - und redet 3,6 Sekunden gegen ein taubes System. Dann
@@ -2986,10 +2982,11 @@ abgeschlossen.*
   zu machen, und seine Frage, wie man das Gerät dauerhaft auf 100 % stellt
   und alles über das OS regelt.
 
-  | Weg | Was passiert | Wirkt es? |
-  |---|---|---|
-  | Senken-Lautstärke (GNOME-Regler, `pactl`) | Wert geht **per AVRCP ans Gerät**, das Signal bleibt unverändert | ja, hörbar |
-  | Dämpfung im Signal (Datei, sox, `paplay --volume`) | Signal verlässt den Laptop korrekt gedämpft | **nein** - der AIRHUG rechnet es weg |
+  Über die Senken-Lautstärke (GNOME-Regler, `pactl`) geht der Wert **per AVRCP
+  ans Gerät**, das Signal selbst bleibt unverändert - das wirkt hörbar. Eine
+  Dämpfung im Signal dagegen (Datei, sox, `paplay --volume`) verlässt den
+  Laptop zwar korrekt gedämpft, wirkt aber **nicht** - der AIRHUG rechnet sie
+  weg.
 
   Der Nachweis ist eine Messung am Monitor der Bluetooth-Senke, also an
   dem, was den Laptop verlässt: Bei halber Amplitude in der Datei kommt
