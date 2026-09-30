@@ -1,0 +1,65 @@
+# Automatischer Prueflauf bei jedem Push.
+#
+# Warum es das gibt: DialOS war lange ein reines Rezept-Repo - Skripte, die
+# am Geraet laufen und dort geprueft werden. Mit DialOS-Rhythmbox liegt hier
+# erstmals Logik, die sich ohne Geraet pruefen laesst (Adresswahl,
+# Sprechformen, Kollisionswarnung). Was ohne Geraet pruefbar ist, gehoert
+# geprueft, bevor Stephan es testen muss - das ist Regel 3 der Arbeitsweise
+# in CLAUDE.md.
+#
+# Bewusst EIN Job auf Linux: Das Repo ist oeffentlich, also kostenlos, aber
+# viele kurze Jobs sind trotzdem die schlechtere Gewohnheit (GitHub rundet
+# jeden Job auf volle Minuten auf). Windows und macOS fehlen mit Absicht -
+# DialOS laeuft nur auf Debian.
+
+name: Tests
+
+on:
+  push:
+    # Reine Doku-Aenderungen brauchen keinen Lauf. Das ist hier keine
+    # Kleinigkeit: Der weitaus groesste Teil der Commits in diesem Repo
+    # betrifft Dokumentation.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'assets/**'
+      - 'Wordpressinstallation/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'assets/**'
+      - 'Wordpressinstallation/**'
+  workflow_dispatch:
+
+# Ueberholte Laeufe abbrechen, statt sie zu Ende laufen zu lassen.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Dieselbe Fassung wie auf dem Zielsystem (Debian 13 liefert 3.13).
+      # Eine andere zu pruefen waere eine Aussage ueber ein System, das
+      # niemand benutzt.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # Ein Syntaxfehler in einem Geraeteskript faellt sonst erst beim
+      # Aufspielen auf - also am Geraet, im Betrieb, bei Stephan.
+      # Nur versionierte Dateien: iso-build/chroot/ enthaelt Fremdcode
+      # aus dem Debian-Grundsystem und gehoert nicht uns.
+      - name: Syntax aller versionierten Python-Dateien
+        run: git ls-files -z '*.py' | xargs -0 python3 -m py_compile
+
+      # Die Tests kommen ohne Netz aus und erzwingen das auch selbst
+      # (siehe setUpModule in tests/test_rhythmbox_sender.py). Ein Lauf,
+      # der fremde Server befragt, wuerde rot, sobald deren Betreiber
+      # etwas aendert - und saegte damit an seiner eigenen Aussagekraft.
+      - name: Tests
+        run: python3 -m unittest discover -s tests -v

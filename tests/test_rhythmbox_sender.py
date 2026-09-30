@@ -1,0 +1,573 @@
+#!/usr/bin/env python3
+"""
+Tests fuer dialos_rhythmbox_sender.py - die Arbeit hinter DialOS-Rhythmbox.
+
+Geprueft wird ausschliesslich, was OHNE NETZ entscheidbar ist: die Wahl
+der Adresse, die Sprechform-Vorschlaege, die Kollisionswarnung, die
+Normalisierung der Bundeslaender und das Ausgabeformat. Die Abfragen
+gegen radio-browser.info sind bewusst nicht dabei - ein Test, der fremde
+Server braucht, faellt aus, wenn deren Betreiber etwas aendert, und sagt
+dann nichts ueber unseren Quelltext aus.
+
+Dass wirklich nichts ins Netz geht, wird nicht behauptet, sondern
+erzwungen: setUpModule() haengt urllib und subprocess Waechter davor.
+Ein Test, der es doch versucht, faellt durch.
+
+Jeder Testfall hier gehoert zu einem Fehler, der am 2026-09-25 wirklich
+passiert ist - nachzulesen im Aenderungsprotokoll unter 0.5.3.
+
+Aufruf (aus dem Repo-Wurzelverzeichnis):
+    python3 -m unittest discover -s tests -v
+"""
+
+import os
+import re
+import subprocess
+import sys
+import unittest
+import urllib.request
+
+MODULPFAD = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "iso-build", "config", "includes.chroot", "usr", "local", "bin")
+sys.path.insert(0, MODULPFAD)
+
+import dialos_rhythmbox_sender as rs      # noqa: E402
+
+
+_echtes_urlopen = urllib.request.urlopen
+_echter_run = subprocess.run
+
+
+def setUpModule():
+    """Netz und fremde Programme sperren, solange die Tests laufen."""
+    def kein_netz(*a, **k):
+        raise AssertionError(
+            "Dieser Test hat das Netz angefasst. Tests muessen ohne "
+            "radio-browser.info und ohne ffprobe auskommen.")
+
+    urllib.request.urlopen = kein_netz
+    subprocess.run = kein_netz
+
+
+def tearDownModule():
+    urllib.request.urlopen = _echtes_urlopen
+    subprocess.run = _echter_run
+
+
+class FreieZugaenglichkeit(unittest.TestCase):
+    """Stephans Vorgabe vom 2026-09-25: „Wichtig ist das die Sender alle
+    frei zugaenglich sind. Ohne einen Account oder so."
+
+    Eine Adresse mit Sitzungskennung spielt im Augenblick oft noch - und
+    verstummt Wochen spaeter ohne erkennbaren Grund. Fuer einen blinden
+    Nutzer ist das der schlimmste Fehlerfall, weil er nicht nachsehen kann.
+    """
+
+    def test_sitzungskennung_erkannt(self):
+        for url in [
+            "https://f121.rndfnk.com/ard/swr/swr2/live/aac/96/stream.aac?sid=3K39",
+            "http://beispiel.de/stream?token=abc",
+            "http://beispiel.de/stream?aggregator=web&auth=xyz",
+            "http://beispiel.de/stream?expires=1759190400",
+            "http://beispiel.de/stream?listenerId=42",
+        ]:
+            with self.subTest(url=url):
+                self.assertTrue(rs.braucht_zugang(url))
+
+    def test_zugangsdaten_in_der_adresse(self):
+        # http://name:wort@host/ - kommt in der Datenbank wirklich vor.
+        self.assertTrue(rs.braucht_zugang("http://max:geheim@beispiel.de/stream"))
+
+    def test_freie_adressen_bleiben_frei(self):
+        for url in [
+            "https://liveradio.swr.de/sw331ch/swr2/play.mp3",
+            "http://onair.krone.at/kronehit.mp3",
+            "http://radioeins.de/stream",
+            # "aggregator" und "quality" sind harmlose Parameter. Frueher
+            # haette ein zu grobes Muster sie mitgefangen und brauchbare
+            # Sender aussortiert.
+            "https://beispiel.de/stream?aggregator=web&quality=high",
+        ]:
+            with self.subTest(url=url):
+                self.assertFalse(rs.braucht_zugang(url))
+
+    def test_ersatzadressen_sind_selbst_frei(self):
+        """Ein Ersatz mit Sitzungskennung waere schlimmer als keiner -
+        er wuerde genau den Fehler festschreiben, den er beheben soll."""
+        for name, url in rs.ERSATZ_ADRESSEN.items():
+            with self.subTest(sender=name):
+                self.assertFalse(rs.braucht_zugang(url))
+                self.assertFalse(rs.ist_playlist(url))
+                self.assertTrue(url.startswith(("http://", "https://")))
+
+
+class Adresswahl(unittest.TestCase):
+    """beste_adresse() - am 2026-09-25 an radioeins gelernt.
+
+    radio-browser liefert zwei Felder. `url_resolved` ist meistens die
+    bessere Wahl, bei der ARD-Verteilung aber gerade die falsche: Die
+    Aufloesung haengt eine Sitzungskennung an, der rohe Einstieg
+    (`http://radioeins.de/stream`) bleibt dauerhaft gueltig.
+    """
+
+    def test_aufgeloeste_adresse_ist_der_normalfall(self):
+        sender = {"url": "http://beispiel.de/start",
+                  "url_resolved": "https://cdn.beispiel.de/stream.mp3"}
+        self.assertEqual(rs.beste_adresse(sender),
+                         "https://cdn.beispiel.de/stream.mp3")
+
+    def test_roher_einstieg_schlaegt_sitzungskennung(self):
+        sender = {"url": "http://radioeins.de/stream",
+                  "url_resolved": "https://f1.rndfnk.com/rbb/stream?sid=abc"}
+        self.assertEqual(rs.beste_adresse(sender), "http://radioeins.de/stream")
+
+    def test_beide_mit_kennung_bleibt_die_aufgeloeste(self):
+        """Der SWR-Kultur-Fall: Ist auch die rohe Adresse verseucht, gibt
+        es hier nichts zu retten. Der Aufrufer muss das merken - deshalb
+        wird NICHT stillschweigend die rohe genommen."""
+        sender = {"url": "https://a.de/stream?sid=1",
+                  "url_resolved": "https://b.de/stream?sid=2"}
+        self.assertEqual(rs.beste_adresse(sender), "https://b.de/stream?sid=2")
+        self.assertTrue(rs.braucht_zugang(rs.beste_adresse(sender)))
+
+    def test_nur_ein_feld_gefuellt(self):
+        self.assertEqual(rs.beste_adresse({"url": "http://a.de/s",
+                                           "url_resolved": ""}),
+                         "http://a.de/s")
+        self.assertEqual(rs.beste_adresse({"url": "",
+                                           "url_resolved": "http://b.de/s"}),
+                         "http://b.de/s")
+        self.assertEqual(rs.beste_adresse({}), "")
+
+    def test_leerzeichen_werden_abgeschnitten(self):
+        self.assertEqual(rs.beste_adresse({"url_resolved": "  http://a.de/s  "}),
+                         "http://a.de/s")
+
+
+class FesterErsatz(unittest.TestCase):
+    """adresse_waehlen() - der SWR-Kultur-Fall vom 2026-09-25.
+
+    Bei diesem Sender tragen BEIDE Felder der Datenbank ein „sid", also
+    kann beste_adresse() nichts retten. Am 2026-09-30 nachgesehen:
+    `https://liveradio.swr.de/sw331ch/swr2/play.mp3` meldet sich als
+    „SWR2 AAC 96" und ist der dauerhafte Einstieg - dass die
+    ARD-Verteilung beim Aufloesen sid und token anhaengt, ist richtig so.
+    """
+
+    KAPUTT = {"url": "https://a.de/stream?sid=1",
+              "url_resolved": "https://b.de/stream?sid=2"}
+
+    def test_ersatz_wird_eingesetzt(self):
+        url, hinweis = rs.adresse_waehlen("SWR Kultur", self.KAPUTT)
+        self.assertEqual(url, rs.ERSATZ_ADRESSEN["SWR Kultur"])
+        self.assertFalse(rs.braucht_zugang(url))
+        self.assertIn("Ersatz", hinweis)
+
+    def test_ohne_ersatz_bleibt_es_bei_der_warnung(self):
+        """Ein Sender ohne hinterlegten Ersatz darf NICHT stillschweigend
+        durchgehen - sonst verstummt er spaeter ohne erkennbaren Grund."""
+        url, hinweis = rs.adresse_waehlen("Irgendein Sender", self.KAPUTT)
+        self.assertTrue(rs.braucht_zugang(url))
+        self.assertIn("Sitzungskennung", hinweis)
+
+    def test_freie_adresse_bleibt_unberuehrt(self):
+        """Repariert radio-browser.info den Eintrag, greift wieder die
+        Datenbank. Der Ersatz faellt dann still aus dem Weg, statt eine
+        irgendwann veraltete Adresse festzuschreiben."""
+        heil = {"url": "", "url_resolved": "https://liveradio.swr.de/neu.mp3"}
+        url, hinweis = rs.adresse_waehlen("SWR Kultur", heil)
+        self.assertEqual(url, "https://liveradio.swr.de/neu.mp3")
+        self.assertIsNone(hinweis)
+
+
+class Verweise(unittest.TestCase):
+    """ist_playlist() - der MDR-Fehler vom 2026-09-25.
+
+    „MDR Aktuell" zeigte ueber eine .m3u-Datei auf einen Eintrag, hinter
+    dem sich MDR KULTUR meldete. Aufgefallen ist das nur ueber den
+    ICY-Namen. Seitdem werden blosse Verweise abgewertet: Sie sagen
+    nichts darueber aus, was am Ende wirklich spielt.
+    """
+
+    def test_verweise_erkannt(self):
+        for url in ["http://a.de/liste.m3u", "http://a.de/liste.M3U",
+                    "http://a.de/liste.pls", "http://a.de/live.m3u8",
+                    "http://a.de/liste.asx",
+                    "http://a.de/liste.m3u?cb=123"]:
+            with self.subTest(url=url):
+                self.assertTrue(rs.ist_playlist(url))
+
+    def test_streams_sind_keine_verweise(self):
+        for url in ["http://a.de/stream.mp3", "http://a.de/stream",
+                    "https://a.de/live.aac", "http://a.de/m3u-archiv/s.mp3"]:
+            with self.subTest(url=url):
+                self.assertFalse(rs.ist_playlist(url))
+
+
+class Guete(unittest.TestCase):
+    """Die Sortierung entscheidet, welcher von mehreren gleichnamigen
+    Eintraegen in die Liste kommt. Geprueft wird die Reihenfolge, nicht
+    der Zahlenwert - der Schluessel darf sich aendern, das Ergebnis nicht.
+    """
+
+    @staticmethod
+    def _sender(url, **rest):
+        eintrag = {"url": "", "url_resolved": url, "codec": "MP3",
+                   "bitrate": 128, "votes": 0}
+        eintrag.update(rest)
+        return eintrag
+
+    def test_sitzungskennung_landet_ganz_hinten(self):
+        frei = self._sender("https://a.de/s.mp3")
+        gebunden = self._sender("https://b.de/s.mp3?sid=1", votes=99999)
+        self.assertEqual(sorted([gebunden, frei], key=rs.guete)[0], frei)
+
+    def test_verweis_hinter_echtem_stream(self):
+        stream = self._sender("https://a.de/s.mp3")
+        verweis = self._sender("https://b.de/l.m3u", votes=99999)
+        self.assertEqual(sorted([verweis, stream], key=rs.guete)[0], stream)
+
+    def test_mp3_vor_anderen_formaten(self):
+        mp3 = self._sender("https://a.de/s.mp3", codec="MP3")
+        aac = self._sender("https://b.de/s.aac", codec="AAC")
+        self.assertEqual(sorted([aac, mp3], key=rs.guete)[0], mp3)
+
+    def test_https_vor_http(self):
+        sicher = self._sender("https://a.de/s.mp3")
+        unsicher = self._sender("http://b.de/s.mp3")
+        self.assertEqual(sorted([unsicher, sicher], key=rs.guete)[0], sicher)
+
+    def test_unsinnige_bitrate_hilft_nicht(self):
+        """Angaben ueber 256 kbit/s sind in der Datenbank fast immer
+        Unsinn (Werte wie 999999). Sie duerfen einen Eintrag nicht nach
+        vorne bringen."""
+        echt = self._sender("https://a.de/s.mp3", bitrate=192)
+        behauptet = self._sender("https://b.de/s.mp3", bitrate=999999)
+        self.assertEqual(sorted([behauptet, echt], key=rs.guete)[0], echt)
+
+
+class Sprechformen(unittest.TestCase):
+    """sprechform_vorschlag() - die Regeln aus docs/medienliste.md,
+    so weit sie sich automatisch anwenden lassen."""
+
+    def test_abkuerzungen_werden_buchstabiert(self):
+        self.assertEqual(rs.sprechform_vorschlag("WDR 2"), "we de er zwei")
+        self.assertEqual(rs.sprechform_vorschlag("SRF 1"), "es er ef eins")
+        self.assertEqual(rs.sprechform_vorschlag("MDR Sachsen"), "em de er sachsen")
+
+    def test_ziffern_werden_ausgeschrieben(self):
+        self.assertEqual(rs.sprechform_vorschlag("Bayern 3"), "bayern drei")
+        self.assertEqual(rs.sprechform_vorschlag("SWR3"), "es we er drei")
+
+    def test_gewoehnliche_namen_werden_nur_klein(self):
+        self.assertEqual(rs.sprechform_vorschlag("Antenne Bayern"), "antenne bayern")
+        self.assertEqual(rs.sprechform_vorschlag("Rock Antenne"), "rock antenne")
+
+    def test_tabelle_schlaegt_die_regel(self):
+        """Was sich nicht ableiten laesst, steht in SPRECHFORMEN - und
+        muss Vorrang haben. „ORF Radio Tirol" heisst im Alltag nur
+        „radio tirol"; das vorangestellte „o er ef" spricht niemand."""
+        self.assertEqual(rs.sprechform_vorschlag("ORF Radio Tirol"), "radio tirol")
+        self.assertEqual(rs.sprechform_vorschlag("1LIVE"), "eins live")
+        self.assertEqual(rs.sprechform_vorschlag("Hitradio Oe3"), "oe drei")
+
+    def test_immer_ein_ergebnis(self):
+        """Der Vorschlag darf nie leer sein - ein leeres Feld in der
+        Oberflaeche sieht aus wie ein Programmfehler."""
+        for name in ["...", "???", "8", "X", "Radio!"]:
+            with self.subTest(name=name):
+                self.assertTrue(rs.sprechform_vorschlag(name).strip())
+
+    def test_nie_grossbuchstaben_im_ergebnis(self):
+        """Die Grammatik der Spracherkennung ist durchgehend klein."""
+        for land in rs.SENDER:
+            for eintrag in rs.SENDER[land]:
+                vorschlag = rs.sprechform_vorschlag(eintrag[0])
+                with self.subTest(sender=eintrag[0]):
+                    self.assertEqual(vorschlag, vorschlag.lower())
+
+
+class Kollisionen(unittest.TestCase):
+    """aehnliche_sprechformen() - docs/medienliste.md verlangt das
+    ausdruecklich: „Keine zwei Eintraege, die aehnlich klingen."
+
+    Der Nutzer kann nicht nachsehen, was gerade laeuft. Zwei
+    verwechselbare Saetze heissen deshalb: Er bekommt gelegentlich den
+    falschen Sender und erfaehrt nie, warum.
+    """
+
+    @staticmethod
+    def _liste(*sprechformen):
+        return [{"sprechform": s} for s in sprechformen]
+
+    def test_gleiche_sprechform(self):
+        paare = rs.aehnliche_sprechformen(self._liste("radio eins", "radio eins"))
+        self.assertEqual(len(paare), 1)
+        self.assertEqual(paare[0][2], "gleich")
+
+    def test_eine_steckt_in_der_anderen(self):
+        """Der gefaehrlichere Fall: Die Erkennung schlaegt schon beim
+        kuerzeren Satz zu, der laengere ist damit unerreichbar."""
+        paare = rs.aehnliche_sprechformen(self._liste("radio tirol",
+                                                      "radio tirol sued"))
+        self.assertEqual(len(paare), 1)
+        self.assertEqual(paare[0][2], "eine steckt in der anderen")
+
+    def test_umlaute_zaehlen_als_gleich(self):
+        """„kaernten" und „kärnten" sind derselbe Laut - die Schreibweise
+        darf die Warnung nicht aushebeln."""
+        paare = rs.aehnliche_sprechformen(self._liste("radio kärnten",
+                                                      "radio kaernten"))
+        self.assertEqual(len(paare), 1)
+
+    def test_echter_fund_vom_25_september(self):
+        """Ueber die 78 gesammelten Sender meldete die Pruefung elf Paare,
+        darunter dieses. Es steht hier als Beleg, dass die Schwelle nicht
+        zu lasch eingestellt ist."""
+        paare = rs.aehnliche_sprechformen(self._liste("we de er zwei",
+                                                      "en de er zwei"))
+        self.assertEqual(len(paare), 1)
+
+    def test_deutlich_verschiedenes_wird_nicht_gemeldet(self):
+        paare = rs.aehnliche_sprechformen(
+            self._liste("deutschlandfunk", "antenne bayern", "oe drei",
+                        "klassik radio"))
+        self.assertEqual(paare, [])
+
+    def test_leere_sprechform_wird_uebersprungen(self):
+        """Ein leeres Feld ist kein Kollisionspartner, sonst waeren zwei
+        noch nicht ausgefuellte Zeilen sofort „gleich"."""
+        paare = rs.aehnliche_sprechformen(self._liste("", "", "radio eins"))
+        self.assertEqual(paare, [])
+
+    def test_liste_bleibt_unveraendert(self):
+        eintraege = self._liste("radio eins", "radio eins")
+        rs.aehnliche_sprechformen(eintraege)
+        self.assertEqual(eintraege, self._liste("radio eins", "radio eins"))
+
+
+class Bundeslaender(unittest.TestCase):
+    """Die Normalisierungstabelle ist der eigentliche Nutzen der Suche.
+
+    Das Feld „state" wird von Hand gepflegt: Am 2026-09-25 standen allein
+    fuer Deutschland 53 Schreibweisen mit mindestens vier Sendern.
+    Nordrhein-Westfalen liefert ueber sechs Schreibweisen 494 Sender,
+    ueber die amtliche allein nur 72.
+    """
+
+    def test_alle_laender_vertreten(self):
+        self.assertEqual(set(rs.BUNDESLAENDER), set(rs.LAENDER))
+        self.assertEqual(set(rs.STAEDTE), set(rs.LAENDER))
+
+    def test_anzahl_stimmt(self):
+        self.assertEqual(len(rs.BUNDESLAENDER["Deutschland"]), 16)
+        self.assertEqual(len(rs.BUNDESLAENDER["Oesterreich"]), 9)
+
+    def test_jedes_bundesland_hat_brauchbare_schreibweisen(self):
+        """Mindestens eine, keine leere, keine doppelte.
+
+        Eine feste Mindestzahl waere falsch: „Hamburg", „Salzburg" und
+        „Zug" heissen in jeder Sprache gleich, da gibt es nichts zu
+        normalisieren. Und der Schluessel muss NICHT selbst ein
+        Suchbegriff sein - „Unterwalden" ist der Menuename fuer die
+        beiden Halbkantone Obwalden und Nidwalden.
+        """
+        for land, tabelle in rs.BUNDESLAENDER.items():
+            for name, schreibweisen in tabelle.items():
+                with self.subTest(land=land, bundesland=name):
+                    self.assertTrue(schreibweisen)
+                    self.assertTrue(all(w.strip() for w in schreibweisen))
+                    klein = [w.lower() for w in schreibweisen]
+                    self.assertEqual(len(set(klein)), len(klein))
+
+    def test_umlaute_haben_eine_ascii_fassung(self):
+        """Hier liegt der eigentliche Nutzen der Tabelle.
+
+        In radio-browser.info tippt jeder, was seine Tastatur hergibt -
+        „Baden-Wuerttemberg" und „Baden-Wurttemberg" stehen neben der
+        amtlichen Schreibweise. Wer nur nach dem Umlaut sucht, verliert
+        genau die Eintraege, die von auslaendischen Tastaturen stammen.
+        """
+        umlaute = "äöüÄÖÜß"
+        for land, tabelle in rs.BUNDESLAENDER.items():
+            for name, schreibweisen in tabelle.items():
+                if not any(z in name for z in umlaute):
+                    continue
+                with self.subTest(land=land, bundesland=name):
+                    self.assertTrue(
+                        any(not any(z in w for z in umlaute)
+                            for w in schreibweisen),
+                        f"{name} hat keine Schreibweise ohne Umlaut")
+
+    def test_keine_doppelten_schreibweisen_je_land(self):
+        """Eine Schreibweise, die zwei Bundeslaendern zugeordnet ist,
+        wuerde dieselben Sender beiden zuschlagen."""
+        for land, tabelle in rs.BUNDESLAENDER.items():
+            gesehen = {}
+            for name, schreibweisen in tabelle.items():
+                for wort in schreibweisen:
+                    schluessel = wort.lower()
+                    with self.subTest(land=land, schreibweise=wort):
+                        self.assertNotIn(
+                            schluessel, gesehen,
+                            f"„{wort}" f"“ steht bei {name} und "
+                            f"bei {gesehen.get(schluessel)}")
+                    gesehen[schluessel] = name
+
+    def test_unbekanntes_bundesland_wird_abgewiesen(self):
+        """Ohne Netz pruefbar, weil der Fehler vor der Abfrage kommt."""
+        with self.assertRaises(ValueError):
+            rs.bundesland_suchen("Deutschland", "Tirol")
+
+    def test_genres_haben_schlagwoerter(self):
+        for name, schlagwoerter in rs.GENRES.items():
+            with self.subTest(genre=name):
+                self.assertTrue(schlagwoerter)
+
+
+class Zusammenfuehren(unittest.TestCase):
+    """_zusammenfuehren() - Dubletten kosten Plaetze in einer Liste,
+    die laut medienliste.md bewusst kurz bleiben soll."""
+
+    @staticmethod
+    def _treffer(uuid, url, **rest):
+        eintrag = {"uuid": uuid, "url": url, "codec": "MP3", "stimmen": 0}
+        eintrag.update(rest)
+        return eintrag
+
+    def test_gleiche_kennung_faellt_weg(self):
+        ergebnis = rs._zusammenfuehren([
+            self._treffer("u1", "https://a.de/s.mp3"),
+            self._treffer("u1", "https://a.de/s.mp3"),
+        ])
+        self.assertEqual(len(ergebnis), 1)
+
+    def test_gleiche_adresse_unter_zwei_kennungen(self):
+        """Denselben Sender zweimal unter verschiedenen Kennungen gibt es
+        in der Datenbank reichlich - deshalb zusaetzlich ueber die
+        Adresse pruefen."""
+        ergebnis = rs._zusammenfuehren([
+            self._treffer("u1", "https://a.de/s.mp3"),
+            self._treffer("u2", "https://a.de/s.mp3"),
+        ])
+        self.assertEqual(len(ergebnis), 1)
+
+    def test_verschiedene_bleiben_erhalten(self):
+        ergebnis = rs._zusammenfuehren([
+            self._treffer("u1", "https://a.de/s.mp3"),
+            self._treffer("u2", "https://b.de/s.mp3"),
+        ])
+        self.assertEqual(len(ergebnis), 2)
+
+    def test_der_bessere_gewinnt(self):
+        """Bei einer Dublette darf nicht der zufaellig erste bleiben,
+        sondern der mit der brauchbareren Adresse."""
+        ergebnis = rs._zusammenfuehren([
+            self._treffer("u1", "https://a.de/liste.m3u", stimmen=500),
+            self._treffer("u2", "https://a.de/liste.m3u", stimmen=1),
+            self._treffer("u3", "https://b.de/s.mp3", stimmen=1),
+        ])
+        self.assertEqual(ergebnis[0]["url"], "https://b.de/s.mp3")
+
+    def test_genrefilter(self):
+        treffer = [
+            {"name": "A", "schlagwoerter": "news,talk", "url": "https://a.de/s"},
+            {"name": "B", "schlagwoerter": "techno", "url": "https://b.de/s"},
+        ]
+        gefiltert = rs.nach_genre_filtern(treffer, "Nachrichten und Wort")
+        self.assertEqual([s["name"] for s in gefiltert], ["A"])
+
+
+class Senderliste(unittest.TestCase):
+    """Die kuratierte Liste selbst - Fehler darin faellt sonst erst am
+    Geraet auf, und dort hoert der Nutzer den falschen Sender."""
+
+    def test_muster_sind_uebersetzbar(self):
+        for land, eintraege in rs.SENDER.items():
+            for eintrag in eintraege:
+                with self.subTest(sender=eintrag[0]):
+                    re.compile(eintrag[1], re.I)
+                    if len(eintrag) > 2:
+                        re.compile(eintrag[2], re.I)
+
+    def test_keine_doppelten_anzeigenamen(self):
+        """Zwei gleiche Namen ergaeben zwei Zeilen, die der Nutzer nicht
+        auseinanderhalten kann - und eine davon gewinnt per Zufall."""
+        alle = [e[0] for land in rs.SENDER for e in rs.SENDER[land]]
+        doppelt = {n for n in alle if alle.count(n) > 1}
+        self.assertEqual(doppelt, set())
+
+    def test_ersatzadressen_gehoeren_zu_bekannten_sendern(self):
+        """Ein Ersatz fuer einen Sender, den es in der Liste nicht gibt,
+        wuerde nie greifen - und das faellt sonst niemandem auf."""
+        alle = {e[0] for land in rs.SENDER for e in rs.SENDER[land]}
+        for name in rs.ERSATZ_ADRESSEN:
+            with self.subTest(sender=name):
+                self.assertIn(name, alle)
+
+    def test_srg_sender_pruefen_die_adresse(self):
+        """Bei der SRG heissen deutsche, franzoesische und italienische
+        Fassung in der Datenbank teilweise gleich. Am 2026-09-25 landete
+        deshalb die italienische Fassung in der Liste. Wer „Swiss"
+        heisst, braucht das dritte Feld."""
+        for eintrag in rs.SENDER["Schweiz"]:
+            if eintrag[0].startswith("Radio Swiss"):
+                with self.subTest(sender=eintrag[0]):
+                    self.assertEqual(len(eintrag), 3)
+
+
+class Ausgabeformat(unittest.TestCase):
+    """medienliste_bauen() - das Format aus docs/medienliste.md.
+    DialOS liest diese Datei spaeter direkt; ein umbenanntes Feld faellt
+    erst dort auf."""
+
+    PROBE = [{"name": "WDR 2", "land": "Deutschland",
+              "url": "https://a.de/s.mp3", "uuid": "u1",
+              "codec": "MP3", "bitrate": 128,
+              "seite": "https://wdr.de", "logo": ""}]
+
+    def test_aufbau(self):
+        liste = rs.medienliste_bauen(self.PROBE)
+        self.assertEqual(set(liste), {"stand", "eintraege"})
+        self.assertRegex(liste["stand"], r"^\d{4}-\d{2}-\d{2}$")
+
+    def test_felder_je_eintrag(self):
+        eintrag = rs.medienliste_bauen(self.PROBE)["eintraege"][0]
+        self.assertEqual(set(eintrag),
+                         {"art", "sprechform", "name", "land", "quelle",
+                          "stationuuid"})
+
+    def test_land_als_kuerzel(self):
+        """In der Medienliste steht das Kuerzel, nicht der ausgeschriebene
+        Name - so steht es im Konzept."""
+        eintrag = rs.medienliste_bauen(self.PROBE)["eintraege"][0]
+        self.assertEqual(eintrag["land"], "DE")
+
+    def test_sprechform_wird_ergaenzt_aber_nicht_ueberschrieben(self):
+        eigene = [dict(self.PROBE[0], sprechform="mein sender")]
+        gebaut = rs.medienliste_bauen(eigene)["eintraege"][0]
+        self.assertEqual(gebaut["sprechform"], "mein sender")
+
+        ohne = rs.medienliste_bauen(self.PROBE)["eintraege"][0]
+        self.assertEqual(ohne["sprechform"], "we de er zwei")
+
+    def test_stationuuid_ist_dabei(self):
+        """Ein Feld mehr als urspruenglich vorgeschlagen: DialOS soll bei
+        einem ausgefallenen Stream die aktuelle Adresse nachschlagen
+        koennen. Ohne die Kennung geht das nicht."""
+        eintrag = rs.medienliste_bauen(self.PROBE)["eintraege"][0]
+        self.assertEqual(eintrag["stationuuid"], "u1")
+
+
+class NetzSperre(unittest.TestCase):
+    """Beweist, dass die Sperre oben wirklich greift - sonst waere die
+    Zusicherung „laeuft ohne Netz" nur eine Behauptung."""
+
+    def test_sperre_greift(self):
+        with self.assertRaises(AssertionError):
+            urllib.request.urlopen("https://de.api.radio-browser.info/")
+
+
+if __name__ == "__main__":
+    unittest.main()

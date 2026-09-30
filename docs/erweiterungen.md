@@ -705,6 +705,23 @@ dauerhafte Einstieg. Auf einem Gerät, das jahrelang läuft, ist das keine
 Feinheit: Der Sender verstummt irgendwann ohne erkennbaren Grund, und der
 blinde Nutzer kann nicht nachsehen, warum.
 
+**Seit dem 2026-09-30 ist die Vorgabe vollständig erfüllt** - alle 78
+Sender sind frei zugänglich, im Lauf über alle drei Länder belegt. Der
+letzte Fall war SWR Kultur: Dort tragen in der Datenbank *beide*
+Adressfelder ein `sid`, also half die Wahl zwischen ihnen nicht mehr.
+Dafür gibt es jetzt `ERSATZ_ADRESSEN`, eine kleine Tabelle von Hand
+nachgesehener Adressen. Sie greift **nur**, solange die Datenbankadresse
+wirklich an einer Sitzung hängt - wird der Eintrag dort repariert, fällt
+der Ersatz still aus dem Weg. Was hier hineingehört, muss aufgerufen und
+am ICY-Namen geprüft worden sein: Eine geratene Adresse wäre schlimmer als
+gar keine, weil sie den Fehler unsichtbar macht.
+
+**Es ist das erste Programm im Repo mit automatischen Tests** (`tests/`,
+54 Fälle, dazu `.github/workflows/tests.yml`). Geprüft wird nur, was ohne
+Gerät und ohne Netz entscheidbar ist - die Adresswahl, die Sprechformen,
+die Kollisionswarnung, die Normalisierung der Bundesländer. Einzelheiten
+zur Regel dahinter stehen in der `CLAUDE.md`.
+
 **Das Symbol wurde gemessen, nicht beurteilt.** Stephans Entwurf hatte
 rechts Schallwellen **und** ein Mikrofon - zwei Objekte, also genau die
 Konstellation, an der der Suche-Entwurf bei 32 Pixeln gescheitert ist

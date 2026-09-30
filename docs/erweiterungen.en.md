@@ -702,6 +702,23 @@ but with the ARD distribution that carries a session key which expires.
 running for years this is not a nicety: the station falls silent at some
 point for no visible reason, and a blind user cannot look up why.
 
+**Since 2026-09-30 the requirement is fully met** - all 78 stations are
+freely accessible, demonstrated in a run across all three countries. The
+last case was SWR Kultur: there *both* address fields in the database
+carry a `sid`, so choosing between them no longer helped. For that there
+is now `ERSATZ_ADRESSEN`, a small table of manually verified addresses. It
+applies **only** while the database address really is bound to a session -
+once the entry there is fixed, the replacement quietly steps aside.
+Anything entered here must have been called and checked against the ICY
+name: a guessed address would be worse than none, because it hides the
+fault.
+
+**It is the first program in this repository with automated tests**
+(`tests/`, 54 cases, plus `.github/workflows/tests.yml`). Only what can be
+decided without the device and without the network is covered - address
+selection, spoken forms, the collision warning, state normalisation. The
+rule behind this is documented in `CLAUDE.md`.
+
 **The icon was measured, not judged.** Stephan's draft had sound waves
 **and** a microphone on the right - two objects, exactly the constellation
 the Suche draft failed on at 32 pixels (see above). Measured with the same

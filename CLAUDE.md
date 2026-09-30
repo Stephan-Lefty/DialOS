@@ -1109,6 +1109,42 @@ nichts fuer den Kunden.** Den Beweis liefert erst ein Start ueber den Autostart
 (Ab- und Anmelden oder Neustart). Fuer stille Einzelproben die Einheit
 nachbilden: `systemd-run --user --scope --unit='app-gnome-dialos\x2d…-<nr>' …`.
 
+## Was ohne Geraet pruefbar ist, wird ohne Geraet geprueft (Regel seit 2026-09-30)
+
+**Seit dem 2026-09-30 hat dieses Repo automatische Tests** - `tests/` und
+`.github/workflows/tests.yml`, ausgeloest bei jedem Push. Das ist neu: DialOS
+war bis dahin ein Rezept-Repo, in dem alles am Geraet geprueft wurde, und stand
+deshalb auch in Stephans allgemeiner Testpflicht ausdruecklich als Ausnahme.
+Mit DialOS-Rhythmbox liegt hier erstmals Logik, die ein Rechner allein pruefen
+kann.
+
+**Die Grenze verlaeuft nicht zwischen „wichtig" und „unwichtig", sondern
+zwischen „braucht das Geraet" und „braucht es nicht":**
+
+- **Gehoert in `tests/`:** Umgang mit Zeichenketten und Tabellen, Auswahl- und
+  Sortierregeln, Ausgabeformate, Normalisierungen. Das laeuft in
+  Millisekunden und faengt genau die Fehler, die man beim Lesen uebersieht.
+- **Bleibt Sache des Geraets:** Sprachausgabe, Erkennung, Audiowege, Dienste,
+  alles mit `pkexec`, alles mit echter Hardware. Dafuer gilt unveraendert die
+  Regel „Dienste nicht aus Claudes Sitzung heraus testen".
+
+**Zwei Dinge, die bei den ersten Tests teuer waren und Vorbild bleiben:**
+
+1. **Kein Netz - und das erzwingen, nicht behaupten.** `setUpModule()` haengt
+   `urllib` und `subprocess` Waechter davor, die jeden Zugriff zum Testfehler
+   machen. Ein Test gegen radio-browser.info wuerde rot, sobald dort jemand
+   etwas aendert, und saegte damit an seiner eigenen Aussagekraft.
+2. **Nach dem Schreiben gegenpruefen, ob die Tests etwas fangen.** Ein gruener
+   Test beweist nichts, solange niemand gesehen hat, wie er rot wird. Beim
+   ersten Satz wurden dafuer sechs Fehler absichtlich eingebaut (in einer
+   Kopie im Speicher, nicht in der Arbeitskopie); alle sechs wurden gefangen.
+   Dabei kam auch heraus, dass einer meiner Tests eine falsche Annahme prueft
+   und nicht das Programm - „Hamburg" und „Zug" heissen in jeder Sprache
+   gleich und brauchen keine zweite Schreibweise.
+
+**Wer einen Fehler behebt, ergaenzt einen Testfall dazu** - sofern er sich
+ohne Geraet nachstellen laesst.
+
 ## Arbeitsweise mit Stephan
 
 **Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,

@@ -53,29 +53,32 @@ finished too, and then move down together. That way no reference breaks.
   the second machine (the `.env` lives there); first add the English version
   and the audio version. The microphone paragraph is already updated.
 - [ ] **Finish DialOS-Rhythmbox** (built 2026-09-25, see changelog 0.5.3).
-  The tool runs, but four things are missing:
+  Three of the five points are done; the filter bar in the window and
+  Stephan's verdict on the icon are still open:
   - [ ] **The menu for state, city and genre in the interface.** In
     `dialos_rhythmbox_sender.py` the search is complete and usable from
     the command line (`suchen --bundesland`, `--stadt`, `--genre`,
     `--text`); the filter bar in the window is still missing. It should
     state honestly that the city search is an approximation - the
     database has no city field (Berlin 155 hits, Innsbruck 1).
-  - [ ] **Tests and CI**, as for every new program. Testable without
-    network: spoken-form suggestions, the confusable-form warning,
-    `braucht_zugang()`, `beste_adresse()` and the state normalisation.
-    The queries themselves must be switched off, or CI would test
-    third-party servers along the way.
-  - [ ] **SWR Kultur still hangs on a session key.** For this station
-    *both* address fields carry a `sid`. The official free address is
-    `https://liveradio.swr.de/sw331ch/swr2/play.mp3` (tested 2026-09-25,
-    announces itself as "SWR2 AAC 96"). Either record it as a fixed
-    fallback or submit it to radio-browser.info.
-  - [ ] **Catch up the documentation**, in both languages:
-    `docs/erweiterungen.md` (the classification - deliberately **without**
-    a manifest, as the tool needs neither start phrases nor the
-    microphone), `docs/anwendungen.md`, and the note in
-    `docs/medienliste.md` that the announced app now exists. Also
-    `docs/Debian-zu-DialOS.md` once the tool is part of device setup.
+  - [x] **Tests and CI** (2026-09-30). 54 cases in `tests/`, plus
+    `.github/workflows/tests.yml` - the first automated tests in this
+    repository at all. No network, and that is enforced: `setUpModule()`
+    puts guards in front of `urllib` and `subprocess`. Verified with six
+    deliberately introduced faults, all six turned red. CI additionally
+    checks the syntax of every versioned Python file.
+  - [x] **SWR Kultur no longer hangs on a session key** (2026-09-30).
+    Table `ERSATZ_ADRESSEN` in the module, for SWR Kultur
+    `https://liveradio.swr.de/sw331ch/swr2/play.mp3` (re-tested,
+    announces itself as "SWR2 AAC 96"). The replacement applies only
+    while the database address really is bound to a session. Demonstrated
+    in a run across all three countries: **all 78 stations freely
+    accessible.**
+  - [x] **Documentation caught up** (2026-09-25, commit `744502a`), in
+    both languages: `docs/erweiterungen.md` (the classification -
+    deliberately **without** a manifest, as the tool needs neither start
+    phrases nor the microphone), `docs/anwendungen.md`, the note in
+    `docs/medienliste.md`, and step 13e in `docs/Debian-zu-DialOS.md`.
   - [ ] **Have Stephan sign off the icon.** The measured version (microphone
     only) is built. His draft with waves *and* microphone sits beside it as
     `assets/rhythmbox-icon-entwurf.png` and failed at 32 pixels - the

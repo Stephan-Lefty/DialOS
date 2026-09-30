@@ -143,6 +143,42 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The first automated tests in this repository** (`tests/`,
+  `.github/workflows/tests.yml`, 2026-09-30). Until now DialOS was a recipe
+  repository: scripts that run on the device and are checked there. With
+  DialOS-Rhythmbox it contains, for the first time, logic that can be checked
+  **without the device** - and whatever can be checked without the device
+  should be checked before Stephan has to test it. 54 cases using `unittest`
+  from the standard library, runtime 8 milliseconds: choice of stream address,
+  spoken-form suggestions, the collision warning, normalisation of federal
+  states, output format. Every case belongs to a mistake that really happened
+  on 2026-09-25 - the misattributed MDR station, the Italian version of Radio
+  Swiss Classic, the session tokens of the ARD distribution. **No network, and
+  that is enforced rather than claimed:** `setUpModule()` puts guards in front
+  of `urllib` and `subprocess` that turn any access into a test failure.
+  **Verified that the tests actually catch something:** six deliberately
+  introduced faults all turned red (session pattern weakened, `beste_adresse()`
+  gutted, collision threshold raised, spoken-form rules removed, playlist
+  references no longer detected, replacement address carrying a session token).
+  The CI additionally checks the syntax of all 63 versioned Python files - a
+  syntax error in a device script would otherwise surface only when it is
+  installed, that is, in operation.
+
+- **SWR Kultur no longer depends on a session token** (2026-09-30). For this
+  station **both** address fields in radio-browser.info carry a `sid`, so
+  `beste_adresse()` had nothing to fall back on - the only one of the 78
+  stations in that state. New is a small table `ERSATZ_ADRESSEN` of manually
+  verified addresses; for SWR Kultur
+  `https://liveradio.swr.de/sw331ch/swr2/play.mp3` (called on 2026-09-30,
+  identifies itself as "SWR2 AAC 96"). Its redirect shows exactly the radioeins
+  pattern: the entry point is permanent, `sid` and `token` are added by the ARD
+  distribution during resolution - so the entry point is what gets stored. The
+  replacement applies **only** while the database address really is bound to a
+  session; should radio-browser.info fix the entry, it quietly steps aside
+  instead of freezing an address that will eventually go stale. The list now
+  fully meets Stephan's requirement of 2026-09-25: **all 78 stations freely
+  accessible, no account** - demonstrated in a run across all three countries.
+
 - **Graphic "From Debian 13 + GNOME to DialOS"** (`assets/debian-zu-dialos.svg`
   and `.png`, German, Stephan's request of 2026-09-25): the build in three
   stages with an explanation for every step, in the DialOS colors from the

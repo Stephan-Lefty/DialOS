@@ -153,6 +153,41 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Die ersten automatischen Tests in diesem Repo** (`tests/`,
+  `.github/workflows/tests.yml`, 2026-09-30). DialOS war bis hierher ein
+  Rezept-Repo: Skripte, die am Gerät laufen und dort geprüft werden. Mit
+  DialOS-Rhythmbox liegt erstmals Logik darin, die sich **ohne Gerät** prüfen
+  lässt - und was ohne Gerät prüfbar ist, gehört geprüft, bevor Stephan es
+  testen muss. 54 Fälle mit `unittest` aus der Standardbibliothek, Laufzeit
+  8 Millisekunden: Wahl der Adresse, Sprechform-Vorschläge, Kollisionswarnung,
+  Normalisierung der Bundesländer, Ausgabeformat. Jeder Fall gehört zu einem
+  Fehler, der am 2026-09-25 wirklich passiert ist - der falsch zugeordnete
+  MDR-Sender, die italienische Fassung von Radio Swiss Classic, die
+  Sitzungskennungen der ARD-Verteilung. **Ohne Netz, und das wird erzwungen,
+  nicht behauptet:** `setUpModule()` hängt `urllib` und `subprocess` Wächter
+  davor, die jeden Zugriff zum Testfehler machen. **Gegengeprüft, dass die
+  Tests überhaupt etwas fangen:** Sechs absichtlich eingebaute Fehler wurden
+  alle sechs rot (Sitzungsmuster entschärft, `beste_adresse()` entkernt,
+  Kollisionsschwelle hochgesetzt, Sprechform-Regeln entfernt, Verweise nicht
+  mehr erkannt, Ersatzadresse mit Sitzungskennung). Die CI prüft zusätzlich
+  die Syntax aller 63 versionierten Python-Dateien - ein Syntaxfehler in einem
+  Gerätskript fällt sonst erst beim Aufspielen auf, also im Betrieb.
+
+- **SWR Kultur hängt nicht mehr an einer Sitzungskennung** (2026-09-30). Bei
+  diesem Sender tragen in radio-browser.info **beide** Adressfelder ein `sid`,
+  deshalb konnte `beste_adresse()` nichts retten - der einzige der 78 Sender,
+  bei dem das so war. Neu ist eine kleine Tabelle `ERSATZ_ADRESSEN` mit von
+  Hand nachgesehenen Adressen; für SWR Kultur
+  `https://liveradio.swr.de/sw331ch/swr2/play.mp3` (am 2026-09-30 aufgerufen,
+  meldet sich als „SWR2 AAC 96"). Die Weiterleitung zeigt dabei genau das
+  Muster von radioeins: Der Einstieg ist dauerhaft, `sid` und `token` hängt
+  erst die ARD-Verteilung beim Auflösen an - gespeichert gehört der Einstieg.
+  Der Ersatz greift **nur**, solange die Datenbankadresse wirklich an einer
+  Sitzung hängt; repariert radio-browser.info den Eintrag, fällt er still aus
+  dem Weg, statt eine irgendwann veraltete Adresse festzuschreiben. Damit
+  erfüllt die Liste Stephans Vorgabe vom 2026-09-25 vollständig: **alle 78
+  Sender frei zugänglich, ohne Konto** - im Lauf über alle drei Länder belegt.
+
 - **Grafik „Von Debian 13 + GNOME zu DialOS"** (`assets/debian-zu-dialos.svg` und
   `.png`, Stephans Wunsch vom 2026-09-25): der Aufbau in drei Abschnitten mit
   einer Erklärung zu jedem Schritt, in den DialOS-Farben aus dem Markenblatt

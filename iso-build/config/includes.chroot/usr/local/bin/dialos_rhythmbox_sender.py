@@ -133,6 +133,32 @@ LAENDER = {"Deutschland": "DE", "Oesterreich": "AT", "Schweiz": "CH"}
 KUERZEL = {v: k for k, v in LAENDER.items()}
 
 
+# --------------------------------------------------------- Feste Ersatzadressen
+#
+# Normalfall ist, dass beste_adresse() die dauerhafte Adresse aus den zwei
+# Feldern der Datenbank waehlt. Das geht aber nur, solange EINES der beiden
+# frei ist. Steht in beiden schon die aufgeloeste Adresse mit Sitzungskennung,
+# ist der Eintrag in der Datenbank selbst kaputt - dann hilft nur eine von
+# Hand nachgesehene Adresse.
+#
+# Hier gehoert nur hinein, was wirklich geprueft wurde: Adresse aufrufen,
+# ICY-Namen mit dem erwarteten Sender vergleichen. Eine geratene Adresse ist
+# schlimmer als gar keine, weil sie den Fehler unsichtbar macht.
+#
+# Angewendet wird der Ersatz NUR, wenn die Datenbankadresse tatsaechlich an
+# einer Sitzung haengt. Repariert radio-browser.info den Eintrag, greift
+# wieder die Datenbank - und der Ersatz faellt still aus dem Weg, statt eine
+# irgendwann veraltete Adresse festzuschreiben.
+ERSATZ_ADRESSEN = {
+    # Geprueft 2026-09-25 und 2026-09-30: meldet sich als "SWR2 AAC 96".
+    # In der Datenbank tragen bei diesem Sender BEIDE Felder ein "sid".
+    # Diese Adresse ist der dauerhafte Einstieg; dass die ARD-Verteilung
+    # beim Aufloesen sid/token anhaengt, ist richtig so - gespeichert wird
+    # der Einstieg, genau wie bei radioeins.
+    "SWR Kultur": "https://liveradio.swr.de/sw331ch/swr2/play.mp3",
+}
+
+
 # ------------------------------------------------- Bundeslaender und Kantone
 #
 # Das Feld "state" in der Datenbank wird von Hand gepflegt und ist
@@ -342,6 +368,24 @@ def beste_adresse(sender):
     return aufgeloest or roh
 
 
+def adresse_waehlen(name, sender):
+    """Die Adresse fuer einen kuratierten Sender, samt Hinweis fuer den Nutzer.
+
+    Gibt (Adresse, Hinweis) zurueck; der Hinweis ist None, wenn alles in
+    Ordnung ist. Gemeldet wird vom Aufrufer - diese Funktion bleibt
+    absichtlich stumm, damit sie ohne Netz und ohne Ausgabe pruefbar ist.
+    """
+    url = beste_adresse(sender)
+    if not braucht_zugang(url):
+        return url, None
+    ersatz = ERSATZ_ADRESSEN.get(name)
+    if ersatz:
+        return ersatz, (f"  {name}: Datenbankadresse haengt an einer "
+                        "Sitzungskennung - fester Ersatz eingesetzt")
+    return url, (f"{name}: alle Adressen haengen an einer Sitzungskennung "
+                 "- der Sender kann spaeter ohne Grund verstummen")
+
+
 def guete(sender):
     """Sortierschluessel: frei zugaenglicher MP3-Stream ueber https."""
     bitrate = sender.get("bitrate") or 0
@@ -541,14 +585,15 @@ def sender_holen(laender):
                 fehler(f"nicht gefunden: {name} ({land})")
                 continue
             bester = sorted(treffer, key=guete)[0]
-            beste_url = beste_adresse(bester)
-            if braucht_zugang(beste_url):
-                fehler(f"{name}: alle Adressen haengen an einer Sitzungskennung "
-                       "- der Sender kann spaeter ohne Grund verstummen")
+            beste_url, hinweis = adresse_waehlen(name, bester)
+            if hinweis and name in ERSATZ_ADRESSEN:
+                sagen(hinweis)
+            elif hinweis:
+                fehler(hinweis)
             ergebnis.append({
                 "name": name,
                 "land": land,
-                "url": beste_adresse(bester),
+                "url": beste_url,
                 "uuid": bester.get("stationuuid"),
                 "codec": bester.get("codec"),
                 "bitrate": bester.get("bitrate"),
