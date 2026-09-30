@@ -105,12 +105,14 @@ finished too, and then move down together. That way no reference breaks.
 - [ ] **Finish DialOS-Rhythmbox** (built 2026-09-25, see changelog 0.5.3).
   Four of the six points are done; the filter bar in the window and
   Stephan's verdict on the icon are still open:
-  - [ ] **The menu for state, city and genre in the interface.** In
-    `dialos_rhythmbox_sender.py` the search is complete and usable from
-    the command line (`suchen --bundesland`, `--stadt`, `--genre`,
-    `--text`); the filter bar in the window is still missing. It should
-    state honestly that the city search is an approximation - the
-    database has no city field (Berlin 155 hits, Innsbruck 1).
+  - [x] **The menu for state, city and genre in the interface**
+    (2026-09-30). Country, area, genre and a free search field. The area
+    list fills only once a country is chosen - all three countries
+    together would be sixty entries. The city search says itself that it
+    is an approximation, and every result states that those stations are
+    untested. **Not yet seen at the window by Stephan** - I only verified
+    that the app starts and that the five search paths deliver (Tyrol 14,
+    Innsbruck 1, classical AT 4, Tyrol+folk 1, "jazz" CH 15).
   - [x] **Tests and CI** (2026-09-30). 54 cases in `tests/`, plus
     `.github/workflows/tests.yml` - the first automated tests in this
     repository at all. No network, and that is enforced: `setUpModule()`

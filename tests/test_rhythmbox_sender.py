@@ -460,6 +460,36 @@ class Bundeslaender(unittest.TestCase):
             with self.subTest(genre=name):
                 self.assertTrue(schlagwoerter)
 
+    def test_staedte_ohne_dubletten(self):
+        """Aus dieser Tabelle fuellt die Filterleiste ihre Auswahl. Ein
+        doppelter Eintrag waere dort zweimal dasselbe zum Anklicken."""
+        for land, staedte in rs.STAEDTE.items():
+            with self.subTest(land=land):
+                self.assertTrue(staedte)
+                klein = [s.lower() for s in staedte]
+                self.assertEqual(len(set(klein)), len(klein))
+
+    def test_stadt_nicht_zugleich_bundesland(self):
+        """Berlin, Hamburg und Bremen sind beides. Sie stehen deshalb in
+        BEIDEN Tabellen und erscheinen in der Filterleiste zweimal - einmal
+        als Bundesland, einmal als Stadt mit dem Zusatz „(Näherung)". Das
+        ist gewollt und keine Dublette: Die beiden Wege fragen die Datenbank
+        verschieden ab und liefern verschieden viele Sender. Der Test haelt
+        nur fest, dass es wirklich diese drei sind - taucht ein viertes auf,
+        gehoert nachgesehen, ob das Absicht war.
+        """
+        doppelt = {land: sorted(set(rs.BUNDESLAENDER.get(land, {}))
+                                & set(rs.STAEDTE.get(land, [])))
+                   for land in rs.LAENDER}
+        self.assertEqual(doppelt["Deutschland"], ["Berlin", "Bremen", "Hamburg"])
+        self.assertEqual(doppelt["Oesterreich"], ["Salzburg", "Wien"])
+        # In der Schweiz ist das die Regel, nicht die Ausnahme: Neun
+        # Kantone heissen wie ihre Hauptstadt.
+        self.assertEqual(
+            doppelt["Schweiz"],
+            ["Basel", "Bern", "Freiburg", "Genf", "Luzern", "Neuenburg",
+             "Schaffhausen", "St. Gallen", "Zürich"])
+
 
 class Zusammenfuehren(unittest.TestCase):
     """_zusammenfuehren() - Dubletten kosten Plaetze in einer Liste,

@@ -109,12 +109,15 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [ ] **DialOS-Rhythmbox fertigstellen** (gebaut 2026-09-25, siehe
   Änderungsprotokoll 0.5.3). Vier der sechs Punkte sind erledigt; offen sind
   die Filterleiste im Fenster und Stephans Urteil über das Symbol:
-  - [ ] **Das Menü für Bundesland, Stadt und Genre in der Oberfläche.**
-    In `dialos_rhythmbox_sender.py` ist die Suche fertig und über die
-    Kommandozeile bedienbar (`suchen --bundesland`, `--stadt`, `--genre`,
-    `--text`); die Filterleiste im Fenster fehlt noch. Dabei ehrlich
-    anzeigen, dass die Stadtsuche eine Näherung ist - die Datenbank hat
-    kein Stadtfeld (Berlin 155 Treffer, Innsbruck 1).
+  - [x] **Das Menü für Bundesland, Stadt und Genre in der Oberfläche**
+    (2026-09-30). Land, Bereich, Genre und ein freies Suchfeld. Der
+    Bereich füllt sich erst, wenn ein Land gewählt ist - alle drei Länder
+    zusammen hätten sechzig Einträge. Die Stadtsuche sagt selbst, dass
+    sie eine Näherung ist, und jedes Suchergebnis sagt, dass diese Sender
+    nicht angetestet sind. **Am Fenster noch nicht von Stephan gesehen** -
+    ich habe nur belegt, dass die App startet und die fünf Suchpfade
+    liefern (Tirol 14, Innsbruck 1, Klassik AT 4, Tirol+Volksmusik 1,
+    „jazz" CH 15).
   - [x] **Tests und CI** (2026-09-30). 54 Fälle in `tests/`, dazu
     `.github/workflows/tests.yml` - die ersten automatischen Tests in
     diesem Repo überhaupt. Ohne Netz, und das wird erzwungen:

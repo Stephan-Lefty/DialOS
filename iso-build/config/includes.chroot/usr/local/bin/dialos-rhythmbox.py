@@ -232,6 +232,8 @@ class Fenster(Adw.ApplicationWindow):
             handlung.connect("activate", rueckruf)
             self.add_action(handlung)
 
+        aussen.add_top_bar(self._filterleiste())
+
         self.seiten = Adw.ToastOverlay()
         self.inhalt = Adw.PreferencesPage()
         self.seiten.set_child(self.inhalt)
@@ -239,6 +241,126 @@ class Fenster(Adw.ApplicationWindow):
 
         aussen.add_bottom_bar(self._fussleiste())
         return aussen
+
+    # -- Filterleiste ------------------------------------------------------
+    #
+    # Stephans Aufbau vom 2026-09-25: "Land - Landesweite Sender,
+    # Bundesland, Stadt oder so in der Art", und danach "Und dann noch nach
+    # Genre". Die Suche dahinter steht seit demselben Tag im Modul und war
+    # bis zum 2026-09-30 nur ueber die Kommandozeile bedienbar.
+    #
+    # WARUM LAND UND BEREICH GETRENNT SIND und nicht eine lange Liste:
+    # Deutschland allein hat 16 Bundeslaender und 4 Grossstaedte, alle drei
+    # Laender zusammen 49 Eintraege plus Genres. Eine Liste mit 60 Zeilen
+    # findet niemand mehr durch.
+
+    #: Die erste Zeile jeder Auswahl - sie muss ohne Nachdenken passen.
+    ALLE_LAENDER = "Alle drei Länder"
+    LANDESWEIT = "Landesweit"
+    ALLE_GENRES = "Alle Genres"
+
+    def _filterleiste(self) -> Gtk.Widget:
+        leiste = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        leiste.set_margin_top(6)
+        leiste.set_margin_bottom(6)
+        leiste.set_margin_start(12)
+        leiste.set_margin_end(12)
+
+        self.wahl_land = Gtk.DropDown.new_from_strings(
+            [self.ALLE_LAENDER] + list(rs.LAENDER))
+        self.wahl_land.set_tooltip_text("Land")
+        self.wahl_land.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Land"])
+        self.wahl_land.connect("notify::selected",
+                               lambda *_: self._land_geaendert())
+        leiste.append(self.wahl_land)
+
+        self.wahl_bereich = Gtk.DropDown.new_from_strings([self.LANDESWEIT])
+        self.wahl_bereich.set_tooltip_text(
+            "Landesweit, ein Bundesland oder eine Stadt")
+        self.wahl_bereich.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Bereich"])
+        leiste.append(self.wahl_bereich)
+
+        self.wahl_genre = Gtk.DropDown.new_from_strings(
+            [self.ALLE_GENRES] + list(rs.GENRES))
+        self.wahl_genre.set_tooltip_text("Genre")
+        self.wahl_genre.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Genre"])
+        leiste.append(self.wahl_genre)
+
+        self.suchfeld = Gtk.SearchEntry()
+        self.suchfeld.set_placeholder_text("Name oder Schlagwort ...")
+        self.suchfeld.set_hexpand(True)
+        self.suchfeld.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Freie Suche"])
+        self.suchfeld.connect("activate", lambda *_: self.suche_starten())
+        leiste.append(self.suchfeld)
+
+        self.knopf_suchen = Gtk.Button(label="Suchen")
+        self.knopf_suchen.connect("clicked", lambda *_: self.suche_starten())
+        leiste.append(self.knopf_suchen)
+
+        # Zurueck zur kuratierten Liste. Ohne diesen Knopf waere die Suche
+        # eine Einbahnstrasse: Wer einmal 155 Berliner Sender geholt hat,
+        # kaeme nur ueber einen Neustart wieder zu den 78 geprueften.
+        self.knopf_kuratiert = Gtk.Button(icon_name="go-home-symbolic")
+        self.knopf_kuratiert.set_tooltip_text(
+            "Zurück zur geprüften Liste der 78 Sender")
+        self.knopf_kuratiert.update_property(
+            [Gtk.AccessibleProperty.LABEL], ["Zurück zur geprüften Liste"])
+        self.knopf_kuratiert.connect(
+            "clicked", lambda *_: self.liste_holen(aus_zwischenspeicher=True))
+        leiste.append(self.knopf_kuratiert)
+
+        self._land_geaendert()
+        return leiste
+
+    def _gewaehltes_land(self) -> str | None:
+        """None heisst: alle drei Laender."""
+        stelle = self.wahl_land.get_selected()
+        if stelle < 1:
+            return None
+        return list(rs.LAENDER)[stelle - 1]
+
+    def _land_geaendert(self) -> None:
+        """Bereiche zum gewaehlten Land neu fuellen.
+
+        Bundeslaender und Staedte gibt es nur je Land - "Tirol" unter
+        Deutschland waere ein Eintrag, der nie einen Treffer liefert.
+        """
+        land = self._gewaehltes_land()
+        eintraege = [self.LANDESWEIT]
+        self._bereiche: list[tuple[str, str | None]] = [("landesweit", None)]
+
+        if land:
+            for name in rs.BUNDESLAENDER.get(land, {}):
+                eintraege.append(name)
+                self._bereiche.append(("bundesland", name))
+            for name in rs.STAEDTE.get(land, []):
+                # Der Zusatz ist keine Zier: Die Datenbank hat kein
+                # Stadtfeld, die Suche ist eine Naeherung ueber Name,
+                # Schlagwort und "state". Wer das nicht weiss, haelt
+                # "Innsbruck: 1 Sender" fuer einen Fehler.
+                eintraege.append(f"{name} (Näherung)")
+                self._bereiche.append(("stadt", name))
+
+        modell = Gtk.StringList.new(eintraege)
+        self.wahl_bereich.set_model(modell)
+        self.wahl_bereich.set_selected(0)
+        self.wahl_bereich.set_sensitive(land is not None)
+        if land is None:
+            self.wahl_bereich.set_tooltip_text(
+                "Bundesländer und Städte gibt es nur für ein einzelnes Land")
+        else:
+            self.wahl_bereich.set_tooltip_text(
+                "Landesweit, ein Bundesland oder eine Stadt")
+
+    def _gewaehltes_genre(self) -> str | None:
+        stelle = self.wahl_genre.get_selected()
+        if stelle < 1:
+            return None
+        return list(rs.GENRES)[stelle - 1]
 
     def _fussleiste(self) -> Gtk.Widget:
         kasten = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -290,8 +412,15 @@ class Fenster(Adw.ApplicationWindow):
     def _knoepfe_sperren(self, gesperrt: bool) -> None:
         self.arbeitet = gesperrt
         for k in (self.knopf_pruefen, self.knopf_rhythmbox,
-                  self.knopf_medienliste, self.knopf_holen):
+                  self.knopf_medienliste, self.knopf_holen,
+                  self.knopf_suchen, self.knopf_kuratiert,
+                  self.wahl_land, self.wahl_genre, self.suchfeld):
             k.set_sensitive(not gesperrt)
+        # Der Bereich bleibt gesperrt, solange kein einzelnes Land gewaehlt
+        # ist - sonst hebt das Entsperren nach einer Suche eine Sperre auf,
+        # die _land_geaendert() aus gutem Grund gesetzt hat.
+        self.wahl_bereich.set_sensitive(
+            not gesperrt and self._gewaehltes_land() is not None)
 
     def _haken_setzen(self, an: bool) -> None:
         for z in self.zeilen:
@@ -373,6 +502,106 @@ class Fenster(Adw.ApplicationWindow):
 
         threading.Thread(target=arbeit, daemon=True).start()
         GLib.timeout_add(120, self._balken_pulsen)
+
+    # -- Suchen ------------------------------------------------------------
+
+    def suche_starten(self) -> None:
+        """Die Filterleiste auswerten und in der Datenbank suchen.
+
+        Gesucht wird IMMER frisch: Der Zwischenspeicher enthaelt die
+        kuratierten 78, nicht die Treffer einer Abfrage. Ein Suchergebnis
+        zwischenzuspeichern waere auch falsch - es gehoert zur Frage, die
+        gerade gestellt wurde, nicht zum Programm.
+        """
+        if self.arbeitet:
+            return
+        land = self._gewaehltes_land()
+        genre = self._gewaehltes_genre()
+        text = self.suchfeld.get_text().strip()
+        art, wert = self._bereiche[self.wahl_bereich.get_selected()]
+
+        if not (land or genre or text):
+            self.sagen("Wähle ein Land, ein Genre oder gib einen Suchbegriff "
+                       "ein. Der Pfeil oben holt die geprüfte Liste zurück.")
+            return
+
+        laender = [land] if land else list(rs.LAENDER)
+        self._knoepfe_sperren(True)
+        self.balken.set_visible(True)
+        self.balken.pulse()
+        self.sagen(self._suchmeldung(art, wert, land, genre, text) + " ...")
+
+        def arbeit():
+            treffer, fehler = [], None
+            try:
+                for einzelland in laender:
+                    if text:
+                        gefunden = rs.frei_suchen(einzelland, text)
+                        if genre:
+                            gefunden = rs.nach_genre_filtern(gefunden, genre)
+                    elif art == "bundesland":
+                        gefunden = rs.bundesland_suchen(einzelland, wert, genre)
+                    elif art == "stadt":
+                        gefunden = rs.stadt_suchen(einzelland, wert, genre)
+                    elif genre:
+                        gefunden = rs.genre_suchen(einzelland, genre)
+                    else:
+                        # Land ohne alles: die kuratierten Sender dieses
+                        # Landes, nicht die ganze Datenbank. Achthundert
+                        # Zeilen sind keine Auswahl, sondern ein Haufen.
+                        gefunden = rs.sender_holen([einzelland])
+                    treffer.extend(gefunden)
+            except Exception as e:                # noqa: BLE001
+                fehler = str(e)
+            im_hauptfaden(self._suche_fertig, treffer, fehler, art, wert,
+                          land, genre, text)
+
+        threading.Thread(target=arbeit, daemon=True).start()
+        GLib.timeout_add(120, self._balken_pulsen)
+
+    @staticmethod
+    def _suchmeldung(art, wert, land, genre, text) -> str:
+        teile = []
+        if text:
+            teile.append(f"Sender zu „{text}“")
+        elif art == "bundesland":
+            teile.append(f"Sender in {wert}")
+        elif art == "stadt":
+            teile.append(f"Sender in {wert}")
+        else:
+            teile.append("Sender")
+        if genre:
+            teile.append(f"im Genre {genre}")
+        teile.append(f"in {land}" if land else "in allen drei Ländern")
+        return " ".join(teile)
+
+    def _suche_fertig(self, treffer, fehler, art, wert, land, genre,
+                      text) -> None:
+        self._knoepfe_sperren(False)
+        self.balken.set_visible(False)
+        if fehler:
+            self.sagen(f"Die Suche ist gescheitert: {fehler}")
+            self.toast("Keine Verbindung zu radio-browser.info")
+            return
+
+        self._liste_zeigen(treffer)
+        was = self._suchmeldung(art, wert, land, genre, text)
+        if not treffer:
+            self.sagen(f"{was}: nichts gefunden. Der Pfeil oben holt die "
+                       "geprüfte Liste zurück.")
+            return
+
+        hinweise = [f"{len(treffer)} Treffer für {was}."]
+        if art == "stadt":
+            # Ehrlichkeit statt Schein: Das TODO verlangt ausdruecklich,
+            # die Naeherung anzuzeigen. Am 2026-09-25 gemessen: Berlin
+            # 155 Treffer, Muenchen 28, Koeln 11, Innsbruck 1.
+            hinweise.append("Die Stadtsuche ist eine Näherung - die Datenbank "
+                            "hat kein Stadtfeld. Gesucht wird über Name, "
+                            "Schlagwort und Bundesland.")
+        hinweise.append("Diese Sender sind NICHT angetestet - dafür unten auf "
+                        "„Sender prüfen“.")
+        self.sagen(" ".join(hinweise))
 
     def _balken_pulsen(self) -> bool:
         if not self.arbeitet:

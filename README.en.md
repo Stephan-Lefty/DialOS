@@ -143,6 +143,22 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The filter bar in DialOS-Rhythmbox is built** (2026-09-30, Stephan's
+  layout of 2026-09-25: "country - nationwide stations, federal state, city or
+  something like that", plus "and then by genre"). Country, area, genre and a
+  free search field; the search behind it had been in the module since
+  2026-09-25 and was usable only from the command line. **Country and area are
+  deliberately separate:** all three countries together have 49 states and
+  cantons plus cities - nobody can navigate a single list of sixty entries.
+  The area list therefore fills only once a country is chosen.
+  **The city search says itself that it is an approximation** - in the entry
+  ("München (Näherung)") and again in the result. The database has no city
+  field; the search goes via name, tag and state. Without knowing that,
+  "Innsbruck: 1 station" looks like a bug. Every search result likewise states
+  that these stations are **not tested** - unlike the 78 curated ones. An
+  arrow button brings the verified list back; without it the search would be
+  a one-way street.
+
 - **Listening to radio works** (`dialos-radio.py`, 2026-09-30). The reader at
   the far end of the media list: seven new voice commands - switch on, a
   specific station, stop, "what is playing", louder, quieter, next station.

@@ -153,6 +153,22 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Die Filterleiste in DialOS-Rhythmbox ist gebaut** (2026-09-30, Stephans
+  Aufbau vom 2026-09-25: „Land - Landesweite Sender, Bundesland, Stadt oder so
+  in der Art", dazu „Und dann noch nach Genre"). Land, Bereich, Genre und ein
+  freies Suchfeld; die Suche dahinter stand seit dem 2026-09-25 im Modul und
+  war nur über die Kommandozeile bedienbar. **Land und Bereich sind bewusst
+  getrennt:** Alle drei Länder zusammen haben 49 Bundesländer und Kantone plus
+  Städte - eine einzige Liste mit sechzig Zeilen findet niemand mehr durch.
+  Der Bereich füllt sich deshalb erst, wenn ein Land gewählt ist.
+  **Die Stadtsuche sagt selbst, dass sie eine Näherung ist** - im Eintrag
+  („München (Näherung)") und noch einmal im Ergebnis. Die Datenbank hat kein
+  Stadtfeld; gesucht wird über Name, Schlagwort und Bundesland. Wer das nicht
+  weiß, hält „Innsbruck: 1 Sender" für einen Fehler. Ebenso steht bei jedem
+  Suchergebnis, dass diese Sender **nicht angetestet** sind - anders als die
+  78 kuratierten. Ein Pfeil-Knopf holt die geprüfte Liste zurück; ohne ihn
+  wäre die Suche eine Einbahnstraße.
+
 - **Radio hören geht** (`dialos-radio.py`, 2026-09-30). Der Leser am anderen
   Ende der Medienliste: sieben neue Sprachbefehle - einschalten, einen
   bestimmten Sender, abstellen, „Was läuft gerade", lauter, leiser, nächster
