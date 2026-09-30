@@ -350,7 +350,30 @@ def programme_lesen():
 
 
 RADIO_SKRIPT = "/usr/local/bin/dialos-radio.py"
-SENDER_MODUL = "/usr/local/bin/dialos_rhythmbox_sender.py"
+
+
+def _sender_modul_suchen():
+    """dialos_rhythmbox_sender.py - NEBEN MIR zuerst.
+
+    Am Geraet liegen beide unter /usr/local/bin, dort trifft der feste
+    Pfad. Auf dem Arbeitsrechner liegen sie im Repo-Baum, und dann fand
+    dieser Dienst die Medienliste nicht - mit der Folge, dass
+    dialos-grammatik-pruefen.py die SENDER-Saetze nicht mitgeprueft hat.
+    Ausgerechnet die also, an denen am 2026-09-30 25 unaussprechliche
+    Sprechformen aufgefallen sind.
+
+    Dieselbe Ueberlegung wie bei _dienst_suchen() in
+    dialos-grammatik-pruefen.py: Die Datei neben mir ist immer die
+    richtige.
+    """
+    neben_mir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "dialos_rhythmbox_sender.py")
+    if os.path.isfile(neben_mir):
+        return neben_mir
+    return "/usr/local/bin/dialos_rhythmbox_sender.py"
+
+
+SENDER_MODUL = _sender_modul_suchen()
 
 
 def radio_saetze_lesen():

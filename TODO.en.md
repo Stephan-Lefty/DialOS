@@ -73,11 +73,13 @@ finished too, and then move down together. That way no reference breaks.
     command recognition still works with the radio playing - the echo
     cancellation was built for exactly that on 2026-08-17 and has never
     been tested with radio.
-  - [ ] **Vosk model onto the workbench machine** (proposal from the
-    2026-09-30 build). It currently sits only in the session's scratch
-    folder; for the vocabulary check to run here permanently it would need
-    a fixed place. It is the same download `dialos-full-office-setup.sh`
-    performs anyway (45 MB, Apache 2.0). Stephan's decision.
+  - [x] **Vosk model permanently on the workbench machine** (2026-09-30,
+    approved by Stephan). It lives at `~/.local/share/vosk-model-de-small`
+    (92 MB unpacked, Apache 2.0, the same download as in
+    `dialos-full-office-setup.sh`). `dialos-grammatik-pruefen.py` searches
+    both locations and now understands `--nur-wortschatz` for the first
+    mandatory check without Piper. **Not system-wide**, because `sudo`
+    requires a password here - which makes no difference for the check.
   - [ ] **The file itself does not exist yet.** The format and both paths are
     settled, but the selection is Stephan's to make - and medienliste.md says
     "less is more": ten stations he really listens to beat the 78 collected.

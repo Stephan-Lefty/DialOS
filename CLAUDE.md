@@ -1145,6 +1145,25 @@ zwischen „braucht das Geraet" und „braucht es nicht":**
 **Wer einen Fehler behebt, ergaenzt einen Testfall dazu** - sofern er sich
 ohne Geraet nachstellen laesst.
 
+**Die erste Pflichtpruefung fuer Sprachbefehle geht seit dem 2026-09-30 auch
+hier** (Wortschatz - steht das Wort ueberhaupt im Modell?):
+
+```bash
+/usr/local/bin/dialos-grammatik-pruefen.py --nur-wortschatz
+```
+
+Das Vosk-Modell liegt dafuer unter `~/.local/share/vosk-model-de-small`; das
+Werkzeug sucht dort und systemweit. Vorher verlangte es Piper, BEVOR auch nur
+ein Wort geprueft war - und verhinderte die Pruefung damit ausgerechnet auf
+dem Rechner, an dem gebaut wird. Sie fand erst am Geraet statt, also nach dem
+Einbau. Genau so sind 25 Sender mit einer Sprechform entstanden, die im
+Wortschatz gar nicht vorkommt.
+
+**Die zweite Pflichtpruefung bleibt Sache des Geraets** (Piper spricht, Vosk
+hoert mit der vollstaendigen Grammatik) - hier ist kein Piper installiert. Ein
+Satz, der nur die erste besteht, ist nicht abgenommen; er ist nur nicht offen
+kaputt.
+
 ## Arbeitsweise mit Stephan
 
 **Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,

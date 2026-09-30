@@ -162,6 +162,22 @@ background) and `splash.png` (boot/login screen).
   `--next`**: a running stream has no next track, so the command would do
   nothing.
 
+- **The first mandatory check now runs on the workbench machine**
+  (`dialos-grammatik-pruefen.py --nur-wortschatz`, 2026-09-30). It needs only
+  Vosk and the model - no Piper, no microphone. Yet the tool demanded Piper
+  **before a single word had been checked**, and so prevented the check
+  precisely where the building happens. It ran only on the device, that is,
+  after the fact. That is exactly how the 25 unpronounceable spoken forms came
+  about. The model now sits permanently at
+  `~/.local/share/vosk-model-de-small`; both locations are searched, as for
+  the voice service - system-wide on the device, in the user's account on a
+  machine without root. This surfaced one more gap: the voice service looked
+  for `dialos_rhythmbox_sender.py` only under `/usr/local/bin` and so never
+  found the media list in the repository tree - meaning the **station**
+  sentences were not being checked at all. It now looks beside itself first.
+  **What this does not replace:** the second check. Piper speaks, Vosk
+  listens - that stays with the device, and only then is a command accepted.
+
 - **The vocabulary check rescued 25 of 78 stations** (2026-09-30). While
   building the radio commands, the first mandatory check from
   `docs/sprachbefehle.md` was run over the station **spoken forms** for the

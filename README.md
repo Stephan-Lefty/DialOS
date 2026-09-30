@@ -173,6 +173,22 @@ das Erfolg meldet, während es versagt.
   **„Nächster Sender" ist nicht `--next` von Rhythmbox**: Bei einem
   laufenden Stream gibt es kein nächstes Stück, der Befehl liefe ins Leere.
 
+- **Die erste Pflichtprüfung läuft jetzt auf dem Arbeitsrechner**
+  (`dialos-grammatik-pruefen.py --nur-wortschatz`, 2026-09-30). Sie braucht nur
+  Vosk und das Modell - kein Piper, kein Mikrofon. Trotzdem verlangte das
+  Werkzeug Piper, **bevor auch nur ein Wort geprüft war**, und verhinderte die
+  Prüfung damit ausgerechnet dort, wo gebaut wird. Sie fand erst am Gerät
+  statt, also nach dem Einbau. Genau so sind die 25 unaussprechlichen
+  Sprechformen entstanden. Das Modell liegt jetzt fest unter
+  `~/.local/share/vosk-model-de-small`; gesucht wird an beiden Orten, wie beim
+  Sprachdienst auch - am Gerät systemweit, auf einem Rechner ohne
+  Root-Rechte im eigenen Konto. Dabei fiel noch eine Lücke auf: Der
+  Sprachdienst suchte `dialos_rhythmbox_sender.py` nur unter `/usr/local/bin`
+  und fand die Medienliste im Repo-Baum nicht - die **Sender**-Sätze wurden
+  also gar nicht mitgeprüft. Jetzt sucht er neben sich zuerst.
+  **Was das nicht ersetzt:** die zweite Prüfung. Piper spricht, Vosk hört -
+  das bleibt Sache des Geräts, und erst danach ist ein Befehl abgenommen.
+
 - **Die Wortschatz-Prüfung hat 25 von 78 Sendern gerettet** (2026-09-30).
   Beim Bauen der Radio-Befehle lief die erste Pflichtprüfung aus
   `docs/sprachbefehle.md` erstmals auch über die **Sprechformen** der

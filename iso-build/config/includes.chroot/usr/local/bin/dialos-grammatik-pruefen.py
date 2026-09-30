@@ -95,7 +95,38 @@ DIENST = _dienst_suchen()
 BIN = os.path.dirname(DIENST)
 PIPER_DIR = "/usr/local/share/dialos-piper"
 STIMME = "voices/de_DE-thorsten-high.onnx"
-MODELL = "/usr/local/share/vosk-model-de-small"
+
+
+def _modell_suchen():
+    """Das Vosk-Modell - am Geraet systemweit, sonst im eigenen Konto.
+
+    HINTERGRUND (2026-09-30): Die erste Pflichtpruefung - steht das Wort
+    ueberhaupt im Wortschatz? - braucht nur Vosk und das Modell, keinen
+    Piper und kein Mikrofon. Sie kann also auf dem Arbeitsrechner laufen,
+    an dem gebaut wird, statt erst am Geraet. Dass sie es bis dahin nicht
+    tat, war teuer: Beim Bau der Radio-Befehle kam heraus, dass 25 der 78
+    Sender eine Sprechform hatten, die im Wortschatz gar nicht vorkommt
+    ("kaernten" statt "kärnten"). Vosk haette sie still aus der Grammatik
+    geworfen, und der Fehler waere erst am Geraet aufgefallen - nach dem
+    Einbau.
+
+    Gesucht wird deshalb an mehreren Orten, dieselbe Ueberlegung wie bei
+    _dienst_suchen(): Am Geraet liegt das Modell unter /usr/local/share,
+    auf einem Arbeitsrechner ohne Root-Rechte unter ~/.local/share. Der
+    Inhalt ist derselbe (vosk-model-small-de-0.15).
+    """
+    kandidaten = (
+        "/usr/local/share/vosk-model-de-small",
+        os.path.join(os.path.expanduser("~"), ".local", "share",
+                     "vosk-model-de-small"),
+    )
+    for pfad in kandidaten:
+        if os.path.isdir(pfad):
+            return pfad
+    return kandidaten[0]
+
+
+MODELL = _modell_suchen()
 ABTASTRATE = 16000
 
 
@@ -181,8 +212,22 @@ def main():
     except ImportError:
         print("vosk fehlt", file=sys.stderr)
         return 1
-    if not os.path.isdir(PIPER_DIR):
+    # NUR DIE ERSTE PFLICHTPRUEFUNG - fuer den Arbeitsrechner (2026-09-30).
+    #
+    # Sie braucht nur Vosk und das Modell. Piper zu verlangen, bevor auch
+    # nur ein Wort geprueft wurde, hat sie auf dem Rechner, an dem gebaut
+    # wird, ganz verhindert - und damit auf den Zeitpunkt NACH dem Einbau
+    # verschoben. Genau so sind die 25 Sender mit unaussprechlicher
+    # Sprechform entstanden (siehe _modell_suchen).
+    #
+    # Die zweite Pruefung ersetzt das nicht und soll es nicht: Wer beide
+    # kann, laesst beide laufen. Wer nur die erste kann, soll wenigstens
+    # die haben.
+    nur_wortschatz = "--nur-wortschatz" in sys.argv
+    if not nur_wortschatz and not os.path.isdir(PIPER_DIR):
         print(f"Piper fehlt: {PIPER_DIR}", file=sys.stderr)
+        print("Fuer die erste Pflichtpruefung allein: --nur-wortschatz",
+              file=sys.stderr)
         return 1
 
     neu = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--neu"
@@ -259,6 +304,16 @@ def main():
         print("waere nie ausloesbar, ohne dass irgendwo etwas stuende.")
         print("Andere Formulierung waehlen, dann erneut pruefen.")
         return 1
+
+    if nur_wortschatz:
+        print(f"Wortschatz geprueft: {len(alle)} Saetze, kein Wort fehlt.")
+        print()
+        print("DAS IST DIE ERSTE VON ZWEI PFLICHTPRUEFUNGEN. Die zweite -")
+        print("Piper spricht, Vosk hoert mit der vollstaendigen Grammatik -")
+        print("steht noch aus und gehoert ans Geraet. Ein Satz, der hier")
+        print("besteht, ist noch nicht bewiesen; er ist nur nicht offen")
+        print("kaputt.")
+        return 0
 
     if neu:
         print(f"{len(alle) - len(neu)} Saetze in der Grammatik, "

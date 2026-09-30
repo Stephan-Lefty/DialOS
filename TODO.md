@@ -75,11 +75,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     mit laufendem Radio noch funktioniert - dafür wurde die
     Echo-Unterdrückung am 2026-08-17 gebaut, geprüft ist sie mit Radio
     noch nie.
-  - [ ] **Vosk-Modell auf den Arbeitsrechner** (Vorschlag aus dem Bau vom
-    2026-09-30). Es liegt zurzeit nur im Wegwerf-Ordner der Sitzung; damit
-    die Wortschatzprüfung dauerhaft hier läuft, müsste es an einen festen
-    Platz. Das ist derselbe Download, den `dialos-full-office-setup.sh`
-    ohnehin macht (45 MB, Apache 2.0). Stephans Entscheidung.
+  - [x] **Vosk-Modell fest auf dem Arbeitsrechner** (2026-09-30, Stephans
+    Freigabe). Liegt unter `~/.local/share/vosk-model-de-small` (92 MB
+    entpackt, Apache 2.0, derselbe Download wie in
+    `dialos-full-office-setup.sh`). `dialos-grammatik-pruefen.py` sucht an
+    beiden Orten und kennt jetzt `--nur-wortschatz` für die erste
+    Pflichtprüfung ohne Piper. **Nicht systemweit**, weil `sudo` hier ein
+    Passwort verlangt - für die Prüfung macht das keinen Unterschied.
   - [ ] **Die Datei selbst gibt es noch nicht.** Das Format und beide Pfade
     stehen, die Auswahl trifft aber Stephan - und laut medienliste.md gilt
     „weniger ist mehr": lieber zehn Sender, die er wirklich hört, als die
