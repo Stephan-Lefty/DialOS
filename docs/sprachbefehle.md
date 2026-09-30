@@ -79,7 +79,49 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Postfach schließen"** | **Mit Rückfrage:** „Soll ich das Postfach schließen? Sage ja oder nein." **Vorher werden angefangene E-Mails gesichert** - DialOS fragt die Brücke, was an Schreibfenstern offen steht, lässt Thunderbird sie als Entwurf ablegen und sagt es an („Eine angefangene E-Mail lege ich noch als Entwurf ab."). Das ist die Antwort auf eine Messung vom 2026-09-21: **Thunderbird fragt bei `SIGTERM` nicht nach** - es geht nach einer Sekunde zu, und ungespeicherter Text ist lautlos weg (der Entwurfsordner wuchs um kein Byte). Lässt sich etwas nicht sichern, bleibt das Postfach offen. Danach erst `SIGTERM`, nie `SIGKILL`. Läuft es gar nicht: „Das Postfach ist gar nicht offen." |
 | **„Internet schließen"** / **„Browser schließen"** | Dasselbe für Firefox. |
 | **„Musik ausschalten"** | Dasselbe für Rhythmbox - „ausschalten" statt „schließen", weil Musik läuft und nicht offen steht. |
-| **„Radio ausschalten"** | Dasselbe für Shortwave. Nach dem Wechsel zu Rhythmbox (entschieden am 2026-09-25, noch nicht gebaut) gilt es für Rhythmbox. |
+| **„Radio ausschalten"** | Schließt das Programm. Nicht zu verwechseln mit **„Radio abstellen"**, das die Wiedergabe anhält - siehe den Radio-Block gleich darunter. |
+
+### Radio hören (gebaut 2026-09-30)
+
+Der Leser der [Medienliste](medienliste.md): `dialos-radio.py` spielt über
+Rhythmbox, was in der Liste steht. Damit ist der Widerspruch aufgelöst, der
+seit dem 2026-09-16 bestand - „Radio einschalten" gab bis hierher die
+ehrliche Antwort „Radio und Musik kann ich noch nicht abspielen".
+
+| Sprachbefehl | Aktion |
+|---|---|
+| **„Radio einschalten"** / **„Musik abspielen"** | Spielt den zuletzt gehörten Sender. Gibt es noch keinen, werden bis zu fünf Sender zur Auswahl angesagt - es wird **nicht** einfach der erste gespielt. Ist die Liste leer: „Ich habe noch keine Sender. Die Liste wird mit dem Programm DialOS-Rhythmbox zusammengestellt." |
+| **„{Sprechform} einschalten"** | Ein bestimmter Sender, z. B. „Deutschlandfunk einschalten". Diese Sätze stehen **nicht** fest in der Grammatik, sondern entstehen beim Start des Dienstes aus der Medienliste - wie die Startsätze der Erweiterungen. |
+| **„Radio abstellen"** | Hält die Wiedergabe an. Läuft nichts: „Es läuft gerade nichts." |
+| **„Was läuft gerade"** | Sagt an, was Rhythmbox meldet - bei einem Stream meist Interpret und Titel aus den ICY-Daten. |
+| **„Lauter machen"** / **„Leiser machen"** | In Zehn-Prozent-Stufen. Am Anschlag: „Lauter geht nicht." |
+| **„Nächster Sender"** | Der nächste Eintrag der Liste, im Kreis. Bewusst **nicht** `--next` von Rhythmbox: Bei einem laufenden Stream gibt es kein nächstes Stück, der Befehl liefe ins Leere. |
+
+**Warum „Radio abstellen" und nicht „Radio ausschalten":** Die
+Kollisionsprüfung aus `dialos_rhythmbox_sender.py` bewertet „radio
+ausschalten" gegen „radio einschalten" mit 0,82 - genau auf der Schwelle.
+Ein Befehlspaar, bei dem der Erkenner das Ein- mit dem Ausschalten
+verwechseln kann, ist für einen blinden Nutzer nicht zu durchschauen.
+„stoppen" schied aus, weil es das Kernwort von „Sprachsteuerung stoppen"
+ist - das Ausschalten der Sprachsteuerung wiegt schwerer als ein
+bequemeres Wort fürs Radio.
+
+**Die erste Pflichtprüfung ist gelaufen** (Wortschatz, 2026-09-30, gegen
+`vosk-model-small-de-0.15`): kein Wort der sieben Sätze fehlt, keiner
+kollidiert mit einem der 49 bestehenden, und fünf haben ein einmaliges
+Kernwort („abstellen", „läuft", „lauter", „leiser", „nächster").
+**Die zweite steht aus** - Piper spricht, Vosk hört - und gehört ans
+Gerät, weil auf dem Arbeitsrechner kein Piper installiert ist.
+
+**Dieselbe Prüfung hat einen Fehler in den Sprechformen gefunden**, der
+sonst 25 der 78 Sender per Sprache unerreichbar gemacht hätte: Die
+Vorschläge waren in ASCII umschrieben („kaernten", „fuenf", „oe"), und
+genau diese Umschreibungen fehlen im Wortschatz, während die
+Umlautfassungen vorhanden sind. Ebenso fehlen die ausgeschriebenen
+Buchstabennamen „ef", „vau", „ix", „uepsilon" und „zet" - das deckt sich
+mit der Buchstaben-Messung vom 2026-09-21. Geblieben ist ein Sender ohne
+sprechbare Form: **Radio Argovia** kommt im kleinen Modell nicht vor und
+ist nur über die Oberfläche wählbar.
 
 > **Programme öffnen (seit 2026-09-21).** Stephans Anstoß: „Wir müssen doch
 > sowieso eine Liste von Befehlen machen, die dann die Programme startet."
@@ -163,7 +205,9 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | Sprachbefehl | Aktion |
 |---|---|
 | „System aktualisieren" | Systemwartung mit Ja/Nein-Rückfrage vor der Ausführung. |
-| „Radio hören" / „Musik hören" | Spielt einen gesprochenen Sender bzw. Musik ab - **beides künftig über Rhythmbox** (siehe unten). Bis zum 2026-09-25 stand hier: „Startet Shortwave bzw. Rhythmbox." |
+| Musik aus der **eigenen Sammlung** | „Musik abspielen" startet zurzeit dasselbe wie „Radio einschalten". Zufallswiedergabe und die zuletzt gehörte Datei fehlen. Radio selbst ist seit dem 2026-09-30 gebaut und steht oben unter „Umgesetzt". |
+| „Nachrichten hören" | Wartet auf Stephans Entscheidung, ob ein Nachrichtensender live oder die neueste Folge einer Kurznachrichten-Sendung gemeint ist (siehe [medien-konzept.md](medien-konzept.md)). |
+| Podcasts und Hörbücher | Brauchen das Lesen des RSS-Feeds und die Merkposition über MPRIS. |
 | „Ruf {Person} an" | Telefonie über SIM oder gekoppeltes Handy, siehe [telefonie.md](telefonie.md). |
 
 **„Unterlagen durchsuchen" stand hier bis zum 2026-09-18.** Seitdem ist die

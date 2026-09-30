@@ -801,33 +801,69 @@ def liste_zeigen(liste):
 # OE3"). Zwei fast gleich klingende Eintraege sind ein Fehler, weil die
 # Erkennung sie verwechselt und der blinde Nutzer nicht nachsehen kann.
 
+# WARUM HIER UMLAUTE STEHEN UND KEINE UMSCHREIBUNGEN (2026-09-30):
+# Der Quelltext dieses Moduls kommt sonst ohne Umlaute aus. Diese Tabellen
+# sind die Ausnahme, und zwar eine gemessene: Sie erzeugen die Saetze, die
+# der Nutzer SPRICHT, und die muessen im Wortschatz des Vosk-Modells
+# stehen. Am 2026-09-30 gegen vosk-model-small-de-0.15 geprueft - jede
+# ASCII-Umschreibung fehlte dort, jede Umlautfassung war vorhanden:
+#
+#   fuenf/fünf, kaernten/kärnten, zuerich/zürich, wuerttemberg/württemberg,
+#   oberoesterreich/oberösterreich, oe/ö
+#
+# Ein Wort, das nicht im Wortschatz steht, wirft Vosk STILL aus der
+# Grammatik. Der Sender waere dann per Sprache unerreichbar, und im
+# Protokoll staende nur, dass nichts erkannt wurde. Vor der Korrektur
+# betraf das 25 der 78 Sender.
 ZIFFERN = {"0": "null", "1": "eins", "2": "zwei", "3": "drei", "4": "vier",
-           "5": "fuenf", "6": "sechs", "7": "sieben", "8": "acht",
+           "5": "fünf", "6": "sechs", "7": "sieben", "8": "acht",
            "9": "neun"}
 
 #: Wie einzelne Buchstaben gesprochen werden, fuer Abkuerzungen wie WDR.
-BUCHSTABEN = {"a": "a", "b": "be", "c": "ce", "d": "de", "e": "e", "f": "ef",
+#:
+#: Fuenf davon stehen NICHT als ausgeschriebener Name im Wortschatz -
+#: "ef", "vau", "ix", "uepsilon" und "zet" fehlen alle. Das deckt sich mit
+#: Stephans Buchstaben-Messung vom 2026-09-21 (Buchstabennamen 16 von 26,
+#: dort schon "ef", "vau" und "ix" als fehlend benannt). Fuer sie steht
+#: hier der blosse Buchstabe bzw. die Fassung, die das Modell kennt -
+#: geprueft am 2026-09-30.
+BUCHSTABEN = {"a": "a", "b": "be", "c": "ce", "d": "de", "e": "e",
+              "f": "f",          # "ef" fehlt im Wortschatz
               "g": "ge", "h": "ha", "i": "i", "j": "jot", "k": "ka",
               "l": "el", "m": "em", "n": "en", "o": "o", "p": "pe",
               "q": "ku", "r": "er", "s": "es", "t": "te", "u": "u",
-              "v": "vau", "w": "we", "x": "ix", "y": "uepsilon",
-              "z": "zet"}
+              "v": "v",          # "vau" fehlt
+              "w": "we",
+              "x": "x",          # "ix" fehlt
+              "y": "ypsilon",    # "uepsilon" fehlt
+              "z": "zett"}       # "zet" fehlt
 
 #: Sender, deren uebliche Sprechform sich nicht ableiten laesst.
 SPRECHFORMEN = {
-    "Hitradio Oe3": "oe drei",
-    "Oe1": "oe eins",
-    "FM4": "ef em vier",
+    "Hitradio Oe3": "ö drei",
+    "Oe1": "ö eins",
+    "FM4": "f em vier",
     "1LIVE": "eins live",
     "N-JOY": "en joy",
     "hr3": "ha er drei",
     "hr-iNFO": "ha er info",
     "BR24": "be er vierundzwanzig",
-    "bigFM": "big ef em",
+    "bigFM": "big f em",
     "Radio 88.6": "achtundachtzig sechs",
     "80s80s": "achtziger",
-    "SRF 4 News": "es er ef vier news",
+    "SRF 4 News": "es er f vier news",
     "Radio 24": "radio vierundzwanzig",
+    # Zusammengeschriebene Namen kennt das Modell nur getrennt - am
+    # 2026-09-30 geprueft: "radioeins", "kronehit", "inforadio",
+    # "musikwelle" und "austropop" fehlen alle, die zwei Woerter nicht.
+    "radioeins": "radio eins",
+    "Kronehit": "krone hit",
+    "Inforadio": "info radio",
+    "SRF Musikwelle": "es er f musik welle",
+    "Radio Arabella Austropop": "radio arabella austro pop",
+    "SWR1 Baden-Wuerttemberg": "es we er eins baden württemberg",
+    "WDR 5": "we de er fünf",
+    "Hit Radio FFH": "hit radio f f ha",
     # Die ORF-Regionalsender heissen im Alltag nur nach ihrem Land. Das
     # vorangestellte "o er ef" spricht niemand, und kurze Saetze erkennt
     # Vosk zuverlaessiger.
@@ -835,17 +871,29 @@ SPRECHFORMEN = {
     "ORF Radio Tirol": "radio tirol",
     "ORF Radio Salzburg": "radio salzburg",
     "ORF Radio Steiermark": "radio steiermark",
-    "ORF Radio Kaernten": "radio kaernten",
+    "ORF Radio Kaernten": "radio kärnten",
     "ORF Radio Vorarlberg": "radio vorarlberg",
     "ORF Radio Burgenland": "radio burgenland",
-    "ORF Radio Oberoesterreich": "radio oberoesterreich",
-    "ORF Radio Niederoesterreich": "radio niederoesterreich",
-    "Radio FM1": "ef em eins",
+    "ORF Radio Oberoesterreich": "radio oberösterreich",
+    "ORF Radio Niederoesterreich": "radio niederösterreich",
+    "Antenne Kaernten": "antenne kärnten",
+    "Energy Zuerich": "energy zürich",
+    "Radio FM1": "f em eins",
     "RTS La Premiere": "la premiere",
     "MDR Jump": "em de er jump",
     "Radio BOB!": "bob",
-    "LoungeFM": "lounge ef em",
+    "LoungeFM": "lounge f em",
+    # KEINE SPRECHFORM MOEGLICH: "Radio Argovia". Weder "argovia" noch
+    # "argovja" steht im Wortschatz des kleinen Modells (2026-09-30
+    # geprueft), und der Name laesst sich nicht sinnvoll in bekannte
+    # Woerter zerlegen. Der Sender bleibt ueber die Oberflaeche
+    # waehlbar, ist aber per Sprache nicht erreichbar - das gehoert dem
+    # Menschen gesagt, statt still eine Sprechform zu erfinden, die nie
+    # erkannt wird.
 }
+
+#: Sender, fuer die es keine sprechbare Form gibt - siehe oben.
+OHNE_SPRECHFORM = ("Radio Argovia",)
 
 
 def sprechform_vorschlag(name):

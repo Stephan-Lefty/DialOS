@@ -215,8 +215,32 @@ GRAMMATIK_AN = json.dumps([
     "befehle für das diktat",
     "nachrichten vorlesen",
     "was gibt es neues",
+    # RADIO (gebaut 2026-09-30). "radio einschalten" und "musik abspielen"
+    # standen seit dem 2026-09-16 hier und gaben bis dahin nur die ehrliche
+    # Antwort "kann ich noch nicht" - siehe WUNSCH_SAETZE, wo sie jetzt
+    # fehlen. Die Sender selbst stehen NICHT hier, sondern kommen aus der
+    # Medienliste dazu (siehe radio_saetze_lesen weiter unten).
+    #
+    # Alle Saetze am 2026-09-30 gegen vosk-model-small-de-0.15 geprueft:
+    # kein Wort fehlt im Wortschatz, keiner kollidiert mit einem der 49
+    # bestehenden Saetze, und fuenf haben ein einmaliges Kernwort
+    # ("abstellen", "läuft", "lauter", "leiser", "nächster").
+    #
+    # WARUM "radio abstellen" UND NICHT "radio ausschalten": Die eigene
+    # Kollisionspruefung aus dialos_rhythmbox_sender.py meldet
+    # "radio ausschalten" gegen "radio einschalten" mit 0,82 - genau auf
+    # der Schwelle. Ein Befehlspaar, bei dem der Erkenner das Ein- mit dem
+    # Ausschalten verwechseln kann, ist fuer einen blinden Nutzer nicht zu
+    # durchschauen. "stoppen" schied aus, weil es das Kernwort von
+    # "sprachsteuerung stoppen" ist - das Ausschalten der Sprachsteuerung
+    # wiegt schwerer als ein bequemeres Wort fuers Radio.
     "radio einschalten",
     "musik abspielen",
+    "radio abstellen",
+    "was läuft gerade",
+    "lauter machen",
+    "leiser machen",
+    "nächster sender",
     "jemanden anrufen",
     "mails vorlesen",
     "termine vorlesen",
@@ -325,8 +349,56 @@ def programme_lesen():
         return ()
 
 
+RADIO_SKRIPT = "/usr/local/bin/dialos-radio.py"
+SENDER_MODUL = "/usr/local/bin/dialos_rhythmbox_sender.py"
+
+
+def radio_saetze_lesen():
+    """Satz -> Sprechform, aus der Medienliste.
+
+    Die Sender stehen NICHT in der Grammatik oben. Sie kommen aus der
+    Medienliste, und die aendert sich, ohne dass jemand diesen Dienst
+    anfasst - dieselbe Ueberlegung wie bei den Erweiterungen und bei
+    dialos-programm.py: Eine zweite Liste hier liefe auseinander, und
+    zwar unbemerkt, weil sie fuer sich genommen richtig aussieht.
+
+    Gebaut wird "<sprechform> einschalten", nicht die blosse Sprechform.
+    Ein Befehl ist ein ganzer Satz - sonst wuerde ein beilaeufiges
+    "Deutschlandfunk" im Gespraech das Radio anwerfen. Dieselbe Regel,
+    an der am 2026-08-16 "windows" als Einzelwort gescheitert ist.
+
+    ACHTUNG, falls hier spaeter etwas fehlt: Steht ein Wort der
+    Sprechform nicht im Wortschatz des Modells, wirft Vosk den GANZEN
+    Satz still aus der Grammatik, und der Sender ist per Sprache
+    unerreichbar. Am 2026-09-30 betraf das 25 der 78 Sender (lauter
+    ASCII-Umschreibungen wie "kaernten" statt "kärnten"); geblieben ist
+    "Radio Argovia", dessen Name im kleinen Modell schlicht nicht
+    vorkommt.
+    """
+    zuordnung = {}
+    try:
+        spec = importlib.util.spec_from_file_location("rs", SENDER_MODUL)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        for eintrag in modul.medienliste_lesen(art="radio"):
+            sprechform = (eintrag.get("sprechform") or "").strip().lower()
+            if sprechform:
+                zuordnung[f"{sprechform} einschalten"] = sprechform
+    except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
+        print(f"Medienliste nicht lesbar: {fehler}", file=sys.stderr)
+    return zuordnung
+
+
 ERWEITERUNG_SAETZE = erweiterungen_lesen()
 PROGRAMM_SAETZE = programme_lesen()
+RADIO_SENDER_SAETZE = radio_saetze_lesen()
+
+if RADIO_SENDER_SAETZE:
+    _liste = json.loads(GRAMMATIK_AN)
+    _liste = ([x for x in _liste if x != "[unk]"]
+              + [s for s in RADIO_SENDER_SAETZE if s not in _liste]
+              + ["[unk]"])
+    GRAMMATIK_AN = json.dumps(_liste, ensure_ascii=False)
 
 if ERWEITERUNG_SAETZE:
     _liste = json.loads(GRAMMATIK_AN)
@@ -439,11 +511,13 @@ UEBERSICHT_THEMEN_SAETZE = {
     "befehle für den einkauf": "einkauf",
     "befehle für den bildschirm": "bildschirm",
     "befehle für das diktat": "diktat",
+    "befehle für das radio": "radio",
 }
 ALLE_BEFEHLE_SATZ = "alle befehle vorlesen"
 THEMEN_NAMEN = {"fragen": "Fragen", "briefe": "Briefe", "notizen": "Notizen",
                 "einkauf": "den Einkauf", "bildschirm": "den Bildschirm",
-                "diktat": "das Diktat", "erweiterungen": "Erweiterungen"}
+                "diktat": "das Diktat", "radio": "das Radio",
+                "erweiterungen": "Erweiterungen"}
 # (Thema, Beschriftung) je Aktion. Schluessel: (Tabelle, Wert der Tabelle).
 AKTIONEN = {
     ("auskunft", "uhrzeit"): ("fragen", "Die Uhrzeit"),
@@ -463,9 +537,15 @@ AKTIONEN = {
     ("foto", None): ("bildschirm", "Ein Bildschirmfoto für Deinen Helfer"),
     ("umschalten", "gnome"): ("bildschirm", "Linux-Ansicht"),
     ("umschalten", "windows"): ("bildschirm", "Windows-Ansicht"),
+    ("radio", "einschalten"): ("radio", "Das Radio einschalten"),
+    ("radio", "aus"): ("radio", "Das Radio abstellen"),
+    ("radio", "was-laeuft"): ("radio", "Hören, was gerade läuft"),
+    ("radio", "lauter"): ("radio", "Lauter"),
+    ("radio", "leiser"): ("radio", "Leiser"),
+    ("radio", "naechster"): ("radio", "Den nächsten Sender"),
 }
 THEMEN_REIHENFOLGE = ("fragen", "briefe", "notizen", "einkauf", "bildschirm", "diktat",
-                      "erweiterungen")
+                      "radio", "erweiterungen")
 GROSS_SCHREIBEN = {"pdf": "PDF", "linux": "Linux", "gnome": "Gnome", "windows": "Windows",
                    "brief": "Brief", "notiz": "Notiz", "notizen": "Notizen",
                    "einkaufszettel": "Einkaufszettel", "einkauf": "Einkauf",
@@ -474,7 +554,8 @@ GROSS_SCHREIBEN = {"pdf": "PDF", "linux": "Linux", "gnome": "Gnome", "windows": 
                    "diktat": "Diktat", "satz": "Satz", "absatz": "Absatz", "zeile": "Zeile",
                    "betreff": "Betreff", "befehle": "Befehle", "fragen": "Fragen",
                    "briefe": "Briefe", "bildschirm": "Bildschirm",
-                   "sprachsteuerung": "Sprachsteuerung"}
+                   "sprachsteuerung": "Sprachsteuerung",
+                   "radio": "Radio", "sender": "Sender", "musik": "Musik"}
 
 
 def gesprochen(satz):
@@ -529,6 +610,8 @@ def befehls_themen():
         dazu(("druck", wert), satz)
     for satz in FOTO_SAETZE:
         dazu(("foto", None), satz)
+    for satz, wert in RADIO_SAETZE.items():
+        dazu(("radio", wert), satz)
     for satz in BEFEHLSSAETZE:
         worte = satz.split()
         if AUSLOESER in worte:
@@ -621,12 +704,29 @@ def befehle_vorbereiten():
 WUNSCH_SAETZE = {
     "nachrichten vorlesen": ("nachrichten", "Nachrichten kann ich noch nicht vorlesen."),
     "was gibt es neues": ("nachrichten", "Nachrichten kann ich noch nicht vorlesen."),
-    "radio einschalten": ("radio", "Radio und Musik kann ich noch nicht abspielen."),
-    "musik abspielen": ("radio", "Radio und Musik kann ich noch nicht abspielen."),
+    # "radio einschalten" und "musik abspielen" standen hier bis zum
+    # 2026-09-30 mit der Antwort "Radio und Musik kann ich noch nicht
+    # abspielen." Sie sind jetzt gebaut - siehe RADIO_SAETZE weiter unten.
+    # Musik aus der eigenen Sammlung ist es noch nicht; "musik abspielen"
+    # startet vorerst dasselbe wie "radio einschalten", weil das naeher an
+    # dem ist, was der Nutzer will, als eine Absage.
     "jemanden anrufen": ("telefon", "Telefonieren kann ich noch nicht."),
     "mails vorlesen": ("mails", "E-Mails kann ich noch nicht vorlesen."),
     "termine vorlesen": ("termine", "Termine kann ich noch nicht vorlesen."),
     "was steht heute an": ("termine", "Termine kann ich noch nicht vorlesen."),
+}
+
+# RADIO (2026-09-30). Satz -> Argument fuer dialos-radio.py. Die Sender
+# selbst stehen nicht hier, sondern in RADIO_SENDER_SAETZE - die kommen
+# aus der Medienliste.
+RADIO_SAETZE = {
+    "radio einschalten": "einschalten",
+    "musik abspielen": "einschalten",
+    "radio abstellen": "aus",
+    "was läuft gerade": "was-laeuft",
+    "lauter machen": "lauter",
+    "leiser machen": "leiser",
+    "nächster sender": "naechster",
 }
 
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
@@ -1747,6 +1847,39 @@ def notiz_aktion(name, was):
         sprich("Ich kann das nicht ausführen.")
 
 
+def radio_aktion(satz):
+    """Startet dialos-radio.py und kehrt sofort zurueck.
+
+    NICHT abwarten, wie bei Notizen und Diktat: Das Radio sagt selbst an,
+    was es tut, und diese Schleife muss in der Zeit weiterhoeren - sonst
+    liesse sich ein gerade gestarteter Sender nicht gleich wieder
+    abstellen.
+
+    Zwei Wege fuehren hierher: ein fester Satz aus RADIO_SAETZE
+    ("radio einschalten") oder ein Sender aus der Medienliste
+    ("deutschlandfunk einschalten"). Im zweiten Fall wird die Sprechform
+    mitgegeben, damit dialos-radio.py nicht ein zweites Mal raten muss,
+    welcher Sender gemeint war.
+    """
+    if satz in RADIO_SENDER_SAETZE:
+        argumente = ["sender", RADIO_SENDER_SAETZE[satz]]
+    else:
+        argumente = [RADIO_SAETZE[satz]]
+
+    if not os.access(RADIO_SKRIPT, os.X_OK):
+        sprich("Ich kann das Radio nicht finden.")
+        return
+    try:
+        subprocess.Popen([RADIO_SKRIPT, *argumente],
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde(f"Radio: {' '.join(argumente)}")
+    except Exception as fehler:
+        melde(f"Radio liess sich nicht starten: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
 def pegel_richten():
     """Setzt die Aufnahme-Verstaerkung zurueck, falls sie uebersteuert.
 
@@ -2363,6 +2496,15 @@ def main():
                 else:
                     melde(f"Befehle angesagt: {UEBERSICHT_THEMEN_SAETZE[satz]}")
                     sprich(thema_text(UEBERSICHT_THEMEN_SAETZE[satz]))
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Radio ---
+            # VOR den Wunsch-Saetzen, damit ein spaeter wieder
+            # eingetragener Wunsch einen gebauten Befehl nicht verdeckt.
+            if satz in RADIO_SAETZE or satz in RADIO_SENDER_SAETZE:
+                radio_aktion(satz)
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

@@ -143,6 +143,45 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Listening to radio works** (`dialos-radio.py`, 2026-09-30). The reader at
+  the far end of the media list: seven new voice commands - switch on, a
+  specific station, stop, "what is playing", louder, quieter, next station.
+  This resolves the contradiction that had stood since 2026-09-16: until now
+  "Radio einschalten" gave the honest answer "I cannot play radio or music
+  yet". **The stations are not in the grammar**; they are read from the media
+  list when the service starts - the same technique as for extensions, so no
+  second list can drift apart. Built as whole sentences ("Deutschlandfunk
+  einschalten"), never as a single word: a casual "Deutschlandfunk" in
+  conversation must not trigger anything.
+  **Two decisions came from measurements, not taste:** "Radio **abstellen**"
+  rather than "ausschalten", because our own collision check rates "radio
+  ausschalten" against "radio einschalten" at 0.82 - exactly on the
+  threshold, and confusing switching on with switching off is impossible for
+  a blind user to diagnose; "stoppen" was ruled out as the core word of
+  "Sprachsteuerung stoppen". And **"next station" is not Rhythmbox's
+  `--next`**: a running stream has no next track, so the command would do
+  nothing.
+
+- **The vocabulary check rescued 25 of 78 stations** (2026-09-30). While
+  building the radio commands, the first mandatory check from
+  `docs/sprachbefehle.md` was run over the station **spoken forms** for the
+  first time - and found a fault no amount of reading would have caught: the
+  suggestions were transliterated to ASCII ("kaernten", "zuerich", "fuenf",
+  "oe"), and **precisely those transliterations are missing from the
+  vocabulary**, while every umlaut form is present. Vosk drops a missing word
+  from the grammar silently: the affected stations would have been
+  unreachable by voice without any error appearing anywhere. The spelled-out
+  letter names "ef", "vau", "ix", "uepsilon" and "zet" are missing too -
+  matching Stephan's letter measurement of 2026-09-21. Both tables are fixed
+  and re-checked; **one** station remains without a speakable form: "Radio
+  Argovia" simply does not occur in the small model and can only be chosen
+  through the interface. That is now recorded in the source instead of
+  silently inventing a spoken form that would never be recognised.
+  **The check became possible because the Vosk model now also sits on the
+  workbench machine** - otherwise it would have run only on the device, that
+  is, after the commands were built. The second mandatory check (Piper
+  speaks, Vosk listens) is still outstanding and belongs on the device.
+
 - **The handover point for the media list is settled** (2026-09-30, Stephan's
   question: "can't that go through the repository?"). It can - but not through
   `docs/`: `dialos-aufspielen` copies only the tree under

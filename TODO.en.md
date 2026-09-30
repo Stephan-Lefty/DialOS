@@ -56,13 +56,28 @@ finished too, and then move down together. That way no reference breaks.
   build the preparation for radio stations, news, audiobooks and podcasts").
   The handover point has been settled since 2026-09-30 (two layers, see
   [medienliste.md](docs/medienliste.md)), but the chain has no end yet:
-  - [ ] **Nobody reads it yet.** No program in the repository opens the
-    `medienliste.json` - `medienliste_lesen()` exists in the module, but no
-    voice control calls it. That is the actual point of the whole exercise:
-    "Radio einschalten" → station from the list → `rhythmbox-client
-    --play-uri`. Beforehand the mandatory checks from `docs/sprachbefehle.md`
-    (vocabulary + full grammar), and the contradiction between "Radio öffnen"
-    and "Radio einschalten" needs resolving.
+  - [x] **The reader for radio is built** (2026-09-30, `dialos-radio.py`).
+    Seven voice commands; the stations enter the grammar from the media
+    list. The contradiction between "Radio einschalten" and the answer "I
+    cannot do that yet" is resolved.
+  - [ ] **The SECOND mandatory check is outstanding - on the device**
+    (Piper speaks, Vosk listens, against the full grammar). It is not
+    possible on the workbench machine because Piper is not installed
+    there. The first (vocabulary) has run and is clean. Command on the
+    device: `/usr/local/bin/dialos-grammatik-pruefen.py`. **Only then is
+    the radio command accepted** - a sentence that passes here is not yet
+    proven, as the tool's own header says.
+  - [ ] **Try on the device what cannot be tried here:** whether Rhythmbox
+    really plays the stream, whether `--print-playing` returns the ICY
+    title for a stream ("Was läuft gerade" depends on it), and whether
+    command recognition still works with the radio playing - the echo
+    cancellation was built for exactly that on 2026-08-17 and has never
+    been tested with radio.
+  - [ ] **Vosk model onto the workbench machine** (proposal from the
+    2026-09-30 build). It currently sits only in the session's scratch
+    folder; for the vocabulary check to run here permanently it would need
+    a fixed place. It is the same download `dialos-full-office-setup.sh`
+    performs anyway (45 MB, Apache 2.0). Stephan's decision.
   - [ ] **The file itself does not exist yet.** The format and both paths are
     settled, but the selection is Stephan's to make - and medienliste.md says
     "less is more": ten stations he really listens to beat the 78 collected.

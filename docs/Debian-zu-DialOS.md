@@ -3658,7 +3658,23 @@ nichts einzurichten. Aufgespielt werden:
 /usr/share/applications/dialos-rhythmbox.desktop
 /usr/share/icons/hicolor/<groesse>/apps/dialos-rhythmbox.png
 /usr/local/share/dialos/medienliste.json      # die Auswahl (0644, sobald getroffen)
+/usr/local/bin/dialos-radio.py                # spielt sie ab (0755, neu 2026-09-30)
 ```
+
+**`dialos-radio.py` ist der Leser der Liste** und gehört zum Sprachdienst,
+nicht zur Oberfläche: Es wird von `dialos-sprachbefehl-desktop.py`
+aufgerufen, wenn einer der sieben Radio-Befehle fällt (siehe
+[sprachbefehle.md](sprachbefehle.md)). Voraussetzung ist Rhythmbox, das seit
+Schritt 11 ohnehin installiert ist. Prüfen lässt es sich ohne Sprechen:
+
+```bash
+/usr/local/bin/dialos-radio.py liste
+```
+
+Das zeigt genau die Sprechformen, die der Befehlsdienst in die Grammatik
+aufnimmt. Kommt „Keine Sender", fehlt die Medienliste - dann ist Schritt 13e
+zwar vollständig, aber noch niemand hat mit DialOS-Rhythmbox eine Auswahl
+getroffen.
 
 **Die Medienliste liegt bewusst zweimal** (entschieden 2026-09-30,
 Begründung in [medienliste.md](medienliste.md)):

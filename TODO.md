@@ -58,13 +58,28 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   ja die Vorbereitung für Radiosender, Nachrichten, Hörbücher und Podcast
   bauen"). Die Übergabestelle steht seit dem 2026-09-30 (zwei Ebenen, siehe
   [medienliste.md](docs/medienliste.md)), aber die Kette hat noch kein Ende:
-  - [ ] **Es liest noch niemand.** Im ganzen Repo öffnet kein Programm die
-    `medienliste.json` - `medienliste_lesen()` im Modul ist da, aber keine
-    Sprachsteuerung ruft sie auf. Das ist der eigentliche Zweck der ganzen
-    Übung: „Radio einschalten" → Sender aus der Liste →
-    `rhythmbox-client --play-uri`. Vorher die Pflichtprüfungen aus
-    `docs/sprachbefehle.md` (Wortschatz + volle Grammatik), und der
-    Widerspruch „Radio öffnen" gegen „Radio einschalten" gehört aufgelöst.
+  - [x] **Der Leser für Radio ist gebaut** (2026-09-30, `dialos-radio.py`).
+    Sieben Sprachbefehle, die Sender kommen aus der Medienliste in die
+    Grammatik. Der Widerspruch „Radio einschalten" gegen die Antwort „kann
+    ich noch nicht" ist aufgelöst.
+  - [ ] **Die ZWEITE Pflichtprüfung steht aus - am Gerät** (Piper spricht,
+    Vosk hört, mit der vollständigen Grammatik). Sie ist auf dem
+    Arbeitsrechner nicht möglich, weil dort kein Piper installiert ist.
+    Die erste (Wortschatz) ist gelaufen und sauber. Befehl am Gerät:
+    `/usr/local/bin/dialos-grammatik-pruefen.py`. **Erst danach ist der
+    Radio-Befehl abgenommen** - ein Satz, der hier besteht, ist noch nicht
+    bewiesen, das steht so im Kopf des Prüfwerkzeugs.
+  - [ ] **Am Gerät proben, was hier nicht geht:** ob Rhythmbox den Stream
+    wirklich spielt, ob `--print-playing` bei einem Stream den ICY-Titel
+    liefert („Was läuft gerade" hängt daran), und ob die Befehlserkennung
+    mit laufendem Radio noch funktioniert - dafür wurde die
+    Echo-Unterdrückung am 2026-08-17 gebaut, geprüft ist sie mit Radio
+    noch nie.
+  - [ ] **Vosk-Modell auf den Arbeitsrechner** (Vorschlag aus dem Bau vom
+    2026-09-30). Es liegt zurzeit nur im Wegwerf-Ordner der Sitzung; damit
+    die Wortschatzprüfung dauerhaft hier läuft, müsste es an einen festen
+    Platz. Das ist derselbe Download, den `dialos-full-office-setup.sh`
+    ohnehin macht (45 MB, Apache 2.0). Stephans Entscheidung.
   - [ ] **Die Datei selbst gibt es noch nicht.** Das Format und beide Pfade
     stehen, die Auswahl trifft aber Stephan - und laut medienliste.md gilt
     „weniger ist mehr": lieber zehn Sender, die er wirklich hört, als die

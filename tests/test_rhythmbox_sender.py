@@ -256,8 +256,11 @@ class Sprechformen(unittest.TestCase):
 
     def test_abkuerzungen_werden_buchstabiert(self):
         self.assertEqual(rs.sprechform_vorschlag("WDR 2"), "we de er zwei")
-        self.assertEqual(rs.sprechform_vorschlag("SRF 1"), "es er ef eins")
         self.assertEqual(rs.sprechform_vorschlag("MDR Sachsen"), "em de er sachsen")
+        # "ef" steht NICHT im Wortschatz des kleinen Modells, "f" schon
+        # (2026-09-30 gemessen; deckt sich mit Stephans Buchstaben-Messung
+        # vom 2026-09-21, wo "ef", "vau" und "ix" fehlten).
+        self.assertEqual(rs.sprechform_vorschlag("SRF 1"), "es er f eins")
 
     def test_ziffern_werden_ausgeschrieben(self):
         self.assertEqual(rs.sprechform_vorschlag("Bayern 3"), "bayern drei")
@@ -273,7 +276,36 @@ class Sprechformen(unittest.TestCase):
         „radio tirol"; das vorangestellte „o er ef" spricht niemand."""
         self.assertEqual(rs.sprechform_vorschlag("ORF Radio Tirol"), "radio tirol")
         self.assertEqual(rs.sprechform_vorschlag("1LIVE"), "eins live")
-        self.assertEqual(rs.sprechform_vorschlag("Hitradio Oe3"), "oe drei")
+        self.assertEqual(rs.sprechform_vorschlag("Hitradio Oe3"), "ö drei")
+
+    def test_keine_ascii_umschreibungen(self):
+        """DIE TEURE LEHRE VOM 2026-09-30.
+
+        Der Quelltext dieses Moduls kommt sonst ohne Umlaute aus, und die
+        Sprechformen waren deshalb ebenfalls umschrieben: "kaernten",
+        "zuerich", "fuenf", "oe". Gegen vosk-model-small-de-0.15 gemessen
+        fehlt JEDE dieser Umschreibungen im Wortschatz, waehrend die
+        Umlautfassung vorhanden ist. Vosk wirft ein fehlendes Wort STILL
+        aus der Grammatik - 25 der 78 Sender waeren per Sprache
+        unerreichbar gewesen, ohne dass irgendwo ein Fehler erschienen
+        waere.
+        """
+        verdaechtig = ("ae", "oe", "ue", "ss")
+        for land in rs.SENDER:
+            for eintrag in rs.SENDER[land]:
+                form = rs.sprechform_vorschlag(eintrag[0])
+                for wort in form.split():
+                    # "news", "blues", "premiere" und aehnliche sind echte
+                    # Woerter mit diesen Buchstabenfolgen - geprueft wird
+                    # deshalb gegen die Liste der bekannten Umschreibungen.
+                    with self.subTest(sender=eintrag[0], wort=wort):
+                        self.assertNotIn(
+                            wort, ("kaernten", "zuerich", "wuerttemberg",
+                                   "fuenf", "oberoesterreich",
+                                   "niederoesterreich", "oe", "ef", "vau",
+                                   "ix", "uepsilon", "zet"),
+                            f"{eintrag[0]}: '{wort}' fehlt im Wortschatz")
+        self.assertTrue(verdaechtig)      # Doku der geprueften Muster
 
     def test_immer_ein_ergebnis(self):
         """Der Vorschlag darf nie leer sein - ein leeres Feld in der

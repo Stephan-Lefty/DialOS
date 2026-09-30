@@ -3535,7 +3535,22 @@ be set up by hand. What is installed:
 /usr/share/applications/dialos-rhythmbox.desktop
 /usr/share/icons/hicolor/<size>/apps/dialos-rhythmbox.png
 /usr/local/share/dialos/medienliste.json      # the selection (0644, once made)
+/usr/local/bin/dialos-radio.py                # plays it (0755, new 2026-09-30)
 ```
+
+**`dialos-radio.py` is the reader of the list** and belongs to the voice
+service, not the interface: it is invoked by
+`dialos-sprachbefehl-desktop.py` when one of the seven radio commands is
+heard (see [sprachbefehle.md](sprachbefehle.md)). It requires Rhythmbox,
+installed since step 11 anyway. It can be checked without speaking:
+
+```bash
+/usr/local/bin/dialos-radio.py liste
+```
+
+This prints exactly the spoken forms the command service adds to the
+grammar. If it says "Keine Sender", the media list is missing - step 13e is
+then complete, but nobody has yet made a selection with DialOS-Rhythmbox.
 
 **The media list deliberately exists twice** (decided 2026-09-30,
 reasoning in [medienliste.md](medienliste.md)):

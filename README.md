@@ -153,6 +153,46 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Radio hören geht** (`dialos-radio.py`, 2026-09-30). Der Leser am anderen
+  Ende der Medienliste: sieben neue Sprachbefehle - einschalten, einen
+  bestimmten Sender, abstellen, „Was läuft gerade", lauter, leiser, nächster
+  Sender. Damit ist der Widerspruch aufgelöst, der seit dem 2026-09-16
+  bestand: „Radio einschalten" gab bis hierher die ehrliche Antwort „Radio und
+  Musik kann ich noch nicht abspielen". **Die Sender stehen nicht in der
+  Grammatik**, sondern kommen beim Start des Dienstes aus der Medienliste -
+  dieselbe Technik wie bei den Erweiterungen, damit keine zweite Liste
+  entsteht, die auseinanderläuft. Gebaut als ganze Sätze („Deutschlandfunk
+  einschalten"), nie als Einzelwort: Ein beiläufiges „Deutschlandfunk" im
+  Gespräch darf nichts auslösen.
+  **Zwei Entscheidungen, die aus Messungen stammen, nicht aus Geschmack:**
+  „Radio **abstellen**" statt „ausschalten", weil die eigene
+  Kollisionsprüfung „radio ausschalten" gegen „radio einschalten" mit 0,82
+  bewertet - genau auf der Schwelle, und ein verwechseltes Ein- mit
+  Ausschalten ist für einen blinden Nutzer nicht zu durchschauen; „stoppen"
+  schied aus, weil es das Kernwort von „Sprachsteuerung stoppen" ist. Und
+  **„Nächster Sender" ist nicht `--next` von Rhythmbox**: Bei einem
+  laufenden Stream gibt es kein nächstes Stück, der Befehl liefe ins Leere.
+
+- **Die Wortschatz-Prüfung hat 25 von 78 Sendern gerettet** (2026-09-30).
+  Beim Bauen der Radio-Befehle lief die erste Pflichtprüfung aus
+  `docs/sprachbefehle.md` erstmals auch über die **Sprechformen** der
+  Sender - und fand einen Fehler, den niemand beim Lesen gesehen hätte: Die
+  Vorschläge waren in ASCII umschrieben („kaernten", „zuerich", „fuenf",
+  „oe"), und **genau diese Umschreibungen fehlen im Wortschatz**, während die
+  Umlautfassungen alle vorhanden sind. Ein fehlendes Wort wirft Vosk still aus
+  der Grammatik: Die betroffenen Sender wären per Sprache unerreichbar
+  gewesen, ohne dass irgendwo ein Fehler erschienen wäre. Ebenso fehlen die
+  ausgeschriebenen Buchstabennamen „ef", „vau", „ix", „uepsilon" und „zet" -
+  das deckt sich mit Stephans Buchstaben-Messung vom 2026-09-21. Beide
+  Tabellen sind korrigiert und gegengeprüft; geblieben ist **ein** Sender
+  ohne sprechbare Form: „Radio Argovia" kommt im kleinen Modell schlicht
+  nicht vor und ist nur über die Oberfläche wählbar. Das steht jetzt im
+  Quelltext, statt still eine Sprechform zu erfinden, die nie erkannt wird.
+  **Möglich wurde die Prüfung, weil das Vosk-Modell jetzt auch auf dem
+  Arbeitsrechner liegt** - vorher wäre sie erst am Gerät gelaufen, also nach
+  dem Einbau. Die zweite Pflichtprüfung (Piper spricht, Vosk hört) steht
+  weiter aus und gehört ans Gerät.
+
 - **Die Übergabestelle für die Medienliste ist geklärt** (2026-09-30, Stephans
   Frage: „geht das nicht über das Repo"). Ja - aber nicht über `docs/`:
   `dialos-aufspielen` kopiert ausschließlich den Baum unter
