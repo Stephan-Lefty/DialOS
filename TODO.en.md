@@ -52,8 +52,41 @@ finished too, and then move down together. That way no reference breaks.
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Only possible from
   the second machine (the `.env` lives there); first add the English version
   and the audio version. The microphone paragraph is already updated.
+- [ ] **Bring the media list to life** (Stephan, 2026-09-30: "we still have to
+  build the preparation for radio stations, news, audiobooks and podcasts").
+  The handover point has been settled since 2026-09-30 (two layers, see
+  [medienliste.md](docs/medienliste.md)), but the chain has no end yet:
+  - [ ] **Nobody reads it yet.** No program in the repository opens the
+    `medienliste.json` - `medienliste_lesen()` exists in the module, but no
+    voice control calls it. That is the actual point of the whole exercise:
+    "Radio einschalten" → station from the list → `rhythmbox-client
+    --play-uri`. Beforehand the mandatory checks from `docs/sprachbefehle.md`
+    (vocabulary + full grammar), and the contradiction between "Radio öffnen"
+    and "Radio einschalten" needs resolving.
+  - [ ] **The file itself does not exist yet.** The format and both paths are
+    settled, but the selection is Stephan's to make - and medienliste.md says
+    "less is more": ten stations he really listens to beat the 78 collected.
+    At 78 the collision check reports eleven confusable pairs, which is the
+    practical confirmation of the rule.
+  - [ ] **`docs/medienliste.md` exists in German only** - the only one of the
+    media documents without an English version (`medien-konzept` has one). The
+    gap predates 2026-09-30 but grew that day: the whole section on the
+    handover point now lives there. Nobody is cut off from the content -
+    the same is in `README.en.md` and in step 13e of
+    `Debian-zu-DialOS.en.md`.
+  - [ ] **News: the form is still open** (recorded since 2026-09-25 in
+    [medien-konzept.md](docs/medien-konzept.md)). A live news station, or the
+    latest episode of a short news programme? The format carries both
+    (`nachrichten-sender`, `nachrichten-podcast`); nothing is decided - and
+    without a decision "Nachrichten hören" does not know what to do.
+  - [ ] **Podcasts and audiobooks need more than an entry.** Podcasts need
+    the RSS feed read (latest episode), both need the resume position via
+    MPRIS - nobody listens to an eight-hour audiobook that restarts from the
+    beginning. Audiobooks are also files, not addresses: where they live on
+    disk or on `DIALOS-DATA` is not yet settled.
+
 - [ ] **Finish DialOS-Rhythmbox** (built 2026-09-25, see changelog 0.5.3).
-  Three of the five points are done; the filter bar in the window and
+  Four of the six points are done; the filter bar in the window and
   Stephan's verdict on the icon are still open:
   - [ ] **The menu for state, city and genre in the interface.** In
     `dialos_rhythmbox_sender.py` the search is complete and usable from
@@ -79,6 +112,12 @@ finished too, and then move down together. That way no reference breaks.
     deliberately **without** a manifest, as the tool needs neither start
     phrases nor the microphone), `docs/anwendungen.md`, the note in
     `docs/medienliste.md`, and step 13e in `docs/Debian-zu-DialOS.md`.
+  - [x] **Handover point settled** (2026-09-30, on Stephan's question "can't
+    that go through the repository?"). It can - via
+    `iso-build/config/includes.chroot/usr/local/share/dialos/`, not via
+    `docs/`. Two layers (system-wide from the repository, personal per
+    account) so that installing does not delete the user's own selection.
+    The app now proposes the right target by itself.
   - [ ] **Have Stephan sign off the icon.** The measured version (microphone
     only) is built. His draft with waves *and* microphone sits beside it as
     `assets/rhythmbox-icon-entwurf.png` and failed at 32 pixels - the

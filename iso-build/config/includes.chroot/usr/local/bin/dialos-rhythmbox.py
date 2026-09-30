@@ -596,8 +596,20 @@ class Fenster(Adw.ApplicationWindow):
             self._medienliste_ziel_waehlen(gewaehlt)
 
     def _medienliste_ziel_waehlen(self, gewaehlt) -> None:
+        """Der Dateidialog mit dem richtigen Ziel vorbelegt.
+
+        Auf der Werkbank ist das die Datei im Repo-Baum - von dort spielt
+        `dialos-aufspielen` sie aufs Geraet, die Auswahl geht also ueber
+        git. Am Geraet selbst ist es die persoenliche Liste des Kontos.
+        Aendern kann der Mensch das Ziel weiterhin; vorgeschlagen wird
+        aber das, was tatsaechlich irgendwo ankommt.
+        """
+        ziel = rs.speicherziel()
         waehler = Gtk.FileDialog(title="Medienliste speichern",
-                                 initial_name="medienliste.json")
+                                 initial_name=os.path.basename(ziel))
+        ordner = os.path.dirname(ziel)
+        if os.path.isdir(ordner):
+            waehler.set_initial_folder(Gio.File.new_for_path(ordner))
         waehler.save(self, None, self._medienliste_ziel_gewaehlt, gewaehlt)
 
     def _medienliste_ziel_gewaehlt(self, waehler, ergebnis, gewaehlt) -> None:
@@ -615,6 +627,18 @@ class Fenster(Adw.ApplicationWindow):
             return
         self.sagen(f"{len(daten['eintraege'])} Eintraege nach {pfad} "
                    "geschrieben.")
+        # Der Weg ans Geraet ist nicht selbsterklaerend, und eine Datei,
+        # die richtig liegt, aber nie aufgespielt wird, sieht von aussen
+        # aus wie eine, die funktioniert.
+        repo = rs.repo_liste()
+        if repo and os.path.abspath(pfad) == os.path.abspath(repo):
+            self.sagen("Das ist die Datei im Repo. Ans Geraet kommt sie "
+                       "ueber git und dann 'sudo dialos-aufspielen "
+                       "--wirklich'.")
+        elif os.path.abspath(pfad) == os.path.abspath(rs.eigene_liste()):
+            self.sagen("Das ist die persoenliche Liste dieses Kontos. "
+                       "Sie gilt sofort und wird von keinem Aufspielen "
+                       "ueberschrieben.")
         self.toast("Medienliste gespeichert")
 
     def markdown_kopieren(self) -> None:

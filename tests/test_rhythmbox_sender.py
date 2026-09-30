@@ -20,10 +20,13 @@ Aufruf (aus dem Repo-Wurzelverzeichnis):
     python3 -m unittest discover -s tests -v
 """
 
+import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 import urllib.request
 
@@ -558,6 +561,164 @@ class Ausgabeformat(unittest.TestCase):
         koennen. Ohne die Kennung geht das nicht."""
         eintrag = rs.medienliste_bauen(self.PROBE)["eintraege"][0]
         self.assertEqual(eintrag["stationuuid"], "u1")
+
+
+class Uebergabestelle(unittest.TestCase):
+    """Die zwei Ebenen der Medienliste - Beschluss vom 2026-09-30.
+
+    Der Grund steht in der NIEMALS-Liste von dialos-aufspielen: Am
+    2026-08-22 standen in `piper-generic.conf` Konfiguration UND die vom
+    Nutzer gewaehlte Stimme in einer Datei; das naechste Aufspielen hat
+    die Wahl stillschweigend zurueckgesetzt. Bei der Medienliste steht
+    dieselbe Falle offen, und sie traefe den Nutzer haerter: Sein
+    Lieblingssender waere weg, ohne dass er nachsehen koennte, warum.
+    """
+
+    def test_systemliste_liegt_im_aufgespielten_baum(self):
+        """Nur was unter /usr/local/share liegt, nimmt dialos-aufspielen
+        mit. `docs/medienliste.json` waere eine Sackgasse."""
+        self.assertTrue(rs.SYSTEMLISTE.startswith("/usr/local/share/dialos/"))
+
+    def test_repo_pfad_passt_zum_systempfad(self):
+        """Beide Pfade muessen dieselbe Datei meinen, sonst spielt
+        dialos-aufspielen sie an eine andere Stelle."""
+        self.assertTrue(rs.REPO_TEILPFAD.endswith(
+            rs.SYSTEMLISTE.lstrip("/").replace("/", os.sep)))
+
+    def test_eigene_liste_im_konto(self):
+        self.assertTrue(rs.eigene_liste().startswith(os.path.expanduser("~")))
+        self.assertIn(os.path.join(".config", "dialos"), rs.eigene_liste())
+
+    def test_repo_liste_wird_hier_gefunden(self):
+        """Dieses Modul liegt im Repo-Baum, also muss die Suche greifen -
+        sonst schluege die Oberflaeche am falschen Ort zu speichern vor."""
+        repo = rs.repo_liste()
+        self.assertIsNotNone(repo)
+        self.assertTrue(os.path.isdir(os.path.dirname(repo)),
+                        f"Zielordner fehlt: {os.path.dirname(repo)}")
+
+    def test_speicherziel_bevorzugt_das_repo(self):
+        self.assertEqual(rs.speicherziel(), rs.repo_liste())
+
+    def test_persoenliche_eintraege_liegen_oben(self):
+        """Wer einen Sender selbst aufnimmt, darf einen mitgelieferten
+        ersetzen - sonst haette er zwei Eintraege mit demselben Satz."""
+        with TempListen(
+            system=[{"art": "radio", "sprechform": "radio eins",
+                     "quelle": "https://alt.de/s.mp3"}],
+            eigen=[{"art": "radio", "sprechform": "radio eins",
+                    "quelle": "https://neu.de/s.mp3"}]) as (sys_pfad, eig_pfad):
+            liste = rs.medienliste_lesen(systemweit=sys_pfad,
+                                         persoenlich=eig_pfad)
+        self.assertEqual(len(liste), 1)
+        self.assertEqual(liste[0]["quelle"], "https://neu.de/s.mp3")
+
+    def test_beide_ebenen_werden_zusammengefuehrt(self):
+        with TempListen(
+            system=[{"art": "radio", "sprechform": "radio eins"}],
+            eigen=[{"art": "radio", "sprechform": "antenne bayern"}]
+        ) as (sys_pfad, eig_pfad):
+            liste = rs.medienliste_lesen(systemweit=sys_pfad,
+                                         persoenlich=eig_pfad)
+        self.assertEqual({e["sprechform"] for e in liste},
+                         {"radio eins", "antenne bayern"})
+
+    def test_klanggleiche_eintraege_zaehlen_als_einer(self):
+        """„radio kärnten" und „radio kaernten" sind derselbe Satz."""
+        with TempListen(
+            system=[{"art": "radio", "sprechform": "radio kaernten"}],
+            eigen=[{"art": "radio", "sprechform": "radio kärnten"}]
+        ) as (sys_pfad, eig_pfad):
+            liste = rs.medienliste_lesen(systemweit=sys_pfad,
+                                         persoenlich=eig_pfad)
+        self.assertEqual(len(liste), 1)
+
+    def test_fehlende_dateien_sind_der_normalfall(self):
+        """Am frischen Geraet gibt es noch keine persoenliche Liste. Das
+        darf nichts kosten und nichts melden."""
+        liste = rs.medienliste_lesen(systemweit="/gibt/es/nicht.json",
+                                     persoenlich="/auch/nicht.json")
+        self.assertEqual(liste, [])
+
+    def test_kaputte_datei_legt_nicht_das_radio_lahm(self):
+        with TempListen(system=[{"art": "radio", "sprechform": "radio eins"}],
+                        eigen="das ist kein JSON") as (sys_pfad, eig_pfad):
+            liste = rs.medienliste_lesen(systemweit=sys_pfad,
+                                         persoenlich=eig_pfad)
+        self.assertEqual(len(liste), 1)
+
+    def test_arten_stimmen_mit_der_doku_ueberein(self):
+        """Die Gattungen stehen an zwei Stellen: als Konstante hier und
+        als Beispiel in docs/medienliste.md. Laufen sie auseinander,
+        schreibt die App ein „art", das DialOS spaeter nicht kennt - und
+        der Eintrag faellt lautlos aus der Ansage."""
+        doku = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "docs", "medienliste.md")
+        with open(doku, encoding="utf-8") as f:
+            text = f.read()
+        genannt = set(re.findall(r'"art":\s*"([a-z-]+)"', text))
+        self.assertTrue(genannt, "in medienliste.md steht kein Beispiel mehr")
+        self.assertEqual(genannt, set(rs.ARTEN))
+
+    def test_nach_gattung_filtern(self):
+        """Radio, Nachrichten, Podcast und Hoerbuch stehen in DERSELBEN
+        Datei und werden ueber `art` unterschieden."""
+        with TempListen(
+            system=[{"art": "radio", "sprechform": "radio eins"},
+                    {"art": "podcast", "sprechform": "lage der nation"},
+                    {"art": "hoerbuch", "sprechform": "die verwandlung"}],
+            eigen=[]) as (sys_pfad, eig_pfad):
+            nur_radio = rs.medienliste_lesen(art="radio", systemweit=sys_pfad,
+                                             persoenlich=eig_pfad)
+            alles = rs.medienliste_lesen(systemweit=sys_pfad,
+                                         persoenlich=eig_pfad)
+        self.assertEqual(len(nur_radio), 1)
+        self.assertEqual(len(alles), 3)
+
+    def test_doppelte_ueber_gattungsgrenzen_hinweg(self):
+        """Der Nutzer spricht einen Satz, keine Gattung. Ein Podcast und
+        ein Radiosender mit derselben Sprechform waeren fuer ihn
+        ununterscheidbar - deshalb entdoppelt die Pruefung ueber alle
+        Gattungen, auch wenn nachher nur eine abgefragt wird."""
+        with TempListen(
+            system=[{"art": "podcast", "sprechform": "radio eins"},
+                    {"art": "radio", "sprechform": "radio eins"}],
+            eigen=[]) as (sys_pfad, eig_pfad):
+            liste = rs.medienliste_lesen(systemweit=sys_pfad,
+                                         persoenlich=eig_pfad)
+            radios = rs.medienliste_lesen(art="radio", systemweit=sys_pfad,
+                                          persoenlich=eig_pfad)
+        self.assertEqual(len(liste), 1)
+        # Der Podcast stand zuerst und hat den Satz belegt; der
+        # gleichnamige Radiosender faellt weg statt danebenzustehen.
+        self.assertEqual(radios, [])
+
+
+class TempListen:
+    """Zwei Medienlisten in einem Wegwerf-Ordner."""
+
+    def __init__(self, system, eigen):
+        self.system, self.eigen = system, eigen
+
+    def _schreiben(self, pfad, inhalt):
+        with open(pfad, "w", encoding="utf-8") as f:
+            if isinstance(inhalt, str):
+                f.write(inhalt)
+            else:
+                json.dump({"stand": "2026-09-30", "eintraege": inhalt}, f,
+                          ensure_ascii=False)
+
+    def __enter__(self):
+        self.ordner = tempfile.mkdtemp(prefix="dialos-medienliste-")
+        sys_pfad = os.path.join(self.ordner, "system.json")
+        eig_pfad = os.path.join(self.ordner, "eigen.json")
+        self._schreiben(sys_pfad, self.system)
+        self._schreiben(eig_pfad, self.eigen)
+        return sys_pfad, eig_pfad
+
+    def __exit__(self, *_):
+        shutil.rmtree(self.ordner, ignore_errors=True)
 
 
 class NetzSperre(unittest.TestCase):

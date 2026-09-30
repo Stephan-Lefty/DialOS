@@ -143,6 +143,28 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The handover point for the media list is settled** (2026-09-30, Stephan's
+  question: "can't that go through the repository?"). It can - but not through
+  `docs/`: `dialos-aufspielen` copies only the tree under
+  `iso-build/config/includes.chroot`, so `docs/medienliste.json` would have
+  been a dead end that looks right and never reaches a device. The file now
+  lives under `usr/local/share/dialos/` inside the installed tree and therefore
+  comes along without any change to the install script. **It deliberately
+  exists twice:** system-wide the shipped state from the repository, and
+  `~/.config/dialos/medienliste.json` for whatever the user adds themselves.
+  The reason is recorded in the `NIEMALS` list of `dialos-aufspielen` and was
+  paid for dearly - on 2026-08-22 `piper-generic.conf` held configuration and
+  the user's choice in one file, and installing silently reset that choice.
+  Here it would have been the favourite station disappearing for no visible
+  reason. DialOS reads both layers and puts the personal one on top; comparison
+  runs on the phonetic form so that "radio kärnten" and "radio kaernten" count
+  as one entry. **Prepared for all four kinds:** radio, news, podcasts and
+  audiobooks live in the same file and differ only in the `art` field - the
+  valid values are the constant `ARTEN` in the module, and a test compares them
+  against the example in `docs/medienliste.md` so the two places cannot drift
+  apart. Duplicates are checked **across all kinds**, not per kind: the user
+  speaks a phrase, not a kind.
+
 - **The first automated tests in this repository** (`tests/`,
   `.github/workflows/tests.yml`, 2026-09-30). Until now DialOS was a recipe
   repository: scripts that run on the device and are checked there. With

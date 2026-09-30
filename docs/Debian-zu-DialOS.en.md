@@ -3534,7 +3534,22 @@ be set up by hand. What is installed:
 /usr/local/bin/dialos_farben.py               # shared colour palette
 /usr/share/applications/dialos-rhythmbox.desktop
 /usr/share/icons/hicolor/<size>/apps/dialos-rhythmbox.png
+/usr/local/share/dialos/medienliste.json      # the selection (0644, once made)
 ```
+
+**The media list deliberately exists twice** (decided 2026-09-30,
+reasoning in [medienliste.md](medienliste.md)):
+
+| File | What it holds |
+|---|---|
+| `/usr/local/share/dialos/medienliste.json` | the shipped state, comes from the repository |
+| `~/.config/dialos/medienliste.json` | what the user adds themselves, per account |
+
+The second is **never** installed and therefore does not appear in the
+list above. The reason is the same as for `piper-generic.conf` in the
+`NIEMALS` list of `dialos-aufspielen`: were both in one file, the user's
+own selection would be gone after the next install - and they could not
+look up why their favourite station had disappeared.
 
 **The prerequisites are already there:** `python3-gi` with GTK 4 and
 libadwaita (step 11), GStreamer for previewing (present with GNOME) and

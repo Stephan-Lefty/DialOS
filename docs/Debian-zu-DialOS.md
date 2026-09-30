@@ -3657,7 +3657,22 @@ nichts einzurichten. Aufgespielt werden:
 /usr/local/bin/dialos_farben.py               # gemeinsame Farbpalette
 /usr/share/applications/dialos-rhythmbox.desktop
 /usr/share/icons/hicolor/<groesse>/apps/dialos-rhythmbox.png
+/usr/local/share/dialos/medienliste.json      # die Auswahl (0644, sobald getroffen)
 ```
+
+**Die Medienliste liegt bewusst zweimal** (entschieden 2026-09-30,
+Begründung in [medienliste.md](medienliste.md)):
+
+| Datei | Was drinsteht |
+|---|---|
+| `/usr/local/share/dialos/medienliste.json` | der Auslieferungszustand, kommt aus dem Repo |
+| `~/.config/dialos/medienliste.json` | was der Nutzer selbst aufnimmt, je Konto |
+
+Die zweite wird **nie** aufgespielt und steht deshalb auch nicht in der
+Liste oben. Der Grund ist derselbe wie bei `piper-generic.conf` in der
+`NIEMALS`-Liste von `dialos-aufspielen`: Stünden beide in einer Datei,
+wäre die eigene Auswahl des Nutzers beim nächsten Aufspielen weg - und er
+könnte nicht nachsehen, warum sein Lieblingssender verschwunden ist.
 
 **Voraussetzungen sind schon da:** `python3-gi` mit GTK 4 und libadwaita
 (Schritt 11), GStreamer fürs Vorhören (mit GNOME vorhanden) und `curl`.

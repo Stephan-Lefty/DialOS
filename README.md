@@ -153,6 +153,29 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Die Übergabestelle für die Medienliste ist geklärt** (2026-09-30, Stephans
+  Frage: „geht das nicht über das Repo"). Ja - aber nicht über `docs/`:
+  `dialos-aufspielen` kopiert ausschließlich den Baum unter
+  `iso-build/config/includes.chroot`, `docs/medienliste.json` wäre eine
+  Sackgasse gewesen, die richtig aussieht und nie auf einem Gerät ankommt. Die
+  Datei liegt jetzt unter `usr/local/share/dialos/` im aufgespielten Baum und
+  kommt damit ohne Änderung am Aufspielskript mit. **Sie gibt es bewusst
+  zweimal:** systemweit der Auslieferungszustand aus dem Repo,
+  `~/.config/dialos/medienliste.json` für das, was der Nutzer selbst aufnimmt.
+  Der Grund steht in der `NIEMALS`-Liste von `dialos-aufspielen` und ist teuer
+  bezahlt - am 2026-08-22 standen in `piper-generic.conf` Konfiguration und
+  Nutzerwahl in einer Datei, und das Aufspielen setzte die Wahl stillschweigend
+  zurück. Hier wäre es der Lieblingssender gewesen, der ohne erkennbaren Grund
+  verschwindet. DialOS liest beide Ebenen und legt die persönliche obenauf;
+  verglichen wird über die Klangform, damit „radio kärnten" und „radio
+  kaernten" als ein Eintrag gelten. **Vorbereitet für alle vier Gattungen:**
+  Radio, Nachrichten, Podcasts und Hörbücher liegen in derselben Datei und
+  unterscheiden sich nur im Feld `art` - die gültigen Werte stehen als
+  Konstante `ARTEN` im Modul, und ein Test vergleicht sie mit dem Beispiel in
+  `docs/medienliste.md`, damit die beiden Stellen nicht auseinanderlaufen.
+  Doppelte werden dabei **über alle Gattungen hinweg** geprüft: Der Nutzer
+  spricht einen Satz, keine Gattung.
+
 - **Die ersten automatischen Tests in diesem Repo** (`tests/`,
   `.github/workflows/tests.yml`, 2026-09-30). DialOS war bis hierher ein
   Rezept-Repo: Skripte, die am Gerät laufen und dort geprüft werden. Mit

@@ -54,8 +54,43 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom
   zweiten Rechner (dort liegt die `.env`); vorher englische Fassung und
   Hörfassung. Der Mikrofon-Absatz ist schon angepasst.
+- [ ] **Die Medienliste zum Leben erwecken** (Stephan, 2026-09-30: „Wir müssen
+  ja die Vorbereitung für Radiosender, Nachrichten, Hörbücher und Podcast
+  bauen"). Die Übergabestelle steht seit dem 2026-09-30 (zwei Ebenen, siehe
+  [medienliste.md](docs/medienliste.md)), aber die Kette hat noch kein Ende:
+  - [ ] **Es liest noch niemand.** Im ganzen Repo öffnet kein Programm die
+    `medienliste.json` - `medienliste_lesen()` im Modul ist da, aber keine
+    Sprachsteuerung ruft sie auf. Das ist der eigentliche Zweck der ganzen
+    Übung: „Radio einschalten" → Sender aus der Liste →
+    `rhythmbox-client --play-uri`. Vorher die Pflichtprüfungen aus
+    `docs/sprachbefehle.md` (Wortschatz + volle Grammatik), und der
+    Widerspruch „Radio öffnen" gegen „Radio einschalten" gehört aufgelöst.
+  - [ ] **Die Datei selbst gibt es noch nicht.** Das Format und beide Pfade
+    stehen, die Auswahl trifft aber Stephan - und laut medienliste.md gilt
+    „weniger ist mehr": lieber zehn Sender, die er wirklich hört, als die
+    78 gesammelten. Bei 78 meldet die Kollisionsprüfung elf verwechselbare
+    Paare, das ist die praktische Bestätigung der Regel.
+  - [ ] **`docs/medienliste.md` gibt es nur auf Deutsch** - als einzige der
+    Medien-Dateien (`medien-konzept` hat eine englische Fassung). Die Lücke
+    bestand schon vorher, ist aber am 2026-09-30 größer geworden: Der ganze
+    Abschnitt zur Übergabestelle steht jetzt dort. Inhaltlich abgeschnitten
+    ist dadurch niemand - dasselbe steht in `README.en.md` und in Schritt 13e
+    von `Debian-zu-DialOS.en.md`.
+  - [ ] **Nachrichten: die Form ist weiter offen** (steht seit dem
+    2026-09-25 in [medien-konzept.md](docs/medien-konzept.md)). Sender live
+    oder neueste Folge einer Kurznachrichten-Sendung? Das Format trägt
+    beides (`nachrichten-sender`, `nachrichten-podcast`), entschieden ist
+    nichts - und ohne Entscheidung weiß „Nachrichten hören" nicht, was es
+    tun soll.
+  - [ ] **Podcasts und Hörbücher brauchen mehr als einen Eintrag.** Für
+    Podcasts fehlt das Lesen des RSS-Feeds (neueste Folge), für beide die
+    Merkposition über MPRIS - ein achtstündiges Hörbuch, das nach dem
+    Einschalten von vorn beginnt, hört niemand. Hörbücher sind außerdem
+    Dateien, keine Adressen: Ablageort auf der Platte oder auf
+    `DIALOS-DATA` ist noch nicht festgelegt.
+
 - [ ] **DialOS-Rhythmbox fertigstellen** (gebaut 2026-09-25, siehe
-  Änderungsprotokoll 0.5.3). Drei der fünf Punkte sind erledigt; offen sind
+  Änderungsprotokoll 0.5.3). Vier der sechs Punkte sind erledigt; offen sind
   die Filterleiste im Fenster und Stephans Urteil über das Symbol:
   - [ ] **Das Menü für Bundesland, Stadt und Genre in der Oberfläche.**
     In `dialos_rhythmbox_sender.py` ist die Suche fertig und über die
@@ -81,6 +116,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     weil das Werkzeug weder Startsätze noch Mikrofon braucht),
     `docs/anwendungen.md`, der Hinweis in `docs/medienliste.md` und
     Schritt 13e in `docs/Debian-zu-DialOS.md`.
+  - [x] **Übergabestelle geklärt** (2026-09-30, auf Stephans Frage „geht das
+    nicht über das Repo"). Ja - über
+    `iso-build/config/includes.chroot/usr/local/share/dialos/`, nicht über
+    `docs/`. Zwei Ebenen (systemweit aus dem Repo, persönlich je Konto), damit
+    das Aufspielen nicht die eigene Auswahl des Nutzers löscht. Die App
+    schlägt jetzt von selbst das richtige Ziel vor.
   - [ ] **Symbol von Stephan abnehmen lassen.** Gebaut ist die gemessene
     Fassung (nur Mikrofon). Sein Entwurf mit Wellen *und* Mikrofon liegt
     als `assets/rhythmbox-icon-entwurf.png` daneben und ist bei 32 Pixeln

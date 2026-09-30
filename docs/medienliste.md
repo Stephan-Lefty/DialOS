@@ -51,9 +51,55 @@ der Mensch.
 [Konzept](medien-konzept.md) verlangt sie, damit DialOS bei einem
 ausgefallenen Stream die aktuelle Adresse nachschlagen kann.
 
-Vorgeschlagenes
-Austauschformat (noch nicht entschieden), damit DialOS die Datei direkt liest -
-später als `docs/medienliste.json` neben dieser Vorlage:
+## Wo die Datei liegt - zwei Ebenen (entschieden 2026-09-30)
+
+Hier stand bis zum 2026-09-30 „später als `docs/medienliste.json` neben
+dieser Vorlage". **Das wäre eine Sackgasse gewesen:** `dialos-aufspielen`
+kopiert ausschließlich den Baum unter `iso-build/config/includes.chroot`,
+und `docs/` gehört nicht dazu. Die Datei hätte richtig ausgesehen und wäre
+nie auf einem Gerät angekommen.
+
+Stattdessen gibt es sie **zweimal**, und das ist kein Umweg, sondern die
+Lehre aus einem teuer bezahlten Fehler. Am 2026-08-22 standen in
+`piper-generic.conf` zwei Dinge in einer Datei: die Konfiguration aus dem
+Repo und die vom Nutzer gewählte Stimme. Das nächste Aufspielen setzte die
+Wahl stillschweigend zurück. Bei der Medienliste steht dieselbe Falle
+offen, und sie träfe den Nutzer härter - sein Lieblingssender wäre weg,
+ohne dass er nachsehen könnte, warum.
+
+| Datei | Was drinsteht | Wer sie schreibt |
+|---|---|---|
+| `/usr/local/share/dialos/medienliste.json` | der Auslieferungszustand, gilt fürs ganze Gerät | kommt über `dialos-aufspielen` aus dem Repo |
+| `~/.config/dialos/medienliste.json` | was der Nutzer selbst aufnimmt, je Konto | die App am Gerät; **wird nie überschrieben** |
+
+DialOS liest beide und legt die persönliche über die systemweite. Gleiche
+Sprechform heißt derselbe Eintrag, wobei über die *Klangform* verglichen
+wird - „radio kärnten" und „radio kaernten" sind für die Spracherkennung
+derselbe Satz.
+
+**Der Weg von der Werkbank ans Gerät** führt damit über git:
+
+1. DialOS-Rhythmbox auf dem Arbeitsrechner öffnen und auswählen. Das
+   Speichern-Ziel ist dort schon vorbelegt mit
+   `iso-build/config/includes.chroot/usr/local/share/dialos/medienliste.json`.
+2. Committen und pushen.
+3. Am Gerät `git pull`, dann `sudo dialos-aufspielen --wirklich`.
+
+Am Gerät selbst schlägt dieselbe App `~/.config/dialos/medienliste.json`
+vor - dorthin darf ein normaler Nutzer schreiben, und kein Aufspielen
+räumt es weg.
+
+**Alle Gattungen liegen in derselben Datei** und unterscheiden sich nur im
+Feld `art`: `radio`, `nachrichten-sender`, `nachrichten-podcast`,
+`podcast`, `hoerbuch`. Die gültigen Werte stehen als Konstante `ARTEN` in
+`dialos_rhythmbox_sender.py`; ein Test vergleicht sie mit dem Beispiel
+unten, damit die beiden Stellen nicht auseinanderlaufen.
+
+**Doppelte werden über alle Gattungen hinweg geprüft**, nicht je Gattung.
+Der Nutzer spricht einen Satz, keine Gattung - ein Podcast und ein
+Radiosender mit derselben Sprechform wären für ihn ununterscheidbar.
+
+Austauschformat, damit DialOS die Datei direkt liest:
 
 ```json
 {"stand": "2026-09-25",

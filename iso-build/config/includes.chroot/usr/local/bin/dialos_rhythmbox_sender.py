@@ -949,10 +949,142 @@ def medienliste_bauen(liste, art="radio"):
 
 def medienliste_schreiben(liste, pfad, art="radio"):
     daten = medienliste_bauen(liste, art)
+    ordner = os.path.dirname(os.path.abspath(pfad))
+    if ordner:
+        os.makedirs(ordner, exist_ok=True)
     with open(pfad, "w", encoding="utf-8") as f:
         json.dump(daten, f, ensure_ascii=False, indent=1)
         f.write("\n")
     return daten
+
+
+# ------------------------------------------------ Wo die Medienliste liegt
+#
+# ZWEI EBENEN, und der Grund dafuer steht in der NIEMALS-Liste von
+# dialos-aufspielen: Am 2026-08-22 standen in piper-generic.conf zwei
+# Dinge in einer Datei - die Konfiguration aus dem Repo UND die vom
+# Nutzer gewaehlte Stimme. Beim naechsten Aufspielen war die Wahl
+# stillschweigend zurueckgesetzt, waehrend das Geraet sich weiter mit dem
+# anderen Namen vorstellte.
+#
+# Dieselbe Falle steht hier offen: Die Senderauswahl kommt aus dem Repo,
+# aber der Nutzer soll eigene Sender aufnehmen koennen. Beides in eine
+# Datei zu schreiben hiesse, seine Sender beim naechsten Aufspielen zu
+# loeschen - auf einem Geraet, dessen Nutzer nicht nachsehen kann, warum
+# sein Lieblingssender verschwunden ist.
+#
+# Deshalb, wie bei den persoenlichen Daten:
+#
+#   /usr/local/share/dialos/medienliste.json   Auslieferungszustand,
+#                                              kommt aus dem Repo,
+#                                              wird aufgespielt
+#   ~/.config/dialos/medienliste.json          was der Nutzer selbst
+#                                              hinzufuegt, je Konto,
+#                                              wird NIE ueberschrieben
+
+#: Die Gattungen, die im Feld "art" stehen duerfen - genau die aus
+#: docs/medienliste.md. Alle vier liegen in DERSELBEN Datei; sie
+#: unterscheiden sich nicht im Format, sondern in diesem einen Wert.
+#:
+#: Warum "nachrichten" zweimal vorkommt: Am 2026-09-25 war noch offen,
+#: was "Nachrichten hoeren" ausloesen soll - einen Nachrichtensender live
+#: oder die neueste Folge einer Kurznachrichten-Sendung. Beides ist
+#: moeglich und darf nebeneinander stehen, deshalb zwei Werte statt einer
+#: Entscheidung, die noch niemand getroffen hat.
+ARTEN = (
+    "radio",                # ein Sender, laeuft live
+    "nachrichten-sender",   # dasselbe, aber als Antwort auf "Nachrichten"
+    "nachrichten-podcast",  # neueste Folge einer Kurznachrichten-Sendung
+    "podcast",              # RSS-Feed, neueste Folge oder Merkposition
+    "hoerbuch",             # Datei auf der Platte oder auf DIALOS-DATA
+)
+
+#: Die Liste, die mit dem Geraet ausgeliefert wird.
+SYSTEMLISTE = "/usr/local/share/dialos/medienliste.json"
+
+#: Wo dieselbe Datei im Repo-Baum liegt - von dort spielt sie
+#: dialos-aufspielen auf.
+REPO_TEILPFAD = os.path.join("iso-build", "config", "includes.chroot",
+                             "usr", "local", "share", "dialos",
+                             "medienliste.json")
+
+
+def eigene_liste():
+    """Die persoenliche Ergaenzung des angemeldeten Kontos."""
+    return os.path.join(os.path.expanduser("~"), ".config", "dialos",
+                        "medienliste.json")
+
+
+def repo_liste():
+    """Der Platz im Repo-Baum - oder None, wenn wir nicht darin liegen.
+
+    Dieselbe Technik wie _quelle_finden() in dialos-aufspielen: Wir
+    suchen die Marke iso-build/config/includes.chroot im eigenen Pfad.
+    Am Geraet liegt dieses Modul unter /usr/local/bin und findet sie
+    nicht - dort gibt es kein Repo, und das ist richtig so.
+    """
+    hier = os.path.dirname(os.path.abspath(__file__))
+    marke = os.path.join("iso-build", "config", "includes.chroot")
+    if marke not in hier:
+        return None
+    baum = hier[:hier.index(marke)]
+    return os.path.join(baum, REPO_TEILPFAD)
+
+
+def speicherziel():
+    """Was die Oberflaeche zum Speichern vorschlagen soll.
+
+    Auf der Werkbank (im Repo-Baum) ist das die Datei, die spaeter
+    aufgespielt wird - so geht die Auswahl ueber git ans Geraet. Am
+    Geraet selbst ist es die persoenliche Liste des Kontos; dorthin darf
+    ein normaler Nutzer schreiben, und kein Aufspielen raeumt sie weg.
+    """
+    return repo_liste() or eigene_liste()
+
+
+def _liste_laden(pfad):
+    """Eine Datei lesen, oder eine leere Liste. Fehler sind hier kein
+    Grund abzubrechen: Eine fehlende persoenliche Liste ist der
+    Normalfall, und eine kaputte darf nicht das ganze Radio lahmlegen."""
+    try:
+        with open(pfad, encoding="utf-8") as f:
+            daten = json.load(f)
+    except (OSError, ValueError):
+        return []
+    eintraege = daten.get("eintraege") if isinstance(daten, dict) else daten
+    return eintraege if isinstance(eintraege, list) else []
+
+
+def medienliste_lesen(art=None, systemweit=None, persoenlich=None):
+    """Beide Ebenen zusammengefuehrt - das, was DialOS ansagen kann.
+
+    Die persoenliche Liste liegt oben: Wer einen Sender selbst aufnimmt,
+    hat damit auch das Recht, einen mitgelieferten zu ersetzen. Verglichen
+    wird ueber die Klangform, nicht ueber die Zeichenkette - "radio
+    kaernten" und "radio kärnten" sind derselbe Satz, und zwei Eintraege
+    dafuer waeren genau die Verwechslung, die medienliste.md verbietet.
+
+    `art` grenzt auf eine Gattung ein ("radio", "nachrichten", "podcast",
+    "hoerbuch"). Die Doppelten-Pruefung laeuft aber IMMER ueber alle
+    Gattungen: Der Nutzer sagt einen Satz, keine Gattung - ein Podcast
+    und ein Radiosender mit derselben Sprechform waeren fuer ihn
+    ununterscheidbar, auch wenn sie im Format verschiedene Felder haben.
+    """
+    systemweit = SYSTEMLISTE if systemweit is None else systemweit
+    persoenlich = eigene_liste() if persoenlich is None else persoenlich
+
+    ergebnis, gesehen = [], set()
+    for pfad in (persoenlich, systemweit):
+        for eintrag in _liste_laden(pfad):
+            if not isinstance(eintrag, dict):
+                continue
+            schluessel = _klangform(eintrag.get("sprechform") or "")
+            if not schluessel or schluessel in gesehen:
+                continue
+            gesehen.add(schluessel)
+            if art is None or eintrag.get("art") == art:
+                ergebnis.append(eintrag)
+    return ergebnis
 
 
 def markdown_tabelle(liste):
