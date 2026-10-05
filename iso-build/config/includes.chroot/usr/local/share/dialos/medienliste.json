@@ -240,6 +240,38 @@
    "land": "CH",
    "quelle": "https://vintageradio.ice.infomaniak.ch/vintageradio-high.mp3",
    "stationuuid": "962af9b5-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "nachrichten-podcast",
+   "sprechform": "landesweite nachrichten",
+   "name": "tagesschau in 100 Sekunden",
+   "land": "DE",
+   "quelle": "https://www.tagesschau.de/multimedia/sendung/tagesschau_in_100_sekunden/podcast-ts100-audio-100~podcast.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "nachrichten-podcast",
+   "sprechform": "landesweite nachrichten",
+   "name": "SRF Nachrichten",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/4d8995b0-8492-4e6c-b97d-1030781d815f.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "nachrichten-sender",
+   "sprechform": "landesweite nachrichten",
+   "name": "Oe1",
+   "land": "AT",
+   "quelle": "http://orf-live.ors-shoutcast.at/oe1-q2a",
+   "stationuuid": "657b7b0f-2ef9-45df-9915-4ca4f948c54f"
+  },
+  {
+   "art": "nachrichten-sender",
+   "sprechform": "regionale nachrichten",
+   "name": "ORF Radio Tirol",
+   "land": "AT",
+   "quelle": "http://orf-live.ors-shoutcast.at/tir-q2a",
+   "stationuuid": "477d5e54-24b0-48dd-97f0-5cf4f047eb55"
   }
  ]
 }

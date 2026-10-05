@@ -399,12 +399,24 @@ class AusgelieferteListe(unittest.TestCase):
                 self.assertFalse(rs.braucht_zugang(eintrag["quelle"]))
                 self.assertFalse(rs.ist_playlist(eintrag["quelle"]))
 
-    def test_keine_verwechselbaren_sprechformen(self):
-        """Der Grund, warum es nur zehn sind: Bei 78 Sendern meldet diese
-        Pruefung zehn Paare, bei der getroffenen Auswahl nichts."""
-        paare = rs.aehnliche_sprechformen(self.eintraege)
-        self.assertEqual(
-            [(a["sprechform"], b["sprechform"], g) for a, b, g in paare], [])
+    def test_keine_verwechselbaren_sprechformen_je_land(self):
+        """Der Grund, warum es nur zehn je Land sind: Bei 78 Sendern
+        meldet diese Pruefung zehn Paare, bei der getroffenen Auswahl
+        nichts.
+
+        GEPRUEFT WIRD JE LAND, nicht ueber die ganze Datei - seit dem
+        2026-10-05 ist das zwingend: „landesweite nachrichten" steht
+        dreimal darin, je Land mit einer anderen Quelle (tagesschau,
+        Oe1 live, SRF). Ueber alle Laender gerechnet waere das eine
+        Kollision; auf einem Geraet treffen sich die drei nie.
+        """
+        for land in ("DE", "AT", "CH"):
+            teil = [e for e in self.eintraege if e.get("land") == land]
+            with self.subTest(land=land):
+                paare = rs.aehnliche_sprechformen(teil)
+                self.assertEqual(
+                    [(a["sprechform"], b["sprechform"], g)
+                     for a, b, g in paare], [])
 
     def test_sprechformen_klein_und_ohne_umschreibung(self):
         for eintrag in self.eintraege:
@@ -419,9 +431,13 @@ class AusgelieferteListe(unittest.TestCase):
         """Der ganze Weg in einem Test: Datei -> medienliste_lesen ->
         Sender finden, so wie dialos-radio.py es tut."""
         radio = _laden("dialos-radio.py", "radio_liste_test")
+        # Ohne Landfilter, aber nur die Radiosender: Die Datei enthaelt
+        # seit dem 2026-10-05 auch Nachrichten-Eintraege.
+        nur_radio = [e for e in self.eintraege if e["art"] == "radio"]
         liste = rs.medienliste_lesen(art="radio", systemweit=self.pfad,
-                                     persoenlich="/gibt/es/nicht.json")
-        self.assertEqual(len(liste), len(self.eintraege))
+                                     persoenlich="/gibt/es/nicht.json",
+                                     land=None)
+        self.assertEqual(len(liste), len(nur_radio))
         for eintrag in liste:
             with self.subTest(sender=eintrag["name"]):
                 gefunden, _ = radio.sender_finden(rs, liste,

@@ -1195,16 +1195,28 @@ def medienliste_lesen(art=None, systemweit=None, persoenlich=None,
         for eintrag in _liste_laden(pfad):
             if not isinstance(eintrag, dict):
                 continue
-            schluessel = _klangform(eintrag.get("sprechform") or "")
-            if not schluessel or schluessel in gesehen:
-                continue
-            gesehen.add(schluessel)
-            if art is not None and eintrag.get("art") != art:
-                continue
+
+            # ERST FILTERN, DANN ENTDOPPELN - die Reihenfolge ist nicht
+            # beliebig (2026-10-05 beim Bau der Nachrichten gefunden).
+            # Dieselbe Sprechform darf je Land auf eine ANDERE Quelle
+            # zeigen: "landesweite nachrichten" bringt in Deutschland die
+            # tagesschau, in der Schweiz SRF. Lief die Entdoppelung
+            # zuerst, ueberlebte nur der erste der drei Eintraege - und
+            # auf zwei Dritteln der Geraete haette der Satz auf eine
+            # auslaendische Quelle gezeigt oder gefehlt.
+            #
             # Ein Eintrag OHNE Land gilt ueberall - etwa ein Podcast oder
             # ein Hoerbuch, das an kein Land gebunden ist.
             if (mit_landfilter and land and eintrag.get("land")
                     and eintrag["land"] != land):
+                continue
+
+            schluessel = _klangform(eintrag.get("sprechform") or "")
+            if not schluessel or schluessel in gesehen:
+                continue
+            gesehen.add(schluessel)
+
+            if art is not None and eintrag.get("art") != art:
                 continue
             ergebnis.append(eintrag)
     return ergebnis

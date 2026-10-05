@@ -844,6 +844,44 @@ class LandFilter(unittest.TestCase):
                                          persoenlich=eigp, land="CH")
         self.assertEqual([e["sprechform"] for e in liste], ["lage der nation"])
 
+    def test_gleiche_sprechform_je_land_andere_quelle(self):
+        """DER FUND VOM 2026-10-05, beim Bau der Nachrichten.
+
+        „landesweite nachrichten" soll in Deutschland die tagesschau
+        bringen, in der Schweiz SRF - also dieselbe Sprechform, je Land
+        eine andere Quelle. Lief die Entdoppelung VOR dem Landfilter,
+        ueberlebte nur der erste der drei Eintraege, und auf zwei
+        Dritteln der Geraete zeigte der Satz ins Ausland oder fehlte.
+        """
+        drei = [
+            {"art": "nachrichten-podcast", "sprechform": "landesweite nachrichten",
+             "land": "DE", "quelle": "https://de/feed"},
+            {"art": "nachrichten-sender", "sprechform": "landesweite nachrichten",
+             "land": "AT", "quelle": "https://at/stream"},
+            {"art": "nachrichten-podcast", "sprechform": "landesweite nachrichten",
+             "land": "CH", "quelle": "https://ch/feed"},
+        ]
+        with TempListen(system=drei, eigen=[]) as (sysp, eigp):
+            for land, erwartet in (("DE", "https://de/feed"),
+                                   ("AT", "https://at/stream"),
+                                   ("CH", "https://ch/feed")):
+                with self.subTest(land=land):
+                    liste = rs.medienliste_lesen(systemweit=sysp,
+                                                 persoenlich=eigp, land=land)
+                    self.assertEqual(len(liste), 1)
+                    self.assertEqual(liste[0]["quelle"], erwartet)
+
+    def test_ohne_land_bleibt_nur_einer(self):
+        """Ohne gesetztes Land greift die Entdoppelung wie bisher - sonst
+        stuenden drei gleichlautende Saetze in der Grammatik, und die
+        Erkennung muesste raten."""
+        drei = [{"art": "nachrichten-podcast", "sprechform": "landesweite nachrichten",
+                 "land": k, "quelle": f"https://{k}/x"} for k in ("DE", "AT", "CH")]
+        with TempListen(system=drei, eigen=[]) as (sysp, eigp):
+            liste = rs.medienliste_lesen(systemweit=sysp, persoenlich=eigp,
+                                         land=None)
+        self.assertEqual(len(liste), 1)
+
     def test_eigene_auswahl_wird_nicht_gefiltert(self):
         """Wer einen auslaendischen Sender selbst aufnimmt, hat ihn
         gewollt. Ein Filter auf die eigene Eingabe waere dieselbe
