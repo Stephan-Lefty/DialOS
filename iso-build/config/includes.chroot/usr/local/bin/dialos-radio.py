@@ -134,10 +134,14 @@ def laeuft():
         return False
 
 
-def liste_holen(rs):
-    """Die Radiosender aus der Medienliste - beide Ebenen zusammengefuehrt."""
+def liste_holen(rs, art="radio"):
+    """Eintraege aus der Medienliste - beide Ebenen zusammengefuehrt.
+
+    `art=None` holt alle Gattungen; das brauchen die Nachrichten, weil
+    sie in zwei Arten vorkommen (Sender live und Podcast).
+    """
     try:
-        return rs.medienliste_lesen(art="radio")
+        return rs.medienliste_lesen(art=art)
     except Exception as fehler:            # noqa: BLE001 - jede Ursache zaehlt
         melde(f"Medienliste nicht lesbar: {fehler}")
         return []
@@ -344,6 +348,92 @@ def naechster(rs):
     return 0 if abspielen(rs, liste[(stelle + 1) % len(liste)]) else 1
 
 
+def podcast_modul():
+    """dialos_podcast.py - neben mir zuerst, wie das Sendermodul."""
+    neben_mir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "dialos_podcast.py")
+    pfad = neben_mir if os.path.isfile(neben_mir) else \
+        "/usr/local/bin/dialos_podcast.py"
+    spec = importlib.util.spec_from_file_location("pod", pfad)
+    modul = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modul)
+    return modul
+
+
+def nachrichten(rs, gesucht=None):
+    """Nachrichten abspielen - als Sender live oder als neueste Folge.
+
+    ZWEI ARTEN, UND DAS IST KEIN SCHOENHEITSFEHLER: Fuer Deutschland und
+    die Schweiz gibt es Kurznachrichten als Podcast (tagesschau in 100
+    Sekunden, SRF Nachrichten) - da wird die neueste Folge geholt. Fuer
+    Oesterreich gibt es kein Kurzformat; der Oe3-Feed ist abgeschaltet,
+    Oe1 Journale ist ein ganzes Mittagsjournal. Dort laeuft deshalb der
+    Sender live, und der Nutzer hoert die Nachrichten zur vollen Stunde
+    (Stephans Entscheidung vom 2026-10-05).
+
+    Welche Art ein Eintrag hat, steht in der Medienliste - hier wird
+    nichts geraten.
+    """
+    eintraege = [e for e in liste_holen(rs, art=None)
+                 if (e.get("art") or "").startswith("nachrichten")]
+    if not eintraege:
+        sprich("Ich habe noch keine Nachrichtenquelle.")
+        melde("keine Nachrichten in der Medienliste")
+        return 1
+
+    if gesucht:
+        eintrag, nah = sender_finden(rs, eintraege, gesucht)
+        if not eintrag:
+            namen = ", ".join(e.get("sprechform", "") for e in eintraege[:4])
+            sprich(f"Das habe ich nicht. Ich kann: {namen}.")
+            return 1
+    elif len(eintraege) == 1:
+        eintrag = eintraege[0]
+    else:
+        namen = ", ".join(e.get("sprechform", "") for e in eintraege[:4])
+        sprich(f"Welche Nachrichten möchtest Du hören? Ich habe: {namen}.")
+        return 0
+
+    quelle = (eintrag.get("quelle") or "").strip()
+    if not quelle:
+        sprich("Zu diesen Nachrichten habe ich keine Adresse.")
+        return 1
+
+    if eintrag["art"] == "nachrichten-podcast":
+        try:
+            pod = podcast_modul()
+        except Exception as fehler:        # noqa: BLE001
+            melde(f"Podcast-Modul nicht ladbar: {fehler}")
+            sprich("Ich komme gerade nicht an die Nachrichten.")
+            return 1
+        text, meldung = pod.feed_holen(quelle)
+        if meldung:
+            sprich("Die Nachrichten sind gerade nicht erreichbar.")
+            melde(f"Feed nicht erreichbar: {meldung}")
+            return 1
+        _, folgen, meldung = pod.feed_lesen(text)
+        if meldung:
+            sprich("Die Nachrichten sind gerade nicht lesbar.")
+            melde(f"Feed nicht lesbar: {meldung}")
+            return 1
+        folge = pod.neueste_folge(folgen)
+        if not folge:
+            sprich("Es ist keine Nachrichtensendung abrufbar.")
+            melde("Feed ohne Audio-Folge")
+            return 1
+        quelle = folge["audio"]
+        melde(f"neueste Folge: {folge['titel']}")
+
+    if not client("--play-uri", quelle):
+        sprich("Ich konnte die Nachrichten nicht starten.")
+        return 1
+    # Kurz, der Nutzer will zuhoeren. Der Name sagt ihm, ob der Erkenner
+    # die richtige Ebene erwischt hat.
+    sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
+    melde(f"spielt Nachrichten: {eintrag.get('name')} <{quelle}>")
+    return 0
+
+
 def liste_zeigen(rs):
     """Fuers Pruefen am Geraet - und fuer die Grammatik.
 
@@ -373,7 +463,7 @@ def main():
 
     # Die Sender-Befehle brauchen das Modul, die Steuerbefehle nicht -
     # und ein Import, der scheitert, darf "Radio aus" nicht verhindern.
-    if befehl in ("einschalten", "sender", "naechster", "liste"):
+    if befehl in ("einschalten", "sender", "naechster", "liste", "nachrichten"):
         try:
             rs = sender_modul()
         except Exception as fehler:        # noqa: BLE001
@@ -395,6 +485,8 @@ def main():
             sprich("Welchen Sender möchtest Du hören?")
             return 2
         return einschalten(rs, rest)
+    if befehl == "nachrichten":
+        return nachrichten(rs, rest or None)
     if befehl == "naechster":
         return naechster(rs)
     if befehl == "liste":

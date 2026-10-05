@@ -412,9 +412,48 @@ def radio_saetze_lesen():
     return zuordnung
 
 
+def nachrichten_saetze_lesen():
+    """Satz -> Sprechform, aus den Nachrichten-Eintraegen der Medienliste.
+
+    ANDERS ALS BEI DEN SENDERN IST DIE SPRECHFORM SCHON DER SATZ:
+    "regionale nachrichten", nicht "<x> einschalten". Der Grund steht in
+    medien-konzept.md - Stephan wollte, dass der Nutzer gezielt sagen
+    kann, welche Ebene er hoeren moechte, und "regionale nachrichten
+    einschalten" spricht niemand.
+
+    Die Saetze sind damit zwei Woerter lang und haben ein eindeutiges
+    erstes Wort ("regionale", "landesweite"). Die Ein-Satz-Regel ist
+    erfuellt: Ein beilaeufiges "nachrichten" im Gespraech loest nichts
+    aus.
+    """
+    zuordnung = {}
+    try:
+        spec = importlib.util.spec_from_file_location("rs", SENDER_MODUL)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        for eintrag in modul.medienliste_lesen():
+            if not (eintrag.get("art") or "").startswith("nachrichten"):
+                continue
+            sprechform = (eintrag.get("sprechform") or "").strip().lower()
+            # Ein Einzelwort waere ein Befehl, der im Gespraech ausloest.
+            if sprechform and len(sprechform.split()) >= 2:
+                zuordnung[sprechform] = sprechform
+    except Exception as fehler:            # noqa: BLE001
+        print(f"Nachrichtenliste nicht lesbar: {fehler}", file=sys.stderr)
+    return zuordnung
+
+
 ERWEITERUNG_SAETZE = erweiterungen_lesen()
 PROGRAMM_SAETZE = programme_lesen()
 RADIO_SENDER_SAETZE = radio_saetze_lesen()
+NACHRICHTEN_SAETZE = nachrichten_saetze_lesen()
+
+if NACHRICHTEN_SAETZE:
+    _liste = json.loads(GRAMMATIK_AN)
+    _liste = ([x for x in _liste if x != "[unk]"]
+              + [s for s in NACHRICHTEN_SAETZE if s not in _liste]
+              + ["[unk]"])
+    GRAMMATIK_AN = json.dumps(_liste, ensure_ascii=False)
 
 if RADIO_SENDER_SAETZE:
     _liste = json.loads(GRAMMATIK_AN)
@@ -566,6 +605,9 @@ AKTIONEN = {
     ("radio", "lauter"): ("radio", "Lauter"),
     ("radio", "leiser"): ("radio", "Leiser"),
     ("radio", "naechster"): ("radio", "Den nächsten Sender"),
+    ("nachrichten", "fragen"): ("radio", "Hören, welche Nachrichten es gibt"),
+    ("nachrichten", "regionale nachrichten"): ("radio", "Nachrichten aus der Region"),
+    ("nachrichten", "landesweite nachrichten"): ("radio", "Nachrichten aus dem Land"),
 }
 THEMEN_REIHENFOLGE = ("fragen", "briefe", "notizen", "einkauf", "bildschirm", "diktat",
                       "radio", "erweiterungen")
@@ -635,6 +677,16 @@ def befehls_themen():
         dazu(("foto", None), satz)
     for satz, wert in RADIO_SAETZE.items():
         dazu(("radio", wert), satz)
+    # DIE NACHRICHTEN GEHOEREN IN DIE UEBERSICHT (2026-10-05). Beim ersten
+    # Lauf meldete die Selbstpruefung "Befehle ohne Platz in der
+    # Uebersicht: ['nachrichten vorlesen', 'was gibt es neues']" - sie
+    # waren aus den Wunsch-Saetzen heraus und nirgends sonst gelandet.
+    # Fuer jemanden, den niemand darauf hinweist, ist ein Befehl so gut
+    # wie nicht vorhanden (Lehre vom 2026-09-18).
+    for satz in NACHRICHTEN_OHNE_EBENE:
+        dazu(("nachrichten", "fragen"), satz)
+    for satz in sorted(NACHRICHTEN_SAETZE):
+        dazu(("nachrichten", satz), satz)
     for satz in BEFEHLSSAETZE:
         worte = satz.split()
         if AUSLOESER in worte:
@@ -725,8 +777,14 @@ def befehle_vorbereiten():
 
 # Thema (fuers Protokoll), ehrliche Antwort. Kein Versprechen, wann.
 WUNSCH_SAETZE = {
-    "nachrichten vorlesen": ("nachrichten", "Nachrichten kann ich noch nicht vorlesen."),
-    "was gibt es neues": ("nachrichten", "Nachrichten kann ich noch nicht vorlesen."),
+    # "nachrichten vorlesen" und "was gibt es neues" standen hier bis zum
+    # 2026-10-05 mit "Nachrichten kann ich noch nicht vorlesen." Jetzt
+    # gibt es sie - aber nach EBENEN getrennt (Stephans Vorgabe: der
+    # Nutzer soll gezielt sagen, was er hoeren will). Die beiden alten
+    # Saetze nennen deshalb die Ebenen, statt eine davon zu raten: Wer
+    # "was gibt es neues" sagt, hat keine Ebene gewaehlt, und ein
+    # geratener Sender waere schlechter als eine Frage.
+    # Siehe NACHRICHTEN_HINWEIS unten.
     # "radio einschalten" und "musik abspielen" standen hier bis zum
     # 2026-09-30 mit der Antwort "Radio und Musik kann ich noch nicht
     # abspielen." Sie sind jetzt gebaut - siehe RADIO_SAETZE weiter unten.
@@ -742,6 +800,11 @@ WUNSCH_SAETZE = {
 # RADIO (2026-09-30). Satz -> Argument fuer dialos-radio.py. Die Sender
 # selbst stehen nicht hier, sondern in RADIO_SENDER_SAETZE - die kommen
 # aus der Medienliste.
+# Die zwei Saetze ohne Ebene. Sie nennen, was es gibt, statt eine Ebene
+# zu raten - dieselbe Haltung wie beim Einschalten ohne Sendernamen: Der
+# Nutzer bekommt die Auswahl, nicht den ersten Treffer.
+NACHRICHTEN_OHNE_EBENE = ("nachrichten vorlesen", "was gibt es neues")
+
 RADIO_SAETZE = {
     "radio einschalten": "einschalten",
     "musik abspielen": "einschalten",
@@ -1884,7 +1947,9 @@ def radio_aktion(satz):
     mitgegeben, damit dialos-radio.py nicht ein zweites Mal raten muss,
     welcher Sender gemeint war.
     """
-    if satz in RADIO_SENDER_SAETZE:
+    if satz in NACHRICHTEN_SAETZE:
+        argumente = ["nachrichten", NACHRICHTEN_SAETZE[satz]]
+    elif satz in RADIO_SENDER_SAETZE:
         argumente = ["sender", RADIO_SENDER_SAETZE[satz]]
     else:
         argumente = [RADIO_SAETZE[satz]]
@@ -2526,7 +2591,18 @@ def main():
             # --- Befehle: Radio ---
             # VOR den Wunsch-Saetzen, damit ein spaeter wieder
             # eingetragener Wunsch einen gebauten Befehl nicht verdeckt.
-            if satz in RADIO_SAETZE or satz in RADIO_SENDER_SAETZE:
+            if satz in NACHRICHTEN_OHNE_EBENE and NACHRICHTEN_SAETZE:
+                # Ohne Ebene wird nicht geraten, sondern genannt.
+                ebenen = ", ".join(sorted(NACHRICHTEN_SAETZE))
+                melde(f"Nachrichten ohne Ebene: {satz!r}")
+                sprich(f"Welche Nachrichten möchtest Du hören? "
+                       f"Sage: {ebenen}.")
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            if (satz in RADIO_SAETZE or satz in RADIO_SENDER_SAETZE
+                    or satz in NACHRICHTEN_SAETZE):
                 radio_aktion(satz)
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()

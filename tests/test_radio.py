@@ -446,6 +446,66 @@ class AusgelieferteListe(unittest.TestCase):
                 self.assertEqual(gefunden["name"], eintrag["name"])
 
 
+class NachrichtenInDerListe(unittest.TestCase):
+    """Die Nachrichten-Eintraege der ausgelieferten Liste.
+
+    Sie werden vom Sprachdienst zu Saetzen gemacht (siehe
+    nachrichten_saetze_lesen) - aber erst, wenn die Liste an ihrem Platz
+    unter /usr/local/share liegt. Auf dem Arbeitsrechner ist das nicht
+    so, deshalb pruefen diese Tests die DATEI, nicht den Dienst.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        with open(rs.repo_liste(), encoding="utf-8") as f:
+            cls.alle = json.load(f)["eintraege"]
+        cls.nachrichten = [e for e in cls.alle
+                           if e["art"].startswith("nachrichten")]
+
+    def test_es_gibt_nachrichten(self):
+        self.assertTrue(self.nachrichten)
+
+    def test_jedes_land_hat_landesweite_nachrichten(self):
+        """Ohne sie waere „landesweite nachrichten" auf dem Geraet ein
+        Satz, der nichts findet."""
+        for land in ("DE", "AT", "CH"):
+            mit_satz = {e["sprechform"] for e in self.nachrichten
+                        if e.get("land") == land}
+            with self.subTest(land=land):
+                self.assertIn("landesweite nachrichten", mit_satz)
+
+    def test_saetze_sind_mindestens_zwei_woerter(self):
+        """Ein Einzelwort waere ein Befehl, der im Gespraech ausloest -
+        dieselbe Regel, an der am 2026-08-16 „windows" gescheitert ist.
+        Der Sprachdienst verwirft kuerzere Sprechformen deshalb."""
+        for eintrag in self.nachrichten:
+            with self.subTest(sender=eintrag["name"]):
+                self.assertGreaterEqual(
+                    len(eintrag["sprechform"].split()), 2)
+
+    def test_art_passt_zur_quelle(self):
+        """Ein Podcast-Eintrag braucht einen Feed, ein Sender einen
+        Stream. Waere die Art falsch, wuerde dialos-radio.py den Feed als
+        Stream abspielen - und der Nutzer hoerte XML-Rauschen oder
+        nichts."""
+        for eintrag in self.nachrichten:
+            with self.subTest(sender=eintrag["name"]):
+                self.assertIn(eintrag["art"],
+                              ("nachrichten-sender", "nachrichten-podcast"))
+                self.assertTrue(eintrag["quelle"].startswith("http"))
+
+    def test_oesterreich_laeuft_live(self):
+        """Stephans Entscheidung vom 2026-10-05, und sie hat einen Grund:
+        Fuer Oesterreich gibt es kein Kurznachrichten-Format als Podcast
+        - der Oe3-Feed ist abgeschaltet, Oe1 Journale ist mit 60 Minuten
+        ein ganzes Mittagsjournal."""
+        at = [e for e in self.nachrichten if e.get("land") == "AT"]
+        self.assertTrue(at)
+        for eintrag in at:
+            with self.subTest(sender=eintrag["name"]):
+                self.assertEqual(eintrag["art"], "nachrichten-sender")
+
+
 class Modulsuche(unittest.TestCase):
     """dialos-radio.py muss sein Modul finden, auch im Repo-Baum.
 
