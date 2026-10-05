@@ -201,13 +201,60 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     erreichbar - `rhythmbox-client` allein kann es nicht, es hat nur
     `--seek`. **Am Gerät zu prüfen:** ob das Plugin aktiv ist und ob
     `Position` bei einem Stream überhaupt etwas Sinnvolles liefert.
-    **Drei Entscheidungen gehören Stephan**, bevor das Hörbuch gebaut
-    wird: wo die Dateien liegen (`~/Hörbücher`, oder auf dem Stick
-    `DIALOS-DATA`, der ohnehin als Zusatzspeicher gedacht ist), woher
-    sie kommen (freie Hörbücher wie LibriVox, gekaufte Dateien,
-    Bibliothek) und wie ein Buch aus mehreren Kapiteldateien
-    zusammengehalten wird. Für Podcasts fehlt außerdem die Auswahl
-    selbst - welche zehn je Land, nach seinem Geschmack.
+    **Der Ablageort ist entschieden** (Stephan, 2026-10-05: „Die
+    Hörbücher werden dann auf die verschlüsselte Platte gelegt!"), und
+    das ist die richtige Wahl: `/home/nutzer` liegt auf LUKS, der Stick
+    `DIALOS-DATA` dagegen ist exFAT und bewusst unverschlüsselt, damit
+    Windows ihn lesen kann. Ein gekauftes Hörbuch dort wäre bei einem
+    verlorenen Stick offen lesbar.
+    **Vorschlag für den genauen Ort: `~/Musik/Hörbücher/`** - nicht
+    `~/Hörbücher`. Rhythmbox indiziert `~/Musik` von selbst, damit
+    findet es die Dateien ohne eigenen Import, und die Merkposition
+    hängt an derselben Mediathek wie alles andere. Zwei Folgen daraus,
+    die zum Ablageort gehören: Hörbücher sind damit **je Konto** (die
+    Platte wird erst nach dem Stick-Gate geöffnet, sie sind also erst
+    nach dem Anmelden da), und sie kommen **nie ins Repo** - zu groß und
+    urheberrechtlich geschützt.
+    **Die Quelle ist entschieden: freie Hörbücher** (Stephan,
+    2026-10-05: „Ich würde erst mal freie Hörbücher anbieten."). Damit
+    entfällt die DRM-Frage ganz - gemeinfreie Aufnahmen sind einfache
+    MP3-Dateien, und DialOS darf sie herunterladen, ablegen und
+    abspielen, ohne an einer Kontobindung zu hängen. Das passt zum
+    Rest: Auch Radio und Nachrichten kommen ohne Konto.
+    **Naheliegender Weg - noch nicht geprüft:** LibriVox hat eine offene
+    Schnittstelle (`librivox.org/api/feed/audiobooks`), mit der sich nach
+    Sprache und Titel suchen lässt. Das wäre für Hörbücher dasselbe, was
+    radio-browser.info für die Sender ist: eine Datenbank, aus der DialOS
+    selbst holt, statt Adressen von Hand zu pflegen. **Vor dem Bau zu
+    prüfen:** ob die Schnittstelle ohne Schlüssel nutzbar ist, wie viele
+    **deutschsprachige** Titel es gibt (LibriVox ist überwiegend
+    englisch - das ist die eigentliche Unbekannte) und in welcher
+    Tonqualität.
+    **Ordner je Buch, nicht Wiedergabeliste** - Empfehlung vom
+    2026-10-05 auf Stephans Frage, mit drei Gründen:
+    **(1) Rhythmbox denkt in Alben, nicht in Listen.** Es indiziert
+    `~/Musik` von selbst und fasst Dateien über die ID3-Felder `Album`
+    und `Titelnummer` zusammen. Ein Hörbuch als Album ist damit genau
+    die Einheit, die der Player ohnehin bildet - `--next` springt zum
+    nächsten Kapitel, ohne dass DialOS etwas verwalten muss.
+    **(2) Eine Wiedergabeliste bricht beim Verschieben.** Eine `.m3u`
+    enthält Pfade; wird der Ordner umbenannt oder wandert das Buch auf
+    ein neues Gerät, zeigt sie ins Leere - und ein blinder Nutzer merkt
+    das erst, wenn nichts kommt. Der Ordner trägt sich selbst.
+    **(3) Eine Datei weniger, die kaputtgehen kann.** Die Liste wäre ein
+    zweiter Zustand neben den Dateien, der mit ihnen auseinanderlaufen
+    kann.
+    **Der Preis, und er gehört genannt:** Die Reihenfolge hängt dann an
+    den ID3-Feldern. Bei LibriVox sind sie meist gesetzt, aber nicht
+    immer - fehlen sie, muss nach Dateinamen sortiert werden
+    (`01-`, `02-`), und das gehört **angesagt**, nicht stillschweigend
+    gemacht. Ein Hörbuch, das die Kapitel in falscher Reihenfolge
+    spielt, ist schlimmer als eines, das sich beschwert.
+    **Noch ungeprüft:** ob Rhythmbox ein Album wirklich in
+    Titelnummern-Reihenfolge abspielt und ob `--next` innerhalb eines
+    Albums bleibt. Das geht nur am Gerät mit echten Dateien.
+    Für Podcasts fehlt außerdem die Auswahl selbst - welche zehn je
+    Land, nach Stephans Geschmack.
   - [ ] **Podcasts und Hörbücher brauchen mehr als einen Eintrag.** Für
     Podcasts fehlt das Lesen des RSS-Feeds (neueste Folge), für beide die
     Merkposition über MPRIS - ein achtstündiges Hörbuch, das nach dem
