@@ -125,12 +125,28 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Abschnitt zur Übergabestelle steht jetzt dort. Inhaltlich abgeschnitten
     ist dadurch niemand - dasselbe steht in `README.en.md` und in Schritt 13e
     von `Debian-zu-DialOS.en.md`.
-  - [ ] **Nachrichten: die Form ist weiter offen** (steht seit dem
-    2026-09-25 in [medien-konzept.md](docs/medien-konzept.md)). Sender live
-    oder neueste Folge einer Kurznachrichten-Sendung? Das Format trägt
-    beides (`nachrichten-sender`, `nachrichten-podcast`), entschieden ist
-    nichts - und ohne Entscheidung weiß „Nachrichten hören" nicht, was es
-    tun soll.
+  - [x] **Nachrichten: die Form ist entschieden** (2026-10-05, Stephan:
+    „die neueste Folge einer Kurznachrichten-Sendung"), dazu die Priorität
+    „regional - Land - Europa - Welt".
+  - [ ] **Nachrichten bauen - mit einem Vorbehalt, der aus der Prüfung
+    kommt.** Für die **regionale** Ebene gibt es keinen
+    Kurznachrichten-Podcast: ORF Tirol bietet nur „Stehaufmenschen" und
+    „Bei die Leut'" an. Regionale Nachrichten gibt es dort nur im
+    laufenden Programm. Deshalb braucht diese eine Ebene den Sender
+    (`nachrichten-sender`), die übrigen den Podcast - das Format trägt
+    beides. Belegt ist bisher nur „tagesschau in 100 Sekunden" (ein Feed
+    mit genau einem Eintrag, direkte MP3-Adresse). **Offen:** ob die
+    Priorität die Abspielreihenfolge eines Blocks meint (dann
+    `rhythmbox-client --enqueue`) oder die Auswahl; eine Quelle für
+    Europa; der Ö3-Nachrichten-Feed ist noch ungeprüft.
+  - [ ] **Prüffunktion für Podcast-Feeds** - vor jeder Podcast-Liste
+    fällig. Sie muss zuerst feststellen, **ob der Feed überhaupt Audio
+    hat**: Die zwei Nachrichten-Feeds des Deutschlandfunks liefern 39
+    Einträge und kein einziges `<enclosure>`, das sind Textartikel. Ein
+    solcher Eintrag stünde sonst in der Liste und machte nie einen Ton.
+    Dazu: neueste Folge finden, Datum prüfen (ein Feed, der seit Monaten
+    stillsteht, ist tot) und die Audiodatei mit `ffprobe` antesten - wie
+    bei den Radiosendern.
   - [ ] **Podcasts und Hörbücher brauchen mehr als einen Eintrag.** Für
     Podcasts fehlt das Lesen des RSS-Feeds (neueste Folge), für beide die
     Merkposition über MPRIS - ein achtstündiges Hörbuch, das nach dem

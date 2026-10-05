@@ -140,6 +140,47 @@ bekommen alle vier dieselbe Bedeutung: abspielen über Rhythmbox.
 - **Konto `nutzer`:** Die Medienliste liegt systemweit, Merkpositionen je Konto.
   Nach dem Bau gehört beides in `dialos-nutzerkonto-pruefen.sh`.
 
+## Nachrichten: entschieden, aber nicht überall machbar (2026-10-05)
+
+> **Stephan, 2026-10-05:** „Beim Nachrichtensender dachte ich - die neueste
+> Folge einer Kurznachrichten-Sendung" und „Prio regional - Land - Europa -
+> Welt"
+
+**Die Form ist damit entschieden:** nicht ein Sender live, sondern die neueste
+Folge. Das war seit dem 2026-09-25 offen und ist der Grund, warum
+„Nachrichten hören" bisher nicht gebaut werden konnte.
+
+**Die Priorität von nah nach fern ist die zweite Vorgabe** - regional zuerst,
+dann das Land, dann Europa, dann die Welt. Noch zu klären ist, ob das die
+*Abspielreihenfolge* eines zusammenhängenden Blocks meint (dann wäre
+`rhythmbox-client --enqueue` der Weg, und „Nachrichten hören" spielte vier
+Folgen hintereinander) oder die *Auswahlpriorität* für die Liste.
+
+**Was die Prüfung am 2026-10-05 ergeben hat - und es passt nicht glatt
+zusammen:**
+
+| Ebene | Befund |
+|---|---|
+| **Regional (Tirol)** | **Es gibt keinen Kurznachrichten-Podcast.** ORF Tirol bietet nur „Stehaufmenschen" und „Bei die Leut'" an, beides keine Nachrichten. Regionale Nachrichten gibt es dort **nur im laufenden Programm**, zur vollen Stunde. |
+| Land (DE) | „tagesschau in 100 Sekunden" läuft: ein Feed mit **genau einem** `<item>`, also immer die neueste Folge, 3,7 kB, direkte MP3-Adresse im `<enclosure>`. Geprüft und brauchbar. |
+| Land (AT) | Ein „Ö3 Nachrichten Podcast" ist belegt, aber noch nicht technisch geprüft. |
+| Europa | Noch keine Quelle gefunden. Reine Europa-Nachrichten als Kurzformat sind selten. |
+| Welt | Deckt die tagesschau mit ab. |
+
+**Daraus folgt: Die regionale Ebene braucht den Sender, nicht den Podcast.**
+Genau dafür hat das Format von Anfang an **zwei** Werte - `nachrichten-sender`
+und `nachrichten-podcast` -, und genau deshalb wurden sie am 2026-09-30 beide
+stehen gelassen, statt die Entscheidung vorwegzunehmen. Für Tirol heißt das:
+ORF Radio Tirol live als `nachrichten-sender`, die übrigen Ebenen als
+`nachrichten-podcast`.
+
+**Ein Befund, der über die Nachrichten hinausgeht:** Nicht jeder RSS-Feed hat
+Audio. Die beiden Nachrichten-Feeds des Deutschlandfunks
+(`nachrichten-100.rss` und `die-nachrichten.353.de.rss`) liefern 39 Einträge
+und **kein einziges `<enclosure>`** - das sind Textartikel. Eine Prüffunktion
+für Podcast-Feeds muss das als Erstes feststellen, sonst steht ein Eintrag in
+der Liste, der nie einen Ton macht.
+
 ## Eine zentrale Liste auf einem Server (Stephans Idee vom 2026-10-05)
 
 > **Stephan, 2026-10-05:** „Aber wir müssen uns offen halten immer welche
