@@ -146,16 +146,27 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     gefunden (Stephans Vorgabe: alles auf Deutsch). Und zu entscheiden:
     ob „landesweit" Österreich oder Deutschland meint - beide Sätze sind
     geprüft und könnten nebeneinander stehen.
-  - [ ] **Die Zehner-Liste ist über drei Länder gestreut und schrumpft
-    durch den Filter** (gemessen 2026-10-05): ohne Land 10 Sender, mit
-    `Land: Deutschland` 5, mit `Österreich` 4, mit `Schweiz` **1**. Das
-    ist kein Fehler des Filters, sondern die Folge daraus, dass die Liste
-    als *Stephans* Mischung entstanden ist und in der *systemweiten*
-    Datei liegt. Zwei Wege: entweder je Land eine eigene
-    Auslieferungsliste mit zehn Sendern (dann braucht es drei Zehner,
-    etwa 30 Einträge im Vorrat), oder Stephans Mischung wandert in seine
-    **persönliche** Liste `~/.config/dialos/medienliste.json`, die nicht
-    gefiltert wird. **Stephans Entscheidung.**
+  - [x] **Drei Radio-Zehner, je Land einer** (2026-10-05, Stephan: „wir
+    müssen für alle Medien 3 Listen machen Egal ob Radio, Nachrichten
+    oder Podcast"). 30 Einträge im Vorrat, jedes Gerät sieht seine zehn.
+    Alle 30 mit `ffprobe` dekodiert, alle spielen, keiner mit
+    Zugangsschranke; je Land kollisionsfrei und sprechbar. Zwei
+    Namenszweifel sind harmlos: Kronehit meldet sich als „digital", SRF
+    Musikwelle als „SRF MW" (die eigene Abkürzung).
+  - [ ] **Stephans eigene Mischung** gehört in die persönliche Liste
+    `~/.config/dialos/medienliste.json` - die wird nicht nach Land
+    gefiltert. Seine Zehn vom 2026-10-05 (Deutschlandfunk, Radio Tirol,
+    Ö3, Ö1, Bayern 3, BR-Klassik, Radio Swiss Jazz, Rock Antenne, FM4,
+    WDR 4) war über drei Länder gestreut und als *Auslieferungs*liste
+    deshalb ungeeignet - in der systemweiten Datei steht jetzt je Land
+    eine eigene Zehn.
+  - [ ] **Nachrichten und Podcasts brauchen ebenfalls drei Listen.** Für
+    Nachrichten heißt das je Land: regional (Sender, weil es keinen
+    Podcast gibt), landesweit, weltweit. Belegt ist bisher eine einzige
+    Quelle - die tagesschau für Deutschland. Für Österreich ist der
+    Ö3-Feed ungeprüft, für die **Schweiz** ist noch nichts gesucht (SRF
+    wäre der naheliegende Anbieter), für „weltweit" fehlt eine
+    deutschsprachige Quelle (Deutsche Welle als nächster Versuch).
   - [x] **Die Medienliste wird nach dem Land des Geräts gefiltert**
     (2026-10-05 gebaut, Stephan: „Das Land würde ich immer an die
     Nutzerdaten verknüpfen. Da haben wir ja bereits eine Maske"). Über

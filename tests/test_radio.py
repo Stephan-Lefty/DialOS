@@ -342,11 +342,46 @@ class AusgelieferteListe(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.pfad))
         self.assertRegex(self.daten["stand"], r"^\d{4}-\d{2}-\d{2}$")
 
-    def test_hoechstens_zehn(self):
-        """Stephans Vorgabe vom 2026-10-05: „Ja lieber 10". Die Regel
-        „weniger ist mehr" aus medienliste.md ist damit eine Zahl."""
-        self.assertLessEqual(len(self.eintraege), 10)
-        self.assertGreater(len(self.eintraege), 0)
+    def test_hoechstens_zehn_je_land_und_gattung(self):
+        """Stephans Vorgaben vom 2026-10-05, beide zusammen: „Ja lieber 10"
+        und „wir müssen für alle Medien 3 Listen machen".
+
+        Die Zahl gilt deshalb JE LAND, nicht fuer die ganze Datei - die
+        Datei ist der Vorrat fuer drei Laender, und jedes Geraet sieht
+        davon nur seines (siehe land_des_geraets). Ein frueherer Test
+        verlangte hoechstens zehn insgesamt und schlug zu, sobald die
+        zweite Landesliste dazukam.
+        """
+        gezaehlt = {}
+        for eintrag in self.eintraege:
+            schluessel = (eintrag.get("land") or "ohne", eintrag["art"])
+            gezaehlt[schluessel] = gezaehlt.get(schluessel, 0) + 1
+        self.assertTrue(gezaehlt, "die Liste ist leer")
+        for (land, art), anzahl in gezaehlt.items():
+            with self.subTest(land=land, art=art):
+                self.assertLessEqual(
+                    anzahl, 10,
+                    f"{anzahl} Eintraege fuer {art} in {land} - "
+                    "„weniger ist mehr“ gilt je Land")
+
+    def test_jedes_land_wird_bedient(self):
+        """DialOS ist fuer drei Laender. Eine Liste, die nur eines
+        bedient, laesst zwei Drittel der Geraete ohne Radio."""
+        laender = {e.get("land") for e in self.eintraege if e.get("land")}
+        self.assertEqual(laender, {"DE", "AT", "CH"})
+
+    def test_je_land_keine_kollision(self):
+        """Entscheidend ist die Kollision INNERHALB eines Landes - nur
+        die Saetze eines Landes kommen zusammen in die Grammatik. Zwei
+        aehnliche Sprechformen in verschiedenen Laendern treffen sich
+        auf keinem Geraet."""
+        for land in ("DE", "AT", "CH"):
+            teil = [e for e in self.eintraege if e.get("land") == land]
+            with self.subTest(land=land):
+                paare = rs.aehnliche_sprechformen(teil)
+                self.assertEqual(
+                    [(a["sprechform"], b["sprechform"]) for a, b, _ in paare],
+                    [])
 
     def test_jeder_eintrag_vollstaendig(self):
         for eintrag in self.eintraege:

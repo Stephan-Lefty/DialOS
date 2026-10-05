@@ -11,30 +11,6 @@
   },
   {
    "art": "radio",
-   "sprechform": "radio tirol",
-   "name": "ORF Radio Tirol",
-   "land": "AT",
-   "quelle": "http://orf-live.ors-shoutcast.at/tir-q2a",
-   "stationuuid": "477d5e54-24b0-48dd-97f0-5cf4f047eb55"
-  },
-  {
-   "art": "radio",
-   "sprechform": "ö drei",
-   "name": "Hitradio Oe3",
-   "land": "AT",
-   "quelle": "https://orf-live.ors-shoutcast.at/oe3-q2a",
-   "stationuuid": "e723f7f8-0db1-4bc5-a64c-64d8377f9f9a"
-  },
-  {
-   "art": "radio",
-   "sprechform": "ö eins",
-   "name": "Oe1",
-   "land": "AT",
-   "quelle": "http://orf-live.ors-shoutcast.at/oe1-q2a",
-   "stationuuid": "657b7b0f-2ef9-45df-9915-4ca4f948c54f"
-  },
-  {
-   "art": "radio",
    "sprechform": "bayern drei",
    "name": "Bayern 3",
    "land": "DE",
@@ -51,11 +27,11 @@
   },
   {
    "art": "radio",
-   "sprechform": "radio swiss jazz",
-   "name": "Radio Swiss Jazz",
-   "land": "CH",
-   "quelle": "http://stream.srg-ssr.ch/m/rsj/mp3_128",
-   "stationuuid": "961ac56b-0601-11e8-ae97-52543be04c81"
+   "sprechform": "we de er vier",
+   "name": "WDR 4",
+   "land": "DE",
+   "quelle": "https://wdr-wdr4-live.icecastssl.wdr.de/wdr/wdr4/live/mp3/128/stream.mp3",
+   "stationuuid": "44ee797f-b7c4-4f94-8853-ce9a9c8731ed"
   },
   {
    "art": "radio",
@@ -67,6 +43,62 @@
   },
   {
    "art": "radio",
+   "sprechform": "en de er zwei",
+   "name": "NDR 2",
+   "land": "DE",
+   "quelle": "https://icecast.ndr.de/ndr/ndr2/niedersachsen/mp3/128/stream.mp3",
+   "stationuuid": "9e3b0f8e-95d3-11e9-a605-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "eins live",
+   "name": "1LIVE",
+   "land": "DE",
+   "quelle": "https://wdr-1live-live.icecastssl.wdr.de/wdr/1live/live/mp3/128/stream.mp3",
+   "stationuuid": "b2cbd1fd-275d-432a-8b20-37dcb3572315"
+  },
+  {
+   "art": "radio",
+   "sprechform": "ha er drei",
+   "name": "hr3",
+   "land": "DE",
+   "quelle": "https://dispatcher.rndfnk.com/hr/hr3/live/mp3/high",
+   "stationuuid": "d99c1386-0a12-4d7b-90d4-519ae5a89136"
+  },
+  {
+   "art": "radio",
+   "sprechform": "em de er jump",
+   "name": "MDR Jump",
+   "land": "DE",
+   "quelle": "http://mdr-284320-0.cast.mdr.de/mdr/284320/0/mp3/high/stream.mp3",
+   "stationuuid": "961696dc-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "klassik radio",
+   "name": "Klassik Radio",
+   "land": "DE",
+   "quelle": "https://live.streams.klassikradio.de/klassikradio-deutschland/stream/mp3",
+   "stationuuid": "ffd351fe-219e-4c6e-b14f-9c2e02fbe45e"
+  },
+  {
+   "art": "radio",
+   "sprechform": "ö eins",
+   "name": "Oe1",
+   "land": "AT",
+   "quelle": "http://orf-live.ors-shoutcast.at/oe1-q2a",
+   "stationuuid": "657b7b0f-2ef9-45df-9915-4ca4f948c54f"
+  },
+  {
+   "art": "radio",
+   "sprechform": "ö drei",
+   "name": "Hitradio Oe3",
+   "land": "AT",
+   "quelle": "https://orf-live.ors-shoutcast.at/oe3-q2a",
+   "stationuuid": "e723f7f8-0db1-4bc5-a64c-64d8377f9f9a"
+  },
+  {
+   "art": "radio",
    "sprechform": "f em vier",
    "name": "FM4",
    "land": "AT",
@@ -75,11 +107,139 @@
   },
   {
    "art": "radio",
-   "sprechform": "we de er vier",
-   "name": "WDR 4",
-   "land": "DE",
-   "quelle": "https://wdr-wdr4-live.icecastssl.wdr.de/wdr/wdr4/live/mp3/128/stream.mp3",
-   "stationuuid": "44ee797f-b7c4-4f94-8853-ce9a9c8731ed"
+   "sprechform": "radio tirol",
+   "name": "ORF Radio Tirol",
+   "land": "AT",
+   "quelle": "http://orf-live.ors-shoutcast.at/tir-q2a",
+   "stationuuid": "477d5e54-24b0-48dd-97f0-5cf4f047eb55"
+  },
+  {
+   "art": "radio",
+   "sprechform": "krone hit",
+   "name": "Kronehit",
+   "land": "AT",
+   "quelle": "http://onair.krone.at/kronehit.mp3",
+   "stationuuid": "7bf200d7-c1fd-4f0d-a33c-be799cd4dfb4"
+  },
+  {
+   "art": "radio",
+   "sprechform": "achtundachtzig sechs",
+   "name": "Radio 88.6",
+   "land": "AT",
+   "quelle": "http://radio886.at/streams/radio_88.6/mp3",
+   "stationuuid": "af1d60c9-5e0d-11ea-be63-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "antenne steiermark",
+   "name": "Antenne Steiermark",
+   "land": "AT",
+   "quelle": "http://live.antenne.at/as",
+   "stationuuid": "9608a2aa-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "life radio",
+   "name": "Life Radio",
+   "land": "AT",
+   "quelle": "http://stream1.liferadio.at/",
+   "stationuuid": "96060101-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "lounge f em",
+   "name": "LoungeFM",
+   "land": "AT",
+   "quelle": "https://s35.derstream.net/100austria.mp3",
+   "stationuuid": "282facce-8ae7-46a5-9e24-a946abe9fc7d"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio arabella austro pop",
+   "name": "Radio Arabella Austropop",
+   "land": "AT",
+   "quelle": "https://frontend.streams.arabella.at/arabella-austropop/stream/mp3?aggregator=arabella-playlistfile",
+   "stationuuid": "bbd3a015-9cff-4afb-8aed-b011555a4538"
+  },
+  {
+   "art": "radio",
+   "sprechform": "es er f eins",
+   "name": "SRF 1",
+   "land": "CH",
+   "quelle": "http://stream.srg-ssr.ch/m/drs1/mp3_128",
+   "stationuuid": "960e57c5-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "es er f zwei kultur",
+   "name": "SRF 2 Kultur",
+   "land": "CH",
+   "quelle": "http://stream.srg-ssr.ch/srgssr/srf2/mp3/128",
+   "stationuuid": "960bbed9-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "es er f vier news",
+   "name": "SRF 4 News",
+   "land": "CH",
+   "quelle": "http://stream.srg-ssr.ch/m/drs4news/mp3_128",
+   "stationuuid": "960ed987-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "es er f musik welle",
+   "name": "SRF Musikwelle",
+   "land": "CH",
+   "quelle": "http://stream.srg-ssr.ch/srgssr/srfmw/mp3/128",
+   "stationuuid": "960dae40-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio swiss pop",
+   "name": "Radio Swiss Pop",
+   "land": "CH",
+   "quelle": "https://livestreaming-node-2.srg-ssr.ch/srgssr/rsp/mp3/128",
+   "stationuuid": "519d7472-7d51-41d4-8aad-09a8ac03fb89"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio swiss jazz",
+   "name": "Radio Swiss Jazz",
+   "land": "CH",
+   "quelle": "http://stream.srg-ssr.ch/m/rsj/mp3_128",
+   "stationuuid": "961ac56b-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio swiss classic",
+   "name": "Radio Swiss Classic",
+   "land": "CH",
+   "quelle": "http://stream.srg-ssr.ch/m/rsc_de/mp3_128",
+   "stationuuid": "96077079-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio vierundzwanzig",
+   "name": "Radio 24",
+   "land": "CH",
+   "quelle": "https://stream.streambase.ch/radio24/mp3-192/direct/",
+   "stationuuid": "be9fa6d2-aace-46ea-bdbf-68092402066f"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio pilatus",
+   "name": "Radio Pilatus",
+   "land": "CH",
+   "quelle": "https://stream.streambase.ch/radiopilatus/mp3-192/chmedia/",
+   "stationuuid": "7fa043b5-6a69-40ce-abaa-2274634484bc"
+  },
+  {
+   "art": "radio",
+   "sprechform": "vintage radio",
+   "name": "Vintage Radio",
+   "land": "CH",
+   "quelle": "https://vintageradio.ice.infomaniak.ch/vintageradio-high.mp3",
+   "stationuuid": "962af9b5-0601-11e8-ae97-52543be04c81"
   }
  ]
 }
