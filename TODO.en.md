@@ -2119,7 +2119,8 @@ finished too, and then move down together. That way no reference breaks.
   **As of 2026-10-05:** the script is in `docs/video-drehbuch.md` (German) -
   fully automatic, Anna plays the user through a virtual microphone,
   Michael is DialOS, sample data in a separate demo account, each voice on
-  its own track. Waiting for Stephan's approval.
+  its own track. Approved by Stephan (2026-10-05),
+  search scene dropped; next is a trial run under DialOS.
 
 - [x] **Reference audio device decided (Stephan, 2026-08-17): two
   devices.** The AIRHUG stays as the speaker in A2DP, plus a wireless

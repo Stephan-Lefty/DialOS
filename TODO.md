@@ -2384,7 +2384,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   **Stand 2026-10-05:** Drehbuch steht in `docs/video-drehbuch.md` -
   vollautomatisch, Anna spielt die Nutzerin über ein virtuelles Mikrofon,
   Michael ist DialOS, Musterdaten im eigenen Vorführkonto, jede Stimme auf
-  eigener Spur. Wartet auf Stephans Freigabe.
+  eigener Spur. Von Stephan freigegeben (2026-10-05),
+  Szene Suche gestrichen; als Nächstes Probelauf unter DialOS.
 
 - [x] **Referenz-Audiogerät entschieden (Stephan, 2026-08-17): zwei
   Geräte.** AIRHUG bleibt als Lautsprecher in A2DP, dazu ein

@@ -1,6 +1,6 @@
 # Drehbuch: Vorführvideo „Was DialOS heute kann"
 
-**Stand: 2026-10-05, Entwurf - noch nicht gedreht.** Stephan: ein Video,
+**Stand: 2026-10-05, von Stephan freigegeben - noch nicht gedreht.** Stephan: ein Video,
 vollautomatisch erstellt, in dem zu sehen und zu hören ist, was DialOS
 heute kann. **Anna spielt die Nutzerin, Michael ist DialOS.** Mit
 Musterdaten, hochauflösend, jede Stimme auf einer eigenen Tonspur.
@@ -19,9 +19,10 @@ nicht, sieht man das - dann wird die Szene im Probelauf angepasst, nicht
 im Schnitt geschönt.
 
 Gezeigt wird nur, was unter „Umgesetzt" in
-[sprachbefehle.md](sprachbefehle.md) steht. Radio, Podcasts und Drucken
-kommen nicht vor (Radio ist noch nicht gebaut, ein Drucker gehört nicht
-zum Aufbau).
+[sprachbefehle.md](sprachbefehle.md) steht. Radio, Podcasts, Drucken und
+die Suche kommen nicht vor (Radio ist noch nicht gebaut, ein Drucker gehört nicht
+zum Aufbau; die Suche hat Stephan am 2026-10-05 gestrichen, damit das
+Video kurz bleibt).
 
 ## Die Musterdaten
 
@@ -54,7 +55,7 @@ beim ersten Durchlauf festgehalten. Das Mitschrift-Fenster ist während
 des ganzen Videos offen - es zeigt sehenden Zuschauern, was erkannt wurde,
 und wirkt im Video wie ein Untertitel.
 
-Geschätzte Länge: **5 bis 6 Minuten.**
+Geschätzte Länge: **rund 5 Minuten.**
 
 ### 1. Aufwachen (ca. 0:15)
 
@@ -113,16 +114,7 @@ DialOS nichts ohne „ja" verschickt.
 | „Diktat beenden" | „2 Sätze an Erika Musterfrau, Betreff Einladung. Soll ich sie verschicken? Sage ja, nein, oder vorlesen." | Mitschrift |
 | „nein" | Legt sie als Entwurf ab *(Probelauf)* | Thunderbird mit dem Entwurf |
 
-### 6. Etwas wiederfinden (ca. 0:45, kann entfallen)
-
-| Anna | DialOS | Bild |
-|---|---|---|
-| „Unterlagen durchsuchen" | Fragt, wo gesucht werden soll | Mitschrift |
-| „Dokumente" | „Wonach soll ich in den Dokumenten suchen? Sage einen Begriff." | Mitschrift |
-| „Erika" | Nennt den Brief aus Szene 4, fragt nach *(Probelauf)* | Mitschrift |
-| „vorlesen" | Liest den Brief | Mitschrift |
-
-### 7. Programme auf Zuruf (ca. 0:30)
+### 6. Programme auf Zuruf (ca. 0:30)
 
 | Anna | DialOS | Bild |
 |---|---|---|
@@ -130,7 +122,7 @@ DialOS nichts ohne „ja" verschickt.
 | „Internet schließen" | „Soll ich … schließen? Sage ja oder nein." *(Probelauf)* | Firefox |
 | „ja" | *(Probelauf)* | Firefox geht zu |
 
-### 8. Schluss (ca. 0:10)
+### 7. Schluss (ca. 0:10)
 
 | Anna | DialOS | Bild |
 |---|---|---|
@@ -223,7 +215,8 @@ sich die Freigabe, und jeder weitere Dreh läuft ohne Klick.
 
 ## Reihenfolge
 
-1. Stephan gibt das Drehbuch frei (Szenen, Musterdaten, Länge).
+1. ~~Stephan gibt das Drehbuch frei~~ - erledigt 2026-10-05 (Szene
+   „Etwas wiederfinden" gestrichen, sonst wie entworfen).
 2. Vorführkonto anlegen, Musterdaten über die Maske, Kontakt Erika
    Musterfrau anlegen, Thunderbird offline.
 3. `obs-studio` und `ffmpeg` installieren, OBS einrichten.
