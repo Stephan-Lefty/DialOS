@@ -131,6 +131,42 @@ for DATEI in frageton persoenliche-daten.txt; do
     [ -e "$HEIM/.config/dialos/$DATEI" ] && da "$DATEI" || fehlt "$DATEI"
 done
 
+# RADIO (neu 2026-09-30). Hier liegen Dinge auf zwei Ebenen, und nur die
+# systemweite ist ein Mangel, wenn sie fehlt:
+#
+#   systemweit  /usr/local/share/dialos/medienliste.json
+#               Ohne sie sagt "Radio einschalten" nur "Ich habe noch keine
+#               Sender" - das Radio ist funktionslos. Das IST ein Mangel.
+#
+#   je Konto    ~/.config/dialos/medienliste.json  (eigene Ergaenzungen)
+#               ~/.config/dialos/radio-zuletzt.txt (zuletzt gehoerter Sender)
+#               Beide entstehen erst, wenn der Mensch etwas tut. Als "FEHLT"
+#               gemeldet waeren sie ein Fehlalarm - dieselbe Falle wie beim
+#               Thunderbird-Profil weiter oben, wo die Abnahme zweimal
+#               "FEHLT" meldete fuer etwas, das richtig eingerichtet war.
+echo "=== Radio ==="
+if [ -e /usr/local/share/dialos/medienliste.json ]; then
+    ANZAHL=$(grep -o '"art"' /usr/local/share/dialos/medienliste.json 2>/dev/null | wc -l)
+    da "Medienliste systemweit ($ANZAHL Eintraege)"
+else
+    fehlt "Medienliste /usr/local/share/dialos/medienliste.json - ohne sie spielt das Radio nichts"
+fi
+[ -x /usr/local/bin/dialos-radio.py ] && da "dialos-radio.py ausfuehrbar" \
+    || fehlt "/usr/local/bin/dialos-radio.py"
+command -v rhythmbox-client >/dev/null && da "rhythmbox-client vorhanden" \
+    || fehlt "rhythmbox-client - das Radio braucht ihn zum Abspielen"
+# Die zwei folgenden sind KEIN Mangel, nur eine Auskunft.
+if [ -e "$HEIM/.config/dialos/medienliste.json" ]; then
+    sagen "da" "eigene Senderliste des Kontos (ergaenzt die systemweite)"
+else
+    sagen "ok" "keine eigene Senderliste - normal, bis der Nutzer eine anlegt"
+fi
+if [ -e "$HEIM/.config/dialos/radio-zuletzt.txt" ]; then
+    sagen "da" "zuletzt gehoert: $(head -c 60 "$HEIM/.config/dialos/radio-zuletzt.txt" | tr -d '\n')"
+else
+    sagen "ok" "noch kein Sender gehoert - normal vor dem ersten Mal"
+fi
+
 echo
 if [ "$FEHLT" -eq 0 ]; then
     echo "Im Konto $KONTO fehlt nichts."
