@@ -188,6 +188,26 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Dazu: neueste Folge finden, Datum prüfen (ein Feed, der seit Monaten
     stillsteht, ist tot) und die Audiodatei mit `ffprobe` antesten - wie
     bei den Radiosendern.
+  - [ ] **Podcasts und Hörbücher: die Merkposition ist der Brocken**
+    (Stand 2026-10-05). Abspielen selbst wäre schnell gebaut - die
+    Technik steht: `dialos_podcast.py` liest Feeds, `dialos-radio.py`
+    spielt seit heute die neueste Folge (bei den Nachrichten). Ein
+    Podcast-Befehl wäre fast dieselbe Funktion.
+    **Was fehlt, ist das Weiterhören.** Ohne Merkposition beginnt ein
+    achtstündiges Hörbuch nach jedem Einschalten von vorn, und das
+    macht es unbrauchbar. **Geprüft 2026-10-05:** Rhythmbox bringt ein
+    MPRIS-Plugin mit (`/usr/lib/rhythmbox/plugins/mpris/libmpris.so`),
+    also sind `Position` (lesen) und `SetPosition` (setzen) über D-Bus
+    erreichbar - `rhythmbox-client` allein kann es nicht, es hat nur
+    `--seek`. **Am Gerät zu prüfen:** ob das Plugin aktiv ist und ob
+    `Position` bei einem Stream überhaupt etwas Sinnvolles liefert.
+    **Drei Entscheidungen gehören Stephan**, bevor das Hörbuch gebaut
+    wird: wo die Dateien liegen (`~/Hörbücher`, oder auf dem Stick
+    `DIALOS-DATA`, der ohnehin als Zusatzspeicher gedacht ist), woher
+    sie kommen (freie Hörbücher wie LibriVox, gekaufte Dateien,
+    Bibliothek) und wie ein Buch aus mehreren Kapiteldateien
+    zusammengehalten wird. Für Podcasts fehlt außerdem die Auswahl
+    selbst - welche zehn je Land, nach seinem Geschmack.
   - [ ] **Podcasts und Hörbücher brauchen mehr als einen Eintrag.** Für
     Podcasts fehlt das Lesen des RSS-Feeds (neueste Folge), für beide die
     Merkposition über MPRIS - ein achtstündiges Hörbuch, das nach dem
