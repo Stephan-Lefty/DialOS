@@ -3567,12 +3567,25 @@ own selection would be gone after the next install - and they could not
 look up why their favourite station had disappeared.
 
 **The prerequisites are already there:** `python3-gi` with GTK 4 and
-libadwaita (step 11), GStreamer for previewing (present with GNOME) and
-`curl`. The thorough check uses `ffprobe` from `ffmpeg` - if `ffmpeg` is
-missing, the tool only checks reachability and says so. Install if needed:
+libadwaita (step 11), GStreamer for previewing (present with GNOME),
+`curl`, and since 2026-09-30 `ffmpeg` as well - it is listed in
+`desktop.list.chroot` and therefore arrives with step 2.
+
+**Why `ffmpeg` is listed explicitly:** the thorough station check decodes
+the stream with `ffprobe` and compares the ICY name the station reports
+about itself. A plain HTTP test would have let three faults through on
+2026-09-25, all of which answered "200 OK" - "MDR Aktuell" pointed at MDR
+Kultur, "Radio Swiss Classic" at the Italian version, "Kronehit" at a JSON
+interface. Without `ffmpeg` the tool falls back to the reachability test;
+it says so, but the actual check is then missing.
+
+**On a device built before 2026-09-30** it is still absent. Install it
+**and mark it manual** - otherwise `apt autoremove` will offer to remove it
+again at the next cleanup (the same trap as `python3-gi-cairo` on
+2026-09-25):
 
 ```bash
-sudo apt-get install -y ffmpeg
+sudo apt-get install -y ffmpeg && sudo apt-mark manual ffmpeg
 ```
 
 **Two differences from the other extensions**, so nobody goes looking:

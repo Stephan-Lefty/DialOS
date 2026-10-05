@@ -60,6 +60,12 @@ finished too, and then move down together. That way no reference breaks.
     Seven voice commands; the stations enter the grammar from the media
     list. The contradiction between "Radio einschalten" and the answer "I
     cannot do that yet" is resolved.
+  - [ ] **Install `ffmpeg` on the device** (in `desktop.list.chroot` since
+    2026-09-30; a device built earlier does not have it). Without
+    `ffprobe`, DialOS-Rhythmbox only checks reachability, not whether
+    sound arrives. **With `apt-mark manual`**, or `autoremove` will take
+    it away again:
+    `sudo apt-get install -y ffmpeg && sudo apt-mark manual ffmpeg`
   - [ ] **The SECOND mandatory check is outstanding - on the device**
     (Piper speaks, Vosk listens, against the full grammar). It is not
     possible on the workbench machine because Piper is not installed

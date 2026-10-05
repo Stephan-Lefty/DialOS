@@ -153,6 +153,21 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **`ffmpeg` gehört jetzt zur Paketliste** (2026-09-30, Stephans Freigabe).
+  Die gründliche Senderprüfung dekodiert den Stream mit `ffprobe` und
+  vergleicht den ICY-Namen, den der Sender über sich selbst sendet. Ein bloßer
+  HTTP-Test hätte am 2026-09-25 **drei** Fehler durchgelassen, die alle mit
+  „200 OK" antworteten: „MDR Aktuell" zeigte auf MDR Kultur, „Radio Swiss
+  Classic" auf die italienische Fassung, „Kronehit" auf eine
+  JSON-Schnittstelle. Ohne `ffmpeg` fällt das Werkzeug auf den
+  Erreichbarkeitstest zurück - es sagt das an, aber damit fehlt genau die
+  Prüfung, die eine *geprüfte* Liste ausmacht. Fürs Abspielen braucht es das
+  Paket nicht (das macht Rhythmbox über GStreamer), fürs Zusammenstellen
+  schon. **Auf einem vor dem 2026-09-30 aufgebauten Gerät** nachinstallieren
+  und **als manuell markieren** - sonst bietet `apt autoremove` es beim
+  nächsten Aufräumen zum Entfernen an, dieselbe Falle wie bei
+  `python3-gi-cairo` am 2026-09-25. Der Befehl steht in Schritt 13e.
+
 - **Die Filterleiste in DialOS-Rhythmbox ist gebaut** (2026-09-30, Stephans
   Aufbau vom 2026-09-25: „Land - Landesweite Sender, Bundesland, Stadt oder so
   in der Art", dazu „Und dann noch nach Genre"). Land, Bereich, Genre und ein

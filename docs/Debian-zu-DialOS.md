@@ -3691,13 +3691,26 @@ wäre die eigene Auswahl des Nutzers beim nächsten Aufspielen weg - und er
 könnte nicht nachsehen, warum sein Lieblingssender verschwunden ist.
 
 **Voraussetzungen sind schon da:** `python3-gi` mit GTK 4 und libadwaita
-(Schritt 11), GStreamer fürs Vorhören (mit GNOME vorhanden) und `curl`.
-Für die gründliche Prüfung wird `ffprobe` aus `ffmpeg` benutzt - ist
-`ffmpeg` nicht installiert, prüft das Werkzeug nur die Erreichbarkeit und
-sagt das auch. Nachinstallieren, falls nötig:
+(Schritt 11), GStreamer fürs Vorhören (mit GNOME vorhanden), `curl` und
+seit dem 2026-09-30 auch `ffmpeg` - es steht in `desktop.list.chroot` und
+kommt damit über Schritt 2 mit.
+
+**Warum `ffmpeg` eigens in der Liste steht:** Die gründliche Senderprüfung
+dekodiert den Stream mit `ffprobe` und vergleicht den ICY-Namen, den der
+Sender über sich selbst sendet. Ein bloßer HTTP-Test hätte am 2026-09-25
+drei Fehler durchgelassen, die alle mit „200 OK" antworteten - „MDR
+Aktuell" zeigte auf MDR Kultur, „Radio Swiss Classic" auf die italienische
+Fassung, „Kronehit" auf eine JSON-Schnittstelle. Fehlt `ffmpeg`, fällt das
+Werkzeug auf den Erreichbarkeitstest zurück; es sagt das an, aber die
+eigentliche Prüfung fehlt dann.
+
+**Auf einem Gerät, das vor dem 2026-09-30 aufgebaut wurde**, fehlt es noch.
+Nachinstallieren **und als manuell markieren** - sonst bietet `apt
+autoremove` beim nächsten Aufräumen an, es wieder zu entfernen (dieselbe
+Falle wie bei `python3-gi-cairo` am 2026-09-25):
 
 ```bash
-sudo apt-get install -y ffmpeg
+sudo apt-get install -y ffmpeg && sudo apt-mark manual ffmpeg
 ```
 
 **Zwei Unterschiede zu den anderen Erweiterungen**, damit niemand sie

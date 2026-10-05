@@ -62,6 +62,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Sieben Sprachbefehle, die Sender kommen aus der Medienliste in die
     Grammatik. Der Widerspruch „Radio einschalten" gegen die Antwort „kann
     ich noch nicht" ist aufgelöst.
+  - [ ] **`ffmpeg` am Gerät nachinstallieren** (seit 2026-09-30 in
+    `desktop.list.chroot`, ein vorher aufgebautes Gerät hat es nicht).
+    Ohne `ffprobe` prüft DialOS-Rhythmbox nur die Erreichbarkeit, nicht ob
+    Ton kommt. **Mit `apt-mark manual`**, sonst räumt `autoremove` es
+    wieder weg:
+    `sudo apt-get install -y ffmpeg && sudo apt-mark manual ffmpeg`
   - [ ] **Die ZWEITE Pflichtprüfung steht aus - am Gerät** (Piper spricht,
     Vosk hört, mit der vollständigen Grammatik). Sie ist auf dem
     Arbeitsrechner nicht möglich, weil dort kein Piper installiert ist.

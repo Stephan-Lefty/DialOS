@@ -143,6 +143,19 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **`ffmpeg` is now part of the package list** (2026-09-30, approved by
+  Stephan). The thorough station check decodes the stream with `ffprobe` and
+  compares the ICY name the station reports about itself. A plain HTTP test
+  would have let **three** faults through on 2026-09-25, all answering "200
+  OK": "MDR Aktuell" pointed at MDR Kultur, "Radio Swiss Classic" at the
+  Italian version, "Kronehit" at a JSON interface. Without `ffmpeg` the tool
+  falls back to the reachability test - it says so, but that removes exactly
+  the check that makes the list a *verified* one. Playback does not need the
+  package (Rhythmbox does that via GStreamer); compiling the list does. **On a
+  device built before 2026-09-30**, install it and **mark it manual** -
+  otherwise `apt autoremove` will offer to remove it at the next cleanup, the
+  same trap as `python3-gi-cairo` on 2026-09-25. The command is in step 13e.
+
 - **The filter bar in DialOS-Rhythmbox is built** (2026-09-30, Stephan's
   layout of 2026-09-25: "country - nationwide stations, federal state, city or
   something like that", plus "and then by genre"). Country, area, genre and a

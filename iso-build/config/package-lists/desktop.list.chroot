@@ -24,6 +24,26 @@ shortwave
 rhythmbox
 gnome-podcasts
 libreoffice-writer
+# ffprobe fuer die Senderpruefung (ergaenzt 2026-09-30, Stephans Freigabe).
+#
+# WARUM ES NICHT REICHT, DEN SERVER ZU FRAGEN: DialOS-Rhythmbox prueft jeden
+# Sender, indem es den Stream mit ffprobe wirklich dekodiert und zusaetzlich
+# den ICY-Namen vergleicht, den der Sender ueber sich selbst sendet. Ein
+# blosser HTTP-Test haette am 2026-09-25 drei Fehler durchgelassen, die alle
+# mit "200 OK" antworteten: "MDR Aktuell" zeigte ueber eine .m3u-Datei auf
+# MDR KULTUR, "Radio Swiss Classic" war die italienische Fassung (sie meldete
+# sich als "Swiss Classic I"), und "Kronehit" zeigte auf eine
+# JSON-Schnittstelle.
+#
+# Ohne ffmpeg faellt das Werkzeug auf den Erreichbarkeitstest zurueck. Es sagt
+# das an - aber die eigentliche Pruefung fehlt dann, und genau sie ist der
+# Grund, warum die Liste geprueft heisst.
+#
+# Fuer das ABSPIELEN ist es nicht noetig, das macht Rhythmbox ueber GStreamer.
+# Gebraucht wird es beim Zusammenstellen der Liste. Es steht hier trotzdem fuer
+# jedes Geraet, weil die Liste auch am Geraet nachgepflegt werden soll - und
+# ein fehlendes Werkzeug fiele dort niemandem auf.
+ffmpeg
 # Rechtschreibpruefung (ergaenzt 2026-09-14). Kamen bisher nur indirekt ueber
 # task-german-desktop mit - als "automatisch installiert". Hier ausdruecklich,
 # damit sie nicht von einem Metapaket abhaengen, das beim Aufraeumen wegfallen
