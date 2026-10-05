@@ -143,6 +143,37 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The radio media list is settled: ten stations** (2026-10-05, Stephan's
+  call "yes, ten rather"). Deutschlandfunk, ORF Radio Tirol, Ö3, Ö1, Bayern 3,
+  BR-Klassik, Radio Swiss Jazz, Rock Antenne, FM4 and WDR 4 - spread across
+  speech, pop, classical, jazz, rock, oldies and one regional station.
+  Everything checkable without the device was checked: **no confusable
+  pairs**, every word in the recogniser's vocabulary (including as a full
+  command sentence), **all ten decoded with `ffprobe`**, none behind an access
+  barrier, none reporting a foreign name. **"Less is more" from
+  `medienliste.md` is therefore no longer merely well meant but measured:** at
+  78 stations the collision check reports ten confusable pairs; among these
+  ten, none.
+
+- **A central station list on a server is thought through but not built**
+  (Stephan's idea of 2026-10-05). The need is undisputed - stream addresses go
+  stale, and without a supply route every customer is stuck with the state of
+  their build day; a station that falls silent looks like a broken device to a
+  blind user. The structure already supports a third layer, because
+  `medienliste_lesen()` reads several files in a precedence order. **Five
+  questions must be decided first**, all recorded in
+  `docs/medien-konzept.md`: offline-first (the fetch must never be a
+  prerequisite and must fail **silently** - an error message about an
+  unreachable station list is of no use to a blind user), **data protection**
+  (every fetch shows the operator an IP address and thus that a DialOS device
+  stands there - with this user group that is more than access statistics and
+  belongs in the privacy policy before the first fetch), **signing** (whoever
+  takes over the server decides what plays on devices of people who cannot
+  look; HTTPS protects the path, not against a compromised server), the
+  precedence against the user's own selection - the same trap as
+  `piper-generic.conf`, only sharper - and how often to fetch. **The decision
+  becomes due when the first device leaves the house.**
+
 - **`ffmpeg` is now part of the package list** (2026-09-30, approved by
   Stephan). The thorough station check decodes the stream with `ffprobe` and
   compares the ICY name the station reports about itself. A plain HTTP test

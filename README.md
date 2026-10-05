@@ -153,6 +153,38 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Die Radio-Medienliste steht: zehn Sender** (2026-10-05, Stephans Vorgabe
+  „Ja lieber 10"). Deutschlandfunk, ORF Radio Tirol, Ö3, Ö1, Bayern 3,
+  BR-Klassik, Radio Swiss Jazz, Rock Antenne, FM4 und WDR 4 - breit gestreut
+  über Wort, Pop, Klassik, Jazz, Rock, Oldies und einen Regionalsender.
+  Geprüft wurde alles, was ohne Gerät prüfbar ist: **keine verwechselbaren
+  Paare**, jedes Wort im Wortschatz des Erkenners (auch als ganzer
+  Befehlssatz „ö eins einschalten"), **alle zehn mit `ffprobe` dekodiert**,
+  keiner mit Zugangsschranke, keiner meldet sich unter fremdem Namen.
+  **Damit ist „weniger ist mehr" aus `medienliste.md` nicht mehr nur gut
+  gemeint, sondern gemessen:** Bei 78 Sendern meldet die Kollisionsprüfung
+  zehn verwechselbare Paare, bei diesen zehn keines.
+
+- **Eine zentrale Senderliste auf einem Server ist durchdacht, aber nicht
+  gebaut** (Stephans Idee vom 2026-10-05). Der Bedarf ist unstrittig -
+  Streamadressen veralten, und ohne Nachlieferung hängt jeder Kunde auf dem
+  Stand seines Aufbautags; ein verstummter Sender sieht für einen blinden
+  Nutzer wie ein kaputtes Gerät aus. Die gebaute Struktur trägt eine dritte
+  Ebene bereits, weil `medienliste_lesen()` mehrere Dateien in einer
+  Rangfolge liest. **Fünf Fragen gehören aber vorher entschieden**, alle in
+  `docs/medien-konzept.md` festgehalten: Offline-first (der Abruf darf nie
+  Voraussetzung sein und muss **lautlos** scheitern - eine Fehlermeldung über
+  eine nicht erreichbare Senderliste nützt einem blinden Nutzer nichts),
+  **Datenschutz** (jeder Abruf zeigt dem Betreiber eine IP-Adresse und damit:
+  hier steht ein DialOS-Gerät - bei dieser Zielgruppe ist das mehr als eine
+  Zugriffsstatistik und gehört vor dem ersten Abruf in die
+  Datenschutzerklärung), **Signatur** (wer den Server übernimmt, bestimmt,
+  was auf Geräten von Menschen spielt, die nicht nachsehen können; HTTPS
+  schützt den Weg, nicht vor einem kompromittierten Server), die Rangfolge
+  gegenüber der eigenen Auswahl des Nutzers - dieselbe Falle wie bei
+  `piper-generic.conf`, nur schärfer - und der Takt des Nachladens.
+  **Fällig wird die Entscheidung, wenn das erste Gerät außer Haus ist.**
+
 - **`ffmpeg` gehört jetzt zur Paketliste** (2026-09-30, Stephans Freigabe).
   Die gründliche Senderprüfung dekodiert den Stream mit `ffprobe` und
   vergleicht den ICY-Namen, den der Sender über sich selbst sendet. Ein bloßer

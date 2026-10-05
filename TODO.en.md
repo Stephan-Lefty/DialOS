@@ -86,11 +86,35 @@ finished too, and then move down together. That way no reference breaks.
     both locations and now understands `--nur-wortschatz` for the first
     mandatory check without Piper. **Not system-wide**, because `sudo`
     requires a password here - which makes no difference for the check.
-  - [ ] **The file itself does not exist yet.** The format and both paths are
-    settled, but the selection is Stephan's to make - and medienliste.md says
-    "less is more": ten stations he really listens to beat the 78 collected.
-    At 78 the collision check reports eleven confusable pairs, which is the
-    practical confirmation of the rule.
+  - [x] **The radio list is settled** (2026-10-05, ten stations):
+    Deutschlandfunk, Radio Tirol, Ö3, Ö1, Bayern 3, BR-Klassik, Radio Swiss
+    Jazz, Rock Antenne, FM4, WDR 4. Verified: no confusable pairs, every
+    word in the vocabulary (including as a full command sentence), all ten
+    decoded with `ffprobe`, none behind an access barrier, none reporting a
+    foreign name.
+  - [x] **"Less is more" is confirmed in practice** (2026-10-05, Stephan:
+    "yes, ten rather"). At 78 stations the collision check reports ten
+    confusable pairs; among the ten chosen, **none**. The rule from
+    medienliste.md is now measured, not just well meant.
+  - [ ] **The other three media lists** (Stephan, 2026-10-05: "finish all
+    media lists with max 10 stations/providers"). Each depends on something
+    missing: **news** on the decision station-or-podcast; **podcasts** on the
+    fact that there is no database like radio-browser.info for RSS feeds -
+    they must be found and checked by hand, and no checking function exists;
+    **audiobooks** on the storage location and the source (free audiobooks,
+    purchased, library?).
+  - [ ] **Central station list on a server** (Stephan's idea of 2026-10-05).
+    The need is undisputed - stream addresses go stale, and without a way to
+    supply updates every customer is stuck with the state of their build day.
+    The structure already supports a third layer. **But five questions are
+    open**, details in [medien-konzept.md](docs/medien-konzept.md):
+    offline-first (the fetch must never be a prerequisite and must fail
+    silently), **data protection** (every fetch shows the operator an IP and
+    thus a DialOS device - with this user group that is more than a
+    statistic), **signing** (whoever takes over the server decides what plays
+    on every device), the precedence against the user's own selection, and
+    how often to fetch. **Due when the first device leaves the house** -
+    until then `git pull` and `dialos-aufspielen` suffice.
   - [ ] **`docs/medienliste.md` exists in German only** - the only one of the
     media documents without an English version (`medien-konzept` has one). The
     gap predates 2026-09-30 but grew that day: the whole section on the

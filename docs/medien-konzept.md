@@ -140,11 +140,73 @@ bekommen alle vier dieselbe Bedeutung: abspielen über Rhythmbox.
 - **Konto `nutzer`:** Die Medienliste liegt systemweit, Merkpositionen je Konto.
   Nach dem Bau gehört beides in `dialos-nutzerkonto-pruefen.sh`.
 
+## Eine zentrale Liste auf einem Server (Stephans Idee vom 2026-10-05)
+
+> **Stephan, 2026-10-05:** „Aber wir müssen uns offen halten immer welche
+> hinzuzufügen oder zu entfernen und das eventuell zentral über eine Liste
+> auf einen Server für alle Nutzer"
+
+**Der Bedarf ist unstrittig.** Streamadressen veralten - allein beim Bau am
+2026-09-25 waren drei von 78 Einträgen falsch, und bei SWR Kultur musste eine
+Adresse von Hand nachgetragen werden. Ohne einen Weg, das nachzuliefern, hängt
+jeder Kunde auf dem Stand seines Aufbautags fest, und ein verstummter Sender
+sieht für einen blinden Nutzer wie ein kaputtes Gerät aus.
+
+**Die gebaute Struktur trägt das schon.** `medienliste_lesen()` liest mehrere
+Dateien in einer Rangfolge und legt die höhere über die niedrigere; eine
+Server-Liste wäre schlicht eine dritte Ebene. Sinnvolle Ordnung:
+
+| Rang | Ebene | Wer pflegt |
+|---|---|---|
+| 1 (gewinnt) | `~/.config/dialos/medienliste.json` | der Nutzer selbst |
+| 2 | die nachgeladene Liste vom Server | zentral |
+| 3 | `/usr/local/share/dialos/medienliste.json` | Auslieferungszustand |
+
+**Fünf Fragen sind vor dem Bau zu klären. Nichts davon ist entschieden:**
+
+1. **Offline-first gilt weiter.** DialOS muss ohne Netz vollständig
+   funktionieren. Eine Server-Liste darf deshalb nur eine *Ergänzung* sein,
+   nie eine Voraussetzung - und wenn der Abruf scheitert, muss das
+   **lautlos** bleiben und die vorhandene Liste weiter gelten. Eine
+   Fehlermeldung über eine nicht erreichbare Senderliste nützt einem blinden
+   Nutzer nichts; sie beunruhigt ihn nur.
+2. **Der Abruf verrät etwas, und zwar Personenbezogenes.** Jede Anfrage zeigt
+   dem Server eine IP-Adresse und damit: Hier steht ein DialOS-Gerät. Da die
+   Zielgruppe blinde und motorisch eingeschränkte Menschen sind, entsteht beim
+   Betreiber - also bei Stephan - eine Liste, die mehr aussagt als eine
+   gewöhnliche Zugriffsstatistik. Das gehört in
+   [sicherheit-datenschutz.md](sicherheit-datenschutz.md) und in die
+   Datenschutzerklärung, bevor der erste Abruf stattfindet. Denkbare
+   Entschärfung: kein Protokoll der IP-Adressen, Abruf über ein CDN, oder die
+   Liste als Teil eines Paket-Updates statt als eigener Dienst.
+3. **Wer die Liste ändern kann, bestimmt, was auf jedem Gerät spielt.** Ein
+   übernommener Server könnte jede beliebige Adresse einspielen - auf Geräten
+   von Menschen, die nicht nachsehen können, was sie hören. HTTPS schützt den
+   Transportweg, nicht vor einem kompromittierten Server. Nötig wäre eine
+   Signatur, die das Gerät prüft, mit einem Schlüssel aus dem Aufbau.
+4. **Die eigene Wahl des Nutzers darf nie überschrieben werden.** Das ist
+   dieselbe Falle wie bei `piper-generic.conf` am 2026-08-22, nur schärfer:
+   Dort hat ein Aufspielen die Stimmwahl zurückgesetzt. Hier könnte ein
+   fremder Server die Lieblingssender ersetzen. Die Rangfolge oben ist
+   deshalb keine Feinheit, sondern die Bedingung.
+5. **Wann wird nachgeladen?** Beim Anmelden, wöchentlich, oder nur auf
+   Zuruf („Senderliste auffrischen")? Jeder Abruf ist ein Zeitpunkt, an dem
+   etwas schiefgehen kann, und beim Anmelden wartet der Nutzer.
+
+**Vorschlag für den Zwischenstand:** Solange das nicht entschieden ist, bleibt
+es bei den zwei Ebenen. Nachliefern geht schon heute über `git pull` und
+`dialos-aufspielen` - für Stephans eigenes Gerät reicht das, und für Kunden
+gibt es noch keine. Die Entscheidung wird erst fällig, wenn das erste Gerät
+außer Haus ist.
+
 ## Vorschlag für die Reihenfolge
 
-1. Medienliste füllen (Stephan, mit seiner App) und das Format festlegen.
-2. Radio: Sender aus der Liste abspielen, anhalten, lauter/leiser, „was läuft
-   gerade". Der kleinste Weg, der jeden Tag gebraucht wird.
+1. ~~Medienliste füllen~~ **Radio erledigt am 2026-10-05:** zehn Sender,
+   geprüft (Wortschatz, Kollisionen, ffprobe) - siehe
+   [medienliste.md](medienliste.md).
+2. ~~Radio: Sender abspielen, anhalten, lauter/leiser, „was läuft gerade"~~
+   **gebaut am 2026-09-30** (`dialos-radio.py`); die zweite Pflichtprüfung
+   steht noch am Gerät aus.
 3. Nachrichten - sobald entschieden ist, welche Form.
 4. Podcasts mit Merkposition.
 5. Musik aus der eigenen Sammlung, Hörbücher.

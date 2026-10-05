@@ -88,11 +88,37 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     beiden Orten und kennt jetzt `--nur-wortschatz` für die erste
     Pflichtprüfung ohne Piper. **Nicht systemweit**, weil `sudo` hier ein
     Passwort verlangt - für die Prüfung macht das keinen Unterschied.
-  - [ ] **Die Datei selbst gibt es noch nicht.** Das Format und beide Pfade
-    stehen, die Auswahl trifft aber Stephan - und laut medienliste.md gilt
-    „weniger ist mehr": lieber zehn Sender, die er wirklich hört, als die
-    78 gesammelten. Bei 78 meldet die Kollisionsprüfung elf verwechselbare
-    Paare, das ist die praktische Bestätigung der Regel.
+  - [x] **Die Radio-Liste steht** (2026-10-05, zehn Sender). Deutschlandfunk,
+    Radio Tirol, Ö3, Ö1, Bayern 3, BR-Klassik, Radio Swiss Jazz, Rock
+    Antenne, FM4, WDR 4. Geprüft: keine verwechselbaren Paare, jedes Wort
+    im Wortschatz (auch als ganzer Befehlssatz), alle zehn mit `ffprobe`
+    dekodiert, keiner mit Zugangsschranke, keiner mit Namenszweifel.
+  - [ ] **Die anderen drei Medienlisten** (Stephan, 2026-10-05: „alle
+    Medienlisten mit max 10 Sender/Anbieter fertig machen"). Jede hängt an
+    etwas, das noch fehlt: **Nachrichten** an der Entscheidung
+    Sender-oder-Podcast; **Podcasts** daran, dass es für RSS-Feeds keine
+    Datenbank wie radio-browser.info gibt - die Feeds müssen von Hand
+    gesucht und geprüft werden, und eine Prüffunktion dafür existiert
+    nicht; **Hörbücher** am Ablageort und an der Quelle (freie Hörbücher,
+    gekauft, Bibliothek?).
+  - [ ] **Zentrale Senderliste auf einem Server** (Stephans Idee vom
+    2026-10-05). Der Bedarf ist unstrittig - Streamadressen veralten, und
+    ohne Nachlieferung hängt jeder Kunde auf dem Stand seines Aufbautags.
+    Die gebaute Struktur trägt eine dritte Ebene schon. **Fünf Fragen sind
+    aber offen**, Einzelheiten in
+    [medien-konzept.md](docs/medien-konzept.md): Offline-first (der Abruf
+    darf nie Voraussetzung sein und muss lautlos scheitern),
+    **Datenschutz** (jeder Abruf zeigt dem Betreiber eine IP und damit ein
+    DialOS-Gerät - bei dieser Zielgruppe mehr als eine Statistik),
+    **Signatur** (wer den Server übernimmt, bestimmt, was auf jedem Gerät
+    spielt), die Rangfolge gegenüber der eigenen Auswahl des Nutzers, und
+    der Takt des Nachladens. **Fällig, wenn das erste Gerät außer Haus
+    ist** - bis dahin reichen `git pull` und `dialos-aufspielen`.
+  - [x] **„Weniger ist mehr" ist in der Praxis bestätigt** (2026-10-05,
+    Stephan: „Ja lieber 10"). Bei 78 Sendern meldet die Kollisionsprüfung
+    zehn verwechselbare Paare, bei den gewählten zehn **keines**. Die
+    Regel aus medienliste.md ist damit nicht nur gut gemeint, sondern
+    gemessen.
   - [ ] **`docs/medienliste.md` gibt es nur auf Deutsch** - als einzige der
     Medien-Dateien (`medien-konzept` hat eine englische Fassung). Die Lücke
     bestand schon vorher, ist aber am 2026-09-30 größer geworden: Der ganze

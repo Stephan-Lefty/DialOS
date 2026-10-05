@@ -37,7 +37,26 @@ import sys
 import time
 
 SAY = "/usr/local/bin/dialos-say.py"
-SENDER_MODUL = "/usr/local/bin/dialos_rhythmbox_sender.py"
+
+
+def _sender_modul_suchen():
+    """dialos_rhythmbox_sender.py - NEBEN MIR zuerst.
+
+    Am Geraet liegen beide unter /usr/local/bin, dort trifft der feste
+    Pfad. Auf dem Arbeitsrechner liegen sie im Repo-Baum - und mit dem
+    festen Pfad endete "dialos-radio.py liste" dort mit Rueckgabewert 1
+    und ohne ein Wort Ausgabe (2026-10-05 aufgefallen). Dieselbe Luecke
+    wie in dialos-sprachbefehl-desktop.py, dort am 2026-09-30 behoben;
+    hier war sie stehen geblieben.
+    """
+    neben_mir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "dialos_rhythmbox_sender.py")
+    if os.path.isfile(neben_mir):
+        return neben_mir
+    return "/usr/local/bin/dialos_rhythmbox_sender.py"
+
+
+SENDER_MODUL = _sender_modul_suchen()
 CLIENT = "rhythmbox-client"
 PROTOKOLL = os.path.join(os.path.expanduser("~"), ".log", "dialos-radio.log")
 
@@ -359,6 +378,13 @@ def main():
             rs = sender_modul()
         except Exception as fehler:        # noqa: BLE001
             melde(f"Sendermodul nicht ladbar: {fehler}")
+            # AUCH AUF stderr, nicht nur ins Protokoll (2026-10-05): Am
+            # Geraet hoert der Nutzer die Ansage, aber wer das Programm von
+            # Hand aufruft - zum Pruefen nach dem Aufspielen - bekam
+            # Rueckgabewert 1 und kein Wort. Ein stiller Fehlschlag ist
+            # genau das, was dieses Projekt sonst ueberall vermeidet.
+            print(f"Senderliste nicht erreichbar: {fehler}", file=sys.stderr)
+            print(f"Erwartet: {SENDER_MODUL}", file=sys.stderr)
             sprich("Ich komme gerade nicht an die Senderliste.")
             return 1
 

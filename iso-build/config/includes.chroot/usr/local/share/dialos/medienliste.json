@@ -1,0 +1,85 @@
+{
+ "stand": "2026-10-05",
+ "eintraege": [
+  {
+   "art": "radio",
+   "sprechform": "deutschlandfunk",
+   "name": "Deutschlandfunk",
+   "land": "DE",
+   "quelle": "https://st01.sslstream.dlf.de/dlf/01/128/mp3/stream.mp3?aggregator=web",
+   "stationuuid": "1c3e8be2-5b14-4933-bad3-87cbc227cba4"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio tirol",
+   "name": "ORF Radio Tirol",
+   "land": "AT",
+   "quelle": "http://orf-live.ors-shoutcast.at/tir-q2a",
+   "stationuuid": "477d5e54-24b0-48dd-97f0-5cf4f047eb55"
+  },
+  {
+   "art": "radio",
+   "sprechform": "ö drei",
+   "name": "Hitradio Oe3",
+   "land": "AT",
+   "quelle": "https://orf-live.ors-shoutcast.at/oe3-q2a",
+   "stationuuid": "e723f7f8-0db1-4bc5-a64c-64d8377f9f9a"
+  },
+  {
+   "art": "radio",
+   "sprechform": "ö eins",
+   "name": "Oe1",
+   "land": "AT",
+   "quelle": "http://orf-live.ors-shoutcast.at/oe1-q2a",
+   "stationuuid": "657b7b0f-2ef9-45df-9915-4ca4f948c54f"
+  },
+  {
+   "art": "radio",
+   "sprechform": "bayern drei",
+   "name": "Bayern 3",
+   "land": "DE",
+   "quelle": "https://dispatcher.rndfnk.com/br/br3/live/mp3/mid",
+   "stationuuid": "0de82079-04e7-407b-b616-e0726eba5244"
+  },
+  {
+   "art": "radio",
+   "sprechform": "be er klassik",
+   "name": "BR-Klassik",
+   "land": "DE",
+   "quelle": "https://dispatcher.rndfnk.com/br/brklassik/live/mp3/high",
+   "stationuuid": "29010f42-faef-4a9e-b15c-3ad1613b45cb"
+  },
+  {
+   "art": "radio",
+   "sprechform": "radio swiss jazz",
+   "name": "Radio Swiss Jazz",
+   "land": "CH",
+   "quelle": "http://stream.srg-ssr.ch/m/rsj/mp3_128",
+   "stationuuid": "961ac56b-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "rock antenne",
+   "name": "Rock Antenne",
+   "land": "DE",
+   "quelle": "http://mp3channels.webradio.rockantenne.de/rockantenne",
+   "stationuuid": "960594a6-0601-11e8-ae97-52543be04c81"
+  },
+  {
+   "art": "radio",
+   "sprechform": "f em vier",
+   "name": "FM4",
+   "land": "AT",
+   "quelle": "https://orf-live.ors-shoutcast.at/fm4-q2a",
+   "stationuuid": "1e13ed4e-daa9-4728-8550-e08d89c1c8e7"
+  },
+  {
+   "art": "radio",
+   "sprechform": "we de er vier",
+   "name": "WDR 4",
+   "land": "DE",
+   "quelle": "https://wdr-wdr4-live.icecastssl.wdr.de/wdr/wdr4/live/mp3/128/stream.mp3",
+   "stationuuid": "44ee797f-b7c4-4f94-8853-ce9a9c8731ed"
+  }
+ ]
+}

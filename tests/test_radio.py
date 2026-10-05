@@ -321,5 +321,102 @@ class PasstZumSprachdienst(unittest.TestCase):
                 self.assertTrue(satz.endswith(" einschalten"))
 
 
+class AusgelieferteListe(unittest.TestCase):
+    """Die Medienliste, die wirklich im Repo liegt und aufs Geraet geht.
+
+    Bis zum 2026-10-05 gab es sie nicht - das Format stand, die Auswahl
+    fehlte. Jetzt sind es zehn Sender, und dieser Test haelt fest, dass
+    sie gueltig bleiben: Ein Tippfehler in einer Sprechform oder eine
+    verlorene Adresse faellt sonst erst am Geraet auf, wo der Nutzer nur
+    hoert, dass nichts kommt.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.pfad = rs.repo_liste()
+        with open(cls.pfad, encoding="utf-8") as f:
+            cls.daten = json.load(f)
+        cls.eintraege = cls.daten["eintraege"]
+
+    def test_es_gibt_sie_ueberhaupt(self):
+        self.assertTrue(os.path.isfile(self.pfad))
+        self.assertRegex(self.daten["stand"], r"^\d{4}-\d{2}-\d{2}$")
+
+    def test_hoechstens_zehn(self):
+        """Stephans Vorgabe vom 2026-10-05: „Ja lieber 10". Die Regel
+        „weniger ist mehr" aus medienliste.md ist damit eine Zahl."""
+        self.assertLessEqual(len(self.eintraege), 10)
+        self.assertGreater(len(self.eintraege), 0)
+
+    def test_jeder_eintrag_vollstaendig(self):
+        for eintrag in self.eintraege:
+            with self.subTest(sender=eintrag.get("name")):
+                for feld in ("art", "sprechform", "name", "quelle"):
+                    self.assertTrue(eintrag.get(feld), f"{feld} fehlt")
+                self.assertIn(eintrag["art"], rs.ARTEN)
+
+    def test_keine_zugangsschranke(self):
+        """Stephans Vorgabe vom 2026-09-25: „Ohne einen Account oder so."
+        Hier gegen die ausgelieferte Datei geprueft, nicht nur gegen die
+        Funktion."""
+        for eintrag in self.eintraege:
+            with self.subTest(sender=eintrag["name"]):
+                self.assertFalse(rs.braucht_zugang(eintrag["quelle"]))
+                self.assertFalse(rs.ist_playlist(eintrag["quelle"]))
+
+    def test_keine_verwechselbaren_sprechformen(self):
+        """Der Grund, warum es nur zehn sind: Bei 78 Sendern meldet diese
+        Pruefung zehn Paare, bei der getroffenen Auswahl nichts."""
+        paare = rs.aehnliche_sprechformen(self.eintraege)
+        self.assertEqual(
+            [(a["sprechform"], b["sprechform"], g) for a, b, g in paare], [])
+
+    def test_sprechformen_klein_und_ohne_umschreibung(self):
+        for eintrag in self.eintraege:
+            form = eintrag["sprechform"]
+            with self.subTest(sender=eintrag["name"]):
+                self.assertEqual(form, form.lower())
+                for wort in form.split():
+                    self.assertNotIn(wort, ("oe", "ef", "vau", "ix", "zet",
+                                            "fuenf", "kaernten", "zuerich"))
+
+    def test_das_radio_liest_sie(self):
+        """Der ganze Weg in einem Test: Datei -> medienliste_lesen ->
+        Sender finden, so wie dialos-radio.py es tut."""
+        radio = _laden("dialos-radio.py", "radio_liste_test")
+        liste = rs.medienliste_lesen(art="radio", systemweit=self.pfad,
+                                     persoenlich="/gibt/es/nicht.json")
+        self.assertEqual(len(liste), len(self.eintraege))
+        for eintrag in liste:
+            with self.subTest(sender=eintrag["name"]):
+                gefunden, _ = radio.sender_finden(rs, liste,
+                                                  eintrag["sprechform"])
+                self.assertIsNotNone(gefunden)
+                self.assertEqual(gefunden["name"], eintrag["name"])
+
+
+class Modulsuche(unittest.TestCase):
+    """dialos-radio.py muss sein Modul finden, auch im Repo-Baum.
+
+    Am 2026-10-05 endete `dialos-radio.py liste` auf dem Arbeitsrechner
+    mit Rueckgabewert 1 und OHNE EIN WORT Ausgabe: Der Pfad zum Modul war
+    fest auf /usr/local/bin verdrahtet, und der Fehlschlag ging nur ins
+    Protokoll. Ein stiller Fehlschlag ist genau das, was dieses Projekt
+    sonst ueberall vermeidet.
+    """
+
+    def test_modul_wird_neben_dem_programm_gefunden(self):
+        radio = _laden("dialos-radio.py", "radio_suche_test")
+        self.assertTrue(os.path.isfile(radio.SENDER_MODUL))
+        self.assertEqual(os.path.dirname(radio.SENDER_MODUL), BIN)
+
+    def test_fehlschlag_wird_gemeldet(self):
+        """Nicht nur ins Protokoll, sondern auf stderr - wer von Hand
+        prueft, muss den Grund sehen."""
+        with open(os.path.join(BIN, "dialos-radio.py"), encoding="utf-8") as f:
+            quelle = f.read()
+        self.assertIn("file=sys.stderr", quelle)
+
+
 if __name__ == "__main__":
     unittest.main()
