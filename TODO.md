@@ -135,10 +135,22 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     laufenden Programm. Deshalb braucht diese eine Ebene den Sender
     (`nachrichten-sender`), die übrigen den Podcast - das Format trägt
     beides. Belegt ist bisher nur „tagesschau in 100 Sekunden" (ein Feed
-    mit genau einem Eintrag, direkte MP3-Adresse). **Offen:** ob die
-    Priorität die Abspielreihenfolge eines Blocks meint (dann
-    `rhythmbox-client --enqueue`) oder die Auswahl; eine Quelle für
-    Europa; der Ö3-Nachrichten-Feed ist noch ungeprüft.
+    mit genau einem Eintrag, direkte MP3-Adresse).
+    **Die Ebenen sind ein ANGEBOT** (Stephan, 2026-10-05): je Ebene ein
+    eigener Satz, der Nutzer wählt gezielt. Alle Formulierungen sind
+    geprüft - „regionale/landesweite/weltweite/deutsche/österreichische/
+    europäische nachrichten", kein Wort fehlt im Wortschatz, keine
+    Kollision untereinander oder mit den 55 bestehenden Sätzen.
+    **Es fehlen noch Quellen:** der Ö3-Nachrichten-Feed ist ungeprüft,
+    für „weltweit" und „Europa" ist keine deutschsprachige Quelle
+    gefunden (Stephans Vorgabe: alles auf Deutsch). Und zu entscheiden:
+    ob „landesweit" Österreich oder Deutschland meint - beide Sätze sind
+    geprüft und könnten nebeneinander stehen.
+  - [ ] **„Nachrichten vorlesen" und „Was gibt es Neues" aus den
+    Wunsch-Sätzen nehmen**, sobald die Ebenen gebaut sind. Sie antworten
+    heute „Nachrichten kann ich noch nicht vorlesen." und würden dann
+    etwas verdecken, das es gibt - dieselbe Auflösung wie bei „radio
+    einschalten" am 2026-09-30.
   - [ ] **Prüffunktion für Podcast-Feeds** - vor jeder Podcast-Liste
     fällig. Sie muss zuerst feststellen, **ob der Feed überhaupt Audio
     hat**: Die zwei Nachrichten-Feeds des Deutschlandfunks liefern 39

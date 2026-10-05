@@ -150,11 +150,40 @@ bekommen alle vier dieselbe Bedeutung: abspielen über Rhythmbox.
 Folge. Das war seit dem 2026-09-25 offen und ist der Grund, warum
 „Nachrichten hören" bisher nicht gebaut werden konnte.
 
-**Die Priorität von nah nach fern ist die zweite Vorgabe** - regional zuerst,
-dann das Land, dann Europa, dann die Welt. Noch zu klären ist, ob das die
-*Abspielreihenfolge* eines zusammenhängenden Blocks meint (dann wäre
-`rhythmbox-client --enqueue` der Weg, und „Nachrichten hören" spielte vier
-Folgen hintereinander) oder die *Auswahlpriorität* für die Liste.
+**„Regional - Land - Europa - Welt" ist das ANGEBOT, nicht die Reihenfolge**
+(Stephan, 2026-10-05 auf die Rückfrage): „Wir müssen dem Nutzer die Chance
+geben das er sich gezielt über regionale Nachrichten, aber auch landesweite
+und weltweite Nachrichten in deutscher Sprachen informieren kann. Und er kann
+dann gezielt sagen was er jetzt hören möchte."
+
+Es gibt also **je Ebene einen eigenen Satz**, und der Nutzer wählt. Kein
+Block, der alles hintereinander spielt - das wäre bequem für den, der alles
+hören will, und im Weg für den, der nur das Wetter von morgen in Tirol sucht.
+
+**Die Formulierungen sind geprüft** (2026-10-05, gegen
+`vosk-model-small-de-0.15`): „regionale nachrichten", „landesweite
+nachrichten", „weltweite nachrichten", „deutsche nachrichten",
+„österreichische nachrichten", „europäische nachrichten" und die Varianten
+mit „nachrichten aus ..." - **kein Wort fehlt im Wortschatz**, und keine
+Formulierung kollidiert mit einer anderen oder mit einem der 55 bestehenden
+Sätze. Die Wahl der Formulierung ist damit frei und nicht durch den Erkenner
+eingeschränkt.
+
+**Alles auf Deutsch** ist Stephans ausdrückliche Vorgabe („in deutscher
+Sprachen"). Das schließt die naheliegenden fremdsprachigen Kurzformate aus -
+auch bei „weltweit" bleibt die Quelle deutschsprachig.
+
+**Zwei Punkte, die beim Bauen zu entscheiden sind:**
+
+1. **Was heißt „landesweit"?** Stephan wohnt in Tirol, die Firma sitzt in
+   Deutschland. Beide Länder sind plausibel, und beide Sätze sind geprüft -
+   „österreichische nachrichten" und „deutsche nachrichten" können auch
+   nebeneinander stehen.
+2. **„Nachrichten vorlesen" und „Was gibt es Neues" stehen noch unter den
+   Wunsch-Sätzen** mit der Antwort „Nachrichten kann ich noch nicht
+   vorlesen." Sobald die Ebenen gebaut sind, verdecken diese zwei Einträge
+   etwas, das es gibt - sie gehören dann aufgelöst, so wie „radio
+   einschalten" am 2026-09-30.
 
 **Was die Prüfung am 2026-10-05 ergeben hat - und es passt nicht glatt
 zusammen:**
