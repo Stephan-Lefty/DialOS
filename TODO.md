@@ -221,15 +221,26 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     MP3-Dateien, und DialOS darf sie herunterladen, ablegen und
     abspielen, ohne an einer Kontobindung zu hängen. Das passt zum
     Rest: Auch Radio und Nachrichten kommen ohne Konto.
-    **Naheliegender Weg - noch nicht geprüft:** LibriVox hat eine offene
-    Schnittstelle (`librivox.org/api/feed/audiobooks`), mit der sich nach
-    Sprache und Titel suchen lässt. Das wäre für Hörbücher dasselbe, was
-    radio-browser.info für die Sender ist: eine Datenbank, aus der DialOS
-    selbst holt, statt Adressen von Hand zu pflegen. **Vor dem Bau zu
-    prüfen:** ob die Schnittstelle ohne Schlüssel nutzbar ist, wie viele
-    **deutschsprachige** Titel es gibt (LibriVox ist überwiegend
-    englisch - das ist die eigentliche Unbekannte) und in welcher
-    Tonqualität.
+    **Die Quelle ist LibriVox, und sie trägt** (gemessen 2026-10-05).
+    Die Schnittstelle `librivox.org/api/feed/audiobooks` ist ohne
+    Schlüssel nutzbar - für Hörbücher dasselbe, was radio-browser.info
+    für die Sender ist. **Rund 3 % der Titel sind deutsch:** drei
+    Stichproben von je 500 Büchern an verschiedenen Stellen ergaben
+    4,0 %, 2,6 % und 3,2 %, der Anteil ist also stabil. Bei über 12.000
+    Titeln sind das grob **400 deutsche Hörbücher** - und brauchbare:
+    Winnetou I (16:43 h, 27 Teile), Der Schimmelreiter, Die Leiden des
+    jungen Werther, Struwwelpeter, Kafka.
+    **Drei Fallen, die beim Bauen Zeit kosten würden:** Der Parameter
+    `language=German` wird **ignoriert** - die Schnittstelle antwortet
+    trotzdem mit englischen Titeln (beide Versuche lieferten „Count of
+    Monte Cristo" als ersten Treffer), gefiltert werden muss über das
+    Feld `language` im Ergebnis. `limit=2000` quittiert sie mit „Too
+    many records requested", 500 geht - also in Schritten abfragen. Und
+    es stehen **Index-Einträge** in den Ergebnissen („Märchen (Index
+    aller Märchen)", 0 Teile, 0 Laufzeit); die müssen heraus, sonst
+    steht ein Hörbuch in der Liste, das keine Datei hat und beim
+    Abspielen schweigt - dieselbe Klasse wie der Deutschlandfunk-Feed
+    ohne Audio.
     **Ordner je Buch, nicht Wiedergabeliste** - Empfehlung vom
     2026-10-05 auf Stephans Frage, mit drei Gründen:
     **(1) Rhythmbox denkt in Alben, nicht in Listen.** Es indiziert
