@@ -757,6 +757,108 @@ class Uebergabestelle(unittest.TestCase):
         self.assertEqual(radios, [])
 
 
+class LandDesGeraets(unittest.TestCase):
+    """DialOS ist fuer Deutschland, Oesterreich UND die Schweiz.
+
+    Stephan am 2026-10-05: „Wir muessen ja immer fuer 3 Laender denken" und
+    „Das Land wuerde ich immer an die Nutzerdaten verknuepfen". Eine Liste,
+    die auf jedem Geraet dasselbe anbietet, haette auf zwei Dritteln der
+    Geraete Saetze, die ins Leere gehen - „radio tirol einschalten" nuetzt
+    einem Schweizer Nutzer nichts.
+    """
+
+    def _daten(self, zeile):
+        ordner = tempfile.mkdtemp(prefix="dialos-daten-")
+        self.addCleanup(shutil.rmtree, ordner, True)
+        pfad = os.path.join(ordner, "persoenliche-daten.txt")
+        with open(pfad, "w", encoding="utf-8") as f:
+            f.write("# Kommentar\nVorname: Max\n" + zeile + "\nOrt: Irgendwo\n")
+        return pfad
+
+    def test_schreibweisen_werden_erkannt(self):
+        """Der Mensch tippt in die Maske, was ihm einfaellt."""
+        for wert, erwartet in (("Deutschland", "DE"), ("DE", "DE"),
+                               ("D", "DE"), ("Germany", "DE"),
+                               ("Österreich", "AT"), ("Oesterreich", "AT"),
+                               ("AT", "AT"), ("Austria", "AT"),
+                               ("Schweiz", "CH"), ("CH", "CH"),
+                               ("Suisse", "CH"), ("switzerland", "CH")):
+            with self.subTest(wert=wert):
+                self.assertEqual(
+                    rs.land_des_geraets(self._daten(f"Land: {wert}")), erwartet)
+
+    def test_leeres_feld_ist_kein_fehler(self):
+        """Der Normalfall vor dem Ausfuellen. Der Aufrufer zeigt dann
+        ALLES - ein leeres Feld darf das Radio nicht abschalten."""
+        self.assertIsNone(rs.land_des_geraets(self._daten("Land:")))
+        self.assertIsNone(rs.land_des_geraets(self._daten("Ort: Nur ein Ort")))
+
+    def test_fehlende_datei_ist_kein_fehler(self):
+        self.assertIsNone(rs.land_des_geraets("/gibt/es/nicht.txt"))
+
+    def test_unbekanntes_land_schaltet_nicht_ab(self):
+        """Steht dort „Italien", ist das kein DialOS-Land - aber der Nutzer
+        soll trotzdem Radio hoeren koennen."""
+        self.assertIsNone(rs.land_des_geraets(self._daten("Land: Italien")))
+
+    def test_kommentarzeile_zaehlt_nicht(self):
+        ordner = tempfile.mkdtemp(prefix="dialos-daten-")
+        self.addCleanup(shutil.rmtree, ordner, True)
+        pfad = os.path.join(ordner, "d.txt")
+        with open(pfad, "w", encoding="utf-8") as f:
+            f.write("# Land: Deutschland\nLand: Schweiz\n")
+        self.assertEqual(rs.land_des_geraets(pfad), "CH")
+
+
+class LandFilter(unittest.TestCase):
+    """Die systemweite Liste ist der Vorrat, nicht das Angebot."""
+
+    SENDER = [
+        {"art": "radio", "sprechform": "deutschlandfunk", "land": "DE",
+         "quelle": "https://a/1"},
+        {"art": "radio", "sprechform": "radio tirol", "land": "AT",
+         "quelle": "https://a/2"},
+        {"art": "radio", "sprechform": "radio swiss jazz", "land": "CH",
+         "quelle": "https://a/3"},
+        # Ohne Land - etwa ein Podcast, der an kein Land gebunden ist.
+        {"art": "podcast", "sprechform": "lage der nation",
+         "quelle": "https://a/4"},
+    ]
+
+    def test_nur_das_eigene_land(self):
+        with TempListen(system=self.SENDER, eigen=[]) as (sysp, eigp):
+            liste = rs.medienliste_lesen(art="radio", systemweit=sysp,
+                                         persoenlich=eigp, land="AT")
+        self.assertEqual([e["sprechform"] for e in liste], ["radio tirol"])
+
+    def test_ohne_land_gilt_alles(self):
+        """None heisst: nichts ausgefuellt - dann wird nichts versteckt."""
+        with TempListen(system=self.SENDER, eigen=[]) as (sysp, eigp):
+            liste = rs.medienliste_lesen(art="radio", systemweit=sysp,
+                                         persoenlich=eigp, land=None)
+        self.assertEqual(len(liste), 3)
+
+    def test_eintrag_ohne_landfeld_gilt_ueberall(self):
+        with TempListen(system=self.SENDER, eigen=[]) as (sysp, eigp):
+            liste = rs.medienliste_lesen(art="podcast", systemweit=sysp,
+                                         persoenlich=eigp, land="CH")
+        self.assertEqual([e["sprechform"] for e in liste], ["lage der nation"])
+
+    def test_eigene_auswahl_wird_nicht_gefiltert(self):
+        """Wer einen auslaendischen Sender selbst aufnimmt, hat ihn
+        gewollt. Ein Filter auf die eigene Eingabe waere dieselbe
+        Anmassung wie eine ueberschriebene Stimmwahl."""
+        eigen = [{"art": "radio", "sprechform": "bayern drei", "land": "DE",
+                  "quelle": "https://b/1"}]
+        with TempListen(system=self.SENDER, eigen=eigen) as (sysp, eigp):
+            liste = rs.medienliste_lesen(art="radio", systemweit=sysp,
+                                         persoenlich=eigp, land="CH")
+        formen = [e["sprechform"] for e in liste]
+        self.assertIn("bayern drei", formen)        # eigene Wahl bleibt
+        self.assertIn("radio swiss jazz", formen)   # passendes Land
+        self.assertNotIn("radio tirol", formen)     # fremdes Land, gefiltert
+
+
 class TempListen:
     """Zwei Medienlisten in einem Wegwerf-Ordner."""
 

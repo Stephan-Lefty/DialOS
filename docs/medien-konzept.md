@@ -173,17 +173,51 @@ eingeschränkt.
 Sprachen"). Das schließt die naheliegenden fremdsprachigen Kurzformate aus -
 auch bei „weltweit" bleibt die Quelle deutschsprachig.
 
-**Zwei Punkte, die beim Bauen zu entscheiden sind:**
+### „Landesweit" hängt am Gerät, nicht an der Liste (2026-10-05)
 
-1. **Was heißt „landesweit"?** Stephan wohnt in Tirol, die Firma sitzt in
-   Deutschland. Beide Länder sind plausibel, und beide Sätze sind geprüft -
-   „österreichische nachrichten" und „deutsche nachrichten" können auch
-   nebeneinander stehen.
-2. **„Nachrichten vorlesen" und „Was gibt es Neues" stehen noch unter den
+> **Stephan, 2026-10-05:** „Wir müssen ja immer für 3 Länder denken, DialOS
+> soll für Deutschland, Österreich und die Schweiz sein"
+
+**Damit war meine Frage „Österreich oder Deutschland?" falsch gestellt** - und
+die Radio-Liste vom selben Tag ist es auch: Sie enthält ORF Radio Tirol, weil
+Stephan in Tirol wohnt. Auf einem Gerät für einen Schweizer Kunden wäre
+„radio tirol einschalten" ein Befehl, der niemandem nützt, und „landesweite
+Nachrichten" müsste dort SRF bringen, nicht Ö3.
+
+**Die Lösung ist schon angelegt, sie wird nur noch nicht benutzt:** Die
+persönlichen Daten haben die Felder `Land` und `Bundesland`
+(`persoenliche-daten-vorlage.txt`, Zeilen 38/39), und jeder Eintrag der
+Medienliste hat ein `land` (DE/AT/CH). Es fehlt nur die Verbindung:
+
+- **Die systemweite Liste darf Einträge für alle drei Länder haben.** Sie ist
+  der Vorrat, nicht das Angebot.
+- **In die Grammatik kommt nur, was zum Land des Geräts passt** - sonst hat
+  ein Schweizer Nutzer dreißig Sätze, von denen zwanzig ins Leere gehen, und
+  die Regel „weniger ist mehr" ist unterlaufen.
+- **„Regionale Nachrichten" löst sich über `Bundesland` auf.** In Tirol ORF
+  Radio Tirol, in Bayern Bayern 1, im Kanton Zürich Radio 24 - die
+  Bundesland-Tabelle in `dialos_rhythmbox_sender.py` kennt alle 49 Länder
+  und Kantone schon.
+- **Steht in den persönlichen Daten kein Land**, gilt alles. Ein leeres Feld
+  darf das Radio nicht abschalten; das wäre schlimmer als eine zu lange
+  Liste.
+
+**Noch nicht gebaut.** `medienliste_lesen()` filtert heute nur nach `art`,
+nicht nach Land. Die Radio-Liste vom 2026-10-05 ist deshalb bis auf weiteres
+**Stephans Liste**, keine Auslieferungsliste - für ein Kundengerät müsste sie
+nach dessen Land zusammengestellt werden.
+
+**Zwei Punkte bleiben beim Bauen zu klären:**
+
+1. **„Nachrichten vorlesen" und „Was gibt es Neues" stehen noch unter den
    Wunsch-Sätzen** mit der Antwort „Nachrichten kann ich noch nicht
    vorlesen." Sobald die Ebenen gebaut sind, verdecken diese zwei Einträge
    etwas, das es gibt - sie gehören dann aufgelöst, so wie „radio
    einschalten" am 2026-09-30.
+2. **Quellen je Land**, und die fehlen für zwei Drittel: Belegt ist nur die
+   tagesschau (DE). Für Österreich ist ein Ö3-Nachrichten-Podcast bekannt,
+   aber ungeprüft; für die Schweiz ist noch nichts gesucht; für „weltweit"
+   und „Europa" fehlt eine deutschsprachige Quelle.
 
 **Was die Prüfung am 2026-10-05 ergeben hat - und es passt nicht glatt
 zusammen:**

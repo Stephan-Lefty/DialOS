@@ -1090,6 +1090,61 @@ def speicherziel():
     return repo_liste() or eigene_liste()
 
 
+#: Wie das Feld "Land" aus den persoenlichen Daten gemeint sein kann.
+#: Der Mensch tippt in die Maske, was ihm einfaellt - "Österreich", "AT",
+#: "A" oder "Austria". Wer nur auf eine Schreibweise prueft, schaltet dem
+#: Nutzer das halbe Radio ab und sagt ihm nicht, warum.
+LANDESNAMEN = {
+    "DE": ("de", "d", "deutschland", "germany", "bundesrepublik deutschland"),
+    "AT": ("at", "a", "oesterreich", "österreich", "austria"),
+    "CH": ("ch", "schweiz", "switzerland", "suisse", "svizzera",
+           "confoederatio helvetica"),
+}
+
+PERSOENLICHE_DATEN = os.path.join(os.path.expanduser("~"), ".config", "dialos",
+                                  "persoenliche-daten.txt")
+
+
+def land_des_geraets(pfad=None):
+    """DE, AT, CH - oder None, wenn nichts Verwertbares dasteht.
+
+    WARUM AUS DEN PERSOENLICHEN DATEN (Stephan, 2026-10-05: "Das Land
+    wuerde ich immer an die Nutzerdaten verknuepfen. Da haben wir ja
+    bereits eine Maske wo man die Nutzerdaten eingibt"): DialOS ist fuer
+    Deutschland, Oesterreich UND die Schweiz. Eine Medienliste, die auf
+    jedem Geraet dieselben Sender anbietet, haette auf zwei Dritteln der
+    Geraete Saetze, die ins Leere gehen - "radio tirol einschalten" nuetzt
+    einem Schweizer Nutzer nichts.
+    Die Maske dafuer gibt es seit dem 2026-09-16, samt Feld "Land".
+
+    NONE IST KEIN FEHLER, sondern der Normalfall vor dem Ausfuellen. Der
+    Aufrufer zeigt dann ALLES - ein leeres Feld darf das Radio nicht
+    abschalten. Das waere derselbe stille Fehlschlag, den dieses Projekt
+    sonst ueberall vermeidet, nur schlimmer: Der Nutzer wuerde denken,
+    das Geraet sei kaputt.
+    """
+    try:
+        with open(pfad or PERSOENLICHE_DATEN, encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return None
+
+    wert = ""
+    for zeile in text.splitlines():
+        if zeile.lstrip().startswith("#") or ":" not in zeile:
+            continue
+        name, _, rest = zeile.partition(":")
+        if name.strip().lower() == "land":
+            wert = rest.strip().lower()
+            break
+    if not wert:
+        return None
+    for kuerzel, namen in LANDESNAMEN.items():
+        if wert in namen:
+            return kuerzel
+    return None
+
+
 def _liste_laden(pfad):
     """Eine Datei lesen, oder eine leere Liste. Fehler sind hier kein
     Grund abzubrechen: Eine fehlende persoenliche Liste ist der
@@ -1103,7 +1158,8 @@ def _liste_laden(pfad):
     return eintraege if isinstance(eintraege, list) else []
 
 
-def medienliste_lesen(art=None, systemweit=None, persoenlich=None):
+def medienliste_lesen(art=None, systemweit=None, persoenlich=None,
+                      land="aus den daten"):
     """Beide Ebenen zusammengefuehrt - das, was DialOS ansagen kann.
 
     Die persoenliche Liste liegt oben: Wer einen Sender selbst aufnimmt,
@@ -1117,12 +1173,25 @@ def medienliste_lesen(art=None, systemweit=None, persoenlich=None):
     Gattungen: Der Nutzer sagt einen Satz, keine Gattung - ein Podcast
     und ein Radiosender mit derselben Sprechform waeren fuer ihn
     ununterscheidbar, auch wenn sie im Format verschiedene Felder haben.
+
+    `land` grenzt auf DE, AT oder CH ein. Standardmaessig kommt es aus den
+    persoenlichen Daten des Kontos (Stephan, 2026-10-05); None zeigt
+    alles. Die systemweite Liste DARF Eintraege fuer alle drei Laender
+    haben - sie ist der Vorrat, nicht das Angebot. Was davon in die
+    Grammatik kommt, entscheidet dieses Feld.
+
+    Die PERSOENLICHE Liste wird NICHT nach Land gefiltert: Wer einen
+    Sender selbst aufnimmt, hat ihn gewollt - auch den auslaendischen.
+    Ein Filter, der die eigene Eingabe des Nutzers verwirft, waere
+    dieselbe Anmassung wie eine ueberschriebene Stimmwahl.
     """
     systemweit = SYSTEMLISTE if systemweit is None else systemweit
     persoenlich = eigene_liste() if persoenlich is None else persoenlich
+    if land == "aus den daten":
+        land = land_des_geraets()
 
     ergebnis, gesehen = [], set()
-    for pfad in (persoenlich, systemweit):
+    for pfad, mit_landfilter in ((persoenlich, False), (systemweit, True)):
         for eintrag in _liste_laden(pfad):
             if not isinstance(eintrag, dict):
                 continue
@@ -1130,8 +1199,14 @@ def medienliste_lesen(art=None, systemweit=None, persoenlich=None):
             if not schluessel or schluessel in gesehen:
                 continue
             gesehen.add(schluessel)
-            if art is None or eintrag.get("art") == art:
-                ergebnis.append(eintrag)
+            if art is not None and eintrag.get("art") != art:
+                continue
+            # Ein Eintrag OHNE Land gilt ueberall - etwa ein Podcast oder
+            # ein Hoerbuch, das an kein Land gebunden ist.
+            if (mit_landfilter and land and eintrag.get("land")
+                    and eintrag["land"] != land):
+                continue
+            ergebnis.append(eintrag)
     return ergebnis
 
 

@@ -146,6 +146,24 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     gefunden (Stephans Vorgabe: alles auf Deutsch). Und zu entscheiden:
     ob „landesweit" Österreich oder Deutschland meint - beide Sätze sind
     geprüft und könnten nebeneinander stehen.
+  - [ ] **Die Zehner-Liste ist über drei Länder gestreut und schrumpft
+    durch den Filter** (gemessen 2026-10-05): ohne Land 10 Sender, mit
+    `Land: Deutschland` 5, mit `Österreich` 4, mit `Schweiz` **1**. Das
+    ist kein Fehler des Filters, sondern die Folge daraus, dass die Liste
+    als *Stephans* Mischung entstanden ist und in der *systemweiten*
+    Datei liegt. Zwei Wege: entweder je Land eine eigene
+    Auslieferungsliste mit zehn Sendern (dann braucht es drei Zehner,
+    etwa 30 Einträge im Vorrat), oder Stephans Mischung wandert in seine
+    **persönliche** Liste `~/.config/dialos/medienliste.json`, die nicht
+    gefiltert wird. **Stephans Entscheidung.**
+  - [x] **Die Medienliste wird nach dem Land des Geräts gefiltert**
+    (2026-10-05 gebaut, Stephan: „Das Land würde ich immer an die
+    Nutzerdaten verknüpfen. Da haben wir ja bereits eine Maske"). Über
+    `land_des_geraets()` aus `persoenliche-daten.txt`, tolerant gegen
+    Schreibweisen („Österreich", „AT", „A", „Austria"). Leeres oder
+    unbekanntes Feld heißt: alles zeigen - ein leeres Feld darf das Radio
+    nicht abschalten. Die **persönliche** Liste wird nie gefiltert: Wer
+    einen ausländischen Sender selbst aufnimmt, hat ihn gewollt.
   - [ ] **„Nachrichten vorlesen" und „Was gibt es Neues" aus den
     Wunsch-Sätzen nehmen**, sobald die Ebenen gebaut sind. Sie antworten
     heute „Nachrichten kann ich noch nicht vorlesen." und würden dann
