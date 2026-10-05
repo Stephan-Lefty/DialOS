@@ -5,6 +5,9 @@
 How DialOS is filmed so that speech output and speech input arrive as
 separate tracks in the edit. Set up and proven on 2026-08-17.
 
+The script for the fully automatic demo video with Anna as the user is
+in [video-drehbuch.md](video-drehbuch.md) (German).
+
 ## What cannot be recorded - and why
 
 Two limits shape the whole procedure. They cannot be programmed away:

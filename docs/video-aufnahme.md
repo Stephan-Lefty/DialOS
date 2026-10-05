@@ -5,6 +5,9 @@
 Wie DialOS gefilmt wird, damit Sprachausgabe und Spracheingabe getrennt
 im Schnitt ankommen. Eingerichtet und belegt am 2026-08-17.
 
+Das Drehbuch für das vollautomatische Vorführvideo mit Anna als Nutzerin
+steht in [video-drehbuch.md](video-drehbuch.md).
+
 ## Was sich nicht aufnehmen lässt - und warum
 
 Zwei Grenzen bestimmen den ganzen Ablauf. Sie lassen sich nicht

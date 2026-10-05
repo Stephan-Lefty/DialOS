@@ -2116,6 +2116,10 @@ finished too, and then move down together. That way no reference breaks.
   microphone so the AIRHUG stays in A2DP - recording via the headset
   microphone would drag playback down to phone quality and make the video
   sound worse than the system actually is.
+  **As of 2026-10-05:** the script is in `docs/video-drehbuch.md` (German) -
+  fully automatic, Anna plays the user through a virtual microphone,
+  Michael is DialOS, sample data in a separate demo account, each voice on
+  its own track. Waiting for Stephan's approval.
 
 - [x] **Reference audio device decided (Stephan, 2026-08-17): two
   devices.** The AIRHUG stays as the speaker in A2DP, plus a wireless

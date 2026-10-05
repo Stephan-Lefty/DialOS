@@ -2381,6 +2381,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   eingebaute Mikrofon, damit das AIRHUG in A2DP bleibt - eine Aufnahme
   über das Headset-Mikrofon würde die Wiedergabe auf Telefonqualität
   ziehen und das Video schlechter klingen lassen, als das System ist.
+  **Stand 2026-10-05:** Drehbuch steht in `docs/video-drehbuch.md` -
+  vollautomatisch, Anna spielt die Nutzerin über ein virtuelles Mikrofon,
+  Michael ist DialOS, Musterdaten im eigenen Vorführkonto, jede Stimme auf
+  eigener Spur. Wartet auf Stephans Freigabe.
 
 - [x] **Referenz-Audiogerät entschieden (Stephan, 2026-08-17): zwei
   Geräte.** AIRHUG bleibt als Lautsprecher in A2DP, dazu ein
