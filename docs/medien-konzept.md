@@ -214,10 +214,46 @@ nach dessen Land zusammengestellt werden.
    vorlesen." Sobald die Ebenen gebaut sind, verdecken diese zwei Einträge
    etwas, das es gibt - sie gehören dann aufgelöst, so wie „radio
    einschalten" am 2026-09-30.
-2. **Quellen je Land**, und die fehlen für zwei Drittel: Belegt ist nur die
-   tagesschau (DE). Für Österreich ist ein Ö3-Nachrichten-Podcast bekannt,
-   aber ungeprüft; für die Schweiz ist noch nichts gesucht; für „weltweit"
-   und „Europa" fehlt eine deutschsprachige Quelle.
+2. **Quellen je Land** - gesucht und geprüft am 2026-10-05, mit
+   `dialos_podcast.py` (Feed, Audio, Alter, ffprobe). Ergebnis:
+
+| Quelle | Dauer | Alter | Urteil |
+|---|---|---|---|
+| **tagesschau in 100 Sekunden** (DE) | 2:12 | 0,1 Tage | **ideal** - 1 Eintrag im Feed, also immer die neueste Folge |
+| **NDR Info Nachrichten** (DE Nord) | 4:34 | 0,0 Tage | **gut**, 1 Eintrag; regional für HH/SH/NI/MV |
+| **SRF Nachrichten** (CH) | 5:54 | 0,0 Tage | **gut** - der Kandidat für die Schweiz |
+| **Nachrichtenleicht** (DLF, Einfache Sprache) | 5:37 | 2,9 Tage | **gut**, aber Wochenrückblick - kein Tagesticker |
+| **DW Langsam Gesprochene Nachrichten** (weltweit) | 7:49 | 0,2 Tage | **fraglich** - es ist ein Lernformat für Deutschlernende, absichtlich langsam gesprochen |
+| **Ö1 Journale** (AT) | **60:22** | 0,1 Tage | **zu lang** - ein ganzes Mittagsjournal, keine Kurznachrichten |
+
+**Drei ehrliche Lücken, die die Prüfung aufgedeckt hat:**
+
+- **Den „Ö3 Nachrichten Podcast" gibt es nicht mehr.** Die in Verzeichnissen
+  genannten Adressen liefern 404 oder 11 Bytes; in der offiziellen
+  ORF-Podcast-Liste führt Ö3 kein Nachrichtenformat mehr. **Österreich hat
+  damit kein landesweites Kurzformat** - Ö1 Journale ist mit einer Stunde das
+  Gegenteil davon. Nachrichtenformate gibt es bei ORF nur noch für `oe1`,
+  `noe`, `stm` und `wie`.
+- **„Weltweit auf Deutsch" ist schwach besetzt.** Die DW führt ihre normalen
+  Nachrichten nicht als Audio-Feed; die einzige verifizierte deutschsprachige
+  DW-Audioquelle sind die *Langsam Gesprochenen Nachrichten* - ein
+  Lernformat. Für einen blinden Nutzer, der Nachrichten hören will, ist das
+  die falsche Geschwindigkeit.
+- **WDR, MDR und ein BR-Bulletin** waren nicht verifizierbar: Die
+  Podcast-Übersichten sind per JavaScript aufgebaut, im HTML steht keine
+  Feed-Adresse, und geratene Muster liefern 404. Hier steht bewusst keine
+  URL - eine geratene wäre schlimmer als eine benannte Lücke.
+
+**Zwei Fundstücke für den Bau:**
+
+1. **Die ORF-Feeds lassen sich programmatisch auflösen**, ohne zu raten:
+   `https://audioapi.orf.at/radiothek/api/2.0/podcasts` liefert je Eintrag
+   `urls.feed`; die Stationen heißen `oe1, oe3, fm4, orf, wie, noe, ooe, stm,
+   sbg, tir, ktn, bgl, vbg`.
+2. **Die Sortierung nach `<pubDate>` war die richtige Entscheidung.** Der
+   SRF-Feed „HeuteMorgen" liefert seine Einträge **nicht** chronologisch -
+   das erste `<item>` war vom 02.10., die neueste Folge vom 05.10. Wer einfach
+   das erste nimmt, spielt eine drei Tage alte Sendung.
 
 **Was die Prüfung am 2026-10-05 ergeben hat - und es passt nicht glatt
 zusammen:**
