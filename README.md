@@ -55,6 +55,9 @@ nichts", der Sprachtest im Konto `nutzer` lief sauber.
   persönlichen Daten.
 - **Unterlagen durchsuchen:** Briefe, Notizen und Mails per Sprache finden,
   vorlesen, drucken, beantworten.
+- **Radio hören per Sprache:** einschalten, Sender wählen, „Was läuft gerade",
+  lauter, leiser; die geprüfte Senderliste in DialOS-Rhythmbox lässt sich nach
+  Land, Bereich und Genre durchsuchen.
 - **Zwei Stimmen:** Anna (Auslieferung) und Michael, über Piper.
 - **Sicherheit:** verschlüsselte `nutzer`-Partition und verschlüsselter Swap,
   Sicherheits-Stick als Anwesenheits-Token; ohne Stick bleibt das Konto zu.
@@ -62,8 +65,8 @@ nichts", der Sprachtest im Konto `nutzer` lief sauber.
   schließen auf Zuruf, Updates auf Ansage, optionale Windows-11-Optik
   („auf Windows umschalten" / „auf Linux umschalten").
 
-**Was noch fehlt:** Radio und Musik per Sprache (entschieden am 2026-09-25:
-beides über Rhythmbox, noch nicht gebaut), Termine ansagen, Post einscannen,
+**Was noch fehlt:** Musik per Sprache (entschieden am 2026-09-25: über
+Rhythmbox, noch nicht gebaut), Termine ansagen, Post einscannen,
 Wecker und Erinnerungen, Telefonie und Chat, das Aufweckwort (die fertigen
 Modelle schließen eine kommerzielle Nutzung aus). Das Einschalten der
 Sprachsteuerung ist in lauter Umgebung noch unzuverlässig.

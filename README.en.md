@@ -55,6 +55,9 @@ they would do. The acceptance check afterwards reported nothing missing in the
   mask.
 - **Searching documents:** find letters, notes and mails by voice, read them
   aloud, print, reply.
+- **Listening to radio by voice:** switch on, choose a station, "Was läuft
+  gerade", louder, quieter; the verified station list in DialOS-Rhythmbox can
+  be searched by country, category and genre.
 - **Two voices:** Anna (default) and Michael, via Piper.
 - **Security:** encrypted `nutzer` partition and encrypted swap, security
   stick as presence token; without the stick the account stays locked.
@@ -62,8 +65,8 @@ they would do. The acceptance check afterwards reported nothing missing in the
   voice, updates on request, optional Windows 11 look
   ("auf Windows umschalten" / "auf Linux umschalten").
 
-**Still missing:** radio and music by voice (decided on 2026-09-25: both
-through Rhythmbox, not built yet), announcing appointments, scanning letters,
+**Still missing:** music by voice (decided on 2026-09-25: through Rhythmbox,
+not built yet), announcing appointments, scanning letters,
 alarms and reminders, telephony and chat, the wake word (the ready-made models
 exclude commercial use). Switching voice control on is still unreliable in
 noisy surroundings.
