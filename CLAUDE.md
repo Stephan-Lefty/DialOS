@@ -1164,6 +1164,43 @@ hoert mit der vollstaendigen Grammatik) - hier ist kein Piper installiert. Ein
 Satz, der nur die erste besteht, ist nicht abgenommen; er ist nur nicht offen
 kaputt.
 
+## Entweder Laptop oder Arbeitsrechner - nie beide (Regel seit 2026-10-08)
+
+> **Stephan, 2026-10-08:** „ich arbeite am Laptop oder hier an DialOS weiter.
+> Beides gleichzeitig fuehrt zu Problemen!"
+
+**Es gibt zwei Rechner mit diesem Repo:** den Arbeitsrechner (RAID, keine
+Sprachausgabe, kein Piper - dafuer Tests und die erste Pflichtpruefung) und
+das Geraet selbst (T490, Repo auf der externen Platte, dort und nur dort die
+zweite Pflichtpruefung und jede echte Probe). **Zur selben Zeit ist genau
+einer dran.**
+
+**Der Anlass war ein Fast-Unfall am 2026-10-08.** Waehrend hier die
+Podcast-Liste in `medienliste.json` geschrieben wurde, entstanden am Laptop
+zwei Commits, die dieselbe Datei anfassten (`radio tirol` ->
+`tiroler radio`, `life radio` -> `life`). Es ging gut aus - aber nur, weil
+der hiesige Diff zufaellig reine Hinzufuegungen enthielt. Haette das Skript
+die Reihenfolge der Eintraege angeruehrt, waere die Arbeit vom Laptop beim
+Rebase **stillschweigend** verschwunden: kein Konflikt, keine Meldung, nur
+zwei Sprechformen zurueck auf den alten Wert. Gefunden wurde es erst, weil
+der Hinweis auf die geaenderte Datei auffiel und nachgesehen wurde.
+
+**Beim Wechsel, in dieser Reihenfolge:**
+
+1. Auf der Seite, die verlassen wird: alles committen und **pushen**.
+   `git status --short --branch` muss `master...origin/master` ohne
+   Zusatz melden.
+2. Auf der neuen Seite: **zuerst** `git pull`, dann anfangen.
+3. Am Geraet gilt zusaetzlich: Ein `git pull` allein wirkt nicht, es
+   braucht `sudo /usr/local/sbin/dialos-aufspielen --wirklich` (siehe
+   [docs/aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md)).
+
+**Fuer Claude heisst das:** Wer eine Datei anfassen will, an der auf der
+anderen Seite auch gearbeitet wird - `medienliste.json`, `dialos-radio.py`,
+die Tests -, holt **vorher** (`git pull --rebase`) und sieht `git log
+--oneline -5` an. Ein Pull NACH dem Schreiben ist zu spaet: Der eigene Diff
+steht dann schon gegen einen veralteten Stand.
+
 ## Arbeitsweise mit Stephan
 
 **Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,
