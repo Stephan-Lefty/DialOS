@@ -71,8 +71,12 @@ ERKENNER = "/usr/local/bin/dialos-sprachbefehl-desktop.py"
 # Alles erfunden; example.org ist fuer Beispiele reserviert (RFC 2606).
 MUSTERDATEN = {
     "Anrede": "Herr", "Vorname": "Max", "Name": "Mustermann",
-    "Straße": "Musterstraße", "Hausnummer": "1", "Postleitzahl": "12345",
-    "Ort": "Musterstadt", "Land": "Deutschland", "Länderkennzeichen": "DE",
+    # IN OESTERREICH (2026-10-08): Das Radio filtert nach dem Land aus diesen
+    # Daten, die laufende Spracherkennung nach dem Land des echten Kontos
+    # (Stephan: Oesterreich). Mit "Deutschland" kannte die Erkennung "tiroler
+    # radio", das Radio aber nicht - "habe ich nicht in der Liste".
+    "Straße": "Musterstraße", "Hausnummer": "1", "Postleitzahl": "1234",
+    "Ort": "Musterstadt", "Land": "Österreich", "Länderkennzeichen": "AT",
     "E-Mail-Adresse": "max.mustermann@example.org",
     "Posteingang-Server": "imap.example.org", "Posteingang-Port": "993",
     "Postausgang-Server": "smtp.example.org", "Postausgang-Port": "587",
@@ -141,13 +145,16 @@ SZENEN = [
     ]),
     # Radio (Stephan, 2026-10-08: "Du kannst ja das Radio schon mit ins
     # Drehbuch nehmen"). WAEHREND MUSIK LAEUFT, WIRD ES NIE STILL - eine
-    # NEGATIVE Ruhe heisst deshalb: nach der Ansage feste Sekunden warten.
+    # NEGATIVE Ruhe heisst deshalb: auf "Ansage vorbei" im Protokoll der
+    # Erkennung warten, dann so viele Sekunden Musik stehen lassen.
     # "Oe3" statt "Oe drei": Piper/kerstin spricht "Oe drei" so, dass Vosk
     # "wie drei" hoert (offline geprueft 2026-10-08), "Oe3" kommt woertlich an.
     ("7 Radio", [
-        ("Ö3 einschalten", "Oe3", -7, 0),
-        ("Was läuft gerade?", "Es läuft", -6, 0),
-        ("Lauter machen", "Lauter", -4, 0),
+        # "Tiroler Radio" statt "Oe3": "Oe3 einschalten" kam offline woertlich
+        # an, live beim elften Dreh aber als "wie drei einschalten".
+        ("Tiroler Radio einschalten", "Radio Tirol", -5, 0),
+        ("Was läuft gerade?", "Es läuft", -3, 0),
+        ("Lauter machen", "Lauter", -3, 0),
         ("Radio abstellen", "Radio aus", 1.2, 1.0),
     ]),
     ("8 Schluss", [
@@ -505,6 +512,25 @@ def ansage(text):
     subprocess.run(["/usr/local/bin/dialos-say.py", text], capture_output=True, timeout=60)
 
 
+ERKENNER_LOG = os.path.join(HEIM, ".log", "dialos-sprachbefehl.log")
+
+
+def erkenner_log_laenge():
+    try:
+        return os.path.getsize(ERKENNER_LOG)
+    except OSError:
+        return 0
+
+
+def erkenner_log_neu(ab):
+    try:
+        with open(ERKENNER_LOG, encoding="utf-8", errors="replace") as f:
+            f.seek(ab)
+            return f.read()
+    except OSError:
+        return ""
+
+
 def say_log_laenge():
     try:
         return os.path.getsize(SAY_LOG)
@@ -719,7 +745,7 @@ def anna_spricht(nr):
                     "--properties={ application.name = %s }" % ANNA_STROM, wav])
 
 
-def warten(pegel, ab, erwartet, ruhe, zeitgrenze=45):
+def warten(pegel, ab, erwartet, ruhe, zeitgrenze=45, erkenner_ab=0):
     if erwartet is None:
         return True
     bis = time.time() + zeitgrenze
@@ -740,6 +766,15 @@ def warten(pegel, ab, erwartet, ruhe, zeitgrenze=45):
     # Ende, und Annas "Ja!" fiel mitten in Michaels Frage.
     gefunden = time.time()
     if ruhe < 0:
+        # WAEHREND MUSIK LAEUFT: Ende der Ansage am Protokoll der Erkennung
+        # ablesen - sie schreibt nach jeder Ansage "Ansage vorbei". Feste
+        # Sekunden gingen beim dreizehnten Dreh schief: Die Liedtitel-Ansage
+        # war laenger, Annas "Lauter machen" fiel hinein und ging verloren.
+        bis = gefunden + 60
+        while time.time() < bis:
+            if "Ansage vorbei" in erkenner_log_neu(erkenner_ab):
+                break
+            time.sleep(0.2)
         time.sleep(-ruhe)
         return True
     while pegel.laut_seit(gefunden - 0.5) < 5 and time.time() - gefunden < 15:
@@ -877,13 +912,25 @@ def drehen():
         # DialOS nicht zu. Also erst ausschalten (ist sie schon aus, passiert
         # nichts) und Ruhe abwarten.
         dialoge_beenden()
+        # ERST STARTEN, DANN STOPPEN - ergibt in jedem Fall "aus". Nur
+        # "stoppen" ging beim zwoelften Dreh schief: Ist die Sprachsteuerung
+        # aus, kennt sie nur "sprachsteuerung starten" und presst "stoppen"
+        # darauf - sie ging AN und schaltete sich 30 s spaeter mit Ansage ab,
+        # mitten in Annas erstem Satz.
         letzte = max(nr for nr, _, _ in saetze())
-        anna_spricht(letzte)
-        time.sleep(2)
-        bis = time.time() + 30
-        while pegel.ruhig_seit() < 3 and time.time() < bis:
-            time.sleep(0.2)
+        for nr in (1, letzte):
+            anna_spricht(nr)
+            time.sleep(2)
+            bis = time.time() + 30
+            while pegel.ruhig_seit() < 3 and time.time() < bis:
+                time.sleep(0.2)
 
+        if admin:
+            # Das Claude-Fenster stand beim elften Dreh in der linken
+            # Bildhaelfte - mit dem Chat. Ausblenden kann es nur der Mensch.
+            ansage("Der Dreh beginnt in fünfzehn Sekunden. "
+                   "Bitte jetzt das Claude-Fenster ausblenden.")
+            time.sleep(15)
         obs = subprocess.Popen(["obs", "--startrecording", "--minimize-to-tray",
                                 "--disable-shutdown-check", "--profile", "DialOS",
                                 "--collection", "DialOS", "--scene", "DialOS"],
@@ -902,8 +949,9 @@ def drehen():
         for nr, szene, (text, erwartet, ruhe, pause) in saetze():
             melde(f"[{szene}] {nr:02d} Anna: {text}")
             ab = say_log_laenge()
+            erkenner_ab = erkenner_log_laenge()
             anna_spricht(nr)
-            if not warten(pegel, ab, erwartet, ruhe):
+            if not warten(pegel, ab, erwartet, ruhe, erkenner_ab=erkenner_ab):
                 melde("!! Szene laeuft nicht wie im Drehbuch - Dreh abgebrochen")
                 abbruch = f"Der Dreh ist bei Szene {szene.split()[0]} abgebrochen."
                 break

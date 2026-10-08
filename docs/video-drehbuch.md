@@ -1,6 +1,6 @@
 # Drehbuch: Vorführvideo „Was DialOS heute kann"
 
-**Stand: 2026-10-05, von Stephan freigegeben - noch nicht gedreht.** Stephan: ein Video,
+**Stand: 2026-10-08, gedreht - das erste vollständige Video steht.** Stephan: ein Video,
 vollautomatisch erstellt, in dem zu sehen und zu hören ist, was DialOS
 heute kann. **Anna spielt die Nutzerin, Michael ist DialOS.** Mit
 Musterdaten, hochauflösend, jede Stimme auf einer eigenen Tonspur.
@@ -32,7 +32,7 @@ Domain, die es nie geben wird.
 
 | Rolle | Name | Anschrift | Mail |
 |---|---|---|---|
-| Nutzer (Absender) | Max Mustermann | Musterstraße 1, 12345 Musterstadt | `max.mustermann@example.org` |
+| Nutzer (Absender) | Max Mustermann | Musterstraße 1, 1234 Musterstadt, Österreich | `max.mustermann@example.org` |
 | Kontakt (Empfängerin) | Frau Erika Musterfrau | Beispielweg 7, 54321 Beispielstadt | `erika.musterfrau@example.org` |
 
 **Gedreht wird in einem eigenen Vorführkonto** (Vorschlag: `vorfuehrung`),
@@ -132,18 +132,18 @@ DialOS nichts ohne „ja" verschickt.
 
 Aufgenommen am 2026-10-08 (Stephan: „Du kannst ja das Radio schon mit ins
 Drehbuch nehmen"). **Achtung beim Veröffentlichen:** Hier läuft echte Musik
-von Ö3 - für die Website gehört die Szene gekürzt oder die Musik leiser
+aus dem Radio - für die Website gehört die Szene gekürzt oder die Musik leiser
 gelegt, damit kein ganzes Lied im Video steht.
 
 | Anna | DialOS | Bild |
 |---|---|---|
-| „Ö3 einschalten" | „Hitradio Oe3." - Ö3 spielt | Mitschrift |
+| „Tiroler Radio einschalten" | „ORF Radio Tirol." - der Sender spielt | Mitschrift |
 | „Was läuft gerade?" | „Es läuft Hitradio Oe3: …" mit Liedtitel, wenn Ö3 einen mitschickt | Mitschrift |
 | „Lauter machen" | „Lauter." | Mitschrift |
 | „Radio abstellen" | „Radio aus." | Mitschrift |
 
-„Ö3" statt „Ö drei" in Annas Text: Piper spricht „Ö drei" so, dass Vosk
-„wie drei" hört - offline geprüft. Während Musik läuft, wird es auf dem
+„Tiroler Radio" statt Ö3: „Ö drei" hört Vosk bei Annas Stimme als „wie
+drei", und „Ö3" kam zwar offline, live beim elften Dreh aber genauso an. Während Musik läuft, wird es auf dem
 Lautsprecher nie still; der Dreh wartet hier deshalb auf Michaels Ansage im
 Protokoll und dann feste Sekunden.
 
@@ -312,8 +312,22 @@ gezeigt, und jede ist im Skript behoben:
 Michael sagt außerdem an, wann der Dreh beginnt, endet oder abbricht - vor
 und nach der Aufnahme, also nicht im Video. Ohne Ton erscheint ein Fenster.
 
-**Stand:** Szenen 1 und 2 laufen, der Einkaufszettel bricht bisher an der
-Rückfrage ab. Der nächste Dreh ist der erste mit allen vier Korrekturen.
+**Stand 2026-10-08, 13:58: Das erste vollständige Video steht** - alle acht
+Szenen, 7:09 Minuten, im Konto dialosadmin mit Vorführmodus. Liegt neben dem
+Repo unter `video-vorfuehrung-2026-10-08/` (MP4 mit Mischung, MKV mit drei
+Spuren, beide Stimmen als WAV, Protokoll) - zu groß fürs Repo. Ehrlich im Bild:
+Parakeet schrieb in der Mail „Hallo, Edika".
+
+Bis dahin brauchte es fünfzehn Drehs. Was nach Punkt 5 noch dazukam: OBS
+überhört SIGINT (jetzt SIGTERM); das Ansage-Protokoll kürzt auf 120 Zeichen
+(auf den Anfang langer Ansagen warten); nach dem Betreff erst „Ich schreibe
+mit" abwarten; 4 s Pause vor „Diktat beenden"; hängende Dialoge beenden und
+die verwaiste Mikrofon-Marke wegräumen (Diktat und Notiz legen sie ohne PID
+an - **ein echtes Risiko fürs Produkt**, offen); Vorlauf „starten, dann
+stoppen", damit die Sprachsteuerung sicher aus ist; Max Mustermann wohnt in
+Österreich, sonst kennt das Radio „tiroler radio" nicht; bei laufender Musik
+auf „Ansage vorbei" im Protokoll der Erkennung warten. Dazu ein Fehler im
+Produkt: „Brief vorlesen" ging seit dem 2026-09-21 nicht (behoben, Test dazu).
 
 ## Risiken, die erst der Probelauf zeigt
 
