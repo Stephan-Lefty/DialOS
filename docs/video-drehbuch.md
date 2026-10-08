@@ -112,7 +112,7 @@ DialOS nichts ohne „ja" verschickt.
 
 | Anna | DialOS | Bild |
 |---|---|---|
-| „E-Mail schreiben" | „Einen Moment, ich hole Zettel und Stift." „An wen soll die E-Mail gehen? Sage den Namen aus Deinen Kontakten, oder sage: buchstabieren." | Mitschrift |
+| „Neue E-Mail schreiben" | „Einen Moment, ich hole Zettel und Stift." „An wen soll die E-Mail gehen? Sage den Namen aus Deinen Kontakten, oder sage: buchstabieren." | Mitschrift |
 | „Frau Erika Musterfrau." | „An Frau Erika Musterfrau, … Stimmt das? Sage ja oder nein." | Mitschrift |
 | „Ja!" | „Was soll im Betreff stehen?" | Mitschrift |
 | „Eine Einladung zum Kaffee." | „Sage jetzt den Text der E-Mail. Wenn Du fertig bist, sage: Diktat beenden." | Mitschrift |
@@ -311,6 +311,16 @@ gezeigt, und jede ist im Skript behoben:
 
 Michael sagt außerdem an, wann der Dreh beginnt, endet oder abbricht - vor
 und nach der Aufnahme, also nicht im Video. Ohne Ton erscheint ein Fenster.
+
+**Stand 2026-10-08, 16:25: Die Fassung mit sichtbaren Programmen steht** -
+9 Minuten, ohne eine einzige Wiederholung, unter
+`video-vorfuehrung-2026-10-08-final/`. Neu darin: PDF bildschirmfüllend,
+Thunderbird mit dem Entwurf (eigenes Vorführprofil), Firefox mit google.de,
+Annas Satzanfänge vollständig (Stille-Strom mit `--raw`). Dabei zwei Fehler im
+Produkt gefunden und behoben: Die Thunderbird-Brücke lief seit dem Neuaufbau
+nie (Host-Datei unter `/usr/lib/mozilla/`), und Java für die Schreibhilfe
+fehlte. Holprig, aber echt: Radio Tirol schickt als „Liedtitel" seinen
+Werbespruch.
 
 **Stand 2026-10-08, 13:58: Das erste vollständige Video steht** - alle acht
 Szenen, 7:09 Minuten, im Konto dialosadmin mit Vorführmodus. Liegt neben dem

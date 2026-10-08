@@ -117,7 +117,11 @@ SZENEN = [
         ("Ja!", "Ich schreibe mit", 1.2, 0.8),
         ("Liebe Frau Musterfrau, vielen Dank für Ihren Besuch am Sonntag. "
          "Ich habe mich sehr gefreut. Herzliche Grüße", None, 0, 4.0),
-        ("Diktat beenden", "", 1.5, 1.0),
+        # 3 s Pause: "Brief vorlesen" direkt nach Michaels langer Ansage kam beim
+        # zwanzigsten Dreh zweimal als "wie vorlesen" an - die Echo-
+        # Unterdrueckung war noch auf seine Stimme eingestellt. Allein durch
+        # denselben Weg geschickt, kam der Satz richtig an.
+        ("Diktat beenden", "", 1.5, 3.0),
         # Auf den ANFANG warten: dialos-say.log kuerzt jede Ansage auf 120
         # Zeichen (Datenschutz, CLAUDE.md) - "Brief als PDF speichern" steht
         # am Ende und kam beim dritten Dreh nie im Protokoll an.
@@ -125,7 +129,9 @@ SZENEN = [
         ("Brief als PDF speichern", "PDF", 1.2, 0.5),
     ]),
     ("5 E-Mail", [
-        ("E-Mail schreiben", "An wen soll die E-Mail gehen", 1.2, 0.6),
+        # "Neue E-Mail schreiben" statt "E-Mail schreiben": live wurde das
+        # kurze "E" am Anfang einmal verschluckt ("die mail schreiben").
+        ("Neue E-Mail schreiben", "An wen soll die E-Mail gehen", 1.2, 0.6),
         ("Frau Erika Musterfrau.", "An Frau Erika", 1.2, 0.6),
         ("Ja!", "Betreff", 1.2, 0.6),
         # Erst nach "Ich schreibe mit" diktieren: Nach "Sage jetzt den Text der
@@ -141,7 +147,11 @@ SZENEN = [
         ("Postfach öffnen", "Soll ich einen davon verschicken", 1.2, 0.6),
         ("Nein!", "bleiben liegen", 1.2, 4.0),
         ("Postfach schließen", "Soll ich das Postfach", 1.2, 0.6),
-        ("Ja!", "", 1.2, 1.5),
+        # Vor dem Schliessen weist DialOS noch einmal auf liegende Entwuerfe
+        # hin (Stephans Wunsch vom 2026-09-21) - beim achtzehnten Dreh nicht
+        # eingeplant, Annas naechster Satz fiel in diese Rueckfrage.
+        ("Ja!", "Soll ich einen davon verschicken", 1.2, 0.6),
+        ("Nein!", "Postfach ist zu", 1.2, 1.5),
     ]),
     # Firefox auch im Konto dialosadmin (Stephan, 2026-10-08: "das ist nur der
     # Tab dialos.org") - die Startseite ist die eigene Webseite.
@@ -575,7 +585,13 @@ VORFUEHR_ORDNER = (os.path.join(HEIM, "Dokumente"), os.path.join(HEIM, "Notizen"
 VORFUEHR_DATEIEN = (os.path.join(DIALOS_CONF, "persoenliche-daten.txt"),
                     os.path.join(DIALOS_CONF, "mail-entwuerfe.json"),
                     os.path.join(DIALOS_CONF, "kontakte-neu.json"),
-                    os.path.join(DIALOS_CONF, "radio-zuletzt.txt"))
+                    os.path.join(DIALOS_CONF, "radio-zuletzt.txt"),
+                    # Einkaufszettel und Notizen GELEERT, nicht nur gesichert:
+                    # Beim neunzehnten Dreh las Michael zehn Eintraege vor -
+                    # Reste aus abgebrochenen Drehs ("Ich wuerde die zugabe
+                    # abstauben"). Ein Zettel, der vorher da war, blieb stehen.
+                    os.path.join(HEIM, "Notizen", "einkaufszettel.txt"),
+                    os.path.join(HEIM, "Notizen", "notizen.txt"))
 
 
 def thunderbird_laeuft():
@@ -610,6 +626,10 @@ def vorfuehrmodus_an():
             zustand["dateien"][pfad] = ziel
         else:
             zustand["dateien"][pfad] = None
+    for pfad in (os.path.join(HEIM, "Notizen", "einkaufszettel.txt"),
+                 os.path.join(HEIM, "Notizen", "notizen.txt")):
+        if os.path.exists(pfad):
+            os.remove(pfad)             # gesichert ist er oben
     persoenliche_daten_schreiben()
     # EIGENES THUNDERBIRD-PROFIL (Stephan, 2026-10-08: man soll sehen, dass
     # eine Mail geschrieben ist). Im echten Profil stuende das echte Postfach
@@ -1110,7 +1130,21 @@ def drehen():
             ab = say_log_laenge()
             erkenner_ab = erkenner_log_laenge()
             anna_spricht(nr)
-            ok = warten(pegel, ab, erwartet, ruhe, erkenner_ab=erkenner_ab)
+            ok = warten(pegel, ab, erwartet, ruhe, zeitgrenze=25, erkenner_ab=erkenner_ab)
+            if not ok:
+                # EINMAL WIEDERHOLEN, wie es ein Mensch tut (Stephan, 2026-10-08:
+                # "Kann nicht sein, dass wir einen Tag dafuer brauchen"). Bis
+                # hierher brach jeder einzelne Verhoerer den ganzen Dreh ab -
+                # bei 38 Saetzen und einer einfachen Synthesestimme fast
+                # jedes Mal irgendwo. Die Wiederholung steht ehrlich im Video.
+                melde(f"  -> Anna wiederholt: {text}")
+                warte_auf_ruhe = time.time() + 15
+                while pegel.ruhig_seit() < 1.5 and time.time() < warte_auf_ruhe:
+                    time.sleep(0.2)
+                ab = say_log_laenge()
+                erkenner_ab = erkenner_log_laenge()
+                anna_spricht(nr)
+                ok = warten(pegel, ab, erwartet, ruhe, erkenner_ab=erkenner_ab)
             if ok and text == "Brief als PDF speichern":
                 try:
                     pdf_zeigen()
@@ -1120,7 +1154,10 @@ def drehen():
                 melde("!! Szene laeuft nicht wie im Drehbuch - Dreh abgebrochen")
                 abbruch = f"Der Dreh ist bei Szene {szene.split()[0]} abgebrochen."
                 break
-            time.sleep(pause)
+            # Eine Sekunde mehr nach jeder Antwort: Die Echo-Unterdrueckung
+            # braucht nach Michaels Stimme einen Augenblick, sonst verschluckt
+            # sie Annas ersten Laut ("die mail schreiben", "wie vorlesen").
+            time.sleep(pause + (1.0 if erwartet is not None else 0))
         else:
             melde("=== alle Szenen durch ===")
             abbruch = None
