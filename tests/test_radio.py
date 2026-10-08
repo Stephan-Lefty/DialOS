@@ -91,12 +91,17 @@ class RadioBasis(unittest.TestCase):
         rs.eigene_liste = lambda: os.path.join(self.ordner, "eigen.json")
 
         self.radio.ZULETZT = os.path.join(self.ordner, "zuletzt.txt")
+        # Abspielen traegt seit 2026-10-08 in Rhythmbox' Datenbank ein - ohne
+        # das hier schriebe jeder Testlauf in die ECHTE des Testenden.
+        self.radio.RHYTHMDB = os.path.join(self.ordner, "rhythmdb.xml")
         self.radio.PROTOKOLL = os.path.join(self.ordner, "log")
         self.radio.sender_modul = lambda: rs
         self.gesagt, self.gerufen = [], []
         self.radio.sprich = self.gesagt.append
         self.radio.client = lambda *a, **k: self.gerufen.append(a) or True
         self.radio.laeuft = lambda: True
+        # Rhythmbox wirklich zu beenden hiesse pgrep - nur vermerken.
+        self.radio.rhythmbox_beenden = lambda: self.gerufen.append(("--quit",)) or True
 
     def tearDown(self):
         rs.SYSTEMLISTE = self._alte_systemliste
@@ -239,6 +244,70 @@ class Steuerung(RadioBasis):
             "1.0" if k.get("hole_ausgabe") else self.gerufen.append(a) or True)
         self.radio.lautstaerke(+1)
         self.assertIn("Lauter geht nicht.", self.gesagt)
+
+
+class AmGeraetGefunden(RadioBasis):
+    """Drei Fehler vom ersten Lauf am Geraet (2026-10-08)."""
+
+    def test_unbekannter_sender_wird_vor_dem_abspielen_eingetragen(self):
+        """--play-uri spielt nur, was in Rhythmbox' Datenbank steht - fuer
+        alles andere meldet es Erfolg und bleibt still."""
+        self.radio.laeuft = lambda: False
+        self.radio.einschalten(self.rs, "ö drei")
+        self.assertEqual(self.gespielt, ["https://b.at/oe3.mp3"])
+        self.assertTrue(self.radio.rhythmbox_kennt("https://b.at/oe3.mp3"))
+        # die ganze Liste auf einmal, damit Rhythmbox nur einmal zu muss
+        self.assertTrue(self.radio.rhythmbox_kennt("https://a.de/dlf.mp3"))
+        # kein Podcast-Feed als Radiosender
+        self.assertFalse(self.radio.rhythmbox_kennt("https://d.de/feed"))
+
+    def test_eingetragen_ohne_unbekannt_als_interpret(self):
+        """Sonst sagt "Was laeuft gerade": "Unbekannt - Hitradio Oe3"."""
+        self.radio.laeuft = lambda: False
+        self.radio.einschalten(self.rs, "ö drei")
+        with open(self.radio.RHYTHMDB, encoding="utf-8") as f:
+            self.assertNotIn("Unbekannt", f.read())
+
+    def test_bekannter_sender_ohne_neustart(self):
+        """Steht er schon drin, wird Rhythmbox nicht geschlossen."""
+        self.radio.laeuft = lambda: False
+        self.radio.einschalten(self.rs, "ö drei")
+        self.gerufen.clear()
+        self.radio.laeuft = lambda: True
+        self.radio.einschalten(self.rs, "ö drei")
+        self.assertNotIn(("--quit",), self.gerufen)
+
+    def test_lautstaerke_mit_deutschem_komma(self):
+        """rhythmbox-client sagt "liegt bei 0,799988." - nicht "0.8"."""
+        self.radio.client = lambda *a, **k: (
+            "Wiedergabelautstärke liegt bei 0,799988." if k.get("hole_ausgabe")
+            else self.gerufen.append(a) or True)
+        self.radio.lautstaerke(+1)
+        self.assertIn(("--set-volume", "0.90"), self.gerufen)
+        self.assertNotIn(("--volume-up",), self.gerufen)
+
+    def test_liedtitel_oder_nur_der_sender(self):
+        n = self.radio.nur_sendername
+        self.assertTrue(n("HITRADIO Ö3 - Livestream", "Hitradio Oe3"))
+        self.assertTrue(n("Life Radio", "Life Radio"))
+        self.assertTrue(n("", "Oe1"))
+        self.assertFalse(n("coldplay - higher power", "Kronehit"))
+        # Sendername IM Titel, und trotzdem ein Lied
+        self.assertFalse(n("beabadoobee - Memories | FM4 Morning Show", "FM4"))
+
+    def test_was_laeuft_sagt_das_lied(self):
+        self.radio.client = lambda *a, **k: "Kronehit" if k.get("hole_ausgabe") else True
+        self.radio.laufende_adresse = lambda: "http://x.at/kronehit.mp3"
+        self.radio.icy_titel = lambda adresse: "coldplay - higher power"
+        self.radio.was_laeuft()
+        self.assertEqual(self.gesagt, ["Es läuft Kronehit: coldplay - higher power."])
+
+    def test_was_laeuft_ohne_liedtitel_sagt_es_ehrlich(self):
+        self.radio.client = lambda *a, **k: "Life Radio" if k.get("hole_ausgabe") else True
+        self.radio.laufende_adresse = lambda: "http://x.at/life"
+        self.radio.icy_titel = lambda adresse: "Life Radio"
+        self.radio.was_laeuft()
+        self.assertIn("keinen Liedtitel", self.gesagt[0])
 
 
 class PasstZumSprachdienst(unittest.TestCase):

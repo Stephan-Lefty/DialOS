@@ -32,6 +32,7 @@ Aufruf:
 
 import importlib.util
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -134,6 +135,93 @@ def laeuft():
         return False
 
 
+RHYTHMDB = os.path.join(os.path.expanduser("~"), ".local", "share", "rhythmbox",
+                        "rhythmdb.xml")
+
+
+def rhythmbox_kennt(quelle):
+    """Steht die Adresse als Eintrag in Rhythmbox' Datenbank?"""
+    import xml.etree.ElementTree as ET
+    try:
+        wurzel = ET.parse(RHYTHMDB).getroot()
+    except (OSError, ET.ParseError):
+        return False
+    return any((e.findtext("location") or "") == quelle for e in wurzel.findall("entry"))
+
+
+def rhythmbox_beenden():
+    """Rhythmbox ordentlich schliessen und warten, bis es wirklich weg ist."""
+    client("--quit")
+    for _ in range(30):
+        if subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "rhythmbox"],
+                          capture_output=True).returncode != 0:
+            return True
+        time.sleep(0.5)
+    melde("Rhythmbox laesst sich nicht beenden")
+    return False
+
+
+def sender_sicherstellen(rs, name, quelle):
+    """Sorgt dafuer, dass Rhythmbox die Adresse kennt - sonst spielt es sie nicht.
+
+    AM GERAET GEMESSEN, 2026-10-08: "rhythmbox-client --play-uri" spielt eine
+    Stream-Adresse NUR, wenn sie als Radiosender in Rhythmbox' Datenbank steht.
+    Fuer jede andere nimmt es den Auftrag an, meldet Erfolg - und spielt nichts
+    (MPRIS: "Stopped", keine Fehlermeldung). Ein Beispielsender aus der
+    Datenbank spielte sofort, Oe3 erst nach dem Eintrag, dann auch aus dem
+    Kaltstart. Auf dem Arbeitsrechner fiel das nicht auf, weil die Sender
+    dort schon eingetragen waren.
+
+    EINGETRAGEN WIRD DIE GANZE LISTE AUF EINMAL: Die Datenbank darf nur
+    beschrieben werden, solange Rhythmbox zu ist - es haelt sie im Speicher
+    und ueberschreibt sie beim Beenden. Fehlt ein Sender, wird Rhythmbox also
+    einmal geschlossen; danach stehen alle Sender drin, und das passiert erst
+    wieder, wenn die Medienliste waechst.
+
+    INTERPRET BLEIBT LEER, wie bei Rhythmbox' eigenen Radiosendern. Mit
+    "Unbekannt" sagte "Was laeuft gerade" sonst "Es laeuft: Unbekannt -
+    Hitradio Oe3".
+    """
+    if rhythmbox_kennt(quelle):
+        return True
+    import xml.etree.ElementTree as ET
+    eintraege = [(e.get("name") or e.get("sprechform") or "", (e.get("quelle") or "").strip())
+                 for e in liste_holen(rs, art=None)
+                 if (e.get("quelle") or "").strip()
+                 and (e.get("art") or "") in ("radio", "nachrichten-sender")]
+    eintraege.append((name, quelle))
+    if laeuft() and not rhythmbox_beenden():
+        return False
+    try:
+        if os.path.isfile(RHYTHMDB):
+            baum = ET.parse(RHYTHMDB)
+            shutil.copy2(RHYTHMDB, RHYTHMDB + ".vor-dialos-radio")
+        else:
+            # Frisches Konto: Rhythmbox lief hier noch nie.
+            os.makedirs(os.path.dirname(RHYTHMDB), exist_ok=True)
+            baum = ET.ElementTree(ET.Element("rhythmdb", {"version": "2.0"}))
+        wurzel = baum.getroot()
+        vorhanden = {e.findtext("location") for e in wurzel.findall("entry")}
+        neu = 0
+        for titel, adresse in eintraege:
+            if adresse in vorhanden:
+                continue
+            vorhanden.add(adresse)
+            e = ET.SubElement(wurzel, "entry", {"type": "iradio"})
+            for feld, wert in (("title", titel), ("genre", "Radio"), ("artist", ""),
+                               ("album", ""), ("location", adresse), ("date", "0"),
+                               ("media-type", "application/octet-stream")):
+                ET.SubElement(e, feld).text = wert
+            neu += 1
+        baum.write(RHYTHMDB + ".neu", encoding="UTF-8", xml_declaration=True)
+        os.replace(RHYTHMDB + ".neu", RHYTHMDB)
+    except (OSError, ET.ParseError) as fehler:
+        melde(f"Rhythmbox-Datenbank nicht beschreibbar: {fehler}")
+        return False
+    melde(f"in Rhythmbox eingetragen: {neu} Sender")
+    return True
+
+
 def liste_holen(rs, art="radio"):
     """Eintraege aus der Medienliste - beide Ebenen zusammengefuehrt.
 
@@ -212,7 +300,7 @@ def abspielen(rs, eintrag):
         melde(f"Eintrag ohne Quelle: {eintrag!r}")
         return False
 
-    if not client("--play-uri", quelle):
+    if not sender_sicherstellen(rs, name, quelle) or not client("--play-uri", quelle):
         sprich("Ich konnte das Radio nicht starten.")
         return False
 
@@ -288,7 +376,12 @@ def lautstaerke(richtung):
         return 0
     jetzt = client("--print-volume", hole_ausgabe=True)
     try:
-        wert = float((jetzt or "").split()[-1])
+        # DEUTSCHES KOMMA (am Geraet gefunden, 2026-10-08): rhythmbox-client
+        # meldet "Wiedergabelautstaerke liegt bei 0,799988." - float() kann
+        # das nicht, und es lief jedes Mal der Rueckfall mit Rhythmbox'
+        # eigenen Mini-Schritten. Stephan: "Lauter und leiser hat nicht
+        # funktioniert."
+        wert = float((jetzt or "").split()[-1].rstrip(".").replace(",", "."))
     except (ValueError, IndexError):
         # Rueckfall auf die Schritte von Rhythmbox selbst. Sie sind
         # kleiner als unsere Stufe, aber besser als gar nichts.
@@ -308,19 +401,92 @@ def lautstaerke(richtung):
     return 0
 
 
+def laufende_adresse():
+    """Die Adresse dessen, was Rhythmbox gerade spielt - ueber MPRIS."""
+    import re
+    try:
+        aus = subprocess.run(
+            ["gdbus", "call", "--session", "--dest", "org.mpris.MediaPlayer2.rhythmbox",
+             "--object-path", "/org/mpris/MediaPlayer2", "--method",
+             "org.freedesktop.DBus.Properties.Get", "org.mpris.MediaPlayer2.Player",
+             "Metadata"], capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    treffer = re.search(r"'xesam:url': <'([^']+)'>", aus)
+    return treffer.group(1) if treffer else ""
+
+
+def icy_titel(adresse, zeitgrenze=5):
+    """Den Liedtitel, den der Sender gerade mitschickt (ICY "StreamTitle").
+
+    RHYTHMBOX GIBT IHN NICHT HERAUS (gemessen 2026-10-08): weder
+    --print-playing noch %st noch MPRIS - nur den Sendernamen, auch bei
+    Kronehit, das "coldplay - higher power" mitschickte. Deshalb fragt
+    DialOS den Stream selbst: Mit "Icy-MetaData: 1" steht der Titel nach
+    icy-metaint Bytes (bei den ORF-Sendern 16000, also unter einer Sekunde).
+    """
+    import urllib.request
+    anfrage = urllib.request.Request(adresse, headers={"Icy-MetaData": "1",
+                                                       "User-Agent": "DialOS"})
+    try:
+        with urllib.request.urlopen(anfrage, timeout=zeitgrenze) as antwort:
+            abstand = int(antwort.headers.get("icy-metaint") or 0)
+            if not 0 < abstand <= 512000:
+                return ""
+            gelesen = 0
+            while gelesen < abstand:
+                stueck = antwort.read(min(65536, abstand - gelesen))
+                if not stueck:
+                    return ""
+                gelesen += len(stueck)
+            laenge = antwort.read(1)
+            daten = antwort.read(laenge[0] * 16) if laenge else b""
+    except Exception as fehler:            # noqa: BLE001 - Netz, Format, alles
+        melde(f"ICY nicht lesbar: {fehler}")
+        return ""
+    try:
+        text = daten.split(b"\0")[0].decode("utf-8")
+    except UnicodeDecodeError:
+        text = daten.split(b"\0")[0].decode("latin-1")
+    anfang = text.find("StreamTitle='")
+    if anfang < 0:
+        return ""
+    text = text[anfang + len("StreamTitle='"):]
+    return text[:text.find("';")] if "';" in text else text.rstrip("'; ")
+
+
+def nur_sendername(titel, sender):
+    """Schickt der Sender statt des Lieds nur sich selbst? ("HITRADIO Oe3 - Livestream")"""
+    import unicodedata
+
+    def flach(t):
+        t = unicodedata.normalize("NFKD", t.lower())
+        return "".join(z for z in t if z.isalnum())
+    t, s = flach(titel), flach(sender)
+    # NICHT "s in t": FM4 schickt "beabadoobee - Memories | FM4 Morning Show"
+    # - der Sendername steht im Titel, und trotzdem ist es ein Lied.
+    return not t or t in s or "livestream" in t
+
+
 def was_laeuft():
     if not laeuft():
         sprich("Es läuft gerade nichts.")
         return 0
-    text = client("--print-playing", hole_ausgabe=True)
-    if not text:
+    sender = client("--print-playing-format=%tt", hole_ausgabe=True)
+    if not sender:
         sprich("Ich kann gerade nicht sagen, was läuft.")
         return 1
-    # Bei einem Stream steht hier der ICY-Titel, also meist
-    # "Interpret - Titel" des laufenden Stuecks. Das ist genau die
-    # Auskunft, die ein blinder Nutzer sonst nirgends bekommt.
-    sprich(f"Es läuft: {text}")
-    melde(f"laeuft: {text}")
+    adresse = laufende_adresse()
+    titel = icy_titel(adresse) if adresse.startswith(("http://", "https://")) else ""
+    melde(f"laeuft: {sender} <{adresse}> Titel: {titel!r}")
+    if titel and not nur_sendername(titel, sender):
+        # "Interpret - Titel" des laufenden Stuecks - genau die Auskunft, die
+        # ein blinder Nutzer sonst nirgends bekommt.
+        sprich(f"Es läuft {sender}: {titel.replace(' | ', ', ')}.")
+    elif adresse.startswith(("http://", "https://")):
+        sprich(f"Es läuft {sender}. Der Sender schickt keinen Liedtitel mit.")
+    else:
+        sprich(f"Es läuft {sender}.")
     return 0
 
 
@@ -424,7 +590,8 @@ def nachrichten(rs, gesucht=None):
         quelle = folge["audio"]
         melde(f"neueste Folge: {folge['titel']}")
 
-    if not client("--play-uri", quelle):
+    if (not sender_sicherstellen(rs, eintrag.get("name") or "Nachrichten", quelle)
+            or not client("--play-uri", quelle)):
         sprich("Ich konnte die Nachrichten nicht starten.")
         return 1
     # Kurz, der Nutzer will zuhoeren. Der Name sagt ihm, ob der Erkenner
