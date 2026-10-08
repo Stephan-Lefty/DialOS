@@ -78,6 +78,7 @@ concrete next steps in [TODO.en.md](TODO.en.md).
 
 - [Debian to DialOS](docs/Debian-zu-DialOS.en.md) – step-by-step recipe: from a bare Debian 13/GNOME install to the current version
 - [Installation guide](docs/installationsanleitung.md) – step-by-step guide for the complete rebuild of a device, as a PDF for when Claude isn't around (German only)
+- [Deploying to the device](docs/aufspielen-am-geraet.md) – the trip from the workbench to the device: dry run, copy, mandatory check, and the trials that only work on the device (German only)
 - [Architecture overview](docs/architektur-uebersicht.en.md) – goal, target audience, core features, software stack
 - [Hardware](docs/hardware.en.md) – reference device, test hardware, WWAN requirements
 - [Security & privacy](docs/sicherheit-datenschutz.en.md) – autologin, encryption, remote support, shipping

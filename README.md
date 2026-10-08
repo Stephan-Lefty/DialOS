@@ -79,6 +79,7 @@ Details zum jeweiligen Stand stehen im
 
 - [Debian-zu-DialOS](docs/Debian-zu-DialOS.md) – Schritt-für-Schritt-Rezept: von einer nackten Debian-13/GNOME-Installation bis zur aktuellen Version
 - [Installationsanleitung](docs/installationsanleitung.md) – Schritt-für-Schritt-Anleitung für den kompletten Neuaufbau eines Geräts, als PDF für den Fall, dass Claude nicht da ist
+- [Aufspielen und Abnahme am Gerät](docs/aufspielen-am-geraet.md) – der Gang von der Werkbank ans Gerät: trocken ansehen, kopieren, Pflichtprüfung, und die Proben, die nur am Gerät gehen
 - [Architektur-Übersicht](docs/architektur-uebersicht.md) – Ziel, Zielgruppe, Kernfunktionen, Software-Stack
 - [Hardware](docs/hardware.md) – Referenzgerät, Test-Hardware, WWAN-Anforderungen
 - [Sicherheit & Datenschutz](docs/sicherheit-datenschutz.md) – Autologin, Verschlüsselung, Fernwartung, Versand
