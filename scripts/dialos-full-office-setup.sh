@@ -537,6 +537,12 @@ schritt_15c_languagetool() {
   log "Schritt 15c: LanguageTool (Schreibhilfe)"
   # Von Hand, weil Debian es nicht paketiert - siehe Debian-zu-DialOS.md.
   # 241 MB gepackt; laeuft nur auf 127.0.0.1:8081, nicht im Netz erreichbar.
+  #
+  # JAVA ZUERST - FEHLTE BIS 2026-10-08: Das Rezept nannte openjdk, dieses
+  # Skript nicht. Nach dem Neuaufbau vom 2026-09-25 lief die Schreibhilfe
+  # deshalb nie ("/usr/bin/java: No such file or directory"), in keinem
+  # Konto; aufgefallen erst im Vorfuehrvideo ("Schreibhilfe laeuft nicht").
+  sudo apt-get install -y openjdk-21-jre-headless
   if [ -f /opt/languagetool/languagetool-server.jar ]; then
     echo "  LanguageTool liegt schon in /opt - uebersprungen."
     return

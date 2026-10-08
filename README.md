@@ -157,6 +157,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Schreibhilfe lief seit dem Neuaufbau nie** (2026-10-08): Java fehlte.
+  Das Rezept nennt `openjdk-21-jre-headless`, `dialos-full-office-setup.sh`
+  (Schritt 15c) installierte es nicht - LanguageTool scheiterte bei jedem
+  Start an `/usr/bin/java`. Notizen und Einkaufszettel kamen deshalb klein
+  geschrieben an. **Zehnte Lücke des Neuaufbaus vom 2026-09-25.** Jetzt im
+  Skript und in der Paketliste, am Gerät nachinstalliert.
 - **Radio am Gerät abgenommen - mit vier Funden, die nur dort auffallen
   konnten** (2026-10-08, erster Lauf am T490). (1) `rhythmbox-client
   --play-uri` spielt eine Stream-Adresse nur, wenn sie als Radiosender in

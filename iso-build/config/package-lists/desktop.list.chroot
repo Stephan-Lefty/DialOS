@@ -23,6 +23,9 @@ thunderbird
 rhythmbox
 gnome-podcasts
 libreoffice-writer
+# Java fuer LanguageTool, die Schreibhilfe (ergaenzt 2026-10-08 - fehlte
+# nach dem Neuaufbau, die Schreibhilfe lief nie).
+openjdk-21-jre-headless
 # ffprobe fuer die Senderpruefung (ergaenzt 2026-09-30, Stephans Freigabe).
 #
 # WARUM ES NICHT REICHT, DEN SERVER ZU FRAGEN: DialOS-Rhythmbox prueft jeden

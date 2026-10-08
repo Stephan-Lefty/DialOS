@@ -147,6 +147,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The writing aid never ran since the rebuild** (2026-10-08): Java was
+  missing. The recipe names `openjdk-21-jre-headless`,
+  `dialos-full-office-setup.sh` (step 15c) did not install it - LanguageTool
+  failed on every start at `/usr/bin/java`. Notes and shopping lists came out
+  in lower case. **Tenth gap of the 2026-09-25 rebuild.** Now in the script
+  and the package list, installed on the device.
 - **Radio accepted on the device - with four findings that could only show up
   there** (2026-10-08, first run on the T490). (1) `rhythmbox-client
   --play-uri` only plays a stream address that is stored as a radio station in
