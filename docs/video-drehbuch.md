@@ -33,13 +33,19 @@ Domain, die es nie geben wird.
 | Rolle | Name | Anschrift | Mail |
 |---|---|---|---|
 | Nutzer (Absender) | Max Mustermann | Musterstraße 1, 12345 Musterstadt | `max.mustermann@example.org` |
-| Kontakt (Empfängerin) | Erika Musterfrau | Beispielweg 7, 54321 Beispielstadt | `erika.musterfrau@example.org` |
+| Kontakt (Empfängerin) | Frau Erika Musterfrau | Beispielweg 7, 54321 Beispielstadt | `erika.musterfrau@example.org` |
 
 **Gedreht wird in einem eigenen Vorführkonto** (Vorschlag: `vorfuehrung`),
 nicht in `nutzer` und nicht in `dialosadmin`. Dort steht nichts von
 Stephan, und nach dem Dreh kann das Konto komplett gelöscht werden. Die
-Musterdaten kommen über die Maske der persönlichen Daten hinein - genau
-wie bei einem echten Kunden. Das ist zugleich ein Test der Maske.
+Musterdaten trägt `scripts/dialos-video-dreh.py einrichten` in die Datei der
+persönlichen Daten ein und verteilt sie mit `dialos-mailkonto.py` an
+Thunderbird - derselbe Weg wie aus der Maske, nur ohne Tippen.
+
+**Der Kontakt heißt „Frau Erika Musterfrau", mit Anrede.** Ohne Anrede hält
+DialOS den Empfänger für eine mögliche Firma und fragt nach einem
+Ansprechpartner; mit Anrede steht die Anschrift im Brief nach DIN richtig
+da. Angelegt wird er mit Mailadresse (die braucht die Mail-Szene).
 
 **Das Mailkonto bleibt offline** (Thunderbird `offline.startup_state = 3`):
 `example.org` hat keinen Mailserver, online käme eine Fehlermeldung ins
@@ -67,7 +73,7 @@ Geschätzte Länge: **rund 5 Minuten.**
 
 | Anna | DialOS | Bild |
 |---|---|---|
-| „Wie spät ist es?" | „Es ist … Uhr …." | Mitschrift |
+| „Wie viel Uhr ist es?" | „Es ist … Uhr …." | Mitschrift |
 | „Welchen Tag haben wir?" | „Heute ist …, der …." | Mitschrift |
 
 ### 3. Einkaufszettel (ca. 1:00)
@@ -78,26 +84,26 @@ Zuruf.
 | Anna | DialOS | Bild |
 |---|---|---|
 | „Einkaufszettel aufnehmen" | „Soll ich etwas in den Einkaufszettel schreiben? Sage ja oder nein." | Mitschrift |
-| „ja" | „Einen Moment, ich hole Zettel und Stift." … „Ich schreibe mit." „Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." | Mitschrift |
-| „Milch" - „Brot" - „Äpfel" (je 2 s Pause) | - | Mitschrift |
+| „Ja!" | „Einen Moment, ich hole Zettel und Stift." … „Ich schreibe mit. Sage jede Ware einzeln, mit einer kleinen Pause dazwischen." | Mitschrift |
+| „Zwei Liter Milch." - „Ein Laib Brot." - „Ein Kilo Äpfel." (je 2 s Pause) | - | Mitschrift |
 | „Diktat beenden" | „Diktat beendet, 3 Einträge geschrieben. …" | Mitschrift |
-| „Einkaufszettel vorlesen" | „… 3 Einträge: Milch. Brot. Äpfel." *(Probelauf)* | Mitschrift |
+| „Einkaufszettel vorlesen" | Anzahl der Einträge, dann die drei Waren *(Wortlaut: Probelauf)* | Mitschrift |
 
-### 4. Ein Brief an Erika Musterfrau (ca. 1:45)
+### 4. Ein Brief an Frau Erika Musterfrau (ca. 1:45)
 
-Zeigt: Empfänger aus den Kontakten, gesprochene Satzzeichen, Vorlesen,
-PDF für den Helfer.
+Zeigt: Empfänger aus den Kontakten, natürliches Sprechen (die Satzzeichen
+setzt Parakeet), Vorlesen, PDF für den Helfer.
 
 | Anna | DialOS | Bild |
 |---|---|---|
 | „Brief schreiben" | „Soll ich einen neuen Brief schreiben? Sage ja oder nein." | Mitschrift |
-| „ja" | „An wen geht der Brief?" | Mitschrift |
-| „Erika Musterfrau" | Liest den Kontakt vor, fragt nach *(Probelauf)* | Mitschrift |
-| „ja" | „Einen Moment, ich hole Zettel und Stift." … „Ich schreibe mit." | Mitschrift |
-| „Liebe Erika Komma neuer Absatz vielen Dank für Deinen Besuch am Sonntag Punkt Ich habe mich sehr gefreut Punkt neuer Absatz Viele Grüße" | - | Mitschrift |
+| „Ja!" | „An wen geht der Brief? Sage den Namen oder die Firma. …" | Mitschrift |
+| „Frau Erika Musterfrau." | „In den Kontakten steht: Frau Erika Musterfrau, Beispielweg 7, Postleitzahl 5 4 3 2 1, Beispielstadt. Ist das der Empfänger? Sage ja oder nein." | Mitschrift |
+| „Ja!" | „Einen Moment, ich hole Zettel und Stift." … „Ich schreibe mit." | Mitschrift |
+| „Liebe Frau Musterfrau, vielen Dank für Ihren Besuch am Sonntag. Ich habe mich sehr gefreut. Herzliche Grüße" | - | Mitschrift |
 | „Diktat beenden" | Bestätigung *(Probelauf)* | Mitschrift |
 | „Brief vorlesen" | Satzzahl, Empfänger, Datum, Text, dann „Du kannst sagen: Brief drucken oder Brief als PDF speichern." | Mitschrift |
-| „Brief als PDF speichern" | „Der Brief liegt jetzt als PDF in Deinen Dokumenten." | **Schnitt-Idee:** das PDF kurz im Dokumentenbetrachter zeigen - der Briefbogen mit Musteranschrift ist das stärkste Bild des Videos *(automatisch öffnen, Probelauf)* |
+| „Brief als PDF speichern" | „Der Brief liegt jetzt als PDF in Deinen Dokumenten." | Mitschrift. **Schnitt-Idee für später:** das PDF kurz im Dokumentenbetrachter zeigen - der Briefbogen mit Musteranschrift ist das stärkste Bild des Videos |
 
 ### 5. Eine E-Mail - ohne sie zu verschicken (ca. 1:30)
 
@@ -106,13 +112,13 @@ DialOS nichts ohne „ja" verschickt.
 
 | Anna | DialOS | Bild |
 |---|---|---|
-| „E-Mail schreiben" | Fragt nach dem Empfänger *(Probelauf)* | Mitschrift |
-| „Erika Musterfrau" | Kontakt vorlesen, nachfragen *(Probelauf)* | Mitschrift |
-| „ja" | „Was soll im Betreff stehen?" | Mitschrift |
-| „Einladung" | *(Probelauf)* | Mitschrift |
-| „Liebe Erika Komma kommst Du am Samstag zum Kaffee Fragezeichen neuer Absatz Viele Grüße" | - | Mitschrift |
-| „Diktat beenden" | „2 Sätze an Erika Musterfrau, Betreff Einladung. Soll ich sie verschicken? Sage ja, nein, oder vorlesen." | Mitschrift |
-| „nein" | Legt sie als Entwurf ab *(Probelauf)* | Thunderbird mit dem Entwurf |
+| „E-Mail schreiben" | „Einen Moment, ich hole Zettel und Stift." „An wen soll die E-Mail gehen? Sage den Namen aus Deinen Kontakten, oder sage: buchstabieren." | Mitschrift |
+| „Frau Erika Musterfrau." | „An Frau Erika Musterfrau, … Stimmt das? Sage ja oder nein." | Mitschrift |
+| „Ja!" | „Was soll im Betreff stehen?" | Mitschrift |
+| „Eine Einladung zum Kaffee." | „Sage jetzt den Text der E-Mail. Wenn Du fertig bist, sage: Diktat beenden." | Mitschrift |
+| „Hallo Erika, kommst Du am Samstag zum Kaffee? Viele Grüße" | - | Mitschrift |
+| „Diktat beenden" | „2 Sätze an Frau Erika Musterfrau, Betreff Eine Einladung zum Kaffee. Soll ich sie verschicken? Sage ja, nein, oder vorlesen." | Mitschrift |
+| „Nein!" | Legt sie als Entwurf ab *(Wortlaut: Probelauf)* | Mitschrift |
 
 ### 6. Programme auf Zuruf (ca. 0:30)
 
@@ -120,13 +126,36 @@ DialOS nichts ohne „ja" verschickt.
 |---|---|---|
 | „Internet öffnen" | *(Probelauf)* | Firefox geht auf |
 | „Internet schließen" | „Soll ich … schließen? Sage ja oder nein." *(Probelauf)* | Firefox |
-| „ja" | *(Probelauf)* | Firefox geht zu |
+| „Ja!" | *(Probelauf)* | Firefox geht zu |
 
 ### 7. Schluss (ca. 0:10)
 
 | Anna | DialOS | Bild |
 |---|---|---|
 | „Sprachsteuerung stoppen" | „Ich höre Dir nicht mehr zu." | Mitschrift geht zu, leerer Desktop, 3 s stehen lassen |
+
+## Annas Sätze - vorher geprüft
+
+Am 2026-10-05 lief jeder Satz offline gegen dieselben Erkenner wie im Betrieb:
+Piper spricht mit Annas Stimme (`kerstin-low`, Tempo 0,95), Vosk hört die
+Befehle mit der vollständigen Grammatik, Parakeet das Diktat. Die Befehle kamen
+alle wörtlich an. Was **nicht** ging, hat das Drehbuch verändert - nicht
+geschönt, sondern so umformuliert, wie es ein Mensch auch sagen würde:
+
+| Gesagt | Erkannt | Darum im Drehbuch |
+|---|---|---|
+| „nein" | **„ja"** | „Nein!" - sonst hätte DialOS die Mail verschickt |
+| „ja" | nichts | „Ja!" |
+| „Milch", „Brot", „Äpfel" | „fest", „das", „pfiffe" | mit Menge: „Zwei Liter Milch." usw. |
+| „Liebe Erika, …" | „Liebe Edika, …" | Brief förmlich: „Liebe Frau Musterfrau, …" |
+| „Einladung" (Betreff) | „I know." | „Eine Einladung zum Kaffee." |
+| „Wie spät ist es?" | „wie spät ist das" (mit Michaels Stimme) | „Wie viel Uhr ist es?" |
+
+Kurze Einzelwörter scheitern bei dieser einfachen Stimme, ganze Sätze nicht.
+„Hallo Erika, …" in der Mail kam dagegen fehlerfrei an, samt Fragezeichen.
+**Das gehört nicht in die Erkennung „repariert"** - Annas Stimme ist kein
+Mensch. Ob echte Nutzer mit „nein" dasselbe Problem haben, beantworten die
+Protokolle vom Gerät, nicht diese Probe.
 
 **Bewusst nicht im Video:** Die Start-Ansage nach dem Anmelden mit der
 Lautstärke-Frage. Sie passiert beim Anmelden, und dabei läuft noch kein
@@ -167,19 +196,17 @@ Mikrofon, Michael nur auf den Lautsprecher. Keine Spur hört die andere.
 2. **Virtuelles Mikrofon anlegen** mit `pw-loopback`: ein Eingang, in den
    die WAVs gespielt werden, und eine Quelle `dialos_anna_mikrofon`, die
    wie ein echtes Mikrofon aussieht.
-3. **Die Erkennung darauf zeigen lassen** über
-   `~/.config/dialos/befehl-mikrofon` im Vorführkonto - dieselbe Datei,
-   über die man DialOS ein bestimmtes Mikrofon vorgibt. Das
-   Standard-Mikrofon des Systems wird **nicht** verändert. Ein
-   `.monitor`-Gerät ginge nicht: Die Erkennung lässt diese bewusst aus.
+3. **Die Echo-Unterdrückung darauf umhängen** - siehe „Was die ersten Drehs
+   gelehrt haben", Punkt 4. Die Mikrofonwahl der Befehlserkennung
+   (`befehl-mikrofon`) reicht nicht: Rückfragen und Diktat kennen sie nicht.
 4. Danach Sprachsteuerung neu starten, damit sie die Quelle übernimmt.
-5. **Nach dem Dreh aufräumen:** Datei entfernen, virtuelles Mikrofon
-   schließen - auch bei Abbruch (das Skript räumt in jedem Fall auf).
+5. **Nach dem Dreh aufräumen:** Echo-Unterdrückung zurück aufs eingebaute
+   Mikrofon, virtuelles Mikrofon schließen - auch bei Abbruch.
 
 ### Der Ablauf - vollautomatisch
 
-Ein Skript (`scripts/dialos-video-dreh.py`, noch zu bauen) liest die
-Szenen und spielt sie ab:
+Das Skript `scripts/dialos-video-dreh.py` liest die Szenen und spielt sie ab
+(gebaut am 2026-10-05):
 
 1. OBS startet mit `--startrecording`, minimiert.
 2. Zwei Sekunden Ruhe.
@@ -201,6 +228,38 @@ sich die Freigabe, und jeder weitere Dreh läuft ohne Klick.
   den Dreh).
 - `dialos-vorfuehrung-anna.wav`, `dialos-vorfuehrung-dialos.wav` - die
   beiden Stimmen einzeln, 48 kHz.
+
+## Was die ersten Drehs gelehrt haben (2026-10-05)
+
+Vier Anläufe, keiner bis zum Ende - aber jeder hat genau eine Ursache
+gezeigt, und jede ist im Skript behoben:
+
+1. **Die Soundkarte gehört dem Konto `dialosadmin`.** Es steht in der Gruppe
+   `audio`, und seine Spracherkennung hält das Mikrofon dauernd offen. Das
+   Vorführkonto bekam deshalb nur `auto_null` - keinen Ton, kein Mikrofon.
+   **Vor jedem Dreh** wird PipeWire in `dialosadmin` angehalten
+   (`systemctl --user stop pipewire.socket pipewire-pulse.socket pipewire
+   pipewire-pulse wireplumber filter-chain`) und danach wieder gestartet; das
+   Skript startet PipeWire im Vorführkonto neu, damit es die Karte findet.
+2. **Annas Eingang wurde Standard-Lautsprecher** - im frischen Konto ist kein
+   Standard gespeichert. Das Skript setzt Lautsprecher und Mikrofon jetzt
+   ausdrücklich.
+3. **Ein kurzer Ton galt als Michaels Antwort**, Annas „Ja!" fiel in seine
+   Frage. Gewartet wird jetzt auf mindestens eine halbe Sekunde Sprache.
+4. **Rückfragen, Diktat und Mail hören fest auf `dialos_mikrofon_ohne_echo`**,
+   nur die Befehlserkennung kennt eine Mikrofonwahl. Die Befehle hörten Anna,
+   die Rückfrage danach nichts. Jetzt wird der Aufnahme-Strom der
+   Echo-Unterdrückung auf Annas Mikrofon umgehängt (`pactl move-source-output`)
+   - alle Programme hören sie auf dem Weg, den sie auch im Betrieb nehmen.
+   Hier am Gerät geprüft: „ja" und „wie viel uhr ist es" kamen so an.
+   *Nicht* gegangen ist eine gleichnamige Datei unter
+   `~/.config/pipewire/pipewire.conf.d/` - PipeWire hat sie ignoriert.
+
+Michael sagt außerdem an, wann der Dreh beginnt, endet oder abbricht - vor
+und nach der Aufnahme, also nicht im Video. Ohne Ton erscheint ein Fenster.
+
+**Stand:** Szenen 1 und 2 laufen, der Einkaufszettel bricht bisher an der
+Rückfrage ab. Der nächste Dreh ist der erste mit allen vier Korrekturen.
 
 ## Risiken, die erst der Probelauf zeigt
 
