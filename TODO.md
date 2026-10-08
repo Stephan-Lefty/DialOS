@@ -62,6 +62,31 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Sieben Sprachbefehle, die Sender kommen aus der Medienliste in die
     Grammatik. Der Widerspruch „Radio einschalten" gegen die Antwort „kann
     ich noch nicht" ist aufgelöst.
+  - [ ] **DER DATENBANK-EINTRAG PASST NICHT ZU PODCASTS** (gefunden
+    2026-10-08 beim Einbau der Podcast-Liste, ohne Gerät - durch Lesen
+    und eine Messung am eigenen Code). `sender_sicherstellen()` ist für
+    **Sender** gebaut, deren Adresse sich nie ändert. Eine Podcast-Folge
+    hat aber **je Folge eine neue Adresse**, und daraus folgt zweierlei:
+    - **Die Rhythmbox-Datenbank wächst unbegrenzt.** Gemessen mit drei
+      Folgen desselben Podcasts: 2 → 3 → 4 Einträge. Bei den
+      Nachrichten (mehrmals täglich) sind das über tausend Einträge im
+      Jahr, jeder für eine Folge, die es längst nicht mehr gibt.
+    - **Läuft Rhythmbox, wird es mitten im Betrieb beendet** (gemessen:
+      genau einmal je neuer Folge). Wer Radio hört und „landesweite
+      nachrichten" sagt, hört das Radio abbrechen, dann bis zu fünfzehn
+      Sekunden Stille - die Schleife in `rhythmbox_beenden()` wartet 30
+      × 0,5 s -, dann die Nachrichten.
+
+    **Die Reparatur hängt an einer Frage, die nur am Gerät zu klären
+    ist:** Der Befund vom 2026-10-08 ist an **Stream**-Adressen
+    gemessen. Braucht eine **MP3-Datei** per HTTPS den Eintrag
+    überhaupt? Wenn nicht, darf `sender_sicherstellen()` bei
+    Podcast-Folgen einfach nicht laufen - das wäre die ganze Reparatur.
+    Wenn doch, braucht es einen Weg ohne Neustart und ein Aufräumen
+    alter Folgen-Einträge. **Nicht ins Blaue reparieren**, sonst baut
+    die Lösung auf einer Annahme. Probe am Gerät:
+    `rhythmbox-client --no-present --play-uri <MP3 einer Podcast-Folge>`
+    bei einer Adresse, die NICHT in der Datenbank steht.
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort
