@@ -99,7 +99,10 @@ SZENEN = [
         ("Ja!", "Ich schreibe mit", 1.2, 0.8),
         ("Zwei Liter Milch.", None, 0, 2.0),
         ("Ein Laib Brot.", None, 0, 2.0),
-        ("Ein Kilo Äpfel.", None, 0, 2.5),
+        # 4 s Pause vor "Diktat beenden": Der Schluss-Erkenner nimmt den Satz
+        # nur allein an; mit 2,5 s hoerte er beim achten Dreh "[unk] diktat
+        # beenden" und lehnte ab (gewollt - im Satz soll er nichts ausloesen).
+        ("Ein Kilo Äpfel.", None, 0, 4.0),
         ("Diktat beenden", "Diktat beendet", 1.5, 1.0),
         ("Einkaufszettel vorlesen", "", 2.5, 1.5),
     ]),
@@ -109,18 +112,24 @@ SZENEN = [
         ("Frau Erika Musterfrau.", "In den Kontakten steht", 1.2, 0.6),
         ("Ja!", "Ich schreibe mit", 1.2, 0.8),
         ("Liebe Frau Musterfrau, vielen Dank für Ihren Besuch am Sonntag. "
-         "Ich habe mich sehr gefreut. Herzliche Grüße", None, 0, 2.5),
+         "Ich habe mich sehr gefreut. Herzliche Grüße", None, 0, 4.0),
         ("Diktat beenden", "", 1.5, 1.0),
-        ("Brief vorlesen", "Brief als PDF speichern", 1.5, 1.0),
+        # Auf den ANFANG warten: dialos-say.log kuerzt jede Ansage auf 120
+        # Zeichen (Datenschutz, CLAUDE.md) - "Brief als PDF speichern" steht
+        # am Ende und kam beim dritten Dreh nie im Protokoll an.
+        ("Brief vorlesen", "Sätze.", 2.0, 1.0),
         ("Brief als PDF speichern", "PDF", 1.2, 0.5),
     ]),
     ("5 E-Mail", [
         ("E-Mail schreiben", "An wen soll die E-Mail gehen", 1.2, 0.6),
-        ("Frau Erika Musterfrau.", "Stimmt das", 1.2, 0.6),
+        ("Frau Erika Musterfrau.", "An Frau Erika", 1.2, 0.6),
         ("Ja!", "Betreff", 1.2, 0.6),
-        ("Eine Einladung zum Kaffee.", "Text der E-Mail", 1.2, 0.8),
-        ("Hallo Erika, kommst Du am Samstag zum Kaffee? Viele Grüße", None, 0, 2.5),
-        ("Diktat beenden", "verschicken", 1.2, 0.6),
+        # Erst nach "Ich schreibe mit" diktieren: Nach "Sage jetzt den Text der
+        # E-Mail" laedt DialOS das Diktat noch - beim fuenften Dreh kam "Ich
+        # schreibe mit" 16 s spaeter, Anna hatte da schon fertig gesprochen.
+        ("Eine Einladung zum Kaffee.", "Ich schreibe mit", 1.2, 0.8),
+        ("Hallo Erika, kommst Du am Samstag zum Kaffee? Viele Grüße", None, 0, 4.0),
+        ("Diktat beenden", "Sätze an", 1.2, 0.6),
         ("Nein!", "", 1.5, 1.5),
     ]),
     # Firefox auch im Konto dialosadmin (Stephan, 2026-10-08: "das ist nur der
@@ -643,6 +652,67 @@ ANNA_STROM = "speech-dispatcher-dialos-video-anna"
 STILLE_STROM = "speech-dispatcher-dialos-video-stille"
 
 
+def dialoge_beenden():
+    """Laufende DialOS-Dialoge ordentlich beenden (SIGTERM, nie SIGKILL).
+
+    Beim sechsten Dreh (2026-10-08) lief der Mail-Dialog aus dem abgebrochenen
+    fuenften noch und wartete auf Text. Solange ein Dialog das Mikrofon hat,
+    haelt sich die Befehlserkennung bewusst heraus ("anderer Dienst hoert zu")
+    - "Sprachsteuerung starten" ging ins Leere. Im Vorfuehrmodus muss das VOR
+    dem Zurueckspielen passieren: Ein Dialog, der danach noch etwas ablegt,
+    schriebe sonst in die echten Daten.
+    """
+    # NICHT "pkill -f": Beim siebten Dreh (2026-10-08) traf das Suchmuster
+    # auch die Shell, die den Dreh gestartet hatte - in deren Befehlszeile
+    # stand dasselbe Muster. Der Dreh starb, OHNE aufzuraeumen (Musterdaten
+    # blieben stehen, bis sie aus der Sicherung zurueckkamen). Jetzt: nur
+    # Prozesse, deren Programm- oder Skriptname GENAU passt, und nie dieser
+    # Prozess oder einer seiner Vorfahren.
+    namen = {"dialos-mail-schreiben.py", "dialos-diktat.py", "diktieren.py",
+             "dialos-suche.py", "dialos-notiz.py", "dialos-auskunft.py", "dialos-radio.py"}
+    vorfahren, pid = set(), os.getpid()
+    while pid > 1:
+        vorfahren.add(pid)
+        try:
+            with open(f"/proc/{pid}/stat") as f:
+                pid = int(f.read().rsplit(")", 1)[1].split()[1])
+        except (OSError, ValueError, IndexError):
+            break
+    getroffen = 0
+    for eintrag in os.listdir("/proc"):
+        if not eintrag.isdigit() or int(eintrag) in vorfahren:
+            continue
+        try:
+            if os.stat(f"/proc/{eintrag}").st_uid != os.getuid():
+                continue
+            with open(f"/proc/{eintrag}/cmdline", "rb") as f:
+                argumente = [a.decode(errors="replace") for a in f.read().split(b"\0") if a]
+        except OSError:
+            continue
+        # Programm (argv[0]) oder Skript (argv[1] bei "python3 skript.py")
+        if any(os.path.basename(a) in namen for a in argumente[:2]):
+            try:
+                os.kill(int(eintrag), signal.SIGTERM)
+                getroffen += 1
+                melde(f"Dialog beendet: {' '.join(argumente)[:120]}")
+            except OSError:
+                pass
+    if getroffen:
+        time.sleep(3)
+    # VERWAISTE MIKROFON-MARKE wegraeumen (achter/neunter Dreh, 2026-10-08):
+    # dialos-diktat.py und dialos-notiz.py legen sie OHNE PID an - die
+    # Erkennung kann nicht pruefen, ob der Besitzer noch lebt, und haelt
+    # sich bis zum Neustart heraus. Hier ist sicher, dass keiner mehr lebt.
+    marke = f"/run/user/{os.getuid()}/dialos-diktat-aktiv"
+    if getroffen or os.path.exists(marke):
+        try:
+            os.remove(marke)
+            melde("verwaiste Mikrofon-Marke entfernt")
+        except OSError:
+            pass
+        time.sleep(1)
+
+
 def anna_spricht(nr):
     wav = os.path.join(ANNA_ORDNER, f"{nr:02d}.wav")
     subprocess.run(["pw-play", f"--target={EINGANG}",
@@ -800,6 +870,20 @@ def drehen():
         pegel = Pegel()
         pegel.start()
 
+        # SAUBERER ANFANG, VOR DER AUFNAHME: Brach ein Dreh ab, ist die
+        # Sprachsteuerung noch an - und schaltet sich irgendwann mit Ansage
+        # selbst ab. Beim vierten Dreh (2026-10-08) genau in der Sekunde, als
+        # Anna "Sprachsteuerung starten" sagte; waehrend einer Ansage hoert
+        # DialOS nicht zu. Also erst ausschalten (ist sie schon aus, passiert
+        # nichts) und Ruhe abwarten.
+        dialoge_beenden()
+        letzte = max(nr for nr, _, _ in saetze())
+        anna_spricht(letzte)
+        time.sleep(2)
+        bis = time.time() + 30
+        while pegel.ruhig_seit() < 3 and time.time() < bis:
+            time.sleep(0.2)
+
         obs = subprocess.Popen(["obs", "--startrecording", "--minimize-to-tray",
                                 "--disable-shutdown-check", "--profile", "DialOS",
                                 "--collection", "DialOS", "--scene", "DialOS"],
@@ -830,17 +914,21 @@ def drehen():
         time.sleep(3)
     finally:
         if obs and obs.poll() is None:
-            obs.send_signal(signal.SIGINT)
+            # SIGTERM, nicht SIGINT: OBS 30 ueberhoert SIGINT (2026-10-08 -
+            # jeder Dreh wartete deshalb 30 s), beendet sich bei SIGTERM aber
+            # sofort, und die MKV bleibt lesbar.
+            obs.terminate()
             try:
-                obs.wait(30)
+                obs.wait(20)
             except subprocess.TimeoutExpired:
-                obs.terminate()
+                melde("!! OBS beendet sich nicht")
         # Aufraeumen - auch bei Abbruch: Echo-Unterdrueckung zurueck aufs
         # eingebaute Mikrofon, Erkennung neu.
         if mikrofon_vorher:
             echo_umhaengen(mikrofon_vorher)
         for p in prozesse:
             p.terminate()
+        dialoge_beenden()
         if zustand is not None:
             vorfuehrmodus_aus(zustand)
         # Nur eine Aufnahme aus DIESEM Lauf - sonst laege nach einem Abbruch
