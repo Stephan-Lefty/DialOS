@@ -422,7 +422,7 @@ def frage(notiz, text):
     Ablauf waere das Vergessen an einer Stelle eine Frage der Zeit gewesen, und
     die Folge waeren zwei Erkenner auf demselben Mikrofon.
     """
-    open(notiz.FREMDE_AUFNAHME_MARKE, "w").close()
+    notiz.marke_setzen()            # mit PID, siehe dialos-notiz.py (2026-10-08)
     try:
         return notiz.ja_oder_nein(text)
     finally:

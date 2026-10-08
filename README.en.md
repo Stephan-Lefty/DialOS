@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **A crashed dictation no longer disables voice control** (2026-10-08).
+  Dictation, note confirmations and the update run created the microphone
+  marker empty; the recognizer treated it as taken as long as the file
+  existed - after a crash it stayed deaf until reboot. The PID is now in it
+  (as with mail and search), and the recognizer removes an orphaned marker by
+  itself. Proven on the device with a hard-killed dictation: removed within
+  the same second. Test `tests/test_mikrofon_marke.py`.
 - **The Thunderbird bridge never ran since the rebuild** (2026-10-08). The
   native messaging host manifest sat in
   `/usr/lib/thunderbird/native-messaging-hosts/` - Debian's Thunderbird 140

@@ -638,9 +638,21 @@ def _vorlesen_liste(name):
     return 0
 
 
+def marke_setzen():
+    """Die Mikrofon-Marke MIT PID anlegen (2026-10-08).
+
+    Leer angelegt hielt die Erkennung sie fuer belegt, solange die Datei
+    existierte - starb dieses Programm mitten in der Rueckfrage, blieb die
+    Sprachsteuerung bis zum Neustart taub. Mit PID raeumt die Erkennung eine
+    verwaiste Marke selbst weg.
+    """
+    with open(FREMDE_AUFNAHME_MARKE, "w", encoding="utf-8") as f:
+        f.write(f"{os.getpid()} dialos-notiz\n")
+
+
 def loeschen(name):
     # Marke fuer die Dauer der Rueckfrage - siehe FREMDE_AUFNAHME_MARKE.
-    open(FREMDE_AUFNAHME_MARKE, "w").close()
+    marke_setzen()
     try:
         return _loeschen(name)
     finally:
@@ -731,7 +743,7 @@ def mit_rueckfrage(frage, bei_nein, bei_nichts):
     hat genau das gehalten: Aus dem Gespraech kam "nein nein ja", und der
     Zettel blieb stehen.
     """
-    open(FREMDE_AUFNAHME_MARKE, "w").close()
+    marke_setzen()
     try:
         antwort = ja_oder_nein(frage)
     finally:

@@ -229,7 +229,10 @@ def widerspruch_hoeren():
     if quelle:
         befehl += ["-d", quelle]
 
-    open(FREMDE_AUFNAHME_MARKE, "w").close()
+    # MIT PID (2026-10-08) - leer angelegt hielt die Erkennung sie fuer belegt,
+    # solange sie existierte; starb dieses Programm, blieb sie taub.
+    with open(FREMDE_AUFNAHME_MARKE, "w", encoding="utf-8") as f:
+        f.write(f"{os.getpid()} dialos-update-lauf\n")
     try:
         modell = vosk.Model(MODELL_KLEIN)
         erkenner = vosk.KaldiRecognizer(modell, ABTASTRATE, WIDERSPRUCH)

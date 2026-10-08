@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Ein abgestürztes Diktat legt die Sprachsteuerung nicht mehr lahm**
+  (2026-10-08). Diktat, Notiz-Rückfragen und Update-Lauf legten die
+  Mikrofon-Marke leer an; die Erkennung hielt sie für belegt, solange die
+  Datei existierte - nach einem Absturz bis zum Neustart taub. Jetzt steht
+  die PID darin (wie bei Mail und Suche), und die Erkennung räumt eine
+  verwaiste Marke selbst weg. Am Gerät mit hart abgeschossenem Diktat
+  belegt: weggeräumt in derselben Sekunde. Test `tests/test_mikrofon_marke.py`.
 - **Die Thunderbird-Brücke lief seit dem Neuaufbau nie** (2026-10-08). Die
   Beschreibungsdatei des Native-Messaging-Hosts lag unter
   `/usr/lib/thunderbird/native-messaging-hosts/` - Debians Thunderbird 140

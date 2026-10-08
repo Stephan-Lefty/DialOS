@@ -1692,7 +1692,13 @@ def main():
     # bei einem Fehler beim Laden wieder verschwindet. Eine liegengebliebene
     # Marke wuerde die Sprachsteuerung fuer den Rest der Sitzung stumm
     # schalten.
-    open(DIKTAT_MARKE, "w").close()
+    # MIT PID (2026-10-08): Leer angelegt galt die Marke fuer die Erkennung als
+    # belegt, solange sie existiert - stuerzte das Diktat ab, blieb die
+    # Sprachsteuerung bis zum Neustart taub. Mit PID prueft die Erkennung, ob
+    # der Besitzer noch lebt, und raeumt sonst selbst auf (dieselbe Form wie
+    # dialos-mail-schreiben.py und dialos-suche.py).
+    with open(DIKTAT_MARKE, "w", encoding="utf-8") as f:
+        f.write(f"{os.getpid()} dialos-diktat\n")
     try:
         return diktat_fuehren(zweck, name, quelle)
     finally:
