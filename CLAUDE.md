@@ -141,6 +141,34 @@ Am Ende Teil 6 (Abnahme) und die Grafik pruefen
 Beim ersten Mal (2026-09-25) waren es neun Luecken - die Zahl pro Durchgang
 gehoert ins Aenderungsprotokoll, sie zeigt, ob die Anleitung reift.
 
+## Stand vom 2026-10-08, Donnerstag abends
+
+**Radio am Geraet abgenommen** (nach `docs/aufspielen-am-geraet.md`, Ergebnisse
+dort): `--play-uri` spielt nur Sender aus Rhythmbox' Datenbank (dialos-radio.py
+traegt jetzt ein), Lautstaerke scheiterte am deutschen Komma, den Liedtitel
+liest DialOS selbst aus dem Stream. "radio/musik ausschalten" gestrichen,
+"tiroler radio" / "life" als Sprechformen, "Radio oeffnen" = Rhythmbox,
+**Shortwave entfernt**. Probe 5a (abstellen bei laufendem Ton) bestanden.
+
+**Vier Fehler im Produkt, alle behoben und am Geraet belegt:** "Brief
+vorlesen" ging seit 21.09. nicht (holen() fehlte in dialos-notiz.py);
+**Thunderbird-Bruecke lief seit dem Neuaufbau nie** (Host-Datei gehoert nach
+/usr/lib/mozilla/, nicht /usr/lib/thunderbird/); **Java fuer die Schreibhilfe
+fehlte** im Aufbau-Skript; **Mikrofon-Marke ohne PID** - ein abgestuerztes
+Diktat machte die Sprachsteuerung bis zum Neustart taub. Damit **elf Luecken**
+im Neuaufbau vom 25.09. - beim naechsten am **23.10.** gezielt pruefen.
+
+**Vorfuehrvideo fertig** (9 min, Stephan schneidet es am Schnitt-Rechner).
+Werkzeug: `scripts/dialos-video-dreh.py drehen --vorfuehrmodus` im Konto
+dialosadmin, Anleitung und alle Lehren in `docs/video-drehbuch.md`.
+
+**Offen:** Radio Tirol schickt seinen Werbespruch als "Liedtitel" (in
+dialos-radio.py abfangen); dialos-empfaenger.py waehlt das Thunderbird-Profil
+alphabetisch statt nach installs.ini; 83 Updates (Montag), autoremove pruefen.
+
+**Neue Regel vom anderen Rechner beachten:** "Entweder Laptop oder
+Arbeitsrechner - nie beide" (Abschnitt weiter unten).
+
 ## NEUAUFBAU ABGESCHLOSSEN UND ABGENOMMEN (Stand: 2026-09-25, Freitag abends)
 
 **Hier stehen wir:**
