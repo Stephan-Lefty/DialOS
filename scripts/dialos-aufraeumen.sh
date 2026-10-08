@@ -46,6 +46,10 @@ WEG_A="gnome-characters gnome-font-viewer gnome-tour malcontent-gui xterm"
 # STUFE B: durch DialOS oder durch die Festlegung in docs/anwendungen.md
 # ersetzt. Jeder Eintrag hat dort seine Begruendung:
 #   gnome-music, gnome-podcasts  -> Rhythmbox ist der EINE Player
+#   shortwave                    -> dito, seit 2026-10-08 auch fuers Radio:
+#                                   von aussen kein Sender vorzugeben, kein
+#                                   DialOS-Befehl braucht es mehr (Stephan:
+#                                   "Wird ja nicht benoetigt")
 #   totem                        -> VLC bleibt der einzige Videoplayer
 #   gnome-contacts               -> Kontakte macht Thunderbird
 #   gnome-clocks, gnome-weather  -> Uhrzeit und Wetter sagt DialOS selbst
@@ -54,7 +58,7 @@ WEG_A="gnome-characters gnome-font-viewer gnome-tour malcontent-gui xterm"
 #   gnome-sound-recorder         -> Aufnahme macht DialOS
 #   simple-scan                  -> kein Scanner im Aufbau
 #   shotwell                     -> der Bildbetrachter genuegt
-WEG_B="gnome-music gnome-podcasts totem totem-plugins gnome-contacts \
+WEG_B="gnome-music gnome-podcasts shortwave totem totem-plugins gnome-contacts \
 gnome-clocks gnome-weather gnome-maps gnome-connections gnome-sound-recorder \
 simple-scan shotwell"
 

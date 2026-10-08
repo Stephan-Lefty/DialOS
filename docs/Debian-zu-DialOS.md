@@ -398,7 +398,8 @@ Wichtige Gruppen darin (Reihenfolge wie in der Datei):
   durch Piper ersetzt, siehe Schritt 8), `plymouth` + `plymouth-themes`.
 - **Netzwerk/Firmware**: `network-manager` + GUI, Firmware-Pakete fürs
   T490 (WLAN/Mikrocode).
-- **Programme**: Firefox, Thunderbird, Shortwave (Radio), Rhythmbox,
+- **Programme**: Firefox, Thunderbird, Rhythmbox (auch Radio; Shortwave
+  seit 2026-10-08 nicht mehr),
   GNOME Podcasts, LibreOffice Writer. Dazu die Rechtschreibprüfung
   `hunspell-de-de` + `hunspell-en-us` (ergänzt 2026-09-14): Sie kam vorher
   nur indirekt über `task-german-desktop` und galt damit als „automatisch
@@ -3351,7 +3352,7 @@ Entscheidung einem Menschen mit Bildschirm.
 | Stufe | Pakete | Begründung |
 |---|---|---|
 | A - Doppelungen und Fremdkörper | `gnome-characters`, `gnome-font-viewer`, `gnome-tour`, `malcontent-gui`, `xterm` | nichts davon hat mit DialOS zu tun |
-| B - ersetzt | `gnome-music`, `gnome-podcasts` | Rhythmbox ist der EINE Player |
+| B - ersetzt | `gnome-music`, `gnome-podcasts`, `shortwave` | Rhythmbox ist der EINE Player - Shortwave seit 2026-10-08: kein DialOS-Befehl braucht es mehr, und von außen lässt sich kein Sender vorgeben |
 | | `totem`, `totem-plugins` | VLC bleibt der einzige Videoplayer |
 | | `gnome-contacts` | Kontakte macht Thunderbird |
 | | `gnome-clocks`, `gnome-weather` | Uhrzeit und Wetter sagt DialOS selbst |
@@ -3404,15 +3405,14 @@ jedem Debian-Update still: Käme ein neues Programm dazu, wäre es sofort sichtb
 und niemandem fiele es auf. Bei einer weißen Liste ist der Standard
 „unsichtbar", und jede Ausnahme steht im Skript begründet.
 
-**`nutzer` sieht 11 Einträge**, `dialosadmin` alles außer den vier Doppelungen:
+**`nutzer` sieht 10 Einträge**, `dialosadmin` alles außer den vier Doppelungen:
 
 | Eintrag | Warum |
 |---|---|
 | Firefox ESR | Browser, Jitsi-Videochat, WhatsApp Web |
 | Thunderbird | Mail, Kalender, Kontakte - für den Helfer |
 | LibreOffice Writer | Briefe |
-| Rhythmbox | Musik, Podcasts, Hörbücher |
-| Shortwave | Radio |
+| Rhythmbox | Musik, Radio, Podcasts, Hörbücher |
 | VLC | Videos |
 | Dateien | der Helfer muss an `~/Notizen` kommen |
 | Texteditor | Einkaufszettel und Notizen sind `.txt`-Dateien |

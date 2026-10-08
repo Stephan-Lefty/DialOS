@@ -162,6 +162,10 @@ background) and `splash.png` (boot/login screen).
   are in the command overview. "Radio öffnen" opens Rhythmbox instead of
   Shortwave. Stopping with sound playing (check 5a) passed; all 79 sentences
   recognized verbatim in the mandatory check.
+- **Shortwave removed** (2026-10-08, Stephan: "it isn't needed anyway"). Since
+  "Radio öffnen" opens Rhythmbox, no DialOS command needs it. Out of the
+  package list, into `dialos-aufraeumen.sh` (stage B) for devices already
+  built, out of `nutzer`'s menu (now 10 entries).
 - **Demo video: script and shooting tool** (`docs/video-drehbuch.md`,
   `scripts/dialos-video-dreh.py`, 2026-10-05). Anna plays the user through a
   virtual microphone, sample data in a separate demo account. Not fully shot

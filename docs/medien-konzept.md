@@ -16,7 +16,7 @@ Nachrichten, Podcasts und Hörbücher laufen über dasselbe Programm.
 - **Warum nicht Shortwave fürs Radio:** Shortwave lässt sich von außen kein
   Sender vorgeben - keine Kommandozeile dafür, und über MPRIS nur Abspielen
   und Pause des zuletzt gehörten Senders. „Spiel Radio Tirol" wäre damit nicht
-  machbar. Shortwave bleibt installiert, aber ohne Sprachsteuerung.
+  machbar. Shortwave ist seit 2026-10-08 entfernt.
 - **Warum nur ein Player:** Sagt der Nutzer „lauter", „stopp" oder „was läuft
   gerade?", muss eindeutig sein, was gemeint ist. Mit zwei Playern wäre es das
   nicht - und der Nutzer kann nicht nachsehen, welches Fenster vorn ist. Die

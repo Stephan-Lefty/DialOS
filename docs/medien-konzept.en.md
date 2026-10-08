@@ -15,7 +15,7 @@ news, podcasts and audiobooks all run through the same program.
 - **Why not Shortwave for radio:** Shortwave cannot be told a station from
   outside - no command line for it, and over MPRIS only play and pause of the
   station last listened to. "Spiel Radio Tirol" would not be possible.
-  Shortwave stays installed, but without voice control.
+  Shortwave was removed on 2026-10-08.
 - **Why only one player:** when the user says "lauter", "stopp" or "was läuft
   gerade?", it must be clear what is meant. With two players it would not be -
   and the user cannot look which window is in front. The one-player rule from

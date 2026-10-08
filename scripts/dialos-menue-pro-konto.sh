@@ -47,8 +47,7 @@ BEHALTEN_NUTZER="
 firefox-esr.desktop                 Browser, Jitsi-Videochat, WhatsApp Web
 thunderbird.desktop                 Mail, Kalender, Kontakte - fuer den Helfer
 libreoffice-writer.desktop          Briefe
-org.gnome.Rhythmbox3.desktop        Musik, Podcasts, Hoerbuecher
-de.haeckerfelix.Shortwave.desktop   Radio
+org.gnome.Rhythmbox3.desktop        Musik, Radio, Podcasts, Hoerbuecher (Shortwave entfernt 2026-10-08)
 vlc.desktop                         Videos
 org.gnome.Nautilus.desktop          Dateien - der Helfer muss an ~/Notizen kommen
 org.gnome.TextEditor.desktop        Einkaufszettel und Notizen sind .txt-Dateien

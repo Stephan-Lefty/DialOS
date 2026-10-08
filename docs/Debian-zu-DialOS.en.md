@@ -385,7 +385,8 @@ Notable groups within it (in the order they appear in the file):
   replaced by Piper, see step 8), `plymouth` + `plymouth-themes`.
 - **Network/firmware**: `network-manager` + GUI, firmware packages for
   the T490 (WLAN/microcode).
-- **Applications**: Firefox, Thunderbird, Shortwave (radio), Rhythmbox,
+- **Applications**: Firefox, Thunderbird, Rhythmbox (radio too; Shortwave
+  no longer since 2026-10-08),
   GNOME Podcasts, LibreOffice Writer. Plus spell-checking
   `hunspell-de-de` + `hunspell-en-us` (added 2026-09-14): before, it only
   came in indirectly via `task-german-desktop` and so counted as
@@ -3243,7 +3244,7 @@ blind user operates alone, that decision belongs to a human with a screen.
 | Tier | Packages | Reason |
 |---|---|---|
 | A - duplicates and foreign bodies | `gnome-characters`, `gnome-font-viewer`, `gnome-tour`, `malcontent-gui`, `xterm` | none of it has anything to do with DialOS |
-| B - superseded | `gnome-music`, `gnome-podcasts` | Rhythmbox is the ONE player |
+| B - superseded | `gnome-music`, `gnome-podcasts`, `shortwave` | Rhythmbox is the ONE player - Shortwave since 2026-10-08: no DialOS command needs it any more, and no station can be set from outside |
 | | `totem`, `totem-plugins` | VLC stays as the only video player |
 | | `gnome-contacts` | contacts are Thunderbird's job |
 | | `gnome-clocks`, `gnome-weather` | DialOS says time and weather itself |
@@ -3294,15 +3295,14 @@ Debian update: a newly added program would be visible at once and nobody would
 notice. With a whitelist the default is "invisible", and every exception is
 justified in the script.
 
-**`nutzer` sees 11 entries**, `dialosadmin` everything but the four duplicates:
+**`nutzer` sees 10 entries**, `dialosadmin` everything but the four duplicates:
 
 | Entry | Why |
 |---|---|
 | Firefox ESR | browser, Jitsi video chat, WhatsApp Web |
 | Thunderbird | mail, calendar, contacts - for the helper |
 | LibreOffice Writer | letters |
-| Rhythmbox | music, podcasts, audiobooks |
-| Shortwave | radio |
+| Rhythmbox | music, radio, podcasts, audiobooks |
 | VLC | videos |
 | Files | the helper needs to reach `~/Notizen` |
 | Text Editor | shopping list and notes are `.txt` files |

@@ -340,7 +340,8 @@ other.
 > before starting, and "louder" or "stop" always means the same program. **Built
 > since 2026-09-30, accepted on the device on 2026-10-08:** "Radio öffnen" and
 > "Musik öffnen" both open Rhythmbox, playback goes through `dialos-radio.py`.
-> Shortwave has no voice command.
+> **Shortwave is removed since 2026-10-08** (package list and
+> `dialos-aufraeumen.sh`, Stephan: "it isn't needed anyway").
 
 **The echo-cancelled source must never become the default source.**
 Checked on 2026-08-18, and it currently holds only because it is

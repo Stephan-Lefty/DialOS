@@ -172,6 +172,10 @@ das Erfolg meldet, während es versagt.
   Sender wie Programmbefehle stehen in der Befehlsübersicht. „Radio öffnen"
   öffnet Rhythmbox statt Shortwave. Abstellen bei laufendem Ton (Probe 5a)
   bestanden; alle 79 Sätze in der Pflichtprüfung wörtlich erkannt.
+- **Shortwave entfernt** (2026-10-08, Stephan: „Wird ja nicht benötigt"). Seit
+  „Radio öffnen" Rhythmbox öffnet, braucht kein DialOS-Befehl es mehr. Raus
+  aus der Paketliste, rein in `dialos-aufraeumen.sh` (Stufe B) für schon
+  aufgebaute Geräte, raus aus dem Menü von `nutzer` (jetzt 10 Einträge).
 - **Vorführvideo: Drehbuch und Ablaufskript** (`docs/video-drehbuch.md`,
   `scripts/dialos-video-dreh.py`, 2026-10-05). Anna spielt die Nutzerin über
   ein virtuelles Mikrofon, Musterdaten im eigenen Vorführkonto. Noch nicht
