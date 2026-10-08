@@ -35,6 +35,14 @@ Domain, die es nie geben wird.
 | Nutzer (Absender) | Max Mustermann | Musterstraße 1, 1234 Musterstadt, Österreich | `max.mustermann@example.org` |
 | Kontakt (Empfängerin) | Frau Erika Musterfrau | Beispielweg 7, 54321 Beispielstadt | `erika.musterfrau@example.org` |
 
+**Seit 2026-10-08 wird im Konto `dialosadmin` gedreht, mit Vorführmodus**
+(siehe „Gedreht im Konto dialosadmin" weiter unten) - ein einziger Befehl:
+`python3 scripts/dialos-video-dreh.py drehen --vorfuehrmodus --im-hintergrund`,
+vorher Thunderbird schließen, beim Hinweis das Claude-Fenster mit Super+H
+ausblenden. Das Konto `vorfuehrung` vom 2026-10-05 ist gelöscht; die Schritte
+`einrichten`, `alles` und `drehen` ohne `--vorfuehrmodus` sind nur noch für ein
+eigenes Vorführkonto da. Ursprünglich geplant war:
+
 **Gedreht wird in einem eigenen Vorführkonto** (Vorschlag: `vorfuehrung`),
 nicht in `nutzer` und nicht in `dialosadmin`. Dort steht nichts von
 Stephan, und nach dem Dreh kann das Konto komplett gelöscht werden. Die
