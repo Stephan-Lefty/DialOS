@@ -107,12 +107,40 @@ Austauschformat, damit DialOS die Datei direkt liest:
   {"art": "radio", "sprechform": "ö drei", "name": "Hitradio Ö3", "land": "AT", "quelle": ""},
   {"art": "nachrichten-sender", "sprechform": "", "name": "", "land": "", "quelle": ""},
   {"art": "nachrichten-podcast", "sprechform": "", "name": "", "land": "", "quelle": ""},
-  {"art": "podcast", "sprechform": "", "name": "", "land": "", "quelle": ""},
+  {"art": "podcast", "sprechform": "", "name": "", "land": "", "quelle": "", "mindestdauer": 1200},
   {"art": "hoerbuch", "sprechform": "", "name": "", "herkunft": ""}]}
 ```
 
 `sprechform` klein und mit Zahlen als Wort, `quelle` darf leer bleiben. Hilfreich
 wäre eine Warnung der App bei fast gleichen Sprechformen.
+
+### `mindestdauer` - freiwillig, in Sekunden (seit 2026-10-08)
+
+**Wozu es da ist:** Sieben der dreißig ausgewählten Podcast-Feeds mischen
+Einzelbeiträge mit ganzen Sendungen. Gemessen am 2026-10-08:
+„Deutschlandfunk Hintergrund" reicht von 1 bis 19 Minuten, der
+WDR-Hörspiel-Speicher von 6 bis 74. DialOS nimmt die **neueste** Folge -
+und das kann ein Einminüter sein. Der Nutzer sagt „hörspiel speicher",
+hört eine Ankündigung und kann nicht unterscheiden, ob das Programm
+kaputt ist.
+
+Mit dem Feld nimmt DialOS die neueste Folge, die **mindestens** so lang
+ist. Drei Regeln dazu, jede aus einem Fehler oder einer Messung:
+
+- **Sekunden, nicht Minuten.** Eine `20` wäre wirkungslos, weil jede
+  Folge länger ist - ein Test schlägt darum unter 60 an.
+- **Eine Folge ohne Dauerangabe gilt als lang genug.** Zwei der
+  geprüften Feeds (SR2 „Fragen an den Autor", hr2 Doppelkopf) liefern
+  gar kein `itunes:duration`. Wer am fehlenden Feld aussortiert, löscht
+  den ganzen Podcast - und zwar lautlos, denn es sieht aus wie ein
+  leerer Feed.
+- **Ist keine Folge lang genug, kommt die neueste.** Lieber eine zu
+  kurze Sendung als Stille: Der Nutzer hört etwas und kann selbst
+  urteilen.
+
+**Nur bei Gattungen mit Folgen** (`podcast`, `nachrichten-podcast`,
+`hoerbuch`). Ein Livestream hat keine Folgen; dort wäre der Wert eine
+Behauptung ohne Wirkung, und ein Test weist ihn deshalb zurück.
 
 ## Radio
 

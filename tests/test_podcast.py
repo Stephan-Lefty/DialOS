@@ -135,6 +135,112 @@ class FeedLesen(unittest.TestCase):
         self.assertEqual(pod.neueste_folge(folgen)["titel"], "mit Ton")
 
 
+class Mindestdauer(unittest.TestCase):
+    """Der Befund vom 2026-10-08: Sieben der dreissig ausgewaehlten Feeds
+    mischen Einzelbeitraege mit ganzen Sendungen. "Deutschlandfunk
+    Hintergrund" reicht von 1 bis 19 Minuten, der WDR-Hoerspiel-Speicher
+    von 6 bis 74. Wer blind die neueste Folge nimmt, spielt dem Nutzer
+    irgendwann eine Ankuendigung statt eines Hoerspiels vor - und fuer
+    jemanden, der den Bildschirm nicht sieht, ist das von einem Fehler
+    nicht zu unterscheiden."""
+
+    def test_schnipsel_wird_uebersprungen(self):
+        _, folgen, _ = pod.feed_lesen(feed(
+            item("Ankuendigung", "https://a/1.mp3", dauer="1:30")
+            + item("die Sendung", "https://a/2.mp3", dauer="52:00")))
+        self.assertEqual(
+            pod.neueste_folge(folgen, mindestdauer=1200)["titel"],
+            "die Sendung")
+
+    def test_ohne_mindestdauer_bleibt_es_beim_alten_verhalten(self):
+        """Das Feld ist freiwillig. 23 der 30 Eintraege haben keins, und
+        fuer die darf sich nichts aendern."""
+        _, folgen, _ = pod.feed_lesen(feed(
+            item("Ankuendigung", "https://a/1.mp3", dauer="1:30")
+            + item("die Sendung", "https://a/2.mp3", dauer="52:00")))
+        self.assertEqual(pod.neueste_folge(folgen)["titel"], "Ankuendigung")
+
+    def test_folge_ohne_dauerangabe_gilt_als_lang_genug(self):
+        """DER WICHTIGSTE FALL. SR2 und hr2 Doppelkopf liefern gar kein
+        itunes:duration (gemessen 2026-10-08). Wer am fehlenden Feld
+        aussortiert, loescht den ganzen Podcast - lautlos, denn es sieht
+        aus wie ein leerer Feed.
+
+        DIE REIHENFOLGE IM FEED IST HIER ABSICHT, und sie ist eine
+        Korrektur an mir selbst (2026-10-08): Die erste Fassung dieses
+        Tests stellte NUR die Folge ohne Angabe hinein. Die
+        Mutationsprobe hat ihn danach fuer gruen erklaert, obwohl der
+        Filter die Folge verwarf - denn ohne Treffer fiel die Funktion
+        auf "die neueste mit Audio" zurueck, und das war dieselbe
+        Folge. Der Test prueft seitdem mit einem zu kurzen Eintrag
+        davor: Wer die Folge ohne Angabe verwirft, landet bei "zu
+        kurz" und faellt auf.
+        """
+        _, folgen, _ = pod.feed_lesen(feed(
+            item("zu kurz", "https://a/1.mp3", dauer="2:00")
+            + item("ohne Angabe", "https://a/2.mp3")))
+        self.assertEqual(
+            pod.neueste_folge(folgen, mindestdauer=1200)["titel"],
+            "ohne Angabe")
+
+    def test_ist_nichts_lang_genug_kommt_die_neueste(self):
+        """Lieber eine zu kurze Sendung als Stille: Der Nutzer hoert
+        etwas und kann selbst urteilen, statt vor einem stummen Geraet
+        zu sitzen."""
+        _, folgen, _ = pod.feed_lesen(feed(
+            item("kurz eins", "https://a/1.mp3", dauer="2:00")
+            + item("kurz zwei", "https://a/2.mp3", dauer="3:00")))
+        self.assertEqual(
+            pod.neueste_folge(folgen, mindestdauer=1200)["titel"],
+            "kurz eins")
+
+    def test_ohne_audio_bleibt_es_bei_none(self):
+        """Die Mindestdauer darf den Audio-Filter nicht aushebeln."""
+        _, folgen, _ = pod.feed_lesen(feed(item("nur Text")))
+        self.assertIsNone(pod.neueste_folge(folgen, mindestdauer=1200))
+
+    def test_feed_pruefen_sieht_dieselbe_folge_an_die_gespielt_wird(self):
+        """DIE ZWEITE VERDRAHTUNG - gefunden durch die Mutationsprobe am
+        2026-10-08, nachdem die erste (dialos-radio.py) schon einen Test
+        hatte.
+
+        Wird `mindestdauer` hier nicht durchgereicht, prueft das Werkzeug
+        den Einminueter und der Nutzer hoert die Stunde - oder umgekehrt.
+        Eine Pruefung, die etwas anderes ansieht als den Betrieb, ist
+        schlimmer als keine: Sie sagt "brauchbar" ueber eine Folge, die
+        niemand spielt.
+
+        `feed_holen` wird ersetzt statt das Netz zu benutzen - die
+        Netzsperre dieses Moduls gilt auch hier.
+        """
+        echtes_holen = pod.feed_holen
+        pod.feed_holen = lambda *a, **k: (feed(
+            item("Ankuendigung", "https://a/1.mp3", dauer="1:00",
+                 datum="Wed, 08 Oct 2026 08:00:00 +0200")
+            + item("die Sendung", "https://a/2.mp3", dauer="52:00",
+                   datum="Tue, 07 Oct 2026 08:00:00 +0200")), "")
+        try:
+            bericht = pod.feed_pruefen("https://egal", gruendlich=False,
+                                       mindestdauer=1200)
+            self.assertEqual(bericht["neueste"], "die Sendung")
+            self.assertEqual(bericht["dauer"], 3120)
+        finally:
+            pod.feed_holen = echtes_holen
+
+    def test_genau_auf_der_grenze_zaehlt_als_lang_genug(self):
+        """Auch hier steht ein zu kurzer Eintrag VOR dem zu pruefenden,
+        und aus demselben Grund wie oben: Ohne ihn faellt die Funktion
+        auf "die neueste mit Audio" zurueck und liefert zufaellig das
+        richtige Ergebnis. Die Mutationsprobe hat diesen Test beim
+        ersten Lauf durchgelassen, als `>=` zu `>` wurde."""
+        _, folgen, _ = pod.feed_lesen(feed(
+            item("zu kurz", "https://a/1.mp3", dauer="2:00")
+            + item("genau zwanzig", "https://a/2.mp3", dauer="20:00")))
+        self.assertEqual(
+            pod.neueste_folge(folgen, mindestdauer=1200)["titel"],
+            "genau zwanzig")
+
+
 class Dauer(unittest.TestCase):
     """iTunes schreibt die Dauer in drei Formaten."""
 

@@ -582,7 +582,7 @@ def nachrichten(rs, gesucht=None):
             sprich("Die Nachrichten sind gerade nicht lesbar.")
             melde(f"Feed nicht lesbar: {meldung}")
             return 1
-        folge = pod.neueste_folge(folgen)
+        folge = pod.neueste_folge(folgen, eintrag.get("mindestdauer") or 0)
         if not folge:
             sprich("Es ist keine Nachrichtensendung abrufbar.")
             melde("Feed ohne Audio-Folge")

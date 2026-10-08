@@ -191,25 +191,57 @@ def feed_lesen(text):
     return kopf, folgen, ""
 
 
-def neueste_folge(folgen):
-    """Die neueste Folge MIT Audio.
+def neueste_folge(folgen, mindestdauer=0):
+    """Die neueste Folge MIT Audio - und lang genug.
 
     Nicht einfach die erste: Manche Feeds mischen Text- und
     Audiobeitraege, und ein Eintrag ohne <enclosure> ist fuer DialOS
     nichts wert - er wuerde nur schweigen.
+
+    MINDESTDAUER, der Befund vom 2026-10-08: Sieben der dreissig
+    ausgewaehlten Podcast-Feeds mischen Einzelbeitraege mit ganzen
+    Sendungen. "Deutschlandfunk Hintergrund" reicht von 1 bis 19
+    Minuten, der WDR-Hoerspiel-Speicher von 6 bis 74. Bei der Messung
+    war die neueste Folge jedes Mal eine richtige Sendung - aber beim
+    naechsten Abruf kann es ein Einminueter sein, und dann sagt der
+    Nutzer "hoerspiel speicher" und bekommt eine Ankuendigung. Fuer
+    jemanden, der den Bildschirm nicht sieht, ist das von einem Fehler
+    nicht zu unterscheiden.
+
+    EINE FOLGE OHNE DAUERANGABE WIRD NICHT VERWORFEN. Zwei der
+    geprueften Feeds (SR2, hr2 Doppelkopf) liefern gar kein
+    itunes:duration. Wer am fehlenden Feld aussortiert, loescht den
+    ganzen Podcast - also gilt im Zweifel "lang genug". Der Filter soll
+    Schnipsel abweisen, die sich selbst als kurz ausweisen, nicht Feeds
+    bestrafen, die ihre Dauer verschweigen.
+
+    IST KEINE FOLGE LANG GENUG, kommt die neueste mit Audio zurueck.
+    Lieber eine zu kurze Sendung als Stille: Der Nutzer hoert dann
+    etwas und kann selbst urteilen, statt vor einem stummen Geraet zu
+    sitzen - dasselbe Prinzip wie bei den Ansagen, die einen Zustand
+    nennen statt zu schweigen.
     """
-    for folge in folgen:
-        if folge["audio"]:
-            return folge
-    return None
+    mit_audio = [f for f in folgen if f["audio"]]
+    if not mit_audio:
+        return None
+    if mindestdauer:
+        for folge in mit_audio:
+            dauer = folge.get("dauer")
+            if dauer is None or dauer >= mindestdauer:
+                return folge
+    return mit_audio[0]
 
 
-def feed_pruefen(url, gruendlich=True):
+def feed_pruefen(url, gruendlich=True, mindestdauer=0):
     """Ein Feed von vorn bis hinten. Gibt einen Bericht als dict zurueck.
 
     Die Reihenfolge der Pruefungen ist die der Fehlerhaeufigkeit: zuerst
     ueberhaupt erreichbar, dann ein Feed, dann Audio darin, dann aktuell,
     dann spielt es wirklich.
+
+    `mindestdauer` wird durchgereicht, damit die Pruefung DIESELBE Folge
+    ansieht, die der Nutzer spaeter hoert. Ohne das prueft man einen
+    Einminueter und spielt eine Stunde - oder umgekehrt.
     """
     bericht = {"url": url, "laeuft": False, "problem": "", "titel": "",
                "folgen": 0, "mit_audio": 0, "neueste": None,
@@ -238,7 +270,7 @@ def feed_pruefen(url, gruendlich=True):
                               "das sind Textartikel, kein Podcast")
         return bericht
 
-    folge = neueste_folge(folgen)
+    folge = neueste_folge(folgen, mindestdauer)
     bericht["neueste"] = folge["titel"]
     bericht["audio"] = folge["audio"]
     bericht["dauer"] = folge["dauer"]

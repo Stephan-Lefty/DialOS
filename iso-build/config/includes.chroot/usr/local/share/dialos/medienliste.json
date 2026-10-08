@@ -1,5 +1,5 @@
 {
- "stand": "2026-10-05",
+ "stand": "2026-10-08",
  "eintraege": [
   {
    "art": "radio",
@@ -272,6 +272,253 @@
    "land": "AT",
    "quelle": "http://orf-live.ors-shoutcast.at/tir-q2a",
    "stationuuid": "477d5e54-24b0-48dd-97f0-5cf4f047eb55"
+  },
+  {
+   "art": "podcast",
+   "sprechform": "radio wissen",
+   "name": "Bayern 2 radioWissen",
+   "land": "DE",
+   "quelle": "https://feeds.br.de/radiowissen/feed.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "zeit zeichen",
+   "name": "WDR Zeitzeichen",
+   "land": "DE",
+   "quelle": "https://www1.wdr.de/mediathek/audio/zeitzeichen/zeitzeichen-podcast-100.podcast",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "geschichten aus der geschichte",
+   "name": "Geschichten aus der Geschichte",
+   "land": "DE",
+   "quelle": "https://geschichten-aus-der-geschichte.podigee.io/feed/mp3",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "sprechstunde",
+   "name": "Deutschlandfunk Sprechstunde",
+   "land": "DE",
+   "quelle": "https://www.deutschlandfunk.de/sprechstunde-102.xml",
+   "stationuuid": "",
+   "mindestdauer": 1200
+  },
+  {
+   "art": "podcast",
+   "sprechform": "hörspiel speicher",
+   "name": "WDR Hörspiel-Speicher",
+   "land": "DE",
+   "quelle": "https://www1.wdr.de/mediathek/audio/hoerspiel-speicher/wdr_hoerspielspeicher150.podcast",
+   "stationuuid": "",
+   "mindestdauer": 1200
+  },
+  {
+   "art": "podcast",
+   "sprechform": "hintergrund",
+   "name": "Deutschlandfunk Hintergrund",
+   "land": "DE",
+   "quelle": "https://www.deutschlandfunk.de/hintergrund-102.xml",
+   "stationuuid": "",
+   "mindestdauer": 600
+  },
+  {
+   "art": "podcast",
+   "sprechform": "garten radio",
+   "name": "Gartenradio",
+   "land": "DE",
+   "quelle": "https://feeds.detektor.fm/gartenradio",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "swr eins leute",
+   "name": "SWR1 Leute",
+   "land": "DE",
+   "quelle": "https://www.swr.de/~podcast/swr1/podcast-swr1-leute-100.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "sternen geschichten",
+   "name": "Sternengeschichten",
+   "land": "DE",
+   "quelle": "https://sternengeschichten.podigee.io/feed/mp3",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "das wissen",
+   "name": "SWR Das Wissen",
+   "land": "DE",
+   "quelle": "https://www.swr.de/~podcast/swrkultur/programm/podcast-swr-das-wissen-102.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "radio kolleg",
+   "name": "Ö1 Radiokolleg",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_radiokolleg/oe1_radiokolleg.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "betrifft geschichte",
+   "name": "Ö1 Betrifft: Geschichte",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_geschichte/oe1_geschichte.xml",
+   "stationuuid": "",
+   "mindestdauer": 1200
+  },
+  {
+   "art": "podcast",
+   "sprechform": "gesund informiert",
+   "name": "Gesund informiert",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/stm/stm_gesundinformiert/stm_gesundinformiert.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "leben der natur",
+   "name": "Ö1 Vom Leben der Natur",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_natur/oe1_natur.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "kultur journal",
+   "name": "Ö1 Kulturjournal",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_kulturaktuell/oe1_kulturaktuell.xml",
+   "stationuuid": "",
+   "mindestdauer": 600
+  },
+  {
+   "art": "podcast",
+   "sprechform": "im gespräch",
+   "name": "Im Gespräch",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_imgespraech/oe1_imgespraech.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "journal panorama",
+   "name": "Ö1 Journal-Panorama",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_panorama/oe1_panorama.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "inklusion",
+   "name": "Ö1 Inklusion gehört gelebt",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_inklusion/oe1_inklusion.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "einfache sprache",
+   "name": "Die Woche in einfacher Sprache",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/stm/stm_einfachesprache/stm_einfachesprache.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "europa journal",
+   "name": "Ö1 Europa-Journal",
+   "land": "AT",
+   "quelle": "https://podcast.orf.at/podcast/oe1/oe1_europajournal/oe1_europajournal.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "schweizer wissen",
+   "name": "SRF Wissen",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/edfc185c-6f96-4d10-9d2c-a25cd4204dd0.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "schweizer geschichte",
+   "name": "SRF Geschichte",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/c4d9aaaa-138e-446d-b273-a9f1ad8e3922.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "passage",
+   "name": "SRF Passage",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/0cbd7957-1cbf-4395-a9fd-fcee2c07e3cb.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "sternstunde philosophie",
+   "name": "SRF Sternstunde Philosophie",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/28426f25-6beb-4264-8ca9-ddddf717d6ea.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "hörspiel",
+   "name": "SRF Hörspiel",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/553f3450-1697-4fc5-ad79-0dead1605c8f.xml",
+   "stationuuid": "",
+   "mindestdauer": 1200
+  },
+  {
+   "art": "podcast",
+   "sprechform": "persönlich",
+   "name": "SRF Persönlich",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/ca86a857-3823-4c63-be4d-e21284f64d8b.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "musik für einen gast",
+   "name": "SRF Musik für einen Gast",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/8fcaf817-aae9-416c-82cd-6f438ddfb309.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "tagesgespräch",
+   "name": "SRF Tagesgespräch",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/26340aaf-8008-4b39-9b57-2fe71bc4f16a.xml",
+   "stationuuid": ""
+  },
+  {
+   "art": "podcast",
+   "sprechform": "ratgeber",
+   "name": "SRF Ratgeber",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/f3715dd9-ca1a-4413-9180-11201892115a.xml",
+   "stationuuid": "",
+   "mindestdauer": 600
+  },
+  {
+   "art": "podcast",
+   "sprechform": "treffpunkt",
+   "name": "SRF Treffpunkt",
+   "land": "CH",
+   "quelle": "https://www.srf.ch/feed/podcast/sd/d2169ee6-574c-4360-b705-2913fad14603.xml",
+   "stationuuid": ""
   }
  ]
 }

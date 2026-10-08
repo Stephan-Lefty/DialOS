@@ -346,6 +346,22 @@ class PasstZumSprachdienst(unittest.TestCase):
             with self.subTest(argument=argument):
                 self.assertIn(f'befehl == "{argument}"', quelle)
 
+    def test_mindestdauer_wird_an_das_podcast_modul_durchgereicht(self):
+        """DIE VERDRAHTUNG, und sie ist aus einer Luecke entstanden
+        (2026-10-08): Die Mutationsprobe hat `neueste_folge(folgen,
+        eintrag.get("mindestdauer") or 0)` zu `neueste_folge(folgen)`
+        gekuerzt - und ALLE Tests blieben gruen. Die Funktion war
+        geprueft, die Liste war geprueft, nur die Leitung dazwischen
+        nicht. Am Geraet haette der Nutzer eine Ankuendigung statt
+        eines Hoerspiels gehoert, und niemand haette gewusst, warum.
+        """
+        with open(os.path.join(BIN, "dialos-radio.py"), encoding="utf-8") as f:
+            quelle = f.read()
+        self.assertIn("neueste_folge(folgen,", quelle,
+                      "dialos-radio.py ruft neueste_folge ohne Mindestdauer")
+        self.assertIn('mindestdauer', quelle,
+                      "dialos-radio.py liest das Feld gar nicht")
+
     def test_radio_steht_nicht_mehr_unter_den_wuenschen(self):
         """"radio einschalten" gab bis zum 2026-09-30 die Antwort "kann
         ich noch nicht". Bleibt der Eintrag stehen, verdeckt er den
@@ -467,6 +483,61 @@ class AusgelieferteListe(unittest.TestCase):
             with self.subTest(sender=eintrag["name"]):
                 self.assertFalse(rs.braucht_zugang(eintrag["quelle"]))
                 self.assertFalse(rs.ist_playlist(eintrag["quelle"]))
+
+    def test_jedes_land_hat_podcasts(self):
+        """Dieselbe Begruendung wie beim Radio: Eine Gattung, die nur ein
+        Land bedient, laesst zwei Drittel der Geraete ohne."""
+        for land in ("DE", "AT", "CH"):
+            with self.subTest(land=land):
+                self.assertTrue(
+                    [e for e in self.eintraege
+                     if e.get("land") == land and e["art"] == "podcast"],
+                    f"{land} hat keinen Podcast")
+
+    def test_mindestdauer_ist_eine_sinnvolle_zahl(self):
+        """Das Feld ist freiwillig - aber wenn es da ist, muss es eine
+        Zahl in SEKUNDEN sein. Eine "20" (gemeint: Minuten) wuerde den
+        Filter still unwirksam machen, weil jede Folge laenger ist."""
+        for eintrag in self.eintraege:
+            if "mindestdauer" not in eintrag:
+                continue
+            with self.subTest(name=eintrag["name"]):
+                wert = eintrag["mindestdauer"]
+                self.assertIsInstance(wert, int)
+                self.assertGreaterEqual(
+                    wert, 60, "unter einer Minute filtert nichts")
+                self.assertLessEqual(
+                    wert, 7200, "ueber zwei Stunden filtert alles weg")
+
+    def test_mindestdauer_nur_wo_sie_gelesen_wird(self):
+        """EIN FELD, DAS NICHTS TUT, IST SCHLIMMER ALS KEINS. Gelesen
+        wird `mindestdauer` nur bei den Gattungen mit Folgen - ein
+        Livestream hat keine, dort waere der Wert eine Behauptung ohne
+        Wirkung. Wer das Feld spaeter bei Radio eintraegt, soll hier
+        anschlagen und nicht am Geraet raetseln."""
+        mit_folgen = ("podcast", "nachrichten-podcast", "hoerbuch")
+        for eintrag in self.eintraege:
+            if "mindestdauer" not in eintrag:
+                continue
+            with self.subTest(name=eintrag["name"]):
+                self.assertIn(
+                    eintrag["art"], mit_folgen,
+                    f"{eintrag['art']} hat keine Folgen - "
+                    "mindestdauer bleibt dort wirkungslos")
+
+    def test_podcast_quellen_sind_feeds_keine_streams(self):
+        """Ein Podcast-Eintrag, dessen Quelle direkt auf eine MP3 zeigt,
+        liefert beim naechsten Abruf immer dieselbe Folge. Die Adresse
+        muss der FEED sein, nicht die Datei."""
+        for eintrag in self.eintraege:
+            if eintrag["art"] not in ("podcast", "nachrichten-podcast"):
+                continue
+            with self.subTest(name=eintrag["name"]):
+                quelle = eintrag["quelle"].lower().split("?")[0]
+                for endung in (".mp3", ".m4a", ".aac", ".ogg", ".opus"):
+                    self.assertFalse(
+                        quelle.endswith(endung),
+                        f"{quelle} ist eine Audiodatei, kein Feed")
 
     def test_keine_verwechselbaren_sprechformen_je_land(self):
         """Der Grund, warum es nur zehn je Land sind: Bei 78 Sendern
