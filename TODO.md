@@ -62,6 +62,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Sieben Sprachbefehle, die Sender kommen aus der Medienliste in die
     Grammatik. Der Widerspruch „Radio einschalten" gegen die Antwort „kann
     ich noch nicht" ist aufgelöst.
+  - **Der Ablauf am Gerät steht als Zettel bereit:**
+    [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
+    Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort
+    gibt es kein Gespräch vom Vortag). Dort stehen Befehle, Reihenfolge
+    und Abbruchkriterien; hier nur noch, **was** offen ist. Nicht beides
+    pflegen.
   - [ ] **`ffmpeg` am Gerät nachinstallieren** (seit 2026-09-30 in
     `desktop.list.chroot`, ein vorher aufgebautes Gerät hat es nicht).
     Ohne `ffprobe` prüft DialOS-Rhythmbox nur die Erreichbarkeit, nicht ob

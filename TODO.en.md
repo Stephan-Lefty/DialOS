@@ -60,6 +60,12 @@ finished too, and then move down together. That way no reference breaks.
     Seven voice commands; the stations enter the grammar from the media
     list. The contradiction between "Radio einschalten" and the answer "I
     cannot do that yet" is resolved.
+  - **The procedure on the device is written down:**
+    [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
+    Stephan's request - the instructions must be readable on the laptop,
+    where yesterday's conversation is not available; German only). That
+    file holds the commands, the order and the stop conditions; this list
+    only holds **what** is still open. Do not maintain both.
   - [ ] **Install `ffmpeg` on the device** (in `desktop.list.chroot` since
     2026-09-30; a device built earlier does not have it). Without
     `ffprobe`, DialOS-Rhythmbox only checks reachability, not whether
