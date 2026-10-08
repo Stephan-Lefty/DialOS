@@ -134,7 +134,14 @@ SZENEN = [
         ("Eine Einladung zum Kaffee.", "Ich schreibe mit", 1.2, 0.8),
         ("Hallo Erika, kommst Du am Samstag zum Kaffee? Viele Grüße", None, 0, 4.0),
         ("Diktat beenden", "Sätze an", 1.2, 0.6),
-        ("Nein!", "", 1.5, 1.5),
+        ("Nein!", "", 1.5, 1.0),
+        # DEN ENTWURF ZEIGEN (Stephan, 2026-10-08): Thunderbird oeffnet im
+        # Vorfuehrprofil, die Bruecke traegt den vorgemerkten Entwurf ein,
+        # DialOS fragt nach liegenden Entwuerfen.
+        ("Postfach öffnen", "Soll ich einen davon verschicken", 1.2, 0.6),
+        ("Nein!", "bleiben liegen", 1.2, 4.0),
+        ("Postfach schließen", "Soll ich das Postfach", 1.2, 0.6),
+        ("Ja!", "", 1.2, 1.5),
     ]),
     # Firefox auch im Konto dialosadmin (Stephan, 2026-10-08: "das ist nur der
     # Tab dialos.org") - die Startseite ist die eigene Webseite.
@@ -604,18 +611,20 @@ def vorfuehrmodus_an():
         else:
             zustand["dateien"][pfad] = None
     persoenliche_daten_schreiben()
-    profil = thunderbird_profil()
+    # EIGENES THUNDERBIRD-PROFIL (Stephan, 2026-10-08: man soll sehen, dass
+    # eine Mail geschrieben ist). Im echten Profil stuende das echte Postfach
+    # im Bild. Fuer die Dauer des Drehs zeigt installs.ini auf ein frisches
+    # Profil mit dem Musterkonto, offline; danach zurueck, Profil geloescht.
+    # Das echte Profil - auch sein Adressbuch - wird nicht angefasst.
+    zustand["thunderbird"] = thunderbird_vorfuehrprofil_an(sicherung)
+    profil = zustand["thunderbird"]["profil"]
     zustand["profil"] = profil
-    if profil:
-        # Das Adressbuch als ganze Datei sichern und danach genau so
-        # zurueckspielen: SQLite aendert die Datei schon durch Einfuegen und
-        # Loeschen, auch wenn der Inhalt am Ende derselbe ist (Trockenlauf
-        # 2026-10-08: Pruefsumme anders, Inhalt gleich).
-        abook = os.path.join(profil, "abook.sqlite")
-        if os.path.isfile(abook):
-            shutil.copy2(abook, os.path.join(sicherung, "abook.sqlite"))
-            zustand["abook"] = abook
-        zustand["kontakt"] = kontakt_anlegen(profil)
+    r = subprocess.run(["/usr/local/bin/dialos-mailkonto.py", "einrichten"],
+                       capture_output=True, text=True)
+    melde(f"Musterkonto im Vorfuehrprofil: Rueckgabe {r.returncode} {r.stdout.strip()[-120:]}")
+    thunderbird_einstellen(profil)
+    zustand["kontakt"] = kontakt_anlegen(profil)
+    zustand["firefox"] = firefox_startseite_an(sicherung)
     banner = subprocess.run(["gsettings", "get", "org.gnome.desktop.notifications",
                              "show-banners"], capture_output=True, text=True).stdout.strip()
     zustand["banner"] = banner or "true"
@@ -626,6 +635,107 @@ def vorfuehrmodus_an():
                   f, ensure_ascii=False, indent=1)
     melde(f"Vorfuehrmodus an, Sicherung: {sicherung}")
     return zustand
+
+
+TB = os.path.join(HEIM, ".thunderbird")
+
+
+
+VORFUEHR_MARKE = ".dialos-vorfuehrprofil"
+
+
+def thunderbird_vorfuehrprofil_an(sicherung):
+    """Das echte Profil beiseite, das Vorfuehrprofil unter SEINEM Namen.
+
+    DIE PROFILVERWALTUNG REICHT NICHT (gemessen 2026-10-08): installs.ini und
+    profiles.ini auf ein anderes Profil umgestellt - Thunderbird oeffnete
+    trotzdem das echte (die Sperrdatei lag dort). Beim siebzehnten Dreh stand
+    deshalb das echte Postfach im Bild. Jetzt wird umbenannt: Thunderbird
+    oeffnet den Ordner, den es immer oeffnet, und darin liegt das Musterkonto.
+    Geloescht wird spaeter nur ein Ordner mit VORFUEHR_MARKE darin.
+    """
+    echt = thunderbird_profil()
+    if not echt or not os.path.isdir(echt):
+        raise RuntimeError("kein Thunderbird-Profil gefunden")
+    beiseite = echt.rstrip("/") + ".dialos-beiseite"
+    if os.path.exists(beiseite):
+        raise RuntimeError(f"{beiseite} existiert schon - frueherer Dreh nicht aufgeraeumt")
+    os.rename(echt, beiseite)
+    os.makedirs(echt)
+    open(os.path.join(echt, VORFUEHR_MARKE), "w").close()
+    melde(f"Thunderbird-Profil beiseite: {beiseite}, Vorfuehrprofil an seiner Stelle")
+    return {"sicherung": sicherung, "profil": echt, "beiseite": beiseite}
+
+
+def thunderbird_vorfuehrprofil_aus(zustand):
+    # Erst zu - es soll nichts mehr in den Ordner schreiben.
+    subprocess.run(["pkill", "-TERM", "-u", str(os.getuid()), "-x", "thunderbird"],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for _ in range(40):
+        if not thunderbird_laeuft():
+            break
+        time.sleep(0.5)
+    profil, beiseite = zustand["profil"], zustand["beiseite"]
+    if not os.path.isdir(beiseite):
+        melde(f"!! {beiseite} fehlt - nichts zurueckzutauschen")
+        return
+    if os.path.isdir(profil):
+        if not os.path.exists(os.path.join(profil, VORFUEHR_MARKE)):
+            melde(f"!! {profil} hat keine Vorfuehr-Marke - NICHT geloescht, bitte ansehen")
+            return
+        shutil.rmtree(profil)
+    os.rename(beiseite, profil)
+    melde("Thunderbird: eigenes Profil wieder an seinem Platz, Vorfuehrprofil geloescht")
+
+
+def firefox_profil():
+    import configparser
+    p = configparser.ConfigParser()
+    p.read(os.path.join(HEIM, ".mozilla", "firefox", "installs.ini"))
+    for abschnitt in p.sections():
+        if p.has_option(abschnitt, "Default"):
+            return os.path.join(HEIM, ".mozilla", "firefox", p.get(abschnitt, "Default"))
+    return None
+
+
+def firefox_startseite_an(sicherung):
+    """Startseite google.de fuer den Dreh (Stephan, 2026-10-08) - user.js UND prefs.js sichern.
+
+    Firefox uebernimmt user.js-Werte beim Start nach prefs.js; nur user.js
+    zurueckzunehmen liesse google.de als Startseite stehen.
+    """
+    profil = firefox_profil()
+    if not profil:
+        return None
+    zustand = {"profil": profil, "dateien": {}}
+    for name in ("user.js", "prefs.js"):
+        pfad = os.path.join(profil, name)
+        if os.path.isfile(pfad):
+            ziel = os.path.join(sicherung, "firefox-" + name)
+            shutil.copy2(pfad, ziel)
+            zustand["dateien"][pfad] = ziel
+        else:
+            zustand["dateien"][pfad] = None
+    with open(os.path.join(profil, "user.js"), "a", encoding="utf-8") as f:
+        f.write('\nuser_pref("browser.startup.homepage", "https://www.google.de");\n'
+                'user_pref("browser.startup.page", 1);\n')
+    melde("Firefox-Startseite fuer den Dreh: google.de")
+    return zustand
+
+
+def firefox_startseite_aus(zustand):
+    subprocess.run(["pkill", "-TERM", "-u", str(os.getuid()), "-x", "firefox-esr"],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(3)
+    for pfad, gesichert in zustand["dateien"].items():
+        try:
+            if gesichert:
+                shutil.copy2(gesichert, pfad)
+            elif os.path.exists(pfad):
+                os.remove(pfad)
+        except OSError as fehler:
+            melde(f"!! Firefox nicht zurueckgespielt: {pfad} ({fehler})")
+    melde("Firefox-Einstellungen zurueck")
 
 
 def vorfuehrmodus_aus(zustand):
@@ -645,11 +755,10 @@ def vorfuehrmodus_aus(zustand):
             melde(f"aus dem Dreh entfernt: {pfad}")
         except OSError as fehler:
             melde(f"!! nicht entfernt: {pfad} ({fehler})")
-    if zustand.get("abook") and not thunderbird_laeuft():
-        shutil.copy2(os.path.join(zustand["sicherung"], "abook.sqlite"), zustand["abook"])
-        melde("Adressbuch zurueckgespielt")
-    elif zustand.get("profil") and zustand.get("kontakt"):
-        kontakt_entfernen(zustand["profil"], zustand["kontakt"])
+    if zustand.get("thunderbird"):
+        thunderbird_vorfuehrprofil_aus(zustand["thunderbird"])
+    if zustand.get("firefox"):
+        firefox_startseite_aus(zustand["firefox"])
     subprocess.run(["gsettings", "set", "org.gnome.desktop.notifications", "show-banners",
                     zustand.get("banner", "true")])
     melde("Vorfuehrmodus aus - eigene Daten zurueck")
@@ -737,6 +846,53 @@ def dialoge_beenden():
         except OSError:
             pass
         time.sleep(1)
+
+
+def pdf_zeigen(sekunden=8):
+    """Den eben gespeicherten Brief kurz zeigen (Stephan, 2026-10-08: "dass man
+    sieht ... das der Brief als pdf gespeichert ist"). Fuer die Zuschauer, nicht
+    fuer die Nutzerin - DialOS selbst oeffnet kein Fenster."""
+    ordner = os.path.join(HEIM, "Dokumente")
+    pdfs = sorted((os.path.join(ordner, n) for n in os.listdir(ordner)
+                   if n.endswith("-Brief.pdf")), key=os.path.getmtime)
+    if not pdfs:
+        melde("!! kein Brief-PDF zum Zeigen")
+        return
+    # --presentation: die GANZE Seite bildschirmfuellend - Anschrift UND Text
+    # (Stephan: "mit der Musteranschrift und dem Text"). Die normale Ansicht
+    # koennte bei Seitenbreite nur die obere Haelfte zeigen.
+    betrachter = subprocess.Popen(["evince", "--presentation", pdfs[-1]],
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.DEVNULL)
+    time.sleep(sekunden)
+    evince_schliessen(betrachter.pid)
+
+
+def evince_schliessen(pid):
+    """Evince ueber seine eigene "close"-Aktion schliessen, nicht per Signal.
+
+    Evince laeuft unter AppArmor ("/usr/bin/evince (enforce)") und nimmt von
+    einem unbeschraenkten Prozess kein SIGTERM an - beim siebzehnten Dreh
+    (2026-10-08) brach der Dreh daran mit PermissionError ab. Ueber D-Bus
+    nimmt es "close" an.
+    """
+    import re
+    try:
+        liste = subprocess.run(["busctl", "--user", "list"], capture_output=True,
+                               text=True, timeout=5).stdout
+        namen = [z.split()[0] for z in liste.splitlines()
+                 if len(z.split()) > 2 and z.split()[1] == str(pid) and z.startswith(":")]
+        for name in namen:
+            baum = subprocess.run(["busctl", "--user", "tree", name], capture_output=True,
+                                  text=True, timeout=5).stdout
+            for fenster in re.findall(r"(/org/gnome/Evince/window/\d+)", baum):
+                subprocess.run(["gdbus", "call", "--session", "--dest", name,
+                                "--object-path", fenster, "--method",
+                                "org.gtk.Actions.Activate", "close", "[]", "{}"],
+                               capture_output=True, timeout=5)
+        time.sleep(1.5)
+    except Exception as fehler:            # noqa: BLE001 - nie den Dreh abbrechen
+        melde(f"!! Evince nicht geschlossen: {fehler}")
 
 
 def anna_spricht(nr):
@@ -865,8 +1021,11 @@ def drehen():
         # Aufwachen geht der Anfang verloren. Beim dritten Dreh (2026-10-05)
         # kam von Annas "Ja!" (0,7 s) nur eine Zehntelsekunde an.
         prozesse.append(subprocess.Popen(
-            ["pw-cat", "--playback", f"--target={EINGANG}", "--rate=48000", "--channels=1",
-             "--format=s16", "--properties={ application.name = %s }" % STILLE_STROM, "-"],
+            # --raw: ohne liest pw-cat "-" als Tondatei und bricht sofort ab
+            # ("Format not recognised") - dann schlief das Mikrofon zwischen
+            # Annas Saetzen ein, und im Video fehlten ihre Satzanfaenge.
+            ["pw-cat", "--playback", "--raw", f"--target={EINGANG}", "--rate=48000",
+             "--channels=1", "--format=s16", "--properties={ application.name = %s }" % STILLE_STROM, "-"],
             stdin=open("/dev/zero", "rb"), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
         # Beim ersten Dreh stieg pw-loopback sofort aus - ohne dass es jemand merkte.
         if prozesse[0].poll() is not None:
@@ -951,7 +1110,13 @@ def drehen():
             ab = say_log_laenge()
             erkenner_ab = erkenner_log_laenge()
             anna_spricht(nr)
-            if not warten(pegel, ab, erwartet, ruhe, erkenner_ab=erkenner_ab):
+            ok = warten(pegel, ab, erwartet, ruhe, erkenner_ab=erkenner_ab)
+            if ok and text == "Brief als PDF speichern":
+                try:
+                    pdf_zeigen()
+                except Exception as fehler:    # noqa: BLE001 - Zeigen ist Beiwerk
+                    melde(f"!! PDF nicht gezeigt: {fehler}")
+            if not ok:
                 melde("!! Szene laeuft nicht wie im Drehbuch - Dreh abgebrochen")
                 abbruch = f"Der Dreh ist bei Szene {szene.split()[0]} abgebrochen."
                 break

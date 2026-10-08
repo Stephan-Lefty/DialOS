@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The Thunderbird bridge never ran since the rebuild** (2026-10-08). The
+  native messaging host manifest sat in
+  `/usr/lib/thunderbird/native-messaging-hosts/` - Debian's Thunderbird 140
+  only looks under `/usr/lib/mozilla/`. Mail drafts were only queued, never
+  filed in Thunderbird, and sending by voice did not work. Found during the
+  demo video ("bridge did not come"); now under the Mozilla path, on the
+  device: answer after 3 s. **Eleventh gap of the rebuild.**
 - **The writing aid never ran since the rebuild** (2026-10-08): Java was
   missing. The recipe names `openjdk-21-jre-headless`,
   `dialos-full-office-setup.sh` (step 15c) did not install it - LanguageTool

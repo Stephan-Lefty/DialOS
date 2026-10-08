@@ -749,7 +749,7 @@ from outside is fine, writing is not.*
 | ID | `bruecke@dialos.org` |
 | Packed `.xpi` | `/usr/local/share/dialos/dialos-bruecke.xpi`, built by `sudo scripts/dialos-erweiterung-bauen.sh` |
 | Installed into every profile | `/usr/lib/thunderbird/distribution/policies.json`, `force_installed` |
-| Counterpart on the DialOS side (native messaging) | `dialos-thunderbird-bruecke.py`, registered via `/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json` |
+| Counterpart on the DialOS side (native messaging) | `dialos-thunderbird-bruecke.py`, registered via `/usr/lib/mozilla/native-messaging-hosts/dialos_bruecke.json` |
 
 **What it can do:** file drafts in the *account's* drafts folder (which is
 uploaded to the server, unlike the local folders), send, create contacts,

@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Die Thunderbird-Brücke lief seit dem Neuaufbau nie** (2026-10-08). Die
+  Beschreibungsdatei des Native-Messaging-Hosts lag unter
+  `/usr/lib/thunderbird/native-messaging-hosts/` - Debians Thunderbird 140
+  sucht aber nur unter `/usr/lib/mozilla/`. Folge: Mail-Entwürfe wurden nur
+  vorgemerkt, nie in Thunderbird abgelegt, Senden per Sprache ging nicht.
+  Gefunden beim Vorführvideo ("Brücke kam nicht"); jetzt unter dem
+  Mozilla-Pfad, am Gerät: Antwort nach 3 s. **Elfte Lücke des Neuaufbaus.**
 - **Schreibhilfe lief seit dem Neuaufbau nie** (2026-10-08): Java fehlte.
   Das Rezept nennt `openjdk-21-jre-headless`, `dialos-full-office-setup.sh`
   (Schritt 15c) installierte es nicht - LanguageTool scheiterte bei jedem

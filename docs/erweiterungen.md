@@ -753,7 +753,7 @@ gilt: *Lesen darf man von außen, Schreiben nicht.*
 | Kennung | `bruecke@dialos.org` |
 | Gepackte `.xpi` | `/usr/local/share/dialos/dialos-bruecke.xpi`, gebaut von `sudo scripts/dialos-erweiterung-bauen.sh` |
 | Einbau in jedes Profil | `/usr/lib/thunderbird/distribution/policies.json`, `force_installed` |
-| Gegenstelle auf DialOS-Seite (Native Messaging) | `dialos-thunderbird-bruecke.py`, angemeldet über `/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json` |
+| Gegenstelle auf DialOS-Seite (Native Messaging) | `dialos-thunderbird-bruecke.py`, angemeldet über `/usr/lib/mozilla/native-messaging-hosts/dialos_bruecke.json` |
 
 **Was sie kann:** Entwürfe im Entwurfsordner des *Kontos* ablegen (der wird
 zum Server hochgeladen, anders als die lokalen Ordner), senden, Kontakte

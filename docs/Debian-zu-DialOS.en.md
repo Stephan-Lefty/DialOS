@@ -3798,8 +3798,14 @@ cd /path/to/repo/thunderbird-erweiterung && python3 -c "import zipfile; z=zipfil
 
 ```bash
 # 2. Install the bridge and the host manifest
-sudo install -m 755 /path/to/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-thunderbird-bruecke.py /usr/local/bin/ && sudo install -m 644 -D /path/to/repo/iso-build/config/includes.chroot/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json /usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json
+sudo install -m 755 /path/to/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-thunderbird-bruecke.py /usr/local/bin/ && sudo install -m 644 -D /path/to/repo/iso-build/config/includes.chroot/usr/lib/mozilla/native-messaging-hosts/dialos_bruecke.json /usr/lib/mozilla/native-messaging-hosts/dialos_bruecke.json
 ```
+
+**The path is `/usr/lib/mozilla/`, not `/usr/lib/thunderbird/`** (corrected
+2026-10-08). Debian's Thunderbird 140 looks for native messaging hosts only
+under the Mozilla path. Until then this said the Thunderbird path - the bridge
+never started after the 2026-09-25 rebuild, mail drafts were only queued.
+Measured on the device: with the Mozilla path the bridge answers after 3 s.
 
 3. In Thunderbird: hamburger menu → Add-ons → gear → *Install Add-on From
    File* → `/tmp/dialos-bruecke.xpi`. **Unsigned is fine here:** Debian's

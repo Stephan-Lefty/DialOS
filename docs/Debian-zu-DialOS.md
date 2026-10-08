@@ -3927,8 +3927,14 @@ cd /pfad/zum/repo/thunderbird-erweiterung && python3 -c "import zipfile; z=zipfi
 
 ```bash
 # 2. Brücke und Host-Manifest aufspielen
-sudo install -m 755 /pfad/zum/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-thunderbird-bruecke.py /usr/local/bin/ && sudo install -m 644 -D /pfad/zum/repo/iso-build/config/includes.chroot/usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json /usr/lib/thunderbird/native-messaging-hosts/dialos_bruecke.json
+sudo install -m 755 /pfad/zum/repo/iso-build/config/includes.chroot/usr/local/bin/dialos-thunderbird-bruecke.py /usr/local/bin/ && sudo install -m 644 -D /pfad/zum/repo/iso-build/config/includes.chroot/usr/lib/mozilla/native-messaging-hosts/dialos_bruecke.json /usr/lib/mozilla/native-messaging-hosts/dialos_bruecke.json
 ```
+
+**Der Pfad ist `/usr/lib/mozilla/`, nicht `/usr/lib/thunderbird/`** (berichtigt
+2026-10-08). Debians Thunderbird 140 sucht Native-Messaging-Hosts nur unter dem
+Mozilla-Pfad. Bis dahin stand hier der Thunderbird-Pfad - die Brücke startete
+nach dem Neuaufbau vom 2026-09-25 nie, Mail-Entwürfe wurden nur vorgemerkt.
+Am Gerät gemessen: mit dem Mozilla-Pfad meldet sich die Brücke nach 3 s.
 
 3. **Nicht von Hand installieren** (Lehre vom 2026-09-21, siehe unten) -
    stattdessen an den festen Platz packen und Thunderbird es selbst einsetzen
