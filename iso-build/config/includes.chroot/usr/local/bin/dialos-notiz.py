@@ -558,6 +558,26 @@ TELEFON = re.compile(r"(?<![\w.,])(\+|00?)(\d[\d /-]{4,}\d)(?![\w.,]\d)")
 MAILADRESSE = re.compile(r"\b([\w.+-]+)@([\w-]+(?:\.[\w-]+)+)")
 
 
+def holen(pfad, name, ersatz=None):
+    """Holt ein anderes DialOS-Skript als Modul - wie holen() in dialos-diktat.py.
+
+    FEHLTE VOM 2026-09-21 BIS 2026-10-08: mail_vorlesbar() rief holen() auf,
+    die Funktion stand aber nur in dialos-diktat.py. "Brief vorlesen" brach
+    deshalb mit NameError ab, bevor es ein Wort sagte - fuer jeden Brief. Kein
+    py_compile und kein Selbsttest faengt einen Namen, der erst beim Aufruf
+    fehlt; gefunden hat es der Dreh des Vorfuehrvideos. Seitdem prueft
+    tests/test_notiz.py genau diesen Aufruf.
+    """
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("geholt_" + name, pfad)
+        modul = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modul)
+        return modul
+    except Exception:
+        return ersatz
+
+
 def mail_vorlesbar(text):
     """"stephan@beispiel.de" -> "stephan. at. beispiel. Punkt. de."
 

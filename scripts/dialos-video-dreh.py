@@ -123,12 +123,25 @@ SZENEN = [
         ("Diktat beenden", "verschicken", 1.2, 0.6),
         ("Nein!", "", 1.5, 1.5),
     ]),
+    # Firefox auch im Konto dialosadmin (Stephan, 2026-10-08: "das ist nur der
+    # Tab dialos.org") - die Startseite ist die eigene Webseite.
     ("6 Programme", [
         ("Internet öffnen", "", 1.2, 5.0),
         ("Internet schließen", "Sage ja oder nein", 1.2, 0.6),
         ("Ja!", "", 1.2, 2.0),
     ]),
-    ("7 Schluss", [
+    # Radio (Stephan, 2026-10-08: "Du kannst ja das Radio schon mit ins
+    # Drehbuch nehmen"). WAEHREND MUSIK LAEUFT, WIRD ES NIE STILL - eine
+    # NEGATIVE Ruhe heisst deshalb: nach der Ansage feste Sekunden warten.
+    # "Oe3" statt "Oe drei": Piper/kerstin spricht "Oe drei" so, dass Vosk
+    # "wie drei" hoert (offline geprueft 2026-10-08), "Oe3" kommt woertlich an.
+    ("7 Radio", [
+        ("Ö3 einschalten", "Oe3", -7, 0),
+        ("Was läuft gerade?", "Es läuft", -6, 0),
+        ("Lauter machen", "Lauter", -4, 0),
+        ("Radio abstellen", "Radio aus", 1.2, 1.0),
+    ]),
+    ("8 Schluss", [
         ("Sprachsteuerung stoppen", "nicht mehr zu", 1.2, 3.0),
     ]),
 ]
@@ -259,7 +272,7 @@ def kontakt_anlegen(profil):
                           (KONTAKT["name"],)).fetchone()
         if schon:
             melde("Kontakt ist schon da")
-            return
+            return None
         uid = str(uuid.uuid4())
         k = KONTAKT
         karte = "\r\n".join([
@@ -274,6 +287,7 @@ def kontakt_anlegen(profil):
             (uid, "LastModifiedDate", str(int(time.time())))])
     v.close()
     melde(f"Kontakt angelegt: {KONTAKT['name']}")
+    return uid
 
 
 def obs_einrichten():
@@ -514,25 +528,125 @@ def echo_umhaengen(quelle):
     return False
 
 
-def erkenner_neu_starten():
-    subprocess.run(["pkill", "-f", ERKENNER])
-    time.sleep(1.5)
-    # Als eigene Einheit, nicht als Kind dieses Skripts - sonst stirbt die
-    # Erkennung mit dem Dreh. Name wie beim Autostart.
-    # Popen, NICHT run: "systemd-run --scope" fuehrt das Programm im
-    # Vordergrund aus und kehrt erst zurueck, wenn es endet - die Erkennung
-    # endet nie. Am 2026-10-05 hing der erste Dreh genau hier, vor der Aufnahme.
-    subprocess.Popen(["systemd-run", "--user", "--scope", "--collect", "--quiet",
-                      f"--unit=app-gnome-dialos\\x2dsprachbefehl\\x2ddesktop-video{int(time.time())}",
-                      "--", ERKENNER],
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-    time.sleep(4)
+VORFUEHR_ORDNER = (os.path.join(HEIM, "Dokumente"), os.path.join(HEIM, "Notizen"),
+                   os.path.join(HEIM, "Bilder"))
+VORFUEHR_DATEIEN = (os.path.join(DIALOS_CONF, "persoenliche-daten.txt"),
+                    os.path.join(DIALOS_CONF, "mail-entwuerfe.json"),
+                    os.path.join(DIALOS_CONF, "kontakte-neu.json"),
+                    os.path.join(DIALOS_CONF, "radio-zuletzt.txt"))
+
+
+def thunderbird_laeuft():
+    return subprocess.run(["pgrep", "-u", str(os.getuid()), "-x", "thunderbird"],
+                          capture_output=True).returncode == 0
+
+
+def alle_dateien(ordner):
+    gefunden = set()
+    for wurzel in ordner:
+        for pfad, _, namen in os.walk(wurzel):
+            gefunden.update(os.path.join(pfad, n) for n in namen)
+    return gefunden
+
+
+def vorfuehrmodus_an():
+    """Eigene Daten beiseite, Musterdaten hinein - fuer den Dreh im Konto dialosadmin.
+
+    Stephan, 2026-10-08: "Koennen wir das nicht im DialOSadmin Account machen" -
+    ohne Kontowechsel und ohne Streit um die Soundkarte. Gesichert wird nach
+    ~/.local/state/dialos-vorfuehrung/, zurueckgespielt in jedem Fall (finally).
+    Geloescht wird danach NUR, was waehrend des Drehs neu entstanden ist.
+    """
+    sicherung = os.path.join(HEIM, ".local", "state", "dialos-vorfuehrung",
+                             time.strftime("%Y%m%d-%H%M%S"))
+    os.makedirs(sicherung, exist_ok=True)
+    zustand = {"sicherung": sicherung, "dateien": {}, "vorher": alle_dateien(VORFUEHR_ORDNER)}
+    for pfad in VORFUEHR_DATEIEN:
+        if os.path.isfile(pfad):
+            ziel = os.path.join(sicherung, os.path.basename(pfad))
+            shutil.copy2(pfad, ziel)
+            zustand["dateien"][pfad] = ziel
+        else:
+            zustand["dateien"][pfad] = None
+    persoenliche_daten_schreiben()
+    profil = thunderbird_profil()
+    zustand["profil"] = profil
+    if profil:
+        # Das Adressbuch als ganze Datei sichern und danach genau so
+        # zurueckspielen: SQLite aendert die Datei schon durch Einfuegen und
+        # Loeschen, auch wenn der Inhalt am Ende derselbe ist (Trockenlauf
+        # 2026-10-08: Pruefsumme anders, Inhalt gleich).
+        abook = os.path.join(profil, "abook.sqlite")
+        if os.path.isfile(abook):
+            shutil.copy2(abook, os.path.join(sicherung, "abook.sqlite"))
+            zustand["abook"] = abook
+        zustand["kontakt"] = kontakt_anlegen(profil)
+    banner = subprocess.run(["gsettings", "get", "org.gnome.desktop.notifications",
+                             "show-banners"], capture_output=True, text=True).stdout.strip()
+    zustand["banner"] = banner or "true"
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.notifications", "show-banners",
+                    "false"])
+    with open(os.path.join(sicherung, "zustand.json"), "w", encoding="utf-8") as f:
+        json.dump({k: (sorted(v) if isinstance(v, set) else v) for k, v in zustand.items()},
+                  f, ensure_ascii=False, indent=1)
+    melde(f"Vorfuehrmodus an, Sicherung: {sicherung}")
+    return zustand
+
+
+def vorfuehrmodus_aus(zustand):
+    """Alles zurueck - auch nach einem Abbruch."""
+    for pfad, gesichert in zustand["dateien"].items():
+        try:
+            if gesichert:
+                shutil.copy2(gesichert, pfad)
+            elif os.path.exists(pfad):
+                os.remove(pfad)
+        except OSError as fehler:
+            melde(f"!! nicht zurueckgespielt: {pfad} ({fehler})")
+    neu = sorted(alle_dateien(VORFUEHR_ORDNER) - zustand["vorher"])
+    for pfad in neu:
+        try:
+            os.remove(pfad)
+            melde(f"aus dem Dreh entfernt: {pfad}")
+        except OSError as fehler:
+            melde(f"!! nicht entfernt: {pfad} ({fehler})")
+    if zustand.get("abook") and not thunderbird_laeuft():
+        shutil.copy2(os.path.join(zustand["sicherung"], "abook.sqlite"), zustand["abook"])
+        melde("Adressbuch zurueckgespielt")
+    elif zustand.get("profil") and zustand.get("kontakt"):
+        kontakt_entfernen(zustand["profil"], zustand["kontakt"])
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.notifications", "show-banners",
+                    zustand.get("banner", "true")])
+    melde("Vorfuehrmodus aus - eigene Daten zurueck")
+
+
+def kontakt_entfernen(profil, uid):
+    try:
+        v = sqlite3.connect(os.path.join(profil, "abook.sqlite"))
+        with v:
+            v.execute("DELETE FROM properties WHERE card = ?", (uid,))
+        v.close()
+        melde(f"Kontakt {KONTAKT['name']} wieder entfernt")
+    except sqlite3.Error as fehler:
+        melde(f"!! Kontakt nicht entfernt: {fehler}")
+
+
+# ANNAS STROEME HEISSEN "speech-dispatcher-..." - mit Absicht. dialos-say.py
+# schaltet waehrend jeder Ansage alle fremden Stroeme stumm und gibt sie danach
+# frei; Sprachausgaben (Name beginnt mit "speech-dispatcher") laesst es aus.
+# Beim fuenften Dreh (2026-10-08) lief Annas "Wie viel Uhr ist es?" noch aus,
+# als Michael schon antwortete: stummgeschaltet, Strom zu Ende, die Freigabe
+# ging ins Leere - und PipeWire merkt sich die Stummschaltung JE PROGRAMMNAME.
+# Jeder weitere Anna-Satz kam stumm zur Welt ("Mute: yes"). Dieselbe Falle wie
+# paplay am 2026-08-24 (CLAUDE.md). Anna IST eine Stimme; die Ausnahme passt.
+ANNA_STROM = "speech-dispatcher-dialos-video-anna"
+STILLE_STROM = "speech-dispatcher-dialos-video-stille"
 
 
 def anna_spricht(nr):
     wav = os.path.join(ANNA_ORDNER, f"{nr:02d}.wav")
     subprocess.run(["pw-play", f"--target={EINGANG}",
-                    "--properties={ application.name = dialos-video-anna }", wav])
+                    "--properties={ application.name = %s }" % ANNA_STROM, wav])
 
 
 def warten(pegel, ab, erwartet, ruhe, zeitgrenze=45):
@@ -555,6 +669,9 @@ def warten(pegel, ab, erwartet, ruhe, zeitgrenze=45):
     # der Frage ein kurzer Ton - der galt als Ansage, die Stille danach als ihr
     # Ende, und Annas "Ja!" fiel mitten in Michaels Frage.
     gefunden = time.time()
+    if ruhe < 0:
+        time.sleep(-ruhe)
+        return True
     while pegel.laut_seit(gefunden - 0.5) < 5 and time.time() - gefunden < 15:
         time.sleep(0.1)
     while pegel.ruhig_seit() < ruhe and time.time() - gefunden < 120:
@@ -563,10 +680,18 @@ def warten(pegel, ab, erwartet, ruhe, zeitgrenze=45):
 
 
 def drehen():
-    if getpass_user() in ("dialosadmin", "nutzer"):
-        print("Nur im Vorfuehrkonto.", file=sys.stderr)
+    admin = getpass_user() == "dialosadmin"
+    if getpass_user() == "nutzer" or (admin and "--vorfuehrmodus" not in sys.argv):
+        print("Im Konto dialosadmin nur mit --vorfuehrmodus (tauscht die eigenen "
+              "Daten fuer die Dauer des Drehs gegen Musterdaten), nie im Konto nutzer.",
+              file=sys.stderr)
         return 2
-    if "--im-hintergrund" not in sys.argv:
+    if admin and thunderbird_laeuft():
+        print("Thunderbird laeuft - bitte schliessen. Sonst landet der Mail-Entwurf "
+              "im echten Postfach, und das Adressbuch ist nicht beschreibbar.",
+              file=sys.stderr)
+        return 2
+    if not admin and "--im-hintergrund" not in sys.argv:
         # Ein haengengebliebener frueherer Dreh belegt den Einheitennamen.
         subprocess.run(["systemctl", "--user", "stop", "dialos-video-dreh"],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -583,8 +708,9 @@ def drehen():
         os.kill(os.getppid(), signal.SIGHUP)
         return 0
 
-    time.sleep(8)
-    melde("=== Dreh beginnt ===")
+    time.sleep(3 if admin else 8)
+    melde(f"=== Dreh beginnt ({'dialosadmin, Vorfuehrmodus' if admin else 'Vorfuehrkonto'}) ===")
+    zustand = None
     prozesse = []
     mikrofon_vorher = ""
     # Ein frueherer Dreh-Stand legte hier eine Mikrofonwahl ab - die darf nicht
@@ -598,7 +724,16 @@ def drehen():
     os.makedirs(VIDEO_ORDNER, exist_ok=True)
     vorher = set(os.listdir(VIDEO_ORDNER))
     try:
-        lautsprecher, mikrofon_vorher = ton_holen()
+        if admin:
+            # Hier gehoert die Soundkarte schon diesem Konto - kein Neustart von
+            # PipeWire, der Claude und die laufende Erkennung mitreissen wuerde.
+            zustand = vorfuehrmodus_an()
+            lautsprecher = subprocess.run(["pactl", "get-default-sink"], capture_output=True,
+                                          text=True).stdout.strip()
+            mikrofone = [n for n in geraete("sources") if n.startswith("alsa_input.")]
+            mikrofon_vorher = mikrofone[0] if mikrofone else ""
+        else:
+            lautsprecher, mikrofon_vorher = ton_holen()
         melde(f"Lautsprecher {lautsprecher!r}, Mikrofon {mikrofon_vorher!r}")
         if not lautsprecher:
             hinweis("Der Dreh ist abgebrochen: Im Vorführkonto gibt es keinen Lautsprecher.\n\n"
@@ -626,7 +761,7 @@ def drehen():
         # kam von Annas "Ja!" (0,7 s) nur eine Zehntelsekunde an.
         prozesse.append(subprocess.Popen(
             ["pw-cat", "--playback", f"--target={EINGANG}", "--rate=48000", "--channels=1",
-             "--format=s16", "--properties={ application.name = dialos-video-stille }", "-"],
+             "--format=s16", "--properties={ application.name = %s }" % STILLE_STROM, "-"],
             stdin=open("/dev/zero", "rb"), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
         # Beim ersten Dreh stieg pw-loopback sofort aus - ohne dass es jemand merkte.
         if prozesse[0].poll() is not None:
@@ -658,7 +793,10 @@ def drehen():
             ansage("Der Dreh ist abgebrochen. Ich kann das Mikrofon nicht umstellen.")
             abbruch = False
             return 1
-        erkenner_neu_starten()
+        # KEIN Neustart der Erkennung: Sie liest dialos_mikrofon_ohne_echo
+        # weiter, nur dessen Eingang haengt jetzt an Anna. (Bis 2026-10-08
+        # startete der Dreh sie neu - im Konto dialosadmin liefe sie danach in
+        # Claudes Einheit, siehe CLAUDE.md "Dienste nicht aus Claudes Sitzung".)
         pegel = Pegel()
         pegel.start()
 
@@ -703,7 +841,8 @@ def drehen():
             echo_umhaengen(mikrofon_vorher)
         for p in prozesse:
             p.terminate()
-        erkenner_neu_starten()
+        if zustand is not None:
+            vorfuehrmodus_aus(zustand)
         # Nur eine Aufnahme aus DIESEM Lauf - sonst laege nach einem Abbruch
         # eine alte Datei als Ergebnis da.
         neueste = sorted((os.path.join(VIDEO_ORDNER, n)
@@ -711,11 +850,22 @@ def drehen():
                          key=os.path.getmtime)
         if neueste:
             ziel = os.path.join(ERGEBNIS, "dialos-vorfuehrung.mkv")
+            # Eine alte Datei kann einem anderen Konto gehoeren (Vorfuehrkonto)
+            # und laesst sich dann nicht ueberschreiben - aber loeschen, der
+            # Ordner gehoert dialosadmin (2026-10-08: PermissionError).
+            try:
+                os.remove(ziel)
+            except OSError:
+                pass
             shutil.copy(neueste[-1], ziel)
             os.chmod(ziel, 0o644)
             melde(f"Video: {ziel}")
         # Das Protokoll immer - gerade nach einem Abbruch wird es gebraucht.
         try:
+            try:
+                os.remove(os.path.join(ERGEBNIS, "dreh.log"))
+            except OSError:
+                pass
             shutil.copy(DREH_LOG, os.path.join(ERGEBNIS, "dreh.log"))
             os.chmod(os.path.join(ERGEBNIS, "dreh.log"), 0o644)
         except OSError:

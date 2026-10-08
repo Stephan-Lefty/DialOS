@@ -61,7 +61,7 @@ beim ersten Durchlauf festgehalten. Das Mitschrift-Fenster ist während
 des ganzen Videos offen - es zeigt sehenden Zuschauern, was erkannt wurde,
 und wirkt im Video wie ein Untertitel.
 
-Geschätzte Länge: **rund 5 Minuten.**
+Geschätzte Länge: **rund 5 bis 6 Minuten.**
 
 ### 1. Aufwachen (ca. 0:15)
 
@@ -128,7 +128,26 @@ DialOS nichts ohne „ja" verschickt.
 | „Internet schließen" | „Soll ich … schließen? Sage ja oder nein." *(Probelauf)* | Firefox |
 | „Ja!" | *(Probelauf)* | Firefox geht zu |
 
-### 7. Schluss (ca. 0:10)
+### 7. Radio (ca. 0:40)
+
+Aufgenommen am 2026-10-08 (Stephan: „Du kannst ja das Radio schon mit ins
+Drehbuch nehmen"). **Achtung beim Veröffentlichen:** Hier läuft echte Musik
+von Ö3 - für die Website gehört die Szene gekürzt oder die Musik leiser
+gelegt, damit kein ganzes Lied im Video steht.
+
+| Anna | DialOS | Bild |
+|---|---|---|
+| „Ö3 einschalten" | „Hitradio Oe3." - Ö3 spielt | Mitschrift |
+| „Was läuft gerade?" | „Es läuft Hitradio Oe3: …" mit Liedtitel, wenn Ö3 einen mitschickt | Mitschrift |
+| „Lauter machen" | „Lauter." | Mitschrift |
+| „Radio abstellen" | „Radio aus." | Mitschrift |
+
+„Ö3" statt „Ö drei" in Annas Text: Piper spricht „Ö drei" so, dass Vosk
+„wie drei" hört - offline geprüft. Während Musik läuft, wird es auf dem
+Lautsprecher nie still; der Dreh wartet hier deshalb auf Michaels Ansage im
+Protokoll und dann feste Sekunden.
+
+### 8. Schluss (ca. 0:10)
 
 | Anna | DialOS | Bild |
 |---|---|---|
@@ -229,9 +248,34 @@ sich die Freigabe, und jeder weitere Dreh läuft ohne Klick.
 - `dialos-vorfuehrung-anna.wav`, `dialos-vorfuehrung-dialos.wav` - die
   beiden Stimmen einzeln, 48 kHz.
 
+## Gedreht im Konto dialosadmin - der Vorführmodus (seit 2026-10-08)
+
+Stephan: „Können wir das nicht im DialOSadmin Account machen" - ohne
+Kontowechsel, ohne Streit um die Soundkarte, und Claude ist dabei. Damit
+dort nichts Persönliches ins Bild kommt und nichts durcheinandergerät,
+schaltet `dialos-video-dreh.py drehen --vorfuehrmodus` für die Dauer des
+Drehs um und danach in jedem Fall zurück (auch bei Abbruch):
+
+- **Gesichert und gegen Musterdaten getauscht:** persönliche Daten; dazu
+  gesichert Mail-Vormerkungen, Kontakt-Warteschlange, zuletzt gehörter
+  Sender und das ganze Thunderbird-Adressbuch (als Datei - SQLite ändert sie
+  schon durch Einfügen und Löschen, Trockenlauf: Prüfsumme danach gleich).
+- **Gelöscht wird danach nur, was neu ist** - in Dokumente, Notizen und
+  Bilder wird vorher alles aufgelistet.
+- **Thunderbird muss zu sein**, sonst bricht der Dreh vorher ab: Der
+  Mail-Entwurf wird dann nur vorgemerkt, nicht ins echte Postfach gelegt.
+- **Benachrichtigungen** sind währenddessen aus.
+- **Kein Neustart von PipeWire und keiner der Erkennung** - umgehängt wird
+  nur der Eingang der Echo-Unterdrückung.
+- **Firefox darf ins Bild** (Stephan: „das ist nur der Tab dialos.org").
+- Sicherungen liegen unter `~/.local/state/dialos-vorfuehrung/`.
+
+Das Claude-Fenster kann der Dreh nicht selbst ausblenden - vor dem Start mit
+Super+H weg, sonst steht es im Bild.
+
 ## Was die ersten Drehs gelehrt haben (2026-10-05)
 
-Vier Anläufe, keiner bis zum Ende - aber jeder hat genau eine Ursache
+Fünf Anläufe, keiner bis zum Ende - aber jeder hat genau eine Ursache
 gezeigt, und jede ist im Skript behoben:
 
 1. **Die Soundkarte gehört dem Konto `dialosadmin`.** Es steht in der Gruppe
@@ -254,6 +298,16 @@ gezeigt, und jede ist im Skript behoben:
    Hier am Gerät geprüft: „ja" und „wie viel uhr ist es" kamen so an.
    *Nicht* gegangen ist eine gleichnamige Datei unter
    `~/.config/pipewire/pipewire.conf.d/` - PipeWire hat sie ignoriert.
+
+5. **Annas Sätze kamen stumm zur Welt** (2026-10-08, erster Dreh im Konto
+   dialosadmin). Michael antwortete auf „Wie viel Uhr ist es?", während
+   Annas Strom noch auslief; `dialos-say.py` schaltet für jede Ansage alle
+   fremden Ströme stumm, Annas Strom endete, die Freigabe ging ins Leere -
+   und PipeWire merkt sich die Stummschaltung je Programmname. Jeder weitere
+   Satz startete mit „Mute: yes". Dieselbe Falle wie paplay am 2026-08-24.
+   Annas Ströme heißen jetzt `speech-dispatcher-dialos-video-anna`: Ströme
+   mit diesem Namensanfang lässt `dialos-say.py` bewusst in Ruhe, und Anna
+   ist eine Stimme. Am Produkt wurde nichts geändert.
 
 Michael sagt außerdem an, wann der Dreh beginnt, endet oder abbricht - vor
 und nach der Aufnahme, also nicht im Video. Ohne Ton erscheint ein Fenster.
