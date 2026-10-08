@@ -107,7 +107,7 @@
   },
   {
    "art": "radio",
-   "sprechform": "radio tirol",
+   "sprechform": "tiroler radio",
    "name": "ORF Radio Tirol",
    "land": "AT",
    "quelle": "http://orf-live.ors-shoutcast.at/tir-q2a",
@@ -139,7 +139,7 @@
   },
   {
    "art": "radio",
-   "sprechform": "life radio",
+   "sprechform": "life",
    "name": "Life Radio",
    "land": "AT",
    "quelle": "http://stream1.liferadio.at/",

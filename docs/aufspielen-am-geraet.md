@@ -188,7 +188,7 @@ ICY-Titel kommt - nicht nur der Sendername. Ob das so ist, ist offen.
 ### 5d. MPRIS, für die Merkposition später
 
 ```
-rhythmbox-client --no-present --check-running; ls -l /usr/lib/rhythmbox/plugins/mpris/
+rhythmbox-client --no-present --check-running; ls -l /usr/lib/x86_64-linux-gnu/rhythmbox/plugins/mpris/
 ```
 
 Die Hörbücher brauchen eine Merkposition, und `rhythmbox-client` allein
@@ -307,3 +307,46 @@ jemanden, der sich informieren will, das falsche Angebot.
 **Was danach ins TODO zurückgehört:** ob 5a bestanden ist, ob
 `--print-playing` den ICY-Titel liefert und was MPRIS gesagt hat. Der
 Hörbuch-Teil wartet auf diese drei Antworten.
+
+### Ergebnis vom 2026-10-08 (erster Lauf am T490)
+
+**Der trockene Lauf hatte recht, nicht die Tabelle:** Es kamen 15 Dateien,
+darunter `dialos-rhythmbox.py`, `dialos_farben.py`, die `.desktop`-Datei und
+sechs Symbole - die Zusatzbefehle aus Schritt 2 waren also doch nötig.
+`ffmpeg` war schon da (für das Vorführvideo am 2026-10-05 installiert).
+
+**Die drei Antworten, auf die der Hörbuch-Teil wartet:**
+
+1. **5a bestanden.** „Radio abstellen" wirkte bei laufendem Ö3 aus den
+   Lautsprechern - die Echo-Unterdrückung hielt den Eigenton nicht für einen
+   Befehl.
+2. **`--print-playing` liefert den ICY-Titel NICHT** - auch nicht `%st` und
+   nicht MPRIS, nur den Sendernamen (gegengeprüft mit Kronehit, das
+   „coldplay - higher power" mitschickte). `dialos-radio.py` liest den Titel
+   jetzt selbst aus dem Stream. Nebenbefund: Ö3 schickt mal Liedtitel, mal
+   nur „HITRADIO Ö3 - Livestream"; Life Radio nie.
+3. **MPRIS:** Plugin aktiv, liegt aber unter
+   `/usr/lib/x86_64-linux-gnu/rhythmbox/plugins/mpris` (oben berichtigt).
+   Beim Stream zählt `Position` mit (4 s, 7 s), `CanSeek` ist `false`,
+   `mpris:length` 0, `xesam:url` liefert die Adresse. Ob `SetPosition` bei
+   einer Datei greift, ist damit noch nicht gemessen - das ist der nächste
+   Schritt für die Hörbücher.
+
+**Drei Fehler, die nur am Gerät auffallen konnten - alle behoben:**
+
+- **`--play-uri` spielt nur, was in Rhythmbox' Datenbank steht.** Für jede
+  andere Adresse meldet es Erfolg und bleibt still. Auf dem Arbeitsrechner
+  standen die Sender schon drin. `dialos-radio.py` trägt jetzt vor dem
+  Abspielen die ganze Medienliste ein (Rhythmbox dafür einmal zu).
+- **Lauter/leiser:** `--print-volume` meldet „0,799988" mit deutschem Komma.
+- **Die Grammatik am Arbeitsrechner ist unvollständig:** Medienliste und
+  Programme liegen nur am Gerät unter `/usr/local/bin`. Erst hier schlugen
+  zwei Tests an - „radio ausschalten" stand noch in `dialos-programm.py`
+  (jetzt gestrichen, ebenso „musik ausschalten"), „radio tirol" und „life
+  radio" klangen zu nah an „radio einschalten" (jetzt „tiroler radio" und
+  „life"), und Sender wie Programme fehlten in der Befehlsübersicht.
+  **Folge für die Werkbank:** Ein grüner Testlauf dort beweist für diese
+  Prüfungen nichts - `python3 -m unittest discover -s tests` gehört nach
+  dem Aufspielen auch am Gerät ausgeführt. Hier: 143 Tests grün, 79 Sätze
+  wörtlich erkannt.
+

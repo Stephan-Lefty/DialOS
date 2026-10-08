@@ -337,9 +337,10 @@ other.
 > Rhythmbox as well** - see the "Radio" row in the table above. Then there is
 > only **one** player for radio, music, podcasts and audiobooks, and the rule
 > takes care of itself: there is nothing left that DialOS would have to stop
-> before starting, and "louder" or "stop" always means the same program. **Not
-> built yet** - until then there are still two programs: "Radio öffnen" opens
-> Shortwave, "Musik öffnen" Rhythmbox.
+> before starting, and "louder" or "stop" always means the same program. **Built
+> since 2026-09-30, accepted on the device on 2026-10-08:** "Radio öffnen" and
+> "Musik öffnen" both open Rhythmbox, playback goes through `dialos-radio.py`.
+> Shortwave has no voice command.
 
 **The echo-cancelled source must never become the default source.**
 Checked on 2026-08-18, and it currently holds only because it is

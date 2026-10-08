@@ -579,7 +579,7 @@ ALLE_BEFEHLE_SATZ = "alle befehle vorlesen"
 THEMEN_NAMEN = {"fragen": "Fragen", "briefe": "Briefe", "notizen": "Notizen",
                 "einkauf": "den Einkauf", "bildschirm": "den Bildschirm",
                 "diktat": "das Diktat", "radio": "das Radio",
-                "erweiterungen": "Erweiterungen"}
+                "programme": "Programme", "erweiterungen": "Erweiterungen"}
 # (Thema, Beschriftung) je Aktion. Schluessel: (Tabelle, Wert der Tabelle).
 AKTIONEN = {
     ("auskunft", "uhrzeit"): ("fragen", "Die Uhrzeit"),
@@ -610,7 +610,7 @@ AKTIONEN = {
     ("nachrichten", "landesweite nachrichten"): ("radio", "Nachrichten aus dem Land"),
 }
 THEMEN_REIHENFOLGE = ("fragen", "briefe", "notizen", "einkauf", "bildschirm", "diktat",
-                      "radio", "erweiterungen")
+                      "radio", "programme", "erweiterungen")
 GROSS_SCHREIBEN = {"pdf": "PDF", "linux": "Linux", "gnome": "Gnome", "windows": "Windows",
                    "brief": "Brief", "notiz": "Notiz", "notizen": "Notizen",
                    "einkaufszettel": "Einkaufszettel", "einkauf": "Einkauf",
@@ -620,7 +620,9 @@ GROSS_SCHREIBEN = {"pdf": "PDF", "linux": "Linux", "gnome": "Gnome", "windows": 
                    "betreff": "Betreff", "befehle": "Befehle", "fragen": "Fragen",
                    "briefe": "Briefe", "bildschirm": "Bildschirm",
                    "sprachsteuerung": "Sprachsteuerung",
-                   "radio": "Radio", "sender": "Sender", "musik": "Musik"}
+                   "radio": "Radio", "sender": "Sender", "musik": "Musik",
+                   "postfach": "Postfach", "kalender": "Kalender", "kontakte": "Kontakte",
+                   "internet": "Internet", "browser": "Browser"}
 
 
 def gesprochen(satz):
@@ -687,6 +689,19 @@ def befehls_themen():
         dazu(("nachrichten", "fragen"), satz)
     for satz in sorted(NACHRICHTEN_SAETZE):
         dazu(("nachrichten", satz), satz)
+    # SENDER UND PROGRAMME GEHOEREN AUCH HINEIN (2026-10-08). Erst am Geraet
+    # sichtbar: Auf dem Arbeitsrechner fehlen Medienliste und Programme unter
+    # /usr/local/bin, dort stehen diese Saetze gar nicht in der Grammatik. Am
+    # T490 meldete der Dienst 22 Saetze ohne Platz - darunter jeden Sender und
+    # "postfach oeffnen". KEIN NEUER SPRACHSATZ dafuer: Die Programme stehen
+    # in "alle befehle vorlesen"; ein "befehle fuer programme" muesste erst
+    # durch beide Pflichtpruefungen.
+    for satz in RADIO_SENDER_SAETZE:
+        eintraege = zuordnung.setdefault("radio", collections.OrderedDict())
+        eintraege.setdefault("Einen bestimmten Sender", []).append(satz)
+    for satz in PROGRAMM_SAETZE:
+        eintraege = zuordnung.setdefault("programme", collections.OrderedDict())
+        eintraege.setdefault(gesprochen(satz), []).append(satz)
     for satz in BEFEHLSSAETZE:
         worte = satz.split()
         if AUSLOESER in worte:

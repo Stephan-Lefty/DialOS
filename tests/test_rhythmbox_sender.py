@@ -272,9 +272,13 @@ class Sprechformen(unittest.TestCase):
 
     def test_tabelle_schlaegt_die_regel(self):
         """Was sich nicht ableiten laesst, steht in SPRECHFORMEN - und
-        muss Vorrang haben. „ORF Radio Tirol" heisst im Alltag nur
-        „radio tirol"; das vorangestellte „o er ef" spricht niemand."""
-        self.assertEqual(rs.sprechform_vorschlag("ORF Radio Tirol"), "radio tirol")
+        muss Vorrang haben. „ORF Radio Salzburg" heisst im Alltag nur
+        „radio salzburg"; das vorangestellte „o er ef" spricht niemand.
+        Tirol ist seit 2026-10-08 „tiroler radio" - „radio tirol" lag zu
+        nah an „radio einschalten"."""
+        self.assertEqual(rs.sprechform_vorschlag("ORF Radio Salzburg"), "radio salzburg")
+        self.assertEqual(rs.sprechform_vorschlag("ORF Radio Tirol"), "tiroler radio")
+        self.assertEqual(rs.sprechform_vorschlag("Life Radio"), "life")
         self.assertEqual(rs.sprechform_vorschlag("1LIVE"), "eins live")
         self.assertEqual(rs.sprechform_vorschlag("Hitradio Oe3"), "ö drei")
 

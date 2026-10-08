@@ -76,11 +76,10 @@ listen?".
 | **"Kontakte öffnen"** (open contacts) | Opens Thunderbird's address book (`-addressbook`). |
 | **"Internet öffnen"** / **"Browser öffnen"** | Opens Firefox ESR. |
 | **"Musik öffnen"** (open music) | Opens Rhythmbox. |
-| **"Radio öffnen"** (open radio) | Opens Shortwave. **Rhythmbox in future** - Stephan's decision of 2026-09-25, not built yet (see the note under "Planned" and [anwendungen.en.md](anwendungen.en.md)). |
+| **"Radio öffnen"** (open radio) | Opens Rhythmbox (since 2026-10-08; Shortwave before). Only the window, for the sighted helper - playing is "Radio einschalten". |
 | **"Postfach schließen"** (close the mailbox) | **With a confirmation:** "Soll ich das Postfach schließen? Sage ja oder nein." **Unfinished e-mails are saved first** - DialOS asks the bridge which compose windows are open, has Thunderbird file them as drafts, and says so. This answers a measurement from 2026-09-21: **Thunderbird does not ask on `SIGTERM`** - it quits after one second and unsaved text is silently gone (the drafts folder did not grow by a single byte). If something cannot be saved, the mailbox stays open. Only then `SIGTERM`, never `SIGKILL`. If it is not running: "Das Postfach ist gar nicht offen." |
 | **"Internet schließen"** / **"Browser schließen"** | The same for Firefox. |
-| **"Musik ausschalten"** (turn the music off) | The same for Rhythmbox - "turn off" rather than "close", because music plays rather than standing open. |
-| **"Radio ausschalten"** (turn the radio off) | The same for Shortwave. After the switch to Rhythmbox (decided on 2026-09-25, not built yet) it applies to Rhythmbox. |
+| ~~"Musik ausschalten"~~ / ~~"Radio ausschalten"~~ | **Dropped on 2026-10-08** (Stephan). "Radio ausschalten" scored 0.82 against "Radio einschalten" - exactly this collision showed up on the device; on the work machine the program sentences are not in the grammar, so it went unnoticed. Stopping is **"Radio abstellen"**; nobody needs to close the program. |
 
 > **Opening programs (since 2026-09-21).** Stephan's prompt: "we need a list
 > of commands that start the programs anyway." Until then DialOS could do a
@@ -160,10 +159,9 @@ explain why the sentence is worded this way and why it stands alone.
 > audiobooks, and "louder" or "stop" always means the same program. Full
 > reasoning in [anwendungen.en.md](anwendungen.en.md).
 >
-> **Not built yet.** Today: "Radio öffnen" opens Shortwave, "Musik öffnen"
-> Rhythmbox (both only open the program and set no station and no track), and
-> "Radio einschalten" / "Musik abspielen" answer "Radio und Musik kann ich noch
-> nicht abspielen." (see "Fallback answers" below).
+> **Built since 2026-09-30, accepted on the device on 2026-10-08** - the
+> details are in the German [sprachbefehle.md](sprachbefehle.md), section
+> "Radio hören". "Radio öffnen" and "Musik öffnen" both open Rhythmbox.
 
 ### Why "Unterlagen durchsuchen" and not "Briefe durchsuchen" (search the letters)
 

@@ -157,6 +157,25 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Radio am Gerät abgenommen - mit vier Funden, die nur dort auffallen
+  konnten** (2026-10-08, erster Lauf am T490). (1) `rhythmbox-client
+  --play-uri` spielt eine Stream-Adresse nur, wenn sie als Radiosender in
+  Rhythmbox' Datenbank steht; sonst meldet es Erfolg und bleibt still.
+  `dialos-radio.py` trägt jetzt vor dem Abspielen die ganze Medienliste ein.
+  (2) Lauter/leiser scheiterte am deutschen Komma („0,799988"). (3) „Was läuft
+  gerade" sagte nur den Sender - Rhythmbox gibt den Liedtitel nicht heraus,
+  DialOS liest ihn jetzt selbst aus dem Stream. (4) Auf dem Arbeitsrechner
+  fehlen Medienliste und Programme in der Grammatik; erst am Gerät schlugen
+  zwei Tests an: **„Radio ausschalten" und „Musik ausschalten" sind
+  gestrichen** (zu nah an „Radio einschalten", Stephans Entscheidung),
+  **ORF Radio Tirol heißt jetzt „tiroler radio", Life Radio „life"**, und
+  Sender wie Programmbefehle stehen in der Befehlsübersicht. „Radio öffnen"
+  öffnet Rhythmbox statt Shortwave. Abstellen bei laufendem Ton (Probe 5a)
+  bestanden; alle 79 Sätze in der Pflichtprüfung wörtlich erkannt.
+- **Vorführvideo: Drehbuch und Ablaufskript** (`docs/video-drehbuch.md`,
+  `scripts/dialos-video-dreh.py`, 2026-10-05). Anna spielt die Nutzerin über
+  ein virtuelles Mikrofon, Musterdaten im eigenen Vorführkonto. Noch nicht
+  fertig gedreht; die Lehren der ersten vier Drehs stehen im Drehbuch.
 - **Die Radio-Medienliste steht: zehn Sender** (2026-10-05, Stephans Vorgabe
   „Ja lieber 10"). Deutschlandfunk, ORF Radio Tirol, Ö3, Ö1, Bayern 3,
   BR-Klassik, Radio Swiss Jazz, Rock Antenne, FM4 und WDR 4 - breit gestreut

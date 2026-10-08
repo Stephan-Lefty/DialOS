@@ -67,7 +67,7 @@ nobody has re-checked since are marked as such.
 | Letter as PDF | own generator via cairo/Pango | Letterhead per DIN 5008, window envelope | in use |
 | Low-level desktop control | Numen (Wayland-native, Vosk-based) | Mouse/window control for motor-impaired users | planned, not installed (as of 2026-08-16, not re-checked) |
 | Screen reader | Orca | Standard GNOME screen reader | installed, pairing with Piper still open (as of 2026-08-16, not re-checked) |
-| Radio | Shortwave today, Rhythmbox in future | Shortwave cannot be controlled from outside, see [anwendungen.en.md](anwendungen.en.md) | installed, "Radio öffnen" opens Shortwave; switch decided 2026-09-25, not built |
+| Radio | Rhythmbox, controlled by `dialos-radio.py` | Shortwave cannot be controlled from outside, see [anwendungen.en.md](anwendungen.en.md) | built 2026-09-30, accepted on the device 2026-10-08 |
 | Music, podcasts, audiobooks | Rhythmbox (one player for everything) | GNOME Music and GNOME Podcasts are removed by `dialos-aufraeumen.sh`, see [anwendungen.en.md](anwendungen.en.md) | installed |
 | Word processing | LibreOffice Writer | — | installed |
 | Browser | Firefox ESR | For search queries and ARD/ZDF Mediatheken (no native Linux client) | installed, home page set via enterprise policy |

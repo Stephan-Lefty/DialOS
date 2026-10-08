@@ -147,6 +147,25 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Radio accepted on the device - with four findings that could only show up
+  there** (2026-10-08, first run on the T490). (1) `rhythmbox-client
+  --play-uri` only plays a stream address that is stored as a radio station in
+  Rhythmbox' database; otherwise it reports success and stays silent.
+  `dialos-radio.py` now enters the whole media list before playing. (2)
+  Louder/quieter failed on the German decimal comma ("0,799988"). (3) "Was
+  läuft gerade" only named the station - Rhythmbox does not hand out the song
+  title, DialOS now reads it from the stream itself. (4) On the work machine the
+  media list and programs are missing from the grammar; only on the device did
+  two tests fail: **"Radio ausschalten" and "Musik ausschalten" are dropped**
+  (too close to "Radio einschalten", Stephan's decision), **ORF Radio Tirol is
+  now "tiroler radio", Life Radio "life"**, and stations and program commands
+  are in the command overview. "Radio öffnen" opens Rhythmbox instead of
+  Shortwave. Stopping with sound playing (check 5a) passed; all 79 sentences
+  recognized verbatim in the mandatory check.
+- **Demo video: script and shooting tool** (`docs/video-drehbuch.md`,
+  `scripts/dialos-video-dreh.py`, 2026-10-05). Anna plays the user through a
+  virtual microphone, sample data in a separate demo account. Not fully shot
+  yet; the lessons of the first four takes are in the script document.
 - **The radio media list is settled: ten stations** (2026-10-05, Stephan's
   call "yes, ten rather"). Deutschlandfunk, ORF Radio Tirol, Ö3, Ö1, Bayern 3,
   BR-Klassik, Radio Swiss Jazz, Rock Antenne, FM4 and WDR 4 - spread across

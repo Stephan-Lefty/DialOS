@@ -75,11 +75,10 @@ dahinter steht in [sprachsteuerung.md](sprachsteuerung.md), Abschnitt
 | **„Kontakte öffnen"** | Öffnet Thunderbirds Adressbuch (`-addressbook`). |
 | **„Internet öffnen"** / **„Browser öffnen"** | Öffnet Firefox ESR. |
 | **„Musik öffnen"** | Öffnet Rhythmbox. |
-| **„Radio öffnen"** | Öffnet Shortwave. **Künftig Rhythmbox** - Stephans Entscheidung vom 2026-09-25, noch nicht gebaut (siehe die Anmerkung unter „Vorgesehen" und [anwendungen.md](anwendungen.md)). |
+| **„Radio öffnen"** | Öffnet Rhythmbox (seit 2026-10-08; bis dahin Shortwave). Nur das Fenster, für den sehenden Helfer - abgespielt wird mit „Radio einschalten". |
 | **„Postfach schließen"** | **Mit Rückfrage:** „Soll ich das Postfach schließen? Sage ja oder nein." **Vorher werden angefangene E-Mails gesichert** - DialOS fragt die Brücke, was an Schreibfenstern offen steht, lässt Thunderbird sie als Entwurf ablegen und sagt es an („Eine angefangene E-Mail lege ich noch als Entwurf ab."). Das ist die Antwort auf eine Messung vom 2026-09-21: **Thunderbird fragt bei `SIGTERM` nicht nach** - es geht nach einer Sekunde zu, und ungespeicherter Text ist lautlos weg (der Entwurfsordner wuchs um kein Byte). Lässt sich etwas nicht sichern, bleibt das Postfach offen. Danach erst `SIGTERM`, nie `SIGKILL`. Läuft es gar nicht: „Das Postfach ist gar nicht offen." |
 | **„Internet schließen"** / **„Browser schließen"** | Dasselbe für Firefox. |
-| **„Musik ausschalten"** | Dasselbe für Rhythmbox - „ausschalten" statt „schließen", weil Musik läuft und nicht offen steht. |
-| **„Radio ausschalten"** | Schließt das Programm. Nicht zu verwechseln mit **„Radio abstellen"**, das die Wiedergabe anhält - siehe den Radio-Block gleich darunter. |
+| ~~„Musik ausschalten"~~ / ~~„Radio ausschalten"~~ | **Gestrichen am 2026-10-08** (Stephan). „Radio ausschalten" lag mit 0,82 an „Radio einschalten" - am Gerät schlug genau diese Kollision an; auf dem Arbeitsrechner fehlen die Programmsätze in der Grammatik, dort fiel sie nicht auf. Anhalten heißt **„Radio abstellen"**, das Programm muss niemand schließen. |
 
 ### Radio hören (gebaut 2026-09-30)
 
@@ -91,9 +90,9 @@ ehrliche Antwort „Radio und Musik kann ich noch nicht abspielen".
 | Sprachbefehl | Aktion |
 |---|---|
 | **„Radio einschalten"** / **„Musik abspielen"** | Spielt den zuletzt gehörten Sender. Gibt es noch keinen, werden bis zu fünf Sender zur Auswahl angesagt - es wird **nicht** einfach der erste gespielt. Ist die Liste leer: „Ich habe noch keine Sender. Die Liste wird mit dem Programm DialOS-Rhythmbox zusammengestellt." |
-| **„{Sprechform} einschalten"** | Ein bestimmter Sender, z. B. „Deutschlandfunk einschalten". Diese Sätze stehen **nicht** fest in der Grammatik, sondern entstehen beim Start des Dienstes aus der Medienliste - wie die Startsätze der Erweiterungen. |
+| **„{Sprechform} einschalten"** | Ein bestimmter Sender, z. B. „Deutschlandfunk einschalten". Diese Sätze stehen **nicht** fest in der Grammatik, sondern entstehen beim Start des Dienstes aus der Medienliste - wie die Startsätze der Erweiterungen. **Kein Sender darf wie „Radio einschalten" klingen:** Deshalb heißt ORF Radio Tirol „tiroler radio" und Life Radio „life" (2026-10-08; „radio tirol" und auch „tirol" allein lagen zu nah). |
 | **„Radio abstellen"** | Hält die Wiedergabe an. Läuft nichts: „Es läuft gerade nichts." |
-| **„Was läuft gerade"** | Sagt an, was Rhythmbox meldet - bei einem Stream meist Interpret und Titel aus den ICY-Daten. |
+| **„Was läuft gerade"** | Sender und, wenn er einen mitschickt, das laufende Lied: „Es läuft Kronehit: coldplay - higher power." Sonst: „… Der Sender schickt keinen Liedtitel mit." Den Liedtitel liest DialOS selbst aus dem Stream (ICY) - **Rhythmbox gibt ihn nicht heraus**, weder über `--print-playing` noch MPRIS (gemessen 2026-10-08). |
 | **„Lauter machen"** / **„Leiser machen"** | In Zehn-Prozent-Stufen. Am Anschlag: „Lauter geht nicht." |
 | **„Nächster Sender"** | Der nächste Eintrag der Liste, im Kreis. Bewusst **nicht** `--next` von Rhythmbox: Bei einem laufenden Stream gibt es kein nächstes Stück, der Befehl liefe ins Leere. |
 
@@ -226,10 +225,9 @@ begründen, warum der Satz so heißt und warum er allein steht.
 > meint immer dasselbe Programm. Begründung vollständig in
 > [anwendungen.md](anwendungen.md).
 >
-> **Noch nicht gebaut.** Heute gilt: „Radio öffnen" öffnet Shortwave, „Musik
-> öffnen" Rhythmbox (beides öffnet nur das Programm und gibt keinen Sender und keinen Titel vor), und
-> „Radio einschalten" / „Musik abspielen" antworten „Radio und Musik kann ich
-> noch nicht abspielen." (siehe „Rückfall-Antworten" unten).
+> **Gebaut seit 2026-09-30, am Gerät abgenommen am 2026-10-08** - siehe
+> „Radio hören" oben. „Radio öffnen" und „Musik öffnen" öffnen beide
+> Rhythmbox.
 
 ### Warum „Unterlagen durchsuchen" und nicht „Briefe durchsuchen"
 

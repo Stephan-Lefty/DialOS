@@ -868,7 +868,16 @@ SPRECHFORMEN = {
     # vorangestellte "o er ef" spricht niemand, und kurze Saetze erkennt
     # Vosk zuverlaessiger.
     "ORF Radio Wien": "radio wien",
-    "ORF Radio Tirol": "radio tirol",
+    # AUSNAHME TIROL (Stephan, 2026-10-08): "radio tirol einschalten" und auch
+    # "tirol einschalten" klingen nach DialOS' Kollisionspruefung zu nah an
+    # "radio einschalten" - wer den zuletzt gehoerten Sender will, bekaeme
+    # Radio Tirol. "tiroler radio" ist frei und steht im Wortschatz. Die
+    # uebrigen Regionalsender haben dasselbe Muster und brauchen dieselbe
+    # Pruefung, sobald einer in die Medienliste kommt.
+    "ORF Radio Tirol": "tiroler radio",
+    # Dasselbe bei Life Radio (2026-10-08): "life radio einschalten" lag zu
+    # nah an "radio einschalten", "life einschalten" ist frei.
+    "Life Radio": "life",
     "ORF Radio Salzburg": "radio salzburg",
     "ORF Radio Steiermark": "radio steiermark",
     "ORF Radio Kaernten": "radio kärnten",

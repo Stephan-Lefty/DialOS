@@ -69,7 +69,7 @@ solche markiert.
 | Brief als PDF | eigener Erzeuger über cairo/Pango | Briefbogen nach DIN 5008, Fensterumschlag | im Einsatz |
 | Low-Level-Desktopsteuerung | Numen (Wayland-nativ, Vosk-basiert) | Maus/Fenster-Steuerung für motorisch eingeschränkte Nutzer | geplant, nicht installiert (Stand 2026-08-16, nicht neu geprüft) |
 | Screenreader | Orca | Standard-GNOME-Screenreader | installiert, Kopplung an Piper noch offen (Stand 2026-08-16, nicht neu geprüft) |
-| Radio | heute Shortwave, künftig Rhythmbox | Shortwave ist von außen nicht steuerbar, siehe [anwendungen.md](anwendungen.md) | installiert, „Radio öffnen" öffnet Shortwave; Wechsel entschieden 2026-09-25, nicht gebaut |
+| Radio | Rhythmbox, gesteuert über `dialos-radio.py` | Shortwave ist von außen nicht steuerbar, siehe [anwendungen.md](anwendungen.md) | gebaut 2026-09-30, am Gerät abgenommen 2026-10-08 |
 | Musik, Podcasts, Hörbücher | Rhythmbox (ein Player für alles) | GNOME Music und GNOME Podcasts entfernt `dialos-aufraeumen.sh`, siehe [anwendungen.md](anwendungen.md) | installiert |
 | Textverarbeitung | LibreOffice Writer | — | installiert |
 | Browser | Firefox ESR | Für Suchfragen und ARD/ZDF-Mediatheken (kein nativer Linux-Client) | installiert, Startseite per Enterprise-Policy gesetzt |

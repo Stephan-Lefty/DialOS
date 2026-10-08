@@ -154,10 +154,14 @@ PROGRAMME = {
         "befehl": ["/usr/bin/rhythmbox"],
         "ansage": "Ich öffne die Musik.",
     },
+    # SEIT 2026-10-08 RHYTHMBOX, nicht mehr Shortwave - Stephans Entscheidung
+    # vom 2026-09-25 ("ein Player fuer alles"). Shortwave laesst sich von
+    # aussen kein Sender vorgeben; ein Radio, das DialOS nicht steuern kann,
+    # ist fuer den Nutzer keins.
     "radio öffnen": {
-        "offen": "Das Radio läuft schon.",
-        "fenster": "/usr/share/applications/de.haeckerfelix.Shortwave.desktop",
-        "befehl": ["/usr/bin/shortwave"],
+        "offen": "Das Radio ist schon offen.",
+        "fenster": "/usr/share/applications/org.gnome.Rhythmbox3.desktop",
+        "befehl": ["/usr/bin/rhythmbox"],
         "ansage": "Ich öffne das Radio.",
     },
 }
@@ -221,20 +225,12 @@ SCHLIESSEN = {
         "nicht_offen": "Der Browser ist gar nicht offen.",
         "bleibt": "Der Browser ist noch offen. Vielleicht fragt er nach etwas.",
     },
-    "musik ausschalten": {
-        "programm": "/usr/bin/rhythmbox",
-        "frage": "Soll ich die Musik ausschalten? Sage ja oder nein.",
-        "zu": "Die Musik ist aus.",
-        "nicht_offen": "Es läuft gerade keine Musik.",
-        "bleibt": "Die Musik läuft noch.",
-    },
-    "radio ausschalten": {
-        "programm": "/usr/bin/shortwave",
-        "frage": "Soll ich das Radio ausschalten? Sage ja oder nein.",
-        "zu": "Das Radio ist aus.",
-        "nicht_offen": "Das Radio läuft gar nicht.",
-        "bleibt": "Das Radio läuft noch.",
-    },
+    # "MUSIK AUSSCHALTEN" UND "RADIO AUSSCHALTEN" GESTRICHEN (Stephan,
+    # 2026-10-08): "radio ausschalten" liegt mit 0,82 an "radio einschalten" -
+    # ein Hoerfehler, und das Radio geht an statt aus. Am Geraet schlug genau
+    # das die Kollisionspruefung an, die auf dem Arbeitsrechner nicht greift
+    # (dort fehlen die Programmsaetze in der Grammatik). Anhalten heisst
+    # "radio abstellen" (dialos-radio.py); das Programm muss niemand schliessen.
 }
 
 NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"

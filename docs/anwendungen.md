@@ -339,8 +339,9 @@ DialOS muss das eine beenden, bevor es das andere startet.
 > noch **einen** Player für Radio, Musik, Podcasts und Hörbücher, und die
 > Regel erledigt sich von selbst: Es gibt nichts mehr, das DialOS vor dem
 > Starten beenden müsste, und „lauter" oder „stopp" meint immer dasselbe
-> Programm. **Noch nicht gebaut** - bis dahin gibt es weiter zwei Programme:
-> „Radio öffnen" öffnet Shortwave, „Musik öffnen" Rhythmbox.
+> Programm. **Gebaut seit 2026-09-30, am Gerät abgenommen am 2026-10-08:**
+> „Radio öffnen" und „Musik öffnen" öffnen beide Rhythmbox, abgespielt wird
+> über `dialos-radio.py`. Shortwave ist ohne Sprachbefehl.
 
 **Die echo-bereinigte Quelle darf nie die Vorgabe-Quelle werden.**
 Geprüft am 2026-08-18, und es stimmt derzeit nur, weil es WirePlumbers
