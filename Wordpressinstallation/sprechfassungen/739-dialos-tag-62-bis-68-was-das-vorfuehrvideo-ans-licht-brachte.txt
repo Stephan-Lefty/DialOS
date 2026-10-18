@@ -1,0 +1,9 @@
+Tag zweiundsechzig bis achtundsechzig. Was das Vorführvideo ans Licht brachte.
+
+Diese Woche hatte ein einziges Ziel: ein Video, das DialOS zeigt, ohne dass ein Mensch es von Hand vorführt. Anna spricht, DialOS antwortet, eine Kamera läuft mit. Und genau dieses Video wurde zur strengsten Prüfung, die DialOS bisher erlebt hat. Denn wer eine Nutzerin wirklich von Anfang bis Ende sprechen lässt, darf sich nicht mehr darauf verlassen, dass eine Meldung die Wahrheit sagt.
+
+Eine nach der anderen fielen Dinge auf, die seit Wochen "läuft" gemeldet hatten und nie gelaufen waren. Das Schreiben einer Mail legte einen Entwurf an, der nirgends ankam. Die Rechtschreibhilfe war seit dem letzten Neuaufbau in keinem Konto an, lautlos. Das Vorlesen eines Briefes brach ab, bevor es ein Wort sagte. Und wäre mitten im Diktieren etwas abgestürzt, wäre die Sprachsteuerung bis zum Neustart taub geblieben, ohne dass irgendwo ein Fehler erschien.
+
+Dann lief zum ersten Mal das Radio auf dem echten Gerät. Es meldete, es spiele, und blieb still. Der Grund fiel nur dort auf, nie am Schreibtisch. Erst als DialOS selbst nachhörte, was wirklich klang, spielte der Sender.
+
+Das ist der rote Faden dieser Woche, derselbe wie immer. Fast jeder Fehler war harmlos in dem Augenblick, in dem man aufhörte, der grünen Meldung zu glauben, und anfing zu messen. Am Ende lief der Dreh sauber durch, und ließ ein System zurück, das zum ersten Mal wirklich tat, was es sagte.
