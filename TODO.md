@@ -16,7 +16,7 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
-- [ ] **Datenschutzerklärung um das Kontaktformular ergänzen** (offen seit
+- [x] **Datenschutzerklärung um das Kontaktformular ergänzt** (erledigt
   2026-10-22, beide Sprachen: Seiten 3 und 376). Seit Flamingo an dem Tag
   installiert wurde, speichert dialos.org **jede Einsendung dauerhaft in der
   Datenbank** – vorher wurde nur durchgeleitet. Beide Erklärungen beschreiben

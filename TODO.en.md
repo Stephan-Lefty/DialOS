@@ -15,7 +15,7 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
-- [ ] **Add the contact form to the privacy policy** (open since 2026-10-22,
+- [x] **Contact form added to the privacy policy** (done 2026-10-22,
   both languages: pages 3 and 376). Since Flamingo was installed that day,
   dialos.org **stores every submission permanently in the database** –
   previously it only passed them through. Both policies describe only contact

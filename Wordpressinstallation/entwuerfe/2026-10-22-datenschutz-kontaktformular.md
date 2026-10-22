@@ -1,6 +1,11 @@
 # Datenschutzerklärung: Abschnitt zum Kontaktformular
 
-**Entwurf vom 22.10.2026. Nicht veröffentlicht – wartet auf Stephans Freigabe.**
+**Umgesetzt am 22.10.2026.** Stephan hat den Text freigegeben („trag den Text
+auf beiden Seiten ein"); er steht seitdem auf Seite 3 (deutsch) und 376
+(englisch), das „Stand"-Datum beider Fassungen ist auf den 22.10.2026
+gesetzt. Diese Datei bleibt als Begründung stehen – warum der Abschnitt
+nötig wurde und welche Entscheidungen dahinterstehen, steht in keiner
+Commit-Nachricht auf der Website.
 
 ## Warum dieser Entwurf entstanden ist
 
@@ -102,12 +107,10 @@ Der bestehende Absatz zur E-Mail bleibt stehen. Darunter:
 
 ---
 
-## Noch offen
+## Nichts mehr offen
 
-**Nur noch der Text auf der Website.** Technisch ist alles umgesetzt.
-
-**Vor dem Veröffentlichen:** beide Sprachfassungen im selben Zug (Seiten 3 und
-376) und das „Stand:"-Datum oben anpassen.
+Beide Sprachfassungen wurden im selben Zug geschrieben, das „Stand"-Datum ist
+angepasst. Gegengeprüft am ausgelieferten HTML, nicht nur an der API.
 
 Einzelheiten zum Spamschutz im Abschnitt „Spamschutz" der
 [README](../README.md#spamschutz).
