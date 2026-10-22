@@ -91,7 +91,7 @@ Zusätzlich eingerichtet:
   Hoster, WordPress läuft nur mit Pseudo-Cron – Matomos vorberechnete
   Berichte hinken deshalb hinterher, und ein manueller Archivierungsanstoß
   über die API ändert daran nichts. Messung und Folgen unter
-  [Zugriffszahlen im Dashboard](#zugriffszahlen-im-dashboard).
+  [Dashboard-Blöcke](#dashboard-blöcke).
 - WordPress-Dashboard aufgeräumt (Google-Analytics- und
   Events-Kästchen ausgeblendet) – gilt nur für den eingeloggten Benutzer
   (Stephan), WordPress speichert das nicht zentral.
@@ -110,11 +110,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.23`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.24`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.23.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.24.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -171,7 +171,8 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.20 | 22.10.2026 | Spamschutz für die Kontaktformulare in vier Schichten, nachdem über 200 Spam-Nachrichten durchkamen – siehe [Spamschutz](#spamschutz) |
 | 1.6.21 | 22.10.2026 | Datensparsamkeit bei Flamingo: IP-Adresse und Browserkennung werden nicht gespeichert, Nachrichten nach fünf Monaten in den Papierkorb |
 | 1.6.22 | 22.10.2026 | Flamingos Adressbuch wird gar nicht erst gefüllt |
-| 1.6.23 | 22.10.2026 | Zugriffszahlen im Dashboard (Woche, 90 Tage, Jahr, gesamt, Herkunftsländer) – siehe [Zugriffszahlen im Dashboard](#zugriffszahlen-im-dashboard) |
+| 1.6.23 | 22.10.2026 | Zugriffszahlen im Dashboard (Woche, 90 Tage, Jahr, gesamt, Herkunftsländer) – siehe [Dashboard-Blöcke](#dashboard-blöcke) |
+| 1.6.24 | 22.10.2026 | Dashboard auf fünf einzelne Blöcke aufgeteilt, dazu Kontaktformular-Zähler, meistbesuchte Seiten und Verweisquellen |
 
 ## Spamschutz
 
@@ -301,21 +302,51 @@ PHP-Syntax wie immer ohne lokales PHP:
 docker run --rm -v "$PWD/wp-theme/dialos:/x:ro" php:8.2-cli php -l /x/functions.php
 ```
 
-## Zugriffszahlen im Dashboard
+## Dashboard-Blöcke
 
-Seit Theme 1.6.23 steht auf der Startseite des Backends ein Kasten „Zugriffe
-auf dialos.org": Besuche und Seitenaufrufe für die **aktuelle Woche, die
-letzten 90 Tage, das laufende Jahr und seit Beginn**, dazu die acht häufigsten
-**Herkunftsländer**. Gezählt wird seit dem 15.08.2026 (Anlagedatum der
-Matomo-Seite, wird nicht fest eingetragen, sondern abgefragt).
+Auf der Startseite des Backends stehen seit Theme 1.6.24 **fünf eigene
+Kästen** – einer je Thema, nicht einer für alles. Jeder lässt sich einzeln
+verschieben, zuklappen oder über „Ansicht anpassen" abschalten; ein
+Sammelkasten wäre entweder ganz da oder ganz weg.
+
+| Block | Was drinsteht | Zeitraum |
+|---|---|---|
+| Zugriffe auf dialos.org | Besuche und Seitenaufrufe, dazu eine Live-Zeile | Woche, 90 Tage, Jahr, gesamt |
+| Herkunft der Besuche | die acht häufigsten Länder | laufendes Jahr |
+| Kontaktformular | Anfragen und aussortierter Spam | 7 Tage und Bestand |
+| Meistbesuchte Seiten | die sechs meistgelesenen Seitentitel | 30 Tage |
+| Woher die Besucher kommen | Suche, Verweise, soziale Netze, direkt | 30 Tage |
+
+Gezählt wird seit dem 15.08.2026 – das Anlagedatum der Matomo-Seite wird
+abgefragt und nicht fest eingetragen, sonst stünde dort nach einem Neuaufbau
+von Matomo eine falsche Zahl, ohne dass es auffiele.
 
 **Woher die Zahlen kommen:** über `rest_do_request()` aus Matomos eigener
 REST-Route, im selben Prozess. Bewusst **kein** HTTP-Aufruf an die eigene
 Seite – der wäre langsam, könnte an einer Firewall scheitern und hätte WP
 Super Cache dazwischen. Und bewusst **kein** Griff in Matomos PHP-Klassen:
 die ändern sich zwischen Fassungen, die REST-Route ist die zugesagte
-Schnittstelle. Sechs Abfragen je Aufruf, deshalb eine halbe Stunde im
-Zwischenspeicher; sofort erneuern mit `wp-admin/index.php?dialos-zahlen=neu`.
+Schnittstelle.
+
+**Jeder Block hat seinen eigenen Zwischenspeicher** (30 Minuten). Wäre es
+einer für alle, müsste beim ersten Aufruf jeder Block auf die Abfragen aller
+anderen warten – und ein abgeschalteter Block würde trotzdem Zeit kosten.
+Alle auf einmal erneuern: `wp-admin/index.php?dialos-zahlen=neu`.
+
+### Warum der Kontaktformular-Block existiert
+
+Er ist die Antwort auf die Lücke vom 22.10.2026: Ein aktives Plugin bewachte
+keinen Schutz, und **nichts wies darauf hin** – bis 200 Spam-Mails ankamen.
+Ein Wachhund-Skript, das regelmäßig Testnachrichten schickt, wäre Dauerlast
+für einen Fall, der sich auch passiv zeigt.
+
+Steht dort eines Tages bei „aussortiert" eine Null, wo vorher Dutzende
+standen, greift etwas nicht mehr. Steht umgekehrt eine ungewohnt hohe Zahl bei
+den Anfragen, lohnt der Blick, ob echte Post im Spam gelandet ist.
+
+Der Verweis im Block zeigt auf `admin.php?page=flamingo_inbound`, **nicht** auf
+`page=flamingo` – Letzteres ist das Adressbuch, und das ist seit 1.6.22
+absichtlich leer.
 
 ### Warum eine Zeile „letzte 24 Stunden (live)" dabeisteht
 
@@ -348,6 +379,13 @@ Publikum, das ist mit großer Wahrscheinlichkeit automatisierter Verkehr, den
 Matomos Bot-Erkennung nicht erwischt. Wer mit diesen Zahlen arbeitet, sollte
 das wissen.
 
+**Der Verweis-Block bestätigt das.** In den letzten 30 Tagen kamen **208 von
+214 Besuchen als „direkte Zugriffe"** – bei genau **einem**
+Suchmaschinen-Besuch, drei Verweisen von anderen Webseiten und zwei aus
+sozialen Netzen. Menschen finden eine Seite über Suche oder Links; wer eine
+Adresse direkt aufruft, ohne je gesucht zu haben, ist in dieser Menge fast
+immer ein Programm. Die 463 Besuche des Jahres sind realistisch eher 200.
+
 ## Änderungsprotokoll
 
 ### 0.6.0 (22.10.2026)
@@ -373,10 +411,14 @@ das wissen.
 - **Eigenes Plugin gegen Namensübernahme gesichert** (`dialos-kommentare`
   2.0.1): `Update URI: false`. Mit automatischen Updates würde WordPress ein
   fremdes Plugin gleichen Ordnernamens ohne Rückfrage einspielen.
-- **Zugriffszahlen im Dashboard** (Theme 1.6.23): Woche, 90 Tage, Jahr,
-  gesamt und Herkunftsländer auf der Startseite des Backends. Dabei
-  gemessen, dass Matomos vorberechnete Berichte hinterherhinken – siehe
-  [Zugriffszahlen im Dashboard](#zugriffszahlen-im-dashboard).
+- **Fünf Dashboard-Blöcke** (Theme 1.6.23/1.6.24): Zugriffe, Herkunftsländer,
+  Kontaktformular, meistbesuchte Seiten und Verweisquellen – je ein eigener
+  Kasten auf der Startseite des Backends, einzeln abschaltbar. Dabei zwei
+  Dinge gemessen, die vorher nur Vermutung waren: dass Matomos vorberechnete
+  Berichte hinterherhinken, und dass **208 von 214 Besuchen „direkte
+  Zugriffe" bei einem einzigen Suchmaschinen-Besuch** sind – das Muster von
+  automatisiertem Verkehr, nicht von Publikum. Siehe
+  [Dashboard-Blöcke](#dashboard-blöcke).
 - **Die Datenschutzerklärung nennt das Kontaktformular jetzt** (Seiten 3 und
   376, „Stand" auf den 22.10.2026 gesetzt).
 
