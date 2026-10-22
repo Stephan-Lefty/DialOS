@@ -26,9 +26,8 @@ finished too, and then move down together. That way no reference breaks.
   **The technical side is already done** (theme 1.6.21, following Stephan's
   decisions of 2026-10-22): IP address and browser identification are never
   stored, messages move to the trash after five months and are gone after six.
-  What remains open is the **text on the website** – and whether Flamingo's
-  **address book** (name and email of every sender) is needed at all; it keeps
-  growing otherwise.
+  What remains open is the **text on the website** . Flamingo's **address book** is no longer
+  filled at all since 1.6.22.
 
 - [x] **Microphone in the new `nutzer` account - cause found** (2026-09-25).
   The first volume question failed because the answer came **too early** -

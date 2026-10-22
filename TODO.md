@@ -28,8 +28,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   vom 22.10.2026): IP-Adresse und Browserkennung werden gar nicht erst
   gespeichert, Nachrichten wandern nach fünf Monaten in den Papierkorb und sind
   damit nach sechs Monaten weg. Offen ist nur noch der **Text auf der Website**
-  – und die Frage, ob Flamingos **Adressbuch** (Name und E-Mail jedes
-  Absenders) gebraucht wird; es wächst sonst unbegrenzt weiter.
+  . Flamingos **Adressbuch** wird seit 1.6.22 gar nicht
+  erst gefüllt.
 
 - [x] **Mikrofon im neuen Konto `nutzer` - Ursache geklärt** (2026-09-25).
   Die erste Lautstärke-Frage scheiterte an zu **frühem Antworten** - bevor die

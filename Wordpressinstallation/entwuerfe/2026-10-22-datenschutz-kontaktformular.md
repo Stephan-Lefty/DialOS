@@ -12,8 +12,8 @@ dialos.org geändert:
 baute daraus eine E-Mail und vergaß sie. Nichts blieb auf dem Server liegen.
 
 **Seit Flamingo** wird **jede Einsendung in der Datenbank von dialos.org
-gespeichert**, auch die aussortierten. Flamingo legt zusätzlich ein Adressbuch
-aller Absender an.
+gespeichert**, auch die aussortierten. (Das Adressbuch, das Flamingo von Haus
+aus zusätzlich anlegt, ist seit Theme 1.6.22 abgeschaltet – siehe unten.)
 
 **Beide Datenschutzerklärungen kennen diesen Fall nicht.** Sie beschreiben
 unter „Kontaktaufnahme" / „Contacting Us" ausschließlich die Kontaktaufnahme
@@ -28,8 +28,10 @@ der bestehenden Erklärung, keine Rechtsberatung.
 
 > „IP-Adresse und Browserkennung brauchen wir nicht"
 > „6 Monate reicht!"
+> „Das Adressbuch brauchen wir auch nicht"
 
-**Beides ist in Theme 1.6.21 umgesetzt**, nicht nur im Text versprochen:
+**Alle drei sind in Theme 1.6.21/1.6.22 umgesetzt**, nicht nur im Text
+versprochen:
 
 - **IP-Adresse und Browserkennung werden gar nicht erst gespeichert.** Der
   Filter `dialos_flamingo_ohne_kennungen` entfernt `remote_ip` und
@@ -43,6 +45,10 @@ der bestehenden Erklärung, keine Rechtsberatung.
   zugesagten sechs Monate, mit Puffer statt knapp darüber. Der Umweg über den
   Papierkorb ist Absicht: Fällt je etwas falsch heraus, bleibt ein Monat, es
   zurückzuholen.
+- **Das Adressbuch wird gar nicht erst gefüllt** (Theme 1.6.22, Stephan:
+  „Das Adressbuch brauchen wir auch nicht."). Flamingo legt sonst neben jeder
+  Nachricht einen Kontakt an – Name und E-Mail aller Absender, unbegrenzt
+  wachsend. Der Filter `dialos_flamingo_kein_adressbuch` verhindert das.
 
 ## Korrektur zu einer früheren Aussage
 
@@ -98,11 +104,7 @@ Der bestehende Absatz zur E-Mail bleibt stehen. Darunter:
 
 ## Noch offen
 
-**Das Adressbuch.** Flamingo legt neben den Nachrichten auch Kontakte an
-(Name und E-Mail-Adresse jedes Absenders, Menüpunkt „Adressbuch"). Diese Liste
-räumt der Lauf oben **nicht** mit auf – sie wächst weiter. Zu entscheiden: ob
-sie gebraucht wird. Wenn nicht, lässt sie sich über den Filter
-`flamingo_add_contact` genauso abschalten wie die IP-Speicherung oben.
+**Nur noch der Text auf der Website.** Technisch ist alles umgesetzt.
 
 **Vor dem Veröffentlichen:** beide Sprachfassungen im selben Zug (Seiten 3 und
 376) und das „Stand:"-Datum oben anpassen.

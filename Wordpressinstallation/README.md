@@ -107,11 +107,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.21`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.22`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.21.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.22.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -167,6 +167,7 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.19 | 23.09.2026 | **Rücknahme aus 1.6.18:** Der `.spacer` ist kein Weißraum, sondern der Platzhalter der fest stehenden Navigationsleiste. Gekürzt saßen „DIALOS" und das Menü im Inhaltskasten |
 | 1.6.20 | 22.10.2026 | Spamschutz für die Kontaktformulare in vier Schichten, nachdem über 200 Spam-Nachrichten durchkamen – siehe [Spamschutz](#spamschutz) |
 | 1.6.21 | 22.10.2026 | Datensparsamkeit bei Flamingo: IP-Adresse und Browserkennung werden nicht gespeichert, Nachrichten nach fünf Monaten in den Papierkorb |
+| 1.6.22 | 22.10.2026 | Flamingos Adressbuch wird gar nicht erst gefüllt |
 
 ## Spamschutz
 
@@ -256,6 +257,7 @@ wurde nur durchgeleitet. Theme 1.6.21 hält das so sparsam wie möglich:
 | Nachrichten älter als fünf Monate | täglicher Lauf legt sie in den Papierkorb |
 | Papierkorb | WordPress leert ihn nach weiteren 30 Tagen → zusammen sechs Monate |
 | Spam älter als 30 Tage | räumt Flamingo selbst weg (`FLAMINGO_MOVE_TRASH_DAYS`) |
+| Adressbuch (Name + E-Mail jedes Absenders) | wird gar nicht erst angelegt |
 
 Die Übergabe an Flamingo macht **nicht Flamingo, sondern Contact Form 7** in
 `modules/flamingo.php`: Dort wird eine Liste von Special Mail Tags
@@ -270,10 +272,14 @@ Fällt je etwas falsch heraus, bleibt ein Monat, es zurückzuholen. Fünf Monate
 plus dieser Monat ergeben die zugesagten sechs – mit Puffer statt knapp
 darüber.
 
-**Noch offen:** Flamingo legt neben den Nachrichten ein **Adressbuch** aller
-Absender an (Name und E-Mail-Adresse). Das räumt der Lauf nicht mit auf. Wenn
-es nicht gebraucht wird, lässt es sich über `flamingo_add_contact` genauso
-abschalten.
+**Das Adressbuch bleibt leer** (seit 1.6.22, Stephans Entscheidung vom
+22.10.2026). Flamingo legt sonst neben jeder Nachricht einen Kontakt an – eine
+Liste aus Name und E-Mail aller Absender, die unbegrenzt weiterwächst und auch
+dann stehen bleibt, wenn die Nachricht längst weggeräumt ist. Contact Form 7
+bietet keinen Filter zum Überspringen, aber Flamingos
+`Flamingo_Contact::add()` steigt direkt hinter dem Filter
+`flamingo_add_contact` aus, wenn keine gültige Adresse übrig ist – ein im Code
+vorgesehener Weg, kein Trick.
 
 Die Datenschutzerklärung muss das alles nennen – Entwurf in beiden Sprachen
 liegt unter

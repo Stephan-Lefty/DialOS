@@ -1255,6 +1255,45 @@ function dialos_flamingo_ohne_kennungen( $args ) {
 }
 
 /**
+ * Flamingos Adressbuch gar nicht erst fuellen.
+ *
+ * Stephan am 22.10.2026: "Das Adressbuch brauchen wir auch nicht."
+ *
+ * Flamingo legt neben jeder Nachricht einen Kontakt an - eine Liste aus
+ * Name und E-Mail-Adresse aller, die je geschrieben haben. Die waechst
+ * unbegrenzt weiter und bleibt auch dann stehen, wenn die zugehoerige
+ * Nachricht laengst weggeraeumt ist. Fuer dialos.org hat sie keinen
+ * Zweck: Anfragen werden per Mail beantwortet, ein Verteiler ist das
+ * nicht und soll es nicht werden.
+ *
+ * Nachgesehen im Quelltext: Contact Form 7 ruft in modules/flamingo.php
+ * `Flamingo_Contact::add()` auf und bietet dafuer KEINEN eigenen Filter
+ * zum Ueberspringen. Der Hebel liegt eine Ebene tiefer, in Flamingos
+ * `class-contact.php`:
+ *
+ *     $args = apply_filters( 'flamingo_add_contact', $args );
+ *
+ *     if ( empty( $args['email'] ) or ! is_email( $args['email'] ) ) {
+ *         return;
+ *     }
+ *
+ * Direkt hinter dem Filter steht also ein Ausstieg. Eine geleerte
+ * Adresse laesst `add()` sauber zurueckkehren, ohne etwas anzulegen -
+ * das ist kein Trick, sondern der im Code vorgesehene Weg. Contact Form
+ * 7 prueft danach `empty( $flamingo_contact )` und kommt damit zurecht.
+ *
+ * Die Nachrichten selbst bleiben davon unberuehrt; nur das Adressbuch
+ * bleibt leer.
+ */
+add_filter( 'flamingo_add_contact', 'dialos_flamingo_kein_adressbuch' );
+
+function dialos_flamingo_kein_adressbuch( $args ) {
+	$args['email'] = '';
+
+	return $args;
+}
+
+/**
  * Gespeicherte Nachrichten nach fuenf Monaten in den Papierkorb legen.
  *
  * Stephan am 22.10.2026 zur Speicherdauer: "6 Monate reicht!" Damit das
