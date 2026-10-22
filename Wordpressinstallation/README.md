@@ -110,11 +110,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.24`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.25`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.24.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.25.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -173,6 +173,7 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.22 | 22.10.2026 | Flamingos Adressbuch wird gar nicht erst gefüllt |
 | 1.6.23 | 22.10.2026 | Zugriffszahlen im Dashboard (Woche, 90 Tage, Jahr, gesamt, Herkunftsländer) – siehe [Dashboard-Blöcke](#dashboard-blöcke) |
 | 1.6.24 | 22.10.2026 | Dashboard auf fünf einzelne Blöcke aufgeteilt, dazu Kontaktformular-Zähler, meistbesuchte Seiten und Verweisquellen |
+| 1.6.25 | 22.10.2026 | Absendername in Flamingo: `[your-name]` stand dort als Platzhalter, weil unser Formular Vor- und Nachname getrennt führt |
 
 ## Spamschutz
 
@@ -279,6 +280,21 @@ weitergereicht. Flamingo lässt davor den Filter `flamingo_add_inbound` laufen,
 und genau dort hängt `dialos_flamingo_ohne_kennungen` die beiden Felder aus.
 Die Flamingo-Oberfläche geht die vorhandenen Felder mit `foreach` durch, ein
 entferntes Feld fällt dort also sauber weg.
+
+**Am gespeicherten Eintrag belegt** (Stephan, 22.10.2026): In der
+Meta-Liste einer Nachricht folgt auf `serial_number` direkt `url` – `remote_ip`
+und `user_agent`, die laut Contact Form 7s Quelltext genau dazwischen stehen
+müssten, fehlen. Seine Rückmeldung: „keine IP Adressen aufgeführt".
+
+**Dabei gefunden und in 1.6.25 behoben:** Als Absender stand dort wörtlich
+`[your-name] <…>` – der Platzhalter statt des Namens. Contact Form 7 sucht für
+Flamingo ein Feld `your-name`; unser Kontaktformular führt Vor- und Nachname
+aber getrennt, und fehlt das Feld, bleibt der Platzhalter ohne Fehlermeldung
+stehen. Kein Schönheitsfehler: Die Nachrichten liegen ein halbes Jahr, und wer
+sie später durchsieht, sähe bei jeder Anfrage denselben Platzhalter. Der Filter
+`dialos_flamingo_absendername` setzt den Namen jetzt aus den beiden Feldern
+zusammen – an `wpcf7_flamingo_get_value`, weil Contact Form 7 aus diesem einen
+Wert sowohl `from_name` als auch `from` baut.
 
 **Der Aufräumlauf geht über den Papierkorb, nicht direkt in die Löschung.**
 Fällt je etwas falsch heraus, bleibt ein Monat, es zurückzuholen. Fünf Monate

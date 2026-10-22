@@ -1842,3 +1842,82 @@ function dialos_zahlen_auffrischen() {
 		delete_transient( 'dialos_db_' . $name );
 	}
 }
+
+/**
+ * Den Absendernamen fuer Flamingo aus Vor- und Nachname zusammensetzen.
+ *
+ * Gefunden am 22.10.2026 in einem gespeicherten Eintrag: Dort stand als
+ * Absender woertlich "[your-name] <test@example.com>" - der Platzhalter
+ * statt des Namens.
+ *
+ * Ursache, nachgesehen in Contact Form 7s modules/flamingo.php: Fuer
+ * Flamingo wird der Name ueber eine Vorlage ermittelt, die standardmaessig
+ * `[your-name]` lautet:
+ *
+ *     $template = sprintf( '[your-%s]', $field );
+ *     $value    = wpcf7_mail_replace_tags( $template );
+ *
+ * Unser Kontaktformular hat Vor- und Nachname aber GETRENNT
+ * (`your-firstname`, `your-lastname`), ein Feld `your-name` gibt es nicht.
+ * Fehlt das Feld, bleibt der Platzhalter unveraendert stehen - ohne
+ * Fehlermeldung.
+ *
+ * Das ist kein Schoenheitsfehler: Die Nachrichten bleiben ein halbes Jahr
+ * liegen. Wer sie spaeter durchsieht, saehe bei jeder Anfrage denselben
+ * Platzhalter und muesste sich den Namen aus den Einzelfeldern
+ * zusammensuchen.
+ *
+ * Der Eingriff passiert bewusst an `wpcf7_flamingo_get_value` und nicht
+ * an den fertigen Parametern: Contact Form 7 baut aus diesem einen Wert
+ * sowohl `from_name` als auch `from` ("Name <adresse>"). Eine Korrektur
+ * hier haelt beide zusammen; zwei nachtraeglich geflickte Felder koennten
+ * auseinanderlaufen.
+ *
+ * Die Bedingung auf den stehengebliebenen Platzhalter ist Absicht: Traegt
+ * jemand spaeter unter "Zusaetzliche Einstellungen" ein eigenes
+ * `flamingo_name` ein, hat das Vorrang und dieser Filter haelt sich raus.
+ */
+add_filter( 'wpcf7_flamingo_get_value', 'dialos_flamingo_absendername', 10, 2 );
+
+function dialos_flamingo_absendername( $wert, $feld ) {
+	if ( 'name' !== $feld ) {
+		return $wert;
+	}
+
+	// Nur eingreifen, wenn wirklich ein unaufgeloester Platzhalter
+	// dasteht - sonst ist der Wert schon richtig.
+	if ( ! is_string( $wert ) || false === strpos( $wert, '[your-' ) ) {
+		return $wert;
+	}
+
+	if ( ! class_exists( 'WPCF7_Submission' ) ) {
+		return $wert;
+	}
+
+	$einsendung = WPCF7_Submission::get_instance();
+
+	if ( ! $einsendung ) {
+		return $wert;
+	}
+
+	$daten = $einsendung->get_posted_data();
+
+	if ( ! is_array( $daten ) ) {
+		return $wert;
+	}
+
+	// Kontaktformular: Vor- und Nachname. Testteilnahme-Formular: ein
+	// einzelnes Namensfeld. Beide hier abdecken, damit der Filter nicht
+	// beim naechsten Formular wieder nachgebessert werden muss.
+	$teile = array();
+
+	foreach ( array( 'your-firstname', 'your-lastname', 'teilnehmer-name' ) as $name_feld ) {
+		if ( ! empty( $daten[ $name_feld ] ) && is_string( $daten[ $name_feld ] ) ) {
+			$teile[] = trim( $daten[ $name_feld ] );
+		}
+	}
+
+	$name = trim( implode( ' ', array_filter( $teile ) ) );
+
+	return '' === $name ? $wert : $name;
+}
