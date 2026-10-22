@@ -107,11 +107,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.20`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.21`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.20.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.21.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -166,6 +166,7 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.18 | 23.09.2026 | Startseiten gestrafft, damit sie ohne Scrollen in den Bildschirm passen |
 | 1.6.19 | 23.09.2026 | **Rücknahme aus 1.6.18:** Der `.spacer` ist kein Weißraum, sondern der Platzhalter der fest stehenden Navigationsleiste. Gekürzt saßen „DIALOS" und das Menü im Inhaltskasten |
 | 1.6.20 | 22.10.2026 | Spamschutz für die Kontaktformulare in vier Schichten, nachdem über 200 Spam-Nachrichten durchkamen – siehe [Spamschutz](#spamschutz) |
+| 1.6.21 | 22.10.2026 | Datensparsamkeit bei Flamingo: IP-Adresse und Browserkennung werden nicht gespeichert, Nachrichten nach fünf Monaten in den Papierkorb |
 
 ## Spamschutz
 
@@ -239,15 +240,45 @@ wegen WP Super Cache ohnehin nicht verlässlich.
 
 ### Wo die aussortierten Nachrichten landen
 
-**Nirgends.** Contact Form 7 hat keinen Spam-Ordner: Was als Spam gilt, wird
-nicht versendet und nicht gespeichert, der Absender bekommt die allgemeine
-Fehlermeldung. Nur der Grund wird protokolliert (`add_spam_log`, Agent
-`dialos-spamschutz`).
+**Seit dem 22.10.2026 in Flamingo.** Contact Form 7 allein hat keinen
+Spam-Ordner – was als Spam gilt, wird nicht versendet und nicht gespeichert,
+nur der Grund wird protokolliert (`add_spam_log`, Agent `dialos-spamschutz`).
+Damit ein Fehlalarm überhaupt auffallen kann, ist **Flamingo** installiert
+(vom selben Autor wie Contact Form 7). Es legt jede Einsendung in der
+Datenbank ab und markiert die aussortierten als Spam.
 
-Sollen die Nachrichten nachlesbar sein – etwa um einen Fehlalarm zu prüfen –,
-bräuchte es das Plugin **Flamingo** (vom selben Autor wie Contact Form 7). Es
-speichert jede Einsendung in der Datenbank und markiert die aussortierten als
-Spam. Nicht installiert, Stand 22.10.2026.
+**Das macht dialos.org zu einer Stelle, die Nachrichten speichert** – vorher
+wurde nur durchgeleitet. Theme 1.6.21 hält das so sparsam wie möglich:
+
+| Was | Wie |
+|---|---|
+| IP-Adresse und Browserkennung | werden gar nicht erst gespeichert |
+| Nachrichten älter als fünf Monate | täglicher Lauf legt sie in den Papierkorb |
+| Papierkorb | WordPress leert ihn nach weiteren 30 Tagen → zusammen sechs Monate |
+| Spam älter als 30 Tage | räumt Flamingo selbst weg (`FLAMINGO_MOVE_TRASH_DAYS`) |
+
+Die Übergabe an Flamingo macht **nicht Flamingo, sondern Contact Form 7** in
+`modules/flamingo.php`: Dort wird eine Liste von Special Mail Tags
+eingesammelt – darunter `remote_ip` und `user_agent` – und als `meta`
+weitergereicht. Flamingo lässt davor den Filter `flamingo_add_inbound` laufen,
+und genau dort hängt `dialos_flamingo_ohne_kennungen` die beiden Felder aus.
+Die Flamingo-Oberfläche geht die vorhandenen Felder mit `foreach` durch, ein
+entferntes Feld fällt dort also sauber weg.
+
+**Der Aufräumlauf geht über den Papierkorb, nicht direkt in die Löschung.**
+Fällt je etwas falsch heraus, bleibt ein Monat, es zurückzuholen. Fünf Monate
+plus dieser Monat ergeben die zugesagten sechs – mit Puffer statt knapp
+darüber.
+
+**Noch offen:** Flamingo legt neben den Nachrichten ein **Adressbuch** aller
+Absender an (Name und E-Mail-Adresse). Das räumt der Lauf nicht mit auf. Wenn
+es nicht gebraucht wird, lässt es sich über `flamingo_add_contact` genauso
+abschalten.
+
+Die Datenschutzerklärung muss das alles nennen – Entwurf in beiden Sprachen
+liegt unter
+[entwuerfe/2026-10-22-datenschutz-kontaktformular.md](entwuerfe/2026-10-22-datenschutz-kontaktformular.md),
+noch nicht veröffentlicht.
 
 ### Prüfen, ohne eine echte Mail auszulösen
 
@@ -271,6 +302,20 @@ docker run --rm -v "$PWD/wp-theme/dialos:/x:ro" php:8.2-cli php -l /x/functions.
   Kontaktformular fehlte das `[honeypot …]`-Tag. Ein aktives Plugin ist kein
   Beweis für einen wirksamen Schutz – dieselbe Fehlerklasse wie
   „Installationsstand prüfen, nicht annehmen" im Hauptprojekt.
+- **Flamingo installiert**, damit ein Fehlalarm überhaupt auffallen kann.
+  Damit speichert dialos.org erstmals Nachrichten, statt sie nur
+  durchzuleiten – Theme 1.6.21 hält das sparsam: IP-Adresse und
+  Browserkennung werden gar nicht erst gespeichert, Nachrichten wandern nach
+  fünf Monaten in den Papierkorb und sind damit nach sechs Monaten weg
+  (Stephans Vorgaben vom 22.10.2026).
+- **Die Datenschutzerklärung kennt das Kontaktformular nicht.** Beide
+  Fassungen beschreiben nur die Kontaktaufnahme per E-Mail. Entwurf in beiden
+  Sprachen liegt unter
+  [entwuerfe/2026-10-22-datenschutz-kontaktformular.md](entwuerfe/2026-10-22-datenschutz-kontaktformular.md),
+  bewusst noch nicht veröffentlicht – siehe `TODO.md` im Hauptverzeichnis.
+- **Eigenes Plugin gegen Namensübernahme gesichert** (`dialos-kommentare`
+  2.0.1): `Update URI: false`. Mit automatischen Updates würde WordPress ein
+  fremdes Plugin gleichen Ordnernamens ohne Rückfrage einspielen.
 
 ### 0.5.0 (23.09.2026)
 - **Das Theme steht endlich in diesem Verzeichnis.** Es lag seit dem

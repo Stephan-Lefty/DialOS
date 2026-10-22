@@ -6,14 +6,14 @@
 
 Am 22.10.2026 wurde **Flamingo** installiert, damit nachlesbar ist, was der
 neue Spamschutz aussortiert. Damit hat sich die Datenverarbeitung auf
-dialos.org geändert, und zwar grundlegend:
+dialos.org geändert:
 
 **Vorher** leitete das Kontaktformular die Eingaben nur durch – Contact Form 7
 baute daraus eine E-Mail und vergaß sie. Nichts blieb auf dem Server liegen.
 
-**Seit Flamingo** wird **jede Einsendung dauerhaft in der Datenbank von
-dialos.org gespeichert** – auch die aussortierten. Flamingo löscht nichts von
-selbst, und es legt zusätzlich ein Adressbuch aller Absender an.
+**Seit Flamingo** wird **jede Einsendung in der Datenbank von dialos.org
+gespeichert**, auch die aussortierten. Flamingo legt zusätzlich ein Adressbuch
+aller Absender an.
 
 **Beide Datenschutzerklärungen kennen diesen Fall nicht.** Sie beschreiben
 unter „Kontaktaufnahme" / „Contacting Us" ausschließlich die Kontaktaufnahme
@@ -21,23 +21,36 @@ unter „Kontaktaufnahme" / „Contacting Us" ausschließlich die Kontaktaufnahm
 Verarbeitung an keiner Stelle vor – der einzige Satz dazu steht unter
 „Empfänger und Auftragsverarbeiter" und betrifft nur den Versandweg.
 
-Solange nichts gespeichert wurde, war das eine kleine Lücke. Jetzt ist es
-eine Verarbeitung, über die nicht informiert wird.
-
 **Ich bin kein Jurist.** Der Text unten ist ein Formulierungsvorschlag im Ton
 der bestehenden Erklärung, keine Rechtsberatung.
 
-## Vorher zu klären
+## Stephans Entscheidungen vom 22.10.2026
 
-1. **Welche Felder Flamingo tatsächlich speichert.** Dass die Formularfelder
-   drin sind, ist sein Zweck. Ob **IP-Adresse und Browserkennung** dabeistehen,
-   steht in einem gespeicherten Eintrag selbst – bitte einmal nachsehen und
-   den Entwurf danach anpassen oder die Klammer streichen.
-2. **Wie lange die Nachrichten bleiben sollen.** Unten steht „zwölf Monate" als
-   Vorschlag. Flamingo räumt nicht selbst auf; was dort steht, muss von Hand
-   gelöscht werden, sonst stimmt die Angabe nach einem Jahr nicht mehr.
-3. Danach **beide Sprachfassungen im selben Zug** (Seiten 3 und 376) und das
-   „Stand:"-Datum oben anpassen.
+> „IP-Adresse und Browserkennung brauchen wir nicht"
+> „6 Monate reicht!"
+
+**Beides ist in Theme 1.6.21 umgesetzt**, nicht nur im Text versprochen:
+
+- **IP-Adresse und Browserkennung werden gar nicht erst gespeichert.** Der
+  Filter `dialos_flamingo_ohne_kennungen` entfernt `remote_ip` und
+  `user_agent`, bevor Flamingo schreibt. Nachgesehen im Quelltext: Die
+  Übergabe macht nicht Flamingo, sondern Contact Form 7 in
+  `modules/flamingo.php`; Flamingo lässt davor den Filter
+  `flamingo_add_inbound` laufen.
+- **Nachrichten werden nach fünf Monaten in den Papierkorb gelegt**, täglicher
+  Lauf über `dialos_flamingo_aufraeumen`. WordPress entfernt
+  Papierkorb-Einträge nach weiteren 30 Tagen – zusammen ergibt das die
+  zugesagten sechs Monate, mit Puffer statt knapp darüber. Der Umweg über den
+  Papierkorb ist Absicht: Fällt je etwas falsch heraus, bleibt ein Monat, es
+  zurückzuholen.
+
+## Korrektur zu einer früheren Aussage
+
+Ich hatte gesagt, Flamingo räume gar nicht auf. **Das stimmt nur zur Hälfte.**
+Nachgesehen in `includes/cron.php`: Flamingo verschiebt **Spam** nach
+`FLAMINGO_MOVE_TRASH_DAYS` (Standard: 30 Tage) in den Papierkorb. Reguläre
+Nachrichten rührt es nicht an – die blieben tatsächlich für immer liegen, und
+genau dafür ist der Lauf oben da.
 
 ---
 
@@ -50,10 +63,10 @@ Der bestehende Absatz zur E-Mail bleibt stehen. Darunter:
 > Nachricht sowie die freiwilligen Angaben Anrede, Firma und Abteilung)
 > ausschließlich zur Bearbeitung Ihrer Anfrage (Art. 6 Abs. 1 lit. b bzw. f
 > DSGVO). Die Nachricht wird uns per E-Mail zugestellt und zusätzlich auf
-> unserem Server gespeichert, damit wir Anfragen nachvollziehen können[ –
-> zusammen mit Ihrer IP-Adresse und der Kennung Ihres Browsers]. Gespeicherte
-> Nachrichten löschen wir spätestens zwölf Monate nach Abschluss der
-> Bearbeitung, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.
+> unserem Server gespeichert, damit wir Anfragen nachvollziehen können. Ihre
+> IP-Adresse und die Kennung Ihres Browsers werden dabei nicht gespeichert.
+> Gespeicherte Nachrichten löschen wir spätestens sechs Monate nach Eingang,
+> sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.
 >
 > Zum Schutz vor automatisiert versandter Werbung prüfen wir jede Einsendung,
 > bevor sie uns zugestellt wird. Dabei wird unter anderem gezählt, wie viele
@@ -69,10 +82,10 @@ Der bestehende Absatz zur E-Mail bleibt stehen. Darunter:
 > (first and last name, email address, subject and message, as well as the
 > optional fields salutation, company and department) exclusively to handle
 > your request (Art. 6(1)(b) or (f) GDPR). The message is sent to us by email
-> and additionally stored on our server so that we can trace enquiries[,
-> together with your IP address and browser identification]. We delete stored
-> messages no later than twelve months after the enquiry has been dealt with,
-> unless statutory retention obligations apply.
+> and additionally stored on our server so that we can trace enquiries. Your
+> IP address and browser identification are not stored. We delete stored
+> messages no later than six months after receipt, unless statutory retention
+> obligations apply.
 >
 > To protect against automated advertising, we check every submission before
 > it reaches us. Among other things, we count how many messages arrive from
@@ -83,13 +96,16 @@ Der bestehende Absatz zur E-Mail bleibt stehen. Darunter:
 
 ---
 
-## Hinweis zum Spamschutz selbst
+## Noch offen
 
-Der zweite Absatz beschreibt die Mengenbremse aus Theme 1.6.20. Sie speichert
-einen Hash der IP-Adresse über `wp_hash()` mit einer Stunde Lebensdauer – aus
-dem gespeicherten Wert lässt sich keine Adresse zurückrechnen. Die übrigen
-drei Schichten (Honigtopf, Verweise in Kurzfeldern, Schriftzeichen) verarbeiten
-nur das, was ohnehin abgeschickt wurde, und speichern nichts.
+**Das Adressbuch.** Flamingo legt neben den Nachrichten auch Kontakte an
+(Name und E-Mail-Adresse jedes Absenders, Menüpunkt „Adressbuch"). Diese Liste
+räumt der Lauf oben **nicht** mit auf – sie wächst weiter. Zu entscheiden: ob
+sie gebraucht wird. Wenn nicht, lässt sie sich über den Filter
+`flamingo_add_contact` genauso abschalten wie die IP-Speicherung oben.
 
-Einzelheiten im Abschnitt „Spamschutz" der
+**Vor dem Veröffentlichen:** beide Sprachfassungen im selben Zug (Seiten 3 und
+376) und das „Stand:"-Datum oben anpassen.
+
+Einzelheiten zum Spamschutz im Abschnitt „Spamschutz" der
 [README](../README.md#spamschutz).

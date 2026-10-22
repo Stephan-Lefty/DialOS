@@ -24,11 +24,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   das Formular kommt als Verarbeitung nicht vor. Fertiger Textvorschlag in
   beiden Sprachen liegt in
   [`Wordpressinstallation/entwuerfe/2026-10-22-datenschutz-kontaktformular.md`](Wordpressinstallation/entwuerfe/2026-10-22-datenschutz-kontaktformular.md).
-  **Vorher zu entscheiden:** welche Felder Flamingo wirklich ablegt (steht in
-  einem gespeicherten Eintrag – IP und Browserkennung sind im Entwurf noch
-  eingeklammert), und wie lange die Nachrichten bleiben sollen. Flamingo räumt
-  **nicht von selbst auf** – welche Frist dort steht, muss von Hand eingehalten
-  werden, sonst stimmt die Angabe nach einem Jahr nicht mehr.
+  **Technisch ist alles schon umgesetzt** (Theme 1.6.21, nach Stephans Vorgaben
+  vom 22.10.2026): IP-Adresse und Browserkennung werden gar nicht erst
+  gespeichert, Nachrichten wandern nach fünf Monaten in den Papierkorb und sind
+  damit nach sechs Monaten weg. Offen ist nur noch der **Text auf der Website**
+  – und die Frage, ob Flamingos **Adressbuch** (Name und E-Mail jedes
+  Absenders) gebraucht wird; es wächst sonst unbegrenzt weiter.
 
 - [x] **Mikrofon im neuen Konto `nutzer` - Ursache geklärt** (2026-09-25).
   Die erste Lautstärke-Frage scheiterte an zu **frühem Antworten** - bevor die

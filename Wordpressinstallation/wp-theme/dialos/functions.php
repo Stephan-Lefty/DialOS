@@ -1209,3 +1209,103 @@ function dialos_spam_vermerken( $submission, $grund ) {
 		)
 	);
 }
+
+/**
+ * ==================================================================
+ * Datensparsamkeit bei Flamingo (seit 2026-10-22)
+ * ==================================================================
+ *
+ * Flamingo wurde am 22.10.2026 installiert, damit nachlesbar ist, was der
+ * Spamschutz aussortiert. Damit speichert dialos.org seitdem jede
+ * Einsendung dauerhaft - vorher wurde nur durchgeleitet.
+ *
+ * Nachgesehen im Quelltext (nicht aus dem Gedaechtnis): Die Uebergabe an
+ * Flamingo macht nicht Flamingo selbst, sondern Contact Form 7 in
+ * `modules/flamingo.php`. Dort wird eine Liste von "Special Mail Tags"
+ * eingesammelt und als `meta` weitergereicht - darunter `remote_ip` und
+ * `user_agent`. Flamingo laesst vor dem Speichern den Filter
+ * `flamingo_add_inbound` darueber laufen.
+ *
+ * Stephan am 22.10.2026: "IP-Adresse und Browserkennung brauchen wir
+ * nicht." Beides wird deshalb hier entfernt, bevor irgendetwas in die
+ * Datenbank geschrieben wird - nicht nachtraeglich geloescht, sondern
+ * gar nicht erst gespeichert.
+ *
+ * Die uebrigen Angaben (Betreff, Zeitpunkt, Seite, von der abgeschickt
+ * wurde) bleiben: Sie sind nicht personenbezogen und helfen beim
+ * Nachvollziehen einer Anfrage.
+ *
+ * Die Flamingo-Oberflaeche geht die vorhandenen Felder mit foreach durch
+ * (admin/includes/meta-boxes.php) - ein entferntes Feld faellt dort
+ * einfach weg und erzeugt keine Fehlermeldung. Deshalb unset und nicht
+ * "auf leer setzen".
+ */
+add_filter( 'flamingo_add_inbound', 'dialos_flamingo_ohne_kennungen' );
+
+function dialos_flamingo_ohne_kennungen( $args ) {
+	if ( empty( $args['meta'] ) || ! is_array( $args['meta'] ) ) {
+		return $args;
+	}
+
+	foreach ( array( 'remote_ip', 'user_agent' ) as $feld ) {
+		unset( $args['meta'][ $feld ] );
+	}
+
+	return $args;
+}
+
+/**
+ * Gespeicherte Nachrichten nach fuenf Monaten in den Papierkorb legen.
+ *
+ * Stephan am 22.10.2026 zur Speicherdauer: "6 Monate reicht!" Damit das
+ * keine Behauptung auf einer Webseite bleibt, raeumt es hier von selbst
+ * auf - eine Frist, an die sich jemand erinnern muesste, ist in sechs
+ * Monaten vergessen, und dann steht in der Datenschutzerklaerung etwas
+ * Falsches.
+ *
+ * Warum FUENF Monate und nicht sechs: Dieser Lauf loescht nicht
+ * endgueltig, sondern legt in den Papierkorb - dasselbe, was Flamingo
+ * mit Spam nach 30 Tagen tut (FLAMINGO_MOVE_TRASH_DAYS). WordPress
+ * entfernt Papierkorb-Eintraege nach weiteren 30 Tagen von selbst
+ * (EMPTY_TRASH_DAYS). Fuenf Monate plus dieser Monat ergeben die
+ * zugesagten sechs - mit Puffer statt knapp darueber.
+ *
+ * Der Umweg ueber den Papierkorb ist Absicht: Faellt hier je etwas
+ * falsch heraus, bleibt ein Monat, es zurueckzuholen.
+ *
+ * Spam ruehrt dieser Lauf nicht an - darum kuemmert sich Flamingo selbst.
+ */
+add_action( 'dialos_flamingo_aufraeumen', 'dialos_flamingo_altes_wegraeumen' );
+
+function dialos_flamingo_altes_wegraeumen() {
+	if ( ! post_type_exists( 'flamingo_inbound' ) ) {
+		return;
+	}
+
+	$alte = get_posts(
+		array(
+			'post_type'      => 'flamingo_inbound',
+			'post_status'    => 'publish',
+			'posts_per_page' => 50,
+			'date_query'     => array(
+				array( 'before' => '5 months ago' ),
+			),
+			'fields'         => 'ids',
+		)
+	);
+
+	foreach ( $alte as $id ) {
+		wp_trash_post( $id );
+	}
+}
+
+/**
+ * Den taeglichen Lauf anmelden, falls er noch nicht eingetragen ist.
+ */
+add_action( 'init', 'dialos_flamingo_aufraeumen_anmelden' );
+
+function dialos_flamingo_aufraeumen_anmelden() {
+	if ( ! wp_next_scheduled( 'dialos_flamingo_aufraeumen' ) ) {
+		wp_schedule_event( time(), 'daily', 'dialos_flamingo_aufraeumen' );
+	}
+}
