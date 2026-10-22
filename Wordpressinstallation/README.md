@@ -44,7 +44,8 @@ Servers), sondern die Analyse-, Konfigurations- und Skriptablage dazu.
   ZIP-Datei auf den Server** – die REST-API kann keine Theme-Dateien
   schreiben, einen zweiten Weg gibt es nicht. Ablauf und Fallstricke stehen
   unten unter [Theme pflegen](#theme-pflegen), die Fassungen unter
-  [Theme-Fassungen](#theme-fassungen).
+  [Theme-Fassungen](#theme-fassungen). Seit 1.6.20 steckt dort auch der
+  [Spamschutz](#spamschutz) der Kontaktformulare.
 - [wp-plugin/dialos-kommentare/](wp-plugin/dialos-kommentare/) – eigenes
   Plugin für die Kommentarfunktion
 - Skripte zum Anlegen einzelner Seiten und Beiträge:
@@ -106,11 +107,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.19`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.20`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.19.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.20.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -164,8 +165,112 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.17 | 23.09.2026 | Tester-Hinweis als runder Aufkleber links neben dem Inhaltskasten, fest stehend ab 1640 px Fensterbreite |
 | 1.6.18 | 23.09.2026 | Startseiten gestrafft, damit sie ohne Scrollen in den Bildschirm passen |
 | 1.6.19 | 23.09.2026 | **Rücknahme aus 1.6.18:** Der `.spacer` ist kein Weißraum, sondern der Platzhalter der fest stehenden Navigationsleiste. Gekürzt saßen „DIALOS" und das Menü im Inhaltskasten |
+| 1.6.20 | 22.10.2026 | Spamschutz für die Kontaktformulare in vier Schichten, nachdem über 200 Spam-Nachrichten durchkamen – siehe [Spamschutz](#spamschutz) |
+
+## Spamschutz
+
+**In der Nacht zum 22.10.2026 kamen über 200 Spam-Nachrichten über das
+Kontaktformular herein** – russischsprachige Werbung mit einem Link auf eine
+`.buzz`-Domain.
+
+Die Ursache war keine Sicherheitslücke, sondern eine Lücke in der eigenen
+Einrichtung: Das Plugin **contact-form-7-honeypot ist aktiv und lädt auf jeder
+Seite seine Dateien – aber ein Honeypot wirkt nur dort, wo im Formular auch ein
+`[honeypot …]`-Tag steht.** Beim Testteilnahme-Formular (ID 205) steht es seit
+jeher drin, beim Kontaktformular (ID 49) wurde es vergessen. Das Plugin hatte
+dort nichts zu bewachen, und nichts hat je darauf hingewiesen.
+
+**Deshalb liegt der Schutz seit 1.6.20 in `functions.php` und nicht im
+Formular.** Ein Tag im Formular hält genau so lange, bis jemand das Formular im
+Editor umbaut – und fällt dann wieder lautlos aus. Im Theme gilt er für alle
+Formulare, liegt im Git und fällt beim Dateivergleich auf, wenn ihn jemand
+entfernt.
+
+### Die vier Schichten
+
+| # | Regel | Greift bei |
+|---|---|---|
+| 1 | Höchstens fünf Absendungen je Stunde und Quelle | Massenangriff, auch wenn er alle Inhaltsregeln umschifft |
+| 2 | Verstecktes Feld (Honigtopf) in jedem Formular | Bots, die stumpf jedes Eingabefeld füllen |
+| 3 | Verweise in Vorname, Nachname, Anrede, Firma, Abteilung, Betreff | Werbung, die den Link im Betreff unterbringt |
+| 4 | Betreff oder Nachricht ohne einen einzigen lateinischen Buchstaben | Fremdsprachige Massenwerbung |
+
+**Zu Schicht 1:** Gespeichert wird nicht die IP-Adresse, sondern nur ihr Hash
+über `wp_hash()`; die Marke verfällt nach einer Stunde von selbst. Fünf ist
+großzügig bemessen, weil mehrere Personen hinter einem gemeinsamen Anschluss
+dieselbe Adresse haben – in einer Einrichtung für blinde Menschen ist das der
+Normalfall.
+
+**Zu Schicht 2:** `aria-hidden` am Umschlag und `tabindex="-1"` am Feld, damit
+Screenreader es weder vorlesen noch anspringen. Bewusst **kein**
+`display: none` – ein Teil der Bots prüft genau darauf und überspringt solche
+Felder; off-screen geschobene füllen sie.
+
+**Zu Schicht 4** – das ist Stephans Regel vom 22.10.2026, und sie ist bewusst
+so herum formuliert: nicht „enthält fremde Zeichen" (das wäre eine Liste von
+Schriften, die nie vollständig wird und bei jedem Zitat falsch anschlägt),
+sondern „enthält **keinen** lateinischen Buchstaben".
+
+| Eingabe | Ergebnis |
+|---|---|
+| `Новый способ получать результат` | Spam |
+| `Frage zu DialOS` | kommt durch |
+| `Frage zu DialOS (Привет, Сергей)` | kommt durch |
+| `Сергей Иванов – Frage` | kommt durch |
+| `2026`, `???` | kommt durch (keine Buchstaben, nichts zu beurteilen) |
+
+Damit deckt eine einzige Prüfung Kyrillisch, Griechisch, Arabisch, Hebräisch,
+Chinesisch und jede andere Schrift ab, ohne sie je zu nennen – und ein
+deutscher Text fällt auch dann nicht durch, wenn fremde Schrift darin vorkommt.
+**Der Preis, und er ist bewusst bezahlt:** Wer dialos.org auf Russisch oder
+Griechisch anschreiben will, kommt nicht durch.
+
+### Was es bewusst nicht gibt
+
+**Kein CAPTCHA**, in keiner Form – kein Bilderrätsel, keine Rechenaufgabe, kein
+„ich bin kein Roboter". dialos.org wendet sich an blinde und motorisch
+eingeschränkte Menschen; ein CAPTCHA wäre genau die Barriere, gegen die dieses
+Projekt antritt.
+
+**Keine Zeitfenster-Prüfung** („zu schnell abgeschickt"). Wer per
+Sprachsteuerung oder Screenreader ausfüllt, braucht ein Vielfaches der Zeit
+eines Sehenden – eine Untergrenze wäre eine Barriere. Eine Obergrenze wäre
+wegen WP Super Cache ohnehin nicht verlässlich.
+
+### Wo die aussortierten Nachrichten landen
+
+**Nirgends.** Contact Form 7 hat keinen Spam-Ordner: Was als Spam gilt, wird
+nicht versendet und nicht gespeichert, der Absender bekommt die allgemeine
+Fehlermeldung. Nur der Grund wird protokolliert (`add_spam_log`, Agent
+`dialos-spamschutz`).
+
+Sollen die Nachrichten nachlesbar sein – etwa um einen Fehlalarm zu prüfen –,
+bräuchte es das Plugin **Flamingo** (vom selben Autor wie Contact Form 7). Es
+speichert jede Einsendung in der Datenbank und markiert die aussortierten als
+Spam. Nicht installiert, Stand 22.10.2026.
+
+### Prüfen, ohne eine echte Mail auszulösen
+
+Die Schriftzeichen-Regel ist vor dem Einbau gegen 14 Fälle geprüft worden
+(echter Spam, deutscher Text mit kyrillischem Einschub, kyrillischer Name mit
+lateinischem Rest, Umlaute, Emoji, reine Ziffern, leeres Feld) – 0 Fehler. Die
+PHP-Syntax wie immer ohne lokales PHP:
+
+```bash
+docker run --rm -v "$PWD/wp-theme/dialos:/x:ro" php:8.2-cli php -l /x/functions.php
+```
 
 ## Änderungsprotokoll
+
+### 0.6.0 (22.10.2026)
+- **Spamschutz für die Kontaktformulare** (Theme 1.6.20), nachdem in der Nacht
+  über 200 Spam-Nachrichten durchkamen. Vier Schichten, keine davon verlangt
+  etwas vom Besucher – Einzelheiten und Begründungen im Abschnitt
+  [Spamschutz](#spamschutz).
+- **Gefunden dabei:** Das Honeypot-Plugin war seit jeher aktiv, aber im
+  Kontaktformular fehlte das `[honeypot …]`-Tag. Ein aktives Plugin ist kein
+  Beweis für einen wirksamen Schutz – dieselbe Fehlerklasse wie
+  „Installationsstand prüfen, nicht annehmen" im Hauptprojekt.
 
 ### 0.5.0 (23.09.2026)
 - **Das Theme steht endlich in diesem Verzeichnis.** Es lag seit dem
