@@ -310,6 +310,26 @@ bietet keinen Filter zum Überspringen, aber Flamingos
 `flamingo_add_contact` aus, wenn keine gültige Adresse übrig ist – ein im Code
 vorgesehener Weg, kein Trick.
 
+### Wo die Nachrichten liegen
+
+**Flamingo trennt in drei Reiter, und der Posteingang zeigt den Spam nicht.**
+Das hat am 22.10.2026 für Verwirrung gesorgt: Ein Testeintrag war „nicht
+auffindbar", lag aber einfach im Spam-Reiter. Wer einem Fehlalarm nachgeht,
+muss dort nachsehen – nur die aussortierten Nachrichten liegen da.
+
+```
+https://dialos.org/wp-admin/admin.php?page=flamingo_inbound
+https://dialos.org/wp-admin/admin.php?page=flamingo_inbound&post_status=spam
+https://dialos.org/wp-admin/admin.php?page=flamingo_inbound&post_status=trash
+```
+
+Der Papierkorb-Reiter erscheint nur, wenn etwas darin liegt. Gelöscht wird
+zweistufig: erst in den Papierkorb, dort dann endgültig – zurückholbar bleibt
+es 30 Tage.
+
+**Nicht zu verwechseln:** `page=flamingo` (ohne `_inbound`) ist das Adressbuch,
+und das bleibt seit 1.6.22 absichtlich leer.
+
 Die Datenschutzerklärung muss das alles nennen – Entwurf in beiden Sprachen
 liegt unter
 [entwuerfe/2026-10-22-datenschutz-kontaktformular.md](entwuerfe/2026-10-22-datenschutz-kontaktformular.md),
