@@ -229,6 +229,14 @@ sondern „enthält **keinen** lateinischen Buchstaben".
 Damit deckt eine einzige Prüfung Kyrillisch, Griechisch, Arabisch, Hebräisch,
 Chinesisch und jede andere Schrift ab, ohne sie je zu nennen – und ein
 deutscher Text fällt auch dann nicht durch, wenn fremde Schrift darin vorkommt.
+
+**Am echten Formular belegt, und zwar versehentlich:** Für einen Testeintrag
+in Flamingo wurde am 22.10.2026 eine Nachricht mit dem Betreff „Проверка
+22.10.2026 — Testeintrag für Flamingo" abgeschickt – in der Erwartung, sie
+werde aussortiert. Sie kam durch, völlig zu Recht: „Testeintrag für Flamingo"
+ist lateinisch. Derselbe Versuch mit rein kyrillischem Betreff wurde sofort
+als Spam eingestuft. Der Fehler lag im Test, nicht im Filter – und nebenbei
+ist damit gezeigt, dass die Regel nicht übereifrig ist.
 **Der Preis, und er ist bewusst bezahlt:** Wer dialos.org auf Russisch oder
 Griechisch anschreiben will, kommt nicht durch.
 
