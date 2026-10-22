@@ -985,3 +985,227 @@ function dialos_child_neueste_beitraege() {
 	</script>
 	<?php
 }
+
+/**
+ * ==================================================================
+ * Spamschutz fuer die Kontaktformulare (seit 2026-10-22)
+ * ==================================================================
+ *
+ * Anlass: In der Nacht zum 2026-10-22 kamen ueber 200 Spam-Nachrichten
+ * ueber das Kontaktformular (ID 49) herein - russischsprachige Werbung
+ * mit einem Link auf eine .buzz-Domain.
+ *
+ * Warum das passieren konnte: Das Plugin "contact-form-7-honeypot" ist
+ * zwar aktiv und laedt seine Dateien auf jeder Seite, aber ein Honeypot
+ * wirkt nur dort, wo auch ein [honeypot ...]-Tag im Formular steht. Beim
+ * Testteilnahme-Formular (ID 205) steht es seit jeher drin - beim
+ * Kontaktformular wurde es vergessen. Das Plugin hatte dort also nichts
+ * zu bewachen, und der Bot lief ungebremst durch.
+ *
+ * Warum der Schutz hier im Theme steht und nicht nur im Formular:
+ * Ein Tag im Formular haelt genau so lange, bis jemand das Formular im
+ * Editor umbaut - und dann faellt der Schutz lautlos aus, ohne dass
+ * irgendetwas eine Fehlermeldung gibt. Genau so ist er entstanden. Im
+ * Theme gilt er fuer ALLE Formulare, liegt im Git und faellt beim
+ * naechsten Vergleich auf, wenn ihn jemand entfernt.
+ *
+ * WICHTIG, und der Grund fuer jede einzelne Entscheidung hier:
+ * dialos.org wendet sich an blinde und motorisch eingeschraenkte
+ * Menschen. Ein CAPTCHA - ob Bilderraetsel, Rechenaufgabe oder
+ * "ich bin kein Roboter" - kommt deshalb NICHT in Frage, auch nicht als
+ * Notloesung. Keine der Regeln unten verlangt vom Besucher irgendetwas;
+ * sie pruefen ausschliesslich das, was ohnehin abgeschickt wird.
+ *
+ * Aus demselben Grund gibt es hier KEINE Zeitfenster-Pruefung ("das
+ * Formular wurde zu schnell abgeschickt"). Wer per Sprachsteuerung oder
+ * Screenreader ausfuellt, braucht ein Vielfaches der Zeit eines
+ * Sehenden - eine Untergrenze waere eine Barriere, und eine Obergrenze
+ * waere wegen WP Super Cache ohnehin nicht verlaesslich.
+ */
+
+/**
+ * Ein verstecktes Feld in jedes Contact-Form-7-Formular einhaengen.
+ *
+ * Fuer Screenreader unsichtbar: aria-hidden am Umschlag, tabindex="-1"
+ * am Feld - es wird weder vorgelesen noch per Tabulator erreicht. Die
+ * Positionierung laeuft bewusst ueber inline-CSS statt ueber eine
+ * Klasse in style.css: Das Feld muss auch dann versteckt sein, wenn das
+ * Stylesheet nicht geladen wird. Und falls doch jemand ohne CSS
+ * unterwegs ist, sagt ihm das Label, was zu tun ist.
+ *
+ * Kein display:none, weil ein Teil der Bots genau darauf prueft und
+ * solche Felder ueberspringt. Off-screen geschobene Felder fuellen sie.
+ */
+add_filter( 'wpcf7_form_elements', 'dialos_honigtopf_anhaengen' );
+
+function dialos_honigtopf_anhaengen( $elemente ) {
+	$feld = '<div class="dialos-honigtopf" aria-hidden="true"'
+		. ' style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">'
+		. '<label for="dialos-mitteilungsform">Dieses Feld bitte leer lassen</label>'
+		. '<input type="text" id="dialos-mitteilungsform" name="dialos-mitteilungsform"'
+		. ' value="" size="25" tabindex="-1" autocomplete="off">'
+		. '</div>';
+
+	return $elemente . $feld;
+}
+
+/**
+ * Die eigentliche Pruefung, bevor Contact Form 7 eine Mail verschickt.
+ *
+ * Reihenfolge ist Absicht: erst die Mengenbremse (sie faengt einen
+ * Massenangriff auch dann, wenn er alle Inhaltsregeln umschifft), dann
+ * der Honigtopf, dann die Inhaltsregeln.
+ */
+add_filter( 'wpcf7_spam', 'dialos_spam_erkennen', 10, 2 );
+
+function dialos_spam_erkennen( $spam, $submission ) {
+	// Hat schon ein anderer Filter (z. B. das Honeypot-Plugin am
+	// Formular 205) entschieden, bleibt es dabei.
+	if ( $spam ) {
+		return $spam;
+	}
+
+	$daten = $submission->get_posted_data();
+
+	// --- 1. Mengenbremse je Absender -------------------------------
+	//
+	// Fuenf Absendungen pro Stunde. Ein Mensch kommt da nicht hin, ein
+	// Bot mit 200 Nachrichten in einer Nacht sehr wohl. Grosszuegig
+	// bemessen, weil mehrere Personen hinter einem gemeinsamen
+	// Internetanschluss dieselbe Adresse haben koennen - in einer
+	// Einrichtung fuer blinde Menschen ist das der Normalfall.
+	//
+	// Gespeichert wird NICHT die IP-Adresse, sondern nur ihr Hash
+	// (wp_hash nutzt die Salts dieser Installation). Damit laesst sich
+	// zwar wiedererkennen, ob dieselbe Quelle erneut sendet, aber aus
+	// dem gespeicherten Wert keine Adresse zurueckrechnen. Die Marke
+	// verfaellt nach einer Stunde von selbst.
+	$adresse = $submission->get_meta( 'remote_ip' );
+	if ( empty( $adresse ) && ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+		$adresse = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+	}
+
+	if ( ! empty( $adresse ) ) {
+		$marke  = 'dialos_abs_' . wp_hash( $adresse );
+		$anzahl = (int) get_transient( $marke );
+
+		// Auch Spam zaehlt mit - ein Bot sperrt sich so selbst aus.
+		set_transient( $marke, $anzahl + 1, HOUR_IN_SECONDS );
+
+		if ( $anzahl >= 5 ) {
+			dialos_spam_vermerken( $submission, 'Mehr als fuenf Absendungen in einer Stunde.' );
+			return true;
+		}
+	}
+
+	// --- 2. Honigtopf ----------------------------------------------
+	//
+	// Das Feld ist fuer Menschen unsichtbar und nicht erreichbar. Steht
+	// etwas drin, war es kein Mensch.
+	if ( ! empty( $_POST['dialos-mitteilungsform'] ) ) {
+		dialos_spam_vermerken( $submission, 'Das versteckte Feld wurde ausgefuellt.' );
+		return true;
+	}
+
+	// --- 3. Verweise in Feldern, die keine enthalten duerfen --------
+	//
+	// Niemand schreibt eine Internetadresse in sein Vornamensfeld. Der
+	// Nachrichtentext ist bewusst NICHT dabei: Dort kann ein Verweis
+	// voellig legitim sein ("schau mal hier: ...").
+	$kurzfelder = array(
+		'your-firstname',
+		'your-lastname',
+		'anrede',
+		'company',
+		'department',
+		'your-subject',
+		'teilnehmer-name',
+	);
+
+	foreach ( $kurzfelder as $feld ) {
+		if ( empty( $daten[ $feld ] ) || ! is_string( $daten[ $feld ] ) ) {
+			continue;
+		}
+
+		if ( preg_match( '#https?://|www\.|\[url#i', $daten[ $feld ] ) ) {
+			dialos_spam_vermerken(
+				$submission,
+				sprintf( 'Verweis im Feld "%s", das keinen enthalten darf.', $feld )
+			);
+			return true;
+		}
+	}
+
+	// --- 4. Text ohne einen einzigen lateinischen Buchstaben --------
+	//
+	// Stephans Regel vom 2026-10-22, und sie ist bewusst SO herum
+	// formuliert: nicht "enthaelt fremde Zeichen" (das waere eine Liste
+	// von Schriften, die nie vollstaendig wird und bei jedem Zitat
+	// falsch anschlaegt), sondern "enthaelt KEINEN lateinischen
+	// Buchstaben".
+	//
+	// Der Unterschied in der Praxis:
+	//   "Новый способ получать результат"  -> kein Latein  -> Spam
+	//   "Frage zu DialOS"                   -> Latein       -> durch
+	//   "Frage zu DialOS (Привет, Сергей)"  -> Latein       -> durch
+	//
+	// Ein deutscher oder englischer Text faellt also auch dann nicht
+	// durch das Raster, wenn fremde Schrift darin vorkommt. Umgekehrt
+	// braucht es keine Aufzaehlung: Die Regel deckt Kyrillisch,
+	// Griechisch, Arabisch, Hebraeisch, Chinesisch und jede andere
+	// Schrift gleichermassen ab, ohne sie je zu nennen.
+	//
+	// Felder ohne Buchstaben (nur Ziffern, nur Satzzeichen, leer)
+	// bleiben ausdruecklich unberuehrt - sonst waere ein Betreff wie
+	// "2026" oder "???" Spam.
+	//
+	// Der Preis, und er ist bewusst bezahlt: Wer dialos.org auf
+	// Russisch oder Griechisch anschreiben will, kommt nicht durch.
+	// Die Seite ist deutsch und englisch, das Formular auch.
+	$textfelder = array( 'your-subject', 'your-message', 'teilnehmer-name' );
+
+	foreach ( $textfelder as $feld ) {
+		if ( empty( $daten[ $feld ] ) || ! is_string( $daten[ $feld ] ) ) {
+			continue;
+		}
+
+		$wert = $daten[ $feld ];
+
+		// Enthaelt das Feld ueberhaupt Buchstaben? Wenn nicht, gibt es
+		// nichts zu beurteilen.
+		if ( ! preg_match( '/\p{L}/u', $wert ) ) {
+			continue;
+		}
+
+		// Buchstaben ja - aber kein einziger davon lateinisch.
+		if ( ! preg_match( '/\p{Latin}/u', $wert ) ) {
+			dialos_spam_vermerken(
+				$submission,
+				sprintf( 'Das Feld "%s" enthaelt keinen lateinischen Buchstaben.', $feld )
+			);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Den Grund im Spam-Protokoll von Contact Form 7 vermerken.
+ *
+ * Ohne das steht in der Oberflaeche nur "als Spam eingestuft", und bei
+ * einem Fehlalarm liesse sich nicht nachvollziehen, welche Regel
+ * zugeschlagen hat.
+ */
+function dialos_spam_vermerken( $submission, $grund ) {
+	if ( ! method_exists( $submission, 'add_spam_log' ) ) {
+		return;
+	}
+
+	$submission->add_spam_log(
+		array(
+			'agent'  => 'dialos-spamschutz',
+			'reason' => $grund,
+		)
+	);
+}
