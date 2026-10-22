@@ -15,6 +15,20 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Add the contact form to the privacy policy** (open since 2026-10-22,
+  both languages: pages 3 and 376). Since Flamingo was installed that day,
+  dialos.org **stores every submission permanently in the database** –
+  previously it only passed them through. Both policies describe only contact
+  **by email** under "Contacting Us"; the form does not appear as a processing
+  activity at all. A finished draft in both languages is in
+  [`Wordpressinstallation/entwuerfe/2026-10-22-datenschutz-kontaktformular.md`](Wordpressinstallation/entwuerfe/2026-10-22-datenschutz-kontaktformular.md)
+  (the draft itself is German, the proposed wording is bilingual).
+  **To decide first:** which fields Flamingo actually stores (visible in a
+  stored entry – IP address and browser identification are still bracketed in
+  the draft), and how long messages should be kept. Flamingo **does not clean
+  up on its own** – whatever retention period the policy states has to be
+  honoured by hand, or the statement stops being true after a year.
+
 - [x] **Microphone in the new `nutzer` account - cause found** (2026-09-25).
   The first volume question failed because the answer came **too early** -
   before recording had started (Stephan; worked on the second try with the
