@@ -2,11 +2,32 @@
 /**
  * Plugin Name:       DialOS – Kommentare
  * Description:       Deutsche Beiträge bekommen einen durchgehend deutschen Kommentarbereich (das Theme "wlow" lässt drei Texte auf Englisch stehen). Bei englischen Beiträgen wird der Kommentarbereich vollständig abgeschaltet. Unterbindet außerdem Selbst-Pingbacks zwischen den beiden Sprachfassungen eines Beitrags.
- * Version:           2.0.0
+ * Version:           2.0.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Stephan Rösner
  * License:           Apache-2.0
+ * Update URI:        false
+ *
+ * WARUM "Update URI: false" HIER STEHT (seit 2026-10-22)
+ *
+ * WordPress fragt für JEDES installierte Plugin beim offiziellen
+ * Verzeichnis nach, ob es eine neuere Fassung gibt - und zwar allein
+ * anhand des Ordnernamens. Dieses Plugin liegt in `dialos-kommentare/`.
+ * Veröffentlicht irgendwann jemand ein fremdes Plugin unter genau diesem
+ * Namen, hält WordPress es für die neuere Fassung von unserem.
+ *
+ * Geprüft am 2026-10-22: Der Name ist im Verzeichnis noch frei (die API
+ * antwortet mit 404). "Noch frei" ist aber keine Zusage für morgen.
+ *
+ * Bis zum 2026-10-22 wäre daraus höchstens ein Hinweis im Dashboard
+ * geworden, den man übersieht. Seit Stephan an dem Tag alle Plugins auf
+ * automatische Aktualisierung gestellt hat, würde WordPress das fremde
+ * Plugin OHNE Rückfrage einspielen - fremder Code auf dialos.org, und
+ * unserer wäre weg.
+ *
+ * `Update URI: false` (seit WordPress 5.8) nimmt dieses Plugin von jeder
+ * Update-Prüfung aus. Es ist eine Zeile und schließt den ganzen Weg.
  *
  * WARUM ES DIESES PLUGIN GIBT
  *
