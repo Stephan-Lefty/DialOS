@@ -87,8 +87,11 @@ Zusätzlich eingerichtet:
   aktualisiert (Abschnitt „Cookies und Analyse-Tools"). Besucherzahlen
   lassen sich über die REST-API abfragen, z. B.
   `./wp-api.sh GET matomo/v1/visits_summary/get?idSite=1\&period=month\&date=today`.
-  Offen: kein echter System-Cron beim Hoster, WordPress läuft nur mit
-  Pseudo-Cron (Details siehe Matomo-Systembericht im wp-admin).
+  **Offen und seit dem 22.10.2026 belegt:** kein echter System-Cron beim
+  Hoster, WordPress läuft nur mit Pseudo-Cron – Matomos vorberechnete
+  Berichte hinken deshalb hinterher, und ein manueller Archivierungsanstoß
+  über die API ändert daran nichts. Messung und Folgen unter
+  [Zugriffszahlen im Dashboard](#zugriffszahlen-im-dashboard).
 - WordPress-Dashboard aufgeräumt (Google-Analytics- und
   Events-Kästchen ausgeblendet) – gilt nur für den eingeloggten Benutzer
   (Stephan), WordPress speichert das nicht zentral.
@@ -107,11 +110,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.22`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.23`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.22.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.23.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -168,6 +171,7 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.20 | 22.10.2026 | Spamschutz für die Kontaktformulare in vier Schichten, nachdem über 200 Spam-Nachrichten durchkamen – siehe [Spamschutz](#spamschutz) |
 | 1.6.21 | 22.10.2026 | Datensparsamkeit bei Flamingo: IP-Adresse und Browserkennung werden nicht gespeichert, Nachrichten nach fünf Monaten in den Papierkorb |
 | 1.6.22 | 22.10.2026 | Flamingos Adressbuch wird gar nicht erst gefüllt |
+| 1.6.23 | 22.10.2026 | Zugriffszahlen im Dashboard (Woche, 90 Tage, Jahr, gesamt, Herkunftsländer) – siehe [Zugriffszahlen im Dashboard](#zugriffszahlen-im-dashboard) |
 
 ## Spamschutz
 
@@ -297,6 +301,53 @@ PHP-Syntax wie immer ohne lokales PHP:
 docker run --rm -v "$PWD/wp-theme/dialos:/x:ro" php:8.2-cli php -l /x/functions.php
 ```
 
+## Zugriffszahlen im Dashboard
+
+Seit Theme 1.6.23 steht auf der Startseite des Backends ein Kasten „Zugriffe
+auf dialos.org": Besuche und Seitenaufrufe für die **aktuelle Woche, die
+letzten 90 Tage, das laufende Jahr und seit Beginn**, dazu die acht häufigsten
+**Herkunftsländer**. Gezählt wird seit dem 15.08.2026 (Anlagedatum der
+Matomo-Seite, wird nicht fest eingetragen, sondern abgefragt).
+
+**Woher die Zahlen kommen:** über `rest_do_request()` aus Matomos eigener
+REST-Route, im selben Prozess. Bewusst **kein** HTTP-Aufruf an die eigene
+Seite – der wäre langsam, könnte an einer Firewall scheitern und hätte WP
+Super Cache dazwischen. Und bewusst **kein** Griff in Matomos PHP-Klassen:
+die ändern sich zwischen Fassungen, die REST-Route ist die zugesagte
+Schnittstelle. Sechs Abfragen je Aufruf, deshalb eine halbe Stunde im
+Zwischenspeicher; sofort erneuern mit `wp-admin/index.php?dialos-zahlen=neu`.
+
+### Warum eine Zeile „letzte 24 Stunden (live)" dabeisteht
+
+**Matomos vorberechnete Berichte hinken auf diesem Hoster hinterher.**
+Gemessen am 22.10.2026: Der Bericht meldete für „heute" 0 Besuche, während die
+Live-Abfrage im selben Moment einen Besuch kannte. Ursache ist der fehlende
+echte System-Cron – WordPress läuft hier nur mit Pseudo-Cron, Matomo archiviert
+also bloß gelegentlich.
+
+Ein manueller Anstoß über die API ist **kein** Ausweg: Der Aufruf
+
+```bash
+./wp-api.sh POST matomo/v1/core_admin_home/run_cron_archiving
+```
+
+kam nach 0,98 Sekunden mit `true` zurück und änderte an der Zahl **nichts**.
+Erfolg gemeldet, nichts getan – das ist genau die Sorte Zustandsmeldung, der
+man nicht glauben darf, ohne das Ergebnis zu messen.
+
+Die Live-Zeile liest die Besuchstabelle direkt und ist deshalb immer aktuell.
+Steht dort eine Zahl und in den Zeilen darüber eine Null, ist das kein
+Widerspruch, sondern dieser Rückstand.
+
+### Was an den Zahlen auffällt
+
+Von 463 Besuchen des laufenden Jahres kommen **246 aus den Vereinigten
+Staaten** – mehr als die Hälfte, bei einer deutschsprachigen Nischenseite mit
+österreichischem und deutschem Publikum (140 bzw. 63 Besuche). Das ist kein
+Publikum, das ist mit großer Wahrscheinlichkeit automatisierter Verkehr, den
+Matomos Bot-Erkennung nicht erwischt. Wer mit diesen Zahlen arbeitet, sollte
+das wissen.
+
 ## Änderungsprotokoll
 
 ### 0.6.0 (22.10.2026)
@@ -322,6 +373,12 @@ docker run --rm -v "$PWD/wp-theme/dialos:/x:ro" php:8.2-cli php -l /x/functions.
 - **Eigenes Plugin gegen Namensübernahme gesichert** (`dialos-kommentare`
   2.0.1): `Update URI: false`. Mit automatischen Updates würde WordPress ein
   fremdes Plugin gleichen Ordnernamens ohne Rückfrage einspielen.
+- **Zugriffszahlen im Dashboard** (Theme 1.6.23): Woche, 90 Tage, Jahr,
+  gesamt und Herkunftsländer auf der Startseite des Backends. Dabei
+  gemessen, dass Matomos vorberechnete Berichte hinterherhinken – siehe
+  [Zugriffszahlen im Dashboard](#zugriffszahlen-im-dashboard).
+- **Die Datenschutzerklärung nennt das Kontaktformular jetzt** (Seiten 3 und
+  376, „Stand" auf den 22.10.2026 gesetzt).
 
 ### 0.5.0 (23.09.2026)
 - **Das Theme steht endlich in diesem Verzeichnis.** Es lag seit dem

@@ -1348,3 +1348,270 @@ function dialos_flamingo_aufraeumen_anmelden() {
 		wp_schedule_event( time(), 'daily', 'dialos_flamingo_aufraeumen' );
 	}
 }
+
+/**
+ * ==================================================================
+ * Zugriffszahlen im Dashboard (seit 2026-10-22)
+ * ==================================================================
+ *
+ * Stephan am 22.10.2026: Zugriffe fuer aktuelle Woche, letzte 90 Tage,
+ * aktuelles Jahr und gesamt, dazu die Herkunftslaender - direkt auf der
+ * Startseite des Backends, ohne erst nach Matomo wechseln zu muessen.
+ *
+ * Die Zahlen kommen ueber `rest_do_request()` aus Matomos eigener
+ * REST-Route. Das ist bewusst kein HTTP-Aufruf an die eigene Seite (der
+ * waere langsam, koennte an Basic Auth oder einer Firewall scheitern und
+ * haette den Cache dazwischen) und auch kein Griff in Matomos
+ * PHP-Klassen (die aendern sich zwischen Fassungen; die REST-Route ist
+ * die oeffentlich zugesagte Schnittstelle). Der Aufruf laeuft im selben
+ * Prozess und mit den Rechten des angemeldeten Benutzers.
+ *
+ * Gemessen am 22.10.2026 ueber dieselbe Route - die Werte oben stimmten
+ * mit denen in Matomos Oberflaeche ueberein.
+ */
+
+const DIALOS_ZAHLEN_CACHE = 'dialos_matomo_zahlen';
+
+add_action( 'wp_dashboard_setup', 'dialos_dashboard_widget_anmelden' );
+
+function dialos_dashboard_widget_anmelden() {
+	// Nur fuer Leute, die ohnehin an die Statistik duerfen.
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	wp_add_dashboard_widget(
+		'dialos_zugriffe',
+		'Zugriffe auf dialos.org',
+		'dialos_dashboard_widget_ausgeben'
+	);
+}
+
+/**
+ * Eine Matomo-Route intern abfragen.
+ *
+ * Gibt bei jedem Fehler null zurueck - ein Dashboard, das wegen einer
+ * fehlenden Statistik eine PHP-Meldung zeigt, ist schlimmer als eines
+ * ohne Statistik.
+ */
+function dialos_matomo_abfragen( $route, $parameter ) {
+	$anfrage = new WP_REST_Request( 'GET', $route );
+	$anfrage->set_query_params( $parameter );
+
+	$antwort = rest_do_request( $anfrage );
+
+	if ( is_wp_error( $antwort ) || $antwort->is_error() ) {
+		return null;
+	}
+
+	return $antwort->get_data();
+}
+
+/**
+ * Alle Zahlen einsammeln, die das Widget zeigt.
+ *
+ * Das sind sechs Abfragen. Bei jedem Aufruf des Dashboards neu waere das
+ * spuerbar langsam, deshalb liegen sie eine halbe Stunde im Zwischen-
+ * speicher. Laenger nicht: Wer nach einem Beitrag nachsieht, ob jemand
+ * kommt, soll nicht bis morgen warten.
+ */
+function dialos_zugriffszahlen_holen() {
+	$zwischen = get_transient( DIALOS_ZAHLEN_CACHE );
+
+	if ( false !== $zwischen ) {
+		return $zwischen;
+	}
+
+	// Ab wann ueberhaupt gezaehlt wird. Nicht fest eintragen - nach einem
+	// Neuaufbau von Matomo waere der Wert sonst falsch, ohne dass es
+	// auffaellt.
+	$beginn = '2026-08-15';
+	$seiten = dialos_matomo_abfragen( '/matomo/v1/sites_manager/all_sites', array() );
+
+	if ( is_array( $seiten ) ) {
+		$erste = reset( $seiten );
+
+		if ( ! empty( $erste['ts_created'] ) ) {
+			$beginn = substr( $erste['ts_created'], 0, 10 );
+		}
+	}
+
+	$zeitraeume = array(
+		'woche'  => array( 'Aktuelle Woche',  'week',  'today' ),
+		'tage90' => array( 'Letzte 90 Tage',  'range', 'last90' ),
+		'jahr'   => array( 'Aktuelles Jahr',  'year',  'today' ),
+		'gesamt' => array( 'Gesamt',          'range', $beginn . ',today' ),
+	);
+
+	$zahlen = array();
+
+	foreach ( $zeitraeume as $schluessel => $angabe ) {
+		list( $titel, $periode, $datum ) = $angabe;
+
+		$wert = dialos_matomo_abfragen(
+			'/matomo/v1/visits_summary/get',
+			array(
+				'idSite' => 1,
+				'period' => $periode,
+				'date'   => $datum,
+			)
+		);
+
+		$zahlen[ $schluessel ] = array(
+			'titel'    => $titel,
+			'besuche'  => is_array( $wert ) && isset( $wert['nb_visits'] ) ? (int) $wert['nb_visits'] : null,
+			'aufrufe'  => is_array( $wert ) && isset( $wert['nb_actions'] ) ? (int) $wert['nb_actions'] : null,
+		);
+	}
+
+	// Zusaetzlich die letzten 24 Stunden aus den ROHDATEN.
+	//
+	// Warum doppelt gemoppelt: Alle Zahlen oben kommen aus Matomos
+	// vorberechneten Berichten, und die hinken hinterher. Gemessen am
+	// 22.10.2026: Der Bericht meldete fuer "heute" 0 Besuche, waehrend
+	// die Live-Abfrage im selben Moment einen Besuch kannte. Auf diesem
+	// Hoster laeuft kein echter System-Cron, Matomo archiviert also nur
+	// gelegentlich - ein manueller Anstoss ueber
+	// core_admin_home/run_cron_archiving meldete zwar Erfolg, aenderte
+	// aber nichts.
+	//
+	// Die Live-Abfrage liest die Besuchstabelle direkt und ist deshalb
+	// immer aktuell. Steht hier eine Zahl und oben eine Null, ist das
+	// kein Widerspruch, sondern genau dieser Rueckstand.
+	$live = dialos_matomo_abfragen(
+		'/matomo/v1/live/counters',
+		array(
+			'idSite'      => 1,
+			'lastMinutes' => 1440,
+		)
+	);
+
+	$laender = dialos_matomo_abfragen(
+		'/matomo/v1/api/processed_report',
+		array(
+			'idSite'       => 1,
+			'period'       => 'year',
+			'date'         => 'today',
+			'apiModule'    => 'UserCountry',
+			'apiAction'    => 'getCountry',
+			'filter_limit' => 8,
+		)
+	);
+
+	$ergebnis = array(
+		'beginn'  => $beginn,
+		'zahlen'  => $zahlen,
+		'live'    => is_array( $live ) && isset( $live[0]['visits'] )
+			? (int) $live[0]['visits']
+			: null,
+		'laender' => is_array( $laender ) && ! empty( $laender['reportData'] )
+			? $laender['reportData']
+			: array(),
+		'stand'   => current_time( 'd.m.Y, H:i' ),
+	);
+
+	set_transient( DIALOS_ZAHLEN_CACHE, $ergebnis, 30 * MINUTE_IN_SECONDS );
+
+	return $ergebnis;
+}
+
+/**
+ * Das Widget zeichnen.
+ *
+ * Zwei echte Tabellen mit Kopfzellen und Beschriftung, keine Kaesten aus
+ * div-Elementen: Diese Seite muss auch mit einem Screenreader lesbar
+ * sein, und eine Tabelle sagt von sich aus, was Zeile und was Spalte ist.
+ */
+function dialos_dashboard_widget_ausgeben() {
+	$daten = dialos_zugriffszahlen_holen();
+
+	if ( empty( $daten['zahlen'] ) ) {
+		echo '<p>Die Zahlen lassen sich gerade nicht abrufen. Ist Matomo aktiv?</p>';
+		return;
+	}
+
+	$zahl = static function ( $wert ) {
+		return null === $wert ? '–' : esc_html( number_format_i18n( $wert ) );
+	};
+
+	?>
+	<style>
+		.dialos-zahlen { width: 100%; border-collapse: collapse; margin-bottom: 1.2em; }
+		.dialos-zahlen caption { text-align: left; font-weight: 600; padding: 0 0 .4em; }
+		.dialos-zahlen th, .dialos-zahlen td { padding: .35em .5em; border-bottom: 1px solid #e0e0e0; }
+		.dialos-zahlen thead th { border-bottom: 2px solid #0d4280; text-align: left; }
+		.dialos-zahlen td.zahl, .dialos-zahlen th.zahl { text-align: right; font-variant-numeric: tabular-nums; }
+		.dialos-zahlen tbody tr:last-child td { border-bottom: none; }
+		.dialos-stand { color: #555; font-size: 12px; margin: 0; }
+	</style>
+
+	<table class="dialos-zahlen">
+		<caption>Besuche nach Zeitraum</caption>
+		<thead>
+			<tr>
+				<th scope="col">Zeitraum</th>
+				<th scope="col" class="zahl">Besuche</th>
+				<th scope="col" class="zahl">Seitenaufrufe</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ( $daten['zahlen'] as $zeile ) : ?>
+			<tr>
+				<th scope="row"><?php echo esc_html( $zeile['titel'] ); ?></th>
+				<td class="zahl"><?php echo $zahl( $zeile['besuche'] ); ?></td>
+				<td class="zahl"><?php echo $zahl( $zeile['aufrufe'] ); ?></td>
+			</tr>
+		<?php endforeach; ?>
+		<?php if ( null !== $daten['live'] ) : ?>
+			<tr>
+				<th scope="row">Letzte 24 Stunden <span title="Direkt aus den Besuchsdaten gelesen, nicht aus den vorberechneten Berichten – deshalb auch dann aktuell, wenn die Zahlen oben noch hinterherhinken.">(live)</span></th>
+				<td class="zahl"><?php echo $zahl( $daten['live'] ); ?></td>
+				<td class="zahl">–</td>
+			</tr>
+		<?php endif; ?>
+		</tbody>
+	</table>
+
+	<?php if ( ! empty( $daten['laender'] ) ) : ?>
+	<table class="dialos-zahlen">
+		<caption>Herkunft der Besuche (aktuelles Jahr)</caption>
+		<thead>
+			<tr>
+				<th scope="col">Land</th>
+				<th scope="col" class="zahl">Besuche</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ( $daten['laender'] as $land ) : ?>
+			<tr>
+				<th scope="row"><?php echo esc_html( $land['label'] ?? '?' ); ?></th>
+				<td class="zahl"><?php echo $zahl( isset( $land['nb_visits'] ) ? (int) $land['nb_visits'] : null ); ?></td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody>
+	</table>
+	<?php endif; ?>
+
+	<p class="dialos-stand">
+		Gezählt wird seit dem
+		<?php echo esc_html( mysql2date( 'd.m.Y', $daten['beginn'] ) ); ?>.
+		Stand dieser Übersicht: <?php echo esc_html( $daten['stand'] ); ?> Uhr
+		(wird halbstündlich erneuert).
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=matomo-reporting' ) ); ?>">Alle Berichte in Matomo</a>
+	</p>
+	<?php
+}
+
+/**
+ * Den Zwischenspeicher leeren, wenn jemand ihn sehen will, ohne zu warten.
+ *
+ * Aufruf: wp-admin/index.php?dialos-zahlen=neu
+ */
+add_action( 'load-index.php', 'dialos_zahlen_auffrischen' );
+
+function dialos_zahlen_auffrischen() {
+	if ( isset( $_GET['dialos-zahlen'] ) && 'neu' === $_GET['dialos-zahlen']
+		&& current_user_can( 'manage_options' ) ) {
+		delete_transient( DIALOS_ZAHLEN_CACHE );
+	}
+}
