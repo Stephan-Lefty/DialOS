@@ -1,0 +1,11 @@
+DialOS Mobil. Drei Fehler, die ich selbst nicht finden konnte.
+
+Seit Ende Oktober prüfen zwölf Menschen das Telefonprogramm von DialOS. Zwölf verlangt Google, bevor ein Programm für alle freigegeben wird. Sie zusammenzubekommen hat sieben Wochen gedauert. Schon die erste Woche hat sich gelohnt.
+
+Die wichtigste Rückmeldung kam an einem Dienstag. Das Programm nahm Befehle an, auf dem Bildschirm war alles zu lesen, aber es sagte kein einziges Wort. Dass ich davon überhaupt erfahren habe, war Glück. Die Testperson hat einen Sehrest und konnte sehen, dass das Programm zuhört. Ohne diesen Sehrest wäre die Meldung nie entstanden. Denn von außen lässt sich nicht unterscheiden, ob ein Programm nicht antwortet oder ob es gar nicht zuhört. Für eine Sprachsteuerung ist das der schlimmste Fall. Man weiß nicht einmal, was fehlt.
+
+Die Ursache lag an zwei Stellen. Das Programm fragte nie nach, ob seine Stimme beim Starten überhaupt wach geworden war. Und jede Ansage danach landete in einer Warteschlange, die nur beim Starten geleert wird.
+
+Einen Tag später kam der zweite Fund. Dieselbe Person hatte sich eine andere Stimme eingestellt, und die war verschwunden. Das Programm hatte beim Starten nach allen Stimmen gefragt, eine leere Liste bekommen, weil die Stimmen noch gar nicht wach waren, und daraus geschlossen, die gewählte gebe es nicht mehr. Ein Zustand, der nur Sekunden dauert, hat also dauerhaft etwas gelöscht. Für jemanden, der den Bildschirm nicht sieht, ist das Einstellen einer Stimme kein Handgriff.
+
+Beides ist behoben. Und beides hätte ich allein nie gefunden, weil ich das Programm sehen kann, während ich es prüfe.

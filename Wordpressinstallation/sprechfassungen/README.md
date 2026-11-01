@@ -101,12 +101,17 @@ geschrieben, und ihr Zuhause ist die Mediathek von dialos.org.
 
 ## Bisher vertont
 
-Alle zwanzig deutschen Beiträge, Stand 2026-09-22. Die englischen bewusst nicht:
+Alle deutschen Beiträge, Stand 2026-11-01. Die englischen bewusst nicht:
 Anna ist eine deutsche Stimme, und eine englische Hörfassung bräuchte eine eigene.
 
 **Die Lücke schließt sich nicht von selbst.** Am 2026-09-21 fehlten zwei
 Hörfassungen, weil die Beiträge nach dem Vertonungstag entstanden waren – und
-aufgefallen ist das nur zufällig beim Durchsehen. Das ist die Kehrseite davon,
+aufgefallen ist das nur zufällig beim Durchsehen. **Am 2026-11-01 wieder
+passiert, diesmal andersherum:** Die drei Chronik-Folgen vom 28.09. bis 12.10.
+waren vertont und hochgeladen, standen aber nicht in dieser Tabelle. Die
+Dateien lagen im Verzeichnis, nur las sie niemand ab. Wer hier ergänzt, zählt
+deshalb nicht die Zeilen der Tabelle, sondern vergleicht sie mit
+`ls sprechfassungen/*.txt`. Das ist die Kehrseite davon,
 dass die Vertonung bewusst nicht mit der Blog-Routine mitläuft. Wer hier
 ergänzt, vergleicht die Tabelle am besten gleich mit allen veröffentlichten
 deutschen Beiträgen.
@@ -134,6 +139,10 @@ deutschen Beiträgen.
 | [Tag 41 bis 47: Schreiben und wiederfinden](https://dialos.org/dialos-tag-41-bis-47-schreiben-und-wiederfinden/) | 2026-09-21 | 1:58 |
 | [Ein Text zum Lesen ist kein Text zum Hören](https://dialos.org/ein-text-zum-lesen-ist-kein-text-zum-hoeren/) | 2026-09-22 | 1:51 |
 | [Ein Server in Innsbruck](https://dialos.org/ein-server-in-innsbruck/) | 2026-09-24 | 1:49 |
+| [DialOS – Tag 48 bis 54: Alles löschen, nur nach der Anleitung zurück](https://dialos.org/dialos-tag-48-bis-54-alles-loeschen-nur-nach-der-anleitung-zurueck/) | 2026-09-28 | 1:43 |
+| [DialOS – Tag 55 bis 61: Die Woche, in der das Radio sprechen lernte](https://dialos.org/dialos-tag-55-bis-61-die-woche-in-der-das-radio-sprechen-lernte/) | 2026-10-05 | 1:37 |
+| [DialOS – Tag 62 bis 68: Was das Vorführvideo ans Licht brachte](https://dialos.org/dialos-tag-62-bis-68-was-das-vorfuehrvideo-ans-licht-brachte/) | 2026-10-12 | 1:39 |
+| [DialOS Mobil – drei Fehler, die ich selbst nicht finden konnte](https://dialos.org/dialos-mobil-drei-fehler-die-ich-selbst-nicht-finden-konnte/) | 2026-11-01 | 1:48 |
 
 ### Was beim Kürzen der Chronik-Folgen zu beachten war
 
