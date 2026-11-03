@@ -2056,3 +2056,291 @@ function dialos_flamingo_absendername( $wert, $feld ) {
 
 	return '' === $name ? $wert : $name;
 }
+
+/**
+ * ==================================================================
+ * Rechennachweis vor dem Absenden (seit 2026-11-03)
+ * ==================================================================
+ *
+ * Alle bisherigen Schichten erkennen Spam am INHALT - und Inhalt kann
+ * ein Angreifer aendern. Am 03.11.2026 kamen rund 300 Nachrichten
+ * durch, und der Bot haette nur den Verkuerzer weglassen und sich
+ * anders nennen muessen, um auch 1.6.26 zu umgehen.
+ *
+ * Dieser Nachweis fragt nicht, WAS jemand schreibt, sondern ob er
+ * ueberhaupt durch das Formular gekommen ist. Der Browser sucht eine
+ * Zahl, deren Pruefsumme mit mehreren Nullen beginnt, und schickt sie
+ * mit. Fuer einen Besucher sind das Bruchteile einer Sekunde im
+ * Hintergrund, waehrend er noch tippt.
+ *
+ * WORIN DER SCHUTZ WIRKLICH BESTEHT - und das ist nicht das, was man
+ * zuerst denkt. Gemessen am 03.11.2026: Eine Loesung zu finden kostet
+ * im Mittel rund zweitausend Pruefsummen; in PHP gerechnet sind das
+ * 0,000 Sekunden. Als "Rechenbremse" taugt das gegen einen Angreifer
+ * mit eigenem Skript ueberhaupt nichts, und wer es so verkauft,
+ * taeuscht sich selbst.
+ *
+ * Was es wirklich leistet: Der Bot, der hier zuschlaegt, postet stumpf
+ * an /wp-json/contact-form-7/v1/contact-forms/49/feedback, ohne die
+ * Seite je zu laden. Er hat damit weder Aufgabe noch Siegel noch
+ * Loesung und faellt sofort durch. Will er durchkommen, muss er seinen
+ * Code eigens fuer dialos.org umbauen: Endpunkt abfragen, Pruefsummen
+ * rechnen, vier Felder mitschicken. Fuer eine Seite mit ein bis zwei
+ * echten Anfragen in der Woche lohnt das niemandem - darin liegt der
+ * Wert, nicht in der Rechenzeit.
+ *
+ * Eine hoehere Schwierigkeit wuerde daran nichts bessern, aber echte
+ * Besucher treffen: Die Krypto-Funktion im Browser ist um ein
+ * Vielfaches langsamer als natives Hashen. Jede Stufe, die einen
+ * Angreifer spuerbar bremst, waere auf einem alten Handy eine
+ * Zumutung. Deshalb bleibt es bei drei Nullen.
+ *
+ * WARUM KEIN FERTIGES PLUGIN: Geprueft am 03.11.2026. Altcha gibt es
+ * nicht im WordPress-Verzeichnis (unter keinem Namen auffindbar).
+ * Friendly Captcha koennte es, braucht aber einen Account und einen
+ * fremden Server - das widerspricht allem, was hier seit dem 22.10.
+ * aufgebaut wurde: keine IP-Speicherung, kein Adressbuch, Matomo
+ * selbst betrieben. Und ein verbreitetes Plugin wird irgendwann
+ * umgangen; ein eigenes Verfahren muesste ein Bot eigens fuer
+ * dialos.org nachbauen - fuer eine Seite mit ein bis zwei Anfragen die
+ * Woche lohnt das niemandem.
+ *
+ * WARUM UEBER EINEN EIGENEN ENDPUNKT und nicht im Formular-HTML:
+ * WP Super Cache liefert die Kontaktseite aus dem Speicher (die
+ * Antwort traegt "Cached page"). Eine eingebettete Aufgabe waere fuer
+ * alle Besucher dieselbe und nach kurzer Zeit abgelaufen. Der
+ * Endpunkt wird nicht gecacht, also bekommt jeder eine frische.
+ *
+ * ZUR BARRIEREFREIHEIT: Es gibt nichts zu sehen, nichts zu hoeren und
+ * nichts zu tun - kein Bild, kein Raetsel, keine Rechenaufgabe fuer
+ * den Menschen. Das Verfahren ist deshalb ueberhaupt erst vertretbar.
+ * Gebraucht wird allerdings JavaScript; fuer den Fall ohne steht ein
+ * noscript-Hinweis mit der Mailadresse im Formular.
+ */
+
+// Wie viele fuehrende Nullen die Pruefsumme haben muss.
+//
+// Drei Nullen heissen im Mittel rund viertausend Versuche. Gemessen an
+// der Geschwindigkeit der eingebauten Krypto-Funktion sind das
+// Bruchteile einer Sekunde, auch auf einem alten Handy - und genau
+// darauf kommt es bei dieser Zielgruppe an. Vier Nullen waeren das
+// Sechzehnfache und auf schwacher Hardware spuerbar; die Bremse waere
+// dann fuer Menschen teurer als fuer ein Rechenzentrum.
+const DIALOS_POW_NULLEN = 3;
+
+/**
+ * Den Endpunkt anmelden, der die Aufgaben ausgibt.
+ */
+add_action( 'rest_api_init', 'dialos_rechenaufgabe_anmelden' );
+
+function dialos_rechenaufgabe_anmelden() {
+	register_rest_route(
+		'dialos/v1',
+		'/rechenaufgabe',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'dialos_rechenaufgabe_ausgeben',
+			// Offen, und das muss so sein: Die Aufgabe braucht jeder
+			// Besucher, bevor er etwas abschickt.
+			'permission_callback' => '__return_true',
+		)
+	);
+}
+
+/**
+ * Eine frische Aufgabe ausgeben.
+ *
+ * Das Siegel ist der Kern: Ohne es koennte sich jeder eine eigene
+ * Aufgabe ausdenken und gleich die passende Loesung mitliefern.
+ * `wp_hash()` nutzt die Salts dieser Installation, der Wert laesst
+ * sich also nur hier erzeugen.
+ */
+function dialos_rechenaufgabe_ausgeben() {
+	$zeit    = time();
+	$aufgabe = wp_generate_password( 32, false, false );
+
+	return array(
+		'aufgabe' => $aufgabe,
+		'zeit'    => $zeit,
+		'siegel'  => wp_hash( $aufgabe . '|' . $zeit ),
+		'nullen'  => DIALOS_POW_NULLEN,
+	);
+}
+
+/**
+ * Die vier Felder fuer den Nachweis und das Rechenskript anhaengen.
+ */
+add_filter( 'wpcf7_form_elements', 'dialos_rechennachweis_anhaengen' );
+
+function dialos_rechennachweis_anhaengen( $elemente ) {
+	$felder = '<div class="dialos-nachweis" hidden>'
+		. '<input type="hidden" name="dialos-pow-aufgabe" value="">'
+		. '<input type="hidden" name="dialos-pow-zeit" value="">'
+		. '<input type="hidden" name="dialos-pow-siegel" value="">'
+		. '<input type="hidden" name="dialos-pow-loesung" value="">'
+		. '</div>';
+
+	// Fuer alle, die kein JavaScript haben: ein Weg, der trotzdem
+	// funktioniert. Ein Formular, das stumm nichts tut, waere das
+	// Schlimmste - niemand wuesste, warum seine Nachricht nicht ankommt.
+	$ohne_js = '<noscript><p><strong>Zum Absenden dieses Formulars wird '
+		. 'JavaScript gebraucht.</strong> Ist es abgeschaltet, schreib '
+		. 'bitte direkt an <a href="mailto:kontakt@dialos.org">'
+		. 'kontakt@dialos.org</a>.</p></noscript>';
+
+	return $elemente . $felder . $ohne_js . dialos_rechenskript();
+}
+
+/**
+ * Das Skript, das im Browser rechnet.
+ *
+ * Es laeuft los, sobald die Seite da ist - also lange bevor jemand das
+ * Formular ausgefuellt hat. Gerechnet wird in Haeppchen mit einer
+ * kurzen Pause dazwischen, damit die Seite waehrenddessen bedienbar
+ * bleibt und kein Browser "Seite reagiert nicht" meldet.
+ *
+ * Die Pruefsumme kommt aus der eingebauten Krypto-Funktion des
+ * Browsers, nicht aus selbstgeschriebenem Code. Sie gibt es auf jeder
+ * Seite, die ueber HTTPS ausgeliefert wird - dialos.org tut das.
+ */
+function dialos_rechenskript() {
+	$endpunkt = esc_url( rest_url( 'dialos/v1/rechenaufgabe' ) );
+
+	ob_start();
+	?>
+	<script>
+	(function () {
+		if (window.dialosNachweisLaeuft) { return; }
+		window.dialosNachweisLaeuft = true;
+
+		var kodierer = new TextEncoder();
+
+		function alsHex(puffer) {
+			return Array.prototype.map
+				.call(new Uint8Array(puffer), function (b) {
+					return b.toString(16).padStart(2, '0');
+				})
+				.join('');
+		}
+
+		async function loesen(aufgabe, nullen) {
+			var gesucht = '0'.repeat(nullen);
+
+			for (var n = 0; n < 20000000; n++) {
+				var summe = await crypto.subtle.digest(
+					'SHA-256', kodierer.encode(aufgabe + n)
+				);
+
+				if (alsHex(summe).indexOf(gesucht) === 0) { return String(n); }
+
+				// Alle paar hundert Versuche dem Browser Luft lassen.
+				if (n % 400 === 0) {
+					await new Promise(function (f) { setTimeout(f, 0); });
+				}
+			}
+			return '';
+		}
+
+		async function vorbereiten() {
+			var felder = document.querySelectorAll('input[name="dialos-pow-aufgabe"]');
+			if (!felder.length || !window.crypto || !crypto.subtle) { return; }
+
+			try {
+				var antwort = await fetch(<?php echo wp_json_encode( $endpunkt ); ?>, {
+					credentials: 'omit'
+				});
+				if (!antwort.ok) { return; }
+
+				var a = await antwort.json();
+				var loesung = await loesen(a.aufgabe, a.nullen);
+
+				document.querySelectorAll('.dialos-nachweis').forEach(function (kasten) {
+					kasten.querySelector('[name="dialos-pow-aufgabe"]').value = a.aufgabe;
+					kasten.querySelector('[name="dialos-pow-zeit"]').value    = a.zeit;
+					kasten.querySelector('[name="dialos-pow-siegel"]').value  = a.siegel;
+					kasten.querySelector('[name="dialos-pow-loesung"]').value = loesung;
+				});
+			} catch (e) {
+				// Stumm bleiben. Schlaegt das hier fehl, wird die
+				// Einsendung abgewiesen - mit einer Meldung, die der
+				// Besucher versteht, nicht mit einem Skriptfehler.
+			}
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', vorbereiten);
+		} else {
+			vorbereiten();
+		}
+	})();
+	</script>
+	<?php
+	return ob_get_clean();
+}
+
+/**
+ * Den Nachweis pruefen.
+ *
+ * Vier Fragen, und jede fuer sich schliesst einen Weg:
+ *   1. Ist das Siegel echt?        -> niemand erfindet eigene Aufgaben
+ *   2. Ist die Aufgabe frisch?     -> kein Vorrat auf Halde
+ *   3. Stimmt die Loesung?         -> es wurde wirklich gerechnet
+ *   4. Schon einmal benutzt?       -> eine Loesung, eine Nachricht
+ *
+ * Ohne Punkt vier waere das ganze Verfahren wirkungslos: Ein Bot
+ * koennte einmal rechnen und dieselbe Loesung tausendfach einsetzen.
+ */
+add_filter( 'wpcf7_spam', 'dialos_rechennachweis_pruefen', 9, 2 );
+
+function dialos_rechennachweis_pruefen( $spam, $submission ) {
+	if ( $spam ) {
+		return $spam;
+	}
+
+	$aufgabe = isset( $_POST['dialos-pow-aufgabe'] ) ? sanitize_text_field( wp_unslash( $_POST['dialos-pow-aufgabe'] ) ) : '';
+	$zeit    = isset( $_POST['dialos-pow-zeit'] ) ? (int) $_POST['dialos-pow-zeit'] : 0;
+	$siegel  = isset( $_POST['dialos-pow-siegel'] ) ? sanitize_text_field( wp_unslash( $_POST['dialos-pow-siegel'] ) ) : '';
+	$loesung = isset( $_POST['dialos-pow-loesung'] ) ? sanitize_text_field( wp_unslash( $_POST['dialos-pow-loesung'] ) ) : '';
+
+	if ( '' === $aufgabe || '' === $siegel || '' === $loesung || $zeit <= 0 ) {
+		dialos_spam_vermerken( $submission, 'Kein Rechennachweis mitgeschickt.' );
+		return true;
+	}
+
+	// 1. Siegel - hash_equals statt == , damit die Pruefzeit nichts
+	//    ueber den richtigen Wert verraet.
+	if ( ! hash_equals( wp_hash( $aufgabe . '|' . $zeit ), $siegel ) ) {
+		dialos_spam_vermerken( $submission, 'Das Siegel der Rechenaufgabe stimmt nicht.' );
+		return true;
+	}
+
+	// 2. Alter. Eine Stunde ist grosszuegig - wer ein langes Anliegen
+	//    tippt oder es per Sprache diktiert, braucht Zeit.
+	$alter = time() - $zeit;
+
+	if ( $alter < -60 || $alter > HOUR_IN_SECONDS ) {
+		dialos_spam_vermerken( $submission, sprintf( 'Rechenaufgabe ist %d Sekunden alt.', $alter ) );
+		return true;
+	}
+
+	// 3. Die Loesung selbst.
+	$summe  = hash( 'sha256', $aufgabe . $loesung );
+	$anfang = str_repeat( '0', DIALOS_POW_NULLEN );
+
+	if ( 0 !== strpos( $summe, $anfang ) ) {
+		dialos_spam_vermerken( $submission, 'Die Loesung der Rechenaufgabe stimmt nicht.' );
+		return true;
+	}
+
+	// 4. Einmaligkeit.
+	$marke = 'dialos_pow_' . md5( $aufgabe );
+
+	if ( get_transient( $marke ) ) {
+		dialos_spam_vermerken( $submission, 'Die Rechenaufgabe wurde schon einmal eingereicht.' );
+		return true;
+	}
+
+	set_transient( $marke, 1, HOUR_IN_SECONDS );
+
+	return false;
+}
