@@ -2381,3 +2381,180 @@ function dialos_keine_bestaetigungsmail( $zusaetzliche ) {
 
 	return $zusaetzliche;
 }
+
+/**
+ * ==================================================================
+ * EINMALIGER Aufräumlauf: Flamingos Spam-Ordner leeren
+ * ==================================================================
+ *
+ * ZEITLICH BEGRENZT. Stephan am 03.11.2026: "bau den Aufraeumlauf, es
+ * sind ueber 13000". Nach dem Durchlauf kommt dieser ganze Abschnitt
+ * wieder heraus - dauerhaft scharfer Loeschcode gehoert nicht in ein
+ * Theme, auch nicht hinter einer Rechtepruefung.
+ *
+ * Warum ueberhaupt: Von Hand ginge es auch, aber Flamingo zeigt je
+ * Seite hoechstens ein paar hundert Eintraege, und das Kaestchen in der
+ * Kopfzeile markiert nur die sichtbaren. Bei dreizehntausend waeren das
+ * dutzende Durchgaenge - zweimal, weil Flamingo erst in den Papierkorb
+ * verschiebt und man ihn danach noch leeren muss.
+ *
+ * Die Zahl selbst ist bemerkenswert: 300 Nachrichten kamen als Mail an,
+ * 13.000 wurden abgewiesen und nur gespeichert. Der Schutz hat also
+ * laengst gearbeitet; sichtbar war nur, was durchkam.
+ *
+ * Geloescht wird ENDGUELTIG (zweiter Parameter von wp_delete_post),
+ * nicht in den Papierkorb - sonst waere hinterher derselbe Berg nur
+ * woanders. Und ausschliesslich der Status `flamingo-spam`: Was jemand
+ * von Hand in den Papierkorb gelegt hat, koennte eine echte Nachricht
+ * sein und bleibt unangetastet.
+ *
+ * Es laeuft in Haeppchen von 300 mit einem automatischen Neuladen
+ * dazwischen. Ein Lauf ueber 13.000 Eintraege in einem Rutsch liefe in
+ * die Laufzeitgrenze von PHP und braeche mittendrin ab - ohne dass man
+ * wuesste, wo.
+ */
+
+const DIALOS_AUFRAEUM_HAEPPCHEN = 300;
+
+add_action( 'admin_menu', 'dialos_aufraeumseite_anmelden' );
+
+function dialos_aufraeumseite_anmelden() {
+	add_submenu_page(
+		'tools.php',
+		'Flamingo-Spam leeren',
+		'Flamingo-Spam leeren',
+		'manage_options',
+		'dialos-spam-leeren',
+		'dialos_aufraeumseite_zeigen'
+	);
+}
+
+/**
+ * Zaehlt, wie viele Eintraege in einem Zustand liegen.
+ */
+function dialos_spam_zaehlen( $status ) {
+	if ( ! post_type_exists( 'flamingo_inbound' ) ) {
+		return 0;
+	}
+
+	$abfrage = new WP_Query(
+		array(
+			'post_type'      => 'flamingo_inbound',
+			'post_status'    => $status,
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+		)
+	);
+
+	return (int) $abfrage->found_posts;
+}
+
+function dialos_aufraeumseite_zeigen() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$laeuft = isset( $_GET['loeschen'] ) && 'ja' === $_GET['loeschen'];
+
+	if ( $laeuft ) {
+		check_admin_referer( 'dialos-spam-leeren' );
+	}
+
+	$offen = dialos_spam_zaehlen( 'flamingo-spam' );
+
+	echo '<div class="wrap"><h1>Flamingo-Spam leeren</h1>';
+
+	// --- Ein Haeppchen loeschen ---------------------------------
+	if ( $laeuft && $offen > 0 ) {
+		$ids = get_posts(
+			array(
+				'post_type'      => 'flamingo_inbound',
+				'post_status'    => 'flamingo-spam',
+				'posts_per_page' => DIALOS_AUFRAEUM_HAEPPCHEN,
+				'fields'         => 'ids',
+			)
+		);
+
+		foreach ( $ids as $id ) {
+			wp_delete_post( $id, true );
+		}
+
+		$offen = dialos_spam_zaehlen( 'flamingo-spam' );
+
+		printf(
+			'<p>%d gelöscht, <strong>%s</strong> übrig.</p>',
+			count( $ids ),
+			esc_html( number_format_i18n( $offen ) )
+		);
+
+		if ( $offen > 0 ) {
+			$weiter = wp_nonce_url(
+				admin_url( 'tools.php?page=dialos-spam-leeren&loeschen=ja' ),
+				'dialos-spam-leeren'
+			);
+			// Kein JavaScript, kein Warten im Hintergrund: Jeder
+			// Durchgang ist ein eigener Seitenaufruf mit eigener
+			// Laufzeit. Bricht einer ab, geht nur er verloren.
+			printf(
+				'<meta http-equiv="refresh" content="1;url=%s">'
+				. '<p>Der nächste Schwung läuft gleich automatisch. '
+				. '<a href="%s">Falls nicht, hier weiter.</a></p>',
+				esc_url( $weiter ),
+				esc_url( $weiter )
+			);
+			echo '</div>';
+			return;
+		}
+
+		echo '<p><strong>Fertig – der Spam-Ordner ist leer.</strong></p>';
+		echo '<p>Dieser Aufräumlauf kann jetzt wieder aus dem Theme entfernt werden.</p>';
+		echo '</div>';
+		return;
+	}
+
+	// --- Startseite mit Nachfrage -------------------------------
+	$papierkorb = dialos_spam_zaehlen( 'trash' );
+
+	printf(
+		'<p>Im Spam-Ordner liegen <strong>%s</strong> Nachrichten.</p>',
+		esc_html( number_format_i18n( $offen ) )
+	);
+
+	if ( 0 === $offen ) {
+		echo '<p>Nichts zu tun.</p></div>';
+		return;
+	}
+
+	echo '<p>Sie werden <strong>endgültig gelöscht</strong>, nicht in den '
+		. 'Papierkorb verschoben – das lässt sich nicht rückgängig machen. '
+		. 'Gelöscht wird ausschließlich, was als Spam markiert ist.</p>';
+
+	if ( $papierkorb > 0 ) {
+		printf(
+			'<p><em>Im Papierkorb liegen zusätzlich %s Einträge. Die bleiben '
+				. 'unberührt – darunter könnten Nachrichten sein, die von Hand '
+				. 'dorthin verschoben wurden.</em></p>',
+			esc_html( number_format_i18n( $papierkorb ) )
+		);
+	}
+
+	printf(
+		'<p><a href="%s" class="button button-primary">Jetzt löschen, in Schritten zu %d</a></p>',
+		esc_url(
+			wp_nonce_url(
+				admin_url( 'tools.php?page=dialos-spam-leeren&loeschen=ja' ),
+				'dialos-spam-leeren'
+			)
+		),
+		DIALOS_AUFRAEUM_HAEPPCHEN
+	);
+
+	printf(
+		'<p>Das sind etwa %d Durchgänge; die Seite lädt sich dafür selbst '
+			. 'immer wieder neu. Das Fenster offen lassen, bis „Fertig" '
+			. 'dasteht.</p>',
+		(int) ceil( $offen / DIALOS_AUFRAEUM_HAEPPCHEN )
+	);
+
+	echo '</div>';
+}
