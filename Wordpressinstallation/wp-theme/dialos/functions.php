@@ -1332,14 +1332,14 @@ function dialos_spam_erkennen( $spam, $submission ) {
  * einem Fehlalarm liesse sich nicht nachvollziehen, welche Regel
  * zugeschlagen hat.
  */
-function dialos_spam_vermerken( $submission, $grund ) {
+function dialos_spam_vermerken( $submission, $grund, $agent = 'dialos-spamschutz' ) {
 	if ( ! method_exists( $submission, 'add_spam_log' ) ) {
 		return;
 	}
 
 	$submission->add_spam_log(
 		array(
-			'agent'  => 'dialos-spamschutz',
+			'agent'  => $agent,
 			'reason' => $grund,
 		)
 	);
@@ -2303,14 +2303,14 @@ function dialos_rechennachweis_pruefen( $spam, $submission ) {
 	$loesung = isset( $_POST['dialos-pow-loesung'] ) ? sanitize_text_field( wp_unslash( $_POST['dialos-pow-loesung'] ) ) : '';
 
 	if ( '' === $aufgabe || '' === $siegel || '' === $loesung || $zeit <= 0 ) {
-		dialos_spam_vermerken( $submission, 'Kein Rechennachweis mitgeschickt.' );
+		dialos_spam_vermerken( $submission, 'Kein Rechennachweis mitgeschickt.', 'dialos-rechennachweis' );
 		return true;
 	}
 
 	// 1. Siegel - hash_equals statt == , damit die Pruefzeit nichts
 	//    ueber den richtigen Wert verraet.
 	if ( ! hash_equals( wp_hash( $aufgabe . '|' . $zeit ), $siegel ) ) {
-		dialos_spam_vermerken( $submission, 'Das Siegel der Rechenaufgabe stimmt nicht.' );
+		dialos_spam_vermerken( $submission, 'Das Siegel der Rechenaufgabe stimmt nicht.', 'dialos-rechennachweis' );
 		return true;
 	}
 
@@ -2319,7 +2319,7 @@ function dialos_rechennachweis_pruefen( $spam, $submission ) {
 	$alter = time() - $zeit;
 
 	if ( $alter < -60 || $alter > HOUR_IN_SECONDS ) {
-		dialos_spam_vermerken( $submission, sprintf( 'Rechenaufgabe ist %d Sekunden alt.', $alter ) );
+		dialos_spam_vermerken( $submission, sprintf( 'Rechenaufgabe ist %d Sekunden alt.', $alter ), 'dialos-rechennachweis' );
 		return true;
 	}
 
@@ -2328,7 +2328,7 @@ function dialos_rechennachweis_pruefen( $spam, $submission ) {
 	$anfang = str_repeat( '0', DIALOS_POW_NULLEN );
 
 	if ( 0 !== strpos( $summe, $anfang ) ) {
-		dialos_spam_vermerken( $submission, 'Die Loesung der Rechenaufgabe stimmt nicht.' );
+		dialos_spam_vermerken( $submission, 'Die Loesung der Rechenaufgabe stimmt nicht.', 'dialos-rechennachweis' );
 		return true;
 	}
 
@@ -2336,7 +2336,7 @@ function dialos_rechennachweis_pruefen( $spam, $submission ) {
 	$marke = 'dialos_pow_' . md5( $aufgabe );
 
 	if ( get_transient( $marke ) ) {
-		dialos_spam_vermerken( $submission, 'Die Rechenaufgabe wurde schon einmal eingereicht.' );
+		dialos_spam_vermerken( $submission, 'Die Rechenaufgabe wurde schon einmal eingereicht.', 'dialos-rechennachweis' );
 		return true;
 	}
 
@@ -2383,178 +2383,61 @@ function dialos_keine_bestaetigungsmail( $zusaetzliche ) {
 }
 
 /**
- * ==================================================================
- * EINMALIGER Aufräumlauf: Flamingos Spam-Ordner leeren
- * ==================================================================
+ * Bot-Abweisungen gar nicht erst in Flamingo ablegen (seit 2026-11-03).
  *
- * ZEITLICH BEGRENZT. Stephan am 03.11.2026: "bau den Aufraeumlauf, es
- * sind ueber 13000". Nach dem Durchlauf kommt dieser ganze Abschnitt
- * wieder heraus - dauerhaft scharfer Loeschcode gehoert nicht in ein
- * Theme, auch nicht hinter einer Rechtepruefung.
+ * Stephan am Abend des 03.11.2026, mit Blick auf sieben neue Eintraege
+ * binnen siebzehn Minuten: "Kommt schon wieder Spam rein". Im Eingang
+ * stand dabei eine Null - es kam also nichts mehr bei ihm an, der
+ * Schutz hielt. Aber der Spam-Ordner fuellte sich weiter, und genau den
+ * hatten wir am selben Abend von dreizehntausend Eintraegen befreit.
  *
- * Warum ueberhaupt: Von Hand ginge es auch, aber Flamingo zeigt je
- * Seite hoechstens ein paar hundert Eintraege, und das Kaestchen in der
- * Kopfzeile markiert nur die sichtbaren. Bei dreizehntausend waeren das
- * dutzende Durchgaenge - zweimal, weil Flamingo erst in den Papierkorb
- * verschiebt und man ihn danach noch leeren muss.
+ * Die Frage ist deshalb nicht, OB gespeichert wird, sondern WAS. Und da
+ * sind die Faelle nicht gleich:
  *
- * Die Zahl selbst ist bemerkenswert: 300 Nachrichten kamen als Mail an,
- * 13.000 wurden abgewiesen und nur gespeichert. Der Schutz hat also
- * laengst gearbeitet; sichtbar war nur, was durchkam.
+ *   Abgewiesen am Rechennachweis -> ein Mensch kann das nicht ausloesen.
+ *     Wer das Formular im Browser benutzt, bekommt die Aufgabe
+ *     automatisch. Fehlt der Nachweis ganz oder ist er falsch, war es
+ *     eine Maschine. Ein Fehlalarm ist hier nicht denkbar, also gibt es
+ *     auch nichts nachzulesen.
  *
- * Geloescht wird ENDGUELTIG (zweiter Parameter von wp_delete_post),
- * nicht in den Papierkorb - sonst waere hinterher derselbe Berg nur
- * woanders. Und ausschliesslich der Status `flamingo-spam`: Was jemand
- * von Hand in den Papierkorb gelegt hat, koennte eine echte Nachricht
- * sein und bleibt unangetastet.
+ *   Abgewiesen an einer Inhaltsregel -> hier KANN ein Mensch getroffen
+ *     worden sein. Vielleicht hat jemand einen Kurzlink mitgeschickt
+ *     oder heisst unglücklich. Diese Faelle bleiben gespeichert, denn
+ *     nur an ihnen laesst sich ein Fehlalarm ueberhaupt bemerken.
  *
- * Es laeuft in Haeppchen von 300 mit einem automatischen Neuladen
- * dazwischen. Ein Lauf ueber 13.000 Eintraege in einem Rutsch liefe in
- * die Laufzeitgrenze von PHP und braeche mittendrin ab - ohne dass man
- * wuesste, wo.
+ * Gehebelt wird an `wpcf7_flamingo_submit_if`. Contact Form 7 entscheidet
+ * damit, bei welchen Ergebnissen es Flamingo ueberhaupt bemueht; nehmen
+ * wir 'spam' heraus, entsteht kein Eintrag. Welche Regel zugeschlagen
+ * hat, steht im Spam-Protokoll der Einsendung - deshalb tragen die
+ * Abweisungen des Rechennachweises seit heute den eigenen Agenten
+ * `dialos-rechennachweis`.
+ *
+ * Der Zaehler im Dashboard zeigt danach nur noch die Faelle, bei denen
+ * ein Blick sich lohnt. Dass der Bot weiter anklopft, sieht man daran
+ * nicht mehr - aber das ist auch nicht die Frage, die beantwortet
+ * werden muss. Die Frage ist, ob jemand faelschlich abgewiesen wurde.
  */
+add_filter( 'wpcf7_flamingo_submit_if', 'dialos_bots_nicht_ablegen' );
 
-const DIALOS_AUFRAEUM_HAEPPCHEN = 300;
-
-add_action( 'admin_menu', 'dialos_aufraeumseite_anmelden' );
-
-function dialos_aufraeumseite_anmelden() {
-	add_submenu_page(
-		'tools.php',
-		'Flamingo-Spam leeren',
-		'Flamingo-Spam leeren',
-		'manage_options',
-		'dialos-spam-leeren',
-		'dialos_aufraeumseite_zeigen'
-	);
-}
-
-/**
- * Zaehlt, wie viele Eintraege in einem Zustand liegen.
- */
-function dialos_spam_zaehlen( $status ) {
-	if ( ! post_type_exists( 'flamingo_inbound' ) ) {
-		return 0;
+function dialos_bots_nicht_ablegen( $faelle ) {
+	if ( ! class_exists( 'WPCF7_Submission' ) ) {
+		return $faelle;
 	}
 
-	$abfrage = new WP_Query(
-		array(
-			'post_type'      => 'flamingo_inbound',
-			'post_status'    => $status,
-			'posts_per_page' => 1,
-			'fields'         => 'ids',
-		)
-	);
+	$einsendung = WPCF7_Submission::get_instance();
 
-	return (int) $abfrage->found_posts;
-}
-
-function dialos_aufraeumseite_zeigen() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
+	if ( ! $einsendung || ! method_exists( $einsendung, 'get_spam_log' ) ) {
+		return $faelle;
 	}
 
-	$laeuft = isset( $_GET['loeschen'] ) && 'ja' === $_GET['loeschen'];
-
-	if ( $laeuft ) {
-		check_admin_referer( 'dialos-spam-leeren' );
-	}
-
-	$offen = dialos_spam_zaehlen( 'flamingo-spam' );
-
-	echo '<div class="wrap"><h1>Flamingo-Spam leeren</h1>';
-
-	// --- Ein Haeppchen loeschen ---------------------------------
-	if ( $laeuft && $offen > 0 ) {
-		$ids = get_posts(
-			array(
-				'post_type'      => 'flamingo_inbound',
-				'post_status'    => 'flamingo-spam',
-				'posts_per_page' => DIALOS_AUFRAEUM_HAEPPCHEN,
-				'fields'         => 'ids',
-			)
-		);
-
-		foreach ( $ids as $id ) {
-			wp_delete_post( $id, true );
+	foreach ( (array) $einsendung->get_spam_log() as $eintrag ) {
+		if ( isset( $eintrag['agent'] ) && 'dialos-rechennachweis' === $eintrag['agent'] ) {
+			// 'spam' herausnehmen: Diese Einsendung wird nicht abgelegt.
+			// Die anderen Faelle (mail_sent, mail_failed) bleiben, sonst
+			// verschwaenden auch die echten Anfragen.
+			return array_values( array_diff( $faelle, array( 'spam' ) ) );
 		}
-
-		$offen = dialos_spam_zaehlen( 'flamingo-spam' );
-
-		printf(
-			'<p>%d gelöscht, <strong>%s</strong> übrig.</p>',
-			count( $ids ),
-			esc_html( number_format_i18n( $offen ) )
-		);
-
-		if ( $offen > 0 ) {
-			$weiter = wp_nonce_url(
-				admin_url( 'tools.php?page=dialos-spam-leeren&loeschen=ja' ),
-				'dialos-spam-leeren'
-			);
-			// Kein JavaScript, kein Warten im Hintergrund: Jeder
-			// Durchgang ist ein eigener Seitenaufruf mit eigener
-			// Laufzeit. Bricht einer ab, geht nur er verloren.
-			printf(
-				'<meta http-equiv="refresh" content="1;url=%s">'
-				. '<p>Der nächste Schwung läuft gleich automatisch. '
-				. '<a href="%s">Falls nicht, hier weiter.</a></p>',
-				esc_url( $weiter ),
-				esc_url( $weiter )
-			);
-			echo '</div>';
-			return;
-		}
-
-		echo '<p><strong>Fertig – der Spam-Ordner ist leer.</strong></p>';
-		echo '<p>Dieser Aufräumlauf kann jetzt wieder aus dem Theme entfernt werden.</p>';
-		echo '</div>';
-		return;
 	}
 
-	// --- Startseite mit Nachfrage -------------------------------
-	$papierkorb = dialos_spam_zaehlen( 'trash' );
-
-	printf(
-		'<p>Im Spam-Ordner liegen <strong>%s</strong> Nachrichten.</p>',
-		esc_html( number_format_i18n( $offen ) )
-	);
-
-	if ( 0 === $offen ) {
-		echo '<p>Nichts zu tun.</p></div>';
-		return;
-	}
-
-	echo '<p>Sie werden <strong>endgültig gelöscht</strong>, nicht in den '
-		. 'Papierkorb verschoben – das lässt sich nicht rückgängig machen. '
-		. 'Gelöscht wird ausschließlich, was als Spam markiert ist.</p>';
-
-	if ( $papierkorb > 0 ) {
-		printf(
-			'<p><em>Im Papierkorb liegen zusätzlich %s Einträge. Die bleiben '
-				. 'unberührt – darunter könnten Nachrichten sein, die von Hand '
-				. 'dorthin verschoben wurden.</em></p>',
-			esc_html( number_format_i18n( $papierkorb ) )
-		);
-	}
-
-	printf(
-		'<p><a href="%s" class="button button-primary">Jetzt löschen, in Schritten zu %d</a></p>',
-		esc_url(
-			wp_nonce_url(
-				admin_url( 'tools.php?page=dialos-spam-leeren&loeschen=ja' ),
-				'dialos-spam-leeren'
-			)
-		),
-		DIALOS_AUFRAEUM_HAEPPCHEN
-	);
-
-	printf(
-		'<p>Das sind etwa %d Durchgänge; die Seite lädt sich dafür selbst '
-			. 'immer wieder neu. Das Fenster offen lassen, bis „Fertig" '
-			. 'dasteht.</p>',
-		(int) ceil( $offen / DIALOS_AUFRAEUM_HAEPPCHEN )
-	);
-
-	echo '</div>';
+	return $faelle;
 }
