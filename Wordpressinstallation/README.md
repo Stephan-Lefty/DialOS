@@ -110,11 +110,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.25`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.28`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.25.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.28.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -174,6 +174,9 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.23 | 22.10.2026 | Zugriffszahlen im Dashboard (Woche, 90 Tage, Jahr, gesamt, Herkunftsländer) – siehe [Dashboard-Blöcke](#dashboard-blöcke) |
 | 1.6.24 | 22.10.2026 | Dashboard auf fünf einzelne Blöcke aufgeteilt, dazu Kontaktformular-Zähler, meistbesuchte Seiten und Verweisquellen |
 | 1.6.25 | 22.10.2026 | Absendername in Flamingo: `[your-name]` stand dort als Platzhalter, weil unser Formular Vor- und Nachname getrennt führt |
+| 1.6.26 | 03.11.2026 | Gesamtbremse, Sperre für gekürzte Verweise, Bot-Signatur als Punktesystem – nach rund 300 Werbenachrichten an zwei Tagen |
+| 1.6.27 | 03.11.2026 | **Rechennachweis** vor dem Absenden – siehe [Rechennachweis](#rechennachweis) |
+| 1.6.28 | 03.11.2026 | Keine Bestätigungsmail mehr an den Absender |
 
 ## Spamschutz
 
@@ -194,14 +197,22 @@ Editor umbaut – und fällt dann wieder lautlos aus. Im Theme gilt er für alle
 Formulare, liegt im Git und fällt beim Dateivergleich auf, wenn ihn jemand
 entfernt.
 
-### Die vier Schichten
+### Die sieben Schichten
 
-| # | Regel | Greift bei |
-|---|---|---|
-| 1 | Höchstens fünf Absendungen je Stunde und Quelle | Massenangriff, auch wenn er alle Inhaltsregeln umschifft |
-| 2 | Verstecktes Feld (Honigtopf) in jedem Formular | Bots, die stumpf jedes Eingabefeld füllen |
-| 3 | Verweise in Vorname, Nachname, Anrede, Firma, Abteilung, Betreff | Werbung, die den Link im Betreff unterbringt |
-| 4 | Betreff oder Nachricht ohne einen einzigen lateinischen Buchstaben | Fremdsprachige Massenwerbung |
+| # | Regel | Greift bei | seit |
+|---|---|---|---|
+| 0 | **Rechennachweis** – der Browser muss vor dem Absenden eine Prüfsumme finden | jedem, der nicht durch das echte Formular kommt | 1.6.27 |
+| 1 | Höchstens **zwanzig** Einsendungen je Stunde **insgesamt** | Massenversand über viele Anschlüsse | 1.6.26 |
+| 2 | Höchstens fünf Absendungen je Stunde und Quelle | Wiederholungstäter von einem Anschluss | 1.6.20 |
+| 3 | Verstecktes Feld (Honigtopf) in jedem Formular | Bots, die stumpf jedes Eingabefeld füllen | 1.6.20 |
+| 4 | Verweise in Vorname, Nachname, Anrede, Firma, Abteilung, Betreff | Werbung, die den Link im Betreff unterbringt | 1.6.20 |
+| 5 | **Gekürzte Verweise** (tinyurl, bit.ly und vierzehn weitere) im Nachrichtentext | Werbung, die das Ziel versteckt | 1.6.26 |
+| 6 | **Bot-Signatur** als Punktesystem (Namenswiederholung, Konzernname, Verweis) | demselben Absender in neuer Verkleidung | 1.6.26 |
+| 7 | Betreff oder Nachricht ohne einen einzigen lateinischen Buchstaben | fremdsprachige Massenwerbung | 1.6.20 |
+
+**Schicht 0 ist die wichtigste**, weil sie als einzige nicht vom Inhalt abhängt –
+siehe [Rechennachweis](#rechennachweis). Alles andere erkennt Spam daran, *was*
+jemand schreibt, und Inhalt kann ein Angreifer ändern.
 
 **Zu Schicht 1:** Gespeichert wird nicht die IP-Adresse, sondern nur ihr Hash
 über `wp_hash()`; die Marke verfällt nach einer Stunde von selbst. Fünf ist
@@ -252,6 +263,76 @@ Projekt antritt.
 Sprachsteuerung oder Screenreader ausfüllt, braucht ein Vielfaches der Zeit
 eines Sehenden – eine Untergrenze wäre eine Barriere. Eine Obergrenze wäre
 wegen WP Super Cache ohnehin nicht verlässlich.
+
+### Rechennachweis
+
+**Alles andere erkennt Spam am Inhalt – und Inhalt kann ein Angreifer ändern.**
+Am 03.11.2026 kamen rund 300 Nachrichten durch, alle mit demselben Betreff
+„I promised.", und der Absender hätte nur den Verkürzer weglassen und sich
+anders nennen müssen, um auch 1.6.26 zu umgehen.
+
+Seit 1.6.27 muss der Browser vor dem Absenden eine Zahl finden, deren
+SHA-256-Summe mit drei Nullen beginnt. Die Aufgabe kommt von
+`dialos/v1/rechenaufgabe` und trägt ein Siegel aus `wp_hash()`. Geprüft werden
+vier Dinge: Siegel echt, Aufgabe jünger als eine Stunde, Lösung richtig – und
+**noch nicht benutzt**. Ohne das Letzte wäre alles wertlos: einmal rechnen,
+tausendfach senden.
+
+**Worin der Schutz wirklich besteht** – und das ist nicht das Naheliegende.
+Gemessen: Eine Lösung kostet im Mittel rund zweitausend Prüfsummen, in PHP
+gerechnet 0,000 Sekunden. Als *Rechenbremse* taugt das gegen ein natives
+Skript nichts. Der Wert liegt woanders: Der Bot postet stumpf an
+`/wp-json/contact-form-7/v1/contact-forms/49/feedback`, ohne die Seite je zu
+laden, und hat damit weder Aufgabe noch Siegel noch Lösung. Durchkommen würde
+er nur, wenn er seinen Code eigens für dialos.org umbaut – für eine Seite mit
+ein bis zwei echten Anfragen die Woche lohnt das niemandem.
+
+Eine höhere Schwierigkeit würde daran nichts bessern, aber echte Besucher
+treffen: Die Krypto-Funktion im Browser ist um ein Vielfaches langsamer als
+natives Hashen. Deshalb bleibt es bei drei Nullen.
+
+**Die Aufgabe kommt über einen Endpunkt, nicht im Seitentext** – WP Super
+Cache liefert die Kontaktseite aus dem Speicher (die Antwort trägt wörtlich
+„Cached page"), eine eingebettete Aufgabe wäre für alle Besucher dieselbe.
+
+**Zur Barrierefreiheit:** nichts zu sehen, nichts zu hören, nichts zu tun. Nur
+so ist das Verfahren für diese Zielgruppe vertretbar. Gebraucht wird
+JavaScript; ohne erscheint ein `<noscript>`-Hinweis mit der Mailadresse, damit
+niemand vor einem stummen Knopf sitzt.
+
+**Kein fertiges Plugin, und warum:** Altcha gibt es im WordPress-Verzeichnis
+nicht (geprüft, unter keinem Namen auffindbar). Friendly Captcha könnte es,
+braucht aber Account und fremden Server – das widerspricht der
+Datensparsamkeit oben und hätte einen neuen Abschnitt in beiden
+Datenschutzerklärungen gebraucht.
+
+### Keine Bestätigungsmail an den Absender
+
+Seit 1.6.28 abgeschaltet, über den Filter `wpcf7_additional_mail` im Theme –
+**nicht** über das Häkchen im Formular-Editor, das beim nächsten Umbau wieder
+gesetzt sein kann.
+
+Der Grund führte sich selbst vor: Ein Testlauf gab `test@example.com` an, und
+der Server verschickte brav eine Bestätigung dorthin, die als unzustellbar
+zurückkam. Bei einer **echten** fremden Adresse wäre sie zugestellt worden –
+und genau das ist bei den 300 Spam-Nachrichten passiert, mit Adressen wie
+`tammyraems@gmail.com`. So gerät eine Domain auf Sperrlisten, und dann kommen
+auch die echten Mails nicht mehr an.
+
+Die Bestätigung im Browser bleibt; sie kommt von Contact Form 7 selbst. Die
+Mail an Stephan läuft ebenfalls weiter.
+
+### Was ein Formular NICHT stilllegt
+
+**Es von der Seite zu nehmen.** Am 03.11.2026 wurden beide Kontaktseiten
+umgebaut – Formular raus, Mailadresse hin. Zwei Minuten später kam die nächste
+Spam-Nachricht.
+
+Der Bot ruft die Seite gar nicht auf. Er kennt die Formular-ID und postet
+direkt an den REST-Endpunkt. Ein Testaufruf dorthin antwortete mit HTTP 415
+statt 404 – der Endpunkt lebt unabhängig davon, ob irgendwo ein Formular
+eingebunden ist. Wer ein Formular wirklich stilllegen will, muss es löschen
+oder filtern.
 
 ### Wo die aussortierten Nachrichten landen
 
@@ -431,6 +512,29 @@ Adresse direkt aufruft, ohne je gesucht zu haben, ist in dieser Menge fast
 immer ein Programm. Die 463 Besuche des Jahres sind realistisch eher 200.
 
 ## Änderungsprotokoll
+
+### 0.7.0 (03.11.2026)
+- **Rund 300 Werbenachrichten an zwei Tagen**, alle über das Kontaktformular,
+  alle mit dem Betreff „I promised." – derselbe Absender wie am 22.10., nur
+  auf Englisch statt Russisch. Der Schutz aus 1.6.20 ließ sie durch: Text
+  lateinisch, Kurzfelder ohne Verweise, Honigtopf leer, und die Mengenbremse
+  zählt je Anschluss.
+- **Drei neue Schichten** (1.6.26): Gesamtbremse über alle Absender, Sperre
+  für gekürzte Verweise im Nachrichtentext, Bot-Signatur als Punktesystem.
+- **Der eigentliche Schutz** (1.6.27): ein [Rechennachweis](#rechennachweis)
+  vor dem Absenden. Er fragt nicht mehr, *was* jemand schreibt, sondern *ob
+  er überhaupt durch das Formular gekommen ist* – und hält damit auch, wenn
+  der nächste Bot anders formuliert. Ohne Bild, ohne Rätsel, ohne Zutun des
+  Besuchers.
+- **Keine Bestätigungsmail mehr an Absender** (1.6.28). Bei den 300
+  Nachrichten hatte dialos.org ebenso viele „Danke für deine Nachricht" an
+  Menschen geschickt, die nie geschrieben hatten.
+- **Gelernt:** Ein Formular von der Seite zu nehmen legt es nicht still –
+  siehe [Was ein Formular NICHT stilllegt](#was-ein-formular-nicht-stilllegt).
+- **Zwei eigene Irrtümer, beide im Quelltext festgehalten:** Altcha als
+  Plugin vorgeschlagen, ohne zu prüfen, ob es das gibt (gibt es nicht). Und
+  den Rechennachweis als „Rechenbremse" begründet – die eigene Messung
+  widerlegte das, der Wert liegt woanders.
 
 ### 0.6.0 (22.10.2026)
 - **Spamschutz für die Kontaktformulare** (Theme 1.6.20), nachdem in der Nacht
