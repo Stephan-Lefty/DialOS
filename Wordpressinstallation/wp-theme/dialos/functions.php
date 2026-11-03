@@ -2344,3 +2344,40 @@ function dialos_rechennachweis_pruefen( $spam, $submission ) {
 
 	return false;
 }
+
+/**
+ * Keine Bestaetigungsmail mehr an den Absender (seit 2026-11-03).
+ *
+ * Stephan am 03.11.2026: "Bestaetigungsmail abschalten und nur eine
+ * Bestaetigung im Browser, dass die Nachricht raus gegangen ist."
+ *
+ * Der Anlass ist der Spam-Ansturm desselben Tages. Das Formular traegt
+ * die Absenderadresse nicht nach, es glaubt sie - und der Bot setzte
+ * fremde Adressen ein (tammyraems@gmail.com,
+ * christian.stammer@freenet.de). Bei rund 300 Nachrichten hat
+ * dialos.org also rund 300 "Danke fuer deine Nachricht" an Menschen
+ * geschickt, die nie geschrieben haben. Das ist nicht nur laestig fuer
+ * sie: Genau so geraet eine Domain auf Sperrlisten, und dann kommen
+ * auch die echten Mails nicht mehr an.
+ *
+ * Der Filter sitzt an `wpcf7_additional_mail`, also direkt vor dem
+ * Versand und NICHT im Formular-Editor. Dort waere es ein Haekchen,
+ * das beim naechsten Umbau versehentlich wieder gesetzt ist, ohne dass
+ * es jemandem auffaellt - dieselbe Fehlerklasse wie das vergessene
+ * Honigtopf-Tag, das die ganze Geschichte ausgeloest hat. Hier steht
+ * es im Git.
+ *
+ * Die Meldung im Browser ("Vielen Dank fuer deine Nachricht. Sie wurde
+ * gesendet.") bleibt unberuehrt - die kommt von Contact Form 7 selbst
+ * und hat mit dem Mailversand nichts zu tun.
+ *
+ * Die Mail an Stephan selbst (`mail`) laeuft weiter; dieser Filter
+ * sieht sie gar nicht, er bekommt nur die zusaetzlichen.
+ */
+add_filter( 'wpcf7_additional_mail', 'dialos_keine_bestaetigungsmail' );
+
+function dialos_keine_bestaetigungsmail( $zusaetzliche ) {
+	unset( $zusaetzliche['mail_2'] );
+
+	return $zusaetzliche;
+}
