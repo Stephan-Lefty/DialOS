@@ -1098,6 +1098,36 @@ function dialos_spam_erkennen( $spam, $submission ) {
 		}
 	}
 
+	// --- 1b. Gesamtbremse ueber alle Absender ----------------------
+	//
+	// Nachgetragen am 03.11.2026: Stephan meldet rund 300 Nachrichten
+	// an zwei Tagen. Die Bremse oben zaehlt JE Internetanschluss und
+	// hat nicht gegriffen - der Absender verteilt also ueber viele
+	// Adressen, wie es ein Botnetz tut. Gegen so etwas hilft keine
+	// Regel, die pro Quelle zaehlt.
+	//
+	// Diese hier zaehlt ALLE Einsendungen zusammen. Zwanzig in der
+	// Stunde sind fuer dialos.org weit jenseits des Normalen - hier
+	// kommen sonst ein bis zwei Anfragen in der Woche an. Bei 300
+	// Nachrichten in zwei Tagen (gut sechs je Stunde im Schnitt, in
+	// Schueben deutlich mehr) schlaegt sie zu.
+	//
+	// Der Preis, und er ist der Grund fuer die hohe Schwelle: Nach
+	// einem Zeitungsbericht oder einem Beitrag, der die Runde macht,
+	// koennten echte Anfragen in Schueben kommen. Zwanzig je Stunde
+	// erreicht aber auch dann kaum jemand, und wer abgewiesen wird,
+	// bekommt die Bitte, es spaeter zu versuchen.
+	$gesamt = (int) get_transient( 'dialos_formular_gesamt' );
+	set_transient( 'dialos_formular_gesamt', $gesamt + 1, HOUR_IN_SECONDS );
+
+	if ( $gesamt >= 20 ) {
+		dialos_spam_vermerken(
+			$submission,
+			sprintf( 'Mehr als zwanzig Einsendungen in einer Stunde (insgesamt %d).', $gesamt )
+		);
+		return true;
+	}
+
 	// --- 2. Honigtopf ----------------------------------------------
 	//
 	// Das Feld ist fuer Menschen unsichtbar und nicht erreichbar. Steht
@@ -1185,6 +1215,111 @@ function dialos_spam_erkennen( $spam, $submission ) {
 			);
 			return true;
 		}
+	}
+
+	// --- 5. Gekuerzte Verweise im Nachrichtentext ------------------
+	//
+	// Nachgetragen am 03.11.2026, nachdem eine Werbenachricht durch
+	// alle vier Schichten gekommen war. Der Verweis stand im
+	// Nachrichtentext, und der war bis dahin bewusst ausgenommen -
+	// dort kann ein Verweis ja legitim sein.
+	//
+	// Fuer GEKUERZTE Verweise gilt das nicht. Wer ernsthaft Kontakt
+	// aufnimmt, verlinkt seine eigene Seite und versteckt das Ziel
+	// nicht hinter einem Dienst, der es erst beim Klicken verraet. Der
+	// Mailserver des Hosters sieht das genauso: Fuer den tinyurl-Link
+	// allein gab SpamAssassin 3,3 Punkte, dazu 2,0 dafuer, dass der
+	// Dienst wegen Missbrauchs gesperrt ist.
+	$verkuerzer = array(
+		'tinyurl.com', 'bit.ly', 'is.gd', 't.co', 'goo.gl', 'ow.ly',
+		'cutt.ly', 'rb.gy', 'rebrand.ly', 'shorturl.at', 'tiny.cc',
+		's.id', 'buff.ly', 't.ly', 'short.io', 'lnkd.in',
+	);
+
+	$nachricht = isset( $daten['your-message'] ) && is_string( $daten['your-message'] )
+		? strtolower( $daten['your-message'] )
+		: '';
+
+	foreach ( $verkuerzer as $dienst ) {
+		if ( false !== strpos( $nachricht, $dienst ) ) {
+			dialos_spam_vermerken(
+				$submission,
+				sprintf( 'Gekuerzter Verweis (%s) im Nachrichtentext.', $dienst )
+			);
+			return true;
+		}
+	}
+
+	// --- 6. Die Signatur des Formular-Bots -------------------------
+	//
+	// Die Welle vom 22.10.2026 und die Nachricht vom 03.11.2026 kamen
+	// vom selben Absender - nur einmal auf Russisch, einmal auf
+	// Englisch. Nebeneinandergelegt faellt das Muster auf:
+	//
+	//            22.10. (russisch)   03.11. (englisch)
+	//   Vorname  Sermchic            Nelsfedy
+	//   Nachname Sermchic            Nelsfedy     <- gleich dem Vornamen
+	//   Firma    google              google
+	//   Abteilung Sermchic           Nelsfedy     <- auch gleich
+	//
+	// Keines dieser Merkmale reicht fuer sich: "Thomas Thomas" gibt es
+	// als Namen, bei Google arbeiten Menschen, und ein Verweis im
+	// Nachrichtentext kann voellig in Ordnung sein. Deshalb hier keine
+	// harte Regel, sondern Punkte - erst die Haeufung entscheidet.
+	//
+	// Gerechnet am Fall vom 03.11.: 2 + 2 + 2 + 2 = 8 Punkte.
+	// Eine echte Anfrage mit einem Verweis auf die eigene Seite: 2.
+	// Die Schwelle liegt bei 4, also genau zwischen beidem.
+	$punkte  = 0;
+	$gruende = array();
+
+	$normal = static function ( $wert ) {
+		return is_string( $wert ) ? strtolower( trim( $wert ) ) : '';
+	};
+
+	$vorname   = $normal( $daten['your-firstname'] ?? '' );
+	$nachname  = $normal( $daten['your-lastname'] ?? '' );
+	$abteilung = $normal( $daten['department'] ?? '' );
+	$firma     = $normal( $daten['company'] ?? '' );
+
+	if ( '' !== $vorname && $vorname === $nachname ) {
+		$punkte += 2;
+		$gruende[] = 'Vorname und Nachname sind identisch';
+	}
+
+	if ( '' !== $abteilung && ( $abteilung === $vorname || $abteilung === $nachname ) ) {
+		$punkte += 2;
+		$gruende[] = 'Die Abteilung wiederholt den Namen';
+	}
+
+	// Nur EIN Punkt, und das ist der Unterschied zwischen einem
+	// brauchbaren und einem schaedlichen Filter. Beim Probelauf flog
+	// mit zwei Punkten ein erfundener, aber voellig moeglicher Fall
+	// heraus: ein Mensch namens "Thomas Thomas", der einen Verweis auf
+	// sein Blog mitschickt - zusammen vier Punkte und damit
+	// aussortiert. Ein Verweis im Nachrichtentext ist das SCHWAECHSTE
+	// Signal von allen; er kommt in echten Anfragen staendig vor.
+	if ( '' !== $nachricht && preg_match( '#https?://|www\.#i', $nachricht ) ) {
+		$punkte += 1;
+		$gruende[] = 'Verweis im Nachrichtentext';
+	}
+
+	// Ein Weltkonzern als Firma, ohne dass es um ihn ginge. Echte
+	// Anfragen von dort gaebe es theoretisch - sie kaemen aber kaum
+	// mit einem Vornamen als Abteilung und einem Verweis im Text.
+	$konzerne = array( 'google', 'facebook', 'meta', 'amazon', 'microsoft', 'apple', 'yahoo', 'tiktok' );
+
+	if ( in_array( $firma, $konzerne, true ) ) {
+		$punkte += 2;
+		$gruende[] = sprintf( 'Firma "%s"', $firma );
+	}
+
+	if ( $punkte >= 4 ) {
+		dialos_spam_vermerken(
+			$submission,
+			sprintf( '%d Punkte: %s.', $punkte, implode( ', ', $gruende ) )
+		);
+		return true;
 	}
 
 	return false;
