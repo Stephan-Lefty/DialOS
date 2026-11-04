@@ -110,11 +110,11 @@ Verzeichnis.
 keine Theme-Dateien schreiben; es gibt keinen zweiten Weg und keinen
 SSH-Zugang. Ablauf:
 
-1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.28`). **Ohne
+1. Version im Kopf von `style.css` hochzählen (`Version: 1.6.30`). **Ohne
    das greift die Änderung nicht** – siehe die Cache-Marke unten.
 2. Archiv packen, mit dem Ordner `dialos/` darin:
    ```bash
-   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.28.zip dialos
+   cd wp-theme && zip -rq ~/Schreibtisch/dialos-theme-1.6.30.zip dialos
    ```
 3. Ältere ZIPs von der Arbeitsfläche löschen, sonst wird die falsche
    hochgeladen.
@@ -177,6 +177,8 @@ Commit-Nachrichten und als Begründung im Quelltext.
 | 1.6.26 | 03.11.2026 | Gesamtbremse, Sperre für gekürzte Verweise, Bot-Signatur als Punktesystem – nach rund 300 Werbenachrichten an zwei Tagen |
 | 1.6.27 | 03.11.2026 | **Rechennachweis** vor dem Absenden – siehe [Rechennachweis](#rechennachweis) |
 | 1.6.28 | 03.11.2026 | Keine Bestätigungsmail mehr an den Absender |
+| 1.6.29 | 03.11.2026 | Einmaliger Aufräumlauf für Flamingos Spam-Ordner (13.000 Einträge) – in 1.6.30 wieder entfernt |
+| 1.6.30 | 03.11.2026 | Bot-Abweisungen werden nicht mehr abgelegt, Inhaltsregel-Fälle schon – siehe [Was gespeichert wird](#was-gespeichert-wird) |
 
 ## Spamschutz
 
@@ -305,6 +307,33 @@ nicht (geprüft, unter keinem Namen auffindbar). Friendly Captcha könnte es,
 braucht aber Account und fremden Server – das widerspricht der
 Datensparsamkeit oben und hätte einen neuen Abschnitt in beiden
 Datenschutzerklärungen gebraucht.
+
+### Was gespeichert wird
+
+**Nicht jede Abweisung ist es wert, aufbewahrt zu werden.** Am Abend des
+03.11.2026 war der Spam-Ordner gerade von 13.000 Einträgen befreit – und füllte
+sich binnen siebzehn Minuten mit sieben neuen. Im Eingang stand dabei eine
+Null: Es kam nichts mehr an, gespeichert wurde trotzdem jeder Versuch.
+
+Seit 1.6.30 wird deshalb unterschieden:
+
+| Abgewiesen am … | gespeichert? | warum |
+|---|---|---|
+| **Rechennachweis** | nein | Ein Mensch kann das nicht auslösen – wer das Formular im Browser benutzt, bekommt die Aufgabe automatisch. Fehlt sie, war es eine Maschine. Ein Fehlalarm ist nicht denkbar. |
+| **Inhaltsregel** | ja | Hier *kann* ein Mensch getroffen worden sein. Nur an diesen Fällen lässt sich ein Fehlalarm überhaupt bemerken. |
+
+Gehebelt wird an `wpcf7_flamingo_submit_if`; welche Regel zugeschlagen hat,
+steht im Spam-Protokoll der Einsendung. Dafür tragen die Abweisungen des
+Rechennachweises den eigenen Agenten `dialos-rechennachweis`.
+
+**Bewusst nicht einfach alles weggelassen:** Dann verlöre der
+Kontaktformular-Block im Dashboard seinen Sinn. Er soll ja gerade zeigen, wenn
+der Filter jemanden fälschlich erwischt. Bleibt er bei null, ist alles in
+Ordnung – steht dort etwas, lohnt das Nachsehen.
+
+**Am 04.11.2026 belegt:** Zwei Testabsendungen, beide abgewiesen, aber aus
+verschiedenen Gründen. Am nächsten Morgen stand genau eine davon in Flamingo –
+die mit der Inhaltsregel. Die Bot-Abweisung war spurlos verschwunden.
 
 ### Keine Bestätigungsmail an den Absender
 
@@ -535,6 +564,13 @@ immer ein Programm. Die 463 Besuche des Jahres sind realistisch eher 200.
   Plugin vorgeschlagen, ohne zu prüfen, ob es das gibt (gibt es nicht). Und
   den Rechennachweis als „Rechenbremse" begründet – die eigene Messung
   widerlegte das, der Wert liegt woanders.
+- **13.000 Einträge im Spam-Ordner** – 300 kamen als Mail an, der Rest wurde
+  abgewiesen und nur gespeichert. Mit einem einmaligen Aufräumlauf (1.6.29)
+  geleert, der danach wieder entfernt wurde. Seit 1.6.30 werden
+  Bot-Abweisungen gar nicht erst abgelegt, Inhaltsregel-Fälle schon – siehe
+  [Was gespeichert wird](#was-gespeichert-wird).
+- **Am Morgen des 04.11.2026 bestätigt:** über Nacht kein Spam durchgekommen,
+  und in Flamingo stand genau der eine Testeintrag, der dort stehen sollte.
 
 ### 0.6.0 (22.10.2026)
 - **Spamschutz für die Kontaktformulare** (Theme 1.6.20), nachdem in der Nacht
