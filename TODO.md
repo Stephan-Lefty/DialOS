@@ -146,8 +146,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     `dialos-notiz.py`, unter der Mikrofon-Marke); sonst nur „Die Nachrichten
     sind zu Ende." Hat der Nutzer umgeschaltet oder „Radio abstellen" gesagt,
     schweigt er. Am Gerät: Ende um 12:01:13 erkannt, gefragt, ohne Antwort
-    zweimal nachgefragt, dann „Ich habe nichts verstanden ...". **Offen: die
-    Probe mit „ja"** (Stephan war nicht am Platz).
+    zweimal nachgefragt, dann „Ich habe nichts verstanden ...". **Probe mit
+    „ja" am selben Tag bestanden** (12:07:38 erkannt, Ö1 kam wieder). Dabei
+    fiel auf: Michaels „Ö1." wurde vom Sender übertönt - behoben, auch beim
+    Radio jetzt erst ansagen, dann abspielen. **Mit Stephans Stimme abgenommen
+    (12:29-12:30):** „Radio abstellen", „Radio einschalten" (Ansage vor dem
+    Sender) und der neue Satz „Radio stoppen".
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort
