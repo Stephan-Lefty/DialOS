@@ -138,8 +138,16 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Rhythmbox startete. `vorwaermen()` startet es jetzt während der Ansage
     (`rhythmbox-client --pause`, ohne Ton und Fenster) - gemessen: **0,16 s**.
     Nach dem Ende der Folge steht Rhythmbox auf „Stopped", es folgt nichts
-    nach (gemessen 20 s lang). Ein vorher laufendes Radio kommt nicht wieder -
-    ob es das soll, entscheidet Stephan.
+    nach (gemessen 20 s lang). Ein vorher laufendes Radio kam nicht wieder.
+    **Entschieden und gebaut** (Stephan: „2 und 3 verbinden ... und vielleicht
+    den Nutzer fragen"): Ein Wächter (`dialos-radio.py nachrichten-ende`)
+    wartet auf das Ende. Lief vorher ein Sender: „Die Nachrichten sind zu Ende.
+    Soll ich Ö1 wieder einschalten? Sage ja oder nein." (Rückfrage aus
+    `dialos-notiz.py`, unter der Mikrofon-Marke); sonst nur „Die Nachrichten
+    sind zu Ende." Hat der Nutzer umgeschaltet oder „Radio abstellen" gesagt,
+    schweigt er. Am Gerät: Ende um 12:01:13 erkannt, gefragt, ohne Antwort
+    zweimal nachgefragt, dann „Ich habe nichts verstanden ...". **Offen: die
+    Probe mit „ja"** (Stephan war nicht am Platz).
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort

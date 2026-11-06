@@ -147,6 +147,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **After the news Michael asks what to do next** (2026-11-06, Stephan's
+  request). Until now the end of a news episode was followed by silence - not
+  even the radio that was playing before came back. Now: "Die Nachrichten sind
+  zu Ende. Soll ich Ö1 wieder einschalten? Sage ja oder nein." - or, if
+  nothing was playing before, just "Die Nachrichten sind zu Ende." Anyone who
+  switches or says "Radio abstellen" in between gets no notice. Rhythmbox
+  also starts during the announcement now: the gap before the first sound
+  fell from 2.3 to 0.16 s. Tests: `tests/test_folgen.py`.
 - **A new track stayed silent after an announcement** (2026-11-06, Stephan:
   "nothing's coming"). If Rhythmbox switched tracks during an announcement,
   the new audio stream started out muted - PipeWire carries the mute over per

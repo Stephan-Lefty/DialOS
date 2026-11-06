@@ -136,6 +136,136 @@ def laeuft():
         return False
 
 
+# NACH DEN NACHRICHTEN (Stephan, 2026-11-06: "2 und 3 verbinden ... und
+# vielleicht den Nutzer fragen, was jetzt gemacht werden soll"). Gemessen vorher:
+# Nach dem Ende der Folge stand Rhythmbox auf "Stopped", und es kam nichts - auch
+# nicht das Radio, das vor den Nachrichten lief. Fuer jemanden, der nichts sieht,
+# ist diese Stille nicht von einem Fehler zu unterscheiden.
+#
+# Ein Waechter laeuft getrennt weiter, bis die Folge zu Ende ist. Lief vorher ein
+# Sender, fragt Michael, ob er wiederkommen soll; sonst sagt er nur, dass die
+# Nachrichten zu Ende sind. Hat der Nutzer zwischendurch selbst umgeschaltet oder
+# "Radio abstellen" gesagt, schweigt der Waechter - dann ist die Stille gewollt.
+CACHE = os.path.join(os.path.expanduser("~"), ".cache", "dialos")
+WAECHTER = os.path.join(CACHE, "nachrichten-waechter")
+RADIO_AUS_DATEI = os.path.join(CACHE, "radio-aus")
+WAECHTER_HOECHSTENS_S = 3 * 3600
+NOTIZ_SKRIPT = "/usr/local/bin/dialos-notiz.py"
+
+
+def wiedergabe_status():
+    """"Playing", "Paused", "Stopped" - oder "" wenn Rhythmbox nicht antwortet."""
+    try:
+        aus = subprocess.run(
+            ["gdbus", "call", "--session", "--dest", "org.mpris.MediaPlayer2.rhythmbox",
+             "--object-path", "/org/mpris/MediaPlayer2", "--method",
+             "org.freedesktop.DBus.Properties.Get", "org.mpris.MediaPlayer2.Player",
+             "PlaybackStatus"], capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    for status in ("Playing", "Paused", "Stopped"):
+        if status in aus:
+            return status
+    return ""
+
+
+def vorher_laufender_sender(rs):
+    """Die Sprechform des Senders, der gerade spielt - oder ""."""
+    if not laeuft() or wiedergabe_status() != "Playing":
+        return ""
+    adresse = laufende_adresse()
+    if not adresse or adresse.startswith("file:"):
+        return ""
+    for e in liste_holen(rs, art=None):
+        if (e.get("quelle") or "").strip() == adresse and e.get("sprechform"):
+            return e["sprechform"]
+    return ""
+
+
+def nachrichten_waechter_starten(uri, vorher):
+    try:
+        subprocess.Popen([sys.executable, os.path.abspath(__file__),
+                          "nachrichten-ende", uri, vorher],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+    except OSError as fehler:
+        melde(f"Waechter nicht startbar: {fehler}")
+
+
+def rueckfrage_modul():
+    """dialos-notiz.py - dort steht die erprobte Ja/Nein-Rueckfrage."""
+    neben_mir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "dialos-notiz.py")
+    pfad = neben_mir if os.path.isfile(neben_mir) else NOTIZ_SKRIPT
+    spec = importlib.util.spec_from_file_location("notiz", pfad)
+    modul = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modul)
+    return modul
+
+
+def nachrichten_ende(uri, vorher, warten=1.0):
+    """Wartet, bis die Folge zu Ende ist, und sagt dann, wie es weitergeht."""
+    os.makedirs(CACHE, exist_ok=True)
+    meine = str(os.getpid())
+    with open(WAECHTER, "w") as f:
+        f.write(meine)
+    anfang = time.time()
+    gespielt = False
+    while time.time() - anfang < WAECHTER_HOECHSTENS_S:
+        time.sleep(warten)
+        try:
+            with open(WAECHTER) as f:
+                if f.read().strip() != meine:
+                    return 0            # neuere Nachrichten haben uebernommen
+        except OSError:
+            return 0
+        try:
+            if os.path.getmtime(RADIO_AUS_DATEI) >= anfang:
+                melde("Nachrichten: vom Nutzer abgestellt - kein Hinweis")
+                return 0
+        except OSError:
+            pass
+        status = wiedergabe_status()
+        if not status:
+            return 0                    # Rhythmbox ist weg
+        if status in ("Playing", "Paused"):
+            adresse = laufende_adresse()
+            if adresse and adresse != uri:
+                melde("Nachrichten: umgeschaltet - kein Hinweis")
+                return 0
+            gespielt = gespielt or status == "Playing"
+            continue
+        if gespielt:                    # "Stopped" nach dem Abspielen: Ende
+            break
+        if time.time() - anfang > 30:
+            melde("Nachrichten: Wiedergabe kam nie in Gang - Waechter endet")
+            return 0
+    else:
+        return 0
+
+    melde(f"Nachrichten zu Ende, vorher lief: {vorher or 'nichts'}")
+    if not vorher:
+        sprich("Die Nachrichten sind zu Ende.")
+        return 0
+    rs = sender_modul()
+    eintrag, _ = sender_finden(rs, liste_holen(rs), vorher)
+    name = (eintrag or {}).get("name") or vorher
+    try:
+        notiz = rueckfrage_modul()
+        ja = notiz.mit_rueckfrage(
+            f"Die Nachrichten sind zu Ende. Soll ich {name} wieder einschalten? "
+            "Sage ja oder nein.",
+            "Gut, dann bleibt es still.",
+            "Ich habe nichts verstanden. Du kannst jederzeit Radio einschalten sagen.")
+    except Exception as fehler:        # noqa: BLE001
+        melde(f"Rueckfrage nicht moeglich: {fehler}")
+        sprich("Die Nachrichten sind zu Ende.")
+        return 0
+    if ja:
+        return einschalten(rs, vorher)
+    return 0
+
+
 def vorwaermen():
     """Rhythmbox starten, ohne etwas zu spielen - waehrend Michael noch spricht.
 
@@ -386,6 +516,11 @@ def ausschalten():
         sprich("Es läuft gerade nichts.")
         return 0
     client("--stop")
+    try:
+        os.makedirs(CACHE, exist_ok=True)
+        pathlib.Path(RADIO_AUS_DATEI).touch()
+    except OSError:
+        pass
     sprich("Radio aus.")
     melde("angehalten")
     return 0
@@ -623,6 +758,7 @@ def nachrichten(rs, gesucht=None):
             melde(f"Folge nicht geladen: {meldung}")
             return 1
         quelle = pathlib.Path(pfad).as_uri()
+        vorher = vorher_laufender_sender(rs)
         # ERST ANSAGEN, DANN ABSPIELEN - bei einer Folge, nicht beim Sender.
         # Gemessen am 2026-11-06 (Stephans Frage nach der Pause): Lief die
         # Wiedergabe zuerst, schaltete dialos-say sie fuer die Dauer der
@@ -634,6 +770,7 @@ def nachrichten(rs, gesucht=None):
         if not client("--play-uri", quelle):
             sprich("Ich konnte die Nachrichten nicht starten.")
             return 1
+        nachrichten_waechter_starten(quelle, vorher)
     elif (not sender_sicherstellen(rs, eintrag.get("name") or "Nachrichten", quelle)
             or not client("--play-uri", quelle)):
         sprich("Ich konnte die Nachrichten nicht starten.")
@@ -699,6 +836,9 @@ def main():
         return einschalten(rs, rest)
     if befehl == "nachrichten":
         return nachrichten(rs, rest or None)
+    if befehl == "nachrichten-ende":
+        return nachrichten_ende(argumente[1] if len(argumente) > 1 else "",
+                                argumente[2] if len(argumente) > 2 else "")
     if befehl == "naechster":
         return naechster(rs)
     if befehl == "liste":

@@ -157,6 +157,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Nach den Nachrichten fragt Michael, wie es weitergeht** (2026-11-06,
+  Stephans Wunsch). Bisher kam nach dem Ende einer Nachrichten-Folge nur
+  Stille, auch das vorher laufende Radio nicht. Jetzt: „Die Nachrichten sind
+  zu Ende. Soll ich Ö1 wieder einschalten? Sage ja oder nein." - oder, wenn
+  vorher nichts lief, nur „Die Nachrichten sind zu Ende." Wer zwischendurch
+  umschaltet oder „Radio abstellen" sagt, bekommt keinen Hinweis. Außerdem
+  startet Rhythmbox schon während der Ansage: Die Pause bis zum ersten Ton
+  sank von 2,3 auf 0,16 s. Tests: `tests/test_folgen.py`.
 - **Nach einer Ansage blieb ein neuer Titel stumm** (2026-11-06, Stephan:
   „da kommt nix"). Wechselte Rhythmbox während einer Ansage den Titel, kam der
   neue Tonstrom stummgeschaltet zur Welt - PipeWire übernimmt die

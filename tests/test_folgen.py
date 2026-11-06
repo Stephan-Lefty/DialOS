@@ -159,6 +159,9 @@ class NachrichtenAlsDatei(RadioBasis):
                 return os.path.join(test.ordner, "folgen", "a b.mp3"), ""
 
         self.radio.podcast_modul = lambda: Pod()
+        # Kein echter Player, kein Waechter-Prozess.
+        self.radio.wiedergabe_status = lambda: ""
+        self.radio.nachrichten_waechter_starten = lambda uri, vorher: None
 
     def test_spielt_die_datei_nicht_die_adresse(self):
         self.assertEqual(self.radio.nachrichten(self.rs, "landesweite nachrichten"), 0)
@@ -200,6 +203,99 @@ class NachrichtenAlsDatei(RadioBasis):
         self.assertEqual(self.radio.nachrichten(self.rs, "landesweite nachrichten"), 1)
         self.assertIn("Ich konnte die Nachrichten nicht laden.", self.gesagt)
         self.assertEqual(self.gespielt, [])
+
+
+class NachDenNachrichten(RadioBasis):
+    """Stephan, 2026-11-06: Nach dem Ende kam nur Stille - auch das Radio von
+    vorher nicht. Jetzt fragt Michael oder sagt, dass es zu Ende ist."""
+
+    def setUp(self):
+        super().setUp()
+        self.radio.CACHE = os.path.join(self.ordner, "cache")
+        self.radio.WAECHTER = os.path.join(self.radio.CACHE, "waechter")
+        self.radio.RADIO_AUS_DATEI = os.path.join(self.radio.CACHE, "radio-aus")
+        self.status = ["Playing", "Playing", "Stopped"]
+        self.adresse = "file:///folge.mp3"
+        self.radio.wiedergabe_status = lambda: self.status.pop(0) if self.status else "Stopped"
+        self.radio.laufende_adresse = lambda: self.adresse
+        self.fragen = []
+        self.antwort = True
+        test = self
+
+        class Notiz:
+            def mit_rueckfrage(self, frage, bei_nein, bei_nichts):
+                test.fragen.append(frage)
+                return test.antwort
+        self.radio.rueckfrage_modul = lambda: Notiz()
+
+    def ende(self, vorher=""):
+        return self.radio.nachrichten_ende("file:///folge.mp3", vorher, warten=0)
+
+    def test_ohne_radio_vorher_nur_der_hinweis(self):
+        self.ende()
+        self.assertEqual(self.gesagt, ["Die Nachrichten sind zu Ende."])
+        self.assertEqual(self.fragen, [])
+
+    def test_mit_radio_vorher_wird_gefragt(self):
+        self.ende("ö drei")
+        self.assertEqual(len(self.fragen), 1)
+        self.assertIn("Soll ich Hitradio Ö3 wieder einschalten?", self.fragen[0])
+        self.assertTrue(self.fragen[0].endswith("Sage ja oder nein."))
+        self.assertEqual(self.gespielt, ["https://b.at/oe3.mp3"])
+
+    def test_bei_nein_bleibt_es_still(self):
+        self.antwort = False
+        self.ende("ö drei")
+        self.assertEqual(self.gespielt, [])
+
+    def test_vom_nutzer_abgestellt_kein_hinweis(self):
+        os.makedirs(self.radio.CACHE, exist_ok=True)
+        self.status = ["Playing"] * 50
+        echt = self.radio.wiedergabe_status
+
+        def status():
+            open(self.radio.RADIO_AUS_DATEI, "w").close()
+            return echt()
+        self.radio.wiedergabe_status = status
+        self.ende("ö drei")
+        self.assertEqual(self.gesagt, [])
+        self.assertEqual(self.fragen, [])
+
+    def test_umgeschaltet_kein_hinweis(self):
+        self.status = ["Playing"] * 5
+        self.adresse = "https://a.de/dlf.mp3"
+        self.ende("ö drei")
+        self.assertEqual(self.gesagt, [])
+        self.assertEqual(self.fragen, [])
+
+    def test_neuere_nachrichten_uebernehmen(self):
+        echt = self.radio.wiedergabe_status
+
+        def status():
+            with open(self.radio.WAECHTER, "w") as f:
+                f.write("anderer")
+            return echt()
+        self.radio.wiedergabe_status = status
+        self.ende()
+        self.assertEqual(self.gesagt, [])
+
+    def test_ausschalten_setzt_die_marke(self):
+        self.radio.client = lambda *a, **k: True
+        self.radio.ausschalten()
+        self.assertTrue(os.path.exists(self.radio.RADIO_AUS_DATEI))
+
+
+class WaechterWirdGestartet(NachrichtenAlsDatei):
+
+    def test_merkt_sich_den_sender_von_vorher(self):
+        gestartet = []
+        self.radio.nachrichten_waechter_starten = lambda uri, vorher: gestartet.append((uri, vorher))
+        self.radio.wiedergabe_status = lambda: "Playing"
+        self.radio.laufende_adresse = lambda: "https://b.at/oe3.mp3"
+        self.radio.nachrichten(self.rs, "landesweite nachrichten")
+        self.assertEqual(len(gestartet), 1)
+        self.assertTrue(gestartet[0][0].startswith("file://"))
+        self.assertEqual(gestartet[0][1], "ö drei")
 
 
 if __name__ == "__main__":
