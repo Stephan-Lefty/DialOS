@@ -1,4 +1,10 @@
 <!--
+UEBERHOLT (festgestellt 2026-11-06): Der Neuaufbau ist am 2026-09-28 in der
+Wochenfolge "DialOS - Tag 48 bis 54: Alles loeschen, nur nach der Anleitung
+zurueck" erschienen, mit Hoerfassung (sprechfassungen/676-...). Diesen
+Einzelbeitrag NICHT mehr veroeffentlichen - er wuerde dasselbe ein zweites Mal
+erzaehlen. Bleibt nur als Entwurf stehen; loeschen, wenn Stephan es will.
+
 Entwurf fuer eine Neuigkeit auf dialos.org - von Stephan am 2026-09-25
 freigegeben ("Passt so"). NOCH NICHT VEROEFFENTLICHT: Die WordPress-
 Zugangsdaten (.env) liegen auf dem zweiten Rechner, nicht auf dem T490.

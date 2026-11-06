@@ -177,9 +177,12 @@ im Neuaufbau vom 25.09. - beim naechsten am **23.10.** gezielt pruefen.
 Werkzeug: `scripts/dialos-video-dreh.py drehen --vorfuehrmodus` im Konto
 dialosadmin, Anleitung und alle Lehren in `docs/video-drehbuch.md`.
 
-**Offen:** Radio Tirol schickt seinen Werbespruch als "Liedtitel" (in
-dialos-radio.py abfangen); dialos-empfaenger.py waehlt das Thunderbird-Profil
-alphabetisch statt nach installs.ini; 83 Updates (Montag), autoremove pruefen.
+**Offen:** ~~Radio Tirol schickt seinen Werbespruch als "Liedtitel"~~ und
+~~dialos-empfaenger.py waehlt das Profil alphabetisch~~ - beide erledigt am
+2026-11-06; ~~83 Updates~~ eingespielt (31.10.), autoremove beim Neuaufbau am
+20.11. pruefen. **Am 2026-11-06 ausserdem:** alle elf Luecken geprueft
+(geschlossen), Abnahme um "Systemweite Voraussetzungen" erweitert, Teil 6 der
+Anleitung prueft per Sprache Brief vorlesen, Mail-Entwurf und Radio, PDF neu.
 
 **Neue Regel vom anderen Rechner beachten:** "Entweder Laptop oder
 Arbeitsrechner - nie beide" (Abschnitt weiter unten).
@@ -263,9 +266,8 @@ vorgeschlagenes JSON-Format steht in der Datei (noch nicht entschieden).
 **Bauplan: `docs/medien-konzept.md`** (+ .en) - Ideen, Bausteine, Befehlsentwurf,
 Reihenfolge; Stephan laesst es in seine App einfliessen.
 
-Danach offen: Beitrag veroeffentlichen (Entwurf
-`Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`, nur vom zweiten
-Rechner), Bluetooth-Lautsprecher koppeln, hassil weglassen (Stephan
+Danach offen: ~~Beitrag veroeffentlichen~~ (ueberholt - der Neuaufbau erschien
+am 2026-09-28 in der Wochenfolge "Tag 48 bis 54"), Bluetooth-Lautsprecher koppeln, hassil weglassen (Stephan
 entscheidet), MX-Hinweis in der Maske, englische Grafik.
 
 ## Stand vom 2026-09-25, Freitag mittags - Version 0.5.2
