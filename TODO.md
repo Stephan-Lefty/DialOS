@@ -60,15 +60,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   ein Konto, zwei Passwort-Einträge, Brücke installiert. Signatur fehlte bis zum
   nächsten Anmelden - trägt das Werkzeug jetzt selbst ein. **Konto `nutzer` ebenfalls
   belegt**, Abnahme: „Im Konto nutzer fehlt nichts".
-- [ ] **Neuaufbau alle 4 Wochen - nächster am Freitag, 2026-10-23** (Dauerregel,
+- [ ] **Neuaufbau alle 4 Wochen - nächster am Freitag, 2026-11-20** (der 2026-10-23 ist ausgefallen; Dauerregel,
   Stephan, 2026-09-25: „Damit Routine rein kommt und wir die Anleitung noch
   optimieren"). Nur nach `docs/installationsanleitung.md`; jede Lücke sofort in
   Anleitung und Rezept. Danach den nächsten Termin hier eintragen (+4 Wochen).
-- [ ] **Beitrag „Ein Gerät, eine Anleitung, ein Nachmittag" veröffentlichen**
-  (von Stephan am 2026-09-25 freigegeben). Entwurf in
-  `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom
-  zweiten Rechner (dort liegt die `.env`); vorher englische Fassung und
-  Hörfassung. Der Mikrofon-Absatz ist schon angepasst.
 - [ ] **Die Medienliste zum Leben erwecken** (Stephan, 2026-09-30: „Wir müssen
   ja die Vorbereitung für Radiosender, Nachrichten, Hörbücher und Podcast
   bauen"). Die Übergabestelle steht seit dem 2026-09-30 (zwei Ebenen, siehe
@@ -434,51 +429,6 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Tastendrücke wie Alt+Tab direkt in den Kernel ein und braucht dafür einen
   Dienst mit Root-Rechten, der beliebige Eingaben erzeugen kann. Auf einem
   Gerät, das bei fremden Leuten steht, ist das die falsche Ecke zum Sparen.
-
-- [ ] **Freitag 2026-09-25: kompletter Neuaufbau, beide Konten** (Stephan,
-  2026-09-21: „Ich würde gerne am Freitag einmal die komplette Installation
-  sowohl für dialosadmin und dem nutzer neu aufzusetzen!"). Das ist der
-  eigentliche Beweis für die Dauerregel, dass sich DialOS lückenlos aus
-  `docs/Debian-zu-DialOS.md` nachbauen lässt.
-
-  **NICHT OHNE VORARBEIT - am 2026-09-21 gemessen:** Das Aufbau-Skript kopiert
-  eine **feste Liste** von Dateien, keine Sammelkopie. Von 118 Gerätedateien im
-  Repo nennt es **75 nicht**; nach Abzug von falschem Alarm (10
-  Hintergrundbilder kommen per `*.png`, 11 Bluetooth-Dateien sind mit Absicht
-  gerätespezifisch, 2 Fernwartungsdateien zurückgestellt) **fehlen 52 echt** -
-  darunter `dialos-diktat.py`, `dialos-notiz.py`, die Suche, `dialos-brief-din.py`,
-  das Mail-Archiv, alle `systemd --user`-Dienste, die sudoers-Regeln und die
-  Konfiguration der Sicherheitsupdates. Auf diesem Gerät kam das alles über
-  `dialos-aufspielen`; das Aufbau-Skript ist seit Mitte August nicht
-  nachgezogen worden. **Ein Neuaufbau nach Skript ergäbe ungefähr den Stand
-  vom 2026-08-16** - und einiges davon fiele erst Tage später auf.
-
-  **Vorarbeit Dienstag bis Donnerstag:**
-  - [ ] **Dateien:** Das Aufbau-Skript ruft am Ende `dialos-aufspielen` aus dem
-    Repo auf (`sudo repo/.../usr/local/sbin/dialos-aufspielen --wirklich`).
-    Das schließt alle 52 Datei-Lücken auf einmal und kann nicht wieder
-    auseinanderlaufen, weil es genau der Weg ist, der täglich benutzt wird -
-    samt seiner Ausschlussliste (Stimmwahl, Bluetooth, Fernwartung).
-  - [ ] **Handlungen, die keine Dateien sind** - das deckt `dialos-aufspielen`
-    NICHT ab: Dienste `systemctl --global enable`, `dialos-erweiterung-bauen.sh`,
-    pip- bzw. Debian-Pakete (siehe den Update-Punkt oben), Sprachmodelle,
-    LanguageTool nach `/opt`, Piper, Parakeet (`dialos-parakeet-einrichten.sh`),
-    Frageton und persönliche Daten je Konto. Gegen `Debian-zu-DialOS.md` Schritt
-    für Schritt abgleichen und in die Skripte bringen.
-  - [ ] **Sichern, bevor gelöscht wird:** ein **Rescuezilla-Abbild** des
-    heutigen Stands (das ist der Rückweg, falls der Neuaufbau hängt - laut
-    `docs/iso-builds.md` gibt es noch keins), dazu was NICHT im Repo liegt und
-    liegen darf: `~/.config/dialos/persoenliche-daten.txt` beider Konten,
-    Thunderbird-Profil (Testkonto `proband@dialos.org`), `~/Dokumente`,
-    `~/Notizen`, das persönliche Wörterbuch. Aufnahmen liegen auf der externen
-    Platte und sind nicht betroffen.
-  - [ ] **Claudes eigenes Gedächtnis geht dabei verloren** (steht oben in
-    CLAUDE.md) - vorher prüfen, dass alles Nötige im Repo steht.
-
-  **Am Freitag selbst:** streng nach Rezept, und **jeden Handgriff, der nicht
-  darin steht, sofort aufschreiben** - er ist eine Lücke. Abnahme mit
-  `scripts/dialos-installstand.sh` (Gerät = Repo?) und
-  `scripts/dialos-nutzerkonto-pruefen.sh` (Konto `nutzer` vollständig?).
 
 - [ ] **Was von Hand aufs Gerät kam, bekommt keine Updates** (Stephans Frage
   vom 2026-09-21: „Werden über Software alle Programme und Erweiterungen
@@ -2493,24 +2443,6 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Anna"), gelesen aus derselben Einstellung wie die Stimmenwahl. Details
   in `docs/sprachsteuerung.md`.
 
-- [ ] **Vorführvideo mit Sprachein- und -ausgabe aufnehmen** (Stephans
-  Idee vom 2026-08-16, für den nächsten Arbeitstag). Zeigen soll es, was
-  DialOS heute wirklich kann: Start-Ansage mit Lautstärke-Frage, dann
-  "auf Windows umschalten" / "auf Linux umschalten" per Zuruf. Zu klären
-  ist dabei die Tonaufnahme - der Bildschirminhalt allein genügt nicht,
-  es müssen sowohl die Sprachausgabe des Systems als auch die gesprochene
-  Eingabe hörbar sein. Denkbar wäre `wf-recorder` oder OBS mit zwei
-  Tonspuren (Systemklang + Mikrofon); beides ist noch nicht installiert.
-  **Achtung bei der Mikrofonwahl:** Der Sprachbefehl-Dienst hört über das
-  eingebaute Mikrofon, damit das AIRHUG in A2DP bleibt - eine Aufnahme
-  über das Headset-Mikrofon würde die Wiedergabe auf Telefonqualität
-  ziehen und das Video schlechter klingen lassen, als das System ist.
-  **Stand 2026-10-05:** Drehbuch steht in `docs/video-drehbuch.md` -
-  vollautomatisch, Anna spielt die Nutzerin über ein virtuelles Mikrofon,
-  Michael ist DialOS, Musterdaten im eigenen Vorführkonto, jede Stimme auf
-  eigener Spur. Von Stephan freigegeben (2026-10-05),
-  Szene Suche gestrichen; als Nächstes Probelauf unter DialOS.
-
 - [x] **Referenz-Audiogerät entschieden (Stephan, 2026-08-17): zwei
   Geräte.** AIRHUG bleibt als Lautsprecher in A2DP, dazu ein
   Funkmikrofon mit **USB**-Empfänger für die Eingabe - bewusst kein
@@ -3184,6 +3116,52 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   Metapaket. `aspell` bewusst weggelassen: Kein Programm auf dem Gerät nutzt
   es; LibreOffice, Firefox, Thunderbird und GNOME greifen auf hunspell.
 
+- ☑️ **2026-09-25** — **Freitag 2026-09-25: kompletter Neuaufbau, beide Konten** (Stephan,
+  2026-09-21: „Ich würde gerne am Freitag einmal die komplette Installation
+  sowohl für dialosadmin und dem nutzer neu aufzusetzen!"). Das ist der
+  eigentliche Beweis für die Dauerregel, dass sich DialOS lückenlos aus
+  `docs/Debian-zu-DialOS.md` nachbauen lässt.
+
+  **NICHT OHNE VORARBEIT - am 2026-09-21 gemessen:** Das Aufbau-Skript kopiert
+  eine **feste Liste** von Dateien, keine Sammelkopie. Von 118 Gerätedateien im
+  Repo nennt es **75 nicht**; nach Abzug von falschem Alarm (10
+  Hintergrundbilder kommen per `*.png`, 11 Bluetooth-Dateien sind mit Absicht
+  gerätespezifisch, 2 Fernwartungsdateien zurückgestellt) **fehlen 52 echt** -
+  darunter `dialos-diktat.py`, `dialos-notiz.py`, die Suche, `dialos-brief-din.py`,
+  das Mail-Archiv, alle `systemd --user`-Dienste, die sudoers-Regeln und die
+  Konfiguration der Sicherheitsupdates. Auf diesem Gerät kam das alles über
+  `dialos-aufspielen`; das Aufbau-Skript ist seit Mitte August nicht
+  nachgezogen worden. **Ein Neuaufbau nach Skript ergäbe ungefähr den Stand
+  vom 2026-08-16** - und einiges davon fiele erst Tage später auf.
+
+  **Vorarbeit Dienstag bis Donnerstag:**
+  - [ ] **Dateien:** Das Aufbau-Skript ruft am Ende `dialos-aufspielen` aus dem
+    Repo auf (`sudo repo/.../usr/local/sbin/dialos-aufspielen --wirklich`).
+    Das schließt alle 52 Datei-Lücken auf einmal und kann nicht wieder
+    auseinanderlaufen, weil es genau der Weg ist, der täglich benutzt wird -
+    samt seiner Ausschlussliste (Stimmwahl, Bluetooth, Fernwartung).
+  - [ ] **Handlungen, die keine Dateien sind** - das deckt `dialos-aufspielen`
+    NICHT ab: Dienste `systemctl --global enable`, `dialos-erweiterung-bauen.sh`,
+    pip- bzw. Debian-Pakete (siehe den Update-Punkt oben), Sprachmodelle,
+    LanguageTool nach `/opt`, Piper, Parakeet (`dialos-parakeet-einrichten.sh`),
+    Frageton und persönliche Daten je Konto. Gegen `Debian-zu-DialOS.md` Schritt
+    für Schritt abgleichen und in die Skripte bringen.
+  - [ ] **Sichern, bevor gelöscht wird:** ein **Rescuezilla-Abbild** des
+    heutigen Stands (das ist der Rückweg, falls der Neuaufbau hängt - laut
+    `docs/iso-builds.md` gibt es noch keins), dazu was NICHT im Repo liegt und
+    liegen darf: `~/.config/dialos/persoenliche-daten.txt` beider Konten,
+    Thunderbird-Profil (Testkonto `proband@dialos.org`), `~/Dokumente`,
+    `~/Notizen`, das persönliche Wörterbuch. Aufnahmen liegen auf der externen
+    Platte und sind nicht betroffen.
+  - [ ] **Claudes eigenes Gedächtnis geht dabei verloren** (steht oben in
+    CLAUDE.md) - vorher prüfen, dass alles Nötige im Repo steht.
+
+  **Am Freitag selbst:** streng nach Rezept, und **jeden Handgriff, der nicht
+  darin steht, sofort aufschreiben** - er ist eine Lücke. Abnahme mit
+  `scripts/dialos-installstand.sh` (Gerät = Repo?) und
+  `scripts/dialos-nutzerkonto-pruefen.sh` (Konto `nutzer` vollständig?).
+  **Erledigt:** Der Neuaufbau beider Konten lief am 2026-09-25 (Abnahme `nutzer`: „Im Konto nutzer fehlt nichts"). Seitdem gilt die Dauerregel „Neuaufbau alle 4 Wochen" oben.
+
 ### Verschlüsselung, Konten und Sicherheit
 
 - ☑️ **2026-08-16** — **Swap entschieden (Stephan, 2026-08-16): 8 GiB, verschlüsselt,
@@ -3267,3 +3245,29 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   Support nach einem Tag gesucht wird und nicht nach einer Nummer. Offen bleibt
   nur, dass eine NEU angelegte Datei 0644 bekommt - ab der ersten Rotation gilt
   0600.
+
+- ☑️ **2026-09-28** — **Beitrag „Ein Gerät, eine Anleitung, ein Nachmittag" veröffentlichen**
+  (von Stephan am 2026-09-25 freigegeben). Entwurf in
+  `Wordpressinstallation/entwuerfe/2026-09-25-neuaufbau.md`. Geht nur vom
+  zweiten Rechner (dort liegt die `.env`); vorher englische Fassung und
+  Hörfassung. Der Mikrofon-Absatz ist schon angepasst.
+  **Erledigt:** am 2026-09-28 unter dem Titel „Tag 48 bis 54" veröffentlicht; der Entwurf ist als überholt markiert.
+
+- ☑️ **2026-10-08** — **Vorführvideo mit Sprachein- und -ausgabe aufnehmen** (Stephans
+  Idee vom 2026-08-16, für den nächsten Arbeitstag). Zeigen soll es, was
+  DialOS heute wirklich kann: Start-Ansage mit Lautstärke-Frage, dann
+  "auf Windows umschalten" / "auf Linux umschalten" per Zuruf. Zu klären
+  ist dabei die Tonaufnahme - der Bildschirminhalt allein genügt nicht,
+  es müssen sowohl die Sprachausgabe des Systems als auch die gesprochene
+  Eingabe hörbar sein. Denkbar wäre `wf-recorder` oder OBS mit zwei
+  Tonspuren (Systemklang + Mikrofon); beides ist noch nicht installiert.
+  **Achtung bei der Mikrofonwahl:** Der Sprachbefehl-Dienst hört über das
+  eingebaute Mikrofon, damit das AIRHUG in A2DP bleibt - eine Aufnahme
+  über das Headset-Mikrofon würde die Wiedergabe auf Telefonqualität
+  ziehen und das Video schlechter klingen lassen, als das System ist.
+  **Stand 2026-10-05:** Drehbuch steht in `docs/video-drehbuch.md` -
+  vollautomatisch, Anna spielt die Nutzerin über ein virtuelles Mikrofon,
+  Michael ist DialOS, Musterdaten im eigenen Vorführkonto, jede Stimme auf
+  eigener Spur. Von Stephan freigegeben (2026-10-05),
+  Szene Suche gestrichen; als Nächstes Probelauf unter DialOS.
+  **Erledigt:** am 2026-10-08 im Konto `dialosadmin` gedreht (Take 16:25, 9 Minuten, Stimmen auf eigenen Spuren), Stephan hat es auf seinen Schnittrechner übernommen. Das Werkzeug `scripts/dialos-video-dreh.py` bleibt für weitere Drehs; Stand und Lehren in `docs/video-drehbuch.md`.
