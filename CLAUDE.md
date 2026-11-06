@@ -130,7 +130,10 @@ vermeiden.
 > **Stephan, 2026-09-25:** „Wir machen jetzt alle 4 Wochen eine Neuinstallation.
 > Damit Routine rein kommt und wir die Anleitung noch optimieren."
 
-**Naechster Termin: Freitag, 2026-10-23**, danach jeweils vier Wochen spaeter.
+**Naechster Termin: Freitag, 2026-11-20** (der 2026-10-23 ist ausgefallen; am
+2026-11-06 festgelegt), danach jeweils vier Wochen spaeter. **Dabei mitnehmen:**
+`apt-get -s autoremove` (am 2026-11-06: 52 Pakete) erst pruefen - nichts
+entfernen, was DialOS braucht (Beispiel python3-gi-cairo, Schritt 13b).
 Ablauf wie am 2026-09-25: Teil 0 der Anleitung (Sichern, Rescuezilla-Abbild,
 benutzten Stick sichern), dann **nur nach `docs/installationsanleitung.md`**
 neu aufbauen. **Die Anleitung ist der Pruefling:** Jeder Handgriff, der nicht
