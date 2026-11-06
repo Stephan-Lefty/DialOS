@@ -294,6 +294,11 @@ class AmGeraetGefunden(RadioBasis):
         self.assertFalse(n("coldplay - higher power", "Kronehit"))
         # Sendername IM Titel, und trotzdem ein Lied
         self.assertFalse(n("beabadoobee - Memories | FM4 Morning Show", "FM4"))
+        # Eigenwerbung, die mit dem Sendernamen beginnt (2026-11-06, live)
+        self.assertTrue(n("ORF Radio Tirol - meine Musik mein Land mein Radio Tirol",
+                          "ORF Radio Tirol"))
+        self.assertTrue(n("Radio 88.6 OnAir", "Radio 88.6"))
+        self.assertFalse(n("Bonnie Tyler - Holding Out For A Hero", "ORF Radio Tirol"))
 
     def test_was_laeuft_sagt_das_lied(self):
         self.radio.client = lambda *a, **k: "Kronehit" if k.get("hole_ausgabe") else True

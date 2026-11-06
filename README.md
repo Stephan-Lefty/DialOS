@@ -157,6 +157,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Kontaktsuche liest das Profil, das Thunderbird öffnet** (2026-11-06):
+  `dialos-empfaenger.py` wählt jetzt über `installs.ini` statt das
+  alphabetisch erste Profil mit Konto - mit zwei Profilen fand sie sonst
+  Kontakte nicht, die der Nutzer im Adressbuch sieht (beim Vorführvideo
+  aufgefallen). Test `tests/test_empfaenger.py`.
+- **„Was läuft gerade" sagt keine Eigenwerbung mehr als Lied an**
+  (2026-11-06): Ein „Titel", der mit dem Sendernamen beginnt, gilt als
+  Senderinfo - live gefunden bei ORF Radio Tirol („… meine Musik mein Land
+  …") und Radio 88.6 („Radio 88.6 OnAir").
 - **Ein abgestürztes Diktat legt die Sprachsteuerung nicht mehr lahm**
   (2026-10-08). Diktat, Notiz-Rückfragen und Update-Lauf legten die
   Mikrofon-Marke leer an; die Erkennung hielt sie für belegt, solange die

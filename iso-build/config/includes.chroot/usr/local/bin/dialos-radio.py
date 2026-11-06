@@ -465,7 +465,11 @@ def nur_sendername(titel, sender):
     t, s = flach(titel), flach(sender)
     # NICHT "s in t": FM4 schickt "beabadoobee - Memories | FM4 Morning Show"
     # - der Sendername steht im Titel, und trotzdem ist es ein Lied.
-    return not t or t in s or "livestream" in t
+    # ABER "t beginnt mit s" (2026-11-06): ORF Radio Tirol schickte "ORF Radio
+    # Tirol - meine Musik mein Land mein Radio Tirol", Radio 88.6 "Radio 88.6
+    # OnAir" - beides wurde als Lied angesagt. Ein Lied beginnt mit dem
+    # Interpreten; was mit dem eigenen Namen beginnt, ist Eigenwerbung.
+    return not t or t in s or t.startswith(s) or "livestream" in t
 
 
 def was_laeuft():

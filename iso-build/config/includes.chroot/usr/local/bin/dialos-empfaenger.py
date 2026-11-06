@@ -60,10 +60,31 @@ def melde(text):
 
 # ------------------------------------------------------------------ Thunderbird
 def profil(heim=HEIM):
-    """Das Thunderbird-Profil mit Adressbuch - das mit einem Mailkonto zuerst."""
+    """Das Thunderbird-Profil mit Adressbuch - das, welches Thunderbird oeffnet.
+
+    ZUERST installs.ini (2026-10-08 gefunden, 2026-11-06 behoben): Bis dahin
+    galt hier "das alphabetisch erste Profil mit Mailkonto". Beim Dreh des
+    Vorfuehrvideos lagen zwei Profile mit Konto nebeneinander - Thunderbird
+    oeffnete das eine, die Kontaktsuche las das andere, und Frau Musterfrau
+    stand "nicht in den Kontakten". dialos-mailkonto.py liest installs.ini
+    genauso; zwei Regeln fuer dieselbe Frage liefen auseinander.
+    Die alte Regel bleibt als Rueckfall, wenn installs.ini fehlt oder auf ein
+    Profil ohne prefs.js zeigt.
+    """
     wurzel = os.path.join(heim, ".thunderbird")
     if not os.path.isdir(wurzel):
         return None
+    import configparser
+    ini = configparser.ConfigParser()
+    try:
+        ini.read(os.path.join(wurzel, "installs.ini"), encoding="utf-8")
+    except configparser.Error:
+        ini = configparser.ConfigParser()
+    for abschnitt in ini.sections():
+        name = ini.get(abschnitt, "Default", fallback="")
+        ordner = os.path.join(wurzel, name)
+        if name and os.path.isfile(os.path.join(ordner, "prefs.js")):
+            return ordner
     kandidaten = []
     for name in sorted(os.listdir(wurzel)):
         ordner = os.path.join(wurzel, name)

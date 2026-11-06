@@ -147,6 +147,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Contact lookup reads the profile Thunderbird opens** (2026-11-06):
+  `dialos-empfaenger.py` now picks via `installs.ini` instead of the
+  alphabetically first profile with an account - with two profiles it missed
+  contacts the user sees in the address book (found during the demo video).
+  Test `tests/test_empfaenger.py`.
+- **"Was läuft gerade" no longer announces self-promotion as a song**
+  (2026-11-06): a "title" that starts with the station name counts as station
+  info - found live with ORF Radio Tirol and Radio 88.6 ("Radio 88.6 OnAir").
 - **A crashed dictation no longer disables voice control** (2026-10-08).
   Dictation, note confirmations and the update run created the microphone
   marker empty; the recognizer treated it as taken as long as the file
