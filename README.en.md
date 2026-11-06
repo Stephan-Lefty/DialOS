@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Mail account: MX record as a hint** (2026-11-06). When the provider
+  database does not know a custom domain, the mask used to say only "enter the
+  servers". It now names the host from the MX record and adds that it usually
+  only reveals the provider - for dialos.org the MX is `s111.goserver.host`,
+  while the right incoming server is `imap.dialos.org`. The device's own DNS
+  server is asked; `host` and `dig` are missing there, and a hint was not worth
+  a new package. Tests: `tests/test_mailkonto_mx.py`.
 - **Licences on the device: "Lizenzen vorlesen"** (2026-11-06). Parakeet is
   licensed CC-BY-4.0 and requires attribution - for a blind user that means:
   something to listen to. The overview lives in

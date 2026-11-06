@@ -48,13 +48,6 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [ ] **Hinweis zur Antwortzeit** prüfen: Wer vor dem Frageton antwortet, wird
   nicht gehört - ohne Rückmeldung. Ist die Pause zwischen Frage und Aufnahme
   zu lang, oder fehlt eine Ansage „Ich habe nichts gehört"?
-- [ ] **Mailkonto: Mailserver aus dem MX-Eintrag als Hinweis** (2026-09-25). Bei
-  eigenen Domains (Stephans `dialos.org`, später Kunden mit eigener Domain) hilft
-  die Anbieter-Datenbank nicht; die Maske sagt dann nur „Server eintragen". Sie
-  könnte den MX-Rechner der Domain nennen (bei `dialos.org`: `s111.goserver.host`,
-  per DNS-over-HTTPS gefunden - `host`/`dig` sind nicht installiert) und auf den
-  Kundenbereich des Hosters verweisen. Nur als Hinweis, nicht als Wert: Der
-  richtige Server war am Ende `imap.dialos.org`.
 - [x] **Mailkonto aus der Maske am Gerät belegt** (2026-09-25, Konto `dialosadmin`,
   Stephan: „Mailkonto eingerichtet, Thunderbird zeigt das Postfach"). Ein Profil,
   ein Konto, zwei Passwort-Einträge, Brücke installiert. Signatur fehlte bis zum
@@ -3017,6 +3010,15 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   Nebenbefund: `lt_lebt()` prueft `/v2/languages` und meldet damit "laeuft",
   waehrend der Dienst neun Sekunden braucht - eine Bereitschaftsmeldung, die
   etwas anderes prueft als das, worauf es ankommt.
+
+- ☑️ **2026-11-06** — **Mailkonto: Mailserver aus dem MX-Eintrag als Hinweis** (2026-09-25). Bei
+  eigenen Domains (Stephans `dialos.org`, später Kunden mit eigener Domain) hilft
+  die Anbieter-Datenbank nicht; die Maske sagt dann nur „Server eintragen". Sie
+  könnte den MX-Rechner der Domain nennen (bei `dialos.org`: `s111.goserver.host`,
+  per DNS-over-HTTPS gefunden - `host`/`dig` sind nicht installiert) und auf den
+  Kundenbereich des Hosters verweisen. Nur als Hinweis, nicht als Wert: Der
+  richtige Server war am Ende `imap.dialos.org`.
+  **Erledigt:** `dialos-mailkonto.py` fragt bei unbekannter Domain den MX-Eintrag beim eigenen DNS-Server ab (aus `/etc/resolv.conf`, kein DNS-over-HTTPS bei einem Dritten, kein neues Paket) und nennt ihn in der Fehlermeldung der Maske - ausdrücklich als Hinweis auf den Anbieter, nicht als Servername. Am Gerät: dialos.org → `s111.goserver.host`. Tests: `tests/test_mailkonto_mx.py`.
 
 ### Desktop und Bedienoberfläche
 

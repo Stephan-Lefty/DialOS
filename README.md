@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Mailkonto: MX-Eintrag als Hinweis** (2026-11-06). Kennt die
+  Anbieter-Datenbank eine eigene Domain nicht, sagte die Maske bisher nur
+  „Server eintragen". Jetzt nennt sie den Rechner aus dem MX-Eintrag und sagt
+  dazu, dass er meist nur den Anbieter verrät - bei dialos.org ist der MX
+  `s111.goserver.host`, der richtige Posteingang aber `imap.dialos.org`. Gefragt
+  wird der DNS-Server des Geräts selbst; `host` und `dig` fehlen dort, ein neues
+  Paket war ein Hinweis nicht wert. Tests: `tests/test_mailkonto_mx.py`.
 - **Lizenzen am Gerät: „Lizenzen vorlesen"** (2026-11-06). Parakeet steht
   unter CC-BY-4.0 und verlangt Namensnennung - für einen blinden Nutzer heißt
   das: zum Anhören. Die Übersicht liegt in `/usr/share/doc/dialos/lizenzen.txt`,

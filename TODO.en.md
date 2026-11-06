@@ -46,12 +46,6 @@ finished too, and then move down together. That way no reference breaks.
 - [ ] **Check the answer timing:** whoever answers before the question tone is
   not heard - with no feedback. Is the pause between question and recording
   too long, or is a "I heard nothing" announcement missing?
-- [ ] **Mail account: offer the MX host as a hint** (2026-09-25). For own
-  domains the provider database does not help; the mask then just says "enter
-  the servers". It could name the domain's MX host (for `dialos.org`:
-  `s111.goserver.host`, found via DNS over HTTPS - `host`/`dig` are not
-  installed) and point to the hoster's customer area. As a hint only, not as a
-  value: the right server turned out to be `imap.dialos.org`.
 - [x] **Mail account from the mask verified on the device** (2026-09-25,
   account `dialosadmin`, Stephan: "mail account set up, Thunderbird shows the
   mailbox"). One profile, one account, two password entries, bridge installed.
@@ -2626,6 +2620,14 @@ memory, not just a record of successes.
   correction. Side finding: `lt_lebt()` checks `/v2/languages` and therefore
   reports "running" while the service still needs nine seconds - a readiness
   check that tests something other than what matters.
+
+- ☑️ **2026-11-06** — **Mail account: offer the MX host as a hint** (2026-09-25). For own
+  domains the provider database does not help; the mask then just says "enter
+  the servers". It could name the domain's MX host (for `dialos.org`:
+  `s111.goserver.host`, found via DNS over HTTPS - `host`/`dig` are not
+  installed) and point to the hoster's customer area. As a hint only, not as a
+  value: the right server turned out to be `imap.dialos.org`.
+  **Done:** for an unknown domain `dialos-mailkonto.py` queries the MX record from the device's own DNS server (from `/etc/resolv.conf`, no DNS-over-HTTPS at a third party, no new package) and names it in the mask's error message - explicitly as a hint at the provider, not as a server name. On the device: dialos.org → `s111.goserver.host`. Tests: `tests/test_mailkonto_mx.py`.
 
 ### Desktop and user interface
 

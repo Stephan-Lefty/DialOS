@@ -103,6 +103,106 @@ def aus_ispdb(mail):
     return werte(ein), werte(aus)
 
 
+# MX-EINTRAG ALS HINWEIS (2026-11-06, offen seit 2026-09-25). Bei einer eigenen
+# Domain - Stephans dialos.org, spaeter Kunden mit eigener Domain - kennt die
+# Anbieter-Datenbank die Server nicht, und die Maske sagte nur "eintragen". Der
+# MX-Eintrag nennt wenigstens den Rechner, der die Mails der Domain annimmt, und
+# damit meist den Hoster. NUR ALS HINWEIS, NIE ALS WERT: Bei dialos.org ist der
+# MX s111.goserver.host, der richtige Posteingang war aber imap.dialos.org.
+#
+# Gefragt wird der DNS-Server aus /etc/resolv.conf, also derselbe, den das
+# Geraet ohnehin benutzt - kein DNS-over-HTTPS bei einem Dritten, der dabei die
+# Domain des Kunden erfaehrt. Selbst gebaut, weil host, dig und resolvectl auf
+# dem Geraet fehlen und ein Hinweis kein neues Paket rechtfertigt.
+RESOLV_CONF = "/etc/resolv.conf"
+
+
+def _dns_name(daten, pos):
+    """Liest einen (evtl. komprimierten) Namen ab pos; gibt (name, neue_pos)."""
+    teile, sprung, ende = [], 0, None
+    while True:
+        laenge = daten[pos]
+        if laenge & 0xC0 == 0xC0:
+            if ende is None:
+                ende = pos + 2
+            pos = ((laenge & 0x3F) << 8) | daten[pos + 1]
+            sprung += 1
+            if sprung > 20:
+                raise ValueError("Schleife im DNS-Namen")
+            continue
+        if laenge == 0:
+            return ".".join(teile), (ende if ende is not None else pos + 1)
+        teile.append(daten[pos + 1:pos + 1 + laenge].decode("ascii", "replace"))
+        pos += 1 + laenge
+
+
+def mx_aus_antwort(antwort, kennung):
+    """MX-Rechner aus einer DNS-Antwort, nach Vorrang sortiert."""
+    if len(antwort) < 12 or int.from_bytes(antwort[0:2], "big") != kennung:
+        return []
+    fragen = int.from_bytes(antwort[4:6], "big")
+    antworten = int.from_bytes(antwort[6:8], "big")
+    pos = 12
+    for _ in range(fragen):
+        _, pos = _dns_name(antwort, pos)
+        pos += 4
+    gefunden = []
+    for _ in range(antworten):
+        _, pos = _dns_name(antwort, pos)
+        typ = int.from_bytes(antwort[pos:pos + 2], "big")
+        laenge = int.from_bytes(antwort[pos + 8:pos + 10], "big")
+        pos += 10
+        if typ == 15:
+            vorrang = int.from_bytes(antwort[pos:pos + 2], "big")
+            name, _ = _dns_name(antwort, pos + 2)
+            gefunden.append((vorrang, name.rstrip(".").lower()))
+        pos += laenge
+    return [name for _, name in sorted(gefunden) if name]
+
+
+def mx_rechner(domain, timeout=3):
+    """MX-Rechner der Domain ueber den eigenen DNS-Server, oder [] - nie ein Fehler."""
+    import socket
+    import struct
+    try:
+        with open(RESOLV_CONF) as f:
+            server = [z.split()[1] for z in f
+                      if z.startswith("nameserver") and len(z.split()) > 1]
+    except OSError:
+        return []
+    kennung = int.from_bytes(os.urandom(2), "big")
+    frage = struct.pack(">HHHHHH", kennung, 0x0100, 1, 0, 0, 0)
+    for teil in domain.strip(".").split("."):
+        frage += bytes([len(teil)]) + teil.encode("idna")
+    frage += b"\0" + struct.pack(">HH", 15, 1)
+    for adresse in server[:3]:
+        try:
+            familie = socket.AF_INET6 if ":" in adresse else socket.AF_INET
+            with socket.socket(familie, socket.SOCK_DGRAM) as s:
+                s.settimeout(timeout)
+                s.sendto(frage, (adresse.split("%")[0], 53))
+                antwort, _ = s.recvfrom(4096)
+            gefunden = mx_aus_antwort(antwort, kennung)
+            if gefunden:
+                return gefunden
+        except Exception:
+            continue
+    return []
+
+
+def hinweis_ohne_server(domain):
+    """Fehlertext, wenn die Anbieter-Datenbank die Domain nicht kennt."""
+    text = (f"Die Server für {domain} stehen nicht in der Anbieter-Datenbank. "
+            "Bitte Posteingang- und Postausgang-Server in der Maske eintragen.")
+    mx = mx_rechner(domain)
+    if mx:
+        text += (f"\n\nHinweis: Mails an {domain} nimmt der Rechner {mx[0]} an "
+                 "(MX-Eintrag). Das zeigt meist, bei welchem Anbieter die Domain "
+                 "liegt - die richtigen Servernamen stehen in dessen Kundenbereich. "
+                 f"{mx[0]} selbst ist oft NICHT der richtige Eintrag.")
+    return text
+
+
 def server_bestimmen(daten):
     """(eingang, ausgang, quelle) - jeweils dict mit server/port/socket/benutzer."""
     mail = daten.get("mail", "")
@@ -120,9 +220,7 @@ def server_bestimmen(daten):
     else:
         gefunden = aus_ispdb(mail)
         if not gefunden:
-            fehler("Die Server fuer " + mail.rsplit("@", 1)[-1] + " stehen nicht in der "
-                   "Anbieter-Datenbank. Bitte Posteingang- und Postausgang-Server in der "
-                   "Maske eintragen.", 4)
+            fehler(hinweis_ohne_server(mail.rsplit("@", 1)[-1]), 4)
         ein, aus = gefunden
         # Was in der Maske steht, geht vor - auch einzeln.
         for d, praefix in ((ein, "imap"), (aus, "smtp")):
