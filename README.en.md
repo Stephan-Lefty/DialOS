@@ -147,6 +147,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The first "Radio einschalten" stopped after a moment** (2026-11-06,
+  Stephan). Warming up started Rhythmbox with "--pause"; with Rhythmbox cold,
+  that arrived only after the station was already playing (Playing at
+  1.93 s, Paused at 2.35 s). It now uses "--print-playing", which leaves
+  playback alone, and playback waits until warming up is done. Reproduced:
+  Ö1 plays through from 2.66 s.
 - **Dropped sentences now name the alternative** (2026-11-06, Stephan: "we
   have to offer the user an alternative"). "Radio ausschalten" and "Musik
   ausschalten" answer "Zum Ausschalten sage: Radio stoppen.", "Briefe

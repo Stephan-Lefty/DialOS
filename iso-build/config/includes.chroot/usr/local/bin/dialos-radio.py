@@ -276,17 +276,38 @@ def vorwaermen():
     Ansage und dem ersten Ton der tagesschau 2,3 s - so lange braucht das
     Programm zum Starten. Laeuft es schon, wenn die Ansage endet, faellt
     diese Pause weg. "--pause" startet Rhythmbox ueber D-Bus, ohne Ton und
-    ohne Fenster; nicht abwarten, es soll ja parallel zur Ansage laufen.
+    ohne Fenster; es laeuft parallel zur Ansage.
+
+    NICHT MEHR "--pause" (Stephan, 2026-11-06: "Beim ersten Radio einschalten
+    hoert man nur einen Bruchteil von einer Sekunde das Radio"). Gemessen:
+    Bei kaltem Rhythmbox kam das "--pause" erst an, NACHDEM der Sender schon
+    lief - Playing bei 1,93 s, Paused bei 2,35 s. "--print-playing" startet
+    Rhythmbox ebenso, aendert aber nichts an der Wiedergabe (danach "Stopped").
+    Und vor dem Abspielen wird gewartet, bis es fertig ist - siehe
+    vorwaermen_abwarten(). Gibt den Prozess zurueck, oder None.
     """
     if laeuft():
-        return
+        return None
     try:
-        subprocess.Popen([CLIENT, "--no-present", "--pause"],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                         start_new_session=True)
+        prozess = subprocess.Popen([CLIENT, "--no-present", "--print-playing"],
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL,
+                                   start_new_session=True)
         melde("Rhythmbox vorgewaermt")
+        return prozess
     except OSError as fehler:
         melde(f"Rhythmbox nicht vorwaermbar: {fehler}")
+        return None
+
+
+def vorwaermen_abwarten(prozess, grenze_s=15):
+    """Erst abspielen, wenn das Vorwaermen fertig ist - sonst stoert es."""
+    if prozess is None:
+        return
+    try:
+        prozess.wait(timeout=grenze_s)
+    except subprocess.TimeoutExpired:
+        melde("Vorwaermen dauert zu lange - spiele trotzdem")
 
 
 RHYTHMDB = os.path.join(os.path.expanduser("~"), ".local", "share", "rhythmbox",
@@ -467,8 +488,9 @@ def abspielen(rs, eintrag):
     # Kurz, weil der Nutzer weiterhoeren will - die Regel zur Laenge aus
     # docs/sprachbefehle.md. Der Sendername steht drin, damit er merkt,
     # wenn der Erkenner den falschen erwischt hat.
-    vorwaermen()
+    warm = vorwaermen()
     sprich(f"{name}.")
+    vorwaermen_abwarten(warm)
     if not client("--play-uri", quelle):
         sprich("Ich konnte das Radio nicht starten.")
         return False
@@ -779,8 +801,9 @@ def nachrichten(rs, gesucht=None):
         # Ansage stumm (2,6 s bei "tagesschau in 100 Sekunden") - die ersten
         # drei Sekunden der Sendung liefen ungehoert durch. Beim Sender ist
         # das gleich, der laeuft ohnehin; eine Folge hat einen Anfang.
-        vorwaermen()
+        warm = vorwaermen()
         sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
+        vorwaermen_abwarten(warm)
         if not client("--play-uri", quelle):
             sprich("Ich konnte die Nachrichten nicht starten.")
             return 1
@@ -791,8 +814,9 @@ def nachrichten(rs, gesucht=None):
             return 1
         # Erst ansagen, dann abspielen - derselbe Grund wie in abspielen().
         # Der Name sagt dem Nutzer, ob der Erkenner die richtige Ebene erwischt hat.
-        vorwaermen()
+        warm = vorwaermen()
         sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
+        vorwaermen_abwarten(warm)
         if not client("--play-uri", quelle):
             sprich("Ich konnte die Nachrichten nicht starten.")
             return 1

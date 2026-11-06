@@ -197,6 +197,22 @@ class NachrichtenAlsDatei(RadioBasis):
         self.radio.nachrichten(self.rs, "landesweite nachrichten")
         self.assertEqual(ablauf, ["vorwaermen", "sagt", "--play-uri"])
 
+    def test_vorwaermen_haelt_nichts_an(self):
+        # 2026-11-06: "--pause" kam bei kaltem Rhythmbox erst NACH dem Start
+        # des Senders an und hielt ihn nach 0,4 s wieder an.
+        aufrufe = []
+        echt = subprocess.Popen
+        self.addCleanup(setattr, subprocess, "Popen", echt)
+        subprocess.Popen = lambda befehl, **kw: aufrufe.append(befehl) or None
+        radio = test_radio._laden("dialos-radio.py", "radio_vorwaermen")
+        radio.laeuft = lambda: False
+        radio.melde = lambda t: None
+        radio.vorwaermen()
+        self.assertEqual(len(aufrufe), 1)
+        self.assertNotIn("--pause", aufrufe[0])
+        self.assertNotIn("--play", aufrufe[0])
+        self.assertIn("--print-playing", aufrufe[0])
+
     def test_fehlgeschlagenes_holen_wird_gesagt(self):
         self.radio.podcast_modul().__class__.folge_herunterladen = \
             lambda s, a, n, bei_wartezeit=None: ("", "curl 6")

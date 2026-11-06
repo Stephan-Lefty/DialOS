@@ -157,6 +157,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Erstes „Radio einschalten" brach nach einem Augenblick ab** (2026-11-06,
+  Stephan). Das Vorwärmen startete Rhythmbox mit „--pause"; bei kaltem
+  Rhythmbox kam das erst an, als der Sender schon lief (Playing bei 1,93 s,
+  Paused bei 2,35 s). Jetzt mit „--print-playing", das an der Wiedergabe
+  nichts ändert, und abgespielt wird erst, wenn das Vorwärmen fertig ist.
+  Nachgestellt: Ö1 läuft ab 2,66 s durch.
 - **Gestrichene Sätze nennen jetzt die Alternative** (2026-11-06, Stephan:
   „Wir müssen dem Nutzer eine Alternative anbieten"). „Radio ausschalten" und
   „Musik ausschalten" antworten „Zum Ausschalten sage: Radio stoppen.",
