@@ -153,7 +153,7 @@ background) and `splash.png` (boot/login screen).
   application - and `dialos-say.py` only unmuted the old stream number. It now
   also unmutes new streams of the same application after the announcement
   (immediately and again after 1 and 3 s), but never one the user muted
-  himself. Reproduced on the device and fixed.
+  on purpose. Reproduced on the device and fixed.
 - **Podcast episodes are downloaded instead of streamed** (2026-11-06).
   Rhythmbox only plays an internet address that is in its database - but
   every podcast episode has a new one. Until now each new episode meant
