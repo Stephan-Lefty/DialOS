@@ -90,26 +90,59 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     die Lösung auf einer Annahme. Probe am Gerät:
     `rhythmbox-client --no-present --play-uri <MP3 einer Podcast-Folge>`
     bei einer Adresse, die NICHT in der Datenbank steht.
+
+    **PROBE AM 2026-11-06 GEMACHT - die einfache Reparatur gibt es nicht,
+    aber eine andere.** Mit der tagesschau von 11:06 Uhr (nicht in der
+    Datenbank):
+    - `--play-uri` mit der MP3-Adresse: **spielt nicht** („Stopped"), auch
+      nicht beim zweiten Versuch mit laufendem Rhythmbox. MPRIS `OpenUri`:
+      ebenso. `PlayQueue.AddToQueue` sagt es ausdrücklich: „Keine
+      registrierte Quelle kann die Adresse verarbeiten". Eine
+      `.pls`-Wiedergabeliste mit der Adresse: spielt nicht. **Auch eine
+      MP3-Datei per HTTPS braucht also den Eintrag.**
+    - **Dieselbe Folge als heruntergeladene Datei (`file://`) spielt
+      sofort** - ohne Eintrag vorab, ohne Neustart. Rhythmbox legt den
+      Eintrag selbst an (Typ `song`). Gemessen mit laufendem Ö1: Umschalten
+      ohne Pause, dieselbe Prozessnummer vorher und nachher - **kein
+      Abbruch, keine Stille**.
+    - **Die Datenbank wächst damit nicht unbegrenzt:** Nach dem Löschen der
+      Datei setzt Rhythmbox beim nächsten Start `hidden` und entfernt den
+      Eintrag nach `org.gnome.rhythmbox.rhythmdb grace-period` Tagen (am
+      Gerät: 45). Obergrenze also: Folgen der letzten 45 Tage.
+
+    **Damit steht die Reparatur fest, gebaut ist sie noch nicht:** Folgen
+    nicht streamen, sondern in einen eigenen Ordner herunterladen (z. B.
+    `~/.cache/dialos/folgen/`), als `file://` spielen, je Podcast nur die
+    neueste Datei behalten; `sender_sicherstellen()` läuft für Folgen gar
+    nicht mehr. **Offen dabei:** die Wartezeit beim Herunterladen langer
+    Folgen (tagesschau 2 MB in unter einer Sekunde, ein 74-Minuten-Hörspiel
+    wären rund 70 MB) - die braucht eine Ansage, damit es nicht nach einem
+    Fehler klingt.
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort
     gibt es kein Gespräch vom Vortag). Dort stehen Befehle, Reihenfolge
     und Abbruchkriterien; hier nur noch, **was** offen ist. Nicht beides
     pflegen.
-  - [ ] **`ffmpeg` am Gerät nachinstallieren** (seit 2026-09-30 in
+  - [x] **`ffmpeg` am Gerät nachinstallieren** (am 2026-11-06 nachgesehen: installiert und
+    mit `apt-mark manual` geschützt; seit 2026-09-30 in
     `desktop.list.chroot`, ein vorher aufgebautes Gerät hat es nicht).
     Ohne `ffprobe` prüft DialOS-Rhythmbox nur die Erreichbarkeit, nicht ob
     Ton kommt. **Mit `apt-mark manual`**, sonst räumt `autoremove` es
     wieder weg:
     `sudo apt-get install -y ffmpeg && sudo apt-mark manual ffmpeg`
-  - [ ] **Die ZWEITE Pflichtprüfung steht aus - am Gerät** (Piper spricht,
+  - [x] **Die ZWEITE Pflichtprüfung - am Gerät gelaufen** (2026-11-06: alle 80
+    Sätze wörtlich erkannt, die Radio-Befehle eingeschlossen; Piper spricht,
     Vosk hört, mit der vollständigen Grammatik). Sie ist auf dem
     Arbeitsrechner nicht möglich, weil dort kein Piper installiert ist.
     Die erste (Wortschatz) ist gelaufen und sauber. Befehl am Gerät:
     `/usr/local/bin/dialos-grammatik-pruefen.py`. **Erst danach ist der
     Radio-Befehl abgenommen** - ein Satz, der hier besteht, ist noch nicht
     bewiesen, das steht so im Kopf des Prüfwerkzeugs.
-  - [ ] **Am Gerät proben, was hier nicht geht:** ob Rhythmbox den Stream
+  - [x] **Am Gerät geprobt** (2026-10-08, Stephans Abnahme): Rhythmbox spielt
+    den Stream (braucht dafür den Datenbank-Eintrag), „Was läuft gerade" liest
+    den ICY-Titel selbst, und „Radio abstellen" wurde bei laufendem Ö3
+    erkannt. Ursprünglich: ob Rhythmbox den Stream
     wirklich spielt, ob `--print-playing` bei einem Stream den ICY-Titel
     liefert („Was läuft gerade" hängt daran), und ob die Befehlserkennung
     mit laufendem Radio noch funktioniert - dafür wurde die
@@ -214,7 +247,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     heute „Nachrichten kann ich noch nicht vorlesen." und würden dann
     etwas verdecken, das es gibt - dieselbe Auflösung wie bei „radio
     einschalten" am 2026-09-30.
-  - [ ] **Prüffunktion für Podcast-Feeds** - vor jeder Podcast-Liste
+  - [x] **Prüffunktion für Podcast-Feeds** (gebaut 2026-10-05, Commit `54250b7`:
+    `feed_pruefen()` in `dialos_podcast.py` - erreichbar, Feed, Audio darin,
+    neueste Folge nicht älter als die Grenze, Datei mit `ffprobe` dekodiert;
+    am 2026-11-06 nachgesehen). Ursprünglich: vor jeder Podcast-Liste
     fällig. Sie muss zuerst feststellen, **ob der Feed überhaupt Audio
     hat**: Die zwei Nachrichten-Feeds des Deutschlandfunks liefern 39
     Einträge und kein einziges `<enclosure>`, das sind Textartikel. Ein

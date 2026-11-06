@@ -63,26 +63,44 @@ finished too, and then move down together. That way no reference breaks.
     Seven voice commands; the stations enter the grammar from the media
     list. The contradiction between "Radio einschalten" and the answer "I
     cannot do that yet" is resolved.
+  - [ ] **Podcast episodes: download instead of streaming** (probe on
+    2026-11-06). Rhythmbox does not play an HTTPS MP3 address that is not
+    in its database (`--play-uri`, MPRIS `OpenUri`, a `.pls` playlist all
+    fail; `AddToQueue` says "no registered source can handle the URI").
+    **The same episode as a downloaded file (`file://`) plays at once** -
+    no prior entry, no restart; switching from a playing Ö1 was seamless,
+    same process before and after. Rhythmbox adds the entry itself, hides it
+    once the file is deleted and drops it after `grace-period` days (45 on
+    the device), so the database no longer grows without limit. **The fix
+    is settled, not built:** download episodes to a folder of their own,
+    play them as `file://`, keep only the newest file per podcast, and stop
+    calling `sender_sicherstellen()` for episodes. Open: an announcement for
+    the download wait on long episodes. Details in the German TODO.md.
   - **The procedure on the device is written down:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephan's request - the instructions must be readable on the laptop,
     where yesterday's conversation is not available; German only). That
     file holds the commands, the order and the stop conditions; this list
     only holds **what** is still open. Do not maintain both.
-  - [ ] **Install `ffmpeg` on the device** (in `desktop.list.chroot` since
+  - [x] **Install `ffmpeg` on the device** (checked 2026-11-06: installed and
+    protected with `apt-mark manual`; in `desktop.list.chroot` since
     2026-09-30; a device built earlier does not have it). Without
     `ffprobe`, DialOS-Rhythmbox only checks reachability, not whether
     sound arrives. **With `apt-mark manual`**, or `autoremove` will take
     it away again:
     `sudo apt-get install -y ffmpeg && sudo apt-mark manual ffmpeg`
-  - [ ] **The SECOND mandatory check is outstanding - on the device**
+  - [x] **The SECOND mandatory check - run on the device** (2026-11-06: all 80
+    sentences recognised verbatim, including the radio commands)
     (Piper speaks, Vosk listens, against the full grammar). It is not
     possible on the workbench machine because Piper is not installed
     there. The first (vocabulary) has run and is clean. Command on the
     device: `/usr/local/bin/dialos-grammatik-pruefen.py`. **Only then is
     the radio command accepted** - a sentence that passes here is not yet
     proven, as the tool's own header says.
-  - [ ] **Try on the device what cannot be tried here:** whether Rhythmbox
+  - [x] **Tried on the device** (2026-10-08, Stephan's acceptance): Rhythmbox
+    plays the stream (it needs the database entry for that), "Was läuft
+    gerade" reads the ICY title itself, and "Radio abstellen" was recognised
+    with Ö3 playing. Originally: whether Rhythmbox
     really plays the stream, whether `--print-playing` returns the ICY
     title for a stream ("Was läuft gerade" depends on it), and whether
     command recognition still works with the radio playing - the echo
