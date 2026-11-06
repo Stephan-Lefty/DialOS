@@ -220,7 +220,10 @@ def nachrichten_ende(uri, vorher, warten=1.0):
         except OSError:
             return 0
         try:
-            if os.path.getmtime(RADIO_AUS_DATEI) >= anfang:
+            # Eine Sekunde Spielraum: Das Dateisystem fuehrt die Zeit groeber
+            # als time.time() - im selben Augenblick angelegt, laege sie sonst
+            # knapp VOR dem Anfang (aufgefallen als wackelnder Test).
+            if os.path.getmtime(RADIO_AUS_DATEI) >= anfang - 1:
                 melde("Nachrichten: vom Nutzer abgestellt - kein Hinweis")
                 return 0
         except OSError:
