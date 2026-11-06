@@ -30,6 +30,32 @@ sagen() { printf '  %-12s %s\n' "$1" "$2"; }
 fehlt()  { sagen "FEHLT" "$1"; FEHLT=$((FEHLT+1)); }
 da()     { sagen "da" "$1"; }
 
+echo "=== Systemweite Voraussetzungen ==="
+# NACHGETRAGEN AM 2026-11-06: Die Abnahme vom 2026-09-25 meldete "Im Konto
+# nutzer fehlt nichts" - und trotzdem fehlten zwei systemweite Dinge, die erst
+# Wochen spaeter auffielen: Java (die Schreibhilfe lief nie) und die
+# Beschreibungsdatei der Thunderbird-Bruecke am richtigen Ort (Entwuerfe wurden
+# nur vorgemerkt). Beides liegt nicht pro Konto - deshalb sah es hier niemand.
+# Jede Zeile unten ist eine Luecke, die es schon einmal gab.
+BRUECKE_JSON=/usr/lib/mozilla/native-messaging-hosts/dialos_bruecke.json
+if [ -f "$BRUECKE_JSON" ]; then
+    BRUECKE_PFAD=$(sed -n 's/.*"path": *"\([^"]*\)".*/\1/p' "$BRUECKE_JSON")
+    [ -x "$BRUECKE_PFAD" ] && da "Thunderbird-Bruecke: $BRUECKE_JSON" \
+        || fehlt "Thunderbird-Bruecke: $BRUECKE_PFAD nicht ausfuehrbar"
+else
+    fehlt "$BRUECKE_JSON - Debians Thunderbird sucht NUR dort, Entwuerfe bleiben sonst vorgemerkt"
+fi
+command -v java >/dev/null && da "Java (fuer die Schreibhilfe)" \
+    || fehlt "Java (openjdk-21-jre-headless) - die Schreibhilfe startet sonst nie"
+[ -f /opt/languagetool/languagetool-server.jar ] && da "LanguageTool unter /opt" \
+    || fehlt "/opt/languagetool/languagetool-server.jar"
+[ -f /usr/local/share/dialos-piper/voices/de_DE-kerstin-low.onnx ] && da "Annas Stimme (kerstin-low)" \
+    || fehlt "Annas Stimme de_DE-kerstin-low.onnx - Sprachausgabe haengt sonst (Schritt 16e)"
+dpkg -s python3-gi-cairo >/dev/null 2>&1 && da "python3-gi-cairo (Brief-PDF)" \
+    || fehlt "python3-gi-cairo - ohne gibt es keinen Brief als PDF"
+command -v ffprobe >/dev/null && da "ffmpeg/ffprobe (Senderpruefung)" \
+    || fehlt "ffmpeg - die Senderliste prueft sonst nur, ob der Server antwortet"
+
 echo "=== Thunderbird-Profile von $KONTO ==="
 # NUR DAS PROFIL, DAS THUNDERBIRD WIRKLICH BENUTZT (seit 2026-09-25): Thunderbird
 # legt beim ersten Start neben seinem Profil ein zweites, leeres "….default" an

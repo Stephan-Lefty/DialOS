@@ -157,6 +157,17 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Abnahme prüft jetzt auch, was systemweit liegt** (2026-11-06,
+  Vorbereitung des Neuaufbaus am 20.11.). `dialos-nutzerkonto-pruefen.sh`
+  meldete am 25.09. „Im Konto nutzer fehlt nichts" - und trotzdem fehlten Java
+  und die Brücken-Datei, aufgefallen erst Wochen später. Neuer erster Abschnitt
+  „Systemweite Voraussetzungen": Brücke unter `/usr/lib/mozilla/`, Java,
+  LanguageTool, Annas Stimme, `python3-gi-cairo`, `ffmpeg` - jede Zeile eine
+  Lücke, die es schon gab. Teil 6 der Installationsanleitung prüft per Sprache
+  jetzt auch „Brief vorlesen", den Mail-Entwurf in Thunderbird und das Radio;
+  PDF neu (13 Seiten). Alle elf Lücken des letzten Neuaufbaus gegen Anleitung,
+  Skripte und Paketliste geprüft: geschlossen. Teil 2 Wort für Wort mit der
+  offiziellen Seite von Anthropic verglichen: unverändert.
 - **Kontaktsuche liest das Profil, das Thunderbird öffnet** (2026-11-06):
   `dialos-empfaenger.py` wählt jetzt über `installs.ini` statt das
   alphabetisch erste Profil mit Konto - mit zwei Profilen fand sie sonst

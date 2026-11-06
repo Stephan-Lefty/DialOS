@@ -1082,7 +1082,9 @@ Gerät ist. Hier geht es darum, dass **`dialosadmin` nicht der Kunde ist**.
 | DialOS-eigene Schalter | `~/.config/dialos/` (Frageton, persönliche Daten, Warteschlangen) |
 
 **Systemweit und damit unkritisch** sind `/usr/local/bin`, `/usr/local/share`,
-`/etc`, die Native-Messaging-Hosts unter `/usr/lib/thunderbird/` und alles, was
+`/etc`, die Native-Messaging-Hosts unter `/usr/lib/mozilla/` (NICHT
+`/usr/lib/thunderbird/` - dort sucht Debians Thunderbird nicht, berichtigt
+2026-10-08) und alles, was
 `dialos-aufspielen` anfasst.
 
 **Die Regel lautet deshalb:** Wird etwas am Gerät eingerichtet, das nicht

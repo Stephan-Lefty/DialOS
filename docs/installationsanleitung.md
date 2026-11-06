@@ -343,12 +343,16 @@ sudo /media/dialosadmin/SanDisk-Extreme/DialOS/repo/scripts/dialos-nutzerkonto-p
 
 Erwartet wird: nichts fehlt. Solange in `nutzer` noch kein Mailkonto eingerichtet ist, meldet es „noch kein Thunderbird-Profil" - das ist kein Mangel.
 
+**Besonders der erste Abschnitt, „Systemweite Voraussetzungen", muss ohne FEHLT sein.** Dort stehen die Lücken, die beim Neuaufbau vom 25.09.2026 erst Wochen später auffielen: Java für die Schreibhilfe und die Beschreibungsdatei der Thunderbird-Brücke unter `/usr/lib/mozilla/`.
+
 **Zum Schluss die Stimme selbst:** Am Nutzerkonto anmelden und sprechen.
 
 - „Sprachsteuerung starten" → „Ich höre Dir zu."
 - „Wie spät ist es" → Uhrzeit
 - „Postfach öffnen" → Thunderbird startet direkt mit dem Postfach, ohne Assistent und ohne Passwortfrage
-- „Brief schreiben" → der Empfängerdialog beginnt
+- „Brief schreiben" → der Empfängerdialog beginnt; den Brief kurz diktieren, dann **„Brief vorlesen"** → er wird vorgelesen (das ging vom 21.09. bis 08.10.2026 nicht)
+- „Neue E-Mail schreiben" → kurz diktieren, bei „Soll ich sie verschicken?" **„nein"**, danach „Postfach öffnen" → der Entwurf liegt **in Thunderbird** unter „Entwürfe". Liegt er dort nicht, fehlt die Thunderbird-Brücke
+- „Radio einschalten" → DialOS fragt nach dem Sender oder spielt den letzten; dann „Was läuft gerade" und **„Radio abstellen"**
 
 Läuft das, ist das Gerät fertig.
 

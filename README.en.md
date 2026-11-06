@@ -147,6 +147,17 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **The acceptance check now also covers what is system-wide** (2026-11-06,
+  preparing the rebuild on 20 November). `dialos-nutzerkonto-pruefen.sh` said
+  "nothing is missing" on 25 September - yet Java and the bridge manifest were
+  missing, found only weeks later. New first section "system-wide
+  prerequisites": bridge under `/usr/lib/mozilla/`, Java, LanguageTool, Anna's
+  voice, `python3-gi-cairo`, `ffmpeg` - every line a gap that already happened.
+  Part 6 of the installation guide now also checks "Brief vorlesen", the mail
+  draft in Thunderbird and the radio by voice; PDF regenerated (13 pages). All
+  eleven gaps of the last rebuild checked against guide, scripts and package
+  list: closed. Part 2 compared word for word with Anthropic's official page:
+  unchanged.
 - **Contact lookup reads the profile Thunderbird opens** (2026-11-06):
   `dialos-empfaenger.py` now picks via `installs.ini` instead of the
   alphabetically first profile with an account - with two profiles it missed
