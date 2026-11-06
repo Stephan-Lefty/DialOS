@@ -255,6 +255,11 @@ GRAMMATIK_AN = json.dumps([
     # umgekehrt ein "einschalten" damit, kommt nur der Hinweis - der
     # harmlosere Fehler. Piper -> Vosk geprueft (alle 82 woertlich).
     "radio ausschalten",
+    # Ebenso fuer die anderen gestrichenen Formulierungen (Stephan, 2026-11-06:
+    # "Wir muessen dem Nutzer eine Alternative anbieten"). Beide Piper -> Vosk
+    # geprueft (alle 84 woertlich), naechster Nachbar 0,76 bzw. 0,77.
+    "musik ausschalten",
+    "briefe durchsuchen",
     "was läuft gerade",
     "lauter machen",
     "leiser machen",
@@ -828,6 +833,10 @@ WUNSCH_SAETZE = {
     # dem ist, was der Nutzer will, als eine Absage.
     "jemanden anrufen": ("telefon", "Telefonieren kann ich noch nicht."),
     "radio ausschalten": ("radio-aus", "Zum Ausschalten sage: Radio stoppen."),
+    "musik ausschalten": ("radio-aus", "Zum Ausschalten sage: Radio stoppen."),
+    # "Unterlagen durchsuchen" statt "Briefe durchsuchen" seit 2026-09-17 -
+    # die Suche findet mehr als Briefe (siehe docs/sprachbefehle.md).
+    "briefe durchsuchen": ("suche", "Die Suche heisst: Unterlagen durchsuchen."),
     "mails vorlesen": ("mails", "E-Mails kann ich noch nicht vorlesen."),
     "termine vorlesen": ("termine", "Termine kann ich noch nicht vorlesen."),
     "was steht heute an": ("termine", "Termine kann ich noch nicht vorlesen."),

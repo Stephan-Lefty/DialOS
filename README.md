@@ -157,6 +157,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Gestrichene Sätze nennen jetzt die Alternative** (2026-11-06, Stephan:
+  „Wir müssen dem Nutzer eine Alternative anbieten"). „Radio ausschalten" und
+  „Musik ausschalten" antworten „Zum Ausschalten sage: Radio stoppen.",
+  „Briefe durchsuchen" antwortet „Die Suche heißt: Unterlagen durchsuchen." Die
+  Sätze schalten nichts. Ohne sie presste die Erkennung „Radio ausschalten" auf
+  den nächsten Satz - „Radio einschalten". Nicht möglich bei Wörtern, die das
+  Modell gar nicht kennt („Befehlsliste", „Lizenzhinweise"). Piper → Vosk:
+  alle 84 Sätze wörtlich.
 - **„Radio stoppen" schaltet das Radio ab, und Michael wird nicht mehr
   übertönt** (2026-11-06). Stephan sagte von sich aus „Radio stoppen" - das
   war kein Befehl; jetzt ist es einer, neben „Radio abstellen". „Radio

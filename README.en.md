@@ -147,6 +147,14 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Dropped sentences now name the alternative** (2026-11-06, Stephan: "we
+  have to offer the user an alternative"). "Radio ausschalten" and "Musik
+  ausschalten" answer "Zum Ausschalten sage: Radio stoppen.", "Briefe
+  durchsuchen" answers "Die Suche heißt: Unterlagen durchsuchen." These
+  sentences switch nothing. Without them the recogniser pressed "Radio
+  ausschalten" onto the nearest sentence - "Radio einschalten". Not possible
+  for words the model does not know at all ("Befehlsliste",
+  "Lizenzhinweise"). Piper → Vosk: all 84 sentences verbatim.
 - **"Radio stoppen" turns the radio off, and Michael is no longer drowned
   out** (2026-11-06). Stephan said "Radio stoppen" on his own - it was not a
   command; now it is one, next to "Radio abstellen". "Radio ausschalten" stays

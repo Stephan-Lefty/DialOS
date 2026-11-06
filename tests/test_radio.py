@@ -425,6 +425,19 @@ class PasstZumSprachdienst(unittest.TestCase):
         self.assertIn("Radio stoppen", antwort)
         self.assertIn("radio stoppen", self.dienst.RADIO_SAETZE)
 
+    def test_jeder_gestrichene_satz_nennt_einen_bestehenden(self):
+        """Hinweis-Saetze schalten nichts, aber sie muessen auf einen Satz
+        zeigen, den es WIRKLICH gibt - sonst lehren sie einen falschen."""
+        hinweise = {"radio ausschalten": "radio stoppen",
+                    "musik ausschalten": "radio stoppen",
+                    "briefe durchsuchen": "unterlagen durchsuchen"}
+        for satz, ziel in hinweise.items():
+            with self.subTest(satz=satz):
+                self.assertIn(satz, self.grammatik)
+                _, antwort = self.dienst.WUNSCH_SAETZE[satz]
+                self.assertIn(ziel, antwort.lower())
+                self.assertIn(ziel, self.dienst.BEFEHLSSAETZE)
+
     def test_sendersaetze_sind_ganze_saetze(self):
         """Ein Befehl ist nie ein Einzelwort - ein beilaeufiges
         "Deutschlandfunk" im Gespraech darf nichts ausloesen. Dieselbe
