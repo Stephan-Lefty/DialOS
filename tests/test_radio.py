@@ -406,10 +406,24 @@ class PasstZumSprachdienst(unittest.TestCase):
     def test_kein_radio_satz_kollidiert_mit_einem_bestehenden(self):
         eintraege = [{"sprechform": s} for s in self.grammatik if s != "[unk]"]
         radio = set(self.dienst.RADIO_SAETZE)
+        # EINE gewollte Naehe (2026-11-06): "radio ausschalten" ist ein
+        # Hinweis-Satz, der genau den Fehlgriff auffaengt. Ohne ihn presst
+        # Vosk den Satz auf "radio einschalten" - das Radio ginge an.
+        gewollt = {frozenset({"radio ausschalten", "radio einschalten"})}
         treffer = [(a["sprechform"], b["sprechform"], grund)
                    for a, b, grund in rs.aehnliche_sprechformen(eintraege)
-                   if a["sprechform"] in radio or b["sprechform"] in radio]
+                   if (a["sprechform"] in radio or b["sprechform"] in radio)
+                   and frozenset({a["sprechform"], b["sprechform"]}) not in gewollt]
         self.assertEqual(treffer, [])
+
+    def test_radio_ausschalten_nennt_den_richtigen_satz(self):
+        """Stephan, 2026-11-06: Wer "radio ausschalten" sagt, erfaehrt, dass
+        es "radio stoppen" heisst - und der Satz schaltet NICHTS."""
+        self.assertIn("radio ausschalten", self.grammatik)
+        self.assertNotIn("radio ausschalten", self.dienst.RADIO_SAETZE)
+        _, antwort = self.dienst.WUNSCH_SAETZE["radio ausschalten"]
+        self.assertIn("Radio stoppen", antwort)
+        self.assertIn("radio stoppen", self.dienst.RADIO_SAETZE)
 
     def test_sendersaetze_sind_ganze_saetze(self):
         """Ein Befehl ist nie ein Einzelwort - ein beilaeufiges

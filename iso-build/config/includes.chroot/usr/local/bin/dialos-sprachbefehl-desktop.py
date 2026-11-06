@@ -247,6 +247,14 @@ GRAMMATIK_AN = json.dumps([
     # alle 82 Saetze woertlich. "radio ausschalten" bleibt draussen (0,82
     # gegen "radio einschalten", Stephans Entscheidung am selben Tag).
     "radio stoppen",
+    # NUR EIN HINWEIS, KEIN BEFEHL (Stephan, 2026-11-06: "Wenn jemand radio
+    # ausschalten nutzen will, koennen wir ihn hinweisen"). Fehlt der Satz in
+    # der Grammatik, presst Vosk ihn auf den naechsten - und das ist "radio
+    # einschalten" (0,82): Wer aus wollte, bekaeme Radio. Als Hinweis-Satz
+    # wird er erkannt und nennt "radio stoppen". Verwechselt der Erkenner
+    # umgekehrt ein "einschalten" damit, kommt nur der Hinweis - der
+    # harmlosere Fehler. Piper -> Vosk geprueft (alle 82 woertlich).
+    "radio ausschalten",
     "was läuft gerade",
     "lauter machen",
     "leiser machen",
@@ -819,6 +827,7 @@ WUNSCH_SAETZE = {
     # startet vorerst dasselbe wie "radio einschalten", weil das naeher an
     # dem ist, was der Nutzer will, als eine Absage.
     "jemanden anrufen": ("telefon", "Telefonieren kann ich noch nicht."),
+    "radio ausschalten": ("radio-aus", "Zum Ausschalten sage: Radio stoppen."),
     "mails vorlesen": ("mails", "E-Mails kann ich noch nicht vorlesen."),
     "termine vorlesen": ("termine", "Termine kann ich noch nicht vorlesen."),
     "was steht heute an": ("termine", "Termine kann ich noch nicht vorlesen."),
