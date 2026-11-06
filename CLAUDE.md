@@ -141,6 +141,18 @@ Am Ende Teil 6 (Abnahme) und die Grafik pruefen
 Beim ersten Mal (2026-09-25) waren es neun Luecken - die Zahl pro Durchgang
 gehoert ins Aenderungsprotokoll, sie zeigt, ob die Anleitung reift.
 
+## GitHub-Token laeuft am 2027-02-07 ab (eingetragen 2026-11-06)
+
+Stephan hat am 2026-11-06 ein neues Token angelegt, gueltig bis **7.2.2027**.
+Eine Erinnerung fuer den **1.2.2027, 8:00** ist als geplante Aufgabe angelegt
+(`dialos-github-token-erinnerung`) - die liegt aber unter `~/.claude/` auf der
+internen Platte und ist nach jedem Neuaufbau WEG. **Nach einem Neuaufbau also
+neu anlegen**, solange das Datum noch in der Zukunft liegt. Erneuern: neues
+Token auf GitHub, dann im Repo `git push` - Git fragt nach Benutzername und
+Token (credential.helper=store). **Das Token gibt Stephan selbst im Terminal
+ein, nie in den Chat**; das schmale Terminal bricht lange Befehle mitten im
+Wort um, deshalb lief es am 2026-11-06 ueber ein kurzes Hilfsskript.
+
 ## Stand vom 2026-10-08, Donnerstag abends
 
 **Radio am Geraet abgenommen** (nach `docs/aufspielen-am-geraet.md`, Ergebnisse
