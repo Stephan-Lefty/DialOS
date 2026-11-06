@@ -405,6 +405,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [ ] **Lizenzhinweis für Parakeet am Gerät** (2026-09-16): CC-BY-4.0 verlangt
   Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
   Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
+  **Gebaut 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, vorgelesen mit
+  **„Lizenzen vorlesen"** (über `dialos-auskunft.py lizenzen`), im Menü als
+  „DialOS Lizenzen". Piper → Vosk: alle 80 Sätze wörtlich erkannt. Tests:
+  `tests/test_lizenzen.py`. **Offen: Stephans Abnahme mit echter Stimme** - und
+  ob englische Wörter wie „GNU General Public License" oder „TDT 0.6B v3"
+  mit deutscher Stimme verständlich klingen.
 
 - [ ] **Eigene GNOME-Shell-Erweiterung, um zwischen Fenstern zu wechseln**
   (Stephans Frage vom 2026-09-21: „Man kann nicht per Sprachbefehl durch die

@@ -246,8 +246,9 @@ dpkg-query -W -f='${Package}\t${Version}\t${Homepage}\n' | sort > packages.txt
   does it stay or is it removed before delivery? See "What does not come
   from Debian". Not decided.
 - **Licence notice for Parakeet on the device** (CC-BY-4.0 requires
-  attribution, wording above) - open item in `TODO.md`, belongs in a licence
-  overview that DialOS can show or read out on the device.
+  attribution, wording above) - **built on 2026-11-06**:
+  `/usr/share/doc/dialos/lizenzen.txt`, read out with "Lizenzen vorlesen", in
+  the menu as "DialOS Lizenzen". Only the acceptance on the device is open.
 - **To be checked:** the libraries in LanguageTool's `third-party-licenses/`,
   and whether the espeak-ng (GPL-3.0) bundled with Piper requires source to
   be provided separately.

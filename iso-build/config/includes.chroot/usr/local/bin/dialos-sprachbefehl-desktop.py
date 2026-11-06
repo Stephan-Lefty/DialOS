@@ -194,6 +194,10 @@ GRAMMATIK_AN = json.dumps([
     # Wetter wieder (2026-09-16), mit Rueckfall-Ort - siehe dialos-auskunft.py.
     "wie ist das wetter",
     "wie wird das wetter",
+    # Lizenzen (2026-11-06): Parakeet verlangt Namensnennung (CC-BY-4.0), und
+    # ein blinder Nutzer erreicht sie nur zum Anhoeren. Beide Woerter im
+    # Wortschatz geprueft; "lizenzhinweise" fehlt dort.
+    "lizenzen vorlesen",
     # UEBERSICHT UND EHRLICHE ANTWORTEN (Stephan, 2026-09-16: "Muessen wir fuer
     # alles, was der Nutzer direkt Michael/Anna fragt und wo es keine Antwort
     # gibt, eine Art Rueckfall-Antwort geben!"). Seine Wahl: klare
@@ -541,6 +545,7 @@ AUSKUNFT_SAETZE = {
     "welches datum haben wir": "datum",
     "wie ist das wetter": "wetter",
     "wie wird das wetter": "wetter",
+    "lizenzen vorlesen": "lizenzen",
 }
 UEBERSICHT_SAETZE = ("was kann ich sagen", "was kannst du")
 ANSAGE_UEBERSICHT = (
@@ -585,6 +590,7 @@ AKTIONEN = {
     ("auskunft", "uhrzeit"): ("fragen", "Die Uhrzeit"),
     ("auskunft", "datum"): ("fragen", "Das Datum"),
     ("auskunft", "wetter"): ("fragen", "Das Wetter"),
+    ("auskunft", "lizenzen"): ("fragen", "Die Lizenzen"),
     ("diktat", "brief"): ("briefe", "Einen Brief diktieren"),
     ("notiz", ("brief", "vorlesen")): ("briefe", "Den Brief vorlesen"),
     ("druck", "brief"): ("briefe", "Den Brief drucken"),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DialOS: Auskunft geben - Uhrzeit, Datum, Wetter.
+"""DialOS: Auskunft geben - Uhrzeit, Datum, Wetter, Lizenzen.
 
 Stephans Wunsch vom 2026-08-19. Drei Fragen, die ein Nutzer taeglich hat und
 die er ohne Bildschirm nicht selbst nachsehen kann.
@@ -24,6 +24,7 @@ Aufruf:
     dialos-auskunft.py uhrzeit
     dialos-auskunft.py datum
     dialos-auskunft.py wetter
+    dialos-auskunft.py lizenzen
     dialos-auskunft.py --debug ...
 """
 
@@ -170,6 +171,43 @@ def wetter(a):
     return 0
 
 
+LIZENZEN = "/usr/share/doc/dialos/lizenzen.txt"
+
+
+def lizenzen_absaetze(inhalt):
+    """Die Lizenzuebersicht in Absaetzen, so wie sie gesprochen wird.
+
+    Seit 2026-11-06. Anlass ist Parakeet: CC-BY-4.0 verlangt Namensnennung,
+    und die gehoert dorthin, wo der Nutzer sie erreicht - fuer einen blinden
+    Nutzer heisst das: zum Anhoeren. Dieselbe Datei oeffnet der Helfer ueber
+    "DialOS Lizenzen" im Menue; deshalb stehen die Adressen darin, aber
+    Zeilen mit "://" werden nicht vorgelesen. Eine Adresse Zeichen fuer
+    Zeichen buchstabiert hilft niemandem.
+
+    Jeder Absatz ist eine eigene Ansage: dialos-say hat eine Zeitgrenze je
+    Aufruf, und kurze Stuecke liegen danach einzeln im Speicher.
+    """
+    absaetze = []
+    for block in inhalt.split("\n\n"):
+        zeilen = [z.strip() for z in block.splitlines()
+                  if z.strip() and "://" not in z]
+        if zeilen:
+            absaetze.append(" ".join(zeilen))
+    return absaetze
+
+
+def lizenzen():
+    try:
+        with open(LIZENZEN, encoding="utf-8") as f:
+            absaetze = lizenzen_absaetze(f.read())
+    except OSError:
+        sprich("Ich kann die Lizenzen nicht finden.")
+        return 1
+    for absatz in absaetze:
+        sprich(absatz)
+    return 0
+
+
 def main():
     argumente = [x for x in sys.argv[1:] if not x.startswith("--")]
     if not argumente:
@@ -177,6 +215,8 @@ def main():
         return 2
     was = argumente[0]
     melde(f"=== {was} ===")
+    if was == "lizenzen":
+        return lizenzen()
     a = bausteine()
     if a is None:
         sprich("Ich kann die Auskunft gerade nicht geben.")

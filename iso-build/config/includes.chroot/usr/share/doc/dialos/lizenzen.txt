@@ -1,0 +1,18 @@
+Lizenzen und Herkunft der Bestandteile von DialOS.
+
+DialOS selbst steht unter der GNU General Public License, Version 3. Wer eine geänderte Fassung weitergibt, muss deren Quelltext ebenfalls offenlegen. Ausgenommen sind der Name DialOS, das Logo und die Hintergrundbilder. Ein abgeleiteter Aufbau braucht einen eigenen Namen.
+Quelltext: https://github.com/Stephan-Lefty/DialOS
+
+DialOS baut auf Debian 13 und GNOME 48 auf. Jedes Debian-Paket bringt seine Lizenz selbst mit, im Ordner usr, share, doc. Der Quelltext liegt bei Debian.
+Quelltext: https://sources.debian.org
+
+Die Sprachausgabe ist Piper, unter der MIT-Lizenz. Die Stimmen Anna und Michael beruhen auf den Datensätzen Kerstin und Thorsten. Beide sind gemeinfrei.
+
+Die Befehlserkennung ist Vosk, mit Modellen unter der Apache-Lizenz 2.0.
+
+Die Texterkennung im Diktat ist Parakeet TDT 0.6B v3 von NVIDIA, lizenziert unter Creative Commons Namensnennung 4.0. Nach ONNX umgewandelt und auf int8 verkleinert vom sherpa-onnx-Projekt, in DialOS unverändert verwendet. sherpa-onnx steht unter der Apache-Lizenz 2.0.
+Lizenz: https://creativecommons.org/licenses/by/4.0/
+
+Die Schreibhilfe im Diktat ist LanguageTool, unter der GNU Lesser General Public License, Version 2.1.
+
+Die ausführliche Fassung mit allen Bestandteilen steht im Quelltext von DialOS unter docs, lizenzen.

@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Licences on the device: "Lizenzen vorlesen"** (2026-11-06). Parakeet is
+  licensed CC-BY-4.0 and requires attribution - for a blind user that means:
+  something to listen to. The overview lives in
+  `/usr/share/doc/dialos/lizenzen.txt`; DialOS reads it paragraph by paragraph
+  (web addresses skipped), and the helper opens it via "DialOS Lizenzen" in the
+  menu. New sentence in the grammar, checked Piper → Vosk: all 80 sentences
+  verbatim. Tests: `tests/test_lizenzen.py`.
 - **DialOS notices when its own announcement would be silent** (2026-11-06).
   On 2026-08-24 every `paplay` stream started out muted, because PipeWire
   remembers that per application - all cached announcements and the question

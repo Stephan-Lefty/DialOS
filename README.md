@@ -157,6 +157,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Lizenzen am Gerät: „Lizenzen vorlesen"** (2026-11-06). Parakeet steht
+  unter CC-BY-4.0 und verlangt Namensnennung - für einen blinden Nutzer heißt
+  das: zum Anhören. Die Übersicht liegt in `/usr/share/doc/dialos/lizenzen.txt`,
+  DialOS liest sie Absatz für Absatz vor (Adressen übersprungen), der Helfer
+  öffnet sie über „DialOS Lizenzen" im Menü. Neuer Satz in der Grammatik, Piper
+  → Vosk geprüft: alle 80 Sätze wörtlich. Tests: `tests/test_lizenzen.py`.
 - **DialOS merkt, wenn seine eigene Ansage stumm wäre** (2026-11-06). Am
   2026-08-24 kam jeder `paplay`-Strom stummgeschaltet zur Welt, weil PipeWire
   sich das je Anwendung merkt - alle gespeicherten Ansagen und der Frageton

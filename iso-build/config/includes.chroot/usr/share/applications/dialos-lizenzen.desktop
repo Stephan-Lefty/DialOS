@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Lizenzen
+Comment=Lizenzen und Herkunft der Bestandteile – vorlesen lassen mit „Lizenzen vorlesen“
+Exec=xdg-open /usr/share/doc/dialos/lizenzen.txt
+Icon=text-x-generic-symbolic
+Terminal=false
+Categories=Utility;Documentation;
+Keywords=Lizenz;Herkunft;Urheber;Namensnennung;

@@ -235,6 +235,12 @@ finished too, and then move down together. That way no reference breaks.
 - [ ] **Parakeet licence notice on the device** (2026-09-16): CC-BY-4.0 requires
   attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
   that DialOS can show or read out on the device.
+  **Built 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, read out with
+  **"Lizenzen vorlesen"** (via `dialos-auskunft.py lizenzen`), in the menu as
+  "DialOS Lizenzen". Piper → Vosk: all 80 sentences recognised verbatim. Tests:
+  `tests/test_lizenzen.py`. **Open: Stephan's acceptance with a real voice** -
+  and whether English words like "GNU General Public License" or "TDT 0.6B v3"
+  sound intelligible in a German voice.
 
 - [ ] **Our own GNOME Shell extension for switching between windows**
   (Stephan's question on 2026-09-21: "can one not walk through the windows by
