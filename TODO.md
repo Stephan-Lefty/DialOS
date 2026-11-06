@@ -65,7 +65,8 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Sieben Sprachbefehle, die Sender kommen aus der Medienliste in die
     Grammatik. Der Widerspruch „Radio einschalten" gegen die Antwort „kann
     ich noch nicht" ist aufgelöst.
-  - [ ] **DER DATENBANK-EINTRAG PASST NICHT ZU PODCASTS** (gefunden
+  - [x] **DER DATENBANK-EINTRAG PASST NICHT ZU PODCASTS** (repariert 2026-11-06,
+    siehe unten „Damit steht die Reparatur fest"; gefunden
     2026-10-08 beim Einbau der Podcast-Liste, ohne Gerät - durch Lesen
     und eine Messung am eigenen Code). `sender_sicherstellen()` ist für
     **Sender** gebaut, deren Adresse sich nie ändert. Eine Podcast-Folge
@@ -118,6 +119,16 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Folgen (tagesschau 2 MB in unter einer Sekunde, ein 74-Minuten-Hörspiel
     wären rund 70 MB) - die braucht eine Ansage, damit es nicht nach einem
     Fehler klingt.
+
+    **GEBAUT AM 2026-11-06:** `folge_herunterladen()` in `dialos_podcast.py`
+    (Ordner `~/.cache/dialos/folgen/<podcast>/`, nur die neueste Datei,
+    erst `.teil`, dann umbenannt; dauert es länger als 2 s: „Einen Moment,
+    ich hole die Sendung."). `nachrichten()` in `dialos-radio.py` spielt die
+    Folge als `file://` und ruft `sender_sicherstellen()` nur noch für
+    Sender. Am Gerät geprobt: Ö1 lief, „landesweite Nachrichten" brachte
+    die tagesschau nach 4,8 s (davon rund 3 s Ansage), derselbe
+    Rhythmbox-Prozess, keine Stille. Tests: `tests/test_folgen.py`. Der
+    künftige Podcast-Befehl nimmt dieselbe Funktion.
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort

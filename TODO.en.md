@@ -63,7 +63,11 @@ finished too, and then move down together. That way no reference breaks.
     Seven voice commands; the stations enter the grammar from the media
     list. The contradiction between "Radio einschalten" and the answer "I
     cannot do that yet" is resolved.
-  - [ ] **Podcast episodes: download instead of streaming** (probe on
+  - [x] **Podcast episodes: download instead of streaming** (built
+    2026-11-06: `folge_herunterladen()` in `dialos_podcast.py`, used by the
+    news; on the device Ö1 was playing and the tagesschau followed after
+    4.8 s in the same Rhythmbox process. Tests: `tests/test_folgen.py`.
+    Probe on
     2026-11-06). Rhythmbox does not play an HTTPS MP3 address that is not
     in its database (`--play-uri`, MPRIS `OpenUri`, a `.pls` playlist all
     fail; `AddToQueue` says "no registered source can handle the URI").

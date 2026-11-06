@@ -32,6 +32,7 @@ Aufruf:
 
 import importlib.util
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -591,10 +592,21 @@ def nachrichten(rs, gesucht=None):
             sprich("Es ist keine Nachrichtensendung abrufbar.")
             melde("Feed ohne Audio-Folge")
             return 1
-        quelle = folge["audio"]
-        melde(f"neueste Folge: {folge['titel']}")
-
-    if (not sender_sicherstellen(rs, eintrag.get("name") or "Nachrichten", quelle)
+        melde(f"neueste Folge: {folge['titel']} <{folge['audio']}>")
+        # Als Datei, nicht als Stream - siehe folge_herunterladen(). Kein
+        # Datenbank-Eintrag, kein Neustart, das laufende Radio bricht nicht ab.
+        pfad, meldung = pod.folge_herunterladen(
+            folge["audio"], eintrag.get("name") or "nachrichten",
+            bei_wartezeit=lambda: sprich("Einen Moment, ich hole die Sendung."))
+        if meldung:
+            sprich("Ich konnte die Nachrichten nicht laden.")
+            melde(f"Folge nicht geladen: {meldung}")
+            return 1
+        quelle = pathlib.Path(pfad).as_uri()
+        if not client("--play-uri", quelle):
+            sprich("Ich konnte die Nachrichten nicht starten.")
+            return 1
+    elif (not sender_sicherstellen(rs, eintrag.get("name") or "Nachrichten", quelle)
             or not client("--play-uri", quelle)):
         sprich("Ich konnte die Nachrichten nicht starten.")
         return 1

@@ -157,6 +157,15 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Podcast-Folgen werden heruntergeladen statt gestreamt** (2026-11-06).
+  Rhythmbox spielt eine Internet-Adresse nur, wenn sie in seiner Datenbank
+  steht - bei Podcasts hat aber jede Folge eine neue. Bisher hieß jede neue
+  Folge: Rhythmbox beenden, Datenbank beschreiben, neu starten; ein laufendes
+  Radio brach ab, bis zu 15 s Stille, und die Datenbank wuchs ohne Ende. Jetzt
+  holt `folge_herunterladen()` die Folge nach `~/.cache/dialos/folgen/` (je
+  Podcast nur die neueste) und spielt sie als Datei - ohne Neustart. Am Gerät
+  geprobt: von Ö1 zur tagesschau ohne Unterbrechung. Tests:
+  `tests/test_folgen.py`.
 - **Mailkonto: MX-Eintrag als Hinweis** (2026-11-06). Kennt die
   Anbieter-Datenbank eine eigene Domain nicht, sagte die Maske bisher nur
   „Server eintragen". Jetzt nennt sie den Rechner aus dem MX-Eintrag und sagt

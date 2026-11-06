@@ -31,6 +31,7 @@ Aufruf:
 
 import argparse
 import email.utils
+import hashlib
 import importlib.util
 import os
 import re
@@ -60,6 +61,16 @@ TOT_NACH_TAGEN = 14
 KURZ_BIS_SEKUNDEN = 600
 
 KOPF = {"User-Agent": "DialOS-Medienliste/1.0 (+https://dialos.org)"}
+
+#: Hier liegen heruntergeladene Folgen, je Podcast ein Ordner mit nur der
+#: neuesten Datei. Im Cache, weil sie jederzeit neu geholt werden koennen.
+FOLGEN = os.path.join(os.path.expanduser("~"), ".cache", "dialos", "folgen")
+
+#: Dauert das Herunterladen laenger als das, wird angesagt, dass es dauert.
+#: Die tagesschau (2 MB) ist in unter einer Sekunde da und bleibt still; ein
+#: Hoerspiel von 70 MB braucht etliche Sekunden, und Stille so lange klingt
+#: fuer jemanden, der nichts sieht, wie ein Fehler.
+WARTEN_ANSAGE_NACH_S = 2
 
 
 def sagen(text=""):
@@ -129,6 +140,83 @@ def _datum(wert):
     except (TypeError, ValueError):
         return None
     return zerlegt.timestamp() if zerlegt else None
+
+
+def _ordnername(name):
+    """Ein Ordnername aus dem Namen des Podcasts - nur Kleinbuchstaben und -."""
+    name = name.lower()
+    for alt, neu in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
+        name = name.replace(alt, neu)
+    return re.sub(r"[^a-z0-9]+", "-", name).strip("-") or "podcast"
+
+
+def folge_herunterladen(audio, name, bei_wartezeit=None, zeit=600, wurzel=None):
+    """Die Folge als Datei holen. Gibt (pfad, fehlermeldung) zurueck.
+
+    WARUM NICHT STREAMEN - die Probe am Geraet vom 2026-11-06: Rhythmbox
+    spielt eine HTTPS-Adresse nur, wenn sie in seiner Datenbank steht
+    (--play-uri, MPRIS OpenUri und eine .pls-Liste blieben stumm,
+    AddToQueue sagte "Keine registrierte Quelle kann die Adresse
+    verarbeiten"). Bei einem Sender ist das ein einmaliger Eintrag; bei
+    Podcasts hat aber jede Folge eine neue Adresse. Jede neue Folge hiess
+    also: Rhythmbox beenden, Datenbank beschreiben, neu starten - das
+    laufende Radio brach ab, bis zu fuenfzehn Sekunden Stille, und die
+    Datenbank wuchs um einen Eintrag je Folge, fuer immer.
+
+    Eine lokale Datei (file://) spielt Rhythmbox dagegen sofort und legt
+    den Eintrag selbst an, ohne Neustart. Gemessen mit laufendem Oe1: kein
+    Abbruch, dieselbe Prozessnummer. Wird die Datei geloescht, versteckt
+    Rhythmbox den Eintrag und entfernt ihn nach "grace-period" Tagen
+    (am Geraet 45) - die Datenbank waechst damit nicht mehr unbegrenzt.
+
+    JE PODCAST NUR DIE NEUESTE DATEI: Nach dem Holen wird der Rest des
+    Ordners geloescht. Liegt die Folge schon da, wird sie nicht erneut
+    geholt. Geschrieben wird erst in eine ".teil"-Datei - eine halb
+    geladene Folge darf nie abgespielt werden.
+    """
+    ordner = os.path.join(wurzel or FOLGEN, _ordnername(name))
+    endung = os.path.splitext(urllib.parse.urlparse(audio).path)[1].lower()
+    if not re.fullmatch(r"\.[a-z0-9]{2,4}", endung):
+        endung = ".mp3"
+    pfad = os.path.join(ordner, hashlib.sha1(audio.encode()).hexdigest()[:16] + endung)
+
+    if not (os.path.isfile(pfad) and os.path.getsize(pfad) > 0):
+        os.makedirs(ordner, exist_ok=True)
+        teil = pfad + ".teil"
+        try:
+            prozess = subprocess.Popen(
+                ["curl", "-sL", "--fail", "--max-time", str(zeit),
+                 "-A", KOPF["User-Agent"], "-o", teil, audio],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except (FileNotFoundError, OSError):
+            return "", "curl fehlt"
+        try:
+            rueckgabe = prozess.wait(timeout=WARTEN_ANSAGE_NACH_S)
+        except subprocess.TimeoutExpired:
+            if bei_wartezeit:
+                bei_wartezeit()
+            try:
+                rueckgabe = prozess.wait(timeout=zeit + 5)
+            except subprocess.TimeoutExpired:
+                prozess.kill()
+                rueckgabe = None
+        if rueckgabe != 0 or not os.path.isfile(teil) or os.path.getsize(teil) == 0:
+            try:
+                os.remove(teil)
+            except OSError:
+                pass
+            return "", ("keine Antwort" if rueckgabe is None
+                        else f"Herunterladen gescheitert (curl {rueckgabe})")
+        os.replace(teil, pfad)
+
+    for datei in os.listdir(ordner):
+        alt = os.path.join(ordner, datei)
+        if alt != pfad and os.path.isfile(alt):
+            try:
+                os.remove(alt)
+            except OSError:
+                pass
+    return pfad, ""
 
 
 def feed_lesen(text):
