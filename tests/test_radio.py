@@ -425,12 +425,22 @@ class PasstZumSprachdienst(unittest.TestCase):
         self.assertIn("Radio stoppen", antwort)
         self.assertIn("radio stoppen", self.dienst.RADIO_SAETZE)
 
+    def test_weck_satz_bleibt_allein(self):
+        """"sprachsteuerung einschalten" ist nur ein Hinweis im laufenden
+        Betrieb - geweckt wird weiter allein mit "sprachsteuerung starten"."""
+        import json
+        self.assertEqual(json.loads(self.dienst.GRAMMATIK_AUS),
+                         ["sprachsteuerung starten", "[unk]"])
+        self.assertIn("sprachsteuerung einschalten", self.dienst.WUNSCH_SAETZE)
+
     def test_jeder_gestrichene_satz_nennt_einen_bestehenden(self):
         """Hinweis-Saetze schalten nichts, aber sie muessen auf einen Satz
         zeigen, den es WIRKLICH gibt - sonst lehren sie einen falschen."""
         hinweise = {"radio ausschalten": "radio stoppen",
                     "musik ausschalten": "radio stoppen",
-                    "briefe durchsuchen": "unterlagen durchsuchen"}
+                    "briefe durchsuchen": "unterlagen durchsuchen",
+                    "brief durchsuchen": "unterlagen durchsuchen",
+                    "musik starten": "musik abspielen"}
         for satz, ziel in hinweise.items():
             with self.subTest(satz=satz):
                 self.assertIn(satz, self.grammatik)

@@ -154,7 +154,10 @@ background) and `splash.png` (boot/login screen).
   sentences switch nothing. Without them the recogniser pressed "Radio
   ausschalten" onto the nearest sentence - "Radio einschalten". Not possible
   for words the model does not know at all ("Befehlsliste",
-  "Lizenzhinweise"). Piper → Vosk: all 84 sentences verbatim.
+  "Lizenzhinweise"). Added from Stephan's trial: "Brief durchsuchen", "Musik
+  starten" (→ "Musik abspielen") and "Sprachsteuerung einschalten" while
+  running (→ "Ich höre schon zu."; waking still only with "Sprachsteuerung
+  starten"). Piper → Vosk: all 87 sentences verbatim.
 - **"Radio stoppen" turns the radio off, and Michael is no longer drowned
   out** (2026-11-06). Stephan said "Radio stoppen" on his own - it was not a
   command; now it is one, next to "Radio abstellen". "Radio ausschalten" stays

@@ -260,6 +260,14 @@ GRAMMATIK_AN = json.dumps([
     # geprueft (alle 84 woertlich), naechster Nachbar 0,76 bzw. 0,77.
     "musik ausschalten",
     "briefe durchsuchen",
+    # Aus Stephans Probe am selben Tag (12:57-12:58): von selbst gesagt, kein
+    # Befehl, "Das kann ich noch nicht". Piper -> Vosk: alle 87 woertlich.
+    # "brief durchsuchen" ist das, was Vosk aus "briefe durchsuchen" machte.
+    # "sprachsteuerung einschalten" gilt NUR im eingeschalteten Zustand - der
+    # Weck-Satz bleibt allein "sprachsteuerung starten" (GRAMMATIK_AUS).
+    "brief durchsuchen",
+    "musik starten",
+    "sprachsteuerung einschalten",
     "was läuft gerade",
     "lauter machen",
     "leiser machen",
@@ -837,6 +845,9 @@ WUNSCH_SAETZE = {
     # "Unterlagen durchsuchen" statt "Briefe durchsuchen" seit 2026-09-17 -
     # die Suche findet mehr als Briefe (siehe docs/sprachbefehle.md).
     "briefe durchsuchen": ("suche", "Die Suche heisst: Unterlagen durchsuchen."),
+    "brief durchsuchen": ("suche", "Die Suche heisst: Unterlagen durchsuchen."),
+    "musik starten": ("radio-ein", "Sage: Musik abspielen, oder: Radio einschalten."),
+    "sprachsteuerung einschalten": ("sprachsteuerung", "Ich höre schon zu."),
     "mails vorlesen": ("mails", "E-Mails kann ich noch nicht vorlesen."),
     "termine vorlesen": ("termine", "Termine kann ich noch nicht vorlesen."),
     "was steht heute an": ("termine", "Termine kann ich noch nicht vorlesen."),
