@@ -1691,6 +1691,18 @@ finished too, and then move down together. That way no reference breaks.
   silent too. What remains: the log, the transcript window, and a visible hint
   for the helper at the next login.
 
+  **Status 2026-11-06 - the cheap candidate is built:** after starting `paplay`
+  (cached announcements and the question tone), `dialos-say.py` looks up its
+  own stream by process id. If it is muted or at 0 %, it unmutes it and writes
+  `WARNUNG: eigener Ton … war stumm - freigegeben` to `~/.log/dialos-say.log`.
+  Since PipeWire remembers this per application, the fault is then also fixed
+  for every following announcement. If the **output** itself is muted, it is
+  only logged - that is the user's own setting. Reproduced on the device
+  (silent tone, `paplay` remembered as muted by PipeWire): muted before,
+  warning in the log, audible afterwards. Tests: `tests/test_stumm_pruefung.py`.
+  **Still open:** the level candidate (also catches cases outside `paplay`) and
+  the visible hint for the helper.
+
 - [ ] **First false start of the voice control - cause unknown** (2026-08-24).
   At 14:41:12 the voice control switched itself on: Vosk recognised
   "sprachsteuerung starten", the transcript window opened, and then came

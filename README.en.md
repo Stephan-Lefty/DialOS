@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **DialOS notices when its own announcement would be silent** (2026-11-06).
+  On 2026-08-24 every `paplay` stream started out muted, because PipeWire
+  remembers that per application - all cached announcements and the question
+  tone were silent, and no error was recorded anywhere. `dialos-say.py` now
+  checks its own stream after starting playback, unmutes it if it is muted or
+  at 0 %, and writes a warning to the log. A muted output for the whole device
+  is only logged. Tests: `tests/test_stumm_pruefung.py`.
 - **The acceptance check now also covers what is system-wide** (2026-11-06,
   preparing the rebuild on 20 November). `dialos-nutzerkonto-pruefen.sh` said
   "nothing is missing" on 25 September - yet Java and the bridge manifest were

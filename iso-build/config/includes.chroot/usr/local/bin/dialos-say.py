@@ -386,16 +386,100 @@ def bluetooth_wecken():
         pass
 
 
+# Wie lange nach dem Start von paplay auf den eigenen Strom gewartet wird.
+# Gemessen am 2026-11-06: Er steht nach wenigen hundertstel Sekunden in der
+# Liste. Eine Sekunde reicht also reichlich und haelt nichts auf - paplay
+# spielt waehrenddessen ja schon.
+STROM_SUCHEN_S = 1.0
+
+
+def senke_stumm(index):
+    """Ist die Ausgabe, auf der ein Strom liegt, selbst stummgeschaltet?"""
+    try:
+        out = subprocess.run(["pactl", "-f", "json", "list", "sinks"],
+                             capture_output=True, text=True, timeout=5).stdout
+        for senke in json.loads(out) if out.strip() else []:
+            if senke.get("index") == index:
+                return bool(senke.get("mute", False))
+    except Exception:
+        pass
+    return False
+
+
+def strom_lautlos(stream):
+    """Steht der Strom auf stumm oder auf 0 % Lautstaerke?"""
+    if stream.get("mute", False):
+        return True
+    kanaele = stream.get("volume", {}).values()
+    return bool(kanaele) and all(k.get("value", 1) == 0 for k in kanaele)
+
+
+def eigenen_strom_pruefen(proc):
+    """Selbstpruefung: Ist der Ton, den DialOS gerade abspielt, hoerbar?
+
+    Offen seit dem 2026-08-24 (TODO "Keine Selbstpruefung, ob das Geraet
+    ueberhaupt noch spricht"): Damals kam jeder paplay-Strom stummgeschaltet
+    zur Welt, weil PipeWire sich das je Anwendung merkt. paplay gab 0 zurueck,
+    die Ansage galt als geglueckt - und das Geraet war fuer einen blinden
+    Nutzer stumm, ohne dass irgendwo ein Fehler stand. ist_eigener_ton()
+    verhindert seitdem, dass DialOS selbst so einen Zustand erzeugt; diese
+    Pruefung faengt ihn, wenn er auf anderem Weg entstanden ist.
+
+    Der EIGENE Strom wird freigegeben - er gehoert DialOS, und eine stumme
+    Ansage hat nie jemand gewollt. Weil PipeWire sich das je Anwendung merkt,
+    ist der Fehler damit auch fuer alle kuenftigen Ansagen behoben.
+
+    Ist dagegen die AUSGABE selbst stumm, wird nur protokolliert: Das ist die
+    Einstellung des Nutzers fuer das ganze Geraet, und die nimmt DialOS ihm
+    nicht ungefragt weg. Eine Ansage koennte es auch nicht melden - die waere
+    ja ebenfalls stumm.
+    """
+    ende = time.monotonic() + STROM_SUCHEN_S
+    # Ein kurzer Ton (Frageton) kann vorbei sein, bevor er in der Liste
+    # auftaucht - dann nicht die volle Sekunde weitersuchen.
+    while time.monotonic() < ende and proc.poll() is None:
+        for stream in sink_inputs():
+            props = stream.get("properties", {})
+            if props.get("application.process.id") != str(proc.pid):
+                continue
+            index = stream.get("index")
+            if strom_lautlos(stream):
+                set_mute(index, False)
+                subprocess.run(["pactl", "set-sink-input-volume", str(index), "100%"],
+                               capture_output=True, timeout=5)
+                melde(f"  WARNUNG: eigener Ton (Strom {index}) war stumm - freigegeben")
+            if senke_stumm(stream.get("sink")):
+                melde("  WARNUNG: die Tonausgabe ist stummgeschaltet - "
+                      "diese Ansage war nicht zu hoeren")
+            return
+        time.sleep(0.05)
+
+
+def paplay_geprueft(pfad, grenze_s):
+    """paplay abspielen und dabei pruefen, ob es zu hoeren ist."""
+    try:
+        proc = subprocess.Popen(["paplay", pfad], stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+    except Exception:
+        return False
+    try:
+        eigenen_strom_pruefen(proc)
+    except Exception:
+        pass
+    try:
+        return proc.wait(timeout=grenze_s) == 0
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+        return False
+
+
 def aus_speicher(text):
     """Spielt die Ansage aus dem Speicher, wenn sie dort liegt."""
     pfad = os.path.join(SPEICHER, speicher_schluessel(text) + ".wav")
     if not os.path.exists(pfad):
         return False
-    try:
-        erg = subprocess.run(["paplay", pfad], capture_output=True, timeout=60)
-        return erg.returncode == 0
-    except Exception:
-        return False
+    return paplay_geprueft(pfad, 60)
 
 
 def frageton_gewuenscht():
@@ -428,10 +512,7 @@ def frageton_gewuenscht():
 def frageton_abspielen():
     if not os.path.exists(FRAGE_TON):
         return
-    try:
-        subprocess.run(["paplay", FRAGE_TON], capture_output=True, timeout=5)
-    except Exception:
-        pass
+    paplay_geprueft(FRAGE_TON, 5)
 
 
 def markierungsdatei():

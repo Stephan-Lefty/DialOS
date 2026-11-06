@@ -1979,6 +1979,18 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   ebenfalls stumm. Bleibt: Protokoll, Mitschrift-Fenster, und beim nächsten
   Anmelden ein sichtbarer Hinweis für den Helfer.
 
+  **Stand 2026-11-06 - der billige Kandidat ist gebaut:** `dialos-say.py`
+  sucht nach dem Start von `paplay` (gespeicherte Ansagen und Frageton) den
+  eigenen Strom über die Prozessnummer. Ist er stumm oder auf 0 %, gibt es ihn
+  frei und schreibt `WARNUNG: eigener Ton … war stumm - freigegeben` nach
+  `~/.log/dialos-say.log`. Weil PipeWire sich das je Anwendung merkt, ist der
+  Fehler damit auch für alle folgenden Ansagen behoben. Ist die **Ausgabe**
+  selbst stumm, wird nur protokolliert - das ist die Einstellung des Nutzers.
+  Am Gerät nachgestellt (stiller Ton, `paplay` von PipeWire als stumm
+  gemerkt): vorher stumm, Warnung im Protokoll, nachher hörbar. Tests:
+  `tests/test_stumm_pruefung.py`. **Offen bleibt:** der Pegel-Kandidat (fängt
+  auch Fälle außerhalb von `paplay`) und der sichtbare Hinweis für den Helfer.
+
 - [ ] **Erster Fehlstart der Sprachsteuerung - Ursache offen** (2026-08-24).
   Um 14:41:12 hat sich die Sprachsteuerung selbst eingeschaltet: Vosk erkannte
   „sprachsteuerung starten", das Mitschrift-Fenster ging auf, danach kamen

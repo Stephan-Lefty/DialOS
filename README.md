@@ -157,6 +157,14 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **DialOS merkt, wenn seine eigene Ansage stumm wäre** (2026-11-06). Am
+  2026-08-24 kam jeder `paplay`-Strom stummgeschaltet zur Welt, weil PipeWire
+  sich das je Anwendung merkt - alle gespeicherten Ansagen und der Frageton
+  waren lautlos, und nirgends stand ein Fehler. `dialos-say.py` prüft jetzt
+  nach jedem Abspielen den eigenen Strom, gibt ihn frei, falls er stumm oder
+  auf 0 % steht, und schreibt eine Warnung ins Protokoll. Eine stumme
+  Tonausgabe des ganzen Geräts wird nur protokolliert. Tests:
+  `tests/test_stumm_pruefung.py`.
 - **Abnahme prüft jetzt auch, was systemweit liegt** (2026-11-06,
   Vorbereitung des Neuaufbaus am 20.11.). `dialos-nutzerkonto-pruefen.sh`
   meldete am 25.09. „Im Konto nutzer fehlt nichts" - und trotzdem fehlten Java
