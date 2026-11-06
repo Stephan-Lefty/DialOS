@@ -156,6 +156,18 @@ Token (credential.helper=store). **Das Token gibt Stephan selbst im Terminal
 ein, nie in den Chat**; das schmale Terminal bricht lange Befehle mitten im
 Wort um, deshalb lief es am 2026-11-06 ueber ein kurzes Hilfsskript.
 
+## Stand vom 2026-11-06, Freitag mittags
+
+Ohne Stephans Stimme gebaut, am Laptop aufgespielt, alle Tests gruen:
+Selbstpruefung "ist die Ansage hoerbar?" in `dialos-say.py` (am Geraet
+nachgestellt), "Lizenzen vorlesen" samt Menue-Eintrag "DialOS Lizenzen"
+(Piper -> Vosk: alle 80 Saetze woertlich), MX-Hinweis in der Mailkonto-Maske,
+TODO aufgeraeumt. System auf Kernel 6.12.115 aktualisiert (autoremove bleibt
+fuer den 20.11.). Automatischer `git pull` bei Sitzungsstart auf beiden
+Rechnern. **Wartet auf Stephans Abnahme mit echter Stimme:** "Lizenzen
+vorlesen" - klingen "GNU General Public License" und "TDT 0.6B v3" mit
+deutscher Stimme verstaendlich?
+
 ## Stand vom 2026-10-08, Donnerstag abends
 
 **Radio am Geraet abgenommen** (nach `docs/aufspielen-am-geraet.md`, Ergebnisse
