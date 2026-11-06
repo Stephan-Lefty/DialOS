@@ -226,16 +226,6 @@ finished too, and then move down together. That way no reference breaks.
   logo bottom right is only ~3 % from the edge - on 16:10 screens the zoom cuts
   5 % on the left and right.
 
-- [ ] **Parakeet licence notice on the device** (2026-09-16): CC-BY-4.0 requires
-  attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
-  that DialOS can show or read out on the device.
-  **Built 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, read out with
-  **"Lizenzen vorlesen"** (via `dialos-auskunft.py lizenzen`), in the menu as
-  "DialOS Lizenzen". Piper → Vosk: all 80 sentences recognised verbatim. Tests:
-  `tests/test_lizenzen.py`. **Listening test accepted on 2026-11-06** (Stephan:
-  "everything was fine - even if a layperson won't know what you are reading
-  out"). Only recognition of the sentence with a real voice is still open.
-
 - [ ] **Our own GNOME Shell extension for switching between windows**
   (Stephan's question on 2026-09-21: "can one not walk through the windows by
   voice?"). Not today, and that is not DialOS's fault: under Wayland a foreign
@@ -2628,6 +2618,17 @@ memory, not just a record of successes.
   installed) and point to the hoster's customer area. As a hint only, not as a
   value: the right server turned out to be `imap.dialos.org`.
   **Done:** for an unknown domain `dialos-mailkonto.py` queries the MX record from the device's own DNS server (from `/etc/resolv.conf`, no DNS-over-HTTPS at a third party, no new package) and names it in the mask's error message - explicitly as a hint at the provider, not as a server name. On the device: dialos.org → `s111.goserver.host`. Tests: `tests/test_mailkonto_mx.py`.
+
+- ☑️ **2026-11-06** — **Parakeet licence notice on the device** (2026-09-16): CC-BY-4.0 requires
+  attribution (wording in docs/lizenzen.en.md). Belongs in a licence overview
+  that DialOS can show or read out on the device.
+  **Built 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, read out with
+  **"Lizenzen vorlesen"** (via `dialos-auskunft.py lizenzen`), in the menu as
+  "DialOS Lizenzen". Piper → Vosk: all 80 sentences recognised verbatim. Tests:
+  `tests/test_lizenzen.py`. **Listening test accepted on 2026-11-06** (Stephan:
+  "everything was fine - even if a layperson won't know what you are reading
+  out"). Only recognition of the sentence with a real voice is still open.
+  **Completed:** "Lizenzen vorlesen" recognised verbatim with Stephan's voice on 2026-11-06 at 11:18 (Stephan: "the sentence worked!").
 
 ### Desktop and user interface
 

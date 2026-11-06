@@ -248,7 +248,8 @@ dpkg-query -W -f='${Package}\t${Version}\t${Homepage}\n' | sort > packages.txt
 - **Licence notice for Parakeet on the device** (CC-BY-4.0 requires
   attribution, wording above) - **built on 2026-11-06**:
   `/usr/share/doc/dialos/lizenzen.txt`, read out with "Lizenzen vorlesen", in
-  the menu as "DialOS Lizenzen". Only the acceptance on the device is open.
+  the menu as "DialOS Lizenzen". Accepted on the
+  device (2026-11-06).
 - **To be checked:** the libraries in LanguageTool's `third-party-licenses/`,
   and whether the espeak-ng (GPL-3.0) bundled with Piper requires source to
   be provided separately.

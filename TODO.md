@@ -395,16 +395,6 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Bildfassung: Das Logo unten rechts liegt nur ~3 % vom Rand - auf 16:10-Bildschirmen
   schneidet der Zoom links/rechts je 5 % ab.
 
-- [ ] **Lizenzhinweis für Parakeet am Gerät** (2026-09-16): CC-BY-4.0 verlangt
-  Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
-  Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
-  **Gebaut 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, vorgelesen mit
-  **„Lizenzen vorlesen"** (über `dialos-auskunft.py lizenzen`), im Menü als
-  „DialOS Lizenzen". Piper → Vosk: alle 80 Sätze wörtlich erkannt. Tests:
-  `tests/test_lizenzen.py`. **Hörprobe am 2026-11-06 abgenommen** (Stephan:
-  „Ja soweit war alles ok. Auch wenn der Leihe nicht weiß, was Du da
-  vorliest!"). Offen bleibt nur die Erkennung des Satzes mit echter Stimme.
-
 - [ ] **Eigene GNOME-Shell-Erweiterung, um zwischen Fenstern zu wechseln**
   (Stephans Frage vom 2026-09-21: „Man kann nicht per Sprachbefehl durch die
   Fenster wandern?"). Heute nicht, und das liegt nicht an DialOS: Unter
@@ -3019,6 +3009,17 @@ die Liste ist die Erinnerung des Projekts, nicht nur eine Erfolgsbilanz.
   Kundenbereich des Hosters verweisen. Nur als Hinweis, nicht als Wert: Der
   richtige Server war am Ende `imap.dialos.org`.
   **Erledigt:** `dialos-mailkonto.py` fragt bei unbekannter Domain den MX-Eintrag beim eigenen DNS-Server ab (aus `/etc/resolv.conf`, kein DNS-over-HTTPS bei einem Dritten, kein neues Paket) und nennt ihn in der Fehlermeldung der Maske - ausdrücklich als Hinweis auf den Anbieter, nicht als Servername. Am Gerät: dialos.org → `s111.goserver.host`. Tests: `tests/test_mailkonto_mx.py`.
+
+- ☑️ **2026-11-06** — **Lizenzhinweis für Parakeet am Gerät** (2026-09-16): CC-BY-4.0 verlangt
+  Namensnennung (Wortlaut in docs/lizenzen.md). Gehört in eine
+  Lizenzübersicht, die DialOS am Gerät zeigen oder vorlesen kann.
+  **Gebaut 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, vorgelesen mit
+  **„Lizenzen vorlesen"** (über `dialos-auskunft.py lizenzen`), im Menü als
+  „DialOS Lizenzen". Piper → Vosk: alle 80 Sätze wörtlich erkannt. Tests:
+  `tests/test_lizenzen.py`. **Hörprobe am 2026-11-06 abgenommen** (Stephan:
+  „Ja soweit war alles ok. Auch wenn der Leihe nicht weiß, was Du da
+  vorliest!"). Offen bleibt nur die Erkennung des Satzes mit echter Stimme.
+  **Abgeschlossen:** „Lizenzen vorlesen" am 2026-11-06 um 11:18 mit Stephans Stimme wörtlich erkannt (Stephan: „Satz "Lizenzen vorlesen" hat funktioniert!").
 
 ### Desktop und Bedienoberfläche
 

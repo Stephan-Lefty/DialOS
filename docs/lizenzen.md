@@ -253,8 +253,8 @@ dpkg-query -W -f='${Package}\t${Version}\t${Homepage}\n' | sort > pakete.txt
   aus Debian kommt". Nicht entschieden.
 - **Lizenzhinweis für Parakeet am Gerät** (CC-BY-4.0 verlangt Namensnennung,
   Wortlaut oben) - **gebaut am 2026-11-06**: `/usr/share/doc/dialos/lizenzen.txt`,
-  vorgelesen mit „Lizenzen vorlesen", im Menü „DialOS Lizenzen". Offen ist nur
-  noch die Abnahme am Gerät.
+  vorgelesen mit „Lizenzen vorlesen", im Menü „DialOS Lizenzen". Am Gerät
+  abgenommen (2026-11-06).
 - **Zu prüfen:** die Bibliotheken in LanguageTools `third-party-licenses/`
   und ob das in Piper mitgelieferte espeak-ng (GPL-3.0) eine eigene
   Quelltext-Bereitstellung verlangt.

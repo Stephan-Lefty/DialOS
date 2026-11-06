@@ -165,8 +165,8 @@ nachgestellt), "Lizenzen vorlesen" samt Menue-Eintrag "DialOS Lizenzen"
 TODO aufgeraeumt. System auf Kernel 6.12.115 aktualisiert (autoremove bleibt
 fuer den 20.11.). Automatischer `git pull` bei Sitzungsstart auf beiden
 Rechnern. Hoerprobe "Lizenzen vorlesen" abgenommen ("soweit alles ok - auch wenn der
-Laie nicht weiss, was Du da vorliest"); offen nur, ob der Satz mit Stephans
-Stimme erkannt wird.
+Laie nicht weiss, was Du da vorliest"), und um 11:18 mit Stephans Stimme
+woertlich erkannt - vollstaendig abgenommen.
 
 ## Stand vom 2026-10-08, Donnerstag abends
 
