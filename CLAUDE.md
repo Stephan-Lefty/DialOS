@@ -1237,7 +1237,14 @@ der Hinweis auf die geaenderte Datei auffiel und nachgesehen wurde.
 1. Auf der Seite, die verlassen wird: alles committen und **pushen**.
    `git status --short --branch` muss `master...origin/master` ohne
    Zusatz melden.
-2. Auf der neuen Seite: **zuerst** `git pull`, dann anfangen.
+2. Auf der neuen Seite: **zuerst** `git pull`, dann anfangen. Seit
+   2026-11-06 erledigt das ein SessionStart-Hook bei jedem Start einer
+   Claude-Sitzung (`.claude/settings.json` im Repo; `git pull --ff-only`,
+   findet das Repo auch, wenn die Sitzung im Ordner darueber startet).
+   Schlaegt er fehl (kein Netz, lokale Konflikte), erscheint ein Hinweis
+   "automatischer git pull fehlgeschlagen" - dann von Hand pullen. Auf dem
+   Laptop starten die Sitzungen im Ordner `DialOS/` ueber dem Repo; dort
+   steht derselbe Hook in `DialOS/.claude/settings.local.json` (nicht im Git).
 3. Am Geraet gilt zusaetzlich: Ein `git pull` allein wirkt nicht, es
    braucht `sudo /usr/local/sbin/dialos-aufspielen --wirklich` (siehe
    [docs/aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md)).
