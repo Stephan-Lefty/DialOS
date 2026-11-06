@@ -135,5 +135,32 @@ class Selbstpruefung(unittest.TestCase):
         self.assertEqual(self.freigaben, [(200, False)])
 
 
+class TitelwechselWaehrendDerAnsage(unittest.TestCase):
+    """Stephan, 2026-11-06: "da kommt nix". Rhythmbox wechselte waehrend einer
+    Ansage den Titel; der neue Strom kam stumm zur Welt, freigegeben wurde nur
+    die alte Strom-Nummer - die neue Sendung blieb stumm."""
+
+    def setUp(self):
+        self.m = _laden()
+        self.freigaben = []
+        self.m.set_mute = lambda i, s: self.freigaben.append((i, s))
+        self.m.melde = lambda t: None
+
+    def test_neuer_strom_derselben_anwendung_wird_freigegeben(self):
+        self.m.sink_inputs = lambda: [strom(805, 1, stumm=True, name="Rhythmbox")]
+        self.m.nach_namen_freigeben({"Rhythmbox"}, vorher_stumm={789})
+        self.assertEqual(self.freigaben, [(805, False)])
+
+    def test_vom_nutzer_stummgeschalteter_strom_bleibt_stumm(self):
+        self.m.sink_inputs = lambda: [strom(700, 1, stumm=True, name="Rhythmbox")]
+        self.m.nach_namen_freigeben({"Rhythmbox"}, vorher_stumm={700})
+        self.assertEqual(self.freigaben, [])
+
+    def test_fremde_anwendung_bleibt_unberuehrt(self):
+        self.m.sink_inputs = lambda: [strom(900, 1, stumm=True, name="Firefox")]
+        self.m.nach_namen_freigeben({"Rhythmbox"}, vorher_stumm=set())
+        self.assertEqual(self.freigaben, [])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -664,7 +664,52 @@ def bei_signal(nummer, _rahmen):
     raise SystemExit(128 + nummer)
 
 
+def anwendung(stream):
+    return stream.get("properties", {}).get("application.name", "")
+
+
+def nach_namen_freigeben(namen, vorher_stumm):
+    """Gibt Stroeme der Anwendungen frei, die DIESE Ansage stummgeschaltet hat.
+
+    GEFUNDEN AM 2026-11-06 (Stephan: "da kommt nix"): Wechselt Rhythmbox
+    WAEHREND einer Ansage den Titel, baut es einen neuen Strom - und der kommt
+    stummgeschaltet zur Welt, weil PipeWire die Stummschaltung je Anwendung
+    uebernimmt. Freigegeben wurde bis dahin nur die gemerkte Strom-NUMMER; die
+    gab es nicht mehr, und die neue Sendung blieb stumm. Nachgestellt: Oe1
+    laeuft, Ansage, mittendrin Wechsel auf eine Datei - danach stumm.
+
+    Freigegeben wird nur, was vorher NICHT stumm war: Einen Strom, den der
+    Nutzer selbst stummgeschaltet hat, laesst DialOS in Ruhe.
+    """
+    if not namen:
+        return
+    for stream in sink_inputs():
+        index = stream.get("index")
+        if (index is not None and stream.get("mute", False)
+                and anwendung(stream) in namen and index not in vorher_stumm):
+            set_mute(index, False)
+            melde(f"  (Strom {index} von {anwendung(stream)} nach der Ansage freigegeben)")
+
+
+def nachkontrolle(argv):
+    """Laeuft getrennt weiter, nachdem dialos-say fertig ist.
+
+    Ein Titelwechsel, der kurz vor dem Ende der Ansage angestossen wurde, baut
+    seinen neuen Strom womoeglich erst danach - der waere bei der Freigabe im
+    finally noch nicht da gewesen. Deshalb nach einer und nach drei Sekunden
+    noch einmal nachsehen, ohne den Aufrufer aufzuhalten.
+    """
+    namen = set(argv[0].split("\x1f")) if argv and argv[0] else set()
+    vorher = {int(x) for x in argv[1].split(",") if x} if len(argv) > 1 else set()
+    for warten in (1, 2):
+        time.sleep(warten)
+        nach_namen_freigeben(namen, vorher)
+
+
 def main():
+    if sys.argv[1:2] == ["--nachkontrolle"]:
+        nachkontrolle(sys.argv[2:])
+        return
     for nummer in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
         signal.signal(nummer, bei_signal)
     argv = sys.argv[1:]
@@ -700,6 +745,8 @@ def main():
     melde(f"{'FRAGE ' if ist_frage else ''}{gekuerzt}")
     streams = sink_inputs()
     stummgeschaltet = []
+    namen = set()
+    vorher_stumm = {s.get("index") for s in streams if s.get("mute", False)}
     for stream in streams:
         index = stream.get("index")
         if index is None or ist_speech_dispatcher(stream) or ist_eigener_ton(stream):
@@ -707,6 +754,7 @@ def main():
         if not stream.get("mute", False):
             set_mute(index, True)
             stummgeschaltet.append(index)
+            namen.add(anwendung(stream))
     markierung_setzen()
     try:
         # ZUERST im Speicher nachsehen. Nur wenn keine Lautstaerke
@@ -746,6 +794,17 @@ def main():
     finally:
         for index in stummgeschaltet:
             set_mute(index, False)
+        try:
+            nach_namen_freigeben(namen, vorher_stumm)
+            if namen:
+                subprocess.Popen(
+                    [sys.executable, os.path.abspath(__file__), "--nachkontrolle",
+                     "\x1f".join(sorted(namen)),
+                     ",".join(str(i) for i in sorted(vorher_stumm) if i is not None)],
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    start_new_session=True)
+        except Exception:
+            pass
         markierung_entfernen()
 
 

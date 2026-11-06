@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Nach einer Ansage blieb ein neuer Titel stumm** (2026-11-06, Stephan:
+  „da kommt nix"). Wechselte Rhythmbox während einer Ansage den Titel, kam der
+  neue Tonstrom stummgeschaltet zur Welt - PipeWire übernimmt die
+  Stummschaltung je Anwendung -, und `dialos-say.py` gab nur die alte
+  Strom-Nummer frei. Jetzt gibt es nach der Ansage auch neue Ströme derselben
+  Anwendung frei (sofort und noch einmal nach 1 und 3 s), aber nie einen, den
+  der Nutzer selbst stummgeschaltet hat. Am Gerät nachgestellt und behoben.
 - **Podcast-Folgen werden heruntergeladen statt gestreamt** (2026-11-06).
   Rhythmbox spielt eine Internet-Adresse nur, wenn sie in seiner Datenbank
   steht - bei Podcasts hat aber jede Folge eine neue. Bisher hieß jede neue
