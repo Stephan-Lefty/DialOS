@@ -401,9 +401,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   **Gebaut 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, vorgelesen mit
   **„Lizenzen vorlesen"** (über `dialos-auskunft.py lizenzen`), im Menü als
   „DialOS Lizenzen". Piper → Vosk: alle 80 Sätze wörtlich erkannt. Tests:
-  `tests/test_lizenzen.py`. **Offen: Stephans Abnahme mit echter Stimme** - und
-  ob englische Wörter wie „GNU General Public License" oder „TDT 0.6B v3"
-  mit deutscher Stimme verständlich klingen.
+  `tests/test_lizenzen.py`. **Hörprobe am 2026-11-06 abgenommen** (Stephan:
+  „Ja soweit war alles ok. Auch wenn der Leihe nicht weiß, was Du da
+  vorliest!"). Offen bleibt nur die Erkennung des Satzes mit echter Stimme.
 
 - [ ] **Eigene GNOME-Shell-Erweiterung, um zwischen Fenstern zu wechseln**
   (Stephans Frage vom 2026-09-21: „Man kann nicht per Sprachbefehl durch die

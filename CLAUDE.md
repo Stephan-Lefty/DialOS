@@ -164,9 +164,9 @@ nachgestellt), "Lizenzen vorlesen" samt Menue-Eintrag "DialOS Lizenzen"
 (Piper -> Vosk: alle 80 Saetze woertlich), MX-Hinweis in der Mailkonto-Maske,
 TODO aufgeraeumt. System auf Kernel 6.12.115 aktualisiert (autoremove bleibt
 fuer den 20.11.). Automatischer `git pull` bei Sitzungsstart auf beiden
-Rechnern. **Wartet auf Stephans Abnahme mit echter Stimme:** "Lizenzen
-vorlesen" - klingen "GNU General Public License" und "TDT 0.6B v3" mit
-deutscher Stimme verstaendlich?
+Rechnern. Hoerprobe "Lizenzen vorlesen" abgenommen ("soweit alles ok - auch wenn der
+Laie nicht weiss, was Du da vorliest"); offen nur, ob der Satz mit Stephans
+Stimme erkannt wird.
 
 ## Stand vom 2026-10-08, Donnerstag abends
 

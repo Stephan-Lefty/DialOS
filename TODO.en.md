@@ -232,9 +232,9 @@ finished too, and then move down together. That way no reference breaks.
   **Built 2026-11-06:** `/usr/share/doc/dialos/lizenzen.txt`, read out with
   **"Lizenzen vorlesen"** (via `dialos-auskunft.py lizenzen`), in the menu as
   "DialOS Lizenzen". Piper → Vosk: all 80 sentences recognised verbatim. Tests:
-  `tests/test_lizenzen.py`. **Open: Stephan's acceptance with a real voice** -
-  and whether English words like "GNU General Public License" or "TDT 0.6B v3"
-  sound intelligible in a German voice.
+  `tests/test_lizenzen.py`. **Listening test accepted on 2026-11-06** (Stephan:
+  "everything was fine - even if a layperson won't know what you are reading
+  out"). Only recognition of the sentence with a real voice is still open.
 
 - [ ] **Our own GNOME Shell extension for switching between windows**
   (Stephan's question on 2026-09-21: "can one not walk through the windows by
