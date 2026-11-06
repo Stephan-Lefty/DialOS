@@ -134,6 +134,12 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     2,6 s der Ansage stumm - die ersten rund drei Sekunden der Sendung liefen
     ungehört durch. Bei Folgen jetzt erst die Ansage, dann die Wiedergabe;
     beim Sender bleibt es, wie es war. Am Gerät: Wiedergabe beginnt bei 0 s.
+    **Pause danach verkürzt:** Zwischen Ansage-Ende und Ton lagen 2,3 s, solange
+    Rhythmbox startete. `vorwaermen()` startet es jetzt während der Ansage
+    (`rhythmbox-client --pause`, ohne Ton und Fenster) - gemessen: **0,16 s**.
+    Nach dem Ende der Folge steht Rhythmbox auf „Stopped", es folgt nichts
+    nach (gemessen 20 s lang). Ein vorher laufendes Radio kommt nicht wieder -
+    ob es das soll, entscheidet Stephan.
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort

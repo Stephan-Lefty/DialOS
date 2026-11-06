@@ -184,6 +184,16 @@ class NachrichtenAlsDatei(RadioBasis):
         self.assertEqual(arten, ["sagt", "spielt"])
         self.assertEqual(ablauf[0][1], "tagesschau in 100 Sekunden.")
 
+    def test_rhythmbox_startet_schon_waehrend_der_ansage(self):
+        # 2026-11-06: 2,3 s Pause nach der Ansage, solange Rhythmbox startete.
+        ablauf = []
+        self.radio.laeuft = lambda: False
+        self.radio.vorwaermen = lambda: ablauf.append("vorwaermen")
+        self.radio.sprich = lambda text: ablauf.append("sagt")
+        self.radio.client = lambda *a, **k: ablauf.append(a[0]) or True
+        self.radio.nachrichten(self.rs, "landesweite nachrichten")
+        self.assertEqual(ablauf, ["vorwaermen", "sagt", "--play-uri"])
+
     def test_fehlgeschlagenes_holen_wird_gesagt(self):
         self.radio.podcast_modul().__class__.folge_herunterladen = \
             lambda s, a, n, bei_wartezeit=None: ("", "curl 6")

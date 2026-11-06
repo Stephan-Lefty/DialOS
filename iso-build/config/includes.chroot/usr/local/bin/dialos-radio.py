@@ -136,6 +136,26 @@ def laeuft():
         return False
 
 
+def vorwaermen():
+    """Rhythmbox starten, ohne etwas zu spielen - waehrend Michael noch spricht.
+
+    Gemessen am 2026-11-06: War Rhythmbox zu, lagen zwischen dem Ende der
+    Ansage und dem ersten Ton der tagesschau 2,3 s - so lange braucht das
+    Programm zum Starten. Laeuft es schon, wenn die Ansage endet, faellt
+    diese Pause weg. "--pause" startet Rhythmbox ueber D-Bus, ohne Ton und
+    ohne Fenster; nicht abwarten, es soll ja parallel zur Ansage laufen.
+    """
+    if laeuft():
+        return
+    try:
+        subprocess.Popen([CLIENT, "--no-present", "--pause"],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        melde("Rhythmbox vorgewaermt")
+    except OSError as fehler:
+        melde(f"Rhythmbox nicht vorwaermbar: {fehler}")
+
+
 RHYTHMDB = os.path.join(os.path.expanduser("~"), ".local", "share", "rhythmbox",
                         "rhythmdb.xml")
 
@@ -609,6 +629,7 @@ def nachrichten(rs, gesucht=None):
         # Ansage stumm (2,6 s bei "tagesschau in 100 Sekunden") - die ersten
         # drei Sekunden der Sendung liefen ungehoert durch. Beim Sender ist
         # das gleich, der laeuft ohnehin; eine Folge hat einen Anfang.
+        vorwaermen()
         sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
         if not client("--play-uri", quelle):
             sprich("Ich konnte die Nachrichten nicht starten.")
