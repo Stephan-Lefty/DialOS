@@ -157,6 +157,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **„Radio stoppen" schaltet das Radio ab, und Michael wird nicht mehr
+  übertönt** (2026-11-06). Stephan sagte von sich aus „Radio stoppen" - das
+  war kein Befehl; jetzt ist es einer, neben „Radio abstellen". „Radio
+  ausschalten" bleibt draußen (0,82 gegen „Radio einschalten"). Außerdem sagt
+  Michael den Sender jetzt **vor** dem Abspielen an: Startete der Sender zuerst,
+  entstand sein Tonstrom oft erst während der Ansage und lief laut über sie.
 - **Nach den Nachrichten fragt Michael, wie es weitergeht** (2026-11-06,
   Stephans Wunsch). Bisher kam nach dem Ende einer Nachrichten-Folge nur
   Stille, auch das vorher laufende Radio nicht. Jetzt: „Die Nachrichten sind

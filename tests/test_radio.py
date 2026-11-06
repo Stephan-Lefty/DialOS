@@ -100,6 +100,8 @@ class RadioBasis(unittest.TestCase):
         self.radio.sprich = self.gesagt.append
         self.radio.client = lambda *a, **k: self.gerufen.append(a) or True
         self.radio.laeuft = lambda: True
+        # Vorwaermen hiesse, das echte Rhythmbox zu starten - nur vermerken.
+        self.radio.vorwaermen = lambda: self.gerufen.append(("vorwaermen",))
         # Rhythmbox wirklich zu beenden hiesse pgrep - nur vermerken.
         self.radio.rhythmbox_beenden = lambda: self.gerufen.append(("--quit",)) or True
 
@@ -276,6 +278,15 @@ class AmGeraetGefunden(RadioBasis):
         self.radio.laeuft = lambda: True
         self.radio.einschalten(self.rs, "ö drei")
         self.assertNotIn(("--quit",), self.gerufen)
+
+    def test_erst_ansage_dann_sender(self):
+        """2026-11-06: Startete der Sender zuerst, lief sein Strom laut ueber
+        Michaels Ansage - dialos-say kannte ihn beim Leiseschalten noch nicht."""
+        ablauf = []
+        self.radio.sprich = lambda text: ablauf.append("sagt")
+        self.radio.client = lambda *a, **k: ablauf.append(a[0]) or True
+        self.radio.einschalten(self.rs, "ö drei")
+        self.assertEqual(ablauf, ["sagt", "--play-uri"])
 
     def test_lautstaerke_mit_deutschem_komma(self):
         """rhythmbox-client sagt "liegt bei 0,799988." - nicht "0.8"."""

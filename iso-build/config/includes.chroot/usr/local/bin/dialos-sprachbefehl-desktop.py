@@ -241,6 +241,12 @@ GRAMMATIK_AN = json.dumps([
     "radio einschalten",
     "musik abspielen",
     "radio abstellen",
+    # Seit 2026-11-06: Stephan sagte von sich aus "radio stoppen", Vosk
+    # erkannte es woertlich - und es war kein Befehl. Gegen "sprachsteuerung
+    # stoppen" geprueft: 0,57, weit unter der Schwelle 0,82; Piper -> Vosk:
+    # alle 82 Saetze woertlich. "radio ausschalten" bleibt draussen (0,82
+    # gegen "radio einschalten", Stephans Entscheidung am selben Tag).
+    "radio stoppen",
     "was läuft gerade",
     "lauter machen",
     "leiser machen",
@@ -830,6 +836,7 @@ RADIO_SAETZE = {
     "radio einschalten": "einschalten",
     "musik abspielen": "einschalten",
     "radio abstellen": "aus",
+    "radio stoppen": "aus",
     "was läuft gerade": "was-laeuft",
     "lauter machen": "lauter",
     "leiser machen": "leiser",

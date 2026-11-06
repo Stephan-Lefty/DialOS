@@ -454,15 +454,26 @@ def abspielen(rs, eintrag):
         melde(f"Eintrag ohne Quelle: {eintrag!r}")
         return False
 
-    if not sender_sicherstellen(rs, name, quelle) or not client("--play-uri", quelle):
+    if not sender_sicherstellen(rs, name, quelle):
+        sprich("Ich konnte das Radio nicht starten.")
+        return False
+    # ERST ANSAGEN, DANN ABSPIELEN (2026-11-06, Stephan: "die Nachricht von
+    # Michael ... wurde durch Oe1 abgeschnitten"). dialos-say schaltet nur die
+    # Stroeme leise, die es beim Beginn der Ansage VORFINDET. Startete der
+    # Sender zuerst, entstand sein Strom oft erst waehrend der Ansage - und
+    # lief laut ueber Michael. Beim Sender geht durch die Reihenfolge nichts
+    # verloren, er laeuft ohnehin; vorgewaermt ist die Pause danach kurz.
+    #
+    # Kurz, weil der Nutzer weiterhoeren will - die Regel zur Laenge aus
+    # docs/sprachbefehle.md. Der Sendername steht drin, damit er merkt,
+    # wenn der Erkenner den falschen erwischt hat.
+    vorwaermen()
+    sprich(f"{name}.")
+    if not client("--play-uri", quelle):
         sprich("Ich konnte das Radio nicht starten.")
         return False
 
     zuletzt_merken(eintrag.get("sprechform") or "")
-    # Kurz, weil der Nutzer weiterhoeren will - die Regel zur Laenge aus
-    # docs/sprachbefehle.md. Der Sendername steht drin, damit er merkt,
-    # wenn der Erkenner den falschen erwischt hat.
-    sprich(f"{name}.")
     melde(f"spielt: {name} <{quelle}>")
     return True
 
@@ -774,14 +785,17 @@ def nachrichten(rs, gesucht=None):
             sprich("Ich konnte die Nachrichten nicht starten.")
             return 1
         nachrichten_waechter_starten(quelle, vorher)
-    elif (not sender_sicherstellen(rs, eintrag.get("name") or "Nachrichten", quelle)
-            or not client("--play-uri", quelle)):
-        sprich("Ich konnte die Nachrichten nicht starten.")
-        return 1
     else:
-        # Kurz, der Nutzer will zuhoeren. Der Name sagt ihm, ob der Erkenner
-        # die richtige Ebene erwischt hat.
+        if not sender_sicherstellen(rs, eintrag.get("name") or "Nachrichten", quelle):
+            sprich("Ich konnte die Nachrichten nicht starten.")
+            return 1
+        # Erst ansagen, dann abspielen - derselbe Grund wie in abspielen().
+        # Der Name sagt dem Nutzer, ob der Erkenner die richtige Ebene erwischt hat.
+        vorwaermen()
         sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
+        if not client("--play-uri", quelle):
+            sprich("Ich konnte die Nachrichten nicht starten.")
+            return 1
     melde(f"spielt Nachrichten: {eintrag.get('name')} <{quelle}>")
     return 0
 

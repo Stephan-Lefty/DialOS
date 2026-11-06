@@ -147,6 +147,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **"Radio stoppen" turns the radio off, and Michael is no longer drowned
+  out** (2026-11-06). Stephan said "Radio stoppen" on his own - it was not a
+  command; now it is one, next to "Radio abstellen". "Radio ausschalten" stays
+  out (0.82 against "Radio einschalten"). Michael also announces the station
+  **before** playing it now: when the station started first, its audio stream
+  often appeared only during the announcement and played loudly over it.
 - **After the news Michael asks what to do next** (2026-11-06, Stephan's
   request). Until now the end of a news episode was followed by silence - not
   even the radio that was playing before came back. Now: "Die Nachrichten sind
