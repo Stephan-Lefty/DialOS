@@ -1245,6 +1245,9 @@ der Hinweis auf die geaenderte Datei auffiel und nachgesehen wurde.
    "automatischer git pull fehlgeschlagen" - dann von Hand pullen. Auf dem
    Laptop starten die Sitzungen im Ordner `DialOS/` ueber dem Repo; dort
    steht derselbe Hook in `DialOS/.claude/settings.local.json` (nicht im Git).
+   Eingetragen wird er dort mit `bash scripts/claude-hook-einrichten.sh`
+   (einmal pro Rechner; auch am Arbeitsrechner, weil die App dort ebenfalls
+   im Ordner ueber dem Repo startet).
 3. Am Geraet gilt zusaetzlich: Ein `git pull` allein wirkt nicht, es
    braucht `sudo /usr/local/sbin/dialos-aufspielen --wirklich` (siehe
    [docs/aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md)).
