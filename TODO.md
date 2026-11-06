@@ -152,6 +152,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     Radio jetzt erst ansagen, dann abspielen. **Mit Stephans Stimme abgenommen
     (12:29-12:30):** „Radio abstellen", „Radio einschalten" (Ansage vor dem
     Sender) und der neue Satz „Radio stoppen".
+    **Hinweis-Sätze für gestrichene und naheliegende Formulierungen** (Stephan:
+    „Wir müssen dem Nutzer eine Alternative anbieten"): „Radio ausschalten",
+    „Musik ausschalten", „Briefe/Brief durchsuchen", „Musik starten",
+    „Sprachsteuerung einschalten" - mit Stephans Stimme abgenommen (12:57 bis
+    13:14). **Offen:** dieselbe Falle im Diktat („Diktat abbrechen" fällt dort
+    womöglich auf „Diktat beenden" = speichern statt verwerfen) und weitere
+    Formulierungen aus dem Protokoll, die Stephan beurteilen muss.
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort
