@@ -1,4 +1,4 @@
-Lizenzen und Herkunft der Bestandteile von DialOS.
+Lizenzen und Herkunft der Bestandteile von DialOS. Das sind die rechtlichen Hinweise zu den Programmen in DialOS. Du brauchst sie nicht zu verstehen, sie müssen nur vorhanden sein.
 
 DialOS selbst steht unter der GNU General Public License, Version 3. Wer eine geänderte Fassung weitergibt, muss deren Quelltext ebenfalls offenlegen. Ausgenommen sind der Name DialOS, das Logo und die Hintergrundbilder. Ein abgeleiteter Aufbau braucht einen eigenen Namen.
 Quelltext: https://github.com/Stephan-Lefty/DialOS
