@@ -164,7 +164,9 @@ das Erfolg meldet, während es versagt.
   Radio brach ab, bis zu 15 s Stille, und die Datenbank wuchs ohne Ende. Jetzt
   holt `folge_herunterladen()` die Folge nach `~/.cache/dialos/folgen/` (je
   Podcast nur die neueste) und spielt sie als Datei - ohne Neustart. Am Gerät
-  geprobt: von Ö1 zur tagesschau ohne Unterbrechung. Tests:
+  geprobt: von Ö1 zur tagesschau ohne Unterbrechung. Bei Folgen kommt die
+  Ansage jetzt **vor** der Wiedergabe - vorher lief die Sendung unter der
+  stummgeschalteten Ansage los, und die ersten drei Sekunden fehlten. Tests:
   `tests/test_folgen.py`.
 - **Mailkonto: MX-Eintrag als Hinweis** (2026-11-06). Kennt die
   Anbieter-Datenbank eine eigene Domain nicht, sagte die Maske bisher nur

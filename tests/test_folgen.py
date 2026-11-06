@@ -173,6 +173,17 @@ class NachrichtenAlsDatei(RadioBasis):
         self.assertNotIn(("--quit",), self.gerufen)
         self.assertFalse(os.path.exists(self.radio.RHYTHMDB))
 
+    def test_erst_ansage_dann_wiedergabe(self):
+        # Stephans Frage vom 2026-11-06: Lief die Folge zuerst, schaltete die
+        # Ansage sie stumm - die ersten drei Sekunden gingen verloren.
+        ablauf = []
+        self.radio.sprich = lambda text: ablauf.append(("sagt", text))
+        self.radio.client = lambda *a, **k: ablauf.append(("spielt",) + a) or True
+        self.radio.nachrichten(self.rs, "landesweite nachrichten")
+        arten = [schritt[0] for schritt in ablauf]
+        self.assertEqual(arten, ["sagt", "spielt"])
+        self.assertEqual(ablauf[0][1], "tagesschau in 100 Sekunden.")
+
     def test_fehlgeschlagenes_holen_wird_gesagt(self):
         self.radio.podcast_modul().__class__.folge_herunterladen = \
             lambda s, a, n, bei_wartezeit=None: ("", "curl 6")

@@ -603,6 +603,13 @@ def nachrichten(rs, gesucht=None):
             melde(f"Folge nicht geladen: {meldung}")
             return 1
         quelle = pathlib.Path(pfad).as_uri()
+        # ERST ANSAGEN, DANN ABSPIELEN - bei einer Folge, nicht beim Sender.
+        # Gemessen am 2026-11-06 (Stephans Frage nach der Pause): Lief die
+        # Wiedergabe zuerst, schaltete dialos-say sie fuer die Dauer der
+        # Ansage stumm (2,6 s bei "tagesschau in 100 Sekunden") - die ersten
+        # drei Sekunden der Sendung liefen ungehoert durch. Beim Sender ist
+        # das gleich, der laeuft ohnehin; eine Folge hat einen Anfang.
+        sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
         if not client("--play-uri", quelle):
             sprich("Ich konnte die Nachrichten nicht starten.")
             return 1
@@ -610,9 +617,10 @@ def nachrichten(rs, gesucht=None):
             or not client("--play-uri", quelle)):
         sprich("Ich konnte die Nachrichten nicht starten.")
         return 1
-    # Kurz, der Nutzer will zuhoeren. Der Name sagt ihm, ob der Erkenner
-    # die richtige Ebene erwischt hat.
-    sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
+    else:
+        # Kurz, der Nutzer will zuhoeren. Der Name sagt ihm, ob der Erkenner
+        # die richtige Ebene erwischt hat.
+        sprich(f"{eintrag.get('name') or 'Nachrichten'}.")
     melde(f"spielt Nachrichten: {eintrag.get('name')} <{quelle}>")
     return 0
 

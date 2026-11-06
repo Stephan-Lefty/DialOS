@@ -154,8 +154,10 @@ background) and `splash.png` (boot/login screen).
   broke off, up to 15 s of silence, and the database grew without limit. Now
   `folge_herunterladen()` fetches the episode into `~/.cache/dialos/folgen/`
   (only the newest per podcast) and plays it as a file - no restart. Tried on
-  the device: from Ö1 to the tagesschau without interruption. Tests:
-  `tests/test_folgen.py`.
+  the device: from Ö1 to the tagesschau without interruption. For episodes
+  the announcement now comes **before** playback - before, the episode
+  started under the muted announcement and its first three seconds were
+  lost. Tests: `tests/test_folgen.py`.
 - **Mail account: MX record as a hint** (2026-11-06). When the provider
   database does not know a custom domain, the mask used to say only "enter the
   servers". It now names the host from the MX record and adds that it usually

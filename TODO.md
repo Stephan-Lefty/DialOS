@@ -129,6 +129,11 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
     die tagesschau nach 4,8 s (davon rund 3 s Ansage), derselbe
     Rhythmbox-Prozess, keine Stille. Tests: `tests/test_folgen.py`. Der
     künftige Podcast-Befehl nimmt dieselbe Funktion.
+    **Nachgebessert am selben Tag** (Stephans Frage nach der Pause): Die
+    Wiedergabe startete vor der Ansage, und dialos-say schaltete sie für die
+    2,6 s der Ansage stumm - die ersten rund drei Sekunden der Sendung liefen
+    ungehört durch. Bei Folgen jetzt erst die Ansage, dann die Wiedergabe;
+    beim Sender bleibt es, wie es war. Am Gerät: Wiedergabe beginnt bei 0 s.
   - **Der Ablauf am Gerät steht als Zettel bereit:**
     [aufspielen-am-geraet.md](docs/aufspielen-am-geraet.md) (2026-10-08,
     Stephans Wunsch - die Anleitung muss am Laptop abrufbar sein, dort
