@@ -59,6 +59,81 @@ unangetastet (z. B. in einer Schublade). Jegliche Interaktion (anrufen,
 rangehen, auflegen) läuft ausschließlich über die Sprachsteuerung am
 Laptop.
 
+## Geprüft: Telefonie über ein externes Modem (Stick)
+
+**Stephans Frage vom 2026-11-15**, aufgekommen beim Konfigurieren des
+ersten Referenzgeräts: Lässt sich die Telefonie von der eingebauten SIM
+lösen und über ein externes Gerät erledigen? Das wäre unabhängig vom
+Laptop-Modell, bei einem Defekt tauschbar und würde den Gerätekauf
+entlasten.
+
+**Technisch ja, aber nur mit bestimmten Modulen.** Ein Modem muss dafür
+zweierlei können, und das ist nicht dasselbe:
+
+1. **Sprachanrufe** – viele LTE-Module sind reine Datenmodems.
+2. **Audio über USB** – das Gespräch muss auch beim Rechner ankommen.
+   Etliche sprachfähige Module führen die Audiosignale nur über
+   PCM-Pins heraus, die bei einem USB-Gehäuse nirgends angeschlossen
+   sind.
+
+Belegt funktioniert das mit dem **Quectel EC25-E**: Er meldet sich als
+USB-Audiogerät (USB Audio Class) an, die Anrufsteuerung läuft über
+AT-Befehle, und ModemManager mit GNOME Calls bedient ihn – also genau die
+Architektur, die oben schon steht.
+
+**Drei Einschränkungen, die bleiben:**
+
+- **8 kHz, fest verdrahtet.** Die USB-Audio-Schnittstelle des EC25 ist in
+  der Firmware auf 8 kHz festgelegt – Telefonqualität wie im Festnetz.
+  Für Telefonie reicht das; HD-Voice ist damit ausgeschlossen.
+- **Es gibt keinen fertigen Stick.** Den EC25 gibt es als M.2- oder
+  Mini-PCIe-Modul; für USB braucht es ein Gehäuse, und das sind
+  Bastlerprodukte. Bei einem Gerät, das fertig eingerichtet ausgeliefert
+  wird, ist das ein weiteres Teil, das abfallen oder verlorengehen kann.
+- **Die Antenne ist winzig.** Ein eingebautes WWAN-Modul nutzt die
+  Antennen im Displayrahmen und hat spürbar besseren Empfang als ein
+  Stick am USB-Anschluss.
+
+## Vierte Möglichkeit: SIP über das Internet
+
+Beim Prüfen der Stick-Frage fiel auf, dass eine Option bisher fehlte.
+Verworfen wurde oben der **Fritzbox-SIP-Trunk**, und zwar weil er am
+Router des Nutzers hängt. Ein SIP-Konto bei einem Anbieter hängt dagegen
+nur am Internet – und das hat das Gerät ohnehin.
+
+Das hätte Vorteile, die zum Projekt passen:
+
+- **Kein sprachfähiges Modem nötig.** Ein reines Datenmodul genügt – auch
+  das, was Lenovo im L14 standardmäßig verbaut (siehe
+  [hardware.md](hardware.md)).
+- **Eine Festnetznummer ist möglich**, samt Rufnummernmitnahme. Für
+  jemanden, der seit Jahrzehnten dieselbe Nummer hat, ist das mehr wert
+  als jede technische Eleganz.
+- **Linphone lässt sich von außen steuern** – das ist das
+  Auswahlkriterium aus [anwendungen.md](anwendungen.md).
+- Keine zusätzliche Hardware, keine Modulfrage beim Gerätekauf.
+
+## Was vor der Technik zu entscheiden ist: Notrufe
+
+**Diese Frage entscheidet mit, ob Mobilfunk Pflicht ist oder Komfort** –
+und sie ist bei dieser Zielgruppe keine Randnotiz.
+
+Über Mobilfunk erreicht man 112 auch ohne Guthaben, ohne Vertrag und in
+jedem erreichbaren Netz; der Standort wird mitgeliefert. Über VoIP ist
+beides schwieriger: Die Standortübermittlung funktioniert anders, und bei
+Internetausfall geht gar nichts.
+
+Wer das Gerät benutzt, kann im Notfall nicht ersatzweise zum Handy
+greifen und meist auch nicht aus dem Fenster rufen. Solange diese Frage
+offen ist, bleibt die eingebaute SIM das Auslieferungsziel – SIP ist dann
+eine Ergänzung für den Alltag, kein Ersatz.
+
+**Empfehlung für den Gerätekauf (2026-11-15):** Die Telefonie-Entscheidung
+vom Kauf trennen. Ein Datenmodul reicht fürs Erste, der M.2-Steckplatz
+bleibt, und ein sprachfähiges Modul lässt sich später nachrüsten. SIP und
+die Handy-Anbindung lassen sich in der Zwischenzeit ohne neue Hardware
+ausprobieren.
+
 ## Videocall
 
 Jitsi Meet im Browser als einfachste, kontofreie Lösung – Open Source,

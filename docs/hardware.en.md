@@ -550,6 +550,22 @@ many USB/M.2 modules are data-only. For telephony over the built-in SIM, a
 voice-capable modem must be specifically selected (e.g. Quectel EM7565,
 Sierra Wireless modules).
 
+**This happened with the very first quote** (2026-11-15): Lenovo ships the
+**Quectel EM061K-GL** as standard in the L14 Gen 6. The module exists in
+two versions, DataVoice and data-only — the standard specification lists
+"Voice Call Support: No". Fine for mobile internet, not for telephony over
+the built-in SIM.
+
+On Linux it also requires **kernel ≥ 6.5** (Debian 13 ships 6.12),
+**ModemManager ≥ 1.22** and an **FCC unlock** via Lenovo's own tool
+(`lenovo-wwan-unlock`) — without it the module stays locked.
+
+**Consequence for the purchase:** separate the telephony decision from
+buying the device. A data-only module is enough for now, and the M.2 slot
+stays free for a voice-capable one. The trade-offs — external modem, SIP
+over the internet, phone tethering — and the emergency-call question are
+in [telefonie.en.md](telefonie.en.md).
+
 ## Open questions
 
 - ~~Reference audio device~~ – **decided 2026-08-16: AIRHUG 01** (see

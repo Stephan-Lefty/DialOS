@@ -562,6 +562,22 @@ ModemManager) – viele USB-/M.2-Module sind reine Datenmodems. Für
 Telefonie über die eingebaute SIM muss gezielt ein sprachfähiges Modem
 gewählt werden (z. B. Quectel EM7565, Sierra-Wireless-Module).
 
+**Der Fall ist beim ersten Angebot sofort eingetreten** (2026-11-15):
+Lenovo verbaut im L14 Gen 6 standardmäßig das **Quectel EM061K-GL**. Das
+Modul gibt es in zwei Ausführungen, DataVoice und Data-only – die
+Standardspezifikation führt „Voice Call Support: No". Für mobiles
+Internet taugt es, für Telefonie über die eingebaute SIM nicht.
+
+Dazu braucht es unter Linux **Kernel ≥ 6.5** (Debian 13 liefert 6.12),
+**ModemManager ≥ 1.22** und einen **FCC-Unlock** über Lenovos eigenes
+Werkzeug (`lenovo-wwan-unlock`) – ohne den bleibt das Modul gesperrt.
+
+**Daraus folgt für den Kauf:** Die Telefonie-Entscheidung vom Gerätekauf
+trennen. Ein Datenmodul genügt zunächst, der M.2-Steckplatz bleibt für
+ein sprachfähiges Modul frei. Die Abwägung – externes Modem, SIP über das
+Internet, Handy-Anbindung – samt der Notruf-Frage steht in
+[telefonie.md](telefonie.md).
+
 ## Offene Punkte
 
 - ~~Referenz-Audiogerät~~ – **entschieden am 2026-08-16: AIRHUG 01**

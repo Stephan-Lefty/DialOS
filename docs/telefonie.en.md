@@ -57,6 +57,81 @@ during setup and then stays untouched afterwards (e.g. in a drawer). Any
 interaction (calling, answering, hanging up) happens exclusively via
 voice control on the laptop.
 
+## Checked: telephony via an external modem (dongle)
+
+**Stephan's question of 2026-11-15**, raised while configuring the first
+reference device: can telephony be decoupled from the built-in SIM and
+handled by an external device? That would be independent of the laptop
+model, replaceable if it fails, and would take pressure off the purchase
+decision.
+
+**Technically yes, but only with certain modules.** A modem needs to do
+two things, and they are not the same:
+
+1. **Voice calls** – many LTE modules are data-only.
+2. **Audio over USB** – the call also has to reach the computer. Quite a
+   few voice-capable modules only expose audio on PCM pins, which a USB
+   enclosure leaves unconnected.
+
+This is proven to work with the **Quectel EC25-E**: it registers as a USB
+audio device (USB Audio Class), call control runs over AT commands, and
+ModemManager with GNOME Calls drives it – exactly the architecture
+described above.
+
+**Three limitations remain:**
+
+- **8 kHz, hard-wired.** The EC25's USB audio interface is fixed at 8 kHz
+  in firmware – landline telephone quality. Fine for telephony; HD voice
+  is ruled out.
+- **There is no ready-made dongle.** The EC25 comes as an M.2 or
+  Mini-PCIe module; USB requires an enclosure, and those are hobbyist
+  products. On a device shipped ready to use, that is one more part that
+  can come loose or get lost.
+- **The antenna is tiny.** A built-in WWAN module uses the antennas in
+  the display frame and has noticeably better reception than a dongle in
+  a USB port.
+
+## A fourth option: SIP over the internet
+
+While checking the dongle question, it became clear that one option had
+been missing. What was rejected above is the **Fritzbox SIP trunk**, and
+rightly so – it depends on the user's router. A SIP account with a
+provider depends only on an internet connection, which the device has
+anyway.
+
+The advantages fit the project:
+
+- **No voice-capable modem needed.** A data-only module is enough –
+  including the one Lenovo ships by default in the L14 (see
+  [hardware.en.md](hardware.en.md)).
+- **A landline number is possible**, including number porting. For
+  someone who has had the same number for decades, that is worth more
+  than any technical elegance.
+- **Linphone can be driven from outside** – the selection criterion from
+  [anwendungen.en.md](anwendungen.en.md).
+- No additional hardware, no module question when buying the device.
+
+## To be decided before the technology: emergency calls
+
+**This question determines whether mobile network access is mandatory or
+merely convenient** – and for this target group it is not a footnote.
+
+Over a mobile network, 112 can be reached without credit, without a
+contract and on any available network; the location is transmitted along
+with the call. Over VoIP both are harder: location handling works
+differently, and if the internet is down, nothing works at all.
+
+People using this device cannot fall back on a mobile phone in an
+emergency, and usually cannot call out of a window either. As long as
+this question is open, the built-in SIM remains the shipping goal – SIP
+is then an addition for everyday use, not a replacement.
+
+**Recommendation for the device purchase (2026-11-15):** separate the
+telephony decision from the purchase. A data-only module is enough for
+now, the M.2 slot stays available, and a voice-capable module can be
+fitted later. SIP and phone tethering can both be tried out in the
+meantime without new hardware.
+
 ## Video calls
 
 Jitsi Meet in the browser as the simplest, account-free solution — open
