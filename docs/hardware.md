@@ -152,6 +152,44 @@ prüfen: eingebautes Mikrofon (Pegel, Echo-Unterdrückung), Bluetooth-Lautsprech
 (A2DP und Wiederaufwachen), Standby am Akku, Firmware über fwupd, und ein Diktat
 über den Prüfstand. Erst das macht ein Modell zur Referenz.
 
+## Zwei konkrete Kandidaten im Vergleich (2026-11-15)
+
+Beim Konfigurieren des ersten Referenzgeräts standen zwei Lenovo-Angebote
+nebeneinander. Der Vergleich steht hier, damit er nicht in einem halben
+Jahr neu recherchiert werden muss.
+
+| | **ThinkPad L14 Gen 6 AMD** | **ThinkPad E14 Gen 7 AMD** |
+|---|---|---|
+| Preis (Lenovo AT, 15.11.2026) | 1.661,21 € | 1.319,20 € |
+| Prozessor der Angebote | Ryzen 5 PRO 215 (6 Kerne/12 Threads, AVX2) | Ryzen 7 249 |
+| Arbeitsspeicher | 32 GB DDR5-5600 **SODIMM** | 32 GB DDR5-5600 **SODIMM** |
+| **Mobilfunk (WWAN)** | **ja** – EM061K-GL oder EM160R-GL, Antennen verbaut | **„No support"** |
+| Akku | 46,5 oder **57 Wh** | 48 oder **64 Wh** |
+| Betriebssystem im Angebot | **ohne** | Windows 11 Pro |
+| Mikrofon | Doppelmikrofon | **Array, 360°, Rauschunterdrückung** |
+| Anschlüsse | | 2× USB-A, 2× USB-C, HDMI, **Ethernet** |
+| SSD-Steckplätze | | **zwei** (M.2 2242 + 2280) |
+| Garantie im Angebot | | 1 Jahr |
+
+**Der Unterschied, auf den es ankommt, ist nicht der Preis, sondern das
+WWAN.** Das E14 hat weder Steckplatz noch Antennen – die Spezifikation
+führt ausdrücklich „WWAN: No support". Damit ist das Auslieferungsziel
+aus [telefonie.md](telefonie.md), ein Gerät mit eingebauter SIM, auf
+diesem Modell nicht erreichbar. Nicht nachrüstbar, nicht umgehbar.
+
+Solange die Notruf-Frage offen ist (siehe telefonie.md), hält das **L14
+beide Wege offen** und ist deshalb der sicherere Kauf – obwohl das E14
+in Akku, Mikrofon-Array, Anschlüssen und Preis besser dasteht.
+
+**Korrektur einer Annahme aus diesem Dokument:** Oben steht, man solle
+„wo möglich mit Intel AX210 bestellen". Bei beiden Geräten geht das
+nicht – **Lenovo bietet dort ausschließlich MediaTek und Realtek an**
+(L14: MediaTek MT7925; E14: MediaTek MT7920/MT7925, Realtek
+RTL8852/RTL8922). Der Rat gilt damit nur noch als **Tausch nach dem
+Kauf**: Die Karte sitzt in einem M.2-2230-Steckplatz und lässt sich
+wechseln. Wichtig ist das vor allem für Bluetooth-Audio, weil der
+AIRHUG 01 das Referenz-Audiogerät ist.
+
 ## Referenz-Audiogerät (festgelegt 2026-08-16)
 
 **AIRHUG 01** – Bluetooth-Headset, gleichzeitig Lautsprecher und

@@ -149,6 +149,44 @@ cancellation), Bluetooth speaker (A2DP and waking up), standby on battery,
 firmware via fwupd, and a dictation through the test bench. Only that makes a
 model the reference.
 
+## Two concrete candidates compared (2026-11-15)
+
+While configuring the first reference device, two Lenovo quotes sat side
+by side. The comparison is recorded here so it does not have to be
+researched again in six months.
+
+| | **ThinkPad L14 Gen 6 AMD** | **ThinkPad E14 Gen 7 AMD** |
+|---|---|---|
+| Price (Lenovo AT, 2026-11-15) | €1,661.21 | €1,319.20 |
+| Processor in the quote | Ryzen 5 PRO 215 (6 cores/12 threads, AVX2) | Ryzen 7 249 |
+| Memory | 32 GB DDR5-5600 **SODIMM** | 32 GB DDR5-5600 **SODIMM** |
+| **Mobile broadband (WWAN)** | **yes** – EM061K-GL or EM160R-GL, antennas fitted | **"No support"** |
+| Battery | 46.5 or **57 Wh** | 48 or **64 Wh** |
+| Operating system in the quote | **none** | Windows 11 Pro |
+| Microphone | dual microphone | **array, 360°, noise cancelling** |
+| Ports | | 2× USB-A, 2× USB-C, HDMI, **Ethernet** |
+| SSD slots | | **two** (M.2 2242 + 2280) |
+| Warranty in the quote | | 1 year |
+
+**What matters is not the price but the WWAN.** The E14 has neither a
+slot nor antennas – the specification explicitly states "WWAN: No
+support". That makes the shipping goal from
+[telefonie.en.md](telefonie.en.md), a device with a built-in SIM,
+unreachable on this model. Not retrofittable, not avoidable.
+
+As long as the emergency-call question is open (see telefonie.en.md), the
+**L14 keeps both paths open** and is therefore the safer purchase – even
+though the E14 is better on battery, microphone array, ports and price.
+
+**Correction to an assumption made earlier in this document:** above it
+says to "order with an Intel AX210 where possible". On both devices that
+is not an option – **Lenovo only offers MediaTek and Realtek there**
+(L14: MediaTek MT7925; E14: MediaTek MT7920/MT7925, Realtek
+RTL8852/RTL8922). The advice therefore only applies as a **swap after
+purchase**: the card sits in an M.2 2230 slot and can be replaced. This
+matters mainly for Bluetooth audio, because the AIRHUG 01 is the
+reference audio device.
+
 ## Reference audio device (decided 2026-08-16)
 
 **AIRHUG 01** – a Bluetooth headset, speaker and microphone in one. This
