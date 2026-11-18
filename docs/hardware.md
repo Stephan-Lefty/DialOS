@@ -623,7 +623,15 @@ Internet, Handy-Anbindung – samt der Notruf-Frage steht in
 - Referenz-Laptop-Modell noch nicht final festgelegt. **Anforderungen seit
   2026-09-17 festgehalten** (32 GB Minimum, Intel- und AMD-Variante, siehe
   „Rechnerausstattung für DialOS") - offen ist die Probe eines Kandidaten unter
-  Debian 13.
+  Debian 13. **Stand 2026-11-16:** Zwei Kandidaten sind durchgerechnet (siehe
+  „Zwei konkrete Kandidaten im Vergleich"). Die Anfrage nach einem Testgerät bei
+  **Lenovo Österreich ist abgelehnt** - es gibt dort „kein offizielles Programm
+  für kostenlose Leihstellungen oder Hardware-Sponsoring für Einzelentwickler".
+  Verwiesen wurde auf das Business-Sales-Team (01 206094034) für
+  Konfigurationsrabatte. Eine frühere Anfrage bei AfB gGmbH (2026-09-17) ist
+  unbeantwortet. **Damit scheitert der dritte Anlauf an der Rechtsform** -
+  Privatperson reicht bei keinem strukturierten Programm. **Gekauft oder
+  entschieden ist nichts**, solange das Mikrofon nicht am Gerät geprüft wurde.
 - Referenz-Sicherheits-Stick (Marke/Modell, USB-A vs. USB-C) noch nicht
   final festgelegt - empfohlene Größe (64 GB) und Dateisystem-Aufteilung
   (`DIALOS-KEY`/`DIALOS-DATA`) stehen bereits (siehe

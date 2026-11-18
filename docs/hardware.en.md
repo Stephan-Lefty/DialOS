@@ -611,6 +611,15 @@ in [telefonie.en.md](telefonie.en.md).
 - Reference laptop model not yet finalized. **Requirements recorded since
   2026-09-17** (32 GB minimum, Intel and AMD variant, see "Computer
   specification for DialOS") - still open: trying a candidate under Debian 13.
+  **Status 2026-11-16:** two candidates have been compared in detail (see "Two
+  concrete candidates compared"). The request for a test device from **Lenovo
+  Austria was declined** - there is "no official programme for free loan units or
+  hardware sponsorship for individual developers"; they pointed to the business
+  sales team (01 206094034) for configuration discounts. An earlier request to
+  AfB gGmbH (2026-09-17) is unanswered. **That is the third attempt to fail on
+  legal form** - being a private individual is not enough for any structured
+  programme. **Nothing is bought or decided** until the microphone has been
+  tested on the device itself.
 - Reference security stick (brand/model, USB-A vs. USB-C) not yet
   finalized - the recommended size (64 GB) and filesystem split
   (`DIALOS-KEY`/`DIALOS-DATA`) are already decided (see
