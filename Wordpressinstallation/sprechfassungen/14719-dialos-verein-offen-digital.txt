@@ -1,0 +1,15 @@
+DialOS hat jetzt einen Träger. Den Verein offen digital.
+
+Wer einen Computer benutzt, den er ohne Augen bedient, verlässt sich auf mehr als auf ein Programm. Er verlässt sich darauf, dass es dieses Programm im nächsten Jahr noch gibt. Dass jemand die Aktualisierungen baut. Dass die Hilfe erreichbar bleibt.
+
+Bei einem Projekt, das in der Freizeit entsteht, hängt all das normalerweise an einer einzigen Person. Das ist die Schwachstelle, die man von außen nicht sieht. Und die man erst bemerkt, wenn es zu spät ist.
+
+Genau dafür gibt es jetzt den Verein. Er ist in Österreich eingetragen, als Verein für Freie Software und Inklusion. Internetadresse, Server und Verträge gehören ab jetzt ihm und nicht einer Privatperson. Fällt einer von uns aus, steht das Projekt nicht still.
+
+Für dich ändert sich nichts. DialOS bleibt frei, bleibt kostenlos, die Spracherkennung läuft weiterhin auf dem Gerät selbst, und es gehen weiterhin keine Daten nach außen.
+
+Im Verein liegt noch ein zweites Projekt. Es heißt Guide O S und ist ein Linux für Menschen, die von Windows kommen und sich bisher nie mit einem Betriebssystem beschäftigen mussten. Fünf Ehrenamtliche bauen es gemeinsam, jede Entscheidung öffentlich. Ich arbeite dort mit. Von mir stammt ein Programm, das Lesezeichen zwischen mehreren Rechnern gleich hält.
+
+Beide Projekte haben verschiedene Zielgruppen, aber denselben Ausgangspunkt. Ein Computer soll bedienbar sein, ohne dass man vorher ein Handbuch liest. Bei Guide O S heißt das: ohne Vorwissen. Bei DialOS heißt es: ohne Maus und ohne Bildschirm.
+
+Als nächstes steht die Frage an, auf welchem Gerät DialOS künftig ausgeliefert wird. Entscheidend ist dabei das eingebaute Mikrofon. Ohne Mikrofon ist ein sprachgesteuerter Computer nicht zu bedienen.
