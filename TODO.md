@@ -16,6 +16,34 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Zwei Tests in `test_radio.py` sind rot - und waren es zwölf Tage
+  unbemerkt** (gefunden 2026-11-18). `test_jeder_gestrichene_satz_nennt_einen_bestehenden`
+  schlägt für `briefe durchsuchen` und `brief durchsuchen` fehl: Beide
+  Hinweis-Sätze verweisen auf **`unterlagen durchsuchen`**, und das steht
+  nicht in `BEFEHLSSAETZE` des Sprachdienstes. Der Satz gehört zu
+  **DialOS-Suche**, also einer Erweiterung, und die bringt ihre Sätze über
+  die Erweiterungsschnittstelle ein statt über die Kernliste.
+
+  **Vor dem Beheben zu entscheiden, welche der beiden Lesarten gilt** - sie
+  führen zu verschiedenen Änderungen:
+  - Lädt der Sprachdienst die Erweiterungssätze zur Laufzeit dazu, prüft der
+    Test die falsche Liste und muss sie mitlesen.
+  - Tut er es nicht, zeigt der Hinweis wirklich ins Leere: Wer „briefe
+    durchsuchen" sagt, lernt einen Befehl, der nichts tut - genau der Fehler,
+    den der Test verhindern soll. Dann ist es kein Testproblem, sondern ein
+    Fund im Produkt.
+
+  Nachzusehen in [docs/erweiterungen.md](docs/erweiterungen.md) und im
+  Sprachdienst, nicht zu raten.
+
+  **Die Lehre daneben ist die wichtigere:** Erster roter Lauf war `7ba56b50`
+  am 2026-11-06 um 11:37 - der Commit „Hinweis-Saetze fuer gestrichene
+  Formulierungen", also genau der, der die Hinweise einführte. Im Stand vom
+  2026-11-06 in [CLAUDE.md](CLAUDE.md) steht „alle Tests gruen"; lokal
+  schlägt derselbe Test aber ebenfalls fehl. Es wurde also nach dem letzten
+  Commit nicht mehr geprüft, und danach zwölf Tage nicht in die CI geschaut.
+  `gh run list --limit 3` kostet fünf Sekunden.
+
 - [x] **Datenschutzerklärung um das Kontaktformular ergänzt** (erledigt
   2026-10-22, beide Sprachen: Seiten 3 und 376). Seit Flamingo an dem Tag
   installiert wurde, speichert dialos.org **jede Einsendung dauerhaft in der

@@ -15,6 +15,34 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Two tests in `test_radio.py` are failing - and went unnoticed for
+  twelve days** (found 2026-11-18). `test_jeder_gestrichene_satz_nennt_einen_bestehenden`
+  fails for `briefe durchsuchen` and `brief durchsuchen`: both hint phrases
+  point at **`unterlagen durchsuchen`**, which is not in the voice service's
+  `BEFEHLSSAETZE`. That phrase belongs to **DialOS-Suche**, an extension, and
+  extensions register their phrases through the extension interface rather
+  than the core list.
+
+  **Decide which of the two readings applies before fixing** - they lead to
+  different changes:
+  - If the voice service loads extension phrases at runtime, the test checks
+    the wrong list and has to include them.
+  - If it does not, the hint really does point nowhere: saying „briefe
+    durchsuchen" teaches a command that does nothing - exactly the failure the
+    test exists to prevent. In that case it is not a test problem but a find
+    in the product.
+
+  To be looked up in [docs/erweiterungen.en.md](docs/erweiterungen.en.md) and
+  in the voice service, not guessed.
+
+  **The side lesson matters more:** the first failing run was `7ba56b50` on
+  2026-11-06 at 11:37 - the commit "Hinweis-Saetze fuer gestrichene
+  Formulierungen", i.e. exactly the one that introduced the hints. The
+  2026-11-06 status in [CLAUDE.md](CLAUDE.md) says "alle Tests gruen", yet the
+  same test fails locally too. So nothing was checked after the final commit,
+  and for twelve days nobody looked at CI. `gh run list --limit 3` costs five
+  seconds.
+
 - [x] **Contact form added to the privacy policy** (done 2026-10-22,
   both languages: pages 3 and 376). Since Flamingo was installed that day,
   dialos.org **stores every submission permanently in the database** –
