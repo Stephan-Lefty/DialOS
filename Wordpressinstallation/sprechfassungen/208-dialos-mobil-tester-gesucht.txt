@@ -1,13 +1,13 @@
-DialOS Mobil sucht Testerinnen und Tester.
+DialOS Mobil. Der Test ist abgeschlossen.
 
-DialOS Mobil ist fertig und lässt sich bedienen. Bevor die App in den Laden für Android-Programme darf, verlangt Google einen geschlossenen Test mit mindestens zwölf Menschen über zwei Wochen. Genau die suche ich.
+Zwölf Menschen haben DialOS Mobil zwei Wochen lang auf ihren Handys geprüft. Dafür ein großes Dankeschön. Die App liegt jetzt bei Google zur Prüfung. Sobald sie für alle verfügbar ist, steht es hier und in den Neuigkeiten. Testerinnen und Tester suche ich im Moment nicht.
 
-Worum es geht. DialOS Mobil ist ein Telefon für Menschen, die ein Telefon nicht bedienen können. Wer blind ist oder die Hände nicht ruhig führt, scheitert am Bildschirm, nicht am Telefonieren. Die App dreht das um. Man sagt, wen man anrufen möchte, und sie ruft an. Kein Tippen, kein Zielen, kein Hinsehen.
+Worum es ging. DialOS Mobil ist ein Telefon für Menschen, die ein Telefon nicht bedienen können. Wer blind ist oder die Hände nicht ruhig führt, scheitert am Bildschirm, nicht am Telefonieren. Die App dreht das um. Man sagt, wen man anrufen möchte, und sie ruft an. Kein Tippen, kein Zielen, kein Hinsehen.
 
 Die Spracherkennung läuft vollständig auf dem Gerät. Die App hat nicht einmal die Berechtigung, ins Internet zu gehen. Sie kann technisch gar nichts versenden. Deshalb funktioniert sie auch im Funkloch, im Keller und im Flugmodus.
 
-Was du dafür brauchst. Ein Android-Handy mit SIM-Karte, ein Google-Konto, und die Bereitschaft, die App zwei Wochen installiert zu lassen und ab und zu zu benutzen. Ohne Telefonie kann die App nichts tun. Tablets ohne Karte fallen also aus.
+Die eine Frage, auf die es im Test ankam, war diese. Springt die Sprachsteuerung bei einer fremden Stimme zuverlässig an? Vorher war das mit einer einzigen Stimme geprüft. Meiner. Eine Sprachsteuerung, die nicht anspringt, ist wertlos.
 
-Und die eine Frage, auf die es ankommt. Wenn du nur eine einzige Sache zurückmeldest, dann bitte diese. Springt die Sprachsteuerung bei deiner Stimme zuverlässig an?
+Die Antwort war ja. Aber der Test hat mehr gebracht als diese Antwort. Drei Rückmeldungen deckten drei Fehler auf, die ich allein nie gefunden hätte. Einer davon war der schlimmste Fall überhaupt. Die App nahm Befehle an, auf dem Bildschirm war alles zu lesen, und sie sagte kein einziges Wort. Wer nicht sieht, kann das nicht von einer App unterscheiden, die gar nicht zuhört.
 
-Bisher ist das mit einer einzigen Stimme geprüft. Meiner. Eine Sprachsteuerung, die nicht anspringt, ist wertlos. Alles andere ist willkommen, aber das ist der Punkt, an dem die App steht oder fällt.
+Genau dafür gibt es Tests mit echten Menschen.
