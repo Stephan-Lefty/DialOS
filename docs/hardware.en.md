@@ -320,13 +320,64 @@ machine for an unbuilt feature while making battery, weight, keyboard and
 service life worse is the wrong trade. For later, the route via an external
 modem remains open (see telefonie.en.md).
 
-**Open and to be settled before purchase:** does the microphone of the
-Pro 14 Gen10 hang off the Realtek HDA codec or off the AMD ACP as a DMIC?
-If Realtek, the entire ACP risk is moot. If ACP, it is not a rejection but
-a question of timing — Debian 14 arrives in 2027 with a newer kernel,
-exactly when shipping begins. The question was put to TUXEDO on
-2026-11-18; the Notebookcheck review of the machine does not help, it was
-run under Windows 11.
+**Answered on 2026-11-19 – the microphone hangs off the HDA codec, not the
+ACP.** TUXEDO in writing: "Das Mikrofon liegt am HDA Codec an und zwar an
+einem Conexant SN6140." That makes the entire ACP7.0 risk **moot** for
+this machine: no board-specific quirk, no waiting for kernel 6.17, no
+DMIC path. This was the question the device choice hinged on.
+
+**That is only half an all-clear, though, and the rest belongs in the test
+plan.** Two failure modes are documented for the Conexant SN6140, and
+both hit our audience precisely:
+
+| Finding | Consequence for DialOS |
+|---|---|
+| After suspend/resume the Audio Function Group and widgets occasionally end up in **D3** | The internal microphone records **digital silence** and the internal speaker stays dead – i.e. mute voice control with no error message |
+| On **cold boot** ALSA UCM returns `EBUSY` because the codec needs longer to initialise than the driver allows; PipeWire falls back to **dummy output** | No sound and no microphone after power-on. Debian bug **#1135354**, filed against kernel **7.0.3+deb14** – still open in Debian 14 |
+
+In addition: the patch "ALSA: hda: conexant: Remove mic bias threshold
+override" **failed** to apply to 6.12-stable.
+
+**Even so, this is a considerably better position than the ACP.** There a
+board entry is missing, and without it nothing works at all. Here the
+driver (`snd_hda_codec_conexant`) exists and is actively maintained – it
+has named quirks. Some of the reports also come from Lenovo ThinkPads with
+a ThinkPad-specific subsystem ID problem (`17aa:0000` instead of the real
+ID, so the fixup does not apply), which need not affect TUXEDO.
+
+**Consequence for the test: the suspend check is the first item, not one
+of many.** Record from the microphone, suspend the machine, wake it,
+record again – and look at the recording, not at a "device present"
+message. The same after a real cold boot. That is the rule "never trust a
+status report when the result can be measured" (see CLAUDE.md) applied to
+this codec.
+
+**No external LTE module from TUXEDO** (reply of 2026-11-19): they have
+not tested external LTE devices and therefore cannot recommend any. The
+external-modem route stays our own work, see
+[telefonie.en.md](telefonie.en.md).
+
+**On the CPU choice, also answered:** between Ryzen 7 H 255 (Zen 4) and
+Ryzen AI 7 350 (Zen 5) TUXEDO sees "theoretically no difference"; the
+stronger CPUs merely give more headroom. Since the microphone hangs off
+the HDA codec, the argument for Zen 4 falls away anyway – it rested
+entirely on the older ACP generation.
+
+**Quoted configuration** (part no. 10900242, as of 2026-11-19): Omnia
+display 3K 120 Hz 500 nits, 32 GB DDR5-5600 (2× 16 GB, socketed),
+**Ryzen AI 7 350** (8 cores/16 threads), 1 TB Kingston NV3, German backlit
+keyboard, **Intel Wi-Fi 6 AX210**, 2-year warranty. **€1,734 gross for
+Germany** (19 %) – shipped to Austria at 20 % roughly **€1,749**, net
+about €1,457. Components **in stock from 2026-12-01**, build time one to
+three weeks.
+
+**Instead of a loan unit: purchase with an extended return window.**
+TUXEDO on 2026-11-19 offered a purchase with an extended right of return
+for a test period this long, subject to internal discussion. **Mind the
+timing trap:** delivery would be possible in December while testing starts
+in late January – if the window runs from delivery, six weeks of it are
+gone before the test begins. Asked on 2026-11-19 whether delivery can be
+moved back or the window started later.
 
 **Evaluation unit requested:** four to eight weeks from late January 2027 —
 more than the two offered. Reason: this is not a benchmark but a complete

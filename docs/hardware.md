@@ -326,13 +326,67 @@ einer ungebauten Funktion zu wählen und dafür Akku, Gewicht, Tastatur und
 Lebensdauer zu verschlechtern, ist der falsche Tausch. Für später bleibt
 der Weg über ein externes Modem offen (siehe telefonie.md).
 
-**Offen und vor dem Kauf zu klären:** Hängt das Mikrofon des Pro 14 Gen10
-am Realtek-HDA-Codec oder als DMIC am AMD ACP? Hängt es am Realtek, ist
-das ganze ACP-Risiko gegenstandslos. Hängt es am ACP, ist es keine
-Absage, sondern eine Terminfrage – Debian 14 kommt 2027 mit neuerem
-Kernel, also genau zum Auslieferungsstart. Die Frage ist am 2026-11-18 an
-TUXEDO gestellt; der Notebookcheck-Test des Geräts hilft nicht, er lief
-unter Windows 11.
+**Beantwortet am 2026-11-19 – das Mikrofon hängt am HDA-Codec, nicht am
+ACP.** TUXEDO schriftlich: „Das Mikrofon liegt am HDA Codec an und zwar
+an einem Conexant SN6140." Damit ist das ganze ACP7.0-Risiko für dieses
+Gerät **gegenstandslos**: kein board-spezifischer Quirk, kein Warten auf
+Kernel 6.17, kein DMIC-Pfad. Das war die Frage, an der die Gerätewahl
+hing.
+
+**Entwarnung ist das aber nur zur Hälfte, und der Rest gehört in den
+Testplan.** Zum Conexant SN6140 sind zwei Fehlerbilder dokumentiert, die
+beide genau unsere Zielgruppe treffen:
+
+| Befund | Folge für DialOS |
+|---|---|
+| Nach Suspend/Resume landen Audio Function Group und Widgets gelegentlich in **D3** | Das interne Mikrofon nimmt **digitale Stille** auf, der interne Lautsprecher bleibt tot – also stumme Sprachsteuerung ohne Fehlermeldung |
+| Beim **Kaltstart** meldet ALSA UCM `EBUSY`, weil der Codec länger zur Initialisierung braucht als der Treiber erlaubt; PipeWire fällt auf **Dummy-Ausgabe** zurück | Kein Ton und kein Mikrofon nach dem Einschalten. Debian-Bug **#1135354**, gemeldet gegen Kernel **7.0.3+deb14** – in Debian 14 also noch offen |
+
+Dazu: Der Patch „ALSA: hda: conexant: Remove mic bias threshold override"
+ließ sich **nicht** auf 6.12-stable anwenden.
+
+**Trotzdem ist die Lage deutlich besser als beim ACP.** Dort fehlt ein
+Board-Eintrag, und ohne den geht gar nichts. Hier existiert der Treiber
+(`snd_hda_codec_conexant`) und wird aktiv gepflegt – er hat benannte
+Macken. Ein Teil der Berichte stammt außerdem von Lenovo-ThinkPads mit
+einem ThinkPad-eigenen Subsystem-ID-Problem (`17aa:0000` statt der
+echten ID, deshalb greift der Fixup nicht), das für TUXEDO nicht gelten
+muss.
+
+**Konsequenz für den Test: Die Suspend-Probe ist der erste Prüfpunkt,
+nicht einer von vielen.** Mikrofon aufnehmen lassen, Gerät in den
+Standby, aufwecken, erneut aufnehmen – und zwar auf die Aufnahme sehen,
+nicht auf die Meldung „Gerät vorhanden". Dasselbe nach einem echten
+Kaltstart. Das ist die Regel „keiner Zustandsmeldung glauben, wenn sich
+das Ergebnis messen lässt" (siehe CLAUDE.md), angewandt auf diesen Codec.
+
+**Kein externes LTE-Modul von TUXEDO** (Antwort vom 2026-11-19): „Da wir
+keine externe LTE Geräte getestet haben, können wir leider auch keine
+Empfehlen." Der Weg über ein externes Modem bleibt also eigene Arbeit,
+siehe [telefonie.md](telefonie.md).
+
+**Zur CPU-Wahl, ebenfalls beantwortet:** Zwischen Ryzen 7 H 255 (Zen 4)
+und Ryzen AI 7 350 (Zen 5) macht es nach TUXEDOs Einschätzung „rein
+theoretisch keinen Unterschied"; die stärkeren CPUs geben nur mehr
+Reserven. Da das Mikrofon am HDA hängt, entfällt das Argument für Zen 4
+ohnehin – es stützte sich allein auf die ältere ACP-Generation.
+
+**Angebotene Konfiguration** (Art.-Nr. 10900242, Stand 2026-11-19):
+Omnia-Display 3K 120 Hz 500 nits, 32 GB DDR5-5600 (2× 16 GB, gesockelt),
+**Ryzen AI 7 350** (8 Kerne/16 Threads), 1 TB Kingston NV3, Tastatur
+deutsch beleuchtet, **Intel Wi-Fi 6 AX210**, 2 Jahre Garantie.
+**1.734 € brutto für Deutschland** (19 %) – bei Lieferung nach Österreich
+mit 20 % rund **1.749 €**, netto etwa 1.457 €. Komponenten **lagernd ab
+2026-12-01**, Fertigung ein bis drei Wochen.
+
+**Statt einer Leihstellung: Kauf mit verlängerter Rückgabemöglichkeit.**
+TUXEDO am 2026-11-19: „Bei so einer langen Testzeit würden wir die
+Möglichkeit einräumen, Kauf mit verlängerter Rückgabemöglichkeit, müssten
+wir jedoch noch intern genau besprechen." **Achtung auf die Terminfalle:**
+Lieferbar wäre noch im Dezember, getestet wird ab Ende Januar – zählt die
+Frist ab Lieferung, sind sechs Wochen davon vorbei, bevor der Test
+beginnt. Am 2026-11-19 deshalb nachgefragt, ob die Auslieferung nach
+hinten gelegt oder die Frist später begonnen werden kann.
 
 **Angefragte Teststellung:** vier bis acht Wochen ab Ende Januar 2027 –
 mehr als die angebotenen zwei. Begründung: Es geht nicht um einen
