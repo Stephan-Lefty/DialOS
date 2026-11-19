@@ -190,6 +190,165 @@ Kauf**: Die Karte sitzt in einem M.2-2230-Steckplatz und lässt sich
 wechseln. Wichtig ist das vor allem für Bluetooth-Audio, weil der
 AIRHUG 01 das Referenz-Audiogerät ist.
 
+## TUXEDO als Hersteller (2026-11-18)
+
+Nach der Absage von Lenovo (siehe unten) ging eine Anfrage an TUXEDO
+Computers, Augsburg. Dort ist Linux der Normalfall, nicht der Sonderfall –
+das Argument „wir müssen erst prüfen, ob das Mikrofon unter Debian läuft"
+trägt also nicht; dafür trägt ein anderes: TUXEDO pflegt Treiber selbst in
+den Kernel ein.
+
+**Geantwortet wurde am selben Tag, mit einem Angebot für eine Teststellung
+über zwei Wochen.** Das ist nach drei Absagen (Lenovo Foundation, netidee,
+Lenovo Österreich) das erste konkrete Angebot überhaupt.
+
+### Der Befund, der die Gerätewahl bestimmt: Debian 13 hat Kernel 6.12
+
+**Das ist der wichtigste Abschnitt dieses Dokuments für jeden künftigen
+Gerätekauf.** Ein Gerät kann auf dem Papier alles erfüllen und trotzdem
+unbrauchbar sein, weil der Kernel von Debian 13 seine Hardware noch nicht
+kennt.
+
+TUXEDO schreibt in der eigenen FAQ zum InfinityBook Pro 14 Gen10:
+„we recommend version **6.17 or newer**, as many of our adjustments have
+already been incorporated into the standard kernel". Konkret belegt sind
+drei Folgen für Debian 13:
+
+| Problem | Behoben ab Kernel |
+|---|---|
+| LAN-Chip Motorcomm **YT6801** – Treiber fehlt | **7.0+** – auf Debian 13 kein Ethernet ohne Handarbeit |
+| Interne Tastatur tot nach dem Standby | **6.17** |
+| Eingebautes Mikrofon über AMD **ACP7.0** | offen – Quirk-Tabelle pro Board, wuchs noch im Oktober 2026 |
+
+**Der Mikrofon-Punkt ist derselbe wie bei Lenovo, nur belegt.** Auf
+Geräten mit AMD Ryzen AI 300 („Strix Point", Zen 5, ACP7.0) bindet der
+Legacy-ACP-Treiber, findet kein passendes Maschinenmodell
+(`No matching ASoC machine driver found`) und das eingebaute Mikrofon
+liefert Stille. Belegt für Framework 13 AMD, HP Omen 16, ASUS Zenbook S 16
+und Dell 16S; Abhilfe ist jeweils ein **DMI-Quirk pro Board-ID** in
+`sound/soc/amd/acp-config.c`. Kernel 6.12 ist die allererste Fassung mit
+SOF-Unterstützung für ACP7.0, nicht eine ausgereifte – die Framework-
+Dokumentation nennt „minimum 6.12, **recommended 6.14+, best = latest
+stable**".
+
+**Daraus die Regel:** „Ab welcher Kernel-Version läuft ACP?" ist die
+falsche Frage. Es gibt keine Versionsnummer, ab der es allgemein geht –
+es gibt nur eine Liste von Boards, die drinstehen. Für ein konkretes
+Gerät gilt deshalb „geht" oder „geht nicht", und das muss **am Gerät**
+geprüft werden.
+
+### Der Ausweg im Konfigurator: Ryzen 7 H 255 ist Zen 4
+
+TUXEDO bietet für das InfinityBook Pro 14 Gen10 neben den Ryzen-AI-300-
+Modellen auch den **AMD Ryzen 7 H 255** an. Der ist **kein Zen 5, sondern
+Zen 4 auf Hawk-Point-Silizium** (8 Kerne/16 Threads, Radeon 780M, kein
+NPU) – also dieselbe Generation wie der 8840U, den dieses Dokument oben
+ausdrücklich empfiehlt. Damit sitzt dort ein **ACP6x statt ACP7.0**, und
+dessen Quirk-Tabelle ist zwei Jahre älter und voller. Gleiches Gehäuse,
+gleicher 80-Wh-Akku, gleiches Display.
+
+Zu beachten: Der H 255 ist ein H-Modell mit cTDP 35–54 W, nicht ein
+U-Modell. Für DialOS ist das unkritisch, weil Rechenleistung ohnehin nicht
+der Engpass ist (Parakeet arbeitet auf dem i7-8665U vierzehnmal schneller
+als Echtzeit) – aber es darf nicht mit einem sparsamen U-Chip verwechselt
+werden.
+
+### Mobilfunk: bei TUXEDO gibt es kein 14-Zoll-Gerät mit LTE
+
+Geprüft am 2026-11-18, und von TUXEDO für das 14-Zoll-Gerät schriftlich
+bestätigt:
+
+| Modell | Display | LTE im Konfigurator |
+|---|---|---|
+| **InfinityBook Pro 14 Gen10** | 14" | **nein** (schriftlich bestätigt) |
+| **Aura 15 Gen4** | 15,6" | **ja** – Huawei ME936, ME906s, Rolling RW101R-GL |
+| **BM15 Gen1** | 15,6" | **ja** – Rolling RW101R-GL |
+| InfinityBook Pro 15 / Max 15 / Max 16, InfinityBook S 15, Stellaris 16 | 15,3"–16" | nein |
+
+Das einzige 14-Zoll-Gerät mit LTE, das **InfinityFlex 14 Gen1**, ist
+ausverkauft. Wer eine eingebaute SIM will, muss also 15,6 Zoll und 1,75 kg
+nehmen.
+
+**Zur Modulwahl, falls LTE gekauft wird:** Die **Huawei ME906s** steht in
+TUXEDOs Vorkonfiguration, ist aber von 2015 (LTE Cat 4). Ihr Datenblatt
+nennt VoLTE und CSFB – CSFB setzt jedoch ein 2G/3G-Netz voraus, und 3G ist
+in Österreich abgeschaltet. Damit hängt Telefonie allein an VoLTE, bei
+einem elf Jahre alten Modul. Die **Rolling RW101R-GL** (Cat 6, VoLTE im
+Handbuch, MBIM für Linux) ist die bessere Wahl – mit dem Vorbehalt, dass
+ihr Treibereintrag erst im September 2025 in den Kernel kam und für
+Debian 13 geprüft gehört.
+
+### Die beiden Kandidaten im Vergleich
+
+| | **InfinityBook Pro 14 Gen10** | **Aura 15 Gen4** |
+|---|---|---|
+| Display | 14", 2880×1800, **500 cd/m²**, 120 Hz, matt | 15,6", FHD, >300 cd/m², 60 Hz, matt |
+| Gewicht | **1,49 kg** | 1,75 kg |
+| Akku | **80 Wh** | 49–50 Wh (gemessen 4 bis über 5 h) |
+| Arbeitsspeicher | DDR5-5600, 2 Sockel, **max. 128 GB** | DDR4-3200, 2 Sockel, max. 64 GB |
+| Prozessor | Ryzen AI 300 (Zen 5) **oder Ryzen 7 H 255 (Zen 4)** | Intel i5-1334U/1335U (Raptor Lake U) |
+| WLAN | **Intel AX210 wählbar** | Intel AX211 ab Werk |
+| USB | 3× USB-A, **2× USB-C** (einer USB4) | 3× USB-A, 1× USB-C |
+| Geladen wird | **nur über USB-C** (150 W PD) | Netzteilbuchse **oder** USB-C-PD (ab 65 W; mitgeliefert 45 W) |
+| Kartenleser | **SD in voller Größe** (bis UHS-II) | microSD |
+| Tastatur | **ohne Nummernblock** | mit Nummernblock |
+| **Mobilfunk** | **nein** | **ja** |
+| **Debian 13 / Kernel 6.12** | **problematisch** (siehe oben) | **ausgereift** (Raptor Lake seit Jahren) |
+| Plattform-Alter | 2026 | 2023 |
+
+**Entschieden am 2026-11-18: das 14-Zoll-Gerät**, obwohl es kein LTE hat.
+Vier Gründe, und alle vier zählen für die Nutzer, nicht für das Datenblatt:
+
+1. **Akku 80 Wh gegen 49 Wh.** Wer den Bildschirm nicht sieht, liest den
+   Ladestand nicht im Vorbeigehen ab, sondern erfährt ihn durch die
+   Warnansage bei 25 %. Je kürzer die Laufzeit, desto häufiger endet eine
+   Arbeit unfreiwillig.
+2. **Tastatur ohne Nummernblock.** Buchstabenmitte gleich Gerätemitte. Wer
+   sich über die Markierungen auf F und J orientiert, tastet bei einem
+   15-Zöller mit Nummernblock eine andere Geometrie – und über Jahre
+   Nachkauf stehen sonst Geräte mit zwei verschiedenen Geometrien beim
+   gleichen Anwenderkreis.
+3. **SD in voller Größe statt microSD.** Fühlbare Kante, greifbar statt
+   mit dem Fingernagel herauszudrücken. Relevant, weil der
+   Sicherheits-Datenträger (ein Stick mit `DIALOS-KEY` + `DIALOS-DATA`,
+   siehe [sicherheit-datenschutz.md](sicherheit-datenschutz.md)) dauerhaft
+   im Gerät steckt und vom Anwender ertastet wird.
+4. **Nachkaufbarkeit.** Ausgeliefert wird ab 2027 und danach über Jahre.
+   DDR5 und Zen 4/5 sind dann normale Ware; DDR4 mit Raptor Lake ist beim
+   Vertriebsstart am Ende seines Lebenszyklus.
+
+**Warum das fehlende LTE diese Entscheidung nicht umwirft:** Telefonie über
+den Laptop ist nicht umgesetzt ([telefonie.md](telefonie.md) führt sie als
+offen), und das Notruf-Argument – Mobilfunk geht ohne Vertrag und ohne
+Internet – gilt genauso für das Mobiltelefon, auf dem DialOS Mobil läuft.
+Ist das Telefon das Telefon, muss der Laptop keines sein. Ein Gerät wegen
+einer ungebauten Funktion zu wählen und dafür Akku, Gewicht, Tastatur und
+Lebensdauer zu verschlechtern, ist der falsche Tausch. Für später bleibt
+der Weg über ein externes Modem offen (siehe telefonie.md).
+
+**Offen und vor dem Kauf zu klären:** Hängt das Mikrofon des Pro 14 Gen10
+am Realtek-HDA-Codec oder als DMIC am AMD ACP? Hängt es am Realtek, ist
+das ganze ACP-Risiko gegenstandslos. Hängt es am ACP, ist es keine
+Absage, sondern eine Terminfrage – Debian 14 kommt 2027 mit neuerem
+Kernel, also genau zum Auslieferungsstart. Die Frage ist am 2026-11-18 an
+TUXEDO gestellt; der Notebookcheck-Test des Geräts hilft nicht, er lief
+unter Windows 11.
+
+**Angefragte Teststellung:** vier bis acht Wochen ab Ende Januar 2027 –
+mehr als die angebotenen zwei. Begründung: Es geht nicht um einen
+Benchmark, sondern um einen vollständigen Aufbau nach
+[installationsanleitung.md](installationsanleitung.md) und anschließenden
+Alltagsbetrieb. Genau dort treten die gefährlichen Fehler auf – Mikrofon
+stumm nach dem Standby, hängende Bluetooth-Umschaltung, Firmware-Update,
+das die Tastatur kostet – und die zeigen sich nicht am ersten Tag, sondern
+in der dritten Woche.
+
+**Gewünschte Konfiguration** (angefragt 2026-11-18): Ryzen AI 7 350 oder
+Ryzen 7 H 255 (je nach TUXEDOs Einschätzung zum Kernel), 32 GB DDR5-5600
+als 2× 16 GB gesteckt, 1 TB NVMe, **Intel Wi-Fi 6 AX210**, Tastatur
+deutsch ISO beleuchtet, Betriebssystem nachrangig (Debian 13 wird selbst
+installiert).
+
 ## Referenz-Audiogerät (festgelegt 2026-08-16)
 
 **AIRHUG 01** – Bluetooth-Headset, gleichzeitig Lautsprecher und

@@ -187,6 +187,161 @@ purchase**: the card sits in an M.2 2230 slot and can be replaced. This
 matters mainly for Bluetooth audio, because the AIRHUG 01 is the
 reference audio device.
 
+## TUXEDO as a vendor (2026-11-18)
+
+After Lenovo declined (see below), an enquiry went to TUXEDO Computers in
+Augsburg. There Linux is the normal case, not the exception — so the
+argument "we first need to check whether the microphone works under
+Debian" does not carry. A different one does: TUXEDO upstreams its own
+drivers into the kernel.
+
+**They replied the same day, offering a two-week evaluation unit.** After
+three rejections (Lenovo Foundation, netidee, Lenovo Austria) that is the
+first concrete offer at all.
+
+### The finding that drives device choice: Debian 13 ships kernel 6.12
+
+**This is the most important section of this document for any future
+purchase.** A machine can tick every box on paper and still be unusable,
+because the Debian 13 kernel does not yet know its hardware.
+
+TUXEDO writes in its own FAQ for the InfinityBook Pro 14 Gen10: "we
+recommend version **6.17 or newer**, as many of our adjustments have
+already been incorporated into the standard kernel". Three documented
+consequences for Debian 13:
+
+| Problem | Fixed from kernel |
+|---|---|
+| LAN chip Motorcomm **YT6801** – driver missing | **7.0+** – no Ethernet on Debian 13 without manual work |
+| Internal keyboard dead after standby | **6.17** |
+| Built-in microphone via AMD **ACP7.0** | open – quirk table per board, still growing in October 2026 |
+
+**The microphone issue is the same one as with Lenovo, only documented.**
+On machines with AMD Ryzen AI 300 ("Strix Point", Zen 5, ACP7.0) the
+legacy ACP driver binds, finds no matching machine model
+(`No matching ASoC machine driver found`), and the built-in microphone
+returns silence. Documented for Framework 13 AMD, HP Omen 16, ASUS Zenbook
+S 16 and Dell 16S; the remedy in each case is a **DMI quirk per board ID**
+in `sound/soc/amd/acp-config.c`. Kernel 6.12 is the very first release
+with SOF support for ACP7.0, not a mature one — Framework's own
+documentation states "minimum 6.12, **recommended 6.14+, best = latest
+stable**".
+
+**The rule that follows:** "From which kernel version does ACP work?" is
+the wrong question. There is no version number from which it works in
+general — there is only a list of boards that are in it. For a specific
+machine the answer is therefore "works" or "does not work", and that has
+to be tested **on the machine**.
+
+### The way out in the configurator: Ryzen 7 H 255 is Zen 4
+
+Alongside the Ryzen AI 300 models, TUXEDO also offers the **AMD Ryzen 7
+H 255** for the InfinityBook Pro 14 Gen10. It is **not Zen 5 but Zen 4 on
+Hawk Point silicon** (8 cores/16 threads, Radeon 780M, no NPU) — the same
+generation as the 8840U that this document recommends above. That means an
+**ACP6x instead of ACP7.0**, and its quirk table is two years older and
+fuller. Same chassis, same 80 Wh battery, same display.
+
+Note: the H 255 is an H model with cTDP 35–54 W, not a U model. For DialOS
+that is uncritical, because compute is not the bottleneck anyway (Parakeet
+runs fourteen times faster than real time on the i7-8665U) — but it must
+not be mistaken for a frugal U chip.
+
+### Cellular: TUXEDO has no 14-inch machine with LTE
+
+Checked on 2026-11-18, and confirmed in writing by TUXEDO for the 14-inch
+machine:
+
+| Model | Display | LTE in configurator |
+|---|---|---|
+| **InfinityBook Pro 14 Gen10** | 14" | **no** (confirmed in writing) |
+| **Aura 15 Gen4** | 15.6" | **yes** – Huawei ME936, ME906s, Rolling RW101R-GL |
+| **BM15 Gen1** | 15.6" | **yes** – Rolling RW101R-GL |
+| InfinityBook Pro 15 / Max 15 / Max 16, InfinityBook S 15, Stellaris 16 | 15.3"–16" | no |
+
+The only 14-inch machine with LTE, the **InfinityFlex 14 Gen1**, is sold
+out. So anyone wanting a built-in SIM has to accept 15.6 inches and
+1.75 kg.
+
+**On module choice, should LTE be bought:** the **Huawei ME906s** is in
+TUXEDO's pre-configuration but dates from 2015 (LTE Cat 4). Its datasheet
+lists VoLTE and CSFB — but CSFB requires a 2G/3G network, and 3G has been
+switched off in Austria. That leaves voice depending on VoLTE alone, on an
+eleven-year-old module. The **Rolling RW101R-GL** (Cat 6, VoLTE in the
+manual, MBIM for Linux) is the better choice — with the caveat that its
+driver entry only reached the kernel in September 2025 and needs checking
+for Debian 13.
+
+### The two candidates compared
+
+| | **InfinityBook Pro 14 Gen10** | **Aura 15 Gen4** |
+|---|---|---|
+| Display | 14", 2880×1800, **500 cd/m²**, 120 Hz, matte | 15.6", FHD, >300 cd/m², 60 Hz, matte |
+| Weight | **1.49 kg** | 1.75 kg |
+| Battery | **80 Wh** | 49–50 Wh (measured 4 to just over 5 h) |
+| Memory | DDR5-5600, 2 sockets, **max. 128 GB** | DDR4-3200, 2 sockets, max. 64 GB |
+| Processor | Ryzen AI 300 (Zen 5) **or Ryzen 7 H 255 (Zen 4)** | Intel i5-1334U/1335U (Raptor Lake U) |
+| Wi-Fi | **Intel AX210 selectable** | Intel AX211 as standard |
+| USB | 3× USB-A, **2× USB-C** (one USB4) | 3× USB-A, 1× USB-C |
+| Charging | **USB-C only** (150 W PD) | barrel jack **or** USB-C PD (65 W+; 45 W supplied) |
+| Card reader | **full-size SD** (up to UHS-II) | microSD |
+| Keyboard | **no numeric keypad** | with numeric keypad |
+| **Cellular** | **no** | **yes** |
+| **Debian 13 / kernel 6.12** | **problematic** (see above) | **mature** (Raptor Lake for years) |
+| Platform age | 2026 | 2023 |
+
+**Decided on 2026-11-18: the 14-inch machine**, even though it has no LTE.
+Four reasons, and all four count for the users, not for the spec sheet:
+
+1. **80 Wh versus 49 Wh.** Someone who cannot see the screen does not read
+   the charge level in passing but learns it from the warning announcement
+   at 25 %. The shorter the runtime, the more often a task ends
+   involuntarily.
+2. **Keyboard without a numeric keypad.** Letter centre equals device
+   centre. Anyone orienting by the markings on F and J feels a different
+   geometry on a 15-inch machine with a keypad — and buying over years
+   would otherwise put two different geometries in front of the same group
+   of users.
+3. **Full-size SD instead of microSD.** A tangible edge, grippable instead
+   of having to be pushed out with a fingernail. Relevant because the
+   security medium (one stick holding `DIALOS-KEY` + `DIALOS-DATA`, see
+   [sicherheit-datenschutz.en.md](sicherheit-datenschutz.en.md)) stays in
+   the machine permanently and is located by touch.
+4. **Long-term availability.** Shipping starts in 2027 and continues for
+   years. DDR5 and Zen 4/5 will be ordinary stock then; DDR4 with Raptor
+   Lake is at the end of its life cycle by the time sales begin.
+
+**Why the missing LTE does not overturn this:** telephony via the laptop is
+not implemented ([telefonie.en.md](telefonie.en.md) lists it as open), and
+the emergency-call argument — cellular works without a contract and
+without internet — applies equally to the mobile phone running DialOS
+Mobil. If the phone is the phone, the laptop need not be one. Choosing a
+machine for an unbuilt feature while making battery, weight, keyboard and
+service life worse is the wrong trade. For later, the route via an external
+modem remains open (see telefonie.en.md).
+
+**Open and to be settled before purchase:** does the microphone of the
+Pro 14 Gen10 hang off the Realtek HDA codec or off the AMD ACP as a DMIC?
+If Realtek, the entire ACP risk is moot. If ACP, it is not a rejection but
+a question of timing — Debian 14 arrives in 2027 with a newer kernel,
+exactly when shipping begins. The question was put to TUXEDO on
+2026-11-18; the Notebookcheck review of the machine does not help, it was
+run under Windows 11.
+
+**Evaluation unit requested:** four to eight weeks from late January 2027 —
+more than the two offered. Reason: this is not a benchmark but a complete
+build following
+[installationsanleitung.md](installationsanleitung.md) followed by
+everyday use. That is where the dangerous faults appear — microphone mute
+after standby, Bluetooth switching that hangs, a firmware update that costs
+the keyboard — and they do not show up on day one but in week three.
+
+**Requested configuration** (asked 2026-11-18): Ryzen AI 7 350 or Ryzen 7
+H 255 (depending on TUXEDO's assessment regarding the kernel), 32 GB
+DDR5-5600 as 2× 16 GB socketed, 1 TB NVMe, **Intel Wi-Fi 6 AX210**, German
+ISO backlit keyboard, operating system secondary (Debian 13 installed by
+us).
+
 ## Reference audio device (decided 2026-08-16)
 
 **AIRHUG 01** – a Bluetooth headset, speaker and microphone in one. This
