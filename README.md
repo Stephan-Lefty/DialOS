@@ -157,6 +157,11 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **os-release vor Debian-Updates geschützt** (2026-11-24). Das Update von
+  `base-files` setzte `/etc/os-release` wieder auf „Debian GNU/Linux 13".
+  `scripts/dialos-os-release.sh` leitet die Datei per `dpkg-divert` um, Debians
+  Fassung landet künftig unter `*.debian`. Die Version darin stand noch auf
+  „0.1 (Konzeptphase)" und heißt jetzt 0.5.3.
 - **NVIDIA-Zusatzkarte abgeschaltet - der Start blieb hängen** (2026-11-24,
   Stephan: „Das darf einem blinden Menschen nicht passieren!"). Mit dem
   Debian-Kernel 6.12.118 stürzte nouveau auf dem T490 bei jedem Start ab;

@@ -147,6 +147,11 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **os-release protected from Debian updates** (2026-11-24). The
+  `base-files` update set `/etc/os-release` back to "Debian GNU/Linux 13".
+  `scripts/dialos-os-release.sh` diverts the file with `dpkg-divert`; Debian's
+  version now goes to `*.debian`. The version inside still said "0.1
+  (Konzeptphase)" and is now 0.5.3.
 - **NVIDIA add-on card disabled - the boot hung** (2026-11-24, Stephan:
   "This must not happen to a blind person!"). With Debian kernel 6.12.118,
   nouveau crashed on the T490 on every boot; once the boot stopped at the

@@ -444,8 +444,15 @@ Alle Branding-Assets liegen fertig aufbereitet unter
 sudo mkdir -p /usr/share/backgrounds/dialos
 sudo cp iso-build/config/includes.chroot/usr/share/backgrounds/dialos/*.png /usr/share/backgrounds/dialos/
 sudo cp assets/mark.png /usr/share/pixmaps/distributor-logo.png   # 512x512, Login-Logo + Avatar-Vorlage
-sudo cp iso-build/config/includes.chroot/etc/os-release /etc/os-release
+sudo scripts/dialos-os-release.sh                                 # os-release, vor Debian-Updates geschuetzt
 ```
+
+**os-release per `dpkg-divert` (seit 2026-11-24).** Bis dahin stand hier ein
+einfaches `cp`. Das Debian-Paket `base-files` liefert die Datei aber selbst mit
+und hat sie bei seinem Update am 2026-11-24 (und laut Dateidatum schon am
+2026-11-08) wieder auf „Debian GNU/Linux 13" gesetzt. `scripts/dialos-os-release.sh`
+leitet `/usr/lib/os-release` und `/etc/os-release` um - Debians Fassung landet
+künftig unter `*.debian`, unsere bleibt stehen.
 
 **Hintergrund nach Jahreszeit (seit 2026-09-16).** Stephan: „etwas Schwung in
 unser Wallpaper bringen" - vier Bilder desselben Bergsees

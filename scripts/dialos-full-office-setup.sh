@@ -162,7 +162,9 @@ schritt_03_branding() {
   sudo cp iso-build/config/includes.chroot/etc/systemd/user/dialos-jahreszeit.service \
     iso-build/config/includes.chroot/etc/systemd/user/dialos-jahreszeit.timer /etc/systemd/user/
   sudo systemctl --global enable dialos-jahreszeit.timer
-  sudo cp iso-build/config/includes.chroot/etc/os-release /etc/os-release
+  # os-release per dpkg-divert, nicht per cp (seit 2026-11-24): base-files
+  # ueberschreibt die Datei sonst bei jedem Debian-Update.
+  sudo scripts/dialos-os-release.sh
 
   sudo mkdir -p /etc/dconf/db/local.d /etc/dconf/profile
   sudo cp iso-build/config/includes.chroot_before_packages/etc/dconf/db/local.d/00-dialos-branding /etc/dconf/db/local.d/

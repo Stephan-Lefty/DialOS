@@ -430,8 +430,15 @@ and in the ISO recipe. Target paths:
 sudo mkdir -p /usr/share/backgrounds/dialos
 sudo cp iso-build/config/includes.chroot/usr/share/backgrounds/dialos/*.png /usr/share/backgrounds/dialos/
 sudo cp assets/mark.png /usr/share/pixmaps/distributor-logo.png   # 512x512, login logo + avatar template
-sudo cp iso-build/config/includes.chroot/etc/os-release /etc/os-release
+sudo scripts/dialos-os-release.sh                                 # os-release, protected from Debian updates
 ```
+
+**os-release via `dpkg-divert` (since 2026-11-24).** Until then a plain `cp`
+stood here. But the Debian package `base-files` ships the file itself and set
+it back to "Debian GNU/Linux 13" with its update on 2026-11-24 (and, judging
+by the file date, already on 2026-11-08). `scripts/dialos-os-release.sh`
+diverts `/usr/lib/os-release` and `/etc/os-release` - Debian's version now
+goes to `*.debian`, ours stays.
 
 **Background by season (since 2026-09-16).** Stephan: bring "some swing" into
 the wallpaper - four pictures of the same mountain lake

@@ -1,7 +1,7 @@
 PRETTY_NAME="DialOS"
 NAME="DialOS"
-VERSION_ID="0.1"
-VERSION="0.1 (Konzeptphase)"
+VERSION_ID="0.5.3"
+VERSION="0.5.3"
 VERSION_CODENAME=trixie
 ID=dialos
 ID_LIKE=debian
