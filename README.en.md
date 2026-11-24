@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Old kernels are removed automatically** (2026-11-24, Stephan's wish).
+  `autoremove` stays disabled on DialOS devices - after the clean-up it would
+  offer the desktop and sound. New: `dialos-alte-kernel` in the update run
+  always keeps the running, the newest and the previous kernel (fallback - the
+  same day the new kernel crashed at boot) and aborts as soon as apt would
+  touch anything else. The T490 had five kernels. Tests:
+  `tests/test_alte_kernel.py`.
 - **"Diktat abbrechen" no longer saves by accident** (2026-11-24). The phrase
   was never a command (discarding is "alles verwerfen"), but the end-phrase
   recogniser pressed it onto something it knew - in one of 16 Piper runs onto

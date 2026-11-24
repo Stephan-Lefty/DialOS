@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Alte Kernel werden automatisch entfernt** (2026-11-24, Stephans Wunsch).
+  `autoremove` bleibt auf DialOS-Geräten abgeschaltet - es würde nach dem
+  Aufräumen Oberfläche und Ton anbieten. Neu: `dialos-alte-kernel` im
+  Update-Lauf behält immer den laufenden, den neuesten und den vorigen Kernel
+  (Notfall - am selben Tag stürzte der neue Kernel beim Start ab) und bricht
+  ab, sobald apt irgendetwas anderes anfassen würde. Am T490 lagen fünf
+  Kernel. Tests: `tests/test_alte_kernel.py`.
 - **„Diktat abbrechen" speichert nicht mehr versehentlich** (2026-11-24). Der
   Satz war nie ein Befehl (zum Verwerfen heißt es „alles verwerfen"), aber der
   Schluss-Erkenner presste ihn auf Bekanntes - in einem von 16 Piper-Läufen auf

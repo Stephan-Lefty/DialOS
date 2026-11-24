@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""DialOS: entfernt alte Kernel - und NUR alte Kernel.
+
+Stephan, 2026-11-24: „ja die alten Kernel sollten wir bereinigen". Anlass:
+Am 2026-11-24 lagen fünf Kernel auf dem T490, drei davon überflüssig.
+
+WARUM NICHT EINFACH "apt autoremove": Das ist auf DialOS-Geräten mit Absicht
+abgeschaltet (siehe dialos-systemupdate und 52dialos-unattended-upgrades).
+Nach dem Aufräumen der GNOME-Programme hielt Debian 49 Pakete für entbehrlich,
+darunter Arbeitsoberfläche und Ton. Alte Kernel dagegen sind eindeutig zu
+erkennen - dieses Werkzeug fasst nichts anderes an.
+
+WELCHE BLEIBEN - immer diese, auch wenn es dieselben sind:
+  - der LAUFENDE Kernel (uname -r)
+  - der NEUESTE installierte - nach einem Update der, mit dem neu gestartet wird
+  - der VORIGE dazu, als Notfall. Am 2026-11-24 stürzte der neue Kernel
+    6.12.118 mit dem NVIDIA-Treiber beim Start ab; da war es gut, dass 6.12.115
+    noch im Startmenü stand.
+
+ZWEITE SICHERUNG: Vor dem Entfernen fragt das Werkzeug apt, was es tun WÜRDE
+(-s). Steht dort auch nur ein Paket, das kein alter Kernel ist, bricht es ab
+und entfernt nichts.
+
+Aufruf (als root - so ruft dialos-systemupdate es auf):
+    dialos-alte-kernel            entfernen, falls sicher
+    dialos-alte-kernel --pruefen  nur sagen, was passieren würde
+"""
+
+import os
+import re
+import subprocess
+import sys
+
+PROTOKOLL = "/var/log/dialos-systemupdate.log"
+MUSTER = re.compile(r"^linux-image-(\d+\.\d+\.\d+.*-amd64)$")
+
+
+def melde(text):
+    print(text, flush=True)
+    try:
+        with open(PROTOKOLL, "a", encoding="utf-8") as f:
+            f.write(f"[dialos-alte-kernel] {text}\n")
+    except OSError:
+        pass
+
+
+def _versionsschluessel(version):
+    """'6.12.115+deb13.1-amd64' -> (6, 12, 115, ...) zum Sortieren."""
+    return [int(x) if x.isdigit() else x for x in re.split(r"[.+\-]", version)]
+
+
+def installierte_kernel():
+    """Paketname -> Kernelversion, nur vollständig installierte."""
+    aus = subprocess.run(["dpkg-query", "-W", "-f", "${Package} ${db:Status-Abbrev}\n",
+                          "linux-image-*"], capture_output=True, text=True).stdout
+    kernel = {}
+    for zeile in aus.splitlines():
+        teile = zeile.split()
+        if len(teile) >= 2 and teile[1].startswith("ii"):
+            treffer = MUSTER.match(teile[0])
+            if treffer:
+                kernel[teile[0]] = treffer.group(1)
+    return kernel
+
+
+def zu_entfernen(kernel, laufend):
+    """Welche Pakete weg dürfen. kernel: Paket -> Version."""
+    sortiert = sorted(kernel.items(), key=lambda kv: _versionsschluessel(kv[1]))
+    behalten = {laufend}
+    behalten.update(v for _, v in sortiert[-2:])     # neuester und voriger
+    return sorted(p for p, v in kernel.items() if v not in behalten)
+
+
+def probe_nur_kernel(pakete, simulation=None):
+    """True, wenn apt beim Entfernen GENAU diese Pakete anfassen würde."""
+    if simulation is None:
+        simulation = subprocess.run(["apt-get", "-s", "purge", *pakete],
+                                    capture_output=True, text=True).stdout
+    angefasst = {z.split()[1] for z in simulation.splitlines()
+                 if z.startswith(("Remv ", "Purg ", "Inst "))}
+    return angefasst == set(pakete), sorted(angefasst - set(pakete))
+
+
+def main():
+    pruefen = "--pruefen" in sys.argv
+    laufend = os.uname().release
+    kernel = installierte_kernel()
+    weg = zu_entfernen(kernel, laufend)
+    if not weg:
+        print(f"Nichts zu tun - {len(kernel)} Kernel installiert, laufend {laufend}.")
+        return 0
+    ok, fremd = probe_nur_kernel(weg)
+    if not ok:
+        melde(f"ABBRUCH: apt wuerde auch anderes anfassen: {fremd} - nichts entfernt")
+        return 1
+    if pruefen:
+        print(f"WUERDE entfernen: {' '.join(weg)} (laufend {laufend})")
+        return 0
+    if os.geteuid() != 0:
+        print("Bitte als root aufrufen.", file=sys.stderr)
+        return 1
+    melde(f"entferne alte Kernel: {' '.join(weg)} (laufend {laufend})")
+    fertig = subprocess.run(["apt-get", "-y", "purge", *weg],
+                            capture_output=True, text=True)
+    if fertig.returncode != 0:
+        melde(f"apt purge fehlgeschlagen (Rueckgabe {fertig.returncode})")
+        return 1
+    melde("alte Kernel entfernt")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

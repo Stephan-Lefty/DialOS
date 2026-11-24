@@ -108,11 +108,13 @@ installieren() {
     melde "offen vor dem Lauf: $vorher Paket(e), $firmware Firmware"
     if [ "$vorher" -eq 0 ] && [ "$firmware" -eq 0 ]; then
         melde "nichts zu tun"
+        alte_kernel_entfernen
         datum_merken
         return 0
     fi
     if [ "$vorher" -eq 0 ]; then
         firmware_einspielen || return 1
+        alte_kernel_entfernen
         datum_merken
         installiert_merken
         return 0
@@ -146,6 +148,7 @@ installieren() {
         # schon das sein, das die Firmware einspielt. Scheitert die Firmware,
         # sind die Pakete trotzdem drin - das zaehlt als Installation.
         firmware_einspielen || melde "Firmware nicht eingespielt - naechster Lauf"
+        alte_kernel_entfernen
         datum_merken
         installiert_merken
         return 0
@@ -153,6 +156,19 @@ installieren() {
 
     melde "apt upgrade fehlgeschlagen"
     return 1
+}
+
+# ALTE KERNEL (seit 2026-11-24, Stephan: "die alten Kernel sollten wir
+# bereinigen"). In JEDEM erfolgreichen Lauf, auch bei "nichts zu tun": Neue
+# Kernel kommen ebenso ueber die taeglichen Sicherheitsupdates. Das Werkzeug
+# behaelt laufenden, neuesten und vorigen Kernel und bricht ab, sobald apt
+# irgendetwas anderes anfassen wuerde - begruendet dort. Scheitert es, ist das
+# kein Fehlschlag des Laufs: Ein alter Kernel zu viel schadet niemandem.
+alte_kernel_entfernen() {
+    if [ -x /usr/local/sbin/dialos-alte-kernel ]; then
+        /usr/local/sbin/dialos-alte-kernel >>"$PROTOKOLL" 2>&1 \
+            || melde "alte Kernel nicht entfernt - naechster Lauf"
+    fi
 }
 
 firmware_einspielen() {
