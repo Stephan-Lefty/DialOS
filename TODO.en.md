@@ -109,7 +109,7 @@ finished too, and then move down together. That way no reference breaks.
   mailbox"). One profile, one account, two password entries, bridge installed.
   The signature was missing until the next login - the tool now writes it
   itself. **Account `nutzer` verified too**, acceptance check: nothing missing.
-- [ ] **Rebuild every 4 weeks - next on Friday, 2026-11-20** (2026-10-23 was skipped; standing rule,
+- [ ] **Rebuild every 4 weeks - next on Friday, 2026-12-18** (2026-10-23 and 2026-11-20 were skipped; standing rule,
   Stephan, 2026-09-25: "so routine sets in and we keep improving the guide").
   Only from `docs/installationsanleitung.md`; every gap goes into guide and
   recipe right away. Afterwards enter the next date here (+4 weeks).

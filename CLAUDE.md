@@ -130,9 +130,14 @@ vermeiden.
 > **Stephan, 2026-09-25:** „Wir machen jetzt alle 4 Wochen eine Neuinstallation.
 > Damit Routine rein kommt und wir die Anleitung noch optimieren."
 
-**Naechster Termin: Freitag, 2026-11-20** (der 2026-10-23 ist ausgefallen; am
-2026-11-06 festgelegt), danach jeweils vier Wochen spaeter. **Dabei mitnehmen:**
-`apt-get -s autoremove` (am 2026-11-06: 52 Pakete) erst pruefen - nichts
+**Naechster Termin: Freitag, 2026-12-18** (am 2026-11-24 festgelegt; der
+2026-10-23 und der 2026-11-20 sind ausgefallen - letzter echter Neuaufbau war
+der 2026-09-25), danach jeweils vier Wochen spaeter. **Neu seit dem letzten
+Neuaufbau und dabei erstmals zu pruefen:** Schritt 3b (NVIDIA-Zusatzkarte,
+`scripts/dialos-nvidia-abschalten.sh` - erster Neustart danach kann beim
+Herunterfahren haengen) und os-release per `scripts/dialos-os-release.sh`.
+**Dabei mitnehmen:** `apt-get -s autoremove` (2026-11-06: 52 Pakete,
+2026-11-24: 58) erst pruefen - nichts
 entfernen, was DialOS braucht (Beispiel python3-gi-cairo, Schritt 13b).
 Ablauf wie am 2026-09-25: Teil 0 der Anleitung (Sichern, Rescuezilla-Abbild,
 benutzten Stick sichern), dann **nur nach `docs/installationsanleitung.md`**

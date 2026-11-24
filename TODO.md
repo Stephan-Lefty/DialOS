@@ -111,7 +111,7 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   ein Konto, zwei Passwort-Einträge, Brücke installiert. Signatur fehlte bis zum
   nächsten Anmelden - trägt das Werkzeug jetzt selbst ein. **Konto `nutzer` ebenfalls
   belegt**, Abnahme: „Im Konto nutzer fehlt nichts".
-- [ ] **Neuaufbau alle 4 Wochen - nächster am Freitag, 2026-11-20** (der 2026-10-23 ist ausgefallen; Dauerregel,
+- [ ] **Neuaufbau alle 4 Wochen - nächster am Freitag, 2026-12-18** (der 2026-10-23 und der 2026-11-20 sind ausgefallen; Dauerregel,
   Stephan, 2026-09-25: „Damit Routine rein kommt und wir die Anleitung noch
   optimieren"). Nur nach `docs/installationsanleitung.md`; jede Lücke sofort in
   Anleitung und Rezept. Danach den nächsten Termin hier eintragen (+4 Wochen).
