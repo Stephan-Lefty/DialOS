@@ -252,13 +252,22 @@ die Sprachsteuerung ist ein Dienst, der laeuft oder nicht; die Schalter in
 
 | Stufe | Was an ist | Fuer wen |
 |---|---|---|
-| 0 | normaler Desktop, Sprachbefehle verfuegbar, keine Ansagen | sieht gut, nutzt Sprache aus Bequemlichkeit |
+| 0 | normaler Desktop, Sprachbefehle verfuegbar, **Begruessung ja**, sonst keine Ansagen | sieht gut, nutzt Sprache aus Bequemlichkeit |
 | 1 | Vorlesen auf Zuruf, grosse Schrift, hoher Kontrast | Sehschwaeche, liest noch |
 | 2 | Ansagen bei jedem Zustandswechsel, Frageton, Bestaetigungen | liest kaum noch |
 | 3 | vollstaendig blind bedienbar, Bildschirm irrelevant | das heutige DialOS |
 
 Der Wechsel von 2 auf 3 waere ein Sprachbefehl oder ein Handgriff des
 Angehoerigen - keine Neuinstallation.
+
+> **Stephan, 2026-11-24:** „Also die Begrüßung würde ich auch bei Stufe 0
+> drin lassen!"
+
+**Die Begruessung gehoert also zu jeder Stufe.** Das passt zum Kern: Wer
+schon bei Stufe 0 von Michael begruesst wird, kennt die Stimme, wenn er sie
+braucht. Offen bleibt fuer Stufe 0 nur, was NACH der Begruessung kommt -
+Ansagen bei Zustandswechseln, und ob die Befehlserkennung ab dem Anmelden
+zuhoert.
 
 **Drei Punkte, die vor einer Entscheidung geklaert gehoeren.**
 
