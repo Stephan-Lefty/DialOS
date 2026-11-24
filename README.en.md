@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **NVIDIA add-on card disabled - the boot hung** (2026-11-24, Stephan:
+  "This must not happen to a blind person!"). With Debian kernel 6.12.118,
+  nouveau crashed on the T490 on every boot; once the boot stopped at the
+  splash screen. New script `scripts/dialos-nvidia-abschalten.sh` (build step
+  3b) disables the driver - but only when other graphics drive the screen,
+  otherwise it would stay black. Checked against six simulated graphics
+  combinations.
 - **The first "Radio einschalten" stopped after a moment** (2026-11-06,
   Stephan). Warming up started Rhythmbox with "--pause"; with Rhythmbox cold,
   that arrived only after the station was already playing (Playing at

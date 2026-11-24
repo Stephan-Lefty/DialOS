@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **NVIDIA-Zusatzkarte abgeschaltet - der Start blieb hängen** (2026-11-24,
+  Stephan: „Das darf einem blinden Menschen nicht passieren!"). Mit dem
+  Debian-Kernel 6.12.118 stürzte nouveau auf dem T490 bei jedem Start ab;
+  einmal blieb der Start am Startbildschirm stehen. Neues Skript
+  `scripts/dialos-nvidia-abschalten.sh` (Aufbau-Schritt 3b) schaltet den
+  Treiber ab - aber nur, wenn eine andere Grafik den Bildschirm treibt, sonst
+  bliebe er schwarz. In sechs nachgestellten Grafik-Kombinationen geprüft.
 - **Erstes „Radio einschalten" brach nach einem Augenblick ab** (2026-11-06,
   Stephan). Das Vorwärmen startete Rhythmbox mit „--pause"; bei kaltem
   Rhythmbox kam das erst an, als der Sender schon lief (Playing bei 1,93 s,

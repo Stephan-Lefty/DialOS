@@ -107,7 +107,10 @@ Laden und Warten; nicht gemessen.
   bei AMD am „ACP" - beides braucht passende Kernel- und Firmware-Einträge je
   Modell. Ohne funktionierendes Mikrofon ist DialOS nicht bedienbar.
 - **Kein Nvidia-Grafikchip.** Bringt für DialOS nichts und macht Treiber,
-  Standby und Akku schwieriger.
+  Standby und Akku schwieriger. **Belegt am 2026-11-24 auf dem T490:** Mit
+  Kernel 6.12.118 stürzte der Treiber nouveau für die MX250 bei jedem Start
+  ab, einmal blieb der Start hängen. Seitdem schaltet Schritt 3b
+  (`scripts/dialos-nvidia-abschalten.sh`) eine NVIDIA-Zusatzkarte ab.
 - **Firmware über LVFS/fwupd** - DialOS spielt Firmware-Updates damit ein
   (Schritt 13d). Lenovo ThinkPad, Dell Latitude und HP EliteBook sind dort gut
   vertreten, viele Consumer-Geräte kaum.

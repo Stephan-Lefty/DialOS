@@ -509,6 +509,28 @@ Firmware-Logo und Anmeldung/Desktop).
 > Mit dem Wegfall von eggs (Schritt 16) ist sie wirkungslos - das
 > Plymouth-Theme oben bringt seine eigene `background.png` mit.
 
+## 3b. NVIDIA-Zusatzkarte abschalten (seit 2026-11-24)
+
+Hat das Gerät neben der Haupt-Grafik eine NVIDIA-**Zusatz**karte (beim T490
+die GeForce MX250, PCI-Klasse „3D controller"), wird ihr Treiber nouveau
+abgeschaltet:
+
+```bash
+sudo scripts/dialos-nvidia-abschalten.sh
+```
+
+**Warum:** Mit dem Debian-Kernel 6.12.118 stürzte nouveau auf dem T490 bei
+jedem Start ab („BUG: unable to handle page fault" in `gp102_acr_wpr_patch`),
+und mindestens einmal blieb der Start dabei hängen - für einen blinden Nutzer
+ein Gerät, das ohne jede Rückmeldung nicht hochkommt. DialOS braucht die Karte
+nicht, die Anzeige läuft über die Intel-Grafik.
+
+**Nur wenn es sicher ist:** Das Skript schaltet nur ab, wenn eine andere Grafik
+den Bildschirm treibt. Ist NVIDIA die einzige oder die Haupt-Grafik, tut es
+nichts - sonst bliebe der Bildschirm schwarz. `--pruefen` zeigt vorher, was
+passieren würde. Es schreibt `/etc/modprobe.d/dialos-kein-nouveau.conf` und
+baut das initramfs neu (nouveau steckt dort auch). Danach neu starten.
+
 ## 4. Autologin einrichten
 
 **Zentrale Falle:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`,

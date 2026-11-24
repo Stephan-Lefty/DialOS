@@ -185,6 +185,14 @@ schritt_03_branding() {
   # Plymouth-Theme oben bringt seine eigene background.png mit.
 }
 
+schritt_03b_nvidia() {
+  log "Schritt 3b: NVIDIA-Zusatzkarte abschalten, falls vorhanden"
+  # Seit 2026-11-24: nouveau stuerzte mit Kernel 6.12.118 auf dem T490 bei
+  # jedem Start ab, einmal blieb der Start haengen. Das Skript schaltet nur
+  # ab, wenn eine andere Grafik den Bildschirm treibt - Begruendung dort.
+  sudo scripts/dialos-nvidia-abschalten.sh
+}
+
 schritt_04_autologin() {
   log "Schritt 4: Autologin fuer dialosadmin (Bootstrap, bis nutzer existiert)"
   local pfad
@@ -622,7 +630,7 @@ schritt_16_dialos_dateien() {
 # NICHT Teil des normalen Laufs (device-spezifisch, siehe Funktion
 # oben), nur per --bluetooth-kopplung zuschaltbar oder einzeln per
 # "./dialos-full-office-setup.sh 14" aufrufbar.
-ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 04_autologin 05_calamares_entfernen 06_rustdesk
+ALLE_SCHRITTE=(02_paketliste 02b_sprachen_aufraeumen 03_branding 03b_nvidia 04_autologin 05_calamares_entfernen 06_rustdesk
   07_claude_cli 08_piper 09_gnome_erweiterungen 10_standardprogramme
   11_sprachausgabe 11c_admin_tastenkuerzel 12_sicherheit 14_bluetooth 15_vosk 15b_parakeet
   15c_languagetool 16_dialos_dateien)

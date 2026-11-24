@@ -495,6 +495,28 @@ logo and the login/desktop).
 > eggs gone (step 16) it has no effect - the Plymouth theme above brings
 > its own `background.png`.
 
+## 3b. Disable an NVIDIA add-on card (since 2026-11-24)
+
+If the device has an NVIDIA **add-on** card next to its main graphics (on the
+T490 the GeForce MX250, PCI class "3D controller"), its driver nouveau is
+disabled:
+
+```bash
+sudo scripts/dialos-nvidia-abschalten.sh
+```
+
+**Why:** With Debian kernel 6.12.118, nouveau crashed on the T490 on every
+boot ("BUG: unable to handle page fault" in `gp102_acr_wpr_patch`), and at
+least once the boot hung - for a blind user, a device that does not come up
+and gives no feedback at all. DialOS does not need the card; the display runs
+on the Intel graphics.
+
+**Only when it is safe:** the script only disables it when other graphics
+drive the screen. If NVIDIA is the only or the main graphics, it does nothing -
+otherwise the screen would stay black. `--pruefen` shows beforehand what would
+happen. It writes `/etc/modprobe.d/dialos-kein-nouveau.conf` and rebuilds the
+initramfs (nouveau is in there too). Reboot afterwards.
+
 ## 4. Set up autologin
 
 **Key gotcha:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`, see
