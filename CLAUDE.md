@@ -1286,7 +1286,8 @@ in `Categories=` - mehr nicht. Der Ordner sammelt nach dieser Kategorie,
 `dialos-tools-ordner.sh` legt ihn bei jedem Anmelden an, falls er fehlt
 (Begründung dort). Eine Liste der Werkzeuge gibt es bewusst NICHT, sie würde
 beim nächsten Werkzeug vergessen. `tests/test_tools_ordner.py` prüft, dass jede
-`dialos-*.desktop` in `usr/share/applications` die Kategorie trägt.
+`dialos-*.desktop` in `usr/share/applications` UND `usr/local/share/applications`
+die Kategorie trägt (die Mitschrift liegt im zweiten Ort).
 
 Achtung bei `nutzer`: Dort blendet `scripts/dialos-menue-pro-konto.sh` alles
 aus, was nicht auf seiner weißen Liste steht - auch DialOS-Werkzeuge. Ein

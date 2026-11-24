@@ -160,7 +160,8 @@ das Erfolg meldet, während es versagt.
 - **Menü-Ordner „DialOS Tools"** (2026-11-24, Stephans Wunsch: „Dann bleibt
   der Bildschirm und das Menü schön aufgeräumt"). Alle DialOS-Werkzeuge -
   Persönliche Daten, Sicherheits-Stick ersetzen, DialOS-Rhythmbox, Lizenzen,
-  Unterstützung - liegen in einem Ordner. Er sammelt nach der Kategorie
+  Unterstützung, Mitschrift - liegen in einem Ordner. Im Konto `nutzer` sind
+  davon „Unterstützung" und „Lizenzen" sichtbar (Stephan). Er sammelt nach der Kategorie
   `X-DialOS-Tools`; `dialos-tools-ordner.sh` legt ihn bei jedem Anmelden an,
   falls er fehlt, und lässt die übrigen Ordner stehen.
 - **Unterstützungsstufen 0 bis 3 - ein System, das mitwächst** (2026-11-24,

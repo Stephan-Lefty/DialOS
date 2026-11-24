@@ -15,5 +15,5 @@ Comment[en]=Shows live what the voice control hears and does
 Exec=gnome-terminal --title="DialOS - Mitschrift" --geometry=100x30 -- /usr/local/bin/dialos-mitschrift.py
 Icon=utilities-terminal
 Terminal=false
-Categories=System;Monitor;
+Categories=System;Monitor;X-DialOS-Tools;
 Keywords=DialOS;Sprache;Mitschrift;Protokoll;

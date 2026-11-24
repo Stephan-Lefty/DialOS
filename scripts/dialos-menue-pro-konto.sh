@@ -54,6 +54,8 @@ org.gnome.TextEditor.desktop        Einkaufszettel und Notizen sind .txt-Dateien
 org.gnome.Evince.desktop            Briefe als PDF lesen
 org.gnome.Loupe.desktop             Bilder von der Familie
 org.gnome.Calculator.desktop        harmlos, und ein Helfer rechnet mal etwas
+dialos-stufe.desktop                Unterstuetzungsstufe waehlen (Stephan, 2026-11-24)
+dialos-lizenzen.desktop             Lizenzen ansehen, Namensnennung (Stephan, 2026-11-24)
 "
 
 # --- Was auch dialosadmin nicht braucht ------------------------------------
@@ -160,6 +162,18 @@ schreibe_fuer() {
     konto="$1"; heim="$2"; shift 2
     ordner="$heim/.local/share/applications"
     mkdir -p "$ordner" || return 1
+    # AUFRAEUMEN (seit 2026-11-24): Kommt ein Eintrag NEU auf die weisse
+    # Liste, liegt von einem frueheren Lauf womoeglich noch seine Ausblendung
+    # hier - und er bliebe unsichtbar. Entfernt wird nur, was dieses Skript
+    # selbst geschrieben hat: eine Ueberlagerung mit NoDisplay=true.
+    if [ "$konto" != "dialosadmin" ]; then
+        for datei in $BEHALTEN; do
+            alt="$ordner/$datei"
+            if [ -f "$alt" ] && grep -qx 'NoDisplay=true' "$alt"; then
+                rm -f "$alt" && sag "  $konto: Ausblendung entfernt: $datei"
+            fi
+        done
+    fi
     anzahl=0
     for datei in "$@"; do
         quelle=$(finde "$datei") || continue

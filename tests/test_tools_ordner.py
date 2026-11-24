@@ -21,8 +21,12 @@ WURZEL = os.path.join(
 class ToolsOrdner(unittest.TestCase):
 
     def test_jedes_werkzeug_traegt_die_kategorie(self):
-        dateien = glob.glob(os.path.join(WURZEL, "usr", "share", "applications",
-                                         "dialos-*.desktop"))
+        # Beide Orte: dialos-mitschrift.desktop liegt in /usr/local/share und
+        # war beim ersten Durchgang (2026-11-24) deshalb uebersehen worden.
+        dateien = (glob.glob(os.path.join(WURZEL, "usr", "share", "applications",
+                                          "dialos-*.desktop"))
+                   + glob.glob(os.path.join(WURZEL, "usr", "local", "share",
+                                            "applications", "dialos-*.desktop")))
         self.assertTrue(dateien)
         for pfad in dateien:
             c = configparser.RawConfigParser(strict=False)
