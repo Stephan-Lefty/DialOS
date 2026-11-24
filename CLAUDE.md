@@ -170,6 +170,28 @@ Token (credential.helper=store). **Das Token gibt Stephan selbst im Terminal
 ein, nie in den Chat**; das schmale Terminal bricht lange Befehle mitten im
 Wort um, deshalb lief es am 2026-11-06 ueber ein kurzes Hilfsskript.
 
+## Stand vom 2026-11-24, Dienstag nachmittags
+
+Am Laptop gebaut, aufgespielt, mit Stephans Stimme abgenommen, alle Tests gruen
+(auch `scripts/dialos-tests-wie-ci.sh`):
+- **Start-Haenger:** nouveau stuerzte mit Kernel 6.12.118 bei jedem Start ab ->
+  `scripts/dialos-nvidia-abschalten.sh` (Schritt 3b). os-release per dpkg-divert
+  geschuetzt (`scripts/dialos-os-release.sh`), Version 0.5.3.
+- **Stufen 0-3** (`dialos_stufe.py`, `dialos-stufe.py`, Fenster „DialOS
+  Unterstuetzung"), Saetze „mehr Unterstuetzung" / „Unterstuetzung verringern".
+- **Menue-Ordner „DialOS Tools"** (Kategorie `X-DialOS-Tools`, Regel oben);
+  `nutzer` sieht Unterstuetzung und Lizenzen.
+- **„markierten Text vorlesen"** ueber die eigene GNOME-Erweiterung
+  `dialos@dialos.org` (D-Bus `org.dialos.Shell`).
+- „Diktat abbrechen" als Hinweis-Satz (speicherte sonst teils); Hinweis-Saetze
+  fuer gestrichene Formulierungen; Radio: erst ansagen, dann abspielen,
+  „Radio stoppen"; Podcast-Folgen als Datei; Rueckfrage nach den Nachrichten.
+- autoremove (58 Pakete) entfernt; alte Kernel raeumt kuenftig der Update-Lauf.
+- Rote Tests vom Arbeitsrechner behoben; Grammatik-Pruefung jetzt wiederholbar,
+  neu `--streuung N`.
+**Offen:** Ordner „DialOS Tools" im Konto `nutzer` ansehen; drei wacklige Saetze
+(TODO); Neuaufbau 18.12.; TUXEDO-Bestellung bis Anfang Januar (Stephan).
+
 ## Stand vom 2026-11-06, Freitag mittags
 
 Ohne Stephans Stimme gebaut, am Laptop aufgespielt, alle Tests gruen:
