@@ -34,7 +34,12 @@ umleiten() {
   if dpkg-divert --list "$pfad" | grep -q "$pfad.debian"; then
     echo "schon umgeleitet: $pfad"
   else
-    dpkg-divert --local --rename --divert "$pfad.debian" --add "$pfad"
+    # --no-rename, wie dpkg-divert es bei essenziellen Paketen verlangt: Mit
+    # --rename fehlt die Datei kurz ganz (am 2026-11-24 so gelaufen, mit
+    # Warnung - harmlos, weil sie gleich danach neu kam). So bleibt sie
+    # stehen und wird unten nur ueberschrieben; Debians Fassung schreibt
+    # base-files erst beim naechsten Update nach *.debian.
+    dpkg-divert --local --no-rename --divert "$pfad.debian" --add "$pfad"
   fi
 }
 
