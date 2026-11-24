@@ -112,8 +112,9 @@ finished too, and then move down together. That way no reference breaks.
 - [ ] **Finish accepting the support levels and the tools folder on the device**
   (built 2026-11-24). Done: "Unterstützung verringern" recognised with Stephan's
   voice (11:26, at the limit "Weniger geht nicht"); the "DialOS Unterstützung"
-  window set level 0 with an announcement. **Open:** "mehr Unterstützung" by
-  voice (level 1 turns on large text and contrast) and whether the "DialOS
+  window set level 0 with an announcement. Stephan, later on 2026-11-24:
+  "support by voice works in both profiles" (tested in `nutzer` - whose log
+  dialosadmin cannot read). **Open:** whether the "DialOS
   Tools" folder with "Unterstützung" and "Lizenzen" appears in the `nutzer`
   account - log in as `nutzer` once and look at the app overview.
 - [ ] **Rebuild every 4 weeks - next on Friday, 2026-12-18** (2026-10-23 and 2026-11-20 were skipped; standing rule,
