@@ -201,73 +201,86 @@ Zeitpunkt: **wenn Forky eingefroren ist.**
   Verbindung.
 - Priorisierung WhatsApp vs. Signal als Messenger noch offen.
 
-## Zweite Variante fuer Nutzer ohne Beeintraechtigung? (Frage vom 2026-11-19, OFFEN)
+## Ein System, das mitwaechst - Stufen statt Varianten (Frage vom 2026-11-19, OFFEN)
 
-> **Stephan, 2026-11-19:** „Ich bin gerade beim überlegen, ob es nicht
-> sinnvoll ist DialOS so aufzubauen, dass der Fokus auf Personen mit
-> Beeinträchtigung liegt, wir aber auch eine Version für Personen ohne
-> Beeinträchtigung fertig machen. Die dann sauber ohne Schnickschnack
-> daher kommt und sich auch auf das Wesentliche konzentriert."
+> **Stephan, 2026-11-19, der erste Anlauf:** „Ich bin gerade beim
+> überlegen, ob es nicht sinnvoll ist DialOS so aufzubauen, dass der Fokus
+> auf Personen mit Beeinträchtigung liegt, wir aber auch eine Version für
+> Personen ohne Beeinträchtigung fertig machen."
 
-**Nicht entschieden.** Festgehalten, damit die Frage nicht verloren geht
-und nicht zweimal von vorn diskutiert wird. Was unten steht, ist Claudes
-Einschätzung vom selben Tag, kein Beschluss.
+> **Und am selben Tag die Praezisierung, auf die es ankommt:** „Mein
+> Gedanke war auch eher der, man startet als Mensch ohne Beeinträchtigung
+> mit DialOS und um so stärker eine Beeinträchtigung wird um so mehr
+> unterstützt DialOS. Ohne Betriebssystem wechsel usw."
 
-**Einwand 1: Das Beschriebene existiert im Verein schon – als GuideOS.**
-Ein aufgeräumtes Debian für Menschen, die bisher keinen Grund hatten,
-sich mit einem Betriebssystem zu beschäftigen; erste öffentliche Fassung
-Weihnachten 2025, gebaut von Florian Jaster und vier weiteren
-Ehrenamtlichen. Seit 2026-11 liegt es mit DialOS unter demselben
-Vereinsdach (offen.digital, siehe [hardware.md](hardware.md) und den
-Blogbeitrag vom 2026-11-18). Zwei Projekte desselben Vereins, die um
-dieselbe Zielgruppe werben und denselben Unterbau nutzen, wären intern
-und nach außen schwer zu begründen.
+**Nicht entschieden.** Festgehalten, damit die Frage nicht verloren geht -
+und damit niemand sie noch einmal falsch versteht. Claude hat sie beim
+ersten Mal als „zwei getrennte Fassungen" gelesen und mit dem Hinweis auf
+GuideOS abgelehnt. **Dieser Einwand traf die Idee nicht** und ist hiermit
+zurueckgenommen: GuideOS ist ein Einsteigersystem, es waechst nicht mit
+und hat keine Sprachsteuerung, die man dazuschalten koennte.
 
-**Einwand 2, der schwerere: Eine Fassung für Sehende hätte nicht weniger
-Schnickschnack, sie hätte die halbe Architektur abgeschaltet.** Wegfallen
-würden: das Vorlesen jeder Rückfrage, der Frageton, die Ansage bei jedem
-Zustandswechsel, die Bestätigungsdialoge, das Mitschrift-Fenster, die
-Akkuansagen. Für einen sehenden Nutzer ist das Lärm. Für die Zielgruppe
-ist es die einzige Rückmeldung, die überhaupt ankommt –
-[sprachsteuerung.md](sprachsteuerung.md) sagt es selbst: „Ein Zustand, den
-man nur sehen kann, wäre für diese Zielgruppe kein Zustand." Schaltet man
-das ab, bleibt Debian mit GNOME und einer Spracheingabe obendrauf. Das ist
-kein zweites Produkt, sondern GuideOS mit einem Zusatzpaket.
+**Warum der Gedanke traegt.** Blindheit ist meist kein Zustand, sondern
+ein Verlauf - Makuladegeneration, Glaukom, diabetische Retinopathie,
+Retinitis pigmentosa; motorisch MS, Parkinson, ALS. Kaum jemand wacht
+blind auf.
 
-**Die interessantere Lücke liegt woanders.** Zwischen „blind" und „ohne
-Beeinträchtigung" liegt die Gruppe, die DialOS schon fast bedient:
-Sehschwäche ohne Blindheit, zittrige Hände ohne Lähmung, Ältere, die am
-Touchpad scheitern und nicht an der Technik. Für sie ist Sprachsteuerung
-der bequemere Weg statt der einzige – und sie brauchen die Ansagen
-weiterhin, nur weniger davon. Das wäre eine **Erweiterung der Zielgruppe**
-(siehe [architektur-uebersicht.md](architektur-uebersicht.md), Abschnitt
-Zielgruppe), keine zweite Variante.
+Und der haerteste Moment in diesem Verlauf ist genau der **Wechsel**. Wer
+mit 72 nicht mehr lesen kann, muesste nach heutigem Stand gleichzeitig ein
+neues Betriebssystem lernen, Daten umziehen, einen Screenreader
+beherrschen, neue Programme begreifen und Hilfe organisieren - in der
+Lebensphase, in der Lernen am schwersten faellt und der Verlust frisch
+ist. Das ist der Punkt, an dem Menschen aufhoeren, Computer zu benutzen:
+nicht beim Sehverlust, sondern beim Umstieg.
 
-**Falls doch etwas gebaut wird: als Profil, nicht als Version.** Den
-Beweis, dass dieser Weg im Projekt funktioniert, gibt es seit dem
-2026-08-16: Die Umschaltung „auf Windows umschalten" / „auf Linux
-umschalten" entstand genau aus diesem Anlass – Interessenten, die DialOS
-wegen der Sprachsteuerung wollten, aber aus der Windows-Welt kamen. Ein
-System, zwei Profile, ein Sprachbefehl dazwischen. Analog wäre „weniger
-ansagen" als Schalter denkbar.
+Der Ansatz dreht das um: **Gelernt wird, solange Lernen leicht ist.** Wer
+mit 65 und gutem Sehvermoegen „Brief schreiben" sagt, weil es bequemer ist
+als tippen, kennt die Befehle schon, wenn er sie mit 75 braucht. Dann wird
+nicht umgestellt, sondern zugeschaltet - dasselbe Geraet, dieselben Daten,
+dieselben Befehle, derselbe Helfer.
 
-Der Unterschied ist nicht kosmetisch, sondern der ganze Pflegeaufwand:
-Eine zweite Variante heißt zweite Paketliste, zweites Aufbau-Rezept in
-[Debian-zu-DialOS.md](Debian-zu-DialOS.md), zweite Abnahme, zweiter Satz
-Tests, alles zweisprachig, und alle vier Wochen zwei Neuaufbauten statt
-einem. Ein Profil heißt ein paar Zeilen Konfiguration und ein Testfall.
+Nebenbei loest das ein Verkaufsproblem: Niemand kauft gern „ein System
+fuer Blinde" fuer den Vater, der langsam schlechter sieht - das fuehlt
+sich an wie eine Kapitulation. Ein normaler Rechner, der spaeter hilft,
+ist etwas, das man kauft.
 
-**Zeitpunkt: nicht jetzt.** DialOS hat kein einziges Gerät ausgeliefert,
-das Referenzgerät ist noch nicht geprüft, Telefonie ist nicht gebaut, und
-die Installationsanleitung ist weiter der Prüfling. Eine zweite
-Produktlinie vor dem ersten Kunden teilt die Kraft an der Stelle, wo am
-wenigsten davon übrig ist – Stephan arbeitet allein.
+**Technisch ist das ein Stufen-, kein Variantenkonzept** - und die
+Bausteine liegen da. Die Optik-Umschaltung „auf Windows / auf Linux
+umschalten" (seit 2026-08-16) zeigt, dass Profile im System funktionieren;
+die Sprachsteuerung ist ein Dienst, der laeuft oder nicht; die Schalter in
+`~/.config/dialos/` gelten pro Konto. Grober Entwurf, nicht entschieden:
 
-**Nächster Schritt, wenn die Frage wieder hochkommt:** mit Florian Jaster
-sprechen, bevor etwas gebaut wird. Soll eine schlanke Sprachsteuerung für
-normale Nutzer entstehen, gehört sie möglicherweise als **Erweiterung zu
-GuideOS** – dann kommt eine Zielgruppe dazu, ohne dass ein Produkt
-dazukommt.
+| Stufe | Was an ist | Fuer wen |
+|---|---|---|
+| 0 | normaler Desktop, Sprachbefehle verfuegbar, keine Ansagen | sieht gut, nutzt Sprache aus Bequemlichkeit |
+| 1 | Vorlesen auf Zuruf, grosse Schrift, hoher Kontrast | Sehschwaeche, liest noch |
+| 2 | Ansagen bei jedem Zustandswechsel, Frageton, Bestaetigungen | liest kaum noch |
+| 3 | vollstaendig blind bedienbar, Bildschirm irrelevant | das heutige DialOS |
+
+Der Wechsel von 2 auf 3 waere ein Sprachbefehl oder ein Handgriff des
+Angehoerigen - keine Neuinstallation.
+
+**Drei Punkte, die vor einer Entscheidung geklaert gehoeren.**
+
+1. **Die Stufen kann man nicht am Schreibtisch festlegen.** Dafuer braucht
+   es Menschen, die in Stufe 1 oder 2 leben - die gibt es im Projekt noch
+   nicht. Alles oben ist ein Entwurf, kein Ergebnis.
+2. **Jede Stufe braucht ihre eigene Abnahme.** Vier Stufen heissen
+   vierfacher Pruefaufwand bei jedem Neuaufbau (alle vier Wochen), und das
+   trifft dieselbe Person, die schon allein arbeitet. Billiger als zwei
+   getrennte Varianten (zweite Paketliste, zweites Aufbau-Rezept, zweiter
+   Satz Tests, alles zweisprachig), aber nicht kostenlos.
+3. **Stufe 0 muss fuer sich stehen.** Ist sie nur „DialOS mit
+   abgeschalteten Ansagen", dann ist sie ein Debian mit Extras - und
+   niemand nimmt das statt Ubuntu. Sie braucht einen eigenen Grund, und
+   der einzige, der traegt, ist das Mitwachsen selbst. Dann muss das aber
+   auch der erste Satz auf der Website sein, nicht ein Nebensatz.
+
+**Zeitpunkt:** nicht vor der ersten Auslieferung. DialOS hat kein Geraet
+ausgeliefert, das Referenzgeraet ist nicht geprueft, Telefonie ist nicht
+gebaut, die Installationsanleitung ist weiter der Pruefling. Die Idee
+gehoert in die Produktplanung fuer die Zeit NACH dem ersten Kunden - aber
+sie gehoert dort hin, und zwar weit oben.
 
 ## Projekt/Repository
 - Logo: Erster Entwurf als Platzhalter vorhanden, Stephan arbeitet

@@ -194,72 +194,85 @@ T490. Sensible timing: **once Forky is frozen.**
   connection.
 - Prioritization of WhatsApp vs. Signal as messenger still open.
 
-## A second variant for users without impairments? (question of 2026-11-19, OPEN)
+## A system that grows with the user - levels instead of variants (question of 2026-11-19, OPEN)
 
-> **Stephan, 2026-11-19:** "I am currently considering whether it would
-> make sense to build DialOS so that the focus is on people with
-> impairments, but we also finish a version for people without
-> impairments. One that comes out clean, without frills, and concentrates
-> on the essentials."
+> **Stephan, 2026-11-19, first attempt:** "I am currently considering
+> whether it would make sense to build DialOS so that the focus is on
+> people with impairments, but we also finish a version for people without
+> impairments."
 
-**Not decided.** Recorded so the question is not lost and not discussed
-from scratch twice. What follows is Claude's assessment from the same day,
-not a decision.
+> **And the clarification from the same day, which is what matters:** "My
+> thought was rather that you start out as a person without impairments
+> using DialOS, and the stronger an impairment becomes, the more DialOS
+> supports you. Without switching operating systems etc."
 
-**Objection 1: what is described already exists inside the association –
-as GuideOS.** A tidied-up Debian for people who have never had a reason to
-think about an operating system; first public release at Christmas 2025,
-built by Florian Jaster and four other volunteers. Since 2026-11 it sits
-under the same association roof as DialOS (offen.digital, see
-[hardware.en.md](hardware.en.md) and the blog post of 2026-11-18). Two
-projects of the same association courting the same audience on the same
-foundation would be hard to justify, internally and outwardly.
+**Not decided.** Recorded so the question is not lost - and so nobody
+misreads it again. Claude read it the first time as "two separate
+editions" and rejected it by pointing at GuideOS. **That objection missed
+the idea** and is hereby withdrawn: GuideOS is an entry-level system, it
+does not grow with the user and has no voice control that could be
+switched on.
 
-**Objection 2, the weightier one: a version for sighted users would not
-have fewer frills, it would have half the architecture switched off.**
-Gone would be: reading out every confirmation prompt, the query tone, the
-announcement on every state change, the confirmation dialogues, the
-transcript window, the battery announcements. To a sighted user that is
-noise. To our audience it is the only feedback that arrives at all –
-[sprachsteuerung.en.md](sprachsteuerung.en.md) says so itself: a state you
-can only see would be no state for this audience. Switch that off and what
-remains is Debian with GNOME and voice input on top. That is not a second
-product but GuideOS with an add-on package.
+**Why the idea holds.** Blindness is usually not a state but a course -
+macular degeneration, glaucoma, diabetic retinopathy, retinitis
+pigmentosa; on the motor side MS, Parkinson's, ALS. Hardly anyone wakes up
+blind.
 
-**The more interesting gap lies elsewhere.** Between "blind" and "without
-impairments" sits the group DialOS almost serves already: low vision
-without blindness, shaky hands without paralysis, older people who
-struggle with the touchpad rather than with technology. For them voice
-control is the more convenient route rather than the only one – and they
-still need the announcements, just fewer of them. That would be an
-**extension of the audience** (see
-[architektur-uebersicht.en.md](architektur-uebersicht.en.md), audience
-section), not a second variant.
+And the hardest moment in that course is precisely the **switch**. Someone
+who can no longer read at 72 would, as things stand, have to learn a new
+operating system, migrate data, master a screen reader, understand new
+programs and organise help - all at once, in the phase of life where
+learning is hardest and the loss is fresh. That is the point where people
+stop using computers: not at the loss of sight, but at the migration.
 
-**If something is built after all: as a profile, not a version.** Proof
-that this route works in this project exists since 2026-08-16: the
-"switch to Windows" / "switch to Linux" toggle arose for exactly this
-reason – people who wanted DialOS for its voice control but came from the
-Windows world. One system, two profiles, one voice command in between. By
-analogy, "announce less" would be conceivable as a switch.
+The approach inverts this: **learning happens while learning is still
+easy.** Someone who at 65, with good eyesight, says "write a letter"
+because it beats typing already knows the commands by the time they need
+them at 75. Nothing is migrated then, only switched on - same machine,
+same data, same commands, same helper.
 
-The difference is not cosmetic but the entire maintenance burden: a second
-variant means a second package list, a second build recipe in
-[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), a second acceptance run,
-a second set of tests, all of it in two languages, and two rebuilds every
-four weeks instead of one. A profile means a few lines of configuration
-and one test case.
+As a side effect it solves a sales problem: nobody likes buying "a system
+for blind people" for a father whose sight is slowly failing - it feels
+like capitulation. A normal computer that helps later is something people
+buy.
 
-**Timing: not now.** DialOS has not shipped a single device, the reference
-machine has not been tested, telephony is not built, and the installation
-guide is still the thing under test. Starting a second product line before
-the first customer splits the effort where there is least of it to spare –
-Stephan works alone.
+**Technically this is a level concept, not a variant concept** - and the
+building blocks exist. The Windows/Linux appearance toggle (since
+2026-08-16) shows that profiles work in this system; voice control is a
+service that either runs or does not; the switches in `~/.config/dialos/`
+are per account. Rough draft, not decided:
 
-**Next step, should the question come up again:** talk to Florian Jaster
-before anything is built. If a lean voice control for ordinary users is to
-exist, it may belong as an **extension to GuideOS** – then an audience is
-added without a product being added.
+| Level | What is on | For whom |
+|---|---|---|
+| 0 | normal desktop, voice commands available, no announcements | sees well, uses voice for convenience |
+| 1 | read aloud on request, large type, high contrast | low vision, still reads |
+| 2 | announcements on every state change, query tone, confirmations | barely reads any more |
+| 3 | fully operable without sight, screen irrelevant | today's DialOS |
+
+Moving from 2 to 3 would be a voice command or one action by a relative -
+not a reinstallation.
+
+**Three points to settle before deciding.**
+
+1. **The levels cannot be defined at a desk.** That needs people living at
+   level 1 or 2 - the project has none yet. Everything above is a draft,
+   not a result.
+2. **Each level needs its own acceptance run.** Four levels mean four
+   times the verification effort at every rebuild (every four weeks), and
+   that falls on the same person who already works alone. Cheaper than two
+   separate variants (second package list, second build recipe, second set
+   of tests, all in two languages), but not free.
+3. **Level 0 has to stand on its own.** If it is merely "DialOS with
+   announcements turned off", it is a Debian with extras - and nobody takes
+   that over Ubuntu. It needs its own reason, and the only one that holds
+   is the growing-with-the-user itself. In that case it must also be the
+   first sentence on the website, not a footnote.
+
+**Timing:** not before the first delivery. DialOS has shipped no device,
+the reference machine is untested, telephony is not built, the
+installation guide is still the thing under test. The idea belongs in
+product planning for the time AFTER the first customer - but it does
+belong there, and high up.
 
 ## Project/repository
 - Logo: a first draft exists as a placeholder, Stephan is working on his
