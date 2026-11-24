@@ -194,7 +194,33 @@ T490. Sensible timing: **once Forky is frozen.**
   connection.
 - Prioritization of WhatsApp vs. Signal as messenger still open.
 
-## A system that grows with the user - levels instead of variants (question of 2026-11-19, OPEN)
+## A system that grows with the user - levels instead of variants (question of 2026-11-19, BEING BUILT SINCE 2026-11-24)
+
+> **Stephan, 2026-11-24:** "Let's build the steps in now, so we can already
+> test them. And we can hand DialOS to users who have no impairment today!"
+
+**Built on 2026-11-24** - Stephan deliberately brought forward the timing
+"not before the first delivery" below:
+- `dialos_stufe.py`: level per account in `~/.config/dialos/stufe`, **no file
+  means level 3** (DialOS as before - existing devices notice nothing). Which
+  kind of announcement from which level: greeting, answer, question, warning
+  at every level; **state changes** ("sound via speaker", "internet
+  connected") from level 2 on.
+- `dialos-say.py --art KIND` stays silent if that kind is not due at the level.
+- `dialos-stufe.py` switches (show, more, less, set) and applies **visual aids
+  from level 1**: text 1.25x, high contrast, pointer size 48 - only when
+  crossing into or out of level 1, never at every login.
+- Voice: **"mehr Unterstützung"** / **"Unterstützung verringern"** (Stephan's
+  choice; "weniger Unterstützung" scored 0.82, right on the threshold).
+- Window **"DialOS Unterstützung"** in the menu (`dialos-stufe-schalter.py`) -
+  four buttons, the same path as the voice command.
+- Level 0 listens after the greeting only after "Sprachsteuerung starten" -
+  that was already so before (Stephan's choice confirms it).
+
+**Not built yet:** "read aloud on request" for level 1 (proposal: start with
+"read the selected text"; the whole screen would need Orca); what sets level 3
+apart from level 2 is still open - today they behave the same.
+
 
 > **Stephan, 2026-11-19, first attempt:** "I am currently considering
 > whether it would make sense to build DialOS so that the focus is on

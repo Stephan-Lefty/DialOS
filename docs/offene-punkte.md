@@ -201,7 +201,34 @@ Zeitpunkt: **wenn Forky eingefroren ist.**
   Verbindung.
 - Priorisierung WhatsApp vs. Signal als Messenger noch offen.
 
-## Ein System, das mitwaechst - Stufen statt Varianten (Frage vom 2026-11-19, OFFEN)
+## Ein System, das mitwaechst - Stufen statt Varianten (Frage vom 2026-11-19, SEIT 2026-11-24 IM BAU)
+
+> **Stephan, 2026-11-24:** „Lass uns jetzt schon die Schritte einbauen, denn
+> dann können wir diese auch schon testen. Und wir können DialOS auch Usern an
+> die Hand geben, die heute keine Beeinträchtigung haben!"
+
+**Gebaut am 2026-11-24** - damit ist der Zeitpunkt „nicht vor der ersten
+Auslieferung" weiter unten von Stephan bewusst vorgezogen:
+- `dialos_stufe.py`: Stufe je Konto in `~/.config/dialos/stufe`, **ohne Datei
+  Stufe 3** (das DialOS von vorher - bestehende Geräte merken nichts). Welche
+  Ansage-Art ab welcher Stufe kommt: Begrüßung, Antwort, Rückfrage, Warnung in
+  jeder Stufe; **Zustandswechsel** („Ton über Lautsprecher", „Internet
+  hergestellt") erst ab Stufe 2.
+- `dialos-say.py --art ART` schweigt, wenn die Art in der Stufe nicht dran ist.
+- `dialos-stufe.py` wechselt (zeigen, mehr, weniger, setzen) und setzt **ab
+  Stufe 1 Sehhilfen**: Schrift 1,25-fach, hoher Kontrast, Mauszeiger 48 - nur
+  beim Überschreiten der Grenze zu Stufe 1, nie bei jedem Anmelden.
+- Sprache: **„mehr Unterstützung"** / **„Unterstützung verringern"** (Stephans
+  Wahl; „weniger Unterstützung" lag mit 0,82 genau auf der Schwelle).
+- Fenster **„DialOS Unterstützung"** im Menü (`dialos-stufe-schalter.py`) -
+  vier Knöpfe, derselbe Weg wie der Sprachbefehl.
+- Stufe 0 hört nach der Begrüßung erst nach „Sprachsteuerung starten" zu - das
+  war schon vorher so (Stephans Wahl bestätigt es).
+
+**Noch nicht gebaut:** „Vorlesen auf Zuruf" für Stufe 1 (Vorschlag: zuerst
+„markierten Text vorlesen", der ganze Bildschirm bräuchte Orca); was Stufe 3
+von Stufe 2 unterscheidet, ist noch offen - heute verhalten sie sich gleich.
+
 
 > **Stephan, 2026-11-19, der erste Anlauf:** „Ich bin gerade beim
 > überlegen, ob es nicht sinnvoll ist DialOS so aufzubauen, dass der Fokus

@@ -111,10 +111,11 @@ def anrede(satz):
         return satz
 
 
-def sprich(text):
+def sprich(text, art=None):
     try:
         if os.access(SAY, os.X_OK):
-            subprocess.run([SAY, text], capture_output=True, timeout=60)
+            subprocess.run([SAY, *(["--art", art] if art else []), text],
+                           capture_output=True, timeout=60)
         else:
             print(text, flush=True)
     except Exception as fehler:
@@ -220,7 +221,7 @@ def main():
                     melde("Stufen wieder scharf")
                 erledigt.clear()
                 if gewarnt:
-                    sprich(ANSAGE_AM_NETZ)
+                    sprich(ANSAGE_AM_NETZ)  # beantwortet eine Warnung - in jeder Stufe
                     melde("Ansage: am Netz")
                     gewarnt = False
             else:

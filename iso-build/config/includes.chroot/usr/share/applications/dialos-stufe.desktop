@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=DialOS Unterstützung
+Comment=Wählen, wie viel DialOS unterstützt – Stufe 0 bis 3
+Exec=/usr/local/bin/dialos-stufe-schalter.py
+Icon=preferences-desktop-accessibility-symbolic
+Terminal=false
+Categories=Settings;Accessibility;
+Keywords=Stufe;Barrierefreiheit;Unterstützung;Ansagen;

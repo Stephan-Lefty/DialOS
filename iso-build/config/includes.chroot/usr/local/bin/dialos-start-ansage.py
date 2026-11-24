@@ -161,7 +161,7 @@ def ist_kundenkonto():
         return False
 
 
-def spd_say(text, intensitaet=None, frage=False):
+def spd_say(text, intensitaet=None, frage=False, art=None):
     """Sprechen. frage=True markiert eine echte Frage an den Nutzer.
 
     Der Text behaelt sein Fragezeichen - Piper erzeugt daraus von selbst
@@ -170,6 +170,9 @@ def spd_say(text, intensitaet=None, frage=False):
     (~/.config/dialos/frageton). Standard ist die Melodie allein.
     """
     cmd = ["/usr/local/bin/dialos-say.py"]
+    if art:
+        # Siehe dialos_stufe.py: "zustand" schweigt in Stufe 0 und 1.
+        cmd += ["--art", art]
     if intensitaet is not None:
         cmd += ["--lautstaerke", str(intensitaet)]
     if frage:
@@ -762,11 +765,13 @@ def netzwerk_ueberwachung(letzter_status):
             continue
         letzter_status = aktueller_status
         if aktueller_status:
-            spd_say("Gute Nachricht, die Internetverbindung wurde gerade hergestellt.")
+            spd_say("Gute Nachricht, die Internetverbindung wurde gerade hergestellt.",
+                    art="zustand")
         else:
             spd_say(
                 "Die Internetverbindung wurde gerade unterbrochen. Bitte "
-                "stelle die Internetverbindung wieder her, wenn Du magst."
+                "stelle die Internetverbindung wieder her, wenn Du magst.",
+                art="zustand",
             )
 
 

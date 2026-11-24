@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Support levels 0 to 3 - a system that grows with the user** (2026-11-24,
+  Stephan's idea of 19.11.). One level per account; without a setting level 3,
+  i.e. as before. State-change announcements from level 2, visual aids (large
+  text, contrast, pointer) from level 1, the greeting at every level. Switch
+  by voice ("mehr Unterstützung", "Unterstützung verringern") or in the
+  "DialOS Unterstützung" window. New files: `dialos_stufe.py`,
+  `dialos-stufe.py`, `dialos-stufe-schalter.py`. Tests: `tests/test_stufe.py`.
 - **os-release protected from Debian updates** (2026-11-24). The
   `base-files` update set `/etc/os-release` back to "Debian GNU/Linux 13".
   `scripts/dialos-os-release.sh` diverts the file with `dpkg-divert`; Debian's

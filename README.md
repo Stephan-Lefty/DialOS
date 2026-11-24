@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Unterstützungsstufen 0 bis 3 - ein System, das mitwächst** (2026-11-24,
+  Stephans Idee vom 19.11.). Je Konto eine Stufe; ohne Einstellung Stufe 3,
+  also wie bisher. Zustandswechsel-Ansagen erst ab Stufe 2, Sehhilfen (große
+  Schrift, Kontrast, Mauszeiger) ab Stufe 1, die Begrüßung in jeder Stufe.
+  Wechseln per Sprache („mehr Unterstützung", „Unterstützung verringern") oder
+  im Fenster „DialOS Unterstützung". Neue Dateien: `dialos_stufe.py`,
+  `dialos-stufe.py`, `dialos-stufe-schalter.py`. Tests: `tests/test_stufe.py`.
 - **os-release vor Debian-Updates geschützt** (2026-11-24). Das Update von
   `base-files` setzte `/etc/os-release` wieder auf „Debian GNU/Linux 13".
   `scripts/dialos-os-release.sh` leitet die Datei per `dpkg-divert` um, Debians

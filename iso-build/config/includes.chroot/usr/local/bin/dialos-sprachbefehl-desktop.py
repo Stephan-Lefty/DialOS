@@ -279,6 +279,12 @@ GRAMMATIK_AN = json.dumps([
     # Bildschirmfoto (Stephan, 2026-08-21). Zwei Formulierungen wie ueberall.
     # Das Foto ist nicht fuer den Nutzer - er sieht es nicht -, sondern fuer
     # den sehenden Helfer und den Support: "Was steht da gerade?"
+    # STUFEN (2026-11-24, siehe dialos_stufe.py). Stephans Wahl: "mehr
+    # unterstuetzung" / "unterstuetzung verringern" - das symmetrische Paar
+    # "weniger unterstuetzung" lag mit 0,82 genau auf der Schwelle, dieses
+    # bei 0,62. Piper -> Vosk geprueft.
+    "mehr unterstützung",
+    "unterstützung verringern",
     "bildschirmfoto erstellen",
     "bildschirmfoto machen",
     # Dritte Formulierung seit 2026-09-14: Stephan hat an dem Tag zweimal von
@@ -574,6 +580,11 @@ AUSKUNFT_SAETZE = {
     "wie wird das wetter": "wetter",
     "lizenzen vorlesen": "lizenzen",
 }
+STUFE_SKRIPT = "/usr/local/bin/dialos-stufe.py"
+STUFE_SAETZE = {
+    "mehr unterstützung": "mehr",
+    "unterstützung verringern": "weniger",
+}
 UEBERSICHT_SAETZE = ("was kann ich sagen", "was kannst du")
 ANSAGE_UEBERSICHT = (
     "Du kannst mich fragen: Wie spät ist es. Welchen Tag haben wir. Wie ist das "
@@ -630,6 +641,8 @@ AKTIONEN = {
     ("druck", "einkaufszettel"): ("einkauf", "Den Einkaufszettel drucken"),
     ("notiz", ("einkaufszettel", "loeschen")): ("einkauf", "Den Einkaufszettel leeren"),
     ("foto", None): ("bildschirm", "Ein Bildschirmfoto für Deinen Helfer"),
+    ("stufe", "mehr"): ("ausserdem", "Mehr Unterstützung"),
+    ("stufe", "weniger"): ("ausserdem", "Weniger Unterstützung"),
     ("umschalten", "gnome"): ("bildschirm", "Linux-Ansicht"),
     ("umschalten", "windows"): ("bildschirm", "Windows-Ansicht"),
     ("radio", "einschalten"): ("radio", "Das Radio einschalten"),
@@ -710,6 +723,8 @@ def befehls_themen():
         dazu(("druck", wert), satz)
     for satz in FOTO_SAETZE:
         dazu(("foto", None), satz)
+    for satz, wert in STUFE_SAETZE.items():
+        dazu(("stufe", wert), satz)
     for satz, wert in RADIO_SAETZE.items():
         dazu(("radio", wert), satz)
     # DIE NACHRICHTEN GEHOEREN IN DIE UEBERSICHT (2026-10-05). Beim ersten
@@ -1946,6 +1961,20 @@ def auskunft(was):
         sprich("Ich kann das nicht ausführen.")
 
 
+def stufe_aktion(was):
+    """Stufe wechseln - dialos-stufe.py sagt selbst, was jetzt gilt."""
+    if not os.access(STUFE_SKRIPT, os.X_OK):
+        sprich("Ich kann die Stufe nicht wechseln.")
+        return
+    try:
+        subprocess.Popen([STUFE_SKRIPT, was], stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+        melde(f"Stufe: {was}")
+    except Exception as fehler:
+        melde(f"Stufe liess sich nicht wechseln: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
 def hilfe_aktion(was):
     """Startet oder beendet die Fernwartung und kehrt sofort zurueck.
 
@@ -2612,6 +2641,13 @@ def main():
             # --- Befehl: Bildschirmfoto ---
             if satz in FOTO_SAETZE:
                 bildschirmfoto()
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehle: Stufe wechseln (2026-11-24) ---
+            if satz in STUFE_SAETZE:
+                stufe_aktion(STUFE_SAETZE[satz])
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

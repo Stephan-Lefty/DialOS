@@ -664,6 +664,17 @@ def bei_signal(nummer, _rahmen):
     raise SystemExit(128 + nummer)
 
 
+def ansage_erlaubt(art):
+    """Fragt dialos_stufe.py. Fehlt das Modul, wird gesprochen - lieber eine
+    Ansage zu viel als ein stummes Geraet."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import dialos_stufe
+        return dialos_stufe.ansage_erlaubt(art)
+    except Exception:
+        return True
+
+
 def anwendung(stream):
     return stream.get("properties", {}).get("application.name", "")
 
@@ -723,6 +734,19 @@ def main():
     # und eine rhetorische Frage will kein Signal. Der Code, der die
     # Ansage baut, WEISS ob er etwas wissen will - diese Information soll
     # er weitergeben, statt sie am Satzzeichen raten zu lassen.
+    # "--art ART" (seit 2026-11-24): Welche Art Ansage das ist - siehe
+    # dialos_stufe.py. In niedrigen Stufen schweigen manche Arten, etwa ein
+    # Zustandswechsel fuer jemanden, der den Bildschirm sieht. Ohne "--art"
+    # wird gesprochen wie bisher.
+    art = None
+    if "--art" in argv:
+        i = argv.index("--art")
+        art = argv[i + 1] if i + 1 < len(argv) else None
+        argv = argv[:i] + argv[i + 2:]
+    if art and not ansage_erlaubt(art):
+        melde(f"(still, {art} erst ab hoeherer Stufe): "
+              f"{' '.join(argv)[:PROTOKOLL_MAX]}")
+        return
     ist_frage = False
     if "--frage" in argv:
         ist_frage = True

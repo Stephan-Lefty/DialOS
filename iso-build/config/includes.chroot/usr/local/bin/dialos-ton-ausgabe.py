@@ -97,9 +97,10 @@ def melde(text):
         pass          # ein fehlendes Protokoll darf den Ton nicht aufhalten
 
 
-def sprich(text):
+def sprich(text, art=None):
     try:
-        subprocess.run([SAY, text], capture_output=True, timeout=60)
+        subprocess.run([SAY, *(["--art", art] if art else []), text],
+                       capture_output=True, timeout=60)
     except Exception:
         pass
 
@@ -208,8 +209,9 @@ def waehle(ansagen):
           else f"  Ausgabe bleibt: {ziel}")
     letzte_wahl = ziel
     if geaendert and ansagen:
+        # Zustandswechsel: schweigt in Stufe 0 und 1 (dialos_stufe.py).
         sprich(ANSAGE_BLUETOOTH if ziel.startswith("bluez_output.")
-               else ANSAGE_INTERN)
+               else ANSAGE_INTERN, art="zustand")
     return ziel
 
 
