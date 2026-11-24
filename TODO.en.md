@@ -109,6 +109,13 @@ finished too, and then move down together. That way no reference breaks.
   mailbox"). One profile, one account, two password entries, bridge installed.
   The signature was missing until the next login - the tool now writes it
   itself. **Account `nutzer` verified too**, acceptance check: nothing missing.
+- [ ] **Finish accepting the support levels and the tools folder on the device**
+  (built 2026-11-24). Done: "Unterstützung verringern" recognised with Stephan's
+  voice (11:26, at the limit "Weniger geht nicht"); the "DialOS Unterstützung"
+  window set level 0 with an announcement. **Open:** "mehr Unterstützung" by
+  voice (level 1 turns on large text and contrast) and whether the "DialOS
+  Tools" folder with "Unterstützung" and "Lizenzen" appears in the `nutzer`
+  account - log in as `nutzer` once and look at the app overview.
 - [ ] **Rebuild every 4 weeks - next on Friday, 2026-12-18** (2026-10-23 and 2026-11-20 were skipped; standing rule,
   Stephan, 2026-09-25: "so routine sets in and we keep improving the guide").
   Only from `docs/installationsanleitung.md`; every gap goes into guide and

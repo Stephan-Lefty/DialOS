@@ -111,6 +111,13 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   ein Konto, zwei Passwort-Einträge, Brücke installiert. Signatur fehlte bis zum
   nächsten Anmelden - trägt das Werkzeug jetzt selbst ein. **Konto `nutzer` ebenfalls
   belegt**, Abnahme: „Im Konto nutzer fehlt nichts".
+- [ ] **Stufen und Tools-Ordner am Gerät zu Ende abnehmen** (gebaut 2026-11-24).
+  Erledigt: „Unterstützung verringern" mit Stephans Stimme erkannt (11:26, an der
+  Grenze „Weniger geht nicht"), Fenster „DialOS Unterstützung" setzte Stufe 0
+  mit Ansage. **Offen:** „mehr Unterstützung" per Stimme (Stufe 1 schaltet große
+  Schrift und Kontrast ein) und ob im Konto `nutzer` der Ordner „DialOS Tools"
+  mit „Unterstützung" und „Lizenzen" erscheint - dafür einmal als `nutzer`
+  anmelden und in die Programmübersicht schauen.
 - [ ] **Neuaufbau alle 4 Wochen - nächster am Freitag, 2026-12-18** (der 2026-10-23 und der 2026-11-20 sind ausgefallen; Dauerregel,
   Stephan, 2026-09-25: „Damit Routine rein kommt und wir die Anleitung noch
   optimieren"). Nur nach `docs/installationsanleitung.md`; jede Lücke sofort in
