@@ -45,7 +45,15 @@ finished too, and then move down together. That way no reference breaks.
   only in kernel 7.0.4 and therefore in Debian 14 – no backport to the 6.12
   branch of Debian 13 is documented).
 
-- [ ] **Two tests in `test_radio.py` are failing - and went unnoticed for
+- [x] **Fixed on 2026-11-24 - it was the first reading:** the voice service
+  loads extension and program phrases via `/usr/local/bin/dialos-erweiterung.py`
+  and `dialos-programm.py`, i.e. from the INSTALLED system. On the device
+  "Briefe durchsuchen" → "Unterlagen durchsuchen" works; only the test checked
+  a list that depends on the machine (green on the laptop, red on the work
+  machine and in CI). It now reads the start phrases from the extension files
+  in the repo. New: `scripts/dialos-tests-wie-ci.sh` runs all tests as if
+  DialOS were not installed - reproduced with it: old test red, new green.
+  Originally: **Two tests in `test_radio.py` are failing - and went unnoticed for
   twelve days** (found 2026-11-18). `test_jeder_gestrichene_satz_nennt_einen_bestehenden`
   fails for `briefe durchsuchen` and `brief durchsuchen`: both hint phrases
   point at **`unterlagen durchsuchen`**, which is not in the voice service's

@@ -46,8 +46,17 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   (Debian-Bug 1135354, behoben erst in Kernel 7.0.4 und damit in Debian 14
   – für den 6.12er Zweig von Debian 13 ist kein Backport dokumentiert).
 
-- [ ] **Zwei Tests in `test_radio.py` sind rot - und waren es zwölf Tage
-  unbemerkt** (gefunden 2026-11-18). `test_jeder_gestrichene_satz_nennt_einen_bestehenden`
+- [x] **Zwei Tests in `test_radio.py` sind rot - und waren es zwölf Tage
+  unbemerkt** (gefunden 2026-11-18). **Behoben am 2026-11-24 - es war die
+  erste Lesart:** Der Sprachdienst lädt Erweiterungs- und Programmsätze über
+  `/usr/local/bin/dialos-erweiterung.py` bzw. `dialos-programm.py`, also aus
+  dem INSTALLIERTEN System. Am Gerät funktioniert „Briefe durchsuchen" →
+  „Unterlagen durchsuchen" also; nur der Test prüfte eine Liste, die vom
+  Rechner abhängt (am Laptop grün, am Arbeitsrechner und in der CI rot). Er
+  liest die Startsätze jetzt aus den Erweiterungs-Dateien im Repo. Neu:
+  `scripts/dialos-tests-wie-ci.sh` lässt alle Tests laufen, als wäre DialOS
+  nicht installiert - damit nachgestellt: alter Test rot, neuer grün.
+  Ursprünglich: `test_jeder_gestrichene_satz_nennt_einen_bestehenden`
   schlägt für `briefe durchsuchen` und `brief durchsuchen` fehl: Beide
   Hinweis-Sätze verweisen auf **`unterlagen durchsuchen`**, und das steht
   nicht in `BEFEHLSSAETZE` des Sprachdienstes. Der Satz gehört zu

@@ -1275,6 +1275,19 @@ die Tests -, holt **vorher** (`git pull --rebase`) und sieht `git log
 --oneline -5` an. Ein Pull NACH dem Schreiben ist zu spaet: Der eigene Diff
 steht dann schon gegen einen veralteten Stand.
 
+## "Alle Tests gruen" heisst: auch ohne installiertes DialOS (Regel seit 2026-11-24)
+
+Am Laptop ist DialOS installiert, am Arbeitsrechner und in der CI nicht. Der
+Sprachdienst liest Erweiterungs- und Programmsätze aus dem installierten
+System - ein Test kann deshalb am Laptop grün und anderswo rot sein. So lagen
+zwei rote Tests zwölf Tage unbemerkt (2026-11-06 bis 2026-11-18), obwohl hier
+„alle Tests grün" stand. **Vor dieser Aussage am Laptop deshalb zusätzlich
+`scripts/dialos-tests-wie-ci.sh`** - es lässt alle Tests laufen, als wäre DialOS
+nicht installiert. Und ein Commit nur, wenn der Testlauf wirklich OK meldet:
+`python3 -m unittest ... | tail -1 | grep -qx OK && git commit ...` (am
+2026-11-06 ging einmal ein Commit trotz rotem Test durch, weil die Kette falsch
+gebaut war).
+
 ## Jedes DialOS-Werkzeug gehoert in den Ordner "DialOS Tools" (Regel seit 2026-11-24)
 
 > **Stephan, 2026-11-24:** „Wenn wir für DialOS kleine Helfer bauen, dann wäre

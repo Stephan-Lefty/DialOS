@@ -433,6 +433,28 @@ class PasstZumSprachdienst(unittest.TestCase):
                          ["sprachsteuerung starten", "[unk]"])
         self.assertIn("sprachsteuerung einschalten", self.dienst.WUNSCH_SAETZE)
 
+    def bekannte_saetze(self):
+        """Kernsaetze PLUS die Startsaetze der Erweiterungen aus dem REPO.
+
+        Gefunden am Arbeitsrechner, 2026-11-18: "unterlagen durchsuchen"
+        gehoert der Erweiterung DialOS-Suche. Der Sprachdienst liest
+        Erweiterungen aus dem INSTALLIERTEN /usr/local/share/dialos/
+        erweiterungen - am Laptop war der Test deshalb gruen, am
+        Arbeitsrechner und in der CI rot. Ein Test darf nicht davon abhaengen,
+        ob auf dem Rechner zufaellig DialOS installiert ist.
+        """
+        import glob
+        import json
+        saetze = set(self.dienst.BEFEHLSSAETZE)
+        # BIN ist .../usr/local/bin - die Erweiterungen liegen in
+        # .../usr/local/share/dialos/erweiterungen.
+        ordner = os.path.join(os.path.dirname(BIN), "share", "dialos", "erweiterungen")
+        self.assertTrue(os.path.isdir(ordner), ordner)
+        for pfad in glob.glob(os.path.join(ordner, "*.json")):
+            with open(pfad, encoding="utf-8") as f:
+                saetze.update(json.load(f).get("startsaetze", []))
+        return saetze
+
     def test_jeder_gestrichene_satz_nennt_einen_bestehenden(self):
         """Hinweis-Saetze schalten nichts, aber sie muessen auf einen Satz
         zeigen, den es WIRKLICH gibt - sonst lehren sie einen falschen."""
@@ -446,7 +468,7 @@ class PasstZumSprachdienst(unittest.TestCase):
                 self.assertIn(satz, self.grammatik)
                 _, antwort = self.dienst.WUNSCH_SAETZE[satz]
                 self.assertIn(ziel, antwort.lower())
-                self.assertIn(ziel, self.dienst.BEFEHLSSAETZE)
+                self.assertIn(ziel, self.bekannte_saetze())
 
     def test_sendersaetze_sind_ganze_saetze(self):
         """Ein Befehl ist nie ein Einzelwort - ein beilaeufiges
