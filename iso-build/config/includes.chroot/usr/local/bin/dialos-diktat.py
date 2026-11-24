@@ -121,10 +121,25 @@ BEFEHL_ABBRECHEN = "alles verwerfen"
 # System auch nicht klar"). Frei gesprochen wird eine fremde Adresse nie
 # zuverlaessig - "guideos" hoerte Vosk als "geit o s t", Parakeet als "guides".
 BEFEHL_MAIL = "mailadresse buchstabieren"
+# "DIKTAT ABBRECHEN" ALS HINWEIS (2026-11-24, Stephan: "Wir muessen dem Nutzer
+# eine Alternative anbieten"). Der Satz bleibt KEIN Befehl - er sagt nur, wie es
+# richtig heisst. Ohne ihn presste der Schluss-Erkenner ein gesprochenes "Diktat
+# abbrechen" auf den naechsten Satz, den er kannte. Gemessen am 2026-11-24 mit
+# Piper (2 Stimmen, 4 Tempi, 2 Varianten, je 16 Laeufe):
+#     heute        "diktat abbrechen" -> 1x "diktat beenden" (= SPEICHERN!),
+#                  13x "diktat loeschen", 2x "diktat"
+#     mit Hinweis  "diktat abbrechen" -> 16x "diktat abbrechen"
+#     "diktat beenden" in beiden Faellen gleich: 14x richtig, 2x "beenden"
+# Er laeuft durch dieselben Sicherungen wie "Satz loeschen" (Ruhe davor und
+# danach, Gegenprobe der freien Erkennung) und wird aus dem Text geschnitten.
+HINWEIS_DIKTAT_ABBRECHEN = "diktat abbrechen"
+ANSAGE_DIKTAT_ABBRECHEN = ("Zum Verwerfen sage: alles verwerfen. "
+                           "Zum Speichern sage: Diktat beenden.")
 BEFEHLE_IM_DIKTAT = (BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN,
-                     BEFEHL_MAIL)
+                     BEFEHL_MAIL, HINWEIS_DIKTAT_ABBRECHEN)
 BEFEHL_STAMM = {BEFEHL_LOESCHEN: "lösch", BEFEHL_WIEDERHOLEN: "wiederhol",
-                BEFEHL_VON_VORNE: "vorn", BEFEHL_ABBRECHEN: "verwerf", BEFEHL_MAIL: "buchstab"}
+                BEFEHL_VON_VORNE: "vorn", BEFEHL_ABBRECHEN: "verwerf", BEFEHL_MAIL: "buchstab",
+                HINWEIS_DIKTAT_ABBRECHEN: "abbrech"}
 # Nur fuer die Entscheidung zwischen zwei gleichzeitig gehoerten Befehlen
 # (befehl_vormerken) - der Schluss selbst hat keine Gegenprobe.
 SCHLUSS_STAMM = "beend"
@@ -134,7 +149,8 @@ SCHLUSS_STAMM = "beend"
 # Saetzen laesst den Schluss-Erkenner, wie er war.
 GRAMMATIK_STEUER = json.dumps([BEFEHL_VON_VORNE, BEFEHL_ABBRECHEN, BEFEHL_MAIL, "[unk]"],
                               ensure_ascii=False)
-GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN, "[unk]"],
+GRAMMATIK_SCHLUSS = json.dumps([SCHLUSSSATZ, BEFEHL_LOESCHEN, BEFEHL_WIEDERHOLEN,
+                                HINWEIS_DIKTAT_ABBRECHEN, "[unk]"],
                                ensure_ascii=False)
 SCHLUSS_WOERTER = set(SCHLUSSSATZ.split())          # {"diktat", "beenden"}
 
@@ -3260,6 +3276,12 @@ def diktat_fuehren(zweck, name, quelle):
                                 antwort = "Eingefügt. Ich schreibe weiter mit."
                             else:
                                 antwort = "Ich habe keine Mailadresse eingefügt. Ich schreibe weiter mit."
+                        elif b["satz"] == HINWEIS_DIKTAT_ABBRECHEN:
+                            # Nichts verwerfen, nichts speichern - nur sagen,
+                            # wie es heisst. Der Satz ist oben schon aus dem
+                            # Text geschnitten.
+                            melde("  DIKTAT ABBRECHEN: nur Hinweis")
+                            antwort = ANSAGE_DIKTAT_ABBRECHEN + " Ich schreibe weiter mit."
                         elif b["satz"] == BEFEHL_LOESCHEN:
                             weg = aeusserungen.satz_entfernen()
                             melde(f"  SATZ LOESCHEN: gestrichen {weg!r}")

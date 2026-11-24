@@ -157,6 +157,13 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **„Diktat abbrechen" speichert nicht mehr versehentlich** (2026-11-24). Der
+  Satz war nie ein Befehl (zum Verwerfen heißt es „alles verwerfen"), aber der
+  Schluss-Erkenner presste ihn auf Bekanntes - in einem von 16 Piper-Läufen auf
+  „Diktat beenden", also Speichern. Jetzt ist er ein Hinweis-Satz mit denselben
+  Sicherungen wie „Satz löschen": 16 von 16 erkannt, „Diktat beenden"
+  unverändert, `dialos-schlussregel-pruefen.py` bestanden. Tests:
+  `tests/test_diktat_hinweis.py`.
 - **Menü-Ordner „DialOS Tools"** (2026-11-24, Stephans Wunsch: „Dann bleibt
   der Bildschirm und das Menü schön aufgeräumt"). Alle DialOS-Werkzeuge -
   Persönliche Daten, Sicherheits-Stick ersetzen, DialOS-Rhythmbox, Lizenzen,

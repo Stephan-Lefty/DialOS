@@ -147,6 +147,13 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **"Diktat abbrechen" no longer saves by accident** (2026-11-24). The phrase
+  was never a command (discarding is "alles verwerfen"), but the end-phrase
+  recogniser pressed it onto something it knew - in one of 16 Piper runs onto
+  "Diktat beenden", i.e. saving. It is now a hint phrase with the same
+  safeguards as "Satz löschen": 16 of 16 recognised, "Diktat beenden"
+  unchanged, `dialos-schlussregel-pruefen.py` passed. Tests:
+  `tests/test_diktat_hinweis.py`.
 - **Menu folder "DialOS Tools"** (2026-11-24, Stephan's wish: "so the screen
   and the menu stay nice and tidy"). All DialOS tools - personal data, replace
   security stick, DialOS-Rhythmbox, licences, support level, live transcript -
