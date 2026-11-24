@@ -244,13 +244,21 @@ are per account. Rough draft, not decided:
 
 | Level | What is on | For whom |
 |---|---|---|
-| 0 | normal desktop, voice commands available, no announcements | sees well, uses voice for convenience |
+| 0 | normal desktop, voice commands available, **greeting yes**, otherwise no announcements | sees well, uses voice for convenience |
 | 1 | read aloud on request, large type, high contrast | low vision, still reads |
 | 2 | announcements on every state change, query tone, confirmations | barely reads any more |
 | 3 | fully operable without sight, screen irrelevant | today's DialOS |
 
 Moving from 2 to 3 would be a voice command or one action by a relative -
 not a reinstallation.
+
+> **Stephan, 2026-11-24:** "I would keep the greeting in stage 0 too!"
+
+**So the greeting belongs to every stage.** That fits the core idea: whoever
+is greeted by Michael from stage 0 on already knows the voice when they need
+it. What stays open for stage 0 is only what comes AFTER the greeting -
+announcements on state changes, and whether command recognition listens from
+login on.
 
 **Three points to settle before deciding.**
 
