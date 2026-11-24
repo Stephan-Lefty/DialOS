@@ -194,6 +194,73 @@ T490. Sensible timing: **once Forky is frozen.**
   connection.
 - Prioritization of WhatsApp vs. Signal as messenger still open.
 
+## A second variant for users without impairments? (question of 2026-11-19, OPEN)
+
+> **Stephan, 2026-11-19:** "I am currently considering whether it would
+> make sense to build DialOS so that the focus is on people with
+> impairments, but we also finish a version for people without
+> impairments. One that comes out clean, without frills, and concentrates
+> on the essentials."
+
+**Not decided.** Recorded so the question is not lost and not discussed
+from scratch twice. What follows is Claude's assessment from the same day,
+not a decision.
+
+**Objection 1: what is described already exists inside the association –
+as GuideOS.** A tidied-up Debian for people who have never had a reason to
+think about an operating system; first public release at Christmas 2025,
+built by Florian Jaster and four other volunteers. Since 2026-11 it sits
+under the same association roof as DialOS (offen.digital, see
+[hardware.en.md](hardware.en.md) and the blog post of 2026-11-18). Two
+projects of the same association courting the same audience on the same
+foundation would be hard to justify, internally and outwardly.
+
+**Objection 2, the weightier one: a version for sighted users would not
+have fewer frills, it would have half the architecture switched off.**
+Gone would be: reading out every confirmation prompt, the query tone, the
+announcement on every state change, the confirmation dialogues, the
+transcript window, the battery announcements. To a sighted user that is
+noise. To our audience it is the only feedback that arrives at all –
+[sprachsteuerung.en.md](sprachsteuerung.en.md) says so itself: a state you
+can only see would be no state for this audience. Switch that off and what
+remains is Debian with GNOME and voice input on top. That is not a second
+product but GuideOS with an add-on package.
+
+**The more interesting gap lies elsewhere.** Between "blind" and "without
+impairments" sits the group DialOS almost serves already: low vision
+without blindness, shaky hands without paralysis, older people who
+struggle with the touchpad rather than with technology. For them voice
+control is the more convenient route rather than the only one – and they
+still need the announcements, just fewer of them. That would be an
+**extension of the audience** (see
+[architektur-uebersicht.en.md](architektur-uebersicht.en.md), audience
+section), not a second variant.
+
+**If something is built after all: as a profile, not a version.** Proof
+that this route works in this project exists since 2026-08-16: the
+"switch to Windows" / "switch to Linux" toggle arose for exactly this
+reason – people who wanted DialOS for its voice control but came from the
+Windows world. One system, two profiles, one voice command in between. By
+analogy, "announce less" would be conceivable as a switch.
+
+The difference is not cosmetic but the entire maintenance burden: a second
+variant means a second package list, a second build recipe in
+[Debian-zu-DialOS.en.md](Debian-zu-DialOS.en.md), a second acceptance run,
+a second set of tests, all of it in two languages, and two rebuilds every
+four weeks instead of one. A profile means a few lines of configuration
+and one test case.
+
+**Timing: not now.** DialOS has not shipped a single device, the reference
+machine has not been tested, telephony is not built, and the installation
+guide is still the thing under test. Starting a second product line before
+the first customer splits the effort where there is least of it to spare –
+Stephan works alone.
+
+**Next step, should the question come up again:** talk to Florian Jaster
+before anything is built. If a lean voice control for ordinary users is to
+exist, it may belong as an **extension to GuideOS** – then an audience is
+added without a product being added.
+
 ## Project/repository
 - Logo: a first draft exists as a placeholder, Stephan is working on his
   own design in parallel.
