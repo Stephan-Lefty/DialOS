@@ -128,6 +128,18 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Protokoll ist für dialosadmin nicht lesbar). **Offen:** ob im Konto `nutzer` der Ordner „DialOS Tools"
   mit „Unterstützung" und „Lizenzen" erscheint - dafür einmal als `nutzer`
   anmelden und in die Programmübersicht schauen.
+- [ ] **NÄCHSTE SITZUNG: Podcasts per Sprache** (Stephan, 2026-11-24: „beim
+  nächsten Mal"). Fertig sind: die Listen (je Land zehn), `feed_pruefen()` und
+  `folge_herunterladen()` (mit den Nachrichten erprobt: kein Abbruch, kein
+  Neustart, Ansage vor dem Abspielen). In dieser Reihenfolge:
+  1. **Der Sprachbefehl** - neueste Folge eines Podcasts per Name, wie bei den
+     Nachrichten. Die 30 Sprechformen durch beide Pflichtprüfungen und
+     `--streuung`, je Land kollisionsfrei; den Satzbau entscheidet Stephan.
+  2. **Weiterhören** (Merkposition) - Folgen dauern 30-60 min. Über MPRIS
+     `Position`/`SetPosition` (siehe Punkt „Podcasts und Hörbücher: die
+     Merkposition ist der Brocken"); wird für Hörbücher ohnehin gebraucht.
+  3. **Nach dem Ende** eine Rückfrage wie bei den Nachrichten („Soll ich die
+     nächste Folge spielen?").
 - [ ] **Wacklige Befehlssätze - gefunden mit `--streuung` (2026-11-24).** Die
   Pflichtprüfung war nie wiederholbar: Piper hat eine zweite Zufallsquelle
   (`noise_scale`), die das Werkzeug nicht abschaltete - jedes „alle Sätze

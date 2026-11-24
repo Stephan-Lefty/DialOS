@@ -117,6 +117,17 @@ finished too, and then move down together. That way no reference breaks.
   mailbox"). One profile, one account, two password entries, bridge installed.
   The signature was missing until the next login - the tool now writes it
   itself. **Account `nutzer` verified too**, acceptance check: nothing missing.
+- [ ] **NEXT SESSION: podcasts by voice** (Stephan, 2026-11-24: "next time").
+  Done: the lists (ten per country), `feed_pruefen()` and
+  `folge_herunterladen()` (proven with the news: no interruption, no restart,
+  announcement before playback). In this order:
+  1. **The voice command** - newest episode of a podcast by name, like the
+     news. The 30 spoken forms through both mandatory checks and `--streuung`,
+     collision-free per country; Stephan decides the sentence pattern.
+  2. **Resume** (bookmark) - episodes run 30-60 min. Via MPRIS
+     `Position`/`SetPosition`; needed for audiobooks anyway.
+  3. **After the end** a question like with the news ("Soll ich die nächste
+     Folge spielen?").
 - [ ] **Finish accepting the support levels and the tools folder on the device**
   (built 2026-11-24). Done: "Unterstützung verringern" recognised with Stephan's
   voice (11:26, at the limit "Weniger geht nicht"); the "DialOS Unterstützung"

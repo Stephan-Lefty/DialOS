@@ -189,6 +189,7 @@ Am Laptop gebaut, aufgespielt, mit Stephans Stimme abgenommen, alle Tests gruen
 - autoremove (58 Pakete) entfernt; alte Kernel raeumt kuenftig der Update-Lauf.
 - Rote Tests vom Arbeitsrechner behoben; Grammatik-Pruefung jetzt wiederholbar,
   neu `--streuung N`.
+**Naechste Sitzung: Podcasts per Sprache** (TODO.md, ganz oben).
 **Offen:** Ordner „DialOS Tools" im Konto `nutzer` ansehen; drei wacklige Saetze
 (TODO); Neuaufbau 18.12.; TUXEDO-Bestellung bis Anfang Januar (Stephan).
 
