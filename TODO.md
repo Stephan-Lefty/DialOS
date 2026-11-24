@@ -16,6 +16,36 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
+- [ ] **Referenzgerät bestellen – FRIST: Anfang Januar 2027** (vereinbart
+  2026-11-19). TUXEDO liefert das **InfinityBook Pro 14 Gen10** zum
+  gewünschten Termin **Ende Januar 2027**, braucht die Bestellung dafür
+  aber **drei bis vier Wochen vorher** („wegen Feiertage usw."). Das heißt
+  praktisch: **spätestens in der ersten Januarwoche, besser noch vor
+  Weihnachten.** Dieser Punkt steht ganz oben, weil er als einziger eine
+  Frist hat, die unwiederbringlich verstreicht.
+
+  **Konfiguration** (Art.-Nr. 10900242): Omnia-Display 3K 120 Hz 500 nits,
+  32 GB DDR5-5600 (2× 16 GB gesockelt), Ryzen AI 7 350, 1 TB Kingston NV3,
+  Tastatur deutsch beleuchtet, **Intel Wi-Fi 6 AX210**, 2 Jahre Garantie.
+  **1.768,74 € inkl. 20 % MwSt** (Lieferung Österreich). Einzelheiten und
+  die Begründung der Gerätewahl in [docs/hardware.md](docs/hardware.md),
+  Abschnitt „TUXEDO als Hersteller".
+
+  **Vor dem Auslösen der Bestellung: Rückgabebedingungen schriftlich.**
+  Die ganze Konstruktion ist ein **Kauf mit verlängerter
+  Rückgabemöglichkeit** statt einer Leihstellung – der Verein finanziert
+  also vor. Am 2026-11-19 angefragt, noch offen: Länge der Frist und ab
+  wann sie läuft, in welchem Zustand ein vier bis acht Wochen benutztes
+  Gerät zurückkommen muss, wer den Rückversand trägt, und ob ein Grund
+  genannt werden muss. **Nicht bestellen, solange das nicht vorliegt.**
+
+  **Der Testplan steht schon** (siehe hardware.md): Erster Prüfpunkt ist
+  die **Suspend-Probe am Conexant SN6140** – aufnehmen, Standby, aufwecken,
+  erneut aufnehmen, und zwar die Aufnahme ansehen, nicht die Meldung
+  „Gerät vorhanden". Dazu dasselbe nach einem echten Kaltstart
+  (Debian-Bug 1135354, behoben erst in Kernel 7.0.4 und damit in Debian 14
+  – für den 6.12er Zweig von Debian 13 ist kein Backport dokumentiert).
+
 - [ ] **Zwei Tests in `test_radio.py` sind rot - und waren es zwölf Tage
   unbemerkt** (gefunden 2026-11-18). `test_jeder_gestrichene_satz_nennt_einen_bestehenden`
   schlägt für `briefe durchsuchen` und `brief durchsuchen` fehl: Beide

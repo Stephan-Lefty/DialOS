@@ -15,6 +15,36 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
+- [ ] **Order the reference machine – DEADLINE: early January 2027**
+  (agreed 2026-11-19). TUXEDO will deliver the **InfinityBook Pro 14
+  Gen10** on the requested date, **late January 2027**, but needs the order
+  **three to four weeks beforehand** ("because of the holidays etc."). In
+  practice: **by the first week of January at the latest, better before
+  Christmas.** This item sits at the very top because it is the only one
+  with a deadline that passes irrecoverably.
+
+  **Configuration** (part no. 10900242): Omnia display 3K 120 Hz 500 nits,
+  32 GB DDR5-5600 (2× 16 GB socketed), Ryzen AI 7 350, 1 TB Kingston NV3,
+  German backlit keyboard, **Intel Wi-Fi 6 AX210**, 2-year warranty.
+  **€1,768.74 incl. 20 % VAT** (delivery to Austria). Details and the
+  reasoning behind the device choice are in
+  [docs/hardware.en.md](docs/hardware.en.md), section "TUXEDO as a vendor".
+
+  **Before placing the order: return conditions in writing.** The whole
+  arrangement is a **purchase with an extended right of return** rather
+  than a loan unit – so the association pays up front. Asked on 2026-11-19,
+  still open: how long the window is and when it starts, what condition a
+  machine used for four to eight weeks has to come back in, who pays return
+  shipping, and whether a reason must be given. **Do not order until that
+  is on paper.**
+
+  **The test plan already exists** (see hardware.en.md): the first item is
+  the **suspend check on the Conexant SN6140** – record, suspend, wake,
+  record again, and look at the recording rather than at a "device present"
+  message. Then the same after a real cold boot (Debian bug 1135354, fixed
+  only in kernel 7.0.4 and therefore in Debian 14 – no backport to the 6.12
+  branch of Debian 13 is documented).
+
 - [ ] **Two tests in `test_radio.py` are failing - and went unnoticed for
   twelve days** (found 2026-11-18). `test_jeder_gestrichene_satz_nennt_einen_bestehenden`
   fails for `briefe durchsuchen` and `brief durchsuchen`: both hint phrases
