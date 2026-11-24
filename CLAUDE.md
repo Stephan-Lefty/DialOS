@@ -137,7 +137,16 @@ Neuaufbau und dabei erstmals zu pruefen:** Schritt 3b (NVIDIA-Zusatzkarte,
 `scripts/dialos-nvidia-abschalten.sh` - erster Neustart danach kann beim
 Herunterfahren haengen) und os-release per `scripts/dialos-os-release.sh`.
 **Dabei mitnehmen:** `apt-get -s autoremove` (2026-11-06: 52 Pakete,
-2026-11-24: 58) erst pruefen - nichts
+2026-11-24: 58 - geprueft und am selben Tag am Laptop entfernt) erst pruefen.
+**So geprueft (2026-11-24):** (1) die `gir1.2-*`-Pakete auf der Liste gegen
+`require_version`/`from gi.repository` im DialOS-Code abgleichen - gebraucht
+werden nur Gtk, Adw, Gio, GLib, Pango(Cairo), Rsvg, Gst, AppIndicator; (2) jeden
+weiteren Namen im Code suchen (Treffer waren harmlos: Portal und GeoClue laufen
+ueber D-Bus, "rnp" stand in "Lernphase"); (3) `apt-cache rdepends --installed`
+fuer Verdaechtige (`librnp0` braucht Thunderbird nicht, es bringt eine eigene
+librnp.so mit); (4) bei Kerneln bleibt der vorige als Notfall stehen. Dass
+`gnome-initial-setup` geht, ist gut - der Assistent ist blind nicht bedienbar.
+Grundregel: nichts
 entfernen, was DialOS braucht (Beispiel python3-gi-cairo, Schritt 13b).
 Ablauf wie am 2026-09-25: Teil 0 der Anleitung (Sichern, Rescuezilla-Abbild,
 benutzten Stick sichern), dann **nur nach `docs/installationsanleitung.md`**
