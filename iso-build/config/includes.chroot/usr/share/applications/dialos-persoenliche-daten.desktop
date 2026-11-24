@@ -5,5 +5,5 @@ Comment=Name, Anschrift, Kontakt und Unterschrift für ein Konto eintragen – a
 Exec=/usr/local/bin/dialos-persoenliche-daten-maske.py
 Icon=contact-new-symbolic
 Terminal=false
-Categories=Settings;
+Categories=Settings;X-DialOS-Tools;
 Keywords=Adresse;Absender;Kundendaten;Kontakt;

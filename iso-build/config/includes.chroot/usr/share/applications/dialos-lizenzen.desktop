@@ -5,5 +5,5 @@ Comment=Lizenzen und Herkunft der Bestandteile – vorlesen lassen mit „Lizenz
 Exec=xdg-open /usr/share/doc/dialos/lizenzen.txt
 Icon=text-x-generic-symbolic
 Terminal=false
-Categories=Utility;Documentation;
+Categories=Utility;Documentation;X-DialOS-Tools;
 Keywords=Lizenz;Herkunft;Urheber;Namensnennung;

@@ -147,6 +147,12 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **Menu folder "DialOS Tools"** (2026-11-24, Stephan's wish: "so the screen
+  and the menu stay nice and tidy"). All DialOS tools - personal data, replace
+  security stick, DialOS-Rhythmbox, licences, support level - sit in one
+  folder. It collects by the category `X-DialOS-Tools`;
+  `dialos-tools-ordner.sh` creates it at every login if it is missing and
+  leaves the other folders alone.
 - **Support levels 0 to 3 - a system that grows with the user** (2026-11-24,
   Stephan's idea of 19.11.). One level per account; without a setting level 3,
   i.e. as before. State-change announcements from level 2, visual aids (large

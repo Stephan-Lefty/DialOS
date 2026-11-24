@@ -1275,6 +1275,24 @@ die Tests -, holt **vorher** (`git pull --rebase`) und sieht `git log
 --oneline -5` an. Ein Pull NACH dem Schreiben ist zu spaet: Der eigene Diff
 steht dann schon gegen einen veralteten Stand.
 
+## Jedes DialOS-Werkzeug gehoert in den Ordner "DialOS Tools" (Regel seit 2026-11-24)
+
+> **Stephan, 2026-11-24:** „Wenn wir für DialOS kleine Helfer bauen, dann wäre
+> es cool, wenn wir diese im Gnome Menü unter einem Reiter alle zusammen legen.
+> Dann bleibt der Bildschirm und das Menü schön aufgeräumt! Nenne es DialOS Tools"
+
+Jede neue `.desktop`-Datei eines DialOS-Werkzeugs bekommt **`X-DialOS-Tools;`**
+in `Categories=` - mehr nicht. Der Ordner sammelt nach dieser Kategorie,
+`dialos-tools-ordner.sh` legt ihn bei jedem Anmelden an, falls er fehlt
+(Begründung dort). Eine Liste der Werkzeuge gibt es bewusst NICHT, sie würde
+beim nächsten Werkzeug vergessen. `tests/test_tools_ordner.py` prüft, dass jede
+`dialos-*.desktop` in `usr/share/applications` die Kategorie trägt.
+
+Achtung bei `nutzer`: Dort blendet `scripts/dialos-menue-pro-konto.sh` alles
+aus, was nicht auf seiner weißen Liste steht - auch DialOS-Werkzeuge. Ein
+Werkzeug, das der Helfer im Konto `nutzer` braucht, muss dort zusätzlich
+eingetragen werden.
+
 ## Arbeitsweise mit Stephan
 
 **Vier Regeln, die am 2026-08-21 teuer gelernt wurden. Sie stehen zuerst,

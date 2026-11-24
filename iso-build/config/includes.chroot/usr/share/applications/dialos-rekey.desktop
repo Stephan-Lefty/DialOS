@@ -5,4 +5,4 @@ Comment=Richtet einen neuen Sicherheits-Stick für ein bereits installiertes Ger
 Exec=/usr/local/sbin/dialos-rekey
 Icon=/usr/share/pixmaps/distributor-logo.png
 Terminal=false
-Categories=System;
+Categories=System;X-DialOS-Tools;

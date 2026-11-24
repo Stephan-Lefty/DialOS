@@ -1,0 +1,10 @@
+[Desktop Entry]
+# Legt beim Anmelden den Menue-Ordner "DialOS Tools" an, falls er fehlt
+# (Stephan, 2026-11-24). Begruendung im Skript.
+Type=Application
+Name=DialOS Tools-Ordner
+Comment=Sammelt die DialOS-Werkzeuge im Programmmenü in einem Ordner
+Exec=/usr/local/bin/dialos-tools-ordner.sh
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

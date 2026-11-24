@@ -5,5 +5,5 @@ Comment=Wählen, wie viel DialOS unterstützt – Stufe 0 bis 3
 Exec=/usr/local/bin/dialos-stufe-schalter.py
 Icon=preferences-desktop-accessibility-symbolic
 Terminal=false
-Categories=Settings;Accessibility;
+Categories=Settings;Accessibility;X-DialOS-Tools;
 Keywords=Stufe;Barrierefreiheit;Unterstützung;Ansagen;

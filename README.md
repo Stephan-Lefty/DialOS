@@ -157,6 +157,12 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **Menü-Ordner „DialOS Tools"** (2026-11-24, Stephans Wunsch: „Dann bleibt
+  der Bildschirm und das Menü schön aufgeräumt"). Alle DialOS-Werkzeuge -
+  Persönliche Daten, Sicherheits-Stick ersetzen, DialOS-Rhythmbox, Lizenzen,
+  Unterstützung - liegen in einem Ordner. Er sammelt nach der Kategorie
+  `X-DialOS-Tools`; `dialos-tools-ordner.sh` legt ihn bei jedem Anmelden an,
+  falls er fehlt, und lässt die übrigen Ordner stehen.
 - **Unterstützungsstufen 0 bis 3 - ein System, das mitwächst** (2026-11-24,
   Stephans Idee vom 19.11.). Je Konto eine Stufe; ohne Einstellung Stufe 3,
   also wie bisher. Zustandswechsel-Ansagen erst ab Stufe 2, Sehhilfen (große
