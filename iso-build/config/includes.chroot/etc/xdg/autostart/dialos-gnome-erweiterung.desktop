@@ -1,0 +1,13 @@
+[Desktop Entry]
+# Schaltet beim Anmelden die DialOS-Erweiterung fuer GNOME Shell ein
+# (dialos@dialos.org, seit 2026-11-24). Sie liefert DialOS den markierten Text
+# fuer "markierten Text vorlesen". Je Konto, weil GNOME die Liste der
+# eingeschalteten Erweiterungen je Konto fuehrt. Schadet nicht, wenn sie schon
+# an ist. Eine gerade erst installierte Erweiterung kennt die Shell erst nach
+# dem naechsten Anmelden.
+Type=Application
+Name=DialOS GNOME-Erweiterung einschalten
+Exec=gnome-extensions enable dialos@dialos.org
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

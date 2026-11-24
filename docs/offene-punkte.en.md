@@ -217,8 +217,9 @@ T490. Sensible timing: **once Forky is frozen.**
 - Level 0 listens after the greeting only after "Sprachsteuerung starten" -
   that was already so before (Stephan's choice confirms it).
 
-**Not built yet:** "read aloud on request" for level 1 (proposal: start with
-"read the selected text"; the whole screen would need Orca); what sets level 3
+**Since 2026-11-24 also:** "markierten Text vorlesen" (read the selection) via
+DialOS's own GNOME extension dialos@dialos.org. **Not built yet:** reading the
+whole screen (would need Orca); what sets level 3
 apart from level 2 is still open - today they behave the same.
 
 

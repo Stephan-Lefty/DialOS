@@ -128,6 +128,18 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Protokoll ist für dialosadmin nicht lesbar). **Offen:** ob im Konto `nutzer` der Ordner „DialOS Tools"
   mit „Unterstützung" und „Lizenzen" erscheint - dafür einmal als `nutzer`
   anmelden und in die Programmübersicht schauen.
+- [ ] **Wacklige Befehlssätze - gefunden mit `--streuung` (2026-11-24).** Die
+  Pflichtprüfung war nie wiederholbar: Piper hat eine zweite Zufallsquelle
+  (`noise_scale`), die das Werkzeug nicht abschaltete - jedes „alle Sätze
+  wörtlich erkannt" davor war eine Stichprobe. Repariert; neu `--streuung N`
+  (jeder Satz N-mal mit Zufall). Bei 5 Läufen wackeln, je 1/5: „wie ist die
+  uhrzeit" / „wie spät ist es" / „wie viel uhr ist es" („wie" → „die" bzw. „es"
+  → „das") und „life einschalten" → „briefe einschalten" (kein Befehl, nur
+  Hinweis). Zu klären, ob echte Stimmen dort häufiger danebenliegen.
+  **Ungeklärt:** Ein Streuungs-Lauf meldete einmal auch im wiederholbaren
+  Teil einen Fehler; vier Läufe davor und einer danach waren sauber, Piper
+  lieferte fünfmal dieselbe Tonspur. Beim nächsten Auftreten die Zeile
+  `FALSCH`/`FEHLT` festhalten.
 - [ ] **Neuaufbau alle 4 Wochen - nächster am Freitag, 2026-12-18** (der 2026-10-23 und der 2026-11-20 sind ausgefallen; Dauerregel,
   Stephan, 2026-09-25: „Damit Routine rein kommt und wir die Anleitung noch
   optimieren"). Nur nach `docs/installationsanleitung.md`; jede Lücke sofort in

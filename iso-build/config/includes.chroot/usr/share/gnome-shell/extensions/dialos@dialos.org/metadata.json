@@ -1,0 +1,8 @@
+{
+  "uuid": "dialos@dialos.org",
+  "name": "DialOS",
+  "description": "Gibt DialOS Zugriff auf das, was nur die GNOME-Oberfläche darf - zuerst den markierten Text zum Vorlesen.",
+  "shell-version": ["48"],
+  "url": "https://github.com/Stephan-Lefty/DialOS",
+  "version": 1
+}

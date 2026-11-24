@@ -157,6 +157,16 @@ das Erfolg meldet, während es versagt.
 
 ### 0.5.3
 
+- **„Markierten Text vorlesen" und eine eigene GNOME-Erweiterung** (2026-11-24,
+  Stufe 1). Unter Wayland darf ein Programm ohne Fenster die Markierung nicht
+  lesen - die neue Erweiterung `dialos@dialos.org` darf es und gibt den Text
+  per D-Bus (`org.dialos.Shell.MarkierungLesen`) an `dialos-markierung.py`.
+  Lange Texte werden in Stücken unter 60 s gelesen. Beim Anmelden wird die
+  Erweiterung in jedem Konto eingeschaltet. Tests: `tests/test_markierung.py`.
+- **Die Grammatik-Prüfung war nie wiederholbar** (2026-11-24). Piper hat neben
+  `noise_w` eine zweite Zufallsquelle, `noise_scale`; dieselbe Grammatik ergab
+  0, 2 und 2 Fehler. Jetzt sind beide aus - und `--streuung N` misst die
+  Schwankung mit Absicht. Drei bestehende Sätze wackeln (je 1 von 5).
 - **Alte Kernel werden automatisch entfernt** (2026-11-24, Stephans Wunsch).
   `autoremove` bleibt auf DialOS-Geräten abgeschaltet - es würde nach dem
   Aufräumen Oberfläche und Ton anbieten. Neu: `dialos-alte-kernel` im

@@ -137,17 +137,28 @@ def dienst_laden():
     return modul
 
 
-def sprechen(text):
+def sprechen(text, streuung=False):
     """Piper spricht den Satz und liefert rohe 16-kHz-Mono-Abtastwerte.
 
     "--noise_w 0" ist Pflicht, sonst klingt derselbe Satz bei jedem Aufruf
     anders (gemessen 2026-08-18: bis zu 17 % andere Dauer) und ein Fehlschlag
     liesse sich nicht wiederholen.
+
+    "--noise_scale 0" EBENSO - die Luecke vom 2026-11-24. Bis dahin stand hier
+    nur noise_w, und Piper hat eine ZWEITE Zufallsquelle: Derselbe Satz ergab
+    drei verschiedene Tonspuren (md5 verschieden), mit noise_scale 0 dreimal
+    dieselbe. Die Pruefung war also nie wiederholbar - drei Laeufe derselben
+    Grammatik ergaben 0, 2 und 2 Fehler mit wechselnden Saetzen. Jedes "alle
+    Saetze woertlich erkannt" davor war eine Zufallsstichprobe.
+
+    streuung=True laesst BEIDE Zufallsquellen an - fuer "--streuung N", das
+    mit Absicht die natuerliche Schwankung misst.
     """
+    zufall = "" if streuung else "--noise_w 0 --noise_scale 0 "
     befehl = (
         f"cd {shlex.quote(PIPER_DIR)} && "
         f"printf %s {shlex.quote(text)} | "
-        f"./piper/piper --model {shlex.quote(STIMME)} --noise_w 0 "
+        f"./piper/piper --model {shlex.quote(STIMME)} {zufall}"
         f"--output_raw 2>/dev/null | "
         f"sox -r 22050 -c 1 -b 16 -e signed-integer -t raw - "
         f"-t raw -r {ABTASTRATE} -c 1 -b 16 -e signed-integer - 2>/dev/null"
@@ -232,13 +243,21 @@ def main():
 
     neu = [sys.argv[i + 1] for i, a in enumerate(sys.argv) if a == "--neu"
            and i + 1 < len(sys.argv)]
+    # "--streuung N" (seit 2026-11-24): jeden Satz zusaetzlich N-mal mit
+    # Piper-Zufall sprechen und zaehlen, wie oft er danebengeht. Echte Stimmen
+    # schwanken mehr als Piper - ein Satz, der hier wackelt, wackelt dort erst
+    # recht. Das Ergebnis ist ein Hinweis, kein Durchfallen.
+    streuung = 0
+    for i, a in enumerate(sys.argv):
+        if a == "--streuung" and i + 1 < len(sys.argv):
+            streuung = int(sys.argv[i + 1])
     rest = []
     ueberspringen = False
     for a in sys.argv[1:]:
         if ueberspringen:
             ueberspringen = False
             continue
-        if a == "--neu":
+        if a in ("--neu", "--streuung"):
             ueberspringen = True
         elif not a.startswith("--"):
             rest.append(a)
@@ -327,6 +346,7 @@ def main():
 
     fehler = 0
     kandidat_fehler = 0
+    wackler = []
     for satz in gewuenscht:
         rohton = sprechen(satz)
         if not rohton:
@@ -335,6 +355,14 @@ def main():
             continue
         gehoert = hoeren(rohton, grammatik, modell, vosk)
         marke = "*" if satz in neu else " "
+        if streuung:
+            daneben = []
+            for _ in range(streuung):
+                anders = hoeren(sprechen(satz, streuung=True), grammatik, modell, vosk)
+                if anders != satz:
+                    daneben.append(anders)
+            if daneben:
+                wackler.append((satz, len(daneben), sorted(set(daneben))))
         if gehoert == satz:
             print(f" {marke}ok     {satz!r}")
         else:
@@ -346,6 +374,14 @@ def main():
     print()
     if neu:
         print("(* = Kandidat)")
+    if streuung:
+        if wackler:
+            print(f"STREUUNG ({streuung} Laeufe je Satz mit Piper-Zufall) - diese wackeln:")
+            for satz, n, wie in sorted(wackler, key=lambda w: -w[1]):
+                print(f"  {n}/{streuung}  {satz!r}  -> {wie}")
+        else:
+            print(f"STREUUNG: kein Satz wackelt ({streuung} Laeufe je Satz).")
+        print()
     if fehler:
         print(f"{fehler} von {len(gewuenscht)} Saetzen nicht woertlich erkannt.")
         if neu and kandidat_fehler < fehler:

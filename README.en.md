@@ -147,6 +147,16 @@ background) and `splash.png` (boot/login screen).
 
 ### 0.5.3
 
+- **"Markierten Text vorlesen" and DialOS's own GNOME extension** (2026-11-24,
+  level 1). Under Wayland a program without a window may not read the
+  selection - the new extension `dialos@dialos.org` may, and passes the text
+  via D-Bus (`org.dialos.Shell.MarkierungLesen`) to `dialos-markierung.py`.
+  Long texts are read in pieces under 60 s. The extension is switched on at
+  login in every account. Tests: `tests/test_markierung.py`.
+- **The grammar check was never repeatable** (2026-11-24). Besides `noise_w`,
+  Piper has a second source of randomness, `noise_scale`; the same grammar
+  gave 0, 2 and 2 failures. Both are off now - and `--streuung N` measures the
+  variation on purpose. Three existing phrases wobble (1 in 5 each).
 - **Old kernels are removed automatically** (2026-11-24, Stephan's wish).
   `autoremove` stays disabled on DialOS devices - after the clean-up it would
   offer the desktop and sound. New: `dialos-alte-kernel` in the update run

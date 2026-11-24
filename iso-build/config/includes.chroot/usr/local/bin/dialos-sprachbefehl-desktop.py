@@ -285,6 +285,11 @@ GRAMMATIK_AN = json.dumps([
     # bei 0,62. Piper -> Vosk geprueft.
     "mehr unterstützung",
     "unterstützung verringern",
+    # MARKIERTEN TEXT VORLESEN (2026-11-24, Stufe 1 - Stephans Wahl aus vier
+    # geprueften Kandidaten). Naechster Nachbar "nachrichten vorlesen" 0,68;
+    # Piper -> Vosk: alle 93 Saetze woertlich. Den Text liefert die
+    # GNOME-Erweiterung dialos@dialos.org, siehe dialos-markierung.py.
+    "markierten text vorlesen",
     "bildschirmfoto erstellen",
     "bildschirmfoto machen",
     # Dritte Formulierung seit 2026-09-14: Stephan hat an dem Tag zweimal von
@@ -580,6 +585,8 @@ AUSKUNFT_SAETZE = {
     "wie wird das wetter": "wetter",
     "lizenzen vorlesen": "lizenzen",
 }
+MARKIERUNG_SKRIPT = "/usr/local/bin/dialos-markierung.py"
+MARKIERUNG_SAETZE = ("markierten text vorlesen",)
 STUFE_SKRIPT = "/usr/local/bin/dialos-stufe.py"
 STUFE_SAETZE = {
     "mehr unterstützung": "mehr",
@@ -641,6 +648,7 @@ AKTIONEN = {
     ("druck", "einkaufszettel"): ("einkauf", "Den Einkaufszettel drucken"),
     ("notiz", ("einkaufszettel", "loeschen")): ("einkauf", "Den Einkaufszettel leeren"),
     ("foto", None): ("bildschirm", "Ein Bildschirmfoto für Deinen Helfer"),
+    ("markierung", None): ("bildschirm", "Markierten Text vorlesen"),
     ("stufe", "mehr"): ("ausserdem", "Mehr Unterstützung"),
     ("stufe", "weniger"): ("ausserdem", "Weniger Unterstützung"),
     ("umschalten", "gnome"): ("bildschirm", "Linux-Ansicht"),
@@ -725,6 +733,8 @@ def befehls_themen():
         dazu(("foto", None), satz)
     for satz, wert in STUFE_SAETZE.items():
         dazu(("stufe", wert), satz)
+    for satz in MARKIERUNG_SAETZE:
+        dazu(("markierung", None), satz)
     for satz, wert in RADIO_SAETZE.items():
         dazu(("radio", wert), satz)
     # DIE NACHRICHTEN GEHOEREN IN DIE UEBERSICHT (2026-10-05). Beim ersten
@@ -1961,6 +1971,20 @@ def auskunft(was):
         sprich("Ich kann das nicht ausführen.")
 
 
+def markierung_vorlesen():
+    """Startet dialos-markierung.py und kehrt sofort zurueck - es spricht selbst."""
+    if not os.access(MARKIERUNG_SKRIPT, os.X_OK):
+        sprich("Ich kann den markierten Text nicht vorlesen.")
+        return
+    try:
+        subprocess.Popen([MARKIERUNG_SKRIPT], stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+        melde("Markierung vorlesen gestartet")
+    except Exception as fehler:
+        melde(f"Markierung liess sich nicht vorlesen: {fehler}")
+        sprich("Ich kann das nicht ausführen.")
+
+
 def stufe_aktion(was):
     """Stufe wechseln - dialos-stufe.py sagt selbst, was jetzt gilt."""
     if not os.access(STUFE_SKRIPT, os.X_OK):
@@ -2641,6 +2665,13 @@ def main():
             # --- Befehl: Bildschirmfoto ---
             if satz in FOTO_SAETZE:
                 bildschirmfoto()
+                letzte_aktivitaet = time.time()
+                erkenner.Reset()
+                continue
+
+            # --- Befehl: markierten Text vorlesen (2026-11-24) ---
+            if satz in MARKIERUNG_SAETZE:
+                markierung_vorlesen()
                 letzte_aktivitaet = time.time()
                 erkenner.Reset()
                 continue

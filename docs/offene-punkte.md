@@ -225,8 +225,9 @@ Auslieferung" weiter unten von Stephan bewusst vorgezogen:
 - Stufe 0 hört nach der Begrüßung erst nach „Sprachsteuerung starten" zu - das
   war schon vorher so (Stephans Wahl bestätigt es).
 
-**Noch nicht gebaut:** „Vorlesen auf Zuruf" für Stufe 1 (Vorschlag: zuerst
-„markierten Text vorlesen", der ganze Bildschirm bräuchte Orca); was Stufe 3
+**Seit dem 2026-11-24 auch:** „markierten Text vorlesen" über die eigene
+GNOME-Erweiterung dialos@dialos.org. **Noch nicht gebaut:** den ganzen
+Bildschirm vorlesen (bräuchte Orca); was Stufe 3
 von Stufe 2 unterscheidet, ist noch offen - heute verhalten sie sich gleich.
 
 
