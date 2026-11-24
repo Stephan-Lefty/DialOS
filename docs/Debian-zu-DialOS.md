@@ -531,6 +531,13 @@ nichts - sonst bliebe der Bildschirm schwarz. `--pruefen` zeigt vorher, was
 passieren würde. Es schreibt `/etc/modprobe.d/dialos-kein-nouveau.conf` und
 baut das initramfs neu (nouveau steckt dort auch). Danach neu starten.
 
+**Am T490 belegt (2026-11-24):** Der erste Neustart danach hing noch - beim
+**Herunterfahren** des alten Systems, das mit dem abgestürzten Treiber lief
+(Protokoll bis „Reached target reboot.target", danach stand er, bis Stephan
+ausschaltete). Die drei Starts danach: nouveau nicht geladen, kein Absturz.
+Wer das Skript ausführt, muss also mit einem Hänger beim ersten Neustart
+rechnen und dann einmal ausschalten.
+
 ## 4. Autologin einrichten
 
 **Zentrale Falle:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`,

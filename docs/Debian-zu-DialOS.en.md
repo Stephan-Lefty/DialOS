@@ -517,6 +517,13 @@ otherwise the screen would stay black. `--pruefen` shows beforehand what would
 happen. It writes `/etc/modprobe.d/dialos-kein-nouveau.conf` and rebuilds the
 initramfs (nouveau is in there too). Reboot afterwards.
 
+**Confirmed on the T490 (2026-11-24):** the first reboot afterwards still
+hung - while **shutting down** the old system, which was running with the
+crashed driver (log up to "Reached target reboot.target", then it stood still
+until Stephan switched it off). The three boots after that: nouveau not
+loaded, no crash. Whoever runs the script should expect one hang on the first
+reboot and switch off once.
+
 ## 4. Set up autologin
 
 **Key gotcha:** `/etc/gdm3/custom.conf` (`AutomaticLogin=nutzer`, see
