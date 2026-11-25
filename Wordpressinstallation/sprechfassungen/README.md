@@ -38,19 +38,28 @@ auch die Beschriftung „gesprochen von Anna, der Stimme von DialOS" und nicht
   Dutzend" schreiben statt „26".
 - **Keine Fachbegriffe.** Vosk, Piper, Commit, ISO haben in einer Hörfassung
   nichts verloren.
-- **Englische Wörter lautmalerisch schreiben.** Anna liest sie deutsch.
-  Aufgefallen am 2026-11-25 bei „App": Sie spricht es als *Ap*, nicht als
-  *Äp*. Stephans Vorgabe nach dem Anhören: **„Ääp" schreiben.** Das steht
-  nur in der Sprechfassung, nie im Beitrag – genau dafür gibt es ja zwei
-  Texte.
+- **Englische Wörter durch deutsche ersetzen, nicht lautmalerisch
+  umschreiben.** Anna liest englische Wörter nach deutschen Regeln. Am
+  2026-11-25 durchgemessen am Wort „App": Sie sprach es als *Ap*. Die
+  lautmalerische Schreibweise „Ääp" machte es schlimmer (*EAP*), „Äpp"
+  wäre der nächste Rateversuch gewesen. Darum wird nicht umschrieben,
+  sondern **das deutsche Wort benutzt** – Stephans Wahl nach einer
+  Hörprobe mit fünf Varianten: **„Anwendung"**.
 
-  | geschrieben | statt |
+  | sagen | statt |
   |---|---|
-  | Ääp | App |
+  | Anwendung | App |
+  | Programm | Tool, Software |
 
-  Die Tabelle wächst mit jedem Fund. Wer ein neues englisches Wort
-  einbaut, hört **vor** dem Hochladen hin – das Skript warnt bei Ziffern
-  und Länge, bei der Aussprache aber nicht.
+  Dasselbe gilt für den Namen selbst: An manchen Stellen ist „DialOS
+  Mobil" die bessere Lösung als ein Gattungswort.
+
+  **Methode, wenn ein neues englisches Wort auftaucht:** nicht raten und
+  auch nicht einzeln nachfragen, sondern eine kurze Probe erzeugen, in
+  der Anna alle Kandidaten im selben Satz spricht, und die einmal
+  anhören lassen. Ein Rateversuch kostet genauso viel wie fünf
+  gemessene, und nur die Messung endet. Das Skript warnt bei Ziffern und
+  Länge, bei der Aussprache nie.
 - **Was Anna schlecht ausspricht, umgehen statt reparieren.** „Grammatik" hat
   die richtige Länge, aber die falsche Betonung – ein Viersilber mit Betonung
   hinten ist genau das, woran ein `low`-Modell scheitert. „Satzbau" sagt
