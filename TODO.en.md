@@ -30,13 +30,19 @@ finished too, and then move down together. That way no reference breaks.
   reasoning behind the device choice are in
   [docs/hardware.en.md](docs/hardware.en.md), section "TUXEDO as a vendor".
 
-  **Before placing the order: return conditions in writing.** The whole
-  arrangement is a **purchase with an extended right of return** rather
-  than a loan unit – so the association pays up front. Asked on 2026-11-19,
-  still open: how long the window is and when it starts, what condition a
-  machine used for four to eight weeks has to come back in, who pays return
-  shipping, and whether a reason must be given. **Do not order until that
-  is on paper.**
+  **Return terms are in (2026-11-25) – it is 14 days, no more.** The hinted
+  "extended right of return" became the statutory one after internal
+  discussion: **14 days from receipt**, notification within the window
+  (otherwise the device counts as purchased), no reason required, prepaid
+  label from TUXEDO. **Installing a third-party distribution is explicitly
+  permitted** – but before returning, **TUXEDO OS must be restored using the
+  enclosed WebFAI stick**, and **WebFAI needs a network cable** (it does not
+  work over Wi-Fi). Budget twelve usable days rather than fourteen, and do
+  not leave the restore to the last one. Details in
+  [docs/hardware.en.md](docs/hardware.en.md).
+
+  Still open (asked 2026-11-25): whether the notification deadline is met by
+  the date of the email or by the parcel arriving at TUXEDO.
 
   **The test plan already exists** (see hardware.en.md): the first item is
   the **suspend check on the Conexant SN6140** – record, suspend, wake,

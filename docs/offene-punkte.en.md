@@ -16,8 +16,9 @@ so nothing gets lost from the discussions.
   Wired profile set to ipv4.route-metric/ipv6.route-metric 100, WLAN
   profile to 600 (verified on the T490 with `nmcli connection show
   "<profile>" | grep route-metric`). UNTESTED: wired metric only set,
-  not functionally verified with a cable plugged in (no cable
-  available). The SIM profile can't be created yet for lack of WWAN
+  not functionally verified with a cable plugged in - **cables have been
+  available since 2026-11-25** (there was none before), so the check is
+  pending rather than blocked. The SIM profile can't be created yet for lack of WWAN
   hardware — once available, set ipv4.route-metric/ipv6.route-metric
   there to e.g. 900, so SIM only kicks in when neither wired nor WLAN
   provides a route.

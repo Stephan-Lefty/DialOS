@@ -382,13 +382,47 @@ in late January – if the window runs from delivery, six weeks of it are
 gone before the test begins. Asked on 2026-11-19 whether delivery can be
 moved back or the window started later.
 
-**Evaluation unit requested:** four to eight weeks from late January 2027 —
-more than the two offered. Reason: this is not a benchmark but a complete
-build following
-[installationsanleitung.md](installationsanleitung.md) followed by
-everyday use. That is where the dangerous faults appear — microphone mute
-after standby, Bluetooth switching that hangs, a firmware update that costs
-the keyboard — and they do not show up on day one but in week three.
+**Evaluation unit: 14 days, terms finalised on 2026-11-25.** Four to
+eight weeks from late January 2027 were requested, on the grounds that the
+dangerous faults only surface in everyday use. TUXEDO discussed it
+internally and offers **14 days from receipt** — essentially the statutory
+right of withdrawal. The decision was to accept, for a reason that
+supersedes the original argument: **since the microphone question was
+answered, the project knows what to look for.** The suspend check and the
+cold-boot check take an hour each and can be repeated twenty times a day —
+no long-term observation required. What genuinely needs weeks (everyday
+use, firmware, documentation) happens after the purchase; the return
+option only covers the single case "the microphone does not work".
+
+**The terms in detail** (Franziska Waldbauer, Inside Sales, 2026-11-25):
+
+| Item | Terms |
+|---|---|
+| Window | **14 days from receipt** of the device |
+| Notification | must occur **within** the window; without it the device counts as purchased |
+| Reason | **not** required |
+| Condition | complete, fully functional, flawless |
+| **Third-party distribution** | **explicitly permitted** — Debian may be installed |
+| **Before returning** | **restore TUXEDO OS using the WebFAI stick** |
+| Return shipping | prepaid label supplied by TUXEDO |
+| Delivery date | known only about two days in advance, via parcel tracking |
+
+**Two traps hidden in the scheduling.** First, the WebFAI restore plus
+packing costs roughly a day — so twelve usable days rather than fourteen,
+and the restore does not belong on the last one. Second, **WebFAI needs a
+network cable; it does not work over Wi-Fi.** The WebFAI stick ships with
+the device (box contents: notebook, power supply, battery, manual, WebFAI
+stick, screws), and the RJ45 port sits at the back (1 Gbit, Motorcomm
+YT6801). Cables have been available since 2026-11-25.
+
+This produces an oddity worth knowing: **Ethernet works under WebFAI but
+not under DialOS** — Debian 13 ships kernel 6.12, and the YT6801 driver
+only arrives with 7.0. So the test runs over Wi-Fi via the AX210, while
+the restore needs the cable.
+
+**Open (asked 2026-11-25):** whether the notification deadline is met by
+the date of the email or by the parcel arriving at TUXEDO. At €1,768.74
+the difference is easily a week.
 
 **Requested configuration** (asked 2026-11-18): Ryzen AI 7 350 or Ryzen 7
 H 255 (depending on TUXEDO's assessment regarding the kernel), 32 GB

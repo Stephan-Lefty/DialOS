@@ -391,14 +391,49 @@ Frist ab Lieferung, sind sechs Wochen davon vorbei, bevor der Test
 beginnt. Am 2026-11-19 deshalb nachgefragt, ob die Auslieferung nach
 hinten gelegt oder die Frist später begonnen werden kann.
 
-**Angefragte Teststellung:** vier bis acht Wochen ab Ende Januar 2027 –
-mehr als die angebotenen zwei. Begründung: Es geht nicht um einen
-Benchmark, sondern um einen vollständigen Aufbau nach
-[installationsanleitung.md](installationsanleitung.md) und anschließenden
-Alltagsbetrieb. Genau dort treten die gefährlichen Fehler auf – Mikrofon
-stumm nach dem Standby, hängende Bluetooth-Umschaltung, Firmware-Update,
-das die Tastatur kostet – und die zeigen sich nicht am ersten Tag, sondern
-in der dritten Woche.
+**Teststellung: 14 Tage, Bedingungen endgültig am 2026-11-25.**
+Angefragt waren vier bis acht Wochen ab Ende Januar 2027, begründet damit,
+dass die gefährlichen Fehler sich erst im Alltagsbetrieb zeigen. TUXEDO hat
+intern Rücksprache gehalten und bietet **14 Tage ab Empfang** – im Kern
+also das normale Widerrufsrecht. Entschieden wurde, das anzunehmen, und
+zwar aus einem Grund, der die ursprüngliche Begründung überholt: **Seit
+die Mikrofonfrage beantwortet ist, weiß das Projekt, worauf es schauen
+muss.** Suspend-Probe und Kaltstart sind Prüfungen von je einer Stunde,
+die man an einem Tag zwanzigmal wiederholen kann – keine
+Langzeitbeobachtung. Was wirklich Wochen braucht (Alltagsbetrieb,
+Firmware, Dokumentation), findet nach dem Kauf statt; die Rückgabe sichert
+nur den einen Fall „Mikrofon läuft nicht" ab.
+
+**Die Bedingungen im Einzelnen** (Franziska Waldbauer, Inside Sales,
+2026-11-25):
+
+| Punkt | Regelung |
+|---|---|
+| Frist | **14 Tage ab Empfang** des Geräts |
+| Rückmeldung | muss **innerhalb** der Frist erfolgen; ohne Rückmeldung gilt das Gerät als gekauft |
+| Grund | muss **nicht** genannt werden |
+| Zustand | vollständig, voll funktionsfähig, einwandfrei |
+| **Fremde Distribution** | **ausdrücklich erlaubt** – Debian darf installiert werden |
+| **Vor der Rücksendung** | **TUXEDO OS mit dem WebFAI-Stick wiederherstellen** |
+| Rückversand | vorfrankiertes Etikett kommt von TUXEDO |
+| Liefertermin | erst ca. zwei Tage vorher bekannt, über die Sendungsverfolgung |
+
+**Zwei Fallen, die in der Zeitplanung stecken.** Erstens kostet die
+WebFAI-Rücksetzung samt Verpacken rund einen Tag – nutzbar sind also eher
+zwölf als vierzehn Tage, und die Rücksetzung gehört nicht auf den letzten.
+Zweitens braucht **WebFAI ein Netzwerkkabel, über WLAN läuft es nicht**;
+der WebFAI-Stick liegt dem Gerät bei (Lieferumfang: Notebook, Netzteil,
+Akku, Handbuch, WebFAI-Stick, Schrauben), der RJ45-Port sitzt hinten
+(1 Gbit, Motorcomm YT6801). Kabel sind seit 2026-11-25 vorhanden.
+
+Daraus ergibt sich nebenbei eine Merkwürdigkeit, die man kennen sollte:
+**Unter WebFAI läuft das Ethernet, unter DialOS nicht** – Debian 13 bringt
+Kernel 6.12, der YT6801-Treiber kommt erst mit 7.0. Für den Test heißt das
+WLAN über den AX210, für die Rücksetzung das Kabel.
+
+**Offen (angefragt 2026-11-25):** Ob für die Rückmeldung das Datum der
+E-Mail zählt oder der Paketeingang bei TUXEDO. Bei 1.768,74 € ist der
+Unterschied leicht eine Woche.
 
 **Gewünschte Konfiguration** (angefragt 2026-11-18): Ryzen AI 7 350 oder
 Ryzen 7 H 255 (je nach TUXEDOs Einschätzung zum Kernel), 32 GB DDR5-5600

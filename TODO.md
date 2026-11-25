@@ -31,13 +31,20 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   die Begründung der Gerätewahl in [docs/hardware.md](docs/hardware.md),
   Abschnitt „TUXEDO als Hersteller".
 
-  **Vor dem Auslösen der Bestellung: Rückgabebedingungen schriftlich.**
-  Die ganze Konstruktion ist ein **Kauf mit verlängerter
-  Rückgabemöglichkeit** statt einer Leihstellung – der Verein finanziert
-  also vor. Am 2026-11-19 angefragt, noch offen: Länge der Frist und ab
-  wann sie läuft, in welchem Zustand ein vier bis acht Wochen benutztes
-  Gerät zurückkommen muss, wer den Rückversand trägt, und ob ein Grund
-  genannt werden muss. **Nicht bestellen, solange das nicht vorliegt.**
+  **Rückgabebedingungen liegen vor (2026-11-25) – es sind 14 Tage, nicht
+  mehr.** Aus der angedeuteten „verlängerten Rückgabemöglichkeit" wurde nach
+  interner Rücksprache das normale Widerrufsrecht: **14 Tage ab Empfang**,
+  Rückmeldung innerhalb der Frist (sonst gilt das Gerät als gekauft), kein
+  Grund nötig, vorfrankiertes Etikett von TUXEDO. **Eine fremde Distribution
+  zu installieren ist ausdrücklich erlaubt** – vor einer Rücksendung muss
+  aber **TUXEDO OS mit dem beiliegenden WebFAI-Stick wiederhergestellt**
+  werden, und **WebFAI braucht ein Netzwerkkabel** (über WLAN läuft es
+  nicht). Rechne mit zwölf nutzbaren Tagen statt vierzehn und lege die
+  Rücksetzung nicht auf den letzten. Einzelheiten in
+  [docs/hardware.md](docs/hardware.md).
+
+  Noch offen (angefragt 2026-11-25): ob für die Rückmeldung das Datum der
+  E-Mail zählt oder der Paketeingang bei TUXEDO.
 
   **Der Testplan steht schon** (siehe hardware.md): Erster Prüfpunkt ist
   die **Suspend-Probe am Conexant SN6140** – aufnehmen, Standby, aufwecken,

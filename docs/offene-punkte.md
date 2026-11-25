@@ -17,8 +17,9 @@ damit nichts aus den Diskussionen verloren geht.
   Kabel-Profil auf ipv4.route-metric/ipv6.route-metric 100, WLAN-Profil
   auf 600 gesetzt (auf dem T490 mit `nmcli connection show "<Profil>" |
   grep route-metric` verifiziert). UNGETESTET: Kabel-Metrik nur gesetzt,
-  nicht mit eingestecktem Kabel funktional geprueft (kein Kabel
-  verfuegbar). SIM-Profil kann mangels WWAN-Hardware noch nicht angelegt
+  nicht mit eingestecktem Kabel funktional geprueft - **Kabel sind seit
+  2026-11-25 vorhanden** (vorher war keins da), die Probe steht also an
+  und ist kein Hindernis mehr. SIM-Profil kann mangels WWAN-Hardware noch nicht angelegt
   werden - sobald vorhanden, dort ipv4.route-metric/ipv6.route-metric auf
   z. B. 900 setzen, damit SIM nur greift, wenn weder Kabel noch WLAN eine
   Route liefern.
