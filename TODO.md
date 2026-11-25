@@ -16,13 +16,27 @@ zu einem noch offenen - der offene verweist auf sie („siehe oben",
 „Restrisiko dazu"). Die bleiben oben stehen, bis auch der offene Punkt
 fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 
-- [ ] **Referenzgerät bestellen – FRIST: Anfang Januar 2027** (vereinbart
-  2026-11-19). TUXEDO liefert das **InfinityBook Pro 14 Gen10** zum
-  gewünschten Termin **Ende Januar 2027**, braucht die Bestellung dafür
-  aber **drei bis vier Wochen vorher** („wegen Feiertage usw."). Das heißt
-  praktisch: **spätestens in der ersten Januarwoche, besser noch vor
-  Weihnachten.** Dieser Punkt steht ganz oben, weil er als einziger eine
-  Frist hat, die unwiederbringlich verstreicht.
+- [ ] **Teststellung vorbereiten – das Gerät kommt Ende Januar 2027, dann
+  läuft eine 14-Tage-Uhr** (zugesagt 2026-11-25, Lieferadresse an TUXEDO
+  übermittelt). ~~Bestellung bis Anfang Januar auslösen~~ **erledigt** – die
+  Teststellung ist angefragt und wird von TUXEDO angelegt.
+
+  **Warum der Punkt trotzdem oben steht:** Der Liefertermin wird erst **ca.
+  zwei Tage vorher** über die Sendungsverfolgung bekannt, und ab **Empfang**
+  laufen 14 Tage. Wer dann erst anfängt zu planen, verliert von zwölf
+  nutzbaren Tagen die ersten drei. Vorbereitet gehört, **bevor** das Paket
+  kommt:
+
+  - **Debian-13-Installationsmedium** bereitlegen (aktuelle ISO von
+    debian.org, siehe [installationsanleitung.md](installationsanleitung.md)
+    Teil 1)
+  - **Netzwerkkabel** griffbereit – nicht für den Test, sondern für die
+    **WebFAI-Rücksetzung** am Ende; über WLAN läuft WebFAI nicht
+  - Zeitfenster im Kalender freihalten: zwei Tage Aufbau, dann gezielte
+    Proben, Abnahme nach Teil 6, zuletzt Rücksetzung – und die **nicht am
+    letzten Tag**
+  - Auftragsbestätigung von TUXEDO abwarten und den Termin eintragen,
+    sobald er bekannt ist
 
   **Konfiguration** (Art.-Nr. 10900242): Omnia-Display 3K 120 Hz 500 nits,
   32 GB DDR5-5600 (2× 16 GB gesockelt), Ryzen AI 7 350, 1 TB Kingston NV3,

@@ -15,13 +15,24 @@ to one that is still open - the open one refers back to them ("see above",
 "residual risk from this"). Those stay at the top until the open item is
 finished too, and then move down together. That way no reference breaks.
 
-- [ ] **Order the reference machine – DEADLINE: early January 2027**
-  (agreed 2026-11-19). TUXEDO will deliver the **InfinityBook Pro 14
-  Gen10** on the requested date, **late January 2027**, but needs the order
-  **three to four weeks beforehand** ("because of the holidays etc."). In
-  practice: **by the first week of January at the latest, better before
-  Christmas.** This item sits at the very top because it is the only one
-  with a deadline that passes irrecoverably.
+- [ ] **Prepare for the evaluation unit – the machine arrives late January
+  2027, and then a 14-day clock starts** (confirmed 2026-11-25, delivery
+  address sent to TUXEDO). ~~Place the order by early January~~ **done** –
+  the evaluation unit has been requested and is being set up by TUXEDO.
+
+  **Why this still sits at the top:** the delivery date is only known
+  **about two days in advance** via parcel tracking, and the 14 days run
+  from **receipt**. Anyone who starts planning then loses the first three
+  of twelve usable days. To be ready **before** the parcel arrives:
+
+  - have the **Debian 13 installation medium** ready (current ISO from
+    debian.org, see
+    [installationsanleitung.md](installationsanleitung.md) part 1)
+  - keep a **network cable** at hand – not for the test but for the
+    **WebFAI restore** at the end; WebFAI does not work over Wi-Fi
+  - block out time: two days to build, then targeted checks, acceptance per
+    part 6, finally the restore – and **not on the last day**
+  - wait for TUXEDO's order confirmation and note the date once known
 
   **Configuration** (part no. 10900242): Omnia display 3K 120 Hz 500 nits,
   32 GB DDR5-5600 (2× 16 GB socketed), Ryzen AI 7 350, 1 TB Kingston NV3,
