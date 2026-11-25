@@ -5,7 +5,20 @@ Der Block kommt direkt hinter den Sprachmarker, damit der Flaggen-Umschalter
 den Marker weiterhin als erstes Element findet - und damit die Hörfassung das
 erste ist, was jemand sieht, der sie sucht.
 
-Aufruf:  ./dialos-hoerfassung-hochladen.py <beitrags-id> <mp3-datei>
+Aufruf:  ./dialos-hoerfassung-hochladen.py <beitrags-id> <mp3-datei> [--ersetzen]
+
+Ohne --ersetzen rührt das Werkzeug einen vorhandenen Audio-Block nicht an.
+Das ist Absicht: Der Normalfall ist "einmal hochladen", und ein zweiter Lauf
+aus Versehen soll nicht stillschweigend eine Datei austauschen, die jemand
+schon gehört und freigegeben hat.
+
+Mit --ersetzen wird die neue Datei hochgeladen und der Block auf sie
+umgehängt. Nötig geworden am 2026-11-25: Die erste Fassung war schon oben,
+als Stephan beim Hören fand, dass Anna "App" als *Ap* ausspricht (siehe
+sprechfassungen/README.md). Die alte Mediendatei wird dabei **nicht**
+gelöscht, nur abgehängt - Löschen in der Mediathek ist endgültig, und das
+soll ein Mensch entscheiden. Die ID der alten Datei wird dafür ausgegeben.
+Der Dateiname der neuen bekommt deshalb von WordPress eine Ziffer angehängt.
 """
 import base64
 import json
@@ -75,18 +88,39 @@ def block(medien_id, url):
         f'<!-- /wp:audio -->\n\n')
 
 
+def alter_block(inhalt):
+    """Findet den vorhandenen Audio-Block samt Medien-ID."""
+    m = re.search(r'<!-- wp:audio(?: \{"id":(\d+)\})? -->.*?'
+                  r'<!-- /wp:audio -->\n*', inhalt, re.S)
+    return (m, int(m.group(1)) if m and m.group(1) else None)
+
+
 def main():
-    beitrag_id = int(sys.argv[1])
-    datei = sys.argv[2]
+    argumente = [a for a in sys.argv[1:] if not a.startswith("--")]
+    ersetzen = "--ersetzen" in sys.argv[1:]
+    beitrag_id = int(argumente[0])
+    datei = argumente[1]
 
     b = req(f"/wp-json/wp/v2/posts/{beitrag_id}?context=edit"
             "&_fields=content,title,link")
     titel = re.sub(r"<[^>]+>", "", b["title"]["rendered"])
     inhalt = b["content"]["raw"]
 
-    if "wp-block-audio" in inhalt:
+    if "wp-block-audio" in inhalt and not ersetzen:
         print("Der Beitrag hat bereits einen Audio-Block - nichts geändert.")
+        print("Zum Austauschen der Datei: --ersetzen anhängen.")
         return 0
+
+    if ersetzen:
+        treffer, alte_id = alter_block(inhalt)
+        if not treffer:
+            print("--ersetzen angegeben, aber es ist kein Audio-Block da.")
+            print("Das Werkzeug legt ihn jetzt normal an.")
+        else:
+            inhalt = inhalt[:treffer.start()] + inhalt[treffer.end():]
+            print(f"Alter Block entfernt (Medien-ID {alte_id}). Die Datei "
+                  "selbst bleibt in der Mediathek - bitte dort von Hand "
+                  "löschen, falls gewünscht.")
 
     medium = hochladen(datei, f"Hörfassung: {titel}")
     url = medium["source_url"]
