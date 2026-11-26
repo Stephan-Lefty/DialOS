@@ -22,10 +22,14 @@ finished too, and then move down together. That way no reference breaks.
   delivery late January 2027 recorded as an order line. The customer
   account is in the association's name, as is the invoice address.
 
-  **Next step, and the one that can slip now: ADVANCE PAYMENT.** TUXEDO
-  issues the invoice; production only starts once the transfer has been
-  made. If the invoice does not arrive, or the transfer is left lying, there
-  is no machine – and that only becomes apparent in January.
+  **Open and not trivial: when is payment due?** The quotation names
+  "Vorkasse-Überweisung" (advance transfer), while TUXEDO's mail of
+  2026-11-26 sounds like billing only on keeping the device. If advance
+  payment applies and nobody transfers, TUXEDO waits for money and we wait
+  for the machine – nothing happens until late January. Decided: wait for
+  what arrives (invoice = pay up front, order confirmation without payment
+  request = pay on keeping). If nothing comes, ask in early December;
+  reminder fires 2026-12-03.
 
   **Why this still sits at the top:** the delivery date is only known
   **about two days in advance** via parcel tracking, and the 14 days run

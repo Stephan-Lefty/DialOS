@@ -389,7 +389,7 @@ Art.-Nr. 10900242). Verbindlicher Stand:
 | Garantie | 2 Jahre (Teile, Arbeitszeit, Versand) |
 | **Preis** | **1.889,75 € brutto** (netto 1.574,79 € + 314,96 € USt.), Versand 0 € |
 | Liefertermin | als Auftragszeile vermerkt: „Lieferung soll Ende Januar 2027 erfolgen" |
-| Zahlung | **Vorkasse-Überweisung nach Rechnungsstellung** |
+| Zahlung | **ungeklärt** – siehe unten |
 
 **Zwei Dinge mussten erst korrigiert werden, und eine davon wäre teuer
 geworden.** Das erste Angebot vom 2026-11-26 führte **MediaTek RZ616**
@@ -400,6 +400,27 @@ Liefertermin völlig; angenommen hätte das bedeutet, das Gerät kommt im
 Dezember und die 14-Tage-Frist läuft, bevor der Test beginnen kann. Beides
 wurde auf Nachfrage am selben Tag berichtigt, der WLAN-Tausch sogar
 preisneutral und in der besseren 6E-Variante.
+
+**Wann gezahlt wird, ist offen – und der Unterschied ist teuer.** Zwei
+Lesarten stehen nebeneinander, beide mit Beleg:
+
+- **Kauf mit Rückgaberecht:** Das Angebot nennt als Zahlungsweise
+  ausdrücklich „Vorkasse-Überweisung" und bittet, Zahlungen „erst nach
+  Rechnungsstellung" zu schicken. Vorkasse heißt dem Wortsinn nach: zahlen,
+  bevor geliefert wird. Dann finanziert der Verein 1.889,75 € vor und
+  bekommt sie bei einer Rückgabe zurück.
+- **Echte Teststellung:** TUXEDO am 2026-11-26 – „Innerhalb der 14 Tage
+  benötigen wir eine Rückmeldung, wenn Sie diese zurückschicken möchten,
+  sonst gehen wir davon aus, dass Sie das Gerät behalten." Das klingt
+  danach, dass erst beim Behalten abgerechnet wird.
+
+**Warum das nicht egal ist:** Gilt die erste Lesart und hier wartet jemand
+auf das Gerät, während TUXEDO auf Zahlung wartet, passiert bis Ende Januar
+nichts – und der Testzeitraum ist weg. Entschieden wurde am 2026-11-26,
+**nicht sofort nachzuhaken, sondern abzuwarten, was kommt**: Eine Rechnung
+bedeutet die erste Lesart, eine Auftragsbestätigung ohne
+Zahlungsaufforderung die zweite. Bleibt es still, ist Anfang Dezember eine
+Nachfrage fällig (Erinnerung `tuxedo-angebot-frist-10-12` am 2026-12-03).
 
 **Zum Preis:** 121,01 € mehr als die am 2026-11-25 genannten 1.768,74 €.
 Einziger Unterschied zur ursprünglichen Konfiguration ist der
