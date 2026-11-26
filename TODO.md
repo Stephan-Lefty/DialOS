@@ -19,10 +19,14 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [ ] **Teststellung vorbereiten – das Gerät kommt Ende Januar 2027, dann
   läuft eine 14-Tage-Uhr** (zugesagt 2026-11-25, Lieferadresse an TUXEDO
   übermittelt). ~~Bestellung bis Anfang Januar auslösen~~ **erledigt** – die
-  Teststellung ist zugesagt. **Noch nicht endgültig bestellt:** TUXEDO
-  erstellt erst ein **Angebot**, das angenommen werden muss, und verlangt
-  dafür ein **Kundenkonto** auf der Website (am 2026-11-26 angefragt).
-  Angebot und Rechnung auf den Verein offen.digital, nicht privat.
+  **Angebot 1126064710 angenommen am 2026-11-26**, 1.889,75 € brutto,
+  Lieferung Ende Januar 2027 als Auftragszeile vermerkt. Kundenkonto läuft
+  auf den Verein, Rechnungsadresse ebenso.
+
+  **Nächster Schritt und der, der jetzt untergehen kann: VORKASSE.** TUXEDO
+  stellt die Rechnung, erst nach der Überweisung wird gefertigt. Kommt die
+  Rechnung nicht oder bleibt die Überweisung liegen, gibt es kein Gerät –
+  und das fällt erst im Januar auf.
 
   **Warum der Punkt trotzdem oben steht:** Der Liefertermin wird erst **ca.
   zwei Tage vorher** über die Sendungsverfolgung bekannt, und ab **Empfang**

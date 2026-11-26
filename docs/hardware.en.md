@@ -366,13 +366,41 @@ stronger CPUs merely give more headroom. Since the microphone hangs off
 the HDA codec, the argument for Zen 4 falls away anyway – it rested
 entirely on the older ACP generation.
 
-**Quoted configuration** (part no. 10900242, as of 2026-11-19): Omnia
-display 3K 120 Hz 500 nits, 32 GB DDR5-5600 (2× 16 GB, socketed),
-**Ryzen AI 7 350** (8 cores/16 threads), 1 TB Kingston NV3, German backlit
-keyboard, **Intel Wi-Fi 6 AX210**, 2-year warranty. **€1,734 gross for
-Germany** (19 %) – shipped to Austria at 20 % roughly **€1,749**, net
-about €1,457. Components **in stock from 2026-12-01**, build time one to
-three weeks.
+**Quotation accepted on 2026-11-26** (reference **1126064710**, part
+no. 10900242). Binding state:
+
+| | |
+|---|---|
+| Display | Omnia 3K (2880×1800), 16:10, 120 Hz, 500 nits |
+| Memory | 32 GB DDR5-5600 (2× 16 GB ADATA SO-DIMM, **socketed**) |
+| Processor | **Ryzen AI 7 350** (8 cores/16 threads, up to 5.0 GHz) |
+| SSD | 1 TB Kingston NV3 (PCIe 4.0); second M.2 slot free |
+| Wi-Fi | **Intel Wi-Fi 6E AX210** (2.4/5/**6 GHz**, Bluetooth 5.3) |
+| Keyboard | German (DE-DE), backlit, TUX super key |
+| Accessory | **USB-C magnetic adapter, 240 W** |
+| Warranty | 2 years (parts, labour, shipping) |
+| **Price** | **€1,889.75 gross** (net €1,574.79 + €314.96 VAT), shipping €0 |
+| Delivery date | recorded as an order line: "delivery intended for late January 2027" |
+| Payment | **advance bank transfer after invoicing** |
+
+**Two things had to be corrected first, and one of them would have been
+expensive.** The first quotation of 2026-11-26 listed **MediaTek RZ616**
+instead of the agreed Intel AX210 – precisely the card whose absence was
+an argument against the Lenovo machines, and that for a project whose
+reference audio device is a Bluetooth headset. The delivery date was also
+missing entirely; accepting as-is would have meant the machine arriving in
+December with the 14-day window running before testing could start. Both
+were fixed the same day on request, the Wi-Fi swap even at no extra cost
+and in the better 6E variant.
+
+**On the price:** €121.01 more than the €1,768.74 quoted on 2026-11-25.
+The only difference from the original configuration is the **USB-C
+magnetic adapter** (net around €101), which was added unasked. It was
+kept, for a reason that belongs to the audience: a magnetically detaching
+power cable does not pull the machine off the table when someone catches
+it – and people who cannot see the cable catch it more often. The
+InfinityBook charges exclusively over USB-C, so the port is in daily
+use.
 
 **Instead of a loan unit: purchase with an extended return window.**
 TUXEDO on 2026-11-19 offered a purchase with an extended right of return

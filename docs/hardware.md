@@ -374,13 +374,41 @@ theoretisch keinen Unterschied"; die stärkeren CPUs geben nur mehr
 Reserven. Da das Mikrofon am HDA hängt, entfällt das Argument für Zen 4
 ohnehin – es stützte sich allein auf die ältere ACP-Generation.
 
-**Angebotene Konfiguration** (Art.-Nr. 10900242, Stand 2026-11-19):
-Omnia-Display 3K 120 Hz 500 nits, 32 GB DDR5-5600 (2× 16 GB, gesockelt),
-**Ryzen AI 7 350** (8 Kerne/16 Threads), 1 TB Kingston NV3, Tastatur
-deutsch beleuchtet, **Intel Wi-Fi 6 AX210**, 2 Jahre Garantie.
-**1.734 € brutto für Deutschland** (19 %) – bei Lieferung nach Österreich
-mit 20 % rund **1.749 €**, netto etwa 1.457 €. Komponenten **lagernd ab
-2026-12-01**, Fertigung ein bis drei Wochen.
+**Angebot angenommen am 2026-11-26** (Referenz **1126064710**,
+Art.-Nr. 10900242). Verbindlicher Stand:
+
+| | |
+|---|---|
+| Display | Omnia 3K (2880×1800), 16:10, 120 Hz, 500 nits |
+| Speicher | 32 GB DDR5-5600 (2× 16 GB ADATA SO-DIMM, **gesockelt**) |
+| Prozessor | **Ryzen AI 7 350** (8 Kerne/16 Threads, bis 5,0 GHz) |
+| SSD | 1 TB Kingston NV3 (PCIe 4.0); zweiter M.2-Platz frei |
+| WLAN | **Intel Wi-Fi 6E AX210** (2,4/5/**6 GHz**, Bluetooth 5.3) |
+| Tastatur | deutsch (DE-DE), beleuchtet, TUX-Super-Taste |
+| Zubehör | **USB-C-Magnet-Adapter 240 W** |
+| Garantie | 2 Jahre (Teile, Arbeitszeit, Versand) |
+| **Preis** | **1.889,75 € brutto** (netto 1.574,79 € + 314,96 € USt.), Versand 0 € |
+| Liefertermin | als Auftragszeile vermerkt: „Lieferung soll Ende Januar 2027 erfolgen" |
+| Zahlung | **Vorkasse-Überweisung nach Rechnungsstellung** |
+
+**Zwei Dinge mussten erst korrigiert werden, und eine davon wäre teuer
+geworden.** Das erste Angebot vom 2026-11-26 führte **MediaTek RZ616**
+statt des vereinbarten Intel AX210 – also genau die Karte, deren Fehlen
+bei Lenovo ein Argument gegen jene Geräte war, und das bei einem Projekt,
+dessen Referenz-Audiogerät ein Bluetooth-Headset ist. Außerdem fehlte der
+Liefertermin völlig; angenommen hätte das bedeutet, das Gerät kommt im
+Dezember und die 14-Tage-Frist läuft, bevor der Test beginnen kann. Beides
+wurde auf Nachfrage am selben Tag berichtigt, der WLAN-Tausch sogar
+preisneutral und in der besseren 6E-Variante.
+
+**Zum Preis:** 121,01 € mehr als die am 2026-11-25 genannten 1.768,74 €.
+Einziger Unterschied zur ursprünglichen Konfiguration ist der
+**USB-C-Magnet-Adapter** (netto rund 101 €), der ungefragt hinzukam. Er
+wurde behalten, und zwar aus einem Grund, der zur Zielgruppe gehört: Ein
+magnetisch lösendes Ladekabel reißt das Gerät nicht vom Tisch, wenn jemand
+hängenbleibt – und wer das Kabel nicht sieht, bleibt häufiger hängen. Das
+InfinityBook lädt ausschließlich über USB-C, der Port wird also täglich
+benutzt.
 
 **Statt einer Leihstellung: Kauf mit verlängerter Rückgabemöglichkeit.**
 TUXEDO am 2026-11-19: „Bei so einer langen Testzeit würden wir die

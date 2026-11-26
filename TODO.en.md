@@ -18,10 +18,14 @@ finished too, and then move down together. That way no reference breaks.
 - [ ] **Prepare for the evaluation unit – the machine arrives late January
   2027, and then a 14-day clock starts** (confirmed 2026-11-25, delivery
   address sent to TUXEDO). ~~Place the order by early January~~ **done** –
-  the evaluation unit is agreed. **Not finally ordered yet:** TUXEDO first
-  issues a **quotation** that has to be accepted, and requires a **customer
-  account** on their website for it (asked 2026-11-26). Quotation and
-  invoice to the association offen.digital, not privately.
+  **Quotation 1126064710 accepted on 2026-11-26**, €1,889.75 gross,
+  delivery late January 2027 recorded as an order line. The customer
+  account is in the association's name, as is the invoice address.
+
+  **Next step, and the one that can slip now: ADVANCE PAYMENT.** TUXEDO
+  issues the invoice; production only starts once the transfer has been
+  made. If the invoice does not arrive, or the transfer is left lying, there
+  is no machine – and that only becomes apparent in January.
 
   **Why this still sits at the top:** the delivery date is only known
   **about two days in advance** via parcel tracking, and the 14 days run
