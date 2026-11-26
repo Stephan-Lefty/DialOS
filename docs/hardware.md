@@ -431,9 +431,23 @@ Daraus ergibt sich nebenbei eine Merkwürdigkeit, die man kennen sollte:
 Kernel 6.12, der YT6801-Treiber kommt erst mit 7.0. Für den Test heißt das
 WLAN über den AX210, für die Rücksetzung das Kabel.
 
-**Offen (angefragt 2026-11-25):** Ob für die Rückmeldung das Datum der
-E-Mail zählt oder der Paketeingang bei TUXEDO. Bei 1.768,74 € ist der
-Unterschied leicht eine Woche.
+**Beantwortet am 2026-11-26:** Die Frist **beginnt am Tag der physischen
+Übergabe** – maßgeblich ist der Eintrag in der Sendungsverfolgung, wann
+der Zusteller das Paket übergeben hat; nicht der Versand und nicht eine
+Benachrichtigungskarte. Zusammen mit „innerhalb der 14 Tage benötigen wir
+eine Rückmeldung" heißt das: **die Rückmeldung muss in der Frist liegen,
+das Paket darf später eintreffen.** Das ist die angenehmere der beiden
+Varianten.
+
+**Ablauf bis zur Bestellung** (Stand 2026-11-26): TUXEDO erstellt
+zunächst ein **Angebot**, das angenommen werden muss – die Teststellung
+ist also zugesagt, aber noch nicht bestellt. Dafür verlangt TUXEDO ein
+**Kundenkonto** auf der Website. Angebot und Rechnung sollten auf den
+Verein offen.digital lauten (ZVR 1324338730), nicht auf eine
+Privatperson: Der Verein finanziert vor, und bei Garantie oder
+Rückabwicklung spart ein korrekter Rechnungsempfänger Reibung. Eine
+UID-Nummer gibt es nicht, der Verein ist nicht unternehmerisch tätig –
+es bleibt beim Bruttopreis mit österreichischer Umsatzsteuer.
 
 **Gewünschte Konfiguration** (angefragt 2026-11-18): Ryzen AI 7 350 oder
 Ryzen 7 H 255 (je nach TUXEDOs Einschätzung zum Kernel), 32 GB DDR5-5600

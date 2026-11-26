@@ -19,7 +19,10 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
 - [ ] **Teststellung vorbereiten – das Gerät kommt Ende Januar 2027, dann
   läuft eine 14-Tage-Uhr** (zugesagt 2026-11-25, Lieferadresse an TUXEDO
   übermittelt). ~~Bestellung bis Anfang Januar auslösen~~ **erledigt** – die
-  Teststellung ist angefragt und wird von TUXEDO angelegt.
+  Teststellung ist zugesagt. **Noch nicht endgültig bestellt:** TUXEDO
+  erstellt erst ein **Angebot**, das angenommen werden muss, und verlangt
+  dafür ein **Kundenkonto** auf der Website (am 2026-11-26 angefragt).
+  Angebot und Rechnung auf den Verein offen.digital, nicht privat.
 
   **Warum der Punkt trotzdem oben steht:** Der Liefertermin wird erst **ca.
   zwei Tage vorher** über die Sendungsverfolgung bekannt, und ab **Empfang**
@@ -57,8 +60,9 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Rücksetzung nicht auf den letzten. Einzelheiten in
   [docs/hardware.md](docs/hardware.md).
 
-  Noch offen (angefragt 2026-11-25): ob für die Rückmeldung das Datum der
-  E-Mail zählt oder der Paketeingang bei TUXEDO.
+  **Fristbeginn geklärt (2026-11-26):** Die 14 Tage laufen ab dem Tag der
+  **physischen Übergabe** laut Sendungsverfolgung – die **Rückmeldung**
+  muss in der Frist liegen, das Paket darf später eintreffen.
 
   **Der Testplan steht schon** (siehe hardware.md): Erster Prüfpunkt ist
   die **Suspend-Probe am Conexant SN6140** – aufnehmen, Standby, aufwecken,

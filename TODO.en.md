@@ -18,7 +18,10 @@ finished too, and then move down together. That way no reference breaks.
 - [ ] **Prepare for the evaluation unit – the machine arrives late January
   2027, and then a 14-day clock starts** (confirmed 2026-11-25, delivery
   address sent to TUXEDO). ~~Place the order by early January~~ **done** –
-  the evaluation unit has been requested and is being set up by TUXEDO.
+  the evaluation unit is agreed. **Not finally ordered yet:** TUXEDO first
+  issues a **quotation** that has to be accepted, and requires a **customer
+  account** on their website for it (asked 2026-11-26). Quotation and
+  invoice to the association offen.digital, not privately.
 
   **Why this still sits at the top:** the delivery date is only known
   **about two days in advance** via parcel tracking, and the 14 days run
@@ -52,8 +55,9 @@ finished too, and then move down together. That way no reference breaks.
   not leave the restore to the last one. Details in
   [docs/hardware.en.md](docs/hardware.en.md).
 
-  Still open (asked 2026-11-25): whether the notification deadline is met by
-  the date of the email or by the parcel arriving at TUXEDO.
+  **Start of the window clarified (2026-11-26):** the 14 days run from the
+  day of **physical handover** per parcel tracking – the **notification**
+  must fall within the window, the parcel may arrive later.
 
   **The test plan already exists** (see hardware.en.md): the first item is
   the **suspend check on the Conexant SN6140** – record, suspend, wake,

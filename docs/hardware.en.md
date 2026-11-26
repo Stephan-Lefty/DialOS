@@ -420,9 +420,22 @@ not under DialOS** — Debian 13 ships kernel 6.12, and the YT6801 driver
 only arrives with 7.0. So the test runs over Wi-Fi via the AX210, while
 the restore needs the cable.
 
-**Open (asked 2026-11-25):** whether the notification deadline is met by
-the date of the email or by the parcel arriving at TUXEDO. At €1,768.74
-the difference is easily a week.
+**Answered on 2026-11-26:** the window **starts on the day of physical
+handover** – what counts is the parcel-tracking entry recording when the
+courier handed it over; not dispatch, and not a delivery note. Together
+with "we need notification within the 14 days" this means: **the
+notification must fall within the window, the parcel may arrive later.**
+That is the more comfortable of the two readings.
+
+**Route to the order** (as of 2026-11-26): TUXEDO first issues a
+**quotation** that has to be accepted – so the evaluation unit is agreed
+but not yet ordered. For that TUXEDO requires a **customer account** on
+their website. Quotation and invoice should be made out to the
+association offen.digital (ZVR 1324338730) rather than to a private
+person: the association pays up front, and a correct invoice recipient
+saves friction in case of warranty or return. There is no VAT ID, as the
+association is not commercially active – the gross price with Austrian
+VAT applies.
 
 **Requested configuration** (asked 2026-11-18): Ryzen AI 7 350 or Ryzen 7
 H 255 (depending on TUXEDO's assessment regarding the kernel), 32 GB
