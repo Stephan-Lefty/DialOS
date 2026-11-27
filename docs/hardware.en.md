@@ -381,7 +381,7 @@ no. 10900242). Binding state:
 | Warranty | 2 years (parts, labour, shipping) |
 | **Price** | **€1,889.75 gross** (net €1,574.79 + €314.96 VAT), shipping €0 |
 | Delivery date | recorded as an order line: "delivery intended for late January 2027" |
-| Payment | **unclear** – see below |
+| Payment | **advance payment before production starts**; invoice only on dispatch |
 
 **Two things had to be corrected first, and one of them would have been
 expensive.** The first quotation of 2026-11-26 listed **MediaTek RZ616**
@@ -393,35 +393,40 @@ December with the 14-day window running before testing could start. Both
 were fixed the same day on request, the Wi-Fi swap even at no extra cost
 and in the better 6E variant.
 
-**When payment is due is open – and the difference is expensive.** Two
-readings stand side by side, both with evidence:
+**Payment is up front – settled on 2026-11-26.** For a while two readings
+stood side by side: the quotation names "Vorkasse-Überweisung" (advance
+transfer), while an earlier mail sounded as though billing would only
+follow a decision to keep the machine. TUXEDO answered unambiguously: the
+evaluation unit is paid for in advance, and **production only starts once
+payment has been received.** On a return the purchase price is refunded.
 
-- **Purchase with right of return:** the quotation explicitly names
-  "Vorkasse-Überweisung" (advance transfer) as the payment method and asks
-  for payments only "after invoicing". Advance payment means paying before
-  delivery. The association would then front €1,889.75 and get it back on
-  a return.
-- **Genuine evaluation unit:** TUXEDO on 2026-11-26 – "within the 14 days
-  we need notification if you wish to send it back, otherwise we assume you
-  are keeping the device." That sounds as though billing only follows a
-  decision to keep it.
+**The sequence:**
 
-**Why this matters:** if the first reading applies and we wait for the
-machine while TUXEDO waits for payment, nothing happens until late January
-— and the test window is gone. Decided on 2026-11-26: **do not chase it
-immediately, wait for what arrives.** An invoice means the first reading,
-an order confirmation without a payment request the second. If nothing
-arrives, a query is due in early December (reminder
-`tuxedo-angebot-frist-10-12` on 2026-12-03).
+1. Place the order → **order acknowledgement with bank details**
+2. **Transfer €1,889.75** – nothing is produced before that
+3. Build, one to three weeks
+4. Dispatch late January 2027, **invoice only on dispatch**, by email
+5. 14 days from physical handover; purchase price refunded on return
 
-**On the price:** €121.01 more than the €1,768.74 quoted on 2026-11-25.
-The only difference from the original configuration is the **USB-C
-magnetic adapter** (net around €101), which was added unasked. It was
-kept, for a reason that belongs to the audience: a magnetically detaching
-power cable does not pull the machine off the table when someone catches
-it – and people who cannot see the cable catch it more often. The
-InfinityBook charges exclusively over USB-C, so the port is in daily
-use.
+**That ties up capital, and it belongs in the planning:** the association
+pays up front. Paying in December and returning the machine would tie the
+money up for roughly three months. On 2026-11-26 we therefore asked
+whether transferring in **early January** would suffice – arithmetically
+that is enough for a late-January delivery and saves a month.
+
+**On the price – my assumption was wrong.** This section used to say the
+€121.01 difference from the €1,768.74 quoted on 2026-11-25 came from the
+USB-C magnetic adapter. It does not. TUXEDO on 2026-11-26: the difference
+stems from **price increases on RAM and SSD**. Benno Bradler had quoted
+the day's shop price on 2026-11-18; the components have become more
+expensive since. The magnetic adapter is still in the configuration but is
+not the cause.
+
+It is kept nonetheless, for a reason that belongs to the audience: a
+magnetically detaching power cable does not pull the machine off the table
+when someone catches it – and people who cannot see the cable catch it
+more often. The InfinityBook charges exclusively over USB-C, so the port
+is in daily use.
 
 **Instead of a loan unit: purchase with an extended return window.**
 TUXEDO on 2026-11-19 offered a purchase with an extended right of return

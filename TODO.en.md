@@ -22,14 +22,16 @@ finished too, and then move down together. That way no reference breaks.
   delivery late January 2027 recorded as an order line. The customer
   account is in the association's name, as is the invoice address.
 
-  **Open and not trivial: when is payment due?** The quotation names
-  "Vorkasse-Überweisung" (advance transfer), while TUXEDO's mail of
-  2026-11-26 sounds like billing only on keeping the device. If advance
-  payment applies and nobody transfers, TUXEDO waits for money and we wait
-  for the machine – nothing happens until late January. Decided: wait for
-  what arrives (invoice = pay up front, order confirmation without payment
-  request = pay on keeping). If nothing comes, ask in early December;
-  reminder fires 2026-12-03.
+  **Next step: wait for the order acknowledgement, then transfer.** Settled
+  on 2026-11-26: payment is **up front**, and **no production starts
+  without it**. Bank details arrive with the order acknowledgement, the
+  invoice only on dispatch. The purchase price is refunded on return.
+
+  **Mind the tied-up capital:** the association fronts €1,889.75. On a
+  return that money is tied up for roughly three months. We have therefore
+  asked whether transferring in **early January** suffices – that is
+  arithmetically enough for a late-January delivery. Reminder fires
+  2026-12-03.
 
   **Why this still sits at the top:** the delivery date is only known
   **about two days in advance** via parcel tracking, and the 14 days run

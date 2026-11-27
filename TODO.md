@@ -23,13 +23,16 @@ fertig ist, und wandern dann gemeinsam nach unten. So zerreißt kein Bezug.
   Lieferung Ende Januar 2027 als Auftragszeile vermerkt. Kundenkonto läuft
   auf den Verein, Rechnungsadresse ebenso.
 
-  **Offen und nicht egal: Wann wird gezahlt?** Das Angebot nennt
-  „Vorkasse-Überweisung", TUXEDOs Mail vom 2026-11-26 klingt dagegen nach
-  Abrechnung erst beim Behalten. Gilt Vorkasse und niemand überweist,
-  wartet TUXEDO auf Geld und wir auf das Gerät – bis Ende Januar passiert
-  dann nichts. Entschieden: abwarten, was kommt (Rechnung = vorab zahlen,
-  Auftragsbestätigung ohne Zahlungsaufforderung = erst beim Behalten).
-  Bleibt es still, Anfang Dezember nachfragen; Erinnerung läuft am
+  **Nächster Schritt: Eingangsbestätigung abwarten, dann überweisen.**
+  Geklärt am 2026-11-26: Es wird **vorab per Vorkasse** gezahlt, und
+  **ohne Zahlung beginnt keine Produktion**. Die Bankverbindung kommt mit
+  der Eingangsbestätigung der Bestellung, die Rechnung erst mit dem
+  Versand. Bei Rückgabe wird der Kaufpreis erstattet.
+
+  **Kapitalbindung bedenken:** Der Verein finanziert 1.889,75 € vor. Bei
+  einer Rückgabe ist das Geld rund drei Monate gebunden. Angefragt ist
+  deshalb, ob eine Überweisung **Anfang Januar** genügt – für einen
+  Liefertermin Ende Januar reicht das rechnerisch. Erinnerung läuft am
   2026-12-03.
 
   **Warum der Punkt trotzdem oben steht:** Der Liefertermin wird erst **ca.

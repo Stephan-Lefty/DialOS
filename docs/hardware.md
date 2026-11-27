@@ -389,7 +389,7 @@ Art.-Nr. 10900242). Verbindlicher Stand:
 | Garantie | 2 Jahre (Teile, Arbeitszeit, Versand) |
 | **Preis** | **1.889,75 € brutto** (netto 1.574,79 € + 314,96 € USt.), Versand 0 € |
 | Liefertermin | als Auftragszeile vermerkt: „Lieferung soll Ende Januar 2027 erfolgen" |
-| Zahlung | **ungeklärt** – siehe unten |
+| Zahlung | **Vorkasse vor Produktionsbeginn**, Rechnung erst mit dem Versand |
 
 **Zwei Dinge mussten erst korrigiert werden, und eine davon wäre teuer
 geworden.** Das erste Angebot vom 2026-11-26 führte **MediaTek RZ616**
@@ -401,31 +401,37 @@ Dezember und die 14-Tage-Frist läuft, bevor der Test beginnen kann. Beides
 wurde auf Nachfrage am selben Tag berichtigt, der WLAN-Tausch sogar
 preisneutral und in der besseren 6E-Variante.
 
-**Wann gezahlt wird, ist offen – und der Unterschied ist teuer.** Zwei
-Lesarten stehen nebeneinander, beide mit Beleg:
+**Gezahlt wird vorab – geklärt am 2026-11-26.** Kurzzeitig standen zwei
+Lesarten nebeneinander: Das Angebot nennt „Vorkasse-Überweisung", eine
+frühere Mail klang dagegen danach, erst beim Behalten werde abgerechnet.
+TUXEDO hat es eindeutig beantwortet: „Bitte bedenken Sie, dass Sie die
+Teststellung vorab per Vorkasse bezahlen. … **Wir können erst mit der
+Produktion beginnen, wenn wir die Zahlung erhalten haben.**" Bei einer
+Rückgabe wird der Kaufpreis erstattet.
 
-- **Kauf mit Rückgaberecht:** Das Angebot nennt als Zahlungsweise
-  ausdrücklich „Vorkasse-Überweisung" und bittet, Zahlungen „erst nach
-  Rechnungsstellung" zu schicken. Vorkasse heißt dem Wortsinn nach: zahlen,
-  bevor geliefert wird. Dann finanziert der Verein 1.889,75 € vor und
-  bekommt sie bei einer Rückgabe zurück.
-- **Echte Teststellung:** TUXEDO am 2026-11-26 – „Innerhalb der 14 Tage
-  benötigen wir eine Rückmeldung, wenn Sie diese zurückschicken möchten,
-  sonst gehen wir davon aus, dass Sie das Gerät behalten." Das klingt
-  danach, dass erst beim Behalten abgerechnet wird.
+**Der Ablauf, in dieser Reihenfolge:**
 
-**Warum das nicht egal ist:** Gilt die erste Lesart und hier wartet jemand
-auf das Gerät, während TUXEDO auf Zahlung wartet, passiert bis Ende Januar
-nichts – und der Testzeitraum ist weg. Entschieden wurde am 2026-11-26,
-**nicht sofort nachzuhaken, sondern abzuwarten, was kommt**: Eine Rechnung
-bedeutet die erste Lesart, eine Auftragsbestätigung ohne
-Zahlungsaufforderung die zweite. Bleibt es still, ist Anfang Dezember eine
-Nachfrage fällig (Erinnerung `tuxedo-angebot-frist-10-12` am 2026-12-03).
+1. Bestellung auslösen → **Eingangsbestätigung mit Bankverbindung**
+2. **1.889,75 € überweisen** – vorher wird nicht produziert
+3. Fertigung, ein bis drei Wochen
+4. Versand Ende Januar 2027, **Rechnung erst mit dem Versand** per Mail
+5. 14 Tage ab physischer Übergabe; bei Rückgabe Kaufpreis zurück
 
-**Zum Preis:** 121,01 € mehr als die am 2026-11-25 genannten 1.768,74 €.
-Einziger Unterschied zur ursprünglichen Konfiguration ist der
-**USB-C-Magnet-Adapter** (netto rund 101 €), der ungefragt hinzukam. Er
-wurde behalten, und zwar aus einem Grund, der zur Zielgruppe gehört: Ein
+**Das bedeutet Kapitalbindung, und die gehört in die Planung:** Der Verein
+finanziert vor. Zahlt er im Dezember und gibt das Gerät zurück, ist das
+Geld rund drei Monate gebunden. Deshalb wurde am 2026-11-26 angefragt, ob
+die Überweisung **Anfang Januar** genügt – rechnerisch reicht das für
+einen Liefertermin Ende Januar, und es spart einen Monat.
+
+**Zum Preis – meine Vermutung war falsch.** Hier stand, die 121,01 €
+Differenz zu den am 2026-11-25 genannten 1.768,74 € gingen auf den
+USB-C-Magnet-Adapter zurück. Das stimmt nicht. TUXEDO am 2026-11-26: Die
+Differenz entsteht durch **Preiserhöhungen bei RAM und SSD**. Benno
+Bradler hatte am 2026-11-18 den tagesaktuellen Shop-Preis genannt;
+dazwischen sind die Bauteile teurer geworden. Der Magnet-Adapter steht
+weiter in der Konfiguration, ist aber nicht die Ursache.
+
+Er wird trotzdem behalten, und der Grund gehört zur Zielgruppe: Ein
 magnetisch lösendes Ladekabel reißt das Gerät nicht vom Tisch, wenn jemand
 hängenbleibt – und wer das Kabel nicht sieht, bleibt häufiger hängen. Das
 InfinityBook lädt ausschließlich über USB-C, der Port wird also täglich
